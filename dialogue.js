@@ -153,7 +153,7 @@ var createDialogues;
 				m_textParts.forEach(function (textPart) {
 					var alignmentMatch = alignmentRegex.exec(textPart);
 					if (alignmentMatch) {
-						m_alignment = alignmentMatch[0];
+						m_alignment = alignmentMatch[1];
 					}
 					else {
 						var colorMatch = colorRegex.exec(textPart);
