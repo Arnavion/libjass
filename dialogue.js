@@ -151,76 +151,68 @@ var createDialogues;
 				var spanStylesChanged = false;
 
 				m_textParts.forEach(function (textPart) {
-					var alignmentMatch = alignmentRegex.exec(textPart);
-					if (alignmentMatch) {
-						m_alignment = alignmentMatch[1];
+					var matchResult;
+
+					if (matchResult = alignmentRegex.exec(textPart)) {
+						m_alignment = matchResult[1];
 					}
+
+					else if (matchResult = colorRegex.exec(textPart)) {
+						var newColor = "#" + matchResult[1].toRGB();
+						if (currentColor !== newColor) {
+							currentColor = newColor;
+							spanStylesChanged = true;
+						}
+					}
+
+					else if (matchResult = borderColorRegex.exec(textPart)) {
+						var newBorderColor = "#" + matchResult[1].toRGB();;
+						if (currentBorderColor !== newBorderColor) {
+							currentBorderColor = newBorderColor;
+							spanStylesChanged = true;
+						}
+					}
+
+					else if (matchResult = fadRegex.exec(textPart)) {
+						if (matchResult[1] !== "0") {
+							m_sub.className = "fad-in";
+							m_sub.style.webkitTransitionDuration = (matchResult[1] / 1000) + "s";
+							m_sub.style.mozTransitionDuration = (matchResult[1] / 1000) + "s";
+							m_sub.style.transitionDuration = (matchResult[1] / 1000) + "s";
+							setTimeout(function () {
+								m_sub.style.opacity = 1;
+							}, 1);
+						}
+						else if (matchResult[2] !== "0") {
+							m_sub.classname = "fad-out";
+							m_sub.style.webkitTransitionDuration = (matchResult[2] / 1000) + "s";
+							m_sub.style.mozTransitionDuration = (matchResult[2] / 1000) + "s";
+							m_sub.style.transitionDuration = (matchResult[2] / 1000) + "s";
+							setTimeout(function () {
+								m_sub.style.opacity = 0;
+							}, 1);
+						}
+					}
+
+					else if (matchResult = blurRegex.exec(textPart)) {
+						var newBlur = matchResult[1];
+						if (currentBlur !== newBlur) {
+							currentBlur = newBlur;
+							spanStylesChanged = true;
+						}
+					}
+
+					else if (matchResult = italicsRegex.exec(textPart)) {
+						var newItalics = (parseInt(matchResult[1], 10) === 1);
+						if (currentItalics !== newItalics) {
+							currentItalics = newItalics;
+							spanStylesChanged = true;
+						}
+					}
+
 					else {
-						var colorMatch = colorRegex.exec(textPart);
-						if (colorMatch) {
-							var newColor = "#" + colorMatch[1].toRGB();
-							if (currentColor !== newColor) {
-								currentColor = newColor;
-								spanStylesChanged = true;
-							}
-						}
-						else {
-							var borderColorMatch = borderColorRegex.exec(textPart);
-							if (borderColorMatch) {
-								var newBorderColor = "#" + borderColorMatch[1].toRGB();;
-								if (currentBorderColor !== newBorderColor) {
-									currentBorderColor = newBorderColor;
-									spanStylesChanged = true;
-								}
-							}
-							else {
-								var fadMatch = fadRegex.exec(textPart);
-								if (fadMatch) {
-									if (fadMatch[1] !== "0") {
-										m_sub.className = "fad-in";
-										m_sub.style.webkitTransitionDuration = (fadMatch[1] / 1000) + "s";
-										m_sub.style.mozTransitionDuration = (fadMatch[1] / 1000) + "s";
-										m_sub.style.transitionDuration = (fadMatch[1] / 1000) + "s";
-										setTimeout(function () {
-											m_sub.style.opacity = 1;
-										}, 1);
-									}
-									else if (fadMatch[2] !== "0") {
-										m_sub.classname = "fad-out";
-										m_sub.style.webkitTransitionDuration = (fadMatch[2] / 1000) + "s";
-										m_sub.style.mozTransitionDuration = (fadMatch[2] / 1000) + "s";
-										m_sub.style.transitionDuration = (fadMatch[2] / 1000) + "s";
-										setTimeout(function () {
-											m_sub.style.opacity = 0;
-										}, 1);
-									}
-								}
-								else {
-									var blurMatch = blurRegex.exec(textPart);
-									if (blurMatch) {
-										var newBlur = blurMatch[1];
-										if (currentBlur !== newBlur) {
-											currentBlur = newBlur;
-											spanStylesChanged = true;
-										}
-									}
-									else {
-										var italicsMatch = italicsRegex.exec(textPart);
-										if (italicsMatch) {
-											var newItalics = (parseInt(italicsMatch[1], 10) === 1);
-											if (currentItalics !== newItalics) {
-												currentItalics = newItalics;
-												spanStylesChanged = true;
-											}
-										}
-										else {
-											currentSpan.appendChild(document.createTextNode(textPart));
-											spanAlreadyHasContent = true;
-										}
-									}
-								}
-							}
-						}
+						currentSpan.appendChild(document.createTextNode(textPart));
+						spanAlreadyHasContent = true;
 					}
 
 					if (spanStylesChanged) {
