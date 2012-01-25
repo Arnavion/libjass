@@ -1,0 +1,79 @@
+body, #video
+{
+	position: absolute;
+	top: 0;
+	left: 50%;
+}
+
+#subs-wrapper
+{
+	position: absolute;
+	top: 30px;
+	bottom: 30px;
+	left: 30px;
+	right: 30px;
+}
+
+#subs-wrapper > *
+{
+	width: 100%;
+	position: absolute;
+}
+
+.an1, .an2, .an3
+{
+	bottom: 0;
+}
+
+.an4, .an5, .an6
+{
+	display: table;
+}
+
+.an4 > *, .an5 > *, .an6 > *
+{
+	display: table-cell;
+	top: 50%;
+	vertical-align: middle;
+}
+
+
+.an7, .an8, .an9
+{
+	top: 0;
+}
+
+.an1, .an4, .an7
+{
+	text-align: left;
+}
+
+.an2, .an5, .an8
+{
+	text-align: center;
+}
+
+.an3, .an6, .an9
+{
+	text-align: right;
+}
+
+.fad-in, .fad-out
+{
+	-moz-transition-property: opacity;
+	-mos-transition-timing-function: linear;
+	-webkit-transition-property: opacity;
+	-webkit-transition-timing-function: linear;
+	transition-property: opacity;
+	transition-timing-function: linear;
+}
+
+.fad-in
+{
+	opacity: 0;
+}
+
+.fad-out
+{
+	opacity: 1;
+}
