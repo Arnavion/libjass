@@ -57,7 +57,7 @@ body, #video
 .fad-in, .fad-out
 {
 	-moz-transition-property: opacity;
-	-mos-transition-timing-function: linear;
+	-moz-transition-timing-function: linear;
 	-webkit-transition-property: opacity;
 	-webkit-transition-timing-function: linear;
 	transition-property: opacity;
@@ -72,46 +72,4 @@ body, #video
 .fad-out
 {
 	opacity: 1;
-}
-
-@font-face
-{
-	font-family: "LTFinnegan Medium";
-	src: url("LT.ttf");
-}
-
-@font-face
-{
-	font-family: "Amienne";
-	src: url("Amienne.ttf");
-}
-
-@font-face
-{
-	font-family: "Complete in Him";
-	src: url("Complete in Him.ttf");
-}
-
-@font-face
-{
-	font-family: "Profile";
-	src: url("Profile-Regular.otf");
-}
-
-@font-face
-{
-	font-family: "CAC Moose";
-	src: url("CAC Moose.ttf");
-}
-
-@font-face
-{
-	font-family: "Swis721 Md BT";
-	src: url("SWZ721M.TTF");
-}
-
-@font-face
-{
-	font-family: "HandelGothic BT";
-	src: url("HANDGOTN.TTF");
 }

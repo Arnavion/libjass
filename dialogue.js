@@ -6,21 +6,29 @@ var createDialogues;
 (function () {
 	var alignmentRegex = /^\{\\an([1-9])\}$/;
 
+	var fontNameRegex = /^\{\\fn([^\\\}]+)\}$/;
+	var fontSizeRegex = /^\{\\fs(\d+(?:\.\d+)?)\}$/;
+
 	var boldRegex = /^\{\\b([01])\}$/;
 	var boldWeightRegex = /^\{\\b(?:[1-9]00)\}$/;
 	var italicRegex = /^\{\\i([01])\}$/;
 
 	var primaryColorRegex = /^\{\\1?c&H([0-9a-fA-F]{6})&\}$/;
+	var borderRegex = /^\{\\bord(\d+(?:\.\d+)?)\}$/;
 	var outlineColorRegex = /^\{\\3c&H([0-9a-fA-F]{6})&\}$/;
 
 	var blurRegex = /^\{\\blur([0-9])\}$/;
 
-	var posRegex = /^\{\\pos\((\d+),(\d+)\)\}$/;
+	var posRegex = /^\{\\pos\((\d+(?:\.\d+)?),(\d+(?:\.\d+)?)\)\}$/;
 
+	var frxRegex = /^\{\\frx(-?\d+(?:\.\d+)?)\}$/;
+	var fryRegex = /^\{\\fry(-?\d+(?:\.\d+)?)\}$/;
 	var frzRegex = /^\{\\frz(-?\d+(?:\.\d+)?)\}$/;
+	var faxRegex = /^\{\\fax(-?\d+(?:\.\d+)?)\}$/;
+	var fayRegex = /^\{\\fay(-?\d+(?:\.\d+)?)\}$/;
 
-	var fadRegex = /^\{\\fad\(([0-9]+),([0-9]+)\)\}$/;
-	
+	var fadRegex = /^\{\\fad\((\d+(?:\.\d+)?),(\d+(?:\.\d+)?)\)\}$/;
+
 	Dialogue = function (text, style, start, end, layer) {
 		var m_style = style;
 
@@ -50,8 +58,8 @@ var createDialogues;
 		var m_layer = ((layer >= 0) ? layer : 0);
 
 		var m_textParts = [];
-		text.split(/(\{[^}]*\})/).filter(function (textPart) {
-			return textPart !== "" && (!textPart.startsWith("{") || textPart.startsWith("{\\"));
+		text.split(/(\{[^}]*\})|(\\N)/).filter(function (textPart) {
+			return textPart !== undefined && textPart !== "" && (!textPart.startsWith("{") || textPart.startsWith("{\\"));
 		}).map(function (textPart) {
 			var result = [textPart];
 
@@ -142,21 +150,21 @@ var createDialogues;
 
 				var currentBlur = 0;
 
-				var rotationStyle = "";
-				var rotationOrigin = "";
+				var transformStyle = "";
 
 				var currentSpanContainer = m_sub; // Changes to a wrapper if {\pos} is present
 				var currentSpan;
-				var spanAlreadyHasContent = true;
-				var createNewSpan = function () {
-					if (spanAlreadyHasContent) {
+				var createNewSpan = true;
+				var updateSpanStyles = function () {
+					if (createNewSpan) {
 						currentSpan = document.createElement("span");
 						currentSpanContainer.appendChild(currentSpan);
-						spanAlreadyHasContent = false;
+						createNewSpan = false;
 					}
 
 					currentSpan.style.fontFamily = "\"" + currentFontName + "\"";
-					currentSpan.style.fontSize = (scaleY * currentFontSize) + "px";
+					currentSpan.style.fontSize = (0.75 * scaleY * currentFontSize) + "px";
+					currentSpan.style.lineHeight = (scaleY * currentFontSize) + "px";
 
 					currentSpan.style.color = currentPrimaryColor;
 
@@ -182,7 +190,7 @@ var createDialogues;
 						currentSpan.style.textDecoration = "underline";
 					}
 				};
-				createNewSpan();
+				updateSpanStyles();
 
 				var spanStylesChanged = false;
 
@@ -190,7 +198,23 @@ var createDialogues;
 					var matchResult;
 
 					if (matchResult = alignmentRegex.exec(textPart)) {
-						m_alignment = matchResult[1];
+						m_alignment = parseInt(matchResult[1], 10);
+					}
+
+					else if (matchResult = fontNameRegex.exec(textPart)) {
+						var newFontName = matchResult;
+						if (currentFontName !== newFontName) {
+							currentFontName = newFontName;
+							spanStylesChanged = true;
+						}
+					}
+
+					else if (matchResult = fontSizeRegex.exec(textPart)) {
+						var newFontSize = parseFloat(matchResult[1]);
+						if (currentFontSize !== newFontSize) {
+							currentFontSize = newFontSize;
+							spanStylesChanged = true;
+						}
 					}
 
 					else if (matchResult = boldRegex.exec(textPart)) {
@@ -225,6 +249,14 @@ var createDialogues;
 						}
 					}
 
+					else if (matchResult = borderRegex.exec(textPart)) {
+						var newOutlineWidth = parseFloat(matchResult[1]);
+						if (currentOutlineWidth !== newOutlineWidth) {
+							currentOutlineWidth = newOutlineWidth;
+							spanStylesChanged = true;
+						}
+					}
+
 					else if (matchResult = outlineColorRegex.exec(textPart)) {
 						var newOutlineColor = "#" + matchResult[1].toRGB();;
 						if (currentOutlineColor !== newOutlineColor) {
@@ -243,8 +275,8 @@ var createDialogues;
 
 					else if (matchResult = posRegex.exec(textPart)) {
 						m_sub.style.position = "absolute";
-						m_sub.style.left = (scaleX * matchResult[1]) + "px";
-						m_sub.style.top = (scaleY * matchResult[2]) + "px";
+						m_sub.style.left = (scaleX * parseFloat(matchResult[1])) + "px";
+						m_sub.style.top = (scaleY * parseFloat(matchResult[2])) + "px";
 
 						var relativeWrapper = document.createElement("div");
 						relativeWrapper.style.position = "relative";
@@ -252,20 +284,20 @@ var createDialogues;
 							relativeWrapper.appendChild(m_sub.firstElementChild);
 						}
 						switch (m_alignment) {
-							case "1": case "2": case "3":
+							case 1: case 2: case 3:
 								relativeWrapper.style.top = "-100%";
 								break;
 
-							case "4": case "5": case "6":
+							case 4: case 5: case 6:
 								relativeWrapper.style.top = "-50%";
 								break;
 						}
 						switch (m_alignment) {
-							case "2": case "5": case "8":
+							case 2: case 5: case 8:
 								relativeWrapper.style.left = "-50%";
 								break;
 
-							case "3": case "6": case "9":
+							case 3: case 6: case 9:
 								relativeWrapper.style.left = "-100%";
 								break;
 						}
@@ -273,42 +305,32 @@ var createDialogues;
 						currentSpanContainer = relativeWrapper;
 					}
 
+					else if (matchResult = frxRegex.exec(textPart)) {
+						transformStyle += " rotateX(" + matchResult[1] + "deg)";
+					}
+
+					else if (matchResult = fryRegex.exec(textPart)) {
+						transformStyle += " rotateY(" + matchResult[1] + "deg)";
+					}
+
 					else if (matchResult = frzRegex.exec(textPart)) {
-						rotationStyle = "rotate(" + (-1 * parseFloat(matchResult[1])) + "deg)";
-						switch (m_alignment) {
-							case "1": case "4": case "7":
-								rotationOrigin = "0% ";
-								break;
+						transformStyle += " rotateZ(" + (-1 * parseFloat(matchResult[1])) + "deg)";
+					}
 
-							case "2": case "5": case "8":
-								rotationOrigin = "50% ";
-								break;
+					else if (matchResult = faxRegex.exec(textPart)) {
+						transformStyle += " skewX(" + (45 * parseFloat(matchResult[1])) + "deg)";
+					}
 
-							case "3": case "6": case "9":
-								rotationOrigin = "100% ";
-								break;
-						}
-						switch (m_alignment) {
-							case "1": case "2": case "3":
-								rotationOrigin += "100%";
-								break;
-
-							case "4": case "5": case "6":
-								rotationOrigin += "50%";
-								break;
-
-							case "7": case "8": case "9":
-								rotationOrigin += "0%";
-								break;
-						}
+					else if (matchResult = fayRegex.exec(textPart)) {
+						transformStyle += " skewY(" + (45 * parseFloat(matchResult[1])) + "deg)";
 					}
 
 					else if (matchResult = fadRegex.exec(textPart)) {
 						if (matchResult[1] !== "0") {
 							m_sub.className = "fad-in";
-							m_sub.style.webkitTransitionDuration = (matchResult[1] / 1000) + "s";
-							m_sub.style.mozTransitionDuration = (matchResult[1] / 1000) + "s";
-							m_sub.style.transitionDuration = (matchResult[1] / 1000) + "s";
+							m_sub.style.webkitTransitionDuration = (parseFloat(matchResult[1]) / 1000) + "s";
+							m_sub.style.mozTransitionDuration = (parseFloat(matchResult[1]) / 1000) + "s";
+							m_sub.style.transitionDuration = (parseFloat(matchResult[1]) / 1000) + "s";
 							setTimeout(function () {
 								if (m_sub) {
 									m_sub.style.opacity = 1;
@@ -317,9 +339,9 @@ var createDialogues;
 						}
 						else if (matchResult[2] !== "0") {
 							m_sub.classname = "fad-out";
-							m_sub.style.webkitTransitionDuration = (matchResult[2] / 1000) + "s";
-							m_sub.style.mozTransitionDuration = (matchResult[2] / 1000) + "s";
-							m_sub.style.transitionDuration = (matchResult[2] / 1000) + "s";
+							m_sub.style.webkitTransitionDuration = (parseFloat(matchResult[2]) / 1000) + "s";
+							m_sub.style.mozTransitionDuration = (parseFloat(matchResult[2]) / 1000) + "s";
+							m_sub.style.transitionDuration = (parseFloat(matchResult[2]) / 1000) + "s";
 							setTimeout(function () {
 								if (m_sub) {
 									m_sub.style.opacity = 0;
@@ -328,24 +350,59 @@ var createDialogues;
 						}
 					}
 
+					else if (textPart === "\\N") {
+						currentSpanContainer.appendChild(document.createElement("br"));
+						createNewSpan = true;
+					}
+
 					else {
 						currentSpan.appendChild(document.createTextNode(textPart));
-						spanAlreadyHasContent = true;
+						createNewSpan = true;
 					}
 
 					if (spanStylesChanged) {
-						createNewSpan();
+						updateSpanStyles();
 					}
 				});
 
-				if (rotationStyle) {
-					currentSpanContainer.style.webkitTransform = rotationStyle;
-					currentSpanContainer.style.mozTransform = rotationStyle;
-					currentSpanContainer.style.transform = rotationStyle;
+				if (transformStyle) {
+					var transformOrigin;
+					switch (m_alignment) {
+						case 1: case 4: case 7:
+							transformOrigin = "0% ";
+							break;
 
-					currentSpanContainer.style.webkitTransformOrigin = rotationOrigin;
-					currentSpanContainer.style.mozTransformOrigin = rotationOrigin;
-					currentSpanContainer.style.transformOrigin = rotationOrigin;
+						case 2: case 5: case 8:
+							transformOrigin = "50% ";
+							break;
+
+						case 3: case 6: case 9:
+							transformOrigin = "100% ";
+							break;
+					}
+					switch (m_alignment) {
+						case 1: case 2: case 3:
+							transformOrigin += "100%";
+							break;
+
+						case 4: case 5: case 6:
+							transformOrigin += "50%";
+							break;
+
+						case 7: case 8: case 9:
+							transformOrigin += "0%";
+							break;
+					}
+
+					currentSpanContainer.style.webkitPerspective = "400";
+
+					currentSpanContainer.style.webkitTransform = transformStyle;
+					currentSpanContainer.style.mozTransform = transformStyle;
+					currentSpanContainer.style.transform = transformStyle;
+
+					currentSpanContainer.style.webkitTransformOrigin = transformOrigin;
+					currentSpanContainer.style.mozTransformOrigin = transformOrigin;
+					currentSpanContainer.style.transformOrigin = transformOrigin;
 				}
 			}
 		};

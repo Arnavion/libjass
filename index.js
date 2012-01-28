@@ -79,7 +79,7 @@ addEventListener("load", function () {
 			}));
 		}, false);
 
-		video.addEventListener("seeked", function () {
+		video.addEventListener("seeking", function () {
 			currentSubs.forEach(function (sub) {
 				sub.remove();
 			});

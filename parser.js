@@ -183,18 +183,18 @@ var parseASS = function (rawASS) {
 					styles.push(
 						new Style(
 							lineParts[nameIndex],
-							lineParts[alignmentIndex],
+							parseInt(lineParts[alignmentIndex], 10),
 							lineParts[fontNameIndex],
-							lineParts[fontSizeIndex],
+							parseFloat(lineParts[fontSizeIndex]),
 							lineParts[boldIndex] === "-1",
 							lineParts[italicIndex] === "-1",
 							lineParts[underlineIndex] === "-1",
 							lineParts[primaryColorIndex].match(/&H([0-9a-fA-F]{8})/)[1].toRGBA(),
-							lineParts[outlineWidthIndex],
+							parseFloat(lineParts[outlineWidthIndex]),
 							lineParts[outlineColorIndex].match(/&H([0-9a-fA-F]{8})/)[1].toRGBA(),
-							lineParts[marginLeftIndex],
-							lineParts[marginRightIndex],
-							lineParts[marginVerticalIndex]
+							parseInt(lineParts[marginLeftIndex], 10),
+							parseInt(lineParts[marginRightIndex], 10),
+							parseInt(lineParts[marginVerticalIndex], 10)
 						)
 					);
 				}
