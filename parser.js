@@ -44,12 +44,20 @@ var Info = function (playResX, playResY) {
 	};
 };
 
-var Style = function (name, alignment, primaryColor, fontName, fontSize) {
+var Style = function (name, alignment, fontName, fontSize, bold, italic, underline, primaryColor, outlineWidth, outlineColor, marginLeft, marginRight, marginVertical) {
 	var m_name = name;
 	var m_alignment = alignment;
-	var m_primaryColor = primaryColor;
 	var m_fontName = fontName;
 	var m_fontSize = fontSize;
+	var m_bold = bold;
+	var m_italic = italic;
+	var m_underline = underline;
+	var m_primaryColor = primaryColor;
+	var m_outlineWidth = outlineWidth;
+	var m_outlineColor = outlineColor;
+	var m_marginLeft = marginLeft;
+	var m_marginRight = marginRight;
+	var m_marginVertical = marginVertical;
 
 	var m_ass;
 
@@ -61,16 +69,48 @@ var Style = function (name, alignment, primaryColor, fontName, fontSize) {
 		return m_alignment;
 	};
 
-	this.getPrimaryColor = function () {
-		return m_primaryColor;
-	};
-
 	this.getFontName = function () {
 		return m_fontName;
 	};
 
 	this.getFontSize = function () {
 		return m_fontSize;
+	};
+
+	this.getBold = function () {
+		return m_bold;
+	};
+
+	this.getItalic = function () {
+		return m_italic;
+	};
+
+	this.getUnderline = function () {
+		return m_underline;
+	};
+
+	this.getPrimaryColor = function () {
+		return m_primaryColor;
+	};
+
+	this.getOutlineWidth = function () {
+		return m_outlineWidth;
+	};
+
+	this.getOutlineColor = function () {
+		return m_outlineColor;
+	};
+
+	this.getMarginLeft = function () {
+		return m_marginLeft;
+	};
+
+	this.getMarginRight = function () {
+		return m_marginRight;
+	};
+
+	this.getMarginVertical = function () {
+		return m_marginVertical;
 	};
 
 	this.setASS = function (ass) {
@@ -123,9 +163,17 @@ var parseASS = function (rawASS) {
 			var styleFormatParts = styleFormatLine.substring("Format:".length).split(",").map(function (formatPart) { return formatPart.trim(); });
 			var nameIndex = styleFormatParts.indexOf("Name");
 			var alignmentIndex = styleFormatParts.indexOf("Alignment");
-			var primaryColorIndex = styleFormatParts.indexOf("PrimaryColour");
 			var fontNameIndex = styleFormatParts.indexOf("Fontname");
 			var fontSizeIndex = styleFormatParts.indexOf("Fontsize");
+			var boldIndex = styleFormatParts.indexOf("Bold");
+			var italicIndex = styleFormatParts.indexOf("Italic");
+			var underlineIndex = styleFormatParts.indexOf("Underline");
+			var primaryColorIndex = styleFormatParts.indexOf("PrimaryColour");
+			var outlineWidthIndex = styleFormatParts.indexOf("Outline");
+			var outlineColorIndex = styleFormatParts.indexOf("OutlineColour");
+			var marginLeftIndex = styleFormatParts.indexOf("MarginL");
+			var marginRightIndex = styleFormatParts.indexOf("MarginR");
+			var marginVerticalIndex = styleFormatParts.indexOf("MarginV");
 
 			assLines.slice(i + styleFormatLineIndex + 2).some(function (line, index) {
 				var result = false;
@@ -136,9 +184,17 @@ var parseASS = function (rawASS) {
 						new Style(
 							lineParts[nameIndex],
 							lineParts[alignmentIndex],
-							lineParts[primaryColorIndex].match(/&H([0-9a-fA-F]{8})/)[1].toRGBA(),
 							lineParts[fontNameIndex],
-							lineParts[fontSizeIndex]
+							lineParts[fontSizeIndex],
+							lineParts[boldIndex] === "-1",
+							lineParts[italicIndex] === "-1",
+							lineParts[underlineIndex] === "-1",
+							lineParts[primaryColorIndex].match(/&H([0-9a-fA-F]{8})/)[1].toRGBA(),
+							lineParts[outlineWidthIndex],
+							lineParts[outlineColorIndex].match(/&H([0-9a-fA-F]{8})/)[1].toRGBA(),
+							lineParts[marginLeftIndex],
+							lineParts[marginRightIndex],
+							lineParts[marginVerticalIndex]
 						)
 					);
 				}

@@ -5,12 +5,22 @@ var createDialogues;
 
 (function () {
 	var alignmentRegex = /^\{\\an([1-9])\}$/;
-	var colorRegex = /^\{\\1?c&H([0-9a-fA-F]{6})&$\}/;
-	var borderColorRegex = /^\{\\3c&H([0-9a-fA-F]{6})&\}$/;
-	var fadRegex = /^\{\\fad\(([0-9]+),([0-9]+)\)\}$/;
-	var blurRegex = /^\{\\blur([0-9])\}$/;
-	var italicsRegex = /^\{\\i([01])\}$/;
 
+	var boldRegex = /^\{\\b([01])\}$/;
+	var boldWeightRegex = /^\{\\b(?:[1-9]00)\}$/;
+	var italicRegex = /^\{\\i([01])\}$/;
+
+	var primaryColorRegex = /^\{\\1?c&H([0-9a-fA-F]{6})&\}$/;
+	var outlineColorRegex = /^\{\\3c&H([0-9a-fA-F]{6})&\}$/;
+
+	var blurRegex = /^\{\\blur([0-9])\}$/;
+
+	var posRegex = /^\{\\pos\((\d+),(\d+)\)\}$/;
+
+	var frzRegex = /^\{\\frz(-?\d+(?:\.\d+)?)\}$/;
+
+	var fadRegex = /^\{\\fad\(([0-9]+),([0-9]+)\)\}$/;
+	
 	Dialogue = function (text, style, start, end, layer) {
 		var m_style = style;
 
@@ -111,39 +121,65 @@ var createDialogues;
 
 			// Magic happens here (TODO: styling)
 			if (m_sub !== null) {
+				var styleInfo = m_ass.getInfo();
+				var scaleX = styleInfo.getScaleX();
+				var scaleY = styleInfo.getScaleY();
+
+				m_sub.style.marginLeft = (scaleX * m_style.getMarginLeft()) + "px";
+				m_sub.style.marginRight = (scaleX * m_style.getMarginRight()) + "px";
+				m_sub.style.marginTop = m_sub.style.marginBottom = (scaleX * m_style.getMarginVertical()) + "px";
+
 				var currentFontName = m_style.getFontName();
 				var currentFontSize = m_style.getFontSize();
-				var currentBorderColor = null; // TODO: Read default from styles
-				var currentColor = m_style.getPrimaryColor();
-				var currentBlur = 0; // TODO: Read default from styles
-				var currentItalics = false; // TODO: Read default from styles
 
+				var currentBold = m_style.getBold() ? "bold" : "";
+				var currentItalic = m_style.getItalic();
+				var currentUnderline = m_style.getUnderline();
+
+				var currentPrimaryColor = m_style.getPrimaryColor();
+				var currentOutlineWidth = m_style.getOutlineWidth();
+				var currentOutlineColor = m_style.getOutlineColor();
+
+				var currentBlur = 0;
+
+				var rotationStyle = "";
+				var rotationOrigin = "";
+
+				var currentSpanContainer = m_sub; // Changes to a wrapper if {\pos} is present
 				var currentSpan;
 				var spanAlreadyHasContent = true;
 				var createNewSpan = function () {
 					if (spanAlreadyHasContent) {
 						currentSpan = document.createElement("span");
-						m_sub.appendChild(currentSpan);
+						currentSpanContainer.appendChild(currentSpan);
 						spanAlreadyHasContent = false;
 					}
 
 					currentSpan.style.fontFamily = "\"" + currentFontName + "\"";
-					currentSpan.style.fontSize = (m_ass.getInfo().getScaleY() * currentFontSize) + "px";
+					currentSpan.style.fontSize = (scaleY * currentFontSize) + "px";
 
-					currentSpan.style.color = currentColor;
+					currentSpan.style.color = currentPrimaryColor;
 
-					var blurRadius = 1;
+					var blurRadius = scaleX * currentOutlineWidth;
 					if (currentBlur > 0) {
 						blurRadius = currentBlur / 2;
 					}
 					currentSpan.style.textShadow =
-						"1px 1px " + blurRadius + "px " + currentBorderColor + ", " +
-						"1px -1px " + blurRadius + "px " + currentBorderColor + ", " +
-						"-1px 1px " + blurRadius + "px " + currentBorderColor + ", " +
-						"-1px -1px " + blurRadius + "px " + currentBorderColor;
+						"1px 1px " + blurRadius + "px " + currentOutlineColor + ", " +
+						"1px -1px " + blurRadius + "px " + currentOutlineColor + ", " +
+						"-1px 1px " + blurRadius + "px " + currentOutlineColor + ", " +
+						"-1px -1px " + blurRadius + "px " + currentOutlineColor;
 
-					if (currentItalics) {
+					if (currentBold) {
+						currentSpan.style.fontWeight = currentBold;
+					}
+
+					if (currentItalic) {
 						currentSpan.style.fontStyle = "italic";
+					}
+
+					if (currentUnderline) {
+						currentSpan.style.textDecoration = "underline";
 					}
 				};
 				createNewSpan();
@@ -157,40 +193,43 @@ var createDialogues;
 						m_alignment = matchResult[1];
 					}
 
-					else if (matchResult = colorRegex.exec(textPart)) {
-						var newColor = "#" + matchResult[1].toRGB();
-						if (currentColor !== newColor) {
-							currentColor = newColor;
+					else if (matchResult = boldRegex.exec(textPart)) {
+						var newBold = ((matchResult[1] === "1") ? "bold" : "");
+						if (currentBold !== newBold) {
+							currentBold = newBold;
 							spanStylesChanged = true;
 						}
 					}
 
-					else if (matchResult = borderColorRegex.exec(textPart)) {
-						var newBorderColor = "#" + matchResult[1].toRGB();;
-						if (currentBorderColor !== newBorderColor) {
-							currentBorderColor = newBorderColor;
+					else if (matchResult = boldWeightRegex.exec(textPart)) {
+						var newBold = matchResult[1];
+						if (currentBold !== newBold) {
+							currentBold = newBold;
 							spanStylesChanged = true;
 						}
 					}
 
-					else if (matchResult = fadRegex.exec(textPart)) {
-						if (matchResult[1] !== "0") {
-							m_sub.className = "fad-in";
-							m_sub.style.webkitTransitionDuration = (matchResult[1] / 1000) + "s";
-							m_sub.style.mozTransitionDuration = (matchResult[1] / 1000) + "s";
-							m_sub.style.transitionDuration = (matchResult[1] / 1000) + "s";
-							setTimeout(function () {
-								m_sub.style.opacity = 1;
-							}, 1);
+					else if (matchResult = italicRegex.exec(textPart)) {
+						var newItalic = (parseInt(matchResult[1], 10) === 1);
+						if (currentItalic !== newItalic) {
+							currentItalic = newItalic;
+							spanStylesChanged = true;
 						}
-						else if (matchResult[2] !== "0") {
-							m_sub.classname = "fad-out";
-							m_sub.style.webkitTransitionDuration = (matchResult[2] / 1000) + "s";
-							m_sub.style.mozTransitionDuration = (matchResult[2] / 1000) + "s";
-							m_sub.style.transitionDuration = (matchResult[2] / 1000) + "s";
-							setTimeout(function () {
-								m_sub.style.opacity = 0;
-							}, 1);
+					}
+
+					else if (matchResult = primaryColorRegex.exec(textPart)) {
+						var newPrimaryColor = "#" + matchResult[1].toRGB();
+						if (currentPrimaryColor !== newPrimaryColor) {
+							currentPrimaryColor = newPrimaryColor;
+							spanStylesChanged = true;
+						}
+					}
+
+					else if (matchResult = outlineColorRegex.exec(textPart)) {
+						var newOutlineColor = "#" + matchResult[1].toRGB();;
+						if (currentOutlineColor !== newOutlineColor) {
+							currentOutlineColor = newOutlineColor;
+							spanStylesChanged = true;
 						}
 					}
 
@@ -202,11 +241,90 @@ var createDialogues;
 						}
 					}
 
-					else if (matchResult = italicsRegex.exec(textPart)) {
-						var newItalics = (parseInt(matchResult[1], 10) === 1);
-						if (currentItalics !== newItalics) {
-							currentItalics = newItalics;
-							spanStylesChanged = true;
+					else if (matchResult = posRegex.exec(textPart)) {
+						m_sub.style.position = "absolute";
+						m_sub.style.left = (scaleX * matchResult[1]) + "px";
+						m_sub.style.top = (scaleY * matchResult[2]) + "px";
+
+						var relativeWrapper = document.createElement("div");
+						relativeWrapper.style.position = "relative";
+						while (m_sub.firstElementChild) {
+							relativeWrapper.appendChild(m_sub.firstElementChild);
+						}
+						switch (m_alignment) {
+							case "1": case "2": case "3":
+								relativeWrapper.style.top = "-100%";
+								break;
+
+							case "4": case "5": case "6":
+								relativeWrapper.style.top = "-50%";
+								break;
+						}
+						switch (m_alignment) {
+							case "2": case "5": case "8":
+								relativeWrapper.style.left = "-50%";
+								break;
+
+							case "3": case "6": case "9":
+								relativeWrapper.style.left = "-100%";
+								break;
+						}
+						m_sub.appendChild(relativeWrapper);
+						currentSpanContainer = relativeWrapper;
+					}
+
+					else if (matchResult = frzRegex.exec(textPart)) {
+						rotationStyle = "rotate(" + (-1 * parseFloat(matchResult[1])) + "deg)";
+						switch (m_alignment) {
+							case "1": case "4": case "7":
+								rotationOrigin = "0% ";
+								break;
+
+							case "2": case "5": case "8":
+								rotationOrigin = "50% ";
+								break;
+
+							case "3": case "6": case "9":
+								rotationOrigin = "100% ";
+								break;
+						}
+						switch (m_alignment) {
+							case "1": case "2": case "3":
+								rotationOrigin += "100%";
+								break;
+
+							case "4": case "5": case "6":
+								rotationOrigin += "50%";
+								break;
+
+							case "7": case "8": case "9":
+								rotationOrigin += "0%";
+								break;
+						}
+					}
+
+					else if (matchResult = fadRegex.exec(textPart)) {
+						if (matchResult[1] !== "0") {
+							m_sub.className = "fad-in";
+							m_sub.style.webkitTransitionDuration = (matchResult[1] / 1000) + "s";
+							m_sub.style.mozTransitionDuration = (matchResult[1] / 1000) + "s";
+							m_sub.style.transitionDuration = (matchResult[1] / 1000) + "s";
+							setTimeout(function () {
+								if (m_sub) {
+									m_sub.style.opacity = 1;
+								}
+							}, 1);
+						}
+						else if (matchResult[2] !== "0") {
+							m_sub.classname = "fad-out";
+							m_sub.style.webkitTransitionDuration = (matchResult[2] / 1000) + "s";
+							m_sub.style.mozTransitionDuration = (matchResult[2] / 1000) + "s";
+							m_sub.style.transitionDuration = (matchResult[2] / 1000) + "s";
+							setTimeout(function () {
+								if (m_sub) {
+									m_sub.style.opacity = 0;
+								}
+							}, 1);
 						}
 					}
 
@@ -219,6 +337,16 @@ var createDialogues;
 						createNewSpan();
 					}
 				});
+
+				if (rotationStyle) {
+					currentSpanContainer.style.webkitTransform = rotationStyle;
+					currentSpanContainer.style.mozTransform = rotationStyle;
+					currentSpanContainer.style.transform = rotationStyle;
+
+					currentSpanContainer.style.webkitTransformOrigin = rotationOrigin;
+					currentSpanContainer.style.mozTransformOrigin = rotationOrigin;
+					currentSpanContainer.style.transformOrigin = rotationOrigin;
+				}
 			}
 		};
 
