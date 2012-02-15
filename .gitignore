@@ -1,5 +1,2 @@
-
-*.webm
-*.ass
-*.ttf
-*.otf
+video/*
+fonts/*

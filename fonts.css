@@ -1,48 +1,48 @@
 ﻿@font-face
 {
 	font-family: "LTFinnegan Medium";
-	src: url("LT.ttf");
+	src: url("fonts/LT.ttf");
 }
 
 @font-face
 {
 	font-family: "LTFinnegan Medium";
-	src: url("LT_3italic.ttf");
+	src: url("fonts/LT_3italic.ttf");
 	font-style: italic;
 }
 
 @font-face
 {
 	font-family: "Amienne";
-	src: url("Amienne.ttf");
+	src: url("fonts/Amienne.ttf");
 }
 
 @font-face
 {
 	font-family: "Complete in Him";
-	src: url("Complete in Him.ttf");
+	src: url("fonts/Complete in Him.ttf");
 }
 
 @font-face
 {
 	font-family: "Profile";
-	src: url("Profile-Regular.otf");
+	src: url("fonts/Profile-Regular.otf");
 }
 
 @font-face
 {
 	font-family: "CAC Moose";
-	src: url("CAC Moose.ttf");
+	src: url("fonts/CAC Moose.ttf");
 }
 
 @font-face
 {
 	font-family: "Swis721 Md BT";
-	src: url("SWZ721M.TTF");
+	src: url("fonts/SWZ721M.TTF");
 }
 
 @font-face
 {
 	font-family: "HandelGothic BT";
-	src: url("HANDGOTN.TTF");
+	src: url("fonts/HANDGOTN.TTF");
 }

@@ -17,7 +17,7 @@ var createDialogues;
 	var borderRegex = /^\{\\bord(\d+(?:\.\d+)?)\}$/;
 	var outlineColorRegex = /^\{\\3c&H([0-9a-fA-F]{6})&\}$/;
 
-	var blurRegex = /^\{\\blur([0-9])\}$/;
+	var blurRegex = /^\{\\blur(\d+(?:\.\d+)?)\}$/;
 
 	var posRegex = /^\{\\pos\((\d+(?:\.\d+)?),(\d+(?:\.\d+)?)\)\}$/;
 
@@ -34,8 +34,7 @@ var createDialogues;
 
 		var m_start;
 		if (start.constructor === String) {
-			var startParts = start.split(":");
-			m_start = startParts[0] * 60 * 60 + startParts[1] * 60 + startParts[2] * 1;
+			m_start = start.split(":").reduce(function (previousValue, currentValue) { return previousValue * 60 + parseFloat(currentValue); });
 		}
 		else {
 			m_start = start;
@@ -43,8 +42,7 @@ var createDialogues;
 
 		var m_end;
 		if (end.constructor === String) {
-			var endParts = end.split(":");
-			m_end = endParts[0] * 60 * 60 + endParts[1] * 60 + endParts[2] * 1;
+			m_end = end.split(":").reduce(function (previousValue, currentValue) { return previousValue * 60 + parseFloat(currentValue); });
 		}
 		else {
 			m_end = end;
@@ -173,10 +171,9 @@ var createDialogues;
 						blurRadius = currentBlur / 2;
 					}
 					currentSpan.style.textShadow =
-						"1px 1px " + blurRadius + "px " + currentOutlineColor + ", " +
-						"1px -1px " + blurRadius + "px " + currentOutlineColor + ", " +
-						"-1px 1px " + blurRadius + "px " + currentOutlineColor + ", " +
-						"-1px -1px " + blurRadius + "px " + currentOutlineColor;
+						[[1, 1], [1, -1], [-1, 1], [-1, -1]].map(function (pair) {
+							return pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + currentOutlineColor;
+						}).join(", ");
 
 					if (currentBold) {
 						currentSpan.style.fontWeight = currentBold;
@@ -266,7 +263,7 @@ var createDialogues;
 					}
 
 					else if (matchResult = blurRegex.exec(textPart)) {
-						var newBlur = matchResult[1];
+						var newBlur = parseFloat(matchResult[1]);
 						if (currentBlur !== newBlur) {
 							currentBlur = newBlur;
 							spanStylesChanged = true;
@@ -283,24 +280,8 @@ var createDialogues;
 						while (m_sub.firstElementChild) {
 							relativeWrapper.appendChild(m_sub.firstElementChild);
 						}
-						switch (m_alignment) {
-							case 1: case 2: case 3:
-								relativeWrapper.style.top = "-100%";
-								break;
-
-							case 4: case 5: case 6:
-								relativeWrapper.style.top = "-50%";
-								break;
-						}
-						switch (m_alignment) {
-							case 2: case 5: case 8:
-								relativeWrapper.style.left = "-50%";
-								break;
-
-							case 3: case 6: case 9:
-								relativeWrapper.style.left = "-100%";
-								break;
-						}
+						relativeWrapper.style.top = ((9 - m_alignment) / 3 * -50) + "% ";
+						relativeWrapper.style.left = (((m_alignment - 1) % 3) * -50) + "% ";
 						m_sub.appendChild(relativeWrapper);
 						currentSpanContainer = relativeWrapper;
 					}
@@ -327,26 +308,22 @@ var createDialogues;
 
 					else if (matchResult = fadRegex.exec(textPart)) {
 						if (matchResult[1] !== "0") {
-							m_sub.className = "fad-in";
-							m_sub.style.webkitTransitionDuration = (parseFloat(matchResult[1]) / 1000) + "s";
-							m_sub.style.mozTransitionDuration = (parseFloat(matchResult[1]) / 1000) + "s";
+							m_sub.style.opacity = 0;
 							m_sub.style.transitionDuration = (parseFloat(matchResult[1]) / 1000) + "s";
+							m_sub.style.mozTransitionDuration = (parseFloat(matchResult[1]) / 1000) + "s";
+							m_sub.style.webkitTransitionDuration = (parseFloat(matchResult[1]) / 1000) + "s";
 							setTimeout(function () {
-								if (m_sub) {
-									m_sub.style.opacity = 1;
-								}
-							}, 1);
+								m_sub.className = "fad-in";
+							}, 0);
 						}
 						else if (matchResult[2] !== "0") {
-							m_sub.classname = "fad-out";
-							m_sub.style.webkitTransitionDuration = (parseFloat(matchResult[2]) / 1000) + "s";
-							m_sub.style.mozTransitionDuration = (parseFloat(matchResult[2]) / 1000) + "s";
+							m_sub.style.opacity = 1;
 							m_sub.style.transitionDuration = (parseFloat(matchResult[2]) / 1000) + "s";
+							m_sub.style.mozTransitionDuration = (parseFloat(matchResult[2]) / 1000) + "s";
+							m_sub.style.webkitTransitionDuration = (parseFloat(matchResult[2]) / 1000) + "s";
 							setTimeout(function () {
-								if (m_sub) {
-									m_sub.style.opacity = 0;
-								}
-							}, 1);
+								m_sub.classname = "fad-out";
+							}, 0);
 						}
 					}
 
@@ -366,43 +343,16 @@ var createDialogues;
 				});
 
 				if (transformStyle) {
-					var transformOrigin;
-					switch (m_alignment) {
-						case 1: case 4: case 7:
-							transformOrigin = "0% ";
-							break;
+					currentSpanContainer.style.transform = transformStyle;
+					currentSpanContainer.style.mozTransform = transformStyle;
+					currentSpanContainer.style.webkitTransform = transformStyle;
 
-						case 2: case 5: case 8:
-							transformOrigin = "50% ";
-							break;
-
-						case 3: case 6: case 9:
-							transformOrigin = "100% ";
-							break;
-					}
-					switch (m_alignment) {
-						case 1: case 2: case 3:
-							transformOrigin += "100%";
-							break;
-
-						case 4: case 5: case 6:
-							transformOrigin += "50%";
-							break;
-
-						case 7: case 8: case 9:
-							transformOrigin += "0%";
-							break;
-					}
+					var transformOrigin = (((m_alignment - 1) % 3) * 50) + "% " + ((5 - m_alignment) / 3 * 50) + "%";
+					currentSpanContainer.style.transformOrigin = transformOrigin;
+					currentSpanContainer.style.mozTransformOrigin = transformOrigin;
+					currentSpanContainer.style.webkitTransformOrigin = transformOrigin;
 
 					currentSpanContainer.style.webkitPerspective = "400";
-
-					currentSpanContainer.style.webkitTransform = transformStyle;
-					currentSpanContainer.style.mozTransform = transformStyle;
-					currentSpanContainer.style.transform = transformStyle;
-
-					currentSpanContainer.style.webkitTransformOrigin = transformOrigin;
-					currentSpanContainer.style.mozTransformOrigin = transformOrigin;
-					currentSpanContainer.style.transformOrigin = transformOrigin;
 				}
 			}
 		};
@@ -422,7 +372,7 @@ var createDialogues;
 
 		while (result[result.length - 1].childDialogue) {
 			result.push(result[result.length - 1].childDialogue);
-			result[result.length - 2].childDialogue = null;
+			result[result.length - 2].childDialogue = undefined;
 		}
 
 		return result;
