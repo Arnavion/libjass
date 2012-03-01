@@ -1,48 +1,41 @@
-﻿@font-face
-{
+﻿@font-face {
+	font-family: "Amienne";
+	src: url("fonts/Amienne.ttf");
+}
+
+@font-face {
+	font-family: "CAC Moose";
+	src: url("fonts/CAC%20Moose.ttf");
+}
+
+@font-face {
+	font-family: "Complete in Him";
+	src: url("fonts/Complete%20in%20Him.ttf");
+}
+
+@font-face {
+	font-family: "HandelGotDBol";
+	src: url("fonts/HANDGOTB.TTF");
+}
+
+@font-face {
+	font-family: "HandelGothic BT";
+	src: url("fonts/HANDGOTN.TTF");
+}
+
+@font-face {
 	font-family: "LTFinnegan Medium";
 	src: url("fonts/LT.ttf");
 }
 
-@font-face
-{
+@font-face {
 	font-family: "LTFinnegan Medium";
 	src: url("fonts/LT_3italic.ttf");
 	font-style: italic;
 }
 
-@font-face
-{
-	font-family: "Amienne";
-	src: url("fonts/Amienne.ttf");
-}
-
-@font-face
-{
-	font-family: "Complete in Him";
-	src: url("fonts/Complete in Him.ttf");
-}
-
-@font-face
-{
-	font-family: "Profile";
-	src: url("fonts/Profile-Regular.otf");
-}
-
-@font-face
-{
-	font-family: "CAC Moose";
-	src: url("fonts/CAC Moose.ttf");
-}
-
-@font-face
-{
+@font-face {
 	font-family: "Swis721 Md BT";
 	src: url("fonts/SWZ721M.TTF");
 }
 
-@font-face
-{
-	font-family: "HandelGothic BT";
-	src: url("fonts/HANDGOTN.TTF");
-}
