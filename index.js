@@ -86,6 +86,28 @@ addEventListener("load", function () {
 			currentSubs = [];
 		});
 
-		video.play();
+		var numFonts = 0;
+		Array.prototype.splice.call(document.styleSheets, 0).filter(function (stylesheet) {
+			return stylesheet.href && stylesheet.href.endsWith("fonts.css");
+		}).forEach(function (style) {
+			numFonts +=
+				Array.prototype.splice.call(style.rules, 0).filter(function (rule) {
+					return rule.constructor === CSSFontFaceRule;
+				}).map(function (fontFaceRule) {
+					var xhr = new XMLHttpRequest();
+					xhr.open("GET", fontFaceRule.style.src.match(/^url\((.+)\)$/)[1], true);
+					xhr.addEventListener("readystatechange", function () {
+						if (xhr.readyState === XMLHttpRequest.DONE) {
+							--numFonts;
+							if (numFonts === 0) {
+								video.play();
+							}
+						}
+					});
+					xhr.send(null);
+					return xhr;
+				})
+				.length;
+		});
 	}
 }, false);
