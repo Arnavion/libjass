@@ -1,5 +1,11 @@
 "use strict";
 
+if (String.prototype.trimLeft === undefined) {
+	String.prototype.trimLeft = function () {
+		return this.match(/^\W*(.+)$/)[1];
+	};
+}
+
 String.prototype.startsWith = function (str) {
 	return this.indexOf(str) === 0;
 };

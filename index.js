@@ -1,6 +1,6 @@
 "use strict";
 
-addEventListener("load", function () {
+addEventListener("DOMContentLoaded", function () {
 	var createSubDiv;
 	var wrappers = {};
 	(function () {
@@ -21,93 +21,137 @@ addEventListener("load", function () {
 	})();
 
 	var video = document.querySelector("#video");
-	var subsRequest = new XMLHttpRequest();
-	subsRequest.open("GET", video.dataset.subs, false);
-	subsRequest.send();
-	if (subsRequest.readyState === XMLHttpRequest.DONE && subsRequest.status === 200) {
-		var ass = parseASS(subsRequest.responseText);
 
-		var videoWidth = video.videoWidth;
-		var videoHeight = video.videoHeight;
-		document.body.style.width = video.style.width = videoWidth + "px";
-		document.body.style.height = video.style.height = videoHeight + "px";
-		document.body.style.marginLeft = video.style.marginLeft = (-videoWidth / 2) + "px";
+	var videoMetadataLoaded = false;
+	var ass;
 
-		var subsWrapper = document.querySelector("#subs-wrapper");
+	var onVideoAndSubsLoaded = function () {
+		if (videoMetadataLoaded && ass) {
+			var videoWidth = video.videoWidth;
+			var videoHeight = video.videoHeight;
+			document.body.style.width = video.style.width = videoWidth + "px";
+			document.body.style.height = video.style.height = videoHeight + "px";
+			document.body.style.marginLeft = video.style.marginLeft = (-videoWidth / 2) + "px";
 
-		ass.getInfo().scaleTo(videoWidth, videoHeight);
+			var subsWrapper = document.querySelector("#subs-wrapper");
 
-		var layers = [];
-		ass.getDialogues().map(function (dialogue) {
-			return dialogue.getLayer();
-		}).forEach(function (layer) {
-			if (layers.indexOf(layer) === -1) {
-				layers.push(layer);
-			}
-		});
-		layers.sort().forEach(function (layer) {
-			var i;
-			wrappers[layer] = {};
-			for (i = 1; i <= 9; ++i) {
-				var wrapperDiv = document.createElement("div");
-				wrapperDiv.className = "an" + i + " layer" + layer;
-				subsWrapper.appendChild(wrapperDiv);
-				wrappers[layer][i] = wrapperDiv;
-			}
-		});
+			ass.getInfo().scaleTo(videoWidth, videoHeight);
 
-		var currentSubs = [];
-
-		video.addEventListener("timeupdate", function () {
-			var currentTime = video.currentTime;
-			var currentDialogues = ass.getDialogues().filter(function (dialogue) { return dialogue.getStart() <= currentTime && dialogue.getEnd() >= currentTime; });
-
-			var subsPartition = currentSubs.partition(function (currentSub) {
-				return currentTime > currentSub.dialogue.getEnd() || currentDialogues.every(function (dialogue) {
-					return dialogue.getSub() !== currentSub;
-				});
+			var layers = [];
+			ass.getDialogues().map(function (dialogue) {
+				return dialogue.getLayer();
+			}).forEach(function (layer) {
+				if (layers.indexOf(layer) === -1) {
+					layers.push(layer);
+				}
+			});
+			layers.sort().forEach(function (layer) {
+				var i;
+				wrappers[layer] = {};
+				for (i = 1; i <= 9; ++i) {
+					var wrapperDiv = document.createElement("div");
+					wrapperDiv.className = "an" + i + " layer" + layer;
+					subsWrapper.appendChild(wrapperDiv);
+					wrappers[layer][i] = wrapperDiv;
+				}
 			});
 
-			subsPartition[0].forEach(function (sub) {
-				sub.remove();
-			});
+			var currentSubs = [];
+			var dialogues = ass.getDialogues();
+			var currentDialogueIndex = 0;
+			video.addEventListener("timeupdate", function () {
+				var currentTime = video.currentTime;
+				var currentDialogues = [];
+				dialogues.every(function (dialogue) {
+					var result = true;
 
-			currentSubs = subsPartition[1].concat(currentDialogues.filter(function (dialogue) {
-				return dialogue.getSub() === null;
-			}).map(function (dialogue) {
-				return createSubDiv(dialogue);
-			}));
-		}, false);
-
-		video.addEventListener("seeking", function () {
-			currentSubs.forEach(function (sub) {
-				sub.remove();
-			});
-			currentSubs = [];
-		});
-
-		var numFonts = 0;
-		Array.prototype.splice.call(document.styleSheets, 0).filter(function (stylesheet) {
-			return stylesheet.href && stylesheet.href.endsWith("fonts.css");
-		}).forEach(function (style) {
-			numFonts +=
-				Array.prototype.splice.call(style.rules, 0).filter(function (rule) {
-					return rule.constructor === CSSFontFaceRule;
-				}).map(function (fontFaceRule) {
-					var xhr = new XMLHttpRequest();
-					xhr.open("GET", fontFaceRule.style.src.match(/^url\((.+)\)$/)[1], true);
-					xhr.addEventListener("readystatechange", function () {
-						if (xhr.readyState === XMLHttpRequest.DONE) {
-							--numFonts;
-							if (numFonts === 0) {
-								video.play();
-							}
+					if (dialogue.getStart() <= currentTime) {
+						if (dialogue.getEnd() >= currentTime) {
+							currentDialogues.push(dialogue);
 						}
+					}
+					else {
+						result = false;
+					}
+
+					return result;
+				});
+
+				var subsPartition = currentSubs.partition(function (currentSub) {
+					return currentTime > currentSub.dialogue.getEnd() || currentDialogues.every(function (dialogue) {
+						return dialogue.getSub() !== currentSub;
 					});
-					xhr.send(null);
-					return xhr;
-				})
-				.length;
-		});
+				});
+
+				subsPartition[0].forEach(function (sub) {
+					sub.remove();
+				});
+
+				currentSubs = subsPartition[1].concat(currentDialogues.filter(function (dialogue) {
+					return dialogue.getSub() === null;
+				}).map(function (dialogue) {
+					return createSubDiv(dialogue);
+				}));
+			}, false);
+
+			video.addEventListener("seeking", function () {
+				currentSubs.forEach(function (sub) {
+					sub.remove();
+				});
+				currentSubs = [];
+			});
+
+			var numFonts = 0;
+			Array.prototype.splice.call(document.styleSheets, 0).filter(function (stylesheet) {
+				return stylesheet.href && stylesheet.href.endsWith("fonts.css");
+			}).forEach(function (style) {
+				numFonts +=
+					Array.prototype.splice.call(style.cssRules, 0).filter(function (rule) {
+						return rule.type === CSSRule.FONT_FACE_RULE;
+					}).map(function (fontFaceRule) {
+						var xhr = new XMLHttpRequest();
+						var fontSrc = fontFaceRule.style.src;
+						if (fontSrc) {
+							fontSrc = fontSrc.match(/^url\((.+)\)$/)[1];
+						}
+						else {
+							fontSrc = fontFaceRule.cssText.match(/url\((.+)\)/)[1];
+						}
+						xhr.open("GET", fontSrc, true);
+						xhr.addEventListener("readystatechange", function () {
+							if (xhr.readyState === XMLHttpRequest.DONE) {
+								--numFonts;
+								if (numFonts === 0) {
+									video.play();
+								}
+							}
+						});
+						xhr.send(null);
+						return xhr;
+					})
+					.length;
+			});
+		}
+	};
+
+	if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
+		video.addEventListener("loadedmetadata", function () {
+			videoMetadataLoaded = true;
+			onVideoAndSubsLoaded();
+		}, false);
 	}
+	else {
+		videoMetadataLoaded = true;
+		onVideoAndSubsLoaded();
+	}
+
+	var subsRequest = new XMLHttpRequest();
+	subsRequest.open("GET", (video.dataset && video.dataset.subs) || video.getAttribute("data-subs"), true);
+	subsRequest.addEventListener("readystatechange", function () {
+		if (subsRequest.readyState === XMLHttpRequest.DONE) {
+			ass = parseASS(subsRequest.responseText);
+			onVideoAndSubsLoaded();
+		}
+	}, false);
+	subsRequest.send();
 }, false);
