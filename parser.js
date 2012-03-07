@@ -143,7 +143,7 @@ var parseASS = function (rawASS) {
 
 	var playResX;
 	var playResY;
-	for (i = 0; i < assLines.length && assLines[i] !== "[Script Info]"; ++i) ;
+	for (i = 0; i < assLines.length && assLines[i] !== "[Script Info]"; ++i);
 	assLines.slice(i + 1).every(function (line, index) {
 		if (line.startsWith("PlayResX:")) {
 			playResX = parseInt(line.substring("PlayResX:".length).trim(), 10);
@@ -162,7 +162,7 @@ var parseASS = function (rawASS) {
 		info = new Info(playResX, playResY);
 	}
 
-	for (; i < assLines.length && assLines[i] !== "[V4+ Styles]"; ++i) ;
+	for (; i < assLines.length && assLines[i] !== "[V4+ Styles]"; ++i);
 	var styleFormatLineIndex;
 	if (assLines.slice(i + 1).some(function (line, index) {
 		var result = line.startsWith("Format:");
@@ -219,7 +219,7 @@ var parseASS = function (rawASS) {
 		});
 	}
 
-	for (; i < assLines.length && assLines[i] !== "[Events]"; ++i) ;
+	for (; i < assLines.length && assLines[i] !== "[Events]"; ++i);
 	var dialogueFormatLineIndex;
 	if (assLines.slice(i + 1).some(function (line, lineIndex) {
 		var result = line.startsWith("Format:");
@@ -255,6 +255,8 @@ var parseASS = function (rawASS) {
 			return result;
 		});
 	}
+
+	dialogues.sort(function (dialogue) { return dialogue.getStart(); });
 
 	return new ASS(info, styles, dialogues);
 }
