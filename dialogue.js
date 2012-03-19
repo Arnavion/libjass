@@ -34,7 +34,10 @@ var createDialogues;
 
 		var m_start;
 		if (start.constructor === String) {
-			m_start = start.split(":").reduce(function (previousValue, currentValue) { return previousValue * 60 + parseFloat(currentValue); });
+			m_start =
+				start.split(":").reduce(function (previousValue, currentValue) {
+					return previousValue * 60 + parseFloat(currentValue);
+				}, 0);
 		}
 		else {
 			m_start = start;
@@ -42,7 +45,10 @@ var createDialogues;
 
 		var m_end;
 		if (end.constructor === String) {
-			m_end = end.split(":").reduce(function (previousValue, currentValue) { return previousValue * 60 + parseFloat(currentValue); });
+			m_end =
+				end.split(":").reduce(function (previousValue, currentValue) {
+					return previousValue * 60 + parseFloat(currentValue);
+				}, 0);
 		}
 		else {
 			m_end = end;
@@ -161,7 +167,7 @@ var createDialogues;
 					}
 
 					currentSpan.style.fontFamily = "\"" + currentFontName + "\"";
-					currentSpan.style.fontSize = (0.75 * scaleY * currentFontSize) + "px";
+					currentSpan.style.fontSize = ((84 / 96) * scaleY * currentFontSize) + "px";
 					currentSpan.style.lineHeight = (scaleY * currentFontSize) + "px";
 
 					currentSpan.style.color = currentPrimaryColor;
