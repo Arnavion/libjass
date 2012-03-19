@@ -1,16 +1,16 @@
-﻿@font-face {
+@font-face {
 	font-family: "Amienne";
 	src: url("fonts/Amienne.ttf");
 }
 
 @font-face {
 	font-family: "CAC Moose";
-	src: url("fonts/CAC%20Moose.ttf");
+	src: url("fonts/CAC Moose.ttf");
 }
 
 @font-face {
 	font-family: "Complete in Him";
-	src: url("fonts/Complete%20in%20Him.ttf");
+	src: url("fonts/Complete in Him.ttf");
 }
 
 @font-face {
@@ -32,6 +32,16 @@
 	font-family: "LTFinnegan Medium";
 	src: url("fonts/LT_3italic.ttf");
 	font-style: italic;
+}
+
+@font-face {
+	font-family: "Profile-Medium";
+	src: url("fonts/Profile-Medium.otf");
+}
+
+@font-face {
+	font-family: "Profile-Regular";
+	src: url("fonts/Profile-Regular.otf");
 }
 
 @font-face {
