@@ -256,7 +256,7 @@ var parseASS = function (rawASS) {
 		});
 	}
 
-	dialogues.sort(function (dialogue) { return dialogue.getStart(); });
+	dialogues.sort(function (dialogue1, dialogue2) { return dialogue1.getStart() - dialogue2.getStart(); });
 
 	return new ASS(info, styles, dialogues);
 }
