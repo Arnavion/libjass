@@ -35,10 +35,13 @@ addEventListener("DOMContentLoaded", function () {
 
 			var subsWrapper = document.querySelector("#subs-wrapper");
 
-			ass.getInfo().scaleTo(videoWidth, videoHeight);
+			var info = ass.getInfo();
+			info.scaleTo(videoWidth, videoHeight);
+			document.body.style.zoom = (1 / info.getScaleX());
 
 			var layers = [];
-			ass.getDialogues().map(function (dialogue) {
+			var dialogues = ass.getDialogues();
+			dialogues.map(function (dialogue) {
 				return dialogue.getLayer();
 			}).forEach(function (layer) {
 				if (layers.indexOf(layer) === -1) {
@@ -57,7 +60,6 @@ addEventListener("DOMContentLoaded", function () {
 			});
 
 			var currentSubs = [];
-			var dialogues = ass.getDialogues();
 			var currentDialogueIndex = 0;
 			video.addEventListener("timeupdate", function () {
 				var currentTime = video.currentTime;
@@ -102,11 +104,11 @@ addEventListener("DOMContentLoaded", function () {
 			});
 
 			var numFonts = 0;
-			Array.prototype.splice.call(document.styleSheets, 0).filter(function (stylesheet) {
-				return stylesheet.href && stylesheet.href.endsWith("fonts.css");
+			Array.prototype.filter.call(document.styleSheets, function (stylesheet) {
+				return stylesheet.href && stylesheet.href.endsWith("/fonts.css");
 			}).forEach(function (style) {
 				numFonts +=
-					Array.prototype.splice.call(style.cssRules, 0).filter(function (rule) {
+					Array.prototype.filter.call(style.cssRules, function (rule) {
 						return rule.type === CSSRule.FONT_FACE_RULE;
 					}).map(function (fontFaceRule) {
 						var xhr = new XMLHttpRequest();
@@ -115,7 +117,7 @@ addEventListener("DOMContentLoaded", function () {
 							fontSrc = fontSrc.match(/^url\((.+)\)$/)[1];
 						}
 						else {
-							fontSrc = fontFaceRule.cssText.match(/url\((.+)\)/)[1];
+							fontSrc = fontFaceRule.cssText.match(/url\("?(.+?)"?\)/)[1];
 						}
 						xhr.open("GET", fontSrc, true);
 						xhr.addEventListener("readystatechange", function () {
