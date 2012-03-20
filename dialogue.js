@@ -350,12 +350,12 @@ var createDialogues;
 
 				if (transformStyle) {
 					currentSpanContainer.style.transform = transformStyle;
-					currentSpanContainer.style.mozTransform = transformStyle;
+					currentSpanContainer.style.MozTransform = transformStyle;
 					currentSpanContainer.style.webkitTransform = transformStyle;
 
 					var transformOrigin = (((m_alignment - 1) % 3) * 50) + "% " + ((5 - m_alignment) / 3 * 50) + "%";
 					currentSpanContainer.style.transformOrigin = transformOrigin;
-					currentSpanContainer.style.mozTransformOrigin = transformOrigin;
+					currentSpanContainer.style.MozTransformOrigin = transformOrigin;
 					currentSpanContainer.style.webkitTransformOrigin = transformOrigin;
 
 					currentSpanContainer.style.webkitPerspective = "400";
