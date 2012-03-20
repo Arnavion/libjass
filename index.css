@@ -4,6 +4,12 @@ body, #video {
 	left: 50%;
 }
 
+#video {
+	transform-origin: 50% 0%;
+	-moz-transform-origin: 50% 0%;
+	-webkit-transform-origin: 50% 0%;
+}
+
 #subs-wrapper {
 	pointer-events: none;
 }

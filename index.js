@@ -37,7 +37,10 @@ addEventListener("DOMContentLoaded", function () {
 
 			var info = ass.getInfo();
 			info.scaleTo(videoWidth, videoHeight);
-			document.body.style.zoom = (1 / info.getScaleX());
+			var zoom = (1 / info.getScaleX());
+			video.style.transform = "scale(" + zoom + ")";
+			video.style.MozTransform = "scale(" + zoom + ")";
+			video.style.webkitTransform = "scale(" + zoom + ")";
 
 			var layers = [];
 			var dialogues = ass.getDialogues();
