@@ -8,16 +8,13 @@ var ASS = function (info, styles, dialogues) {
 	var that = this;
 
 	m_info.setASS(that);
-	m_info.setASS = undefined;
 
 	m_styles.forEach(function (style) {
 		style.setASS(that);
-		style.setASS = undefined;
 	});
 
 	m_dialogues.forEach(function (dialogue) {
 		dialogue.setASS(that);
-		dialogue.setASS = undefined;
 	});
 
 	this.getInfo = function () {
@@ -34,12 +31,15 @@ var ASS = function (info, styles, dialogues) {
 };
 
 var Info = function (playResX, playResY) {
+	var that = this;
+
 	var m_playResX = playResX;
 	var m_playResY = playResY;
 
 	var m_scaleX;
 	var m_scaleY;
 	var m_ass;
+	var m_dpi;
 
 	this.scaleTo = function (videoWidth, videoHeight) {
 		m_scaleX = videoWidth / m_playResX;
@@ -54,12 +54,24 @@ var Info = function (playResX, playResY) {
 		return m_scaleY;
 	};
 
+	this.getDPI = function () {
+		return m_dpi;
+	};
+
+	this.setDPI = function (dpi) {
+		m_dpi = dpi;
+		that.setDPI = undefined;
+	};
+
 	this.setASS = function (ass) {
 		m_ass = ass;
+		that.setASS = undefined;
 	};
 };
 
 var Style = function (name, alignment, fontName, fontSize, bold, italic, underline, primaryColor, outlineWidth, outlineColor, marginLeft, marginRight, marginVertical) {
+	var that = this;
+
 	var m_name = name;
 	var m_alignment = alignment;
 	var m_fontName = fontName;
@@ -130,6 +142,7 @@ var Style = function (name, alignment, fontName, fontSize, bold, italic, underli
 
 	this.setASS = function (ass) {
 		m_ass = ass;
+		that.setASS = undefined;
 	};
 };
 

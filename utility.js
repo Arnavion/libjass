@@ -47,3 +47,23 @@ Array.prototype.partition = function (predicate) {
 	});
 	return [trueResult, falseResult];
 };
+
+function Set() {
+	var that = this;
+	var data = {};
+
+	this.add = function (element) {
+		data[">" + element] = true;
+	};
+
+	this.forEach = function (callback, thisArg) {
+		var i = 0;
+		thisArg = thisArg || that;
+		for (var element in data) {
+			if (element.startsWith(">")) {
+				callback.call(thisArg, element, i, this);
+				++i;
+			}
+		}
+	};
+}

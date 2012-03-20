@@ -4,7 +4,7 @@ body, #video {
 	left: 50%;
 }
 
-#video {
+.zoomed {
 	transform-origin: 50% 0%;
 	-moz-transform-origin: 50% 0%;
 	-webkit-transform-origin: 50% 0%;
@@ -64,4 +64,11 @@ body, #video {
 
 .fad-out {
 	opacity: 0;
+}
+
+#dpi-div {
+	position: absolute;
+	width: 1in;
+	height: 1in;
+	visibility: hidden;
 }

@@ -30,6 +30,8 @@ var createDialogues;
 	var fadRegex = /^\{\\fad\((\d+(?:\.\d+)?),(\d+(?:\.\d+)?)\)\}$/;
 
 	Dialogue = function (text, style, start, end, layer) {
+		var that = this;
+
 		var m_style = style;
 
 		var m_start;
@@ -106,8 +108,6 @@ var createDialogues;
 
 		var m_ass;
 
-		var that = this;
-
 		this.getStart = function () {
 			return m_start;
 		};
@@ -133,9 +133,10 @@ var createDialogues;
 
 			// Magic happens here (TODO: styling)
 			if (m_sub !== null) {
-				var styleInfo = m_ass.getInfo();
-				var scaleX = styleInfo.getScaleX();
-				var scaleY = styleInfo.getScaleY();
+				var info = m_ass.getInfo();
+				var scaleX = info.getScaleX();
+				var scaleY = info.getScaleY();
+				var dpi = info.getDPI();
 
 				m_sub.style.marginLeft = (scaleX * m_style.getMarginLeft()) + "px";
 				m_sub.style.marginRight = (scaleX * m_style.getMarginRight()) + "px";
@@ -167,7 +168,7 @@ var createDialogues;
 					}
 
 					currentSpan.style.fontFamily = "\"" + currentFontName + "\"";
-					currentSpan.style.fontSize = ((84 / 96) * scaleY * currentFontSize) + "px";
+					currentSpan.style.fontSize = ((72 / dpi) * scaleY * currentFontSize) + "px";
 					currentSpan.style.lineHeight = (scaleY * currentFontSize) + "px";
 
 					currentSpan.style.color = currentPrimaryColor;
@@ -366,6 +367,7 @@ var createDialogues;
 
 		this.setASS = function (ass) {
 			m_ass = ass;
+			that.setASS = undefined;
 		};
 
 		this.toString = function () {
