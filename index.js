@@ -23,59 +23,61 @@ addEventListener("DOMContentLoaded", function () {
 	var video = document.querySelector("#video");
 
 	var videoMetadataLoaded = false;
+	var parserLoaded = false;
 	var ass;
 
-	var onVideoAndSubsLoaded = function () {
-		var videoWidth = video.videoWidth;
-		var videoHeight = video.videoHeight;
-		document.body.style.width = video.style.width = videoWidth + "px";
-		document.body.style.height = video.style.height = videoHeight + "px";
-		document.body.style.marginLeft = video.style.marginLeft = (-videoWidth / 2) + "px";
+	var onVideo_Parser_SubsLoaded = function () {
+		if (videoMetadataLoaded && parserLoaded && ass) {
+			var videoWidth = video.videoWidth;
+			var videoHeight = video.videoHeight;
+			document.body.style.width = video.style.width = videoWidth + "px";
+			document.body.style.height = video.style.height = videoHeight + "px";
+			document.body.style.marginLeft = video.style.marginLeft = (-videoWidth / 2) + "px";
 
-		var subsWrapper = document.querySelector("#subs-wrapper");
+			var subsWrapper = document.querySelector("#subs-wrapper");
 
-		var info = ass.getInfo();
-		info.scaleTo(videoWidth, videoHeight);
-		var zoom = (1 / info.getScaleX());
-		var zoomedDiv = document.querySelector(".zoomed");
-		zoomedDiv.style.transform = "scale(" + zoom + ")";
-		zoomedDiv.style.MozTransform = "scale(" + zoom + ")";
-		zoomedDiv.style.webkitTransform = "scale(" + zoom + ")";
+			var info = ass.getInfo();
+			info.scaleTo(videoWidth, videoHeight);
+			var zoom = (1 / info.getScaleX());
+			var zoomedDiv = document.querySelector(".zoomed");
+			zoomedDiv.style.transform = "scale(" + zoom + ")";
+			zoomedDiv.style.MozTransform = "scale(" + zoom + ")";
+			zoomedDiv.style.webkitTransform = "scale(" + zoom + ")";
 
-		info.setDPI(parseFloat(getComputedStyle(document.querySelector("#dpi-div")).height.match(/(\d+)px/)[1]));
+			info.setDPI(parseFloat(getComputedStyle(document.querySelector("#dpi-div")).height.match(/(\d+)px/)[1]));
 
-		var layers = [];
-		var dialogues = ass.getDialogues();
-		dialogues.map(function (dialogue) {
-			return dialogue.getLayer();
-		}).forEach(function (layer) {
-			if (layers.indexOf(layer) === -1) {
-				layers.push(layer);
-			}
-		});
-		layers.sort().forEach(function (layer) {
-			var i;
-			wrappers[layer] = {};
-			for (i = 1; i <= 9; ++i) {
-				var wrapperDiv = document.createElement("div");
-				wrapperDiv.className = "an" + i + " layer" + layer;
-				subsWrapper.appendChild(wrapperDiv);
-				wrappers[layer][i] = wrapperDiv;
-			}
-		});
+			var layers = [];
+			var dialogues = ass.getDialogues();
+			dialogues.map(function (dialogue) {
+				return dialogue.getLayer();
+			}).forEach(function (layer) {
+				if (layers.indexOf(layer) === -1) {
+					layers.push(layer);
+				}
+			});
+			layers.sort().forEach(function (layer) {
+				var i;
+				wrappers[layer] = {};
+				for (i = 1; i <= 9; ++i) {
+					var wrapperDiv = document.createElement("div");
+					wrapperDiv.className = "an" + i + " layer" + layer;
+					subsWrapper.appendChild(wrapperDiv);
+					wrappers[layer][i] = wrapperDiv;
+				}
+			});
 
-		var allFonts = new Set();
-		ass.getStyles().forEach(function (style) {
-			allFonts.add(style.getFontName());
-		});
-		dialogues.forEach(function (dialogue) {
-			// TODO: Find {\fn<>} here and put those in allFonts too.
-		});
-		var numFonts = 0;
-		Array.prototype.filter.call(document.styleSheets, function (stylesheet) {
-			return stylesheet.href && stylesheet.href.endsWith("/fonts.css");
-		}).forEach(function (style) {
-			numFonts +=
+			var allFonts = new Set();
+			ass.getStyles().forEach(function (style) {
+				allFonts.add(style.getFontName());
+			});
+			dialogues.forEach(function (dialogue) {
+				// TODO: Find {\fn<>} here and put those in allFonts too.
+			});
+			var numFonts = 0;
+			Array.prototype.filter.call(document.styleSheets, function (stylesheet) {
+				return stylesheet.href && stylesheet.href.endsWith("/fonts.css");
+			}).forEach(function (style) {
+				numFonts +=
 				Array.prototype.filter.call(style.cssRules, function (rule) {
 					return rule.type === CSSRule.FONT_FACE_RULE /*&& allFonts.has(rule.style.fontFamily)*/; // TODO
 				}).map(function (fontFaceRule) {
@@ -100,79 +102,85 @@ addEventListener("DOMContentLoaded", function () {
 					return xhr;
 				})
 				.length;
-		});
-		if (numFonts === 0) {
-			video.play();
-		}
+			});
+			if (numFonts === 0) {
+				video.play();
+			}
 
-		var currentSubs = [];
-		var currentDialogueIndex = 0;
-		video.addEventListener("timeupdate", function () {
-			var currentTime = video.currentTime;
-			var currentDialogues = [];
-			dialogues.every(function (dialogue) {
-				var result = true;
+			var currentSubs = [];
+			var currentDialogueIndex = 0;
+			video.addEventListener("timeupdate", function () {
+				var currentTime = video.currentTime;
+				var currentDialogues = [];
+				dialogues.every(function (dialogue) {
+					var result = true;
 
-				if (dialogue.getStart() <= currentTime) {
-					if (dialogue.getEnd() >= currentTime) {
-						currentDialogues.push(dialogue);
+					if (dialogue.getStart() <= currentTime) {
+						if (dialogue.getEnd() >= currentTime) {
+							currentDialogues.push(dialogue);
+						}
 					}
-				}
-				else {
-					result = false;
-				}
+					else {
+						result = false;
+					}
 
-				return result;
-			});
-
-			var subsPartition = currentSubs.partition(function (currentSub) {
-				return currentTime > currentSub.dialogue.getEnd() || currentDialogues.every(function (dialogue) {
-					return dialogue.getSub() !== currentSub;
+					return result;
 				});
-			});
 
-			subsPartition[0].forEach(function (sub) {
-				sub.remove();
-			});
+				var subsPartition = currentSubs.partition(function (currentSub) {
+					return currentTime > currentSub.dialogue.getEnd() || currentDialogues.every(function (dialogue) {
+						return dialogue.getSub() !== currentSub;
+					});
+				});
 
-			currentSubs = subsPartition[1].concat(currentDialogues.filter(function (dialogue) {
-				return dialogue.getSub() === null;
-			}).map(function (dialogue) {
-				return createSubDiv(dialogue);
-			}));
-		}, false);
+				subsPartition[0].forEach(function (sub) {
+					sub.remove();
+				});
 
-		video.addEventListener("seeking", function () {
-			currentSubs.forEach(function (sub) {
-				sub.remove();
+				currentSubs = subsPartition[1].concat(currentDialogues.filter(function (dialogue) {
+					return dialogue.getSub() === null;
+				}).map(function (dialogue) {
+					return createSubDiv(dialogue);
+				}));
+			}, false);
+
+			video.addEventListener("seeking", function () {
+				currentSubs.forEach(function (sub) {
+					sub.remove();
+				});
+				currentSubs = [];
 			});
-			currentSubs = [];
-		});
-	};
+		};
+	}
 
 	if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
 		video.addEventListener("loadedmetadata", function () {
 			videoMetadataLoaded = true;
-			if (ass) {
-				onVideoAndSubsLoaded();
-			}
+			onVideo_Parser_SubsLoaded();
 		}, false);
 	}
 	else {
 		videoMetadataLoaded = true;
-		if (ass) {
-			onVideoAndSubsLoaded();
-		}
+		onVideo_Parser_SubsLoaded();
 	}
+
+	var parserRequest = new XMLHttpRequest();
+	parserRequest.open("GET", "ass.pegjs", true);
+	parserRequest.addEventListener("readystatechange", function () {
+		if (parserRequest.readyState === XMLHttpRequest.DONE) {
+			createDialogueParser(parserRequest.responseText);
+			parserLoaded = true;
+			onVideo_Parser_SubsLoaded();
+		}
+	}, false);
+	parserRequest.send(null);
 
 	var subsRequest = new XMLHttpRequest();
 	subsRequest.open("GET", (video.dataset && video.dataset.subs) || video.getAttribute("data-subs"), true);
 	subsRequest.addEventListener("readystatechange", function () {
 		if (subsRequest.readyState === XMLHttpRequest.DONE) {
 			ass = parseASS(subsRequest.responseText);
-			if (videoMetadataLoaded) {
-				onVideoAndSubsLoaded();
-			}
+			onVideo_Parser_SubsLoaded();
 		}
 	}, false);
 	subsRequest.send();

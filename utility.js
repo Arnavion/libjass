@@ -48,6 +48,14 @@ Array.prototype.partition = function (predicate) {
 	return [trueResult, falseResult];
 };
 
+(function () {
+	var oldParseInt = window.parseInt;
+
+	window.parseInt = function (str) {
+		return oldParseInt(str, arguments[1] || (!str.startsWith("0x") && 10));
+	};
+})();
+
 function Set() {
 	var that = this;
 	var data = {};

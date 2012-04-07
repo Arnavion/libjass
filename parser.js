@@ -159,10 +159,10 @@ var parseASS = function (rawASS) {
 	for (i = 0; i < assLines.length && assLines[i] !== "[Script Info]"; ++i);
 	assLines.slice(i + 1).every(function (line, index) {
 		if (line.startsWith("PlayResX:")) {
-			playResX = parseInt(line.substring("PlayResX:".length).trim(), 10);
+			playResX = parseInt(line.substring("PlayResX:".length).trim());
 		}
 		else if (line.startsWith("PlayResY:")) {
-			playResY = parseInt(line.substring("PlayResY:".length).trim(), 10);
+			playResY = parseInt(line.substring("PlayResY:".length).trim());
 		}
 
 		var result = (playResX === undefined || playResY === undefined);
@@ -208,7 +208,7 @@ var parseASS = function (rawASS) {
 				styles.push(
 					new Style(
 						lineParts[nameIndex],
-						parseInt(lineParts[alignmentIndex], 10),
+						parseInt(lineParts[alignmentIndex]),
 						lineParts[fontNameIndex],
 						parseFloat(lineParts[fontSizeIndex]),
 						lineParts[boldIndex] === "-1",
@@ -217,9 +217,9 @@ var parseASS = function (rawASS) {
 						lineParts[primaryColorIndex].match(/&H([0-9a-fA-F]{8})/)[1].toRGBA(),
 						parseFloat(lineParts[outlineWidthIndex]),
 						lineParts[outlineColorIndex].match(/&H([0-9a-fA-F]{8})/)[1].toRGBA(),
-						parseInt(lineParts[marginLeftIndex], 10),
-						parseInt(lineParts[marginRightIndex], 10),
-						parseInt(lineParts[marginVerticalIndex], 10)
+						parseInt(lineParts[marginLeftIndex]),
+						parseInt(lineParts[marginRightIndex]),
+						parseInt(lineParts[marginVerticalIndex])
 					)
 				);
 			}

@@ -1,35 +1,21 @@
 "use strict";
 
+var createDialogueParser;
 var Dialogue;
 var createDialogues;
 
 (function () {
-	var alignmentRegex = /^\{\\an([1-9])\}$/;
+	var parseDialogue;
 
-	var fontNameRegex = /^\{\\fn([^\\\}]+)\}$/;
-	var fontSizeRegex = /^\{\\fs(\d+(?:\.\d+)?)\}$/;
+	createDialogueParser = function (pegjs) {
+		var dialogueParser = PEG.buildParser(pegjs);
 
-	var boldRegex = /^\{\\b([01])\}$/;
-	var boldWeightRegex = /^\{\\b(?:[1-9]00)\}$/;
-	var italicRegex = /^\{\\i([01])\}$/;
+		parseDialogue = function (text) {
+			return dialogueParser.parse(text, "dialogue");
+		}
+	};
 
-	var primaryColorRegex = /^\{\\1?c&H([0-9a-fA-F]{6})&\}$/;
-	var borderRegex = /^\{\\bord(\d+(?:\.\d+)?)\}$/;
-	var outlineColorRegex = /^\{\\3c&H([0-9a-fA-F]{6})&\}$/;
-
-	var blurRegex = /^\{\\blur(\d+(?:\.\d+)?)\}$/;
-
-	var posRegex = /^\{\\pos\((\d+(?:\.\d+)?),(\d+(?:\.\d+)?)\)\}$/;
-
-	var frxRegex = /^\{\\frx(-?\d+(?:\.\d+)?)\}$/;
-	var fryRegex = /^\{\\fry(-?\d+(?:\.\d+)?)\}$/;
-	var frzRegex = /^\{\\frz(-?\d+(?:\.\d+)?)\}$/;
-	var faxRegex = /^\{\\fax(-?\d+(?:\.\d+)?)\}$/;
-	var fayRegex = /^\{\\fay(-?\d+(?:\.\d+)?)\}$/;
-
-	var fadRegex = /^\{\\fad\((\d+(?:\.\d+)?),(\d+(?:\.\d+)?)\)\}$/;
-
-	Dialogue = function (text, style, start, end, layer) {
+	Dialogue = function (textOrParts, style, start, end, layer) {
 		var that = this;
 
 		var m_style = style;
@@ -63,45 +49,34 @@ var createDialogues;
 
 		var m_layer = ((layer >= 0) ? layer : 0);
 
-		var m_textParts = [];
-		text.split(/(\{[^}]*\})|(\\N)/).filter(function (textPart) {
-			return textPart !== undefined && textPart !== "" && (!textPart.startsWith("{") || textPart.startsWith("{\\"));
-		}).map(function (textPart) {
-			var result = [textPart];
+		var m_parts =
+			(textOrParts instanceof Array) ?
+				textOrParts :
+				parseDialogue(textOrParts).reduce(function (previous, current) {
+					var result;
+	
+					if (current instanceof Tags.Text && previous.length > 0 && previous[previous.length - 1] instanceof Tags.Text) {
+						previous[previous.length - 1].value += current.value;
+						result = previous;
+					}
+					else {
+						result = previous.concat(current);
+					}
 
-			if (textPart.startsWith("{") && textPart.endsWith("}")) {
-				result =
-					textPart.split(/\\([^\\\}]*)/).filter(function (textSubPart) {
-						return textSubPart !== "" && textSubPart !== "{" && textSubPart !== "}";
-					}).map(function (textSubPart) {
-						return "{\\" + textSubPart + "}";
-					});
+					return result;
+				}, []);
+
+		var childDialogueTextParts;
+		m_parts.forEach(function (part, index) {
+			if (part instanceof Tags.Fade && part.start !== 0 && part.end !== 0) {
+				childDialogueTextParts = m_parts.slice(0);
+				childDialogueTextParts[index] = new Tags.Fade(0, part.end);
+				m_end -= part.end;
+				part.end = 0;
 			}
-
-			return result;
-		}).forEach(function (textParts) {
-			textParts.forEach(function(textPart) {
-				var fadMatch = fadRegex.exec(textPart);
-				if (!fadMatch || fadMatch[2] === "0" || fadMatch[1] === "0") {
-					m_textParts.push(textPart);
-					if (hasFadeInAndFadeOut) {
-						childDialogueTextParts.push(textPart);
-					}
-				}
-				else {
-					hasFadeInAndFadeOut = true;
-					childDialogueTextParts = m_textParts.slice(0);
-					childDialogueTextParts.push("{\\fad(0," + fadMatch[2] + ")}");
-					if (fadMatch[1] && fadMatch[1] !== "0") {
-						m_textParts.push("{\\fad(" + fadMatch[1] + ",0)}");
-						m_end -= (fadMatch[2] / 1000);
-					}
-				}
-			});
 		});
-
-		if (hasFadeInAndFadeOut) {
-			this.childDialogue = new Dialogue(childDialogueTextParts.join(""), style, m_end, end, m_layer);
+		if (childDialogueTextParts) {
+			this.childDialogue = new Dialogue(childDialogueTextParts, style, m_end, end, m_layer);
 		}
 
 		var m_alignment = m_style.getAlignment();
@@ -198,89 +173,104 @@ var createDialogues;
 
 				var spanStylesChanged = false;
 
-				m_textParts.forEach(function (textPart) {
-					var matchResult;
-
-					if (matchResult = alignmentRegex.exec(textPart)) {
-						m_alignment = parseInt(matchResult[1], 10);
-					}
-
-					else if (matchResult = fontNameRegex.exec(textPart)) {
-						var newFontName = matchResult;
-						if (currentFontName !== newFontName) {
-							currentFontName = newFontName;
-							spanStylesChanged = true;
-						}
-					}
-
-					else if (matchResult = fontSizeRegex.exec(textPart)) {
-						var newFontSize = parseFloat(matchResult[1]);
-						if (currentFontSize !== newFontSize) {
-							currentFontSize = newFontSize;
-							spanStylesChanged = true;
-						}
-					}
-
-					else if (matchResult = boldRegex.exec(textPart)) {
-						var newBold = ((matchResult[1] === "1") ? "bold" : "");
-						if (currentBold !== newBold) {
-							currentBold = newBold;
-							spanStylesChanged = true;
-						}
-					}
-
-					else if (matchResult = boldWeightRegex.exec(textPart)) {
-						var newBold = matchResult[1];
-						if (currentBold !== newBold) {
-							currentBold = newBold;
-							spanStylesChanged = true;
-						}
-					}
-
-					else if (matchResult = italicRegex.exec(textPart)) {
-						var newItalic = (parseInt(matchResult[1], 10) === 1);
+				m_parts.forEach(function (part) {
+					if (part instanceof Tags.Italic) {
+						var newItalic = part.value;
 						if (currentItalic !== newItalic) {
 							currentItalic = newItalic;
 							spanStylesChanged = true;
 						}
 					}
 
-					else if (matchResult = primaryColorRegex.exec(textPart)) {
-						var newPrimaryColor = "#" + matchResult[1].toRGB();
-						if (currentPrimaryColor !== newPrimaryColor) {
-							currentPrimaryColor = newPrimaryColor;
+					else if (part instanceof Tags.Bold) {
+						var newBold;
+						switch (part.value) {
+							case true: newBold = "bold"; break;
+							case false: newBold = ""; break;
+							default: newBold = part.value; break;
+						}
+						if (currentBold !== newBold) {
+							currentBold = newBold;
 							spanStylesChanged = true;
 						}
 					}
 
-					else if (matchResult = borderRegex.exec(textPart)) {
-						var newOutlineWidth = parseFloat(matchResult[1]);
+					else if (part instanceof Tags.Border) {
+						var newOutlineWidth = part.value;
 						if (currentOutlineWidth !== newOutlineWidth) {
 							currentOutlineWidth = newOutlineWidth;
 							spanStylesChanged = true;
 						}
 					}
 
-					else if (matchResult = outlineColorRegex.exec(textPart)) {
-						var newOutlineColor = "#" + matchResult[1].toRGB();;
-						if (currentOutlineColor !== newOutlineColor) {
-							currentOutlineColor = newOutlineColor;
-							spanStylesChanged = true;
-						}
-					}
-
-					else if (matchResult = blurRegex.exec(textPart)) {
-						var newBlur = parseFloat(matchResult[1]);
+					else if (part instanceof Tags.Blur) {
+						var newBlur = part.value;
 						if (currentBlur !== newBlur) {
 							currentBlur = newBlur;
 							spanStylesChanged = true;
 						}
 					}
 
-					else if (matchResult = posRegex.exec(textPart)) {
+					else if (part instanceof Tags.FontName) {
+						var newFontName = part.value;
+						if (currentFontName !== newFontName) {
+							currentFontName = newFontName;
+							spanStylesChanged = true;
+						}
+					}
+
+					else if (part instanceof Tags.FontSize) {
+						var newFontSize = part.value;
+						if (currentFontSize !== newFontSize) {
+							currentFontSize = newFontSize;
+							spanStylesChanged = true;
+						}
+					}
+
+					else if (part instanceof Tags.Frx) {
+						transformStyle += " rotateX(" + part.value + "deg)";
+					}
+
+					else if (part instanceof Tags.Fry) {
+						transformStyle += " rotateY(" + part.value + "deg)";
+					}
+
+					else if (part instanceof Tags.Frz) {
+						transformStyle += " rotateZ(" + (-1 * part.value) + "deg)";
+					}
+
+					else if (part instanceof Tags.Fax) {
+						transformStyle += " skewX(" + (45 * part.value) + "deg)";
+					}
+
+					else if (part instanceof Tags.Fay) {
+						transformStyle += " skewY(" + (45 * part.value) + "deg)";
+					}
+
+					else if (part instanceof Tags.PrimaryColor) {
+						var newPrimaryColor = "#" + part.value;
+						if (currentPrimaryColor !== newPrimaryColor) {
+							currentPrimaryColor = newPrimaryColor;
+							spanStylesChanged = true;
+						}
+					}
+
+					else if (part instanceof Tags.OutlineColor) {
+						var newOutlineColor = "#" + part.value;
+						if (currentOutlineColor !== newOutlineColor) {
+							currentOutlineColor = newOutlineColor;
+							spanStylesChanged = true;
+						}
+					}
+
+					else if (part instanceof Tags.Alignment) {
+						m_alignment = part.value;
+					}
+
+					else if (part instanceof Tags.Pos) {
 						m_sub.style.position = "absolute";
-						m_sub.style.left = (scaleX * parseFloat(matchResult[1])) + "px";
-						m_sub.style.top = (scaleY * parseFloat(matchResult[2])) + "px";
+						m_sub.style.left = (scaleX * part.x) + "px";
+						m_sub.style.top = (scaleY * part.y) + "px";
 
 						var relativeWrapper = document.createElement("div");
 						relativeWrapper.style.position = "relative";
@@ -293,54 +283,39 @@ var createDialogues;
 						currentSpanContainer = relativeWrapper;
 					}
 
-					else if (matchResult = frxRegex.exec(textPart)) {
-						transformStyle += " rotateX(" + matchResult[1] + "deg)";
-					}
-
-					else if (matchResult = fryRegex.exec(textPart)) {
-						transformStyle += " rotateY(" + matchResult[1] + "deg)";
-					}
-
-					else if (matchResult = frzRegex.exec(textPart)) {
-						transformStyle += " rotateZ(" + (-1 * parseFloat(matchResult[1])) + "deg)";
-					}
-
-					else if (matchResult = faxRegex.exec(textPart)) {
-						transformStyle += " skewX(" + (45 * parseFloat(matchResult[1])) + "deg)";
-					}
-
-					else if (matchResult = fayRegex.exec(textPart)) {
-						transformStyle += " skewY(" + (45 * parseFloat(matchResult[1])) + "deg)";
-					}
-
-					else if (matchResult = fadRegex.exec(textPart)) {
-						if (matchResult[1] !== "0") {
+					else if (part instanceof Tags.Fade) {
+						if (part.start !== 0) {
 							m_sub.style.opacity = 0;
-							m_sub.style.transitionDuration = (parseFloat(matchResult[1]) / 1000) + "s";
-							m_sub.style.mozTransitionDuration = (parseFloat(matchResult[1]) / 1000) + "s";
-							m_sub.style.webkitTransitionDuration = (parseFloat(matchResult[1]) / 1000) + "s";
+							m_sub.style.transitionDuration = part.start + "s";
+							m_sub.style.mozTransitionDuration = part.start + "s";
+							m_sub.style.webkitTransitionDuration = part.start + "s";
 							setTimeout(function () {
 								m_sub.className = "fad-in";
 							}, 0);
 						}
-						else if (matchResult[2] !== "0") {
+						else if (part.end !== 0) {
 							m_sub.style.opacity = 1;
-							m_sub.style.transitionDuration = (parseFloat(matchResult[2]) / 1000) + "s";
-							m_sub.style.mozTransitionDuration = (parseFloat(matchResult[2]) / 1000) + "s";
-							m_sub.style.webkitTransitionDuration = (parseFloat(matchResult[2]) / 1000) + "s";
+							m_sub.style.transitionDuration = part.end + "s";
+							m_sub.style.mozTransitionDuration = part.end + "s";
+							m_sub.style.webkitTransitionDuration = part.end + "s";
 							setTimeout(function () {
 								m_sub.classname = "fad-out";
 							}, 0);
 						}
 					}
 
-					else if (textPart === "\\N") {
+					else if (part instanceof Tags.NewLine) {
 						currentSpanContainer.appendChild(document.createElement("br"));
 						createNewSpan = true;
 					}
 
-					else {
-						currentSpan.appendChild(document.createTextNode(textPart));
+					else if (part instanceof Tags.HardSpace) {
+						currentSpan.appendChild(document.createTextNode("&#160;"));
+						createNewSpan = true;
+					}
+
+					else if (part instanceof Tags.Text) {
+						currentSpan.appendChild(document.createTextNode(part.value));
 						createNewSpan = true;
 					}
 
@@ -371,7 +346,7 @@ var createDialogues;
 		};
 
 		this.toString = function () {
-			return "[" + m_start + " - " + m_end + "] " + m_textParts.join("");
+			return "[" + m_start + " - " + m_end + "] " + m_parts.join("");
 		};
 	};
 
@@ -386,3 +361,94 @@ var createDialogues;
 		return result;
 	};
 })();
+
+var Tags = new function () {
+	this.Comment = function (value) {
+		this.value = value;
+	};
+	
+	this.HardSpace = function () {
+	};
+	
+	this.NewLine = function () {
+	};
+	
+	this.Text = function (value) {
+		this.value = value;
+	};
+	
+	this.Tag = function (func) {
+		return function (value) {
+			if (value === "") {
+				this.value = null;
+			}
+			else if (func) {
+				this.value = func(value);
+			}
+			else {
+				this.value = value;
+			}
+		};
+	};
+	
+	this.Italic = this.Tag(function (value) {
+		if (value === "1") {
+			return true;
+		}
+		else if (value === "0") {
+			return false;
+		}
+	});
+	this.Bold = this.Tag(function (value) {
+		if (value === "1") {
+			return true;
+		}
+		else if (value === "0") {
+			return false;
+		}
+		else {
+			return parseFloat(value);
+		}
+	});
+	this.Underline = this.Tag(function (value) {
+		if (value === "1") {
+			return true;
+		}
+		else if (value === "0") {
+			return false;
+		}
+	});
+	this.Strikeout = this.Tag();
+	
+	this.Border = this.Tag(parseFloat);
+
+	this.Blur = this.Tag(parseFloat);
+	
+	this.FontName = this.Tag();
+	this.FontSize = this.Tag(parseFloat);
+	
+	this.Frx = this.Tag(parseFloat);
+	this.Fry = this.Tag(parseFloat);
+	this.Frz = this.Tag(parseFloat);
+	this.Fax = this.Tag(parseFloat);
+	this.Fay = this.Tag(parseFloat);
+	
+	this.PrimaryColor = this.Tag();
+	this.OutlineColor = this.Tag();
+
+	this.Alpha = this.Tag();
+	this.PrimaryAlpha = this.Tag();
+	this.OutlineAlpha = this.Tag();
+	
+	this.Alignment = this.Tag(parseInt);
+	
+	this.Pos = function (x, y) {
+		this.x = parseFloat(x);
+		this.y = parseFloat(y);
+	};
+	
+	this.Fade = function (start, end) {
+		this.start = (parseFloat(start) || 0) / 1000;
+		this.end = (parseFloat(end) || 0) / 1000;
+	};
+}
