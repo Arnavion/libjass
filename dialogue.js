@@ -117,29 +117,62 @@ var createDialogues;
 				m_sub.style.marginRight = (scaleX * m_style.getMarginRight()) + "px";
 				m_sub.style.marginTop = m_sub.style.marginBottom = (scaleX * m_style.getMarginVertical()) + "px";
 
+				var currentItalic = m_style.getItalic();
+				var currentBold = m_style.getBold() ? "bold" : "";
+				var currentUnderline = m_style.getUnderline();
+				var currentStrikethrough = m_style.getStrikethrough();
+
+				var currentOutlineWidth = m_style.getOutlineWidth();
+
 				var currentFontName = m_style.getFontName();
 				var currentFontSize = m_style.getFontSize();
 
-				var currentBold = m_style.getBold() ? "bold" : "";
-				var currentItalic = m_style.getItalic();
-				var currentUnderline = m_style.getUnderline();
-
 				var currentPrimaryColor = m_style.getPrimaryColor();
-				var currentOutlineWidth = m_style.getOutlineWidth();
 				var currentOutlineColor = m_style.getOutlineColor();
 
 				var currentBlur = 0;
-
 				var transformStyle = "";
-
 				var currentSpanContainer = m_sub; // Changes to a wrapper if {\pos} is present
 				var currentSpan;
+
 				var createNewSpan = true;
 				var updateSpanStyles = function () {
 					if (createNewSpan) {
 						currentSpan = document.createElement("span");
 						currentSpanContainer.appendChild(currentSpan);
 						createNewSpan = false;
+					}
+
+					var valueOrDefault = function (value, defaultFunc) {
+						return (value !== null) ? value : defaultFunc.call(m_style);
+					};
+
+					currentItalic = valueOrDefault(currentItalic, m_style.getItalic);
+					currentBold = valueOrDefault(currentBold, m_style.getBold);
+					currentUnderline = valueOrDefault(currentUnderline, m_style.getUnderline);
+					currentStrikethrough = valueOrDefault(currentStrikethrough, m_style.getStrikethrough);
+					currentOutlineWidth = valueOrDefault(currentOutlineWidth, m_style.getOutlineWidth);
+					currentFontName = valueOrDefault(currentFontName, m_style.getFontName);
+					currentFontSize = valueOrDefault(currentFontSize, m_style.getFontSize);
+					currentPrimaryColor = valueOrDefault(currentPrimaryColor, m_style.getPrimaryColor);
+					currentOutlineColor = valueOrDefault(currentOutlineColor, m_style.getOutlineColor);
+
+					if (currentItalic) {
+						currentSpan.style.fontStyle = "italic";
+					}
+
+					if (currentBold) {
+						currentSpan.style.fontWeight = currentBold;
+					}
+
+					currentSpan.style.textDecoration = "";
+
+					if (currentUnderline) {
+						currentSpan.style.textDecoration = "underline";
+					}
+
+					if (currentStrikethrough) {
+						currentSpan.style.textDecoration += " line-through";
 					}
 
 					currentSpan.style.fontFamily = "\"" + currentFontName + "\"";
@@ -156,18 +189,6 @@ var createDialogues;
 						[[1, 1], [1, -1], [-1, 1], [-1, -1]].map(function (pair) {
 							return pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + currentOutlineColor;
 						}).join(", ");
-
-					if (currentBold) {
-						currentSpan.style.fontWeight = currentBold;
-					}
-
-					if (currentItalic) {
-						currentSpan.style.fontStyle = "italic";
-					}
-
-					if (currentUnderline) {
-						currentSpan.style.textDecoration = "underline";
-					}
 				};
 				updateSpanStyles();
 
@@ -191,6 +212,22 @@ var createDialogues;
 						}
 						if (currentBold !== newBold) {
 							currentBold = newBold;
+							spanStylesChanged = true;
+						}
+					}
+
+					else if (part instanceof Tags.Underline) {
+						var newUnderline = part.value;
+						if (newUnderline !== currentUnderline) {
+							currentUnderline = newUnderline;
+							spanStylesChanged = true;
+						}
+					}
+
+					else if (part instanceof Tags.Strikeout) {
+						var newStrikethrough = part.value;
+						if (newStrikethrough !== currentStrikethrough) {
+							currentStrikethrough = newStrikethrough;
 							spanStylesChanged = true;
 						}
 					}

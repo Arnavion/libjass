@@ -69,19 +69,20 @@ var Info = function (playResX, playResY) {
 	};
 };
 
-var Style = function (name, alignment, fontName, fontSize, bold, italic, underline, primaryColor, outlineWidth, outlineColor, marginLeft, marginRight, marginVertical) {
+var Style = function (name, italic, bold, underline, strikethrough, outlineWidth, fontName, fontSize, primaryColor, outlineColor, alignment, marginLeft, marginRight, marginVertical) {
 	var that = this;
 
 	var m_name = name;
-	var m_alignment = alignment;
+	var m_italic = italic;
+	var m_bold = bold;
+	var m_underline = underline;
+	var m_strikethrough = strikethrough;
+	var m_outlineWidth = outlineWidth;
 	var m_fontName = fontName;
 	var m_fontSize = fontSize;
-	var m_bold = bold;
-	var m_italic = italic;
-	var m_underline = underline;
 	var m_primaryColor = primaryColor;
-	var m_outlineWidth = outlineWidth;
 	var m_outlineColor = outlineColor;
+	var m_alignment = alignment;
 	var m_marginLeft = marginLeft;
 	var m_marginRight = marginRight;
 	var m_marginVertical = marginVertical;
@@ -92,8 +93,24 @@ var Style = function (name, alignment, fontName, fontSize, bold, italic, underli
 		return m_name;
 	};
 
-	this.getAlignment = function () {
-		return m_alignment;
+	this.getItalic = function () {
+		return m_italic;
+	};
+
+	this.getBold = function () {
+		return m_bold;
+	};
+
+	this.getUnderline = function () {
+		return m_underline;
+	};
+
+	this.getStrikethrough = function () {
+		return m_strikethrough;
+	};
+
+	this.getOutlineWidth = function () {
+		return m_outlineWidth;
 	};
 
 	this.getFontName = function () {
@@ -104,28 +121,16 @@ var Style = function (name, alignment, fontName, fontSize, bold, italic, underli
 		return m_fontSize;
 	};
 
-	this.getBold = function () {
-		return m_bold;
-	};
-
-	this.getItalic = function () {
-		return m_italic;
-	};
-
-	this.getUnderline = function () {
-		return m_underline;
-	};
-
 	this.getPrimaryColor = function () {
 		return m_primaryColor;
 	};
 
-	this.getOutlineWidth = function () {
-		return m_outlineWidth;
-	};
-
 	this.getOutlineColor = function () {
 		return m_outlineColor;
+	};
+
+	this.getAlignment = function () {
+		return m_alignment;
 	};
 
 	this.getMarginLeft = function () {
@@ -187,15 +192,16 @@ var parseASS = function (rawASS) {
 		var styleFormatLine = assLines[i + styleFormatLineIndex + 1];
 		var styleFormatParts = styleFormatLine.substring("Format:".length).split(",").map(function (formatPart) { return formatPart.trim(); });
 		var nameIndex = styleFormatParts.indexOf("Name");
-		var alignmentIndex = styleFormatParts.indexOf("Alignment");
+		var italicIndex = styleFormatParts.indexOf("Italic");
+		var boldIndex = styleFormatParts.indexOf("Bold");
+		var underlineIndex = styleFormatParts.indexOf("Underline");
+		var strikethroughIndex = styleFormatParts.indexOf("Strikeout");
+		var outlineWidthIndex = styleFormatParts.indexOf("Outline");
 		var fontNameIndex = styleFormatParts.indexOf("Fontname");
 		var fontSizeIndex = styleFormatParts.indexOf("Fontsize");
-		var boldIndex = styleFormatParts.indexOf("Bold");
-		var italicIndex = styleFormatParts.indexOf("Italic");
-		var underlineIndex = styleFormatParts.indexOf("Underline");
 		var primaryColorIndex = styleFormatParts.indexOf("PrimaryColour");
-		var outlineWidthIndex = styleFormatParts.indexOf("Outline");
 		var outlineColorIndex = styleFormatParts.indexOf("OutlineColour");
+		var alignmentIndex = styleFormatParts.indexOf("Alignment");
 		var marginLeftIndex = styleFormatParts.indexOf("MarginL");
 		var marginRightIndex = styleFormatParts.indexOf("MarginR");
 		var marginVerticalIndex = styleFormatParts.indexOf("MarginV");
@@ -208,15 +214,16 @@ var parseASS = function (rawASS) {
 				styles.push(
 					new Style(
 						lineParts[nameIndex],
-						parseInt(lineParts[alignmentIndex]),
+						lineParts[italicIndex] === "-1",
+						lineParts[boldIndex] === "-1",
+						lineParts[underlineIndex] === "-1",
+						lineParts[strikethroughIndex] === "-1",
+						parseFloat(lineParts[outlineWidthIndex]),
 						lineParts[fontNameIndex],
 						parseFloat(lineParts[fontSizeIndex]),
-						lineParts[boldIndex] === "-1",
-						lineParts[italicIndex] === "-1",
-						lineParts[underlineIndex] === "-1",
 						lineParts[primaryColorIndex].match(/&H([0-9a-fA-F]{8})/)[1].toRGBA(),
-						parseFloat(lineParts[outlineWidthIndex]),
 						lineParts[outlineColorIndex].match(/&H([0-9a-fA-F]{8})/)[1].toRGBA(),
+						parseInt(lineParts[alignmentIndex]),
 						parseInt(lineParts[marginLeftIndex]),
 						parseInt(lineParts[marginRightIndex]),
 						parseInt(lineParts[marginVerticalIndex])
