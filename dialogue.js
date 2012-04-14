@@ -324,7 +324,7 @@ var createDialogues;
 						if (part.start !== 0) {
 							m_sub.style.opacity = 0;
 							m_sub.style.transitionDuration = part.start + "s";
-							m_sub.style.mozTransitionDuration = part.start + "s";
+							m_sub.style.MozTransitionDuration = part.start + "s";
 							m_sub.style.webkitTransitionDuration = part.start + "s";
 							setTimeout(function () {
 								m_sub.className = "fad-in";
@@ -333,7 +333,7 @@ var createDialogues;
 						else if (part.end !== 0) {
 							m_sub.style.opacity = 1;
 							m_sub.style.transitionDuration = part.end + "s";
-							m_sub.style.mozTransitionDuration = part.end + "s";
+							m_sub.style.MozTransitionDuration = part.end + "s";
 							m_sub.style.webkitTransitionDuration = part.end + "s";
 							setTimeout(function () {
 								m_sub.classname = "fad-out";
