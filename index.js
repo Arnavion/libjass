@@ -108,40 +108,27 @@ addEventListener("DOMContentLoaded", function () {
 			}
 
 			var currentSubs = [];
-			var currentDialogueIndex = 0;
+			var newSubs = dialogues.toEnumerable().skipWhile(function (dialogue, currentTime) {
+				return dialogue.getEnd() < currentTime;
+			}).takeWhile(function (dialogue, currentTime) {
+				return dialogue.getStart() <= currentTime;
+			}).filter(function (dialogue, currentTime) {
+				return dialogue.getEnd() >= currentTime && dialogue.getSub() === null;
+			}).map(function (dialogue) {
+				return createSubDiv(dialogue);
+			});
 			video.addEventListener("timeupdate", function () {
 				var currentTime = video.currentTime;
-				var currentDialogues = [];
-				dialogues.every(function (dialogue) {
-					var result = true;
 
-					if (dialogue.getStart() <= currentTime) {
-						if (dialogue.getEnd() >= currentTime) {
-							currentDialogues.push(dialogue);
-						}
+				currentSubs = currentSubs.filter(function (sub) {
+					if (sub.dialogue.getStart() <= currentTime && sub.dialogue.getEnd() > currentTime) {
+						return true;
 					}
 					else {
-						result = false;
+						sub.remove();
+						return false;
 					}
-
-					return result;
-				});
-
-				var subsPartition = currentSubs.partition(function (currentSub) {
-					return currentTime > currentSub.dialogue.getEnd() || currentDialogues.every(function (dialogue) {
-						return dialogue.getSub() !== currentSub;
-					});
-				});
-
-				subsPartition[0].forEach(function (sub) {
-					sub.remove();
-				});
-
-				currentSubs = subsPartition[1].concat(currentDialogues.filter(function (dialogue) {
-					return dialogue.getSub() === null;
-				}).map(function (dialogue) {
-					return createSubDiv(dialogue);
-				}));
+				}).concat(newSubs.reset().setUserToken(currentTime).toArray());
 			}, false);
 
 			video.addEventListener("seeking", function () {

@@ -34,20 +34,6 @@ String.prototype.toRGBA = function () {
 	);
 };
 
-Array.prototype.partition = function (predicate) {
-	var trueResult = [];
-	var falseResult = [];
-	this.forEach(function (el, i) {
-		if (predicate(el, i)) {
-			trueResult.push(el);
-		}
-		else {
-			falseResult.push(el);
-		}
-	});
-	return [trueResult, falseResult];
-};
-
 (function () {
 	var oldParseInt = window.parseInt;
 
