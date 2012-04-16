@@ -43,7 +43,7 @@ italicTag
 	=	"i" value:enableDisable? { return new Tags.Italic(value); }
 
 boldTag
-	=	"b" value:(enableDisable / decimal)? { return new Tags.Bold(value); }
+	=	"b" value:(decimal)? { return new Tags.Bold(value); }
 
 underlineTag
 	=	"u" value:enableDisable? { return new Tags.Underline(value); }
