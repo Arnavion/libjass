@@ -42,7 +42,7 @@ String.prototype.toRGBA = function () {
 	};
 })();
 
-function Set() {
+window.Set = function () {
 	var that = this;
 	var data = {};
 
@@ -50,14 +50,26 @@ function Set() {
 		data[">" + element] = true;
 	};
 
+	this.has = function (element) {
+		return !!data[">" + element];
+	};
+
 	this.forEach = function (callback, thisArg) {
 		var i = 0;
 		thisArg = thisArg || that;
 		for (var element in data) {
 			if (element.startsWith(">")) {
-				callback.call(thisArg, element, i, this);
+				callback.call(thisArg, element.substring(1), i, this);
 				++i;
 			}
 		}
+	};
+
+	this.toArray = function () {
+		var result = [];
+		this.forEach(function (element) {
+			result.push(element);
+		});
+		return result;
 	};
 }
