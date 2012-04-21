@@ -1,154 +1,56 @@
 "use strict";
 
 var ASS = function (info, styles, dialogues) {
-	var m_info = info;
-	var m_styles = styles;
-	var m_dialogues = dialogues;
-
 	var that = this;
 
-	m_info.setASS(that);
+	info.ass = that;
 
-	m_styles.forEach(function (style) {
-		style.setASS(that);
+	styles.forEach(function (style) {
+		style.ass = that;
 	});
 
-	m_dialogues.forEach(function (dialogue) {
-		dialogue.setASS(that);
+	dialogues.forEach(function (dialogue) {
+		dialogue.ass = that;
 	});
 
-	this.getInfo = function () {
-		return m_info;
-	};
-
-	this.getStyles = function () {
-		return m_styles;
-	};
-
-	this.getDialogues = function () {
-		return m_dialogues;
-	};
+	Object.defineProperty(this, "info", { value: info });
+	Object.defineProperty(this, "styles", { value: styles });
+	Object.defineProperty(this, "dialogues", { value: dialogues });
 };
 
 var Info = function (playResX, playResY) {
 	var that = this;
 
-	var m_playResX = playResX;
-	var m_playResY = playResY;
-
-	var m_scaleX;
-	var m_scaleY;
-	var m_ass;
-	var m_dpi;
+	var scaleX;
+	var scaleY;
 
 	this.scaleTo = function (videoWidth, videoHeight) {
-		m_scaleX = videoWidth / m_playResX;
-		m_scaleY = videoHeight / m_playResY;
+		scaleX = videoWidth / playResX;
+		scaleY = videoHeight / playResY;
 	};
 
-	this.getScaleX = function () {
-		return m_scaleX;
-	};
-
-	this.getScaleY = function () {
-		return m_scaleY;
-	};
-
-	this.getDPI = function () {
-		return m_dpi;
-	};
-
-	this.setDPI = function (dpi) {
-		m_dpi = dpi;
-		that.setDPI = undefined;
-	};
-
-	this.setASS = function (ass) {
-		m_ass = ass;
-		that.setASS = undefined;
-	};
+	Object.defineProperty(this, "scaleX", { get: function () { return scaleX; } });
+	Object.defineProperty(this, "scaleY", { get: function () { return scaleY; } });
+	Object.defineProperty(this, "dpi", { writable: true });
+	Object.defineProperty(this, "ass", { writable: true });
 };
 
 var Style = function (name, italic, bold, underline, strikethrough, outlineWidth, fontName, fontSize, primaryColor, outlineColor, alignment, marginLeft, marginRight, marginVertical) {
-	var that = this;
-
-	var m_name = name;
-	var m_italic = italic;
-	var m_bold = bold;
-	var m_underline = underline;
-	var m_strikethrough = strikethrough;
-	var m_outlineWidth = outlineWidth;
-	var m_fontName = fontName;
-	var m_fontSize = fontSize;
-	var m_primaryColor = primaryColor;
-	var m_outlineColor = outlineColor;
-	var m_alignment = alignment;
-	var m_marginLeft = marginLeft;
-	var m_marginRight = marginRight;
-	var m_marginVertical = marginVertical;
-
-	var m_ass;
-
-	this.getName = function () {
-		return m_name;
-	};
-
-	this.getItalic = function () {
-		return m_italic;
-	};
-
-	this.getBold = function () {
-		return m_bold;
-	};
-
-	this.getUnderline = function () {
-		return m_underline;
-	};
-
-	this.getStrikethrough = function () {
-		return m_strikethrough;
-	};
-
-	this.getOutlineWidth = function () {
-		return m_outlineWidth;
-	};
-
-	this.getFontName = function () {
-		return m_fontName;
-	};
-
-	this.getFontSize = function () {
-		return m_fontSize;
-	};
-
-	this.getPrimaryColor = function () {
-		return m_primaryColor;
-	};
-
-	this.getOutlineColor = function () {
-		return m_outlineColor;
-	};
-
-	this.getAlignment = function () {
-		return m_alignment;
-	};
-
-	this.getMarginLeft = function () {
-		return m_marginLeft;
-	};
-
-	this.getMarginRight = function () {
-		return m_marginRight;
-	};
-
-	this.getMarginVertical = function () {
-		return m_marginVertical;
-	};
-
-	this.setASS = function (ass) {
-		m_ass = ass;
-		that.setASS = undefined;
-	};
+	Object.defineProperty(this, "name", { value: name });
+	Object.defineProperty(this, "italic", { value: italic });
+	Object.defineProperty(this, "bold", { value: bold });
+	Object.defineProperty(this, "underline", { value: underline });
+	Object.defineProperty(this, "strikethrough", { value: strikethrough });
+	Object.defineProperty(this, "outlineWidth", { value: outlineWidth });
+	Object.defineProperty(this, "fontName", { value: fontName });
+	Object.defineProperty(this, "fontSize", { value: fontSize });
+	Object.defineProperty(this, "primaryColor", { value: primaryColor });
+	Object.defineProperty(this, "outlineColor", { value: outlineColor });
+	Object.defineProperty(this, "alignment", { value: alignment });
+	Object.defineProperty(this, "marginLeft", { value: marginLeft });
+	Object.defineProperty(this, "marginRight", { value: marginRight });
+	Object.defineProperty(this, "marginVertical", { value: marginVertical });
+	Object.defineProperty(this, "ass", { writable: true });
 };
 
 var parseASS = function (rawASS) {
@@ -263,10 +165,10 @@ var parseASS = function (rawASS) {
 				var lineParts = line.substring("Dialogue:".length).trimLeft().split(",");
 				dialogues = dialogues.concat(createDialogues(
 					lineParts.slice(textIndex).join(","),
-					styles.filter(function (aStyle) { return aStyle.getName() === lineParts[styleIndex]; })[0],
+					styles.filter(function (aStyle) { return aStyle.name === lineParts[styleIndex]; })[0],
 					lineParts[startIndex],
 					lineParts[endIndex],
-					lineParts[layerIndex]));
+					parseInt(lineParts[layerIndex])));
 			}
 			else if (line.startsWith("[")) {
 				result = true;
@@ -276,7 +178,7 @@ var parseASS = function (rawASS) {
 		});
 	}
 
-	dialogues.sort(function (dialogue1, dialogue2) { return dialogue1.getStart() - dialogue2.getStart(); });
+	dialogues.sort(function (dialogue1, dialogue2) { return dialogue1.start - dialogue2.start; });
 
 	return new ASS(info, styles, dialogues);
 }

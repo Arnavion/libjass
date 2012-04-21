@@ -9,14 +9,14 @@ addEventListener("DOMContentLoaded", function () {
 		createSubDiv = function (dialogue) {
 			var result = defaultSubDiv.cloneNode(true);
 			result.dialogue = dialogue;
-			dialogue.setSub(result);
-			wrappers[dialogue.getLayer()][dialogue.getAlignment()].appendChild(result);
+			dialogue.sub = result;
+			wrappers[dialogue.layer][dialogue.alignment].appendChild(result);
 			return result;
 		};
 
 		defaultSubDiv.constructor.prototype.remove = function () {
 			this.parentElement.removeChild(this);
-			this.dialogue.setSub(null);
+			this.dialogue.sub = null;
 		};
 	})();
 
@@ -36,26 +36,22 @@ addEventListener("DOMContentLoaded", function () {
 
 			var subsWrapper = document.querySelector("#subs-wrapper");
 
-			var info = ass.getInfo();
+			var info = ass.info;
 			info.scaleTo(videoWidth, videoHeight);
-			var zoom = (1 / info.getScaleX());
+			var zoom = (1 / info.scaleX);
 			var zoomedDiv = document.querySelector(".zoomed");
 			zoomedDiv.style.transform = "scale(" + zoom + ")";
 			zoomedDiv.style.MozTransform = "scale(" + zoom + ")";
 			zoomedDiv.style.webkitTransform = "scale(" + zoom + ")";
 
-			info.setDPI(parseFloat(getComputedStyle(document.querySelector("#dpi-div")).height.match(/(\d+)px/)[1]));
+			info.dpi = parseFloat(getComputedStyle(document.querySelector("#dpi-div")).height.match(/(\d+)px/)[1]);
 
-			var layers = [];
-			var dialogues = ass.getDialogues();
-			dialogues.map(function (dialogue) {
-				return dialogue.getLayer();
-			}).forEach(function (layer) {
-				if (layers.indexOf(layer) === -1) {
-					layers.push(layer);
-				}
+			var layers = new Set();
+			var dialogues = ass.dialogues;
+			dialogues.forEach(function (dialogue) {
+				layers.add(dialogue.layer);
 			});
-			layers.sort().forEach(function (layer) {
+			layers.toArray().sort().forEach(function (layer) {
 				var i;
 				wrappers[layer] = {};
 				for (i = 1; i <= 9; ++i) {
@@ -67,19 +63,21 @@ addEventListener("DOMContentLoaded", function () {
 			});
 
 			var allFonts = new Set();
-			ass.getStyles().forEach(function (style) {
-				allFonts.add(style.getFontName());
+			ass.styles.forEach(function (style) {
+				allFonts.add(style.fontName);
 			});
 			dialogues.forEach(function (dialogue) {
-				// TODO: Find {\fn<>} here and put those in allFonts too.
+				dialogue.parts.forEach(function (part) {
+					if (part instanceof Tags.FontName) {
+						allFonts.add(fontName);
+					}
+				});
 			});
-			var numFonts = 0;
-			Array.prototype.filter.call(document.styleSheets, function (stylesheet) {
+			var numFonts = Array.prototype.filter.call(document.styleSheets, function (stylesheet) {
 				return stylesheet.href && stylesheet.href.endsWith("/fonts.css");
-			}).forEach(function (style) {
-				numFonts +=
-				Array.prototype.filter.call(style.cssRules, function (rule) {
-					return rule.type === CSSRule.FONT_FACE_RULE /*&& allFonts.has(rule.style.fontFamily)*/; // TODO
+			}).reduce(function (previousValue, currentValue) {
+				return previousValue + Array.prototype.filter.call(currentValue.cssRules, function (rule) {
+					return rule.type === CSSRule.FONT_FACE_RULE && allFonts.has(rule.style.fontFamily);
 				}).map(function (fontFaceRule) {
 					var xhr = new XMLHttpRequest();
 					var fontSrc = fontFaceRule.style.src;
@@ -102,18 +100,18 @@ addEventListener("DOMContentLoaded", function () {
 					return xhr;
 				})
 				.length;
-			});
+			}, 0);
 			if (numFonts === 0) {
 				video.play();
 			}
 
 			var currentSubs = [];
 			var newSubs = dialogues.toEnumerable().skipWhile(function (dialogue, currentTime) {
-				return dialogue.getEnd() < currentTime;
+				return dialogue.end < currentTime;
 			}).takeWhile(function (dialogue, currentTime) {
-				return dialogue.getStart() <= currentTime;
+				return dialogue.start <= currentTime;
 			}).filter(function (dialogue, currentTime) {
-				return dialogue.getEnd() >= currentTime && dialogue.getSub() === null;
+				return dialogue.end >= currentTime && dialogue.sub === null;
 			}).map(function (dialogue) {
 				return createSubDiv(dialogue);
 			});
@@ -121,7 +119,7 @@ addEventListener("DOMContentLoaded", function () {
 				var currentTime = video.currentTime;
 
 				currentSubs = currentSubs.filter(function (sub) {
-					if (sub.dialogue.getStart() <= currentTime && sub.dialogue.getEnd() > currentTime) {
+					if (sub.dialogue.start <= currentTime && sub.dialogue.end > currentTime) {
 						return true;
 					}
 					else {

@@ -12,7 +12,7 @@ var createDialogues;
 
 		parseDialogue = function (text) {
 			return dialogueParser.parse(text, "dialogue");
-		}
+		};
 	};
 
 	Dialogue = function (textOrParts, style, start, end, layer) {
@@ -45,7 +45,6 @@ var createDialogues;
 		var m_sub = null;
 
 		var hasFadeInAndFadeOut = false;
-		var childDialogueTextParts;
 
 		var m_layer = ((layer >= 0) ? layer : 0);
 
@@ -79,56 +78,42 @@ var createDialogues;
 			this.childDialogue = new Dialogue(childDialogueTextParts, style, m_end, end, m_layer);
 		}
 
-		var m_alignment = m_style.getAlignment();
+		var m_alignment = m_style.alignment;
 
 		var m_ass;
 
-		this.getStart = function () {
-			return m_start;
-		};
+		Object.defineProperty(this, "start", { value: m_start });
+		Object.defineProperty(this, "end", { value: m_end });
+		Object.defineProperty(this, "alignment", { value: m_alignment });
+		Object.defineProperty(this, "layer", { value: m_layer });
+		Object.defineProperty(this, "parts", { value: m_parts });
 
-		this.getEnd = function () {
-			return m_end;
-		};
-
-		this.getAlignment = function () {
-			return m_alignment;
-		};
-
-		this.getSub = function () {
-			return m_sub;
-		};
-
-		this.getLayer = function () {
-			return m_layer;
-		};
-
-		this.setSub = function (sub) {
+		Object.defineProperty(this, "sub", { get: function () { return m_sub; }, set: function (sub) {
 			m_sub = sub;
 
 			// Magic happens here (TODO: styling)
 			if (m_sub !== null) {
-				var info = m_ass.getInfo();
-				var scaleX = info.getScaleX();
-				var scaleY = info.getScaleY();
-				var dpi = info.getDPI();
+				var info = m_ass.info;
+				var scaleX = info.scaleX;
+				var scaleY = info.scaleY;
+				var dpi = info.dpi;
 
-				m_sub.style.marginLeft = (scaleX * m_style.getMarginLeft()) + "px";
-				m_sub.style.marginRight = (scaleX * m_style.getMarginRight()) + "px";
-				m_sub.style.marginTop = m_sub.style.marginBottom = (scaleX * m_style.getMarginVertical()) + "px";
+				m_sub.style.marginLeft = (scaleX * m_style.marginLeft) + "px";
+				m_sub.style.marginRight = (scaleX * m_style.marginRight) + "px";
+				m_sub.style.marginTop = m_sub.style.marginBottom = (scaleX * m_style.marginVertical) + "px";
 
-				var currentItalic = m_style.getItalic();
-				var currentBold = m_style.getBold() ? "bold" : "";
-				var currentUnderline = m_style.getUnderline();
-				var currentStrikethrough = m_style.getStrikethrough();
+				var currentItalic = m_style.italic;
+				var currentBold = m_style.bold ? "bold" : "";
+				var currentUnderline = m_style.underline;
+				var currentStrikethrough = m_style.strikethrough;
 
-				var currentOutlineWidth = m_style.getOutlineWidth();
+				var currentOutlineWidth = m_style.outlineWidth;
 
-				var currentFontName = m_style.getFontName();
-				var currentFontSize = m_style.getFontSize();
+				var currentFontName = m_style.fontName;
+				var currentFontSize = m_style.fontSize;
 
-				var currentPrimaryColor = m_style.getPrimaryColor();
-				var currentOutlineColor = m_style.getOutlineColor();
+				var currentPrimaryColor = m_style.primaryColor;
+				var currentOutlineColor = m_style.outlineColor;
 
 				var currentBlur = 0;
 				var transformStyle = "";
@@ -143,19 +128,19 @@ var createDialogues;
 						createNewSpan = false;
 					}
 
-					var valueOrDefault = function (value, defaultFunc) {
-						return (value !== null) ? value : defaultFunc.call(m_style);
+					var valueOrDefault = function (newValue, defaultValue) {
+						return (newValue !== null) ? newValue : defaultValue;
 					};
 
-					currentItalic = valueOrDefault(currentItalic, m_style.getItalic);
-					currentBold = valueOrDefault(currentBold, m_style.getBold);
-					currentUnderline = valueOrDefault(currentUnderline, m_style.getUnderline);
-					currentStrikethrough = valueOrDefault(currentStrikethrough, m_style.getStrikethrough);
-					currentOutlineWidth = valueOrDefault(currentOutlineWidth, m_style.getOutlineWidth);
-					currentFontName = valueOrDefault(currentFontName, m_style.getFontName);
-					currentFontSize = valueOrDefault(currentFontSize, m_style.getFontSize);
-					currentPrimaryColor = valueOrDefault(currentPrimaryColor, m_style.getPrimaryColor);
-					currentOutlineColor = valueOrDefault(currentOutlineColor, m_style.getOutlineColor);
+					currentItalic = valueOrDefault(currentItalic, m_style.italic);
+					currentBold = valueOrDefault(currentBold, m_style.bold);
+					currentUnderline = valueOrDefault(currentUnderline, m_style.underline);
+					currentStrikethrough = valueOrDefault(currentStrikethrough, m_style.strikethrough);
+					currentOutlineWidth = valueOrDefault(currentOutlineWidth, m_style.outlineWidth);
+					currentFontName = valueOrDefault(currentFontName, m_style.fontName);
+					currentFontSize = valueOrDefault(currentFontSize, m_style.fontSize);
+					currentPrimaryColor = valueOrDefault(currentPrimaryColor, m_style.primaryColor);
+					currentOutlineColor = valueOrDefault(currentOutlineColor, m_style.outlineColor);
 
 					if (currentItalic) {
 						currentSpan.style.fontStyle = "italic";
@@ -374,13 +359,10 @@ var createDialogues;
 					currentSpanContainer.style.webkitPerspective = "400";
 				}
 			}
-		};
-
-
-		this.setASS = function (ass) {
+		} });
+		Object.defineProperty(this, "ass", { get: function () { return m_ass; }, set: function (ass) {
 			m_ass = ass;
-			that.setASS = undefined;
-		};
+		} });
 
 		this.toString = function () {
 			return "[" + m_start + " - " + m_end + "] " + m_parts.join("");
@@ -488,4 +470,4 @@ var Tags = new function () {
 		this.start = (parseFloat(start) || 0) / 1000;
 		this.end = (parseFloat(end) || 0) / 1000;
 	};
-}
+};
