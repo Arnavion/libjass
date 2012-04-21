@@ -42,34 +42,37 @@ String.prototype.toRGBA = function () {
 	};
 })();
 
-window.Set = function () {
-	var that = this;
-	var data = {};
+if (!window.Set || !window.Set.prototype.iterator) {
+	window.Set = function () {
+		var that = this;
+		var data = {};
 
-	this.add = function (element) {
-		data[">" + element] = true;
-	};
+		this.add = function (element) {
+			data[">" + element] = true;
+		};
 
-	this.has = function (element) {
-		return !!data[">" + element];
-	};
+		this.has = function (element) {
+			return data.hasOwnProperty(">" + element);
+		};
 
-	this.forEach = function (callback, thisArg) {
-		var i = 0;
-		thisArg = thisArg || that;
-		for (var element in data) {
-			if (element.startsWith(">")) {
-				callback.call(thisArg, element.substring(1), i, this);
-				++i;
-			}
-		}
-	};
-
-	this.toArray = function () {
-		var result = [];
-		this.forEach(function (element) {
-			result.push(element);
-		});
-		return result;
+		this.iterator = function () {
+			return Object.keys(data).toEnumerable().filter(function (property) {
+				return property.startsWith(">");
+			}).map(function (property) {
+				return property.substring(1);
+			});
+		};
 	};
 }
+
+window.Set.prototype.forEach = function (callback) {
+	this.iterator().forEach(callback);
+};
+
+window.Set.prototype.toArray = function () {
+	var result = [];
+	this.forEach(function (element) {
+		result.push(element);
+	});
+	return result;
+};

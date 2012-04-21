@@ -36,8 +36,9 @@
 };
 var prototype = new IEnumerable();
 
-var StopIteration = function () {
-};
+if (!window.StopIteration) {
+	window.StopIteration = function () { };
+}
 
 var ArrayEnumerable = function (array) {
 	this.reset = function () {
