@@ -54,17 +54,38 @@ var Style = function (name, italic, bold, underline, strikethrough, outlineWidth
 };
 
 var parseASS = function (rawASS) {
-	var info;
 	var styles = [];
 	var dialogues = [];
 
-	var assLines = rawASS.replace(/\r$/gm, "").split("\n");
-	var i;
-
 	var playResX;
 	var playResY;
-	for (i = 0; i < assLines.length && assLines[i] !== "[Script Info]"; ++i);
-	assLines.slice(i + 1).every(function (line, index) {
+
+	var nameIndex;
+	var italicIndex;
+	var boldIndex;
+	var underlineIndex;
+	var strikethroughIndex;
+	var outlineWidthIndex;
+	var fontNameIndex;
+	var fontSizeIndex;
+	var primaryColorIndex;
+	var outlineColorIndex;
+	var alignmentIndex;
+	var marginLeftIndex;
+	var marginRightIndex;
+	var marginVerticalIndex;
+
+	var styleIndex;
+	var startIndex;
+	var endIndex;
+	var textIndex;
+	var layerIndex;
+
+	rawASS.replace(/\r$/gm, "").split("\n").toEnumerable().skipWhile(function (line) {
+		return line !== "[Script Info]";
+	}).skipWhile(function (line) {
+		var result = line !== "[V4+ Styles]";
+
 		if (line.startsWith("PlayResX:")) {
 			playResX = parseInt(line.substring("PlayResX:".length).trim());
 		}
@@ -72,48 +93,35 @@ var parseASS = function (rawASS) {
 			playResY = parseInt(line.substring("PlayResY:".length).trim());
 		}
 
-		var result = (playResX === undefined || playResY === undefined);
-		if (result) {
-			i = index;
-		}
 		return result;
-	});
-	if (playResX !== undefined && playResY !== undefined) {
-		info = new Info(playResX, playResY);
-	}
+	}).skipWhile(function (line) {
+		var result = !line.startsWith("Format:");
 
-	for (; i < assLines.length && assLines[i] !== "[V4+ Styles]"; ++i);
-	var styleFormatLineIndex;
-	if (assLines.slice(i + 1).some(function (line, index) {
-		var result = line.startsWith("Format:");
-		if (result) {
-			styleFormatLineIndex = index;
+		if (!result) {
+			var styleFormatParts = line.substring("Format:".length).split(",").map(function (formatPart) { return formatPart.trim(); });
+			nameIndex = styleFormatParts.indexOf("Name");
+			italicIndex = styleFormatParts.indexOf("Italic");
+			boldIndex = styleFormatParts.indexOf("Bold");
+			underlineIndex = styleFormatParts.indexOf("Underline");
+			strikethroughIndex = styleFormatParts.indexOf("Strikeout");
+			outlineWidthIndex = styleFormatParts.indexOf("Outline");
+			fontNameIndex = styleFormatParts.indexOf("Fontname");
+			fontSizeIndex = styleFormatParts.indexOf("Fontsize");
+			primaryColorIndex = styleFormatParts.indexOf("PrimaryColour");
+			outlineColorIndex = styleFormatParts.indexOf("OutlineColour");
+			alignmentIndex = styleFormatParts.indexOf("Alignment");
+			marginLeftIndex = styleFormatParts.indexOf("MarginL");
+			marginRightIndex = styleFormatParts.indexOf("MarginR");
+			marginVerticalIndex = styleFormatParts.indexOf("MarginV");
 		}
+
 		return result;
-	})) {
-		var styleFormatLine = assLines[i + styleFormatLineIndex + 1];
-		var styleFormatParts = styleFormatLine.substring("Format:".length).split(",").map(function (formatPart) { return formatPart.trim(); });
-		var nameIndex = styleFormatParts.indexOf("Name");
-		var italicIndex = styleFormatParts.indexOf("Italic");
-		var boldIndex = styleFormatParts.indexOf("Bold");
-		var underlineIndex = styleFormatParts.indexOf("Underline");
-		var strikethroughIndex = styleFormatParts.indexOf("Strikeout");
-		var outlineWidthIndex = styleFormatParts.indexOf("Outline");
-		var fontNameIndex = styleFormatParts.indexOf("Fontname");
-		var fontSizeIndex = styleFormatParts.indexOf("Fontsize");
-		var primaryColorIndex = styleFormatParts.indexOf("PrimaryColour");
-		var outlineColorIndex = styleFormatParts.indexOf("OutlineColour");
-		var alignmentIndex = styleFormatParts.indexOf("Alignment");
-		var marginLeftIndex = styleFormatParts.indexOf("MarginL");
-		var marginRightIndex = styleFormatParts.indexOf("MarginR");
-		var marginVerticalIndex = styleFormatParts.indexOf("MarginV");
+	}).skipWhile(function (line) {
+		var result = !line.startsWith("[Events]");
 
-		assLines.slice(i + styleFormatLineIndex + 2).some(function (line, index) {
-			var result = false;
-
-			if (line.startsWith("Style:")) {
-				var lineParts = line.substring("Style:".length).trimLeft().split(",");
-				styles.push(
+		if (line.startsWith("Style:")) {
+			var lineParts = line.substring("Style:".length).trimLeft().split(",");
+			styles.push(
 					new Style(
 						lineParts[nameIndex],
 						lineParts[italicIndex] === "-1",
@@ -131,52 +139,35 @@ var parseASS = function (rawASS) {
 						parseInt(lineParts[marginVerticalIndex])
 					)
 				);
-			}
-			else if (line.startsWith("[")) {
-				result = true;
-				i += index + 1;
-			}
-
-			return result;
-		});
-	}
-
-	for (; i < assLines.length && assLines[i] !== "[Events]"; ++i);
-	var dialogueFormatLineIndex;
-	if (assLines.slice(i + 1).some(function (line, lineIndex) {
-		var result = line.startsWith("Format:");
-		if (result) {
-			dialogueFormatLineIndex = lineIndex;
 		}
+
 		return result;
-	})) {
-		var dialogueFormatLine = assLines[i + dialogueFormatLineIndex + 1];
-		var dialogueFormatParts = dialogueFormatLine.substring("Format:".length).split(",").map(function (formatPart) { return formatPart.trim(); });
-		var styleIndex = dialogueFormatParts.indexOf("Style");
-		var startIndex = dialogueFormatParts.indexOf("Start");
-		var endIndex = dialogueFormatParts.indexOf("End");
-		var textIndex = dialogueFormatParts.indexOf("Text");
-		var layerIndex = dialogueFormatParts.indexOf("Layer");
+	}).skipWhile(function (line) {
+		var result = !line.startsWith("Format:");
 
-		assLines.slice(i + dialogueFormatLineIndex + 2).some(function (line) {
-			var result = false;
+		if (!result) {
+			var dialogueFormatParts = line.substring("Format:".length).split(",").map(function (formatPart) { return formatPart.trim(); });
+			styleIndex = dialogueFormatParts.indexOf("Style");
+			startIndex = dialogueFormatParts.indexOf("Start");
+			endIndex = dialogueFormatParts.indexOf("End");
+			textIndex = dialogueFormatParts.indexOf("Text");
+			layerIndex = dialogueFormatParts.indexOf("Layer");
+		}
 
-			if (line.startsWith("Dialogue:")) {
-				var lineParts = line.substring("Dialogue:".length).trimLeft().split(",");
-				dialogues = dialogues.concat(createDialogues(
+		return result;
+	}).forEach(function (line) {
+		if (line.startsWith("Dialogue:")) {
+			var lineParts = line.substring("Dialogue:".length).trimLeft().split(",");
+			dialogues = dialogues.concat(createDialogues(
 					lineParts.slice(textIndex).join(","),
 					styles.filter(function (aStyle) { return aStyle.name === lineParts[styleIndex]; })[0],
 					lineParts[startIndex],
 					lineParts[endIndex],
 					parseInt(lineParts[layerIndex])));
-			}
-			else if (line.startsWith("[")) {
-				result = true;
-			}
+		}
+	});
 
-			return result;
-		});
-	}
+	var info = new Info(playResX, playResY);
 
 	dialogues.sort(function (dialogue1, dialogue2) { return dialogue1.start - dialogue2.start; });
 
