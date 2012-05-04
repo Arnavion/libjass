@@ -44,7 +44,6 @@ String.prototype.toRGBA = function () {
 
 if (!window.Set || !window.Set.prototype.iterator) {
 	window.Set = function () {
-		var that = this;
 		var data = {};
 
 		this.add = function (element) {

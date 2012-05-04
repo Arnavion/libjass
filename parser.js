@@ -1,17 +1,15 @@
 "use strict";
 
 var ASS = function (info, styles, dialogues) {
-	var that = this;
-
-	info.ass = that;
+	info.ass = this;
 
 	styles.forEach(function (style) {
-		style.ass = that;
-	});
+		style.ass = this;
+	}, this);
 
 	dialogues.forEach(function (dialogue) {
-		dialogue.ass = that;
-	});
+		dialogue.ass = this;
+	}, this);
 
 	Object.defineProperty(this, "info", { value: info });
 	Object.defineProperty(this, "styles", { value: styles });
@@ -19,8 +17,6 @@ var ASS = function (info, styles, dialogues) {
 };
 
 var Info = function (playResX, playResY) {
-	var that = this;
-
 	var scaleX;
 	var scaleY;
 
