@@ -16,8 +16,6 @@ var createDialogues;
 	};
 
 	Dialogue = function (textOrParts, style, start, end, layer) {
-		var that = this;
-
 		var m_style = style;
 
 		var m_start;
@@ -289,6 +287,34 @@ var createDialogues;
 						m_alignment = part.value;
 					}
 
+					else if (part instanceof Tags.Reset) {
+						if (part.value === null) {
+							currentItalic = null;
+							currentBold = null;
+							currentUnderline = null;
+							currentStrikethrough = null;
+							currentOutlineWidth = null;
+							currentFontName = null;
+							currentFontSize = null;
+							currentPrimaryColor = null;
+							currentOutlineColor = null;
+							spanStylesChanged = true;
+						}
+						else {
+							var newStyle = m_ass.styles.filter(function (style) { return style.name === part.value; })[0];
+							currentItalic = newStyle.italic;
+							currentBold = newStyle.bold ? "bold" : "";
+							currentUnderline = newStyle.underline;
+							currentStrikethrough = newStyle.strikethrough;
+							currentOutlineWidth = newStyle.outlineWidth;
+							currentFontName = newStyle.fontName;
+							currentFontSize = newStyle.fontSize;
+							currentPrimaryColor = newStyle.primaryColor;
+							currentOutlineColor = newStyle.outlineColor;
+							spanStylesChanged = true;
+						}
+					}
+
 					else if (part instanceof Tags.Pos) {
 						m_sub.style.position = "absolute";
 						m_sub.style.left = (scaleX * part.x) + "px";
@@ -385,17 +411,17 @@ var Tags = new function () {
 	this.Comment = function (value) {
 		this.value = value;
 	};
-	
+
 	this.HardSpace = function () {
 	};
-	
+
 	this.NewLine = function () {
 	};
-	
+
 	this.Text = function (value) {
 		this.value = value;
 	};
-	
+
 	this.Tag = function (func) {
 		return function (value) {
 			if (value === "") {
@@ -409,7 +435,7 @@ var Tags = new function () {
 			}
 		};
 	};
-	
+
 	this.Italic = this.Tag(function (value) {
 		if (value === "1") {
 			return true;
@@ -438,34 +464,36 @@ var Tags = new function () {
 		}
 	});
 	this.Strikeout = this.Tag();
-	
+
 	this.Border = this.Tag(parseFloat);
 
 	this.Blur = this.Tag(parseFloat);
-	
+
 	this.FontName = this.Tag();
 	this.FontSize = this.Tag(parseFloat);
-	
+
 	this.Frx = this.Tag(parseFloat);
 	this.Fry = this.Tag(parseFloat);
 	this.Frz = this.Tag(parseFloat);
 	this.Fax = this.Tag(parseFloat);
 	this.Fay = this.Tag(parseFloat);
-	
+
 	this.PrimaryColor = this.Tag();
 	this.OutlineColor = this.Tag();
 
 	this.Alpha = this.Tag();
 	this.PrimaryAlpha = this.Tag();
 	this.OutlineAlpha = this.Tag();
-	
+
 	this.Alignment = this.Tag(parseInt);
-	
+
+	this.Reset = this.Tag();
+
 	this.Pos = function (x, y) {
 		this.x = parseFloat(x);
 		this.y = parseFloat(y);
 	};
-	
+
 	this.Fade = function (start, end) {
 		this.start = (parseFloat(start) || 0) / 1000;
 		this.end = (parseFloat(end) || 0) / 1000;

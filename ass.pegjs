@@ -23,7 +23,8 @@ enclosedTags
 			"\\" tag:italicTag { return tag; } /
 			"\\" tag:boldTag { return tag; } /
 			"\\" tag:underlineTag { return tag; } /
-			"\\" tag:strikeoutTag { return tag; }
+			"\\" tag:strikeoutTag { return tag; } /
+			"\\" tag:resetTag { return tag; }
 		)+
 		"}" { return tags; }
 
@@ -95,6 +96,9 @@ outlineAlphaTag
 
 alignmentTag
 	=	"an" value:[1-9]? { return new Tags.Alignment(value); }
+
+resetTag
+	=	"r" value:[^\\}]*? { return new Tags.Reset(value); }
 
 posTag
 	=	"pos(" x:decimal "," y:decimal ")" { return new Tags.Pos(x, y); }
