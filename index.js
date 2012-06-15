@@ -69,7 +69,7 @@ addEventListener("DOMContentLoaded", function () {
 			dialogues.forEach(function (dialogue) {
 				dialogue.parts.forEach(function (part) {
 					if (part instanceof Tags.FontName) {
-						allFonts.add(fontName);
+						allFonts.add(part.value);
 					}
 				});
 			});
