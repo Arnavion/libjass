@@ -98,7 +98,7 @@ alignmentTag
 	=	"an" value:[1-9]? { return new Tags.Alignment(value); }
 
 resetTag
-	=	"r" value:[^\\}]*? { return new Tags.Reset(value); }
+	=	"r" value:[^\\}]* { return new Tags.Reset(value); }
 
 posTag
 	=	"pos(" x:decimal "," y:decimal ")" { return new Tags.Pos(x, y); }
