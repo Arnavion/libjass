@@ -34,6 +34,12 @@ String.prototype.toRGBA = function () {
 	);
 };
 
+String.prototype.toTime = function () {
+	return this.split(":").reduce(function (previousValue, currentValue) {
+		return previousValue * 60 + parseFloat(currentValue);
+	}, 0);
+};
+
 (function () {
 	var oldParseInt = window.parseInt;
 

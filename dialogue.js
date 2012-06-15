@@ -16,43 +16,22 @@ var createDialogues;
 	};
 
 	Dialogue = function (textOrParts, style, start, end, layer) {
-		var m_style = style;
-
-		var m_start;
 		if (start.constructor === String) {
-			m_start =
-				start.split(":").reduce(function (previousValue, currentValue) {
-					return previousValue * 60 + parseFloat(currentValue);
-				}, 0);
-		}
-		else {
-			m_start = start;
+			start = start.toTime();
 		}
 
-		var m_end;
 		if (end.constructor === String) {
-			m_end =
-				end.split(":").reduce(function (previousValue, currentValue) {
-					return previousValue * 60 + parseFloat(currentValue);
-				}, 0);
-		}
-		else {
-			m_end = end;
+			end = end.toTime();
 		}
 
-		var m_sub = null;
-
-		var hasFadeInAndFadeOut = false;
-
-		var m_layer = ((layer >= 0) ? layer : 0);
+		layer = ((layer >= 0) ? layer : 0);
 
 		var m_parts =
-			(textOrParts instanceof Array) ?
-				textOrParts :
+			(textOrParts.constructor === String) ?
 				parseDialogue(textOrParts).reduce(function (previous, current) {
 					var result;
 	
-					if (current instanceof Tags.Text && previous.length > 0 && previous[previous.length - 1] instanceof Tags.Text) {
+					if (current instanceof Tags.Text && previous[previous.length - 1] instanceof Tags.Text) {
 						previous[previous.length - 1].value += current.value;
 						result = previous;
 					}
@@ -61,31 +40,35 @@ var createDialogues;
 					}
 
 					return result;
-				}, []);
+				}, []) :
+				textOrParts;
 
 		var childDialogueTextParts;
+		var oldEnd;
 		m_parts.forEach(function (part, index) {
 			if (part instanceof Tags.Fade && part.start !== 0 && part.end !== 0) {
 				childDialogueTextParts = m_parts.slice(0);
 				childDialogueTextParts[index] = new Tags.Fade(0, part.end);
-				m_end -= part.end;
+				oldEnd = end;
+				end -= part.end;
 				part.end = 0;
 			}
 		});
 		if (childDialogueTextParts) {
-			this.childDialogue = new Dialogue(childDialogueTextParts, style, m_end, end, m_layer);
+			this.childDialogue = new Dialogue(childDialogueTextParts, style, end, oldEnd, layer);
 		}
 
-		var m_alignment = m_style.alignment;
+		var m_alignment = style.alignment;
 
 		var m_ass;
 
-		Object.defineProperty(this, "start", { value: m_start });
-		Object.defineProperty(this, "end", { value: m_end });
+		Object.defineProperty(this, "start", { value: start });
+		Object.defineProperty(this, "end", { value: end });
 		Object.defineProperty(this, "alignment", { value: m_alignment });
-		Object.defineProperty(this, "layer", { value: m_layer });
+		Object.defineProperty(this, "layer", { value: layer });
 		Object.defineProperty(this, "parts", { value: m_parts });
 
+		var m_sub = null;
 		Object.defineProperty(this, "sub", { get: function () { return m_sub; }, set: function (sub) {
 			m_sub = sub;
 
@@ -96,22 +79,22 @@ var createDialogues;
 				var scaleY = info.scaleY;
 				var dpi = info.dpi;
 
-				m_sub.style.marginLeft = (scaleX * m_style.marginLeft) + "px";
-				m_sub.style.marginRight = (scaleX * m_style.marginRight) + "px";
-				m_sub.style.marginTop = m_sub.style.marginBottom = (scaleX * m_style.marginVertical) + "px";
+				m_sub.style.marginLeft = (scaleX * style.marginLeft) + "px";
+				m_sub.style.marginRight = (scaleX * style.marginRight) + "px";
+				m_sub.style.marginTop = m_sub.style.marginBottom = (scaleX * style.marginVertical) + "px";
 
-				var currentItalic = m_style.italic;
-				var currentBold = m_style.bold ? "bold" : "";
-				var currentUnderline = m_style.underline;
-				var currentStrikethrough = m_style.strikethrough;
+				var currentItalic = style.italic;
+				var currentBold = style.bold ? "bold" : "";
+				var currentUnderline = style.underline;
+				var currentStrikethrough = style.strikethrough;
 
-				var currentOutlineWidth = m_style.outlineWidth;
+				var currentOutlineWidth = style.outlineWidth;
 
-				var currentFontName = m_style.fontName;
-				var currentFontSize = m_style.fontSize;
+				var currentFontName = style.fontName;
+				var currentFontSize = style.fontSize;
 
-				var currentPrimaryColor = m_style.primaryColor;
-				var currentOutlineColor = m_style.outlineColor;
+				var currentPrimaryColor = style.primaryColor;
+				var currentOutlineColor = style.outlineColor;
 
 				var currentBlur = 0;
 				var transformStyle = "";
@@ -130,15 +113,15 @@ var createDialogues;
 						return (newValue !== null) ? newValue : defaultValue;
 					};
 
-					currentItalic = valueOrDefault(currentItalic, m_style.italic);
-					currentBold = valueOrDefault(currentBold, m_style.bold);
-					currentUnderline = valueOrDefault(currentUnderline, m_style.underline);
-					currentStrikethrough = valueOrDefault(currentStrikethrough, m_style.strikethrough);
-					currentOutlineWidth = valueOrDefault(currentOutlineWidth, m_style.outlineWidth);
-					currentFontName = valueOrDefault(currentFontName, m_style.fontName);
-					currentFontSize = valueOrDefault(currentFontSize, m_style.fontSize);
-					currentPrimaryColor = valueOrDefault(currentPrimaryColor, m_style.primaryColor);
-					currentOutlineColor = valueOrDefault(currentOutlineColor, m_style.outlineColor);
+					currentItalic = valueOrDefault(currentItalic, style.italic);
+					currentBold = valueOrDefault(currentBold, style.bold);
+					currentUnderline = valueOrDefault(currentUnderline, style.underline);
+					currentStrikethrough = valueOrDefault(currentStrikethrough, style.strikethrough);
+					currentOutlineWidth = valueOrDefault(currentOutlineWidth, style.outlineWidth);
+					currentFontName = valueOrDefault(currentFontName, style.fontName);
+					currentFontSize = valueOrDefault(currentFontSize, style.fontSize);
+					currentPrimaryColor = valueOrDefault(currentPrimaryColor, style.primaryColor);
+					currentOutlineColor = valueOrDefault(currentOutlineColor, style.outlineColor);
 
 					if (currentItalic) {
 						currentSpan.style.fontStyle = "italic";
@@ -303,7 +286,17 @@ var createDialogues;
 						else {
 							var newStyle = m_ass.styles.filter(function (style) { return style.name === part.value; })[0];
 							currentItalic = newStyle.italic;
-							currentBold = newStyle.bold ? "bold" : "";
+							switch (newStyle.bold) {
+							case true:
+								currentBold = "bold";
+								break;
+							case false:
+								currentBold = "";
+								break;
+							default :
+								currentBold = newStyle.bold.value;
+								break;
+							}
 							currentUnderline = newStyle.underline;
 							currentStrikethrough = newStyle.strikethrough;
 							currentOutlineWidth = newStyle.outlineWidth;
@@ -391,7 +384,7 @@ var createDialogues;
 		} });
 
 		this.toString = function () {
-			return "[" + m_start + " - " + m_end + "] " + m_parts.join("");
+			return "[" + start + " - " + end + "] " + m_parts.join("");
 		};
 	};
 
