@@ -68,6 +68,8 @@ if (!window.Set || !window.Set.prototype.iterator) {
 			});
 		};
 	};
+	
+	Set.prototype = new Set();
 }
 
 window.Set.prototype.forEach = function (callback) {
@@ -75,9 +77,5 @@ window.Set.prototype.forEach = function (callback) {
 };
 
 window.Set.prototype.toArray = function () {
-	var result = [];
-	this.forEach(function (element) {
-		result.push(element);
-	});
-	return result;
+	return this.iterator().toArray();
 };
