@@ -42,7 +42,7 @@ if (!window.StopIteration) {
 
 var ArrayEnumerable = function (array) {
 	this.reset = function () {
-		currentIndex = -1;
+		currentIndex = 0;
 		return this;
 	};
 
@@ -51,15 +51,18 @@ var ArrayEnumerable = function (array) {
 	};
 
 	this.next = function () {
-		if (++currentIndex < array.length) {
-			return array[currentIndex];
+		while (currentIndex < array.length) {
+			if (currentIndex in array) {
+				return array[currentIndex++];
+			}
+			else {
+				++currentIndex;
+			}
 		}
-		else {
-			throw new StopIteration();
-		}
+		throw new StopIteration();
 	};
 
-	var currentIndex = -1;
+	var currentIndex = 0;
 };
 ArrayEnumerable.prototype = prototype;
 
