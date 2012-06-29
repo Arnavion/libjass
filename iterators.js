@@ -38,6 +38,7 @@ var prototype = new IEnumerable();
 
 if (!window.StopIteration) {
 	window.StopIteration = function () { };
+	window.StopIteration.__proto__ = window.StopIteration;
 }
 
 var ArrayEnumerable = function (array) {
@@ -59,7 +60,7 @@ var ArrayEnumerable = function (array) {
 				++currentIndex;
 			}
 		}
-		throw new StopIteration();
+		throw StopIteration;
 	};
 
 	var currentIndex = 0;
