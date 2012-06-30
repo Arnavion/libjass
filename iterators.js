@@ -22,7 +22,7 @@
 			}
 		}
 		catch (ex) {
-			if (!(ex instanceof StopIteration)) {
+			if (ex !== StopIteration) {
 				throw ex;
 			}
 		}
@@ -37,8 +37,7 @@
 var prototype = new IEnumerable();
 
 if (!window.StopIteration) {
-	window.StopIteration = function () { };
-	window.StopIteration.__proto__ = window.StopIteration;
+	window.StopIteration = {};
 }
 
 var ArrayEnumerable = function (array) {
