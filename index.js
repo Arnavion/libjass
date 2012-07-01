@@ -77,7 +77,7 @@ addEventListener("DOMContentLoaded", function () {
 				return stylesheet.href && stylesheet.href.endsWith("/fonts.css");
 			}).reduce(function (previousValue, currentValue) {
 				return previousValue + Array.prototype.filter.call(currentValue.cssRules, function (rule) {
-					return rule.type === CSSRule.FONT_FACE_RULE && allFonts.has(rule.style.fontFamily);
+					return rule.type === CSSRule.FONT_FACE_RULE && allFonts.has(rule.style.getPropertyValue("font-family").match(/^['"]?(.*?)['"]?$/)[1]);
 				}).map(function (fontFaceRule) {
 					var xhr = new XMLHttpRequest();
 					var fontSrc = fontFaceRule.style.src;
