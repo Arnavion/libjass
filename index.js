@@ -105,18 +105,19 @@ addEventListener("DOMContentLoaded", function () {
 				video.play();
 			}
 
+			var currentTime;
 			var currentSubs = [];
 			var newSubs = dialogues.toEnumerable().skipWhile(function (dialogue, currentTime) {
 				return dialogue.end < currentTime;
-			}).takeWhile(function (dialogue, currentTime) {
+			}).takeWhile(function (dialogue) {
 				return dialogue.start <= currentTime;
-			}).filter(function (dialogue, currentTime) {
+			}).filter(function (dialogue) {
 				return dialogue.end >= currentTime && dialogue.sub === null;
 			}).map(function (dialogue) {
 				return createSubDiv(dialogue);
 			});
 			video.addEventListener("timeupdate", function () {
-				var currentTime = video.currentTime;
+				currentTime = video.currentTime;
 
 				currentSubs = currentSubs.filter(function (sub) {
 					if (sub.dialogue.start <= currentTime && sub.dialogue.end > currentTime) {
@@ -126,7 +127,7 @@ addEventListener("DOMContentLoaded", function () {
 						sub.remove();
 						return false;
 					}
-				}).concat(newSubs.reset().setUserToken(currentTime).toArray());
+				}).concat(newSubs.reset().toArray());
 			}, false);
 
 			video.addEventListener("seeking", function () {

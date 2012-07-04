@@ -1,23 +1,38 @@
 "use strict";
 
+// String.trimLeft for browsers which don't support it
 if (String.prototype.trimLeft === undefined) {
 	String.prototype.trimLeft = function () {
 		return this.match(/^\W*(.+)$/)[1];
 	};
 }
 
+/**
+ * @param str
+ * @return <code>true</code> if this string starts with <code>str<code>
+ */
 String.prototype.startsWith = function (str) {
 	return this.indexOf(str) === 0;
 };
 
+/**
+ * @param str
+ * @return <code>true</code> if this string ends with <code>str<code>
+ */
 String.prototype.endsWith = function (str) {
 	return this.indexOf(str) === this.length - str.length;
 };
 
+/**
+ * Converts this string into a CSS rgb color string. This string must be 6 hexadecimal digits in the form BBGGRR.
+ */
 String.prototype.toRGB = function () {
 	return this.split(/([0-9a-fA-F]{2})/).reverse().join("");
 };
 
+/**
+ * Converts this string into a CSS rgba color string. This string must be 8 hexadecimal digits in the form BBGGRRAA.
+ */
 String.prototype.toRGBA = function () {
 	return (
 		"rgba(" +
@@ -34,20 +49,30 @@ String.prototype.toRGBA = function () {
 	);
 };
 
+/**
+ * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
+ */
 String.prototype.toTime = function () {
 	return this.split(":").reduce(function (previousValue, currentValue) {
 		return previousValue * 60 + parseFloat(currentValue);
 	}, 0);
 };
 
+// Replace the in-built parseInt with one which always parses to base 10 ints if the second parameter is undefined
 (function () {
 	var oldParseInt = window.parseInt;
 
 	window.parseInt = function (str) {
+		// If str starts with 0x, then it is to be parsed as base 16 even if the second parameter is not given.
+		// PEGjs requires this.
 		return oldParseInt(str, arguments[1] || (!str.startsWith("0x") && 10));
 	};
 })();
 
+/* Set and Set.iterator implementation for browsers that don't support them. Only supports String elements.
+ * Elements are stored as properties of an object, prefixed with the ">" character to avoid collisions with pre-defined
+ * properties.
+ */
 if (!window.Set || !window.Set.prototype.iterator) {
 	window.Set = function () {
 		var data = {};
@@ -72,10 +97,20 @@ if (!window.Set || !window.Set.prototype.iterator) {
 	Set.prototype = new Set();
 }
 
+/**
+ * Custom method to iterate through a Set until an API is agreed upon.
+ * 
+ * @param callback A function (element)
+ */
 window.Set.prototype.forEach = function (callback) {
 	this.iterator().forEach(callback);
 };
 
+/**
+ * Converts this set into an array.
+ * 
+ * @return An array of the elements of this set
+ */
 window.Set.prototype.toArray = function () {
 	return this.iterator().toArray();
 };
