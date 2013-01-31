@@ -86,25 +86,19 @@ if (!window.Set || !window.Set.prototype.iterator) {
 		};
 
 		this.iterator = function () {
-			return Object.keys(data).toEnumerable().filter(function (property) {
+			return Iterator(Object.keys(data).toEnumerable().map(function (entry) {
+				return entry[1];
+			}).filter(function (property) {
 				return property.startsWith(">");
 			}).map(function (property) {
 				return property.substring(1);
-			});
+			}));
 		};
 	};
 	
 	Set.prototype = new Set();
+	Set.prototype.__iterator__ = Set.prototype.iterator;
 }
-
-/**
- * Custom method to iterate through a Set until an API is agreed upon.
- * 
- * @param callback A function (element)
- */
-window.Set.prototype.forEach = function (callback) {
-	this.iterator().forEach(callback);
-};
 
 /**
  * Converts this set into an array.

@@ -107,7 +107,9 @@ addEventListener("DOMContentLoaded", function () {
 
 			var currentTime;
 			var currentSubs = [];
-			var newSubs = dialogues.toEnumerable().skipWhile(function (dialogue, currentTime) {
+			var newSubs = dialogues.toEnumerable().map(function (entry) {
+				return entry[1];
+			}).skipWhile(function (dialogue) {
 				return dialogue.end < currentTime;
 			}).takeWhile(function (dialogue) {
 				return dialogue.start <= currentTime;
@@ -127,7 +129,7 @@ addEventListener("DOMContentLoaded", function () {
 						sub.remove();
 						return false;
 					}
-				}).concat(newSubs.reset().toArray());
+				}).concat(Iterator(newSubs).toArray());
 			}, false);
 
 			video.addEventListener("seeking", function () {

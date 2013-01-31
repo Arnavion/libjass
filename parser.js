@@ -123,7 +123,9 @@ var parseASS = function (rawASS) {
 	var layerIndex;
 
 	// Remove all \r's. Then for each line...
-	rawASS.replace(/\r$/gm, "").split("\n").toEnumerable().skipWhile(function (line) {
+	Iterator(rawASS.replace(/\r$/gm, "").split("\n").toEnumerable().map(function (entry) {
+		return entry[1];
+	}).skipWhile(function (line) {
 		// Skip all lines till the script info section begins
 		return line !== "[Script Info]";
 	}).skipWhile(function (line) {
@@ -206,7 +208,7 @@ var parseASS = function (rawASS) {
 		}
 
 		return result;
-	}).forEach(function (line) {
+	})).forEach(function (line) {
 		// Read all the dialogues and add them to the dialogues array
 		if (line.startsWith("Dialogue:")) {
 			var lineParts = line.substring("Dialogue:".length).trimLeft().split(",");
