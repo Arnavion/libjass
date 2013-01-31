@@ -3,7 +3,7 @@
 // String.trimLeft for browsers which don't support it
 if (String.prototype.trimLeft === undefined) {
 	String.prototype.trimLeft = function () {
-		return this.match(/^\W*(.+)$/)[1];
+		return this.match(/^\s*(.*)$/)[1];
 	};
 }
 
