@@ -31,7 +31,7 @@ String.prototype.toRGB = function () {
 };
 
 /**
- * Converts this string into a CSS rgba color string. This string must be 8 hexadecimal digits in the form BBGGRRAA.
+ * Converts this string into a CSS rgba color string. This string must be 8 hexadecimal digits in the form AABBGGRR.
  */
 String.prototype.toRGBA = function () {
 	return (
