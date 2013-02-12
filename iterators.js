@@ -62,7 +62,7 @@ if (!window.Iterator) {
 				}
 					// Else advance to the next index
 				else {
-					++currentIndex;
+					currentIndex++;
 				}
 			}
 			// If there are no more elements in the array, throw StopIteration
