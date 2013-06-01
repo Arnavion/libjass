@@ -42,7 +42,6 @@ addEventListener("DOMContentLoaded", function () {
 			var zoom = (1 / info.scaleX);
 			var zoomedDiv = document.querySelector(".zoomed");
 			zoomedDiv.style.transform = "scale(" + zoom + ")";
-			zoomedDiv.style.MozTransform = "scale(" + zoom + ")";
 			zoomedDiv.style.webkitTransform = "scale(" + zoom + ")";
 
 			info.dpi = parseFloat(getComputedStyle(document.querySelector("#dpi-div")).height.match(/(\d+)px/)[1]);

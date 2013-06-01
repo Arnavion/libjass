@@ -328,8 +328,6 @@ var createDialogues;
 						if (part.start !== 0) {
 							m_sub.style.opacity = 0;
 							m_sub.style.transitionDuration = part.start + "s";
-							m_sub.style.MozTransitionDuration = part.start + "s";
-							m_sub.style.webkitTransitionDuration = part.start + "s";
 							setTimeout(function () {
 								m_sub.className = "fad-in";
 							}, 0);
@@ -337,8 +335,6 @@ var createDialogues;
 						else if (part.end !== 0) {
 							m_sub.style.opacity = 1;
 							m_sub.style.transitionDuration = part.end + "s";
-							m_sub.style.MozTransitionDuration = part.end + "s";
-							m_sub.style.webkitTransitionDuration = part.end + "s";
 							setTimeout(function () {
 								m_sub.classname = "fad-out";
 							}, 0);
@@ -367,12 +363,10 @@ var createDialogues;
 
 				if (transformStyle) {
 					currentSpanContainer.style.transform = transformStyle;
-					currentSpanContainer.style.MozTransform = transformStyle;
 					currentSpanContainer.style.webkitTransform = transformStyle;
 
 					var transformOrigin = (((m_alignment - 1) % 3) * 50) + "% " + ((5 - m_alignment) / 3 * 50) + "%";
 					currentSpanContainer.style.transformOrigin = transformOrigin;
-					currentSpanContainer.style.MozTransformOrigin = transformOrigin;
 					currentSpanContainer.style.webkitTransformOrigin = transformOrigin;
 
 					currentSpanContainer.style.webkitPerspective = "400";
