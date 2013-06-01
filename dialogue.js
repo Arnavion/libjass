@@ -271,18 +271,16 @@ var Dialogue = function (parts, style, start, end, layer) {
 
 				else if (part instanceof Tags.Fade) {
 					if (part.start !== 0) {
-						m_sub.style.opacity = 0;
-						m_sub.style.transitionDuration = part.start + "s";
-						setTimeout(function () {
-							m_sub.className = "fad-in";
-						}, 0);
+						m_sub.style.animationDuration = part.start + "s";
+						m_sub.style.animationName = "fad-in";
+						m_sub.style.webkitAnimationDuration = part.start + "s";
+						m_sub.style.webkitAnimationName = "fad-in";
 					}
 					else if (part.end !== 0) {
-						m_sub.style.opacity = 1;
-						m_sub.style.transitionDuration = part.end + "s";
-						setTimeout(function () {
-							m_sub.className = "fad-out";
-						}, 0);
+						m_sub.style.animationDuration = part.end + "s";
+						m_sub.style.animationName = "fad-out";
+						m_sub.style.webkitAnimationDuration = part.end + "s";
+						m_sub.style.webkitAnimationName = "fad-out";
 					}
 				}
 

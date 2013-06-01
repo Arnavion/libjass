@@ -49,17 +49,40 @@ body, #video {
 	text-align: right;
 }
 
-.fad-in, .fad-out {
-	transition-property: opacity;
-	transition-timing-function: linear;
+@keyframes fad-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
-.fad-in {
-	opacity: 1 !important;
+@keyframes fad-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
 }
 
-.fad-out {
-	opacity: 0 !important;
+@-webkit-keyframes fad-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@-webkit-keyframes fad-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
 }
 
 #dpi-div {
