@@ -347,7 +347,7 @@ var createDialogues;
 					}
 
 					else if (part instanceof Tags.HardSpace) {
-						currentSpan.appendChild(document.createTextNode("&#160;"));
+						currentSpan.appendChild(document.createTextNode("\u00A0"));
 						createNewSpan = true;
 					}
 
