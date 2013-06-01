@@ -24,6 +24,7 @@ addEventListener("DOMContentLoaded", function () {
 
 	var videoMetadataLoaded = false;
 	var parserLoaded = false;
+	var rawASS;
 	var ass;
 
 	var onVideo_Parser_SubsLoaded = function () {
@@ -158,6 +159,11 @@ addEventListener("DOMContentLoaded", function () {
 		if (parserRequest.readyState === XMLHttpRequest.DONE) {
 			createDialogueParser(parserRequest.responseText);
 			parserLoaded = true;
+
+			if (rawASS) {
+				ass = parseASS(rawASS);
+			}
+
 			onVideo_Parser_SubsLoaded();
 		}
 	}, false);
@@ -167,7 +173,12 @@ addEventListener("DOMContentLoaded", function () {
 	subsRequest.open("GET", (video.dataset && video.dataset.subs) || video.getAttribute("data-subs"), true);
 	subsRequest.addEventListener("readystatechange", function () {
 		if (subsRequest.readyState === XMLHttpRequest.DONE) {
-			ass = parseASS(subsRequest.responseText);
+			rawASS = subsRequest.responseText;
+
+			if (parserLoaded) {
+				ass = parseASS(rawASS);
+			}
+
 			onVideo_Parser_SubsLoaded();
 		}
 	}, false);
