@@ -104,7 +104,7 @@ posTag
 	=	"pos(" x:decimal "," y:decimal ")" { return new Tags.Pos(x, y); }
 
 fadeTag
-	=	"fad(" start:decimal "," end:decimal ")" { return new Tags.Fade(start, end); }
+	=	"fad(" start:decimal "," end:decimal ")" { return new Tags.Fade((parseFloat(start) || 0) / 1000, (parseFloat(end) || 0) / 1000); }
 
 decimal
 	=	value:([0-9]+ ("." [0-9]+)?) { return value[0].join("") + (value[1][0] || "") + (value[1][1] && value[1][1].join("") || ""); }

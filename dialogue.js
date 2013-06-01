@@ -281,7 +281,7 @@ var Dialogue = function (parts, style, start, end, layer) {
 						m_sub.style.opacity = 1;
 						m_sub.style.transitionDuration = part.end + "s";
 						setTimeout(function () {
-							m_sub.classname = "fad-out";
+							m_sub.className = "fad-out";
 						}, 0);
 					}
 				}
@@ -466,7 +466,7 @@ var Tags = new function () {
 	};
 
 	this.Fade = function (start, end) {
-		this.start = (parseFloat(start) || 0) / 1000;
-		this.end = (parseFloat(end) || 0) / 1000;
+		this.start = start;
+		this.end = end;
 	};
 };
