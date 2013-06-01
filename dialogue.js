@@ -369,6 +369,7 @@ var createDialogues;
 					currentSpanContainer.style.transformOrigin = transformOrigin;
 					currentSpanContainer.style.webkitTransformOrigin = transformOrigin;
 
+					currentSpanContainer.style.perspective = "400";
 					currentSpanContainer.style.webkitPerspective = "400";
 				}
 			}
