@@ -86,7 +86,7 @@ if (!window.Set || !window.Set.prototype.iterator) {
 		};
 
 		this.iterator = function () {
-			return Iterator(Object.keys(data).toEnumerable().map(function (entry) {
+			return Iterator(Object.keys(data).toIterable().map(function (entry) {
 				return entry[1];
 			}).filter(function (property) {
 				return property.startsWith(">");

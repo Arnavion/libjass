@@ -107,7 +107,7 @@ addEventListener("DOMContentLoaded", function () {
 
 			var currentTime;
 			var currentSubs = [];
-			var newSubs = dialogues.toEnumerable().map(function (entry) {
+			var newSubs = dialogues.toIterable().map(function (entry) {
 				return entry[1];
 			}).skipWhile(function (dialogue) {
 				return dialogue.end < currentTime;

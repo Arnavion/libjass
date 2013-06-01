@@ -123,7 +123,7 @@ var parseASS = function (rawASS) {
 	var layerIndex;
 
 	// Remove all \r's. Then for each line...
-	Iterator(rawASS.replace(/\r$/gm, "").split("\n").toEnumerable().map(function (entry) {
+	Iterator(rawASS.replace(/\r$/gm, "").split("\n").toIterable().map(function (entry) {
 		return entry[1];
 	}).skipWhile(function (line) {
 		// Skip all lines till the script info section begins

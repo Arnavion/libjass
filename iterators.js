@@ -1,42 +1,42 @@
 ﻿"use strict";
 
 /**
- * The base class of all enumerable objects. An enumerable is a lazily evaluated sequence.
+ * The base class of all iterable objects. An iterable is a lazily evaluated sequence.
  */
-var IEnumerable = function () {
+var Iterable = function () {
 	/**
 	 * @param transform A function (element) -> (transformedElement)
-	 * @return A new {@link IEnumerable} with the given transform applied
+	 * @return A new {@link Iterable} with the given transform applied
 	 */
 	this.map = function (transform) {
-		return new SelectEnumerable(this, transform);
+		return new SelectIterable(this, transform);
 	};
 
 	/**
 	 * @param filter A function (element) -> (Boolean). Returns <code>true</code> if <code>element</code> should
 	 * remain in the enumeration.
-	 * @return A new {@link IEnumerable} with the given filter applied
+	 * @return A new {@link Iterable} with the given filter applied
 	 */
 	this.filter = function (filter) {
-		return new WhereEnumerable(this, filter);
+		return new WhereIterable(this, filter);
 	};
 
 	/**
 	 * @param filter A function (element) -> (Boolean). Returns <code>false</code> if enumeration of this
-	 * {@link IEnumerable} should stop at <code>element</code>.
-	 * @return A new {@link IEnumerable} with the given filter applied
+	 * {@link Iterable} should stop at <code>element</code>.
+	 * @return A new {@link Iterable} with the given filter applied
 	 */
 	this.takeWhile = function (filter) {
-		return new TakeWhileEnumerable(this, filter);
+		return new TakeWhileIterable(this, filter);
 	};
 
 	/**
 	 * @param filter A function (element) -> (Boolean). Returns <code>true</code> if enumeration of this
-	 * {@link IEnumerable} should skip <code>element</code>.
-	 * @return A new {@link IEnumerable} with the given filter applied
+	 * {@link Iterable} should skip <code>element</code>.
+	 * @return A new {@link Iterable} with the given filter applied
 	 */
 	this.skipWhile = function (filter) {
-		return new SkipWhileEnumerable(this, filter);
+		return new SkipWhileIterable(this, filter);
 	};
 }
 
@@ -100,7 +100,7 @@ else {
 }
 
 /**
- * Calls the provided function for each element in this {@link IEnumerable}.
+ * Calls the provided function for each element in this {@link Iterable}.
  * 
  * @param func A function (element)
  */
@@ -119,9 +119,9 @@ iteratorPrototype.forEach = function (func) {
 };
 
 /**
- * Evaluates this enumerable.
+ * Evaluates this iterable.
  * 
- * @return An array of the elements of this {@link IEnumerable}
+ * @return An array of the elements of this {@link Iterable}
  */
 iteratorPrototype.toArray = function () {
 	var result = [];
@@ -131,7 +131,7 @@ iteratorPrototype.toArray = function () {
 	return result;
 };
 
-var enumerablePrototype = new IEnumerable();
+var iterablePrototype = new Iterable();
 
 // If this browser does not have an implementation of StopIteration, mock it
 if (!window.StopIteration) {
@@ -139,35 +139,35 @@ if (!window.StopIteration) {
 }
 
 /**
- * This class is an {@link IEnumerable} returned by {@link Array#toEnumerable} and represents an IEnumerable backed by the
+ * This class is an {@link Iterable} returned by {@link Array#toIterable} and represents an Iterable backed by the
  * elements of that array.
  */
-var ArrayEnumerable = function (array) {
+var ArrayIterable = function (array) {
 	this.__iterator__ = function () {
 		return Iterator(array);
 	};
 };
-ArrayEnumerable.prototype = enumerablePrototype;
+ArrayIterable.prototype = iterablePrototype;
 
 /**
- * @return An {@link IEnumerable} backed by this Array
+ * @return An {@link Iterable} backed by this Array
  */
-Array.prototype.toEnumerable = function () {
-	return new ArrayEnumerable(this);
+Array.prototype.toIterable = function () {
+	return new ArrayIterable(this);
 };
 
 /**
- * An {@link IEnumerable} returned from {@link IEnumerable#map}.
+ * An {@link Iterable} returned from {@link Iterable#map}.
  * 
- * @param previous The underlying {@link IEnumerable}
+ * @param previous The underlying {@link Iterable}
  * @param transform The transform function (element) -> (transformedElement)
  */
-var SelectEnumerable = function (previous, transform) {
+var SelectIterable = function (previous, transform) {
 	this.__iterator__ = function () {
 		return new SelectIterator(Iterator(previous), transform);
 	};
 };
-SelectEnumerable.prototype = enumerablePrototype;
+SelectIterable.prototype = iterablePrototype;
 
 var SelectIterator = function (previous, transform) {
 	var currentIndex = 0;
@@ -180,21 +180,21 @@ var SelectIterator = function (previous, transform) {
 SelectIterator.prototype = iteratorPrototype;
 
 /**
- * An {@link IEnumerable} returned from {@link IEnumerable#filter}.
+ * An {@link Iterable} returned from {@link Iterable#filter}.
  * 
- * @param previous The underlying {@link IEnumerable}
+ * @param previous The underlying {@link Iterable}
  * @param filter The filter function (element) -> (Boolean)
  */
-var WhereEnumerable = function (previous, filter) {
+var WhereIterable = function (previous, filter) {
 	this.__iterator__ = function () {
 		return new WhereIterator(Iterator(previous), filter);
 	};
 };
-WhereEnumerable.prototype = enumerablePrototype;
+WhereIterable.prototype = iterablePrototype;
 
 var WhereIterator = function (previous, filter) {
 	this.next = function () {
-		// Loop to find the next element from the underlying IEnumerable which passes the filter and return it
+		// Loop to find the next element from the underlying Iterable which passes the filter and return it
 		var result;
 		do {
 			result = previous.next();
@@ -205,17 +205,17 @@ var WhereIterator = function (previous, filter) {
 WhereIterator.prototype = iteratorPrototype;
 
 /**
- * An {@link IEnumerable} returned from {@link IEnumerable#takeWhile}.
+ * An {@link Iterable} returned from {@link Iterable#takeWhile}.
  * 
- * @param previous The underlying {@link IEnumerable}
+ * @param previous The underlying {@link Iterable}
  * @param filter The filter function (element) -> (Boolean)
  */
-var TakeWhileEnumerable = function (previous, filter) {
+var TakeWhileIterable = function (previous, filter) {
 	this.__iterator__ = function () {
 		return new TakeWhileIterator(Iterator(previous), filter);
 	};
 };
-TakeWhileEnumerable.prototype = enumerablePrototype;
+TakeWhileIterable.prototype = iterablePrototype;
 
 var TakeWhileIterator = function (previous, filter) {
 	// Set to true when an element not matching the filter is found
@@ -226,7 +226,7 @@ var TakeWhileIterator = function (previous, filter) {
 
 		// If we haven't already found the end in a previous call to next()
 		if (!foundEnd) {
-			// Get the next element from the underlying IEnumerable and see if we've found the end now
+			// Get the next element from the underlying Iterable and see if we've found the end now
 			result = previous.next();
 			foundEnd = !filter.call(this, result);
 		}
@@ -244,17 +244,17 @@ var TakeWhileIterator = function (previous, filter) {
 TakeWhileIterator.prototype = iteratorPrototype;
 
 /**
- * An {@link IEnumerable} returned from {@link IEnumerable#skipWhile}.
+ * An {@link Iterable} returned from {@link Iterable#skipWhile}.
  * 
- * @param previous The underlying {@link IEnumerable}
+ * @param previous The underlying {@link Iterable}
  * @param filter The filter function (element) -> (Boolean)
  */
-var SkipWhileEnumerable = function (previous, filter) {
+var SkipWhileIterable = function (previous, filter) {
 	this.__iterator__ = function () {
 		return new SkipWhileIterator(Iterator(previous), filter);
 	};
 };
-SkipWhileEnumerable.prototype = enumerablePrototype;
+SkipWhileIterable.prototype = iterablePrototype;
 
 var SkipWhileIterator = function (previous, filter) {
 	// Set to true when an element matching the filter is found

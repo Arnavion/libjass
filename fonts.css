@@ -35,12 +35,12 @@
 }
 
 @font-face {
-	font-family: "Profile-Medium";
+	font-family: "Profile";
 	src: url("fonts/Profile-Medium.otf");
 }
 
 @font-face {
-	font-family: "Profile-Regular";
+	font-family: "Profile";
 	src: url("fonts/Profile-Regular.otf");
 }
 
