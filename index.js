@@ -23,12 +23,13 @@ addEventListener("DOMContentLoaded", function () {
 	var video = document.querySelector("#video");
 
 	var videoMetadataLoaded = false;
-	var parserLoaded = false;
-	var rawASS;
-	var ass;
+	var ass = null;
 
-	var onVideo_Parser_SubsLoaded = function () {
-		if (videoMetadataLoaded && parserLoaded && ass) {
+	var parser = null;
+	var rawASS = null;
+
+	var testVideoAndASSLoaded = function () {
+		if (videoMetadataLoaded && ass) {
 			var videoWidth = video.videoWidth;
 			var videoHeight = video.videoHeight;
 			document.body.style.width = video.style.width = videoWidth + "px";
@@ -144,26 +145,24 @@ addEventListener("DOMContentLoaded", function () {
 	if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
 		video.addEventListener("loadedmetadata", function () {
 			videoMetadataLoaded = true;
-			onVideo_Parser_SubsLoaded();
+			testVideoAndASSLoaded();
 		}, false);
 	}
 	else {
 		videoMetadataLoaded = true;
-		onVideo_Parser_SubsLoaded();
+		testVideoAndASSLoaded();
 	}
 
 	var parserRequest = new XMLHttpRequest();
 	parserRequest.open("GET", "ass.pegjs", true);
 	parserRequest.addEventListener("readystatechange", function () {
 		if (parserRequest.readyState === XMLHttpRequest.DONE) {
-			createDialogueParser(parserRequest.responseText);
-			parserLoaded = true;
+			parser = new Dialogue.Parser(parserRequest.responseText);
 
 			if (rawASS) {
-				ass = parseASS(rawASS);
+				ass = ASS.parse(rawASS, parser);
+				testVideoAndASSLoaded();
 			}
-
-			onVideo_Parser_SubsLoaded();
 		}
 	}, false);
 	parserRequest.send(null);
@@ -174,12 +173,11 @@ addEventListener("DOMContentLoaded", function () {
 		if (subsRequest.readyState === XMLHttpRequest.DONE) {
 			rawASS = subsRequest.responseText;
 
-			if (parserLoaded) {
-				ass = parseASS(rawASS);
+			if (parser) {
+				ass = ASS.parse(rawASS, parser);
+				testVideoAndASSLoaded();
 			}
-
-			onVideo_Parser_SubsLoaded();
 		}
 	}, false);
-	subsRequest.send();
+	subsRequest.send(null);
 }, false);

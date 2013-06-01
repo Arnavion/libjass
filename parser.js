@@ -20,9 +20,11 @@ var ASS = function (info, styles, dialogues) {
 		dialogue.ass = this;
 	}, this);
 
-	Object.defineProperty(this, "info", { value: info });
-	Object.defineProperty(this, "styles", { value: styles });
-	Object.defineProperty(this, "dialogues", { value: dialogues });
+	Object.defineProperties(this, {
+		info: { value: info },
+		styles: { value: styles },
+		dialogues: { value: dialogues }
+	});
 };
 
 /**
@@ -47,10 +49,12 @@ var Info = function (playResX, playResY) {
 		scaleY = videoHeight / playResY;
 	};
 
-	Object.defineProperty(this, "scaleX", { get: function () { return scaleX; } });
-	Object.defineProperty(this, "scaleY", { get: function () { return scaleY; } });
-	Object.defineProperty(this, "dpi", { writable: true });
-	Object.defineProperty(this, "ass", { writable: true });
+	Object.defineProperties(this, {
+		scaleX: { get: function () { return scaleX; } },
+		scaleY: { get: function () { return scaleY; } },
+		dpi: { writable: true },
+		ass: { writable: true }
+	});
 };
 
 /**
@@ -73,25 +77,27 @@ var Info = function (playResX, playResY) {
  * @param marginVertical The vertical margin
  */
 var Style = function (name, italic, bold, underline, strikethrough, outlineWidth, fontName, fontSize, primaryColor, outlineColor, alignment, marginLeft, marginRight, marginVertical) {
-	Object.defineProperty(this, "name", { value: name });
-	Object.defineProperty(this, "italic", { value: italic });
-	Object.defineProperty(this, "bold", { value: bold });
-	Object.defineProperty(this, "underline", { value: underline });
-	Object.defineProperty(this, "strikethrough", { value: strikethrough });
-	Object.defineProperty(this, "outlineWidth", { value: outlineWidth });
-	Object.defineProperty(this, "fontName", { value: fontName });
-	Object.defineProperty(this, "fontSize", { value: fontSize });
-	Object.defineProperty(this, "primaryColor", { value: primaryColor });
-	Object.defineProperty(this, "outlineColor", { value: outlineColor });
-	Object.defineProperty(this, "alignment", { value: alignment });
-	Object.defineProperty(this, "marginLeft", { value: marginLeft });
-	Object.defineProperty(this, "marginRight", { value: marginRight });
-	Object.defineProperty(this, "marginVertical", { value: marginVertical });
-	Object.defineProperty(this, "ass", { writable: true });
+	Object.defineProperties(this, {
+		name: { value: name },
+		italic: { value: italic },
+		bold: { value: bold },
+		underline: { value: underline },
+		strikethrough: { value: strikethrough },
+		outlineWidth: { value: outlineWidth },
+		fontName: { value: fontName },
+		fontSize: { value: fontSize },
+		primaryColor: { value: primaryColor },
+		outlineColor: { value: outlineColor },
+		alignment: { value: alignment },
+		marginLeft: { value: marginLeft },
+		marginRight: { value: marginRight },
+		marginVertical: { value: marginVertical },
+		ass: { writable: true }
+	});
 };
 
 // Parses the raw ASS string into an ASS object
-var parseASS = function (rawASS) {
+ASS.parse = function (rawASS, dialogueParser) {
 	var styles = [];
 	var dialogues = [];
 
@@ -212,7 +218,8 @@ var parseASS = function (rawASS) {
 		// Read all the dialogues and add them to the dialogues array
 		if (line.startsWith("Dialogue:")) {
 			var lineParts = line.substring("Dialogue:".length).trimLeft().split(",");
-			dialogues = dialogues.concat(createDialogues(
+			dialogues = dialogues.concat(Dialogue.create(
+				dialogueParser,
 				lineParts.slice(textIndex).join(","),
 				styles.filter(function (aStyle) { return aStyle.name === lineParts[styleIndex]; })[0],
 				lineParts[startIndex],
