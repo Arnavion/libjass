@@ -15,61 +15,23 @@ var createDialogues;
 		};
 	};
 
-	Dialogue = function (textOrParts, style, start, end, layer) {
-		if (start.constructor === String) {
-			start = start.toTime();
-		}
-
-		if (end.constructor === String) {
-			end = end.toTime();
-		}
-
-		layer = ((layer >= 0) ? layer : 0);
-
-		var m_parts =
-			(textOrParts.constructor === String) ?
-				parseDialogue(textOrParts).reduce(function (previous, current) {
-					var result;
-	
-					if (current instanceof Tags.Text && previous[previous.length - 1] instanceof Tags.Text) {
-						previous[previous.length - 1].value += current.value;
-						result = previous;
-					}
-					else {
-						result = previous.concat(current);
-					}
-
-					return result;
-				}, []) :
-				textOrParts;
-
-		var childDialogueTextParts;
-		var oldEnd;
-		m_parts.forEach(function (part, index) {
-			if (part instanceof Tags.Fade && part.start !== 0 && part.end !== 0) {
-				childDialogueTextParts = m_parts.slice(0);
-				childDialogueTextParts[index] = new Tags.Fade(0, part.end);
-				oldEnd = end;
-				end -= part.end;
-				part.end = 0;
-			}
-		});
-		if (childDialogueTextParts) {
-			this.childDialogue = new Dialogue(childDialogueTextParts, style, end, oldEnd, layer);
-		}
-
+	Dialogue = function (parts, style, start, end, layer) {
 		var m_alignment = style.alignment;
 
 		var m_ass;
 
-		Object.defineProperty(this, "start", { value: start });
-		Object.defineProperty(this, "end", { value: end });
-		Object.defineProperty(this, "alignment", { value: m_alignment });
-		Object.defineProperty(this, "layer", { value: layer });
-		Object.defineProperty(this, "parts", { value: m_parts });
+		Object.defineProperties(this, {
+			start: { value: start },
+			end: { value: end },
+			alignment: { value: m_alignment },
+			layer: { value: layer },
+			parts: { value: parts },
+			ass: { get: function () { return m_ass }, set: function (value) { m_ass = value; } }
+		});
 
 		var m_sub = null;
-		Object.defineProperty(this, "sub", { get: function () { return m_sub; }, set: function (sub) {
+
+		this.drawTo = function (sub) {
 			m_sub = sub;
 
 			// Magic happens here (TODO: styling)
@@ -160,7 +122,7 @@ var createDialogues;
 
 				var spanStylesChanged = false;
 
-				m_parts.forEach(function (part) {
+				parts.forEach(function (part) {
 					if (part instanceof Tags.Italic) {
 						var newItalic = part.value;
 						if (currentItalic !== newItalic) {
@@ -287,15 +249,15 @@ var createDialogues;
 							var newStyle = m_ass.styles.filter(function (style) { return style.name === part.value; })[0];
 							currentItalic = newStyle.italic;
 							switch (newStyle.bold) {
-							case true:
-								currentBold = "bold";
-								break;
-							case false:
-								currentBold = "";
-								break;
-							default :
-								currentBold = newStyle.bold.value;
-								break;
+								case true:
+									currentBold = "bold";
+									break;
+								case false:
+									currentBold = "";
+									break;
+								default:
+									currentBold = newStyle.bold.value;
+									break;
 							}
 							currentUnderline = newStyle.underline;
 							currentStrikethrough = newStyle.strikethrough;
@@ -373,22 +335,53 @@ var createDialogues;
 					currentSpanContainer.style.webkitPerspective = "400";
 				}
 			}
-		} });
-		Object.defineProperty(this, "ass", { get: function () { return m_ass; }, set: function (ass) {
-			m_ass = ass;
-		} });
+		};
+
+		this.erase = function () { m_sub = null; };
+
+		this.isDrawn = function () { return m_sub !== null; };
 
 		this.toString = function () {
-			return "[" + start + " - " + end + "] " + m_parts.join("");
+			return "[" + start + " - " + end + "] " + parts.join("");
 		};
 	};
 
 	createDialogues = function (text, style, start, end, layer) {
-		var result = [new Dialogue(text, style, start, end, layer)];
+		start = start.toTime();
+		end = end.toTime();
 
-		while (result[result.length - 1].childDialogue) {
-			result.push(result[result.length - 1].childDialogue);
-			result[result.length - 2].childDialogue = undefined;
+		layer = ((layer >= 0) ? layer : 0);
+
+		var parts =
+			parseDialogue(text).reduce(function (previous, current) {
+				var result;
+
+				if (current instanceof Tags.Text && previous[previous.length - 1] instanceof Tags.Text) {
+					previous[previous.length - 1].value += current.value;
+					result = previous;
+				}
+				else {
+					result = previous.concat(current);
+				}
+
+				return result;
+			}, []);
+
+		var secondDialogueParts;
+		var oldEnd;
+		parts.forEach(function (part, index) {
+			if (part instanceof Tags.Fade && part.start !== 0 && part.end !== 0) {
+				secondDialogueParts = parts.slice(0);
+				secondDialogueParts[index] = new Tags.Fade(0, part.end);
+				oldEnd = end;
+				end -= part.end;
+				part.end = 0;
+			}
+		});
+
+		var result = [new Dialogue(parts, style, start, end, layer)];
+		if (secondDialogueParts) {
+			result.push(new Dialogue(secondDialogueParts, style, end, oldEnd, layer));
 		}
 
 		return result;

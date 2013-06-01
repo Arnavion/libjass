@@ -9,14 +9,14 @@ addEventListener("DOMContentLoaded", function () {
 		createSubDiv = function (dialogue) {
 			var result = defaultSubDiv.cloneNode(true);
 			result.dialogue = dialogue;
-			dialogue.sub = result;
+			dialogue.drawTo(result);
 			wrappers[dialogue.layer][dialogue.alignment].appendChild(result);
 			return result;
 		};
 
 		defaultSubDiv.constructor.prototype.remove = function () {
 			this.parentElement.removeChild(this);
-			this.dialogue.sub = null;
+			this.dialogue.erase();
 		};
 	})();
 
@@ -114,7 +114,7 @@ addEventListener("DOMContentLoaded", function () {
 			}).takeWhile(function (dialogue) {
 				return dialogue.start <= currentTime;
 			}).filter(function (dialogue) {
-				return dialogue.end >= currentTime && dialogue.sub === null;
+				return dialogue.end >= currentTime && !dialogue.isDrawn();
 			}).map(function (dialogue) {
 				return createSubDiv(dialogue);
 			});
