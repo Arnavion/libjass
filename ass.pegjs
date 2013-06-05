@@ -41,76 +41,76 @@ text
 	=	value:. { return new Tags.Text(value); }
 
 italicTag
-	=	"i" value:enableDisable? { return new Tags.Italic(value); }
+	=	"i" value:enableDisable? { return new Tags.Italic(value || null); }
 
 boldTag
-	=	"b" value:(decimal)? { return new Tags.Bold(value); }
+	=	"b" value:(decimal)? { switch (value) { case "1": return true; case "0": return false; case "": return null; default: return parseFloat(value); } }
 
 underlineTag
-	=	"u" value:enableDisable? { return new Tags.Underline(value); }
+	=	"u" value:enableDisable? { return new Tags.Underline(value || null); }
 
 strikeoutTag
-	=	"s" value:enableDisable? { return new Tags.Strikeout(value); }
+	=	"s" value:enableDisable? { return new Tags.Strikeout(value || null); }
 
 borderTag
-	=	"bord" value:decimal? { return new Tags.Border(value); }
+	=	"bord" value:decimal? { return new Tags.Border((value !== "") ? value : null); }
 
 blurTag
-	=	"blur" value:decimal? { return new Tags.Blur(value); }
+	=	"blur" value:decimal? { return new Tags.Blur((value !== "") ? value : null); }
 
 fontNameTag
-	=	"fn" value:[^\\}]* { return new Tags.FontName(value); }
+	=	"fn" value:[^\\}]* { return new Tags.FontName((value !== "") ? value : null); }
 
 fontSizeTag
-	=	"fs" value:decimal? { return new Tags.FontSize(value); }
+	=	"fs" value:decimal? { return new Tags.FontSize((value !== "") ? value : null); }
 
 frxTag
-	=	"frx" value:decimal? { return new Tags.Frx(value); }
+	=	"frx" value:decimal? { return new Tags.Frx((value !== "") ? value : null); }
 
 fryTag
-	=	"fry" value:decimal? { return new Tags.Fry(value); }
+	=	"fry" value:decimal? { return new Tags.Fry((value !== "") ? value : null); }
 
 frzTag
-	=	"frz" value:decimal? { return new Tags.Frz(value); }
+	=	"frz" value:decimal? { return new Tags.Frz((value !== "") ? value : null); }
 
 faxTag
-	=	"fax" value:decimal? { return new Tags.Fax(value); }
+	=	"fax" value:decimal? { return new Tags.Fax((value !== "") ? value : null); }
 
 fayTag
-	=	"fay" value:decimal? { return new Tags.Fay(value); }
+	=	"fay" value:decimal? { return new Tags.Fay((value !== "") ? value : null); }
 
 primaryColorTag
-	=	"1"? "c" value:color? { return new Tags.PrimaryColor(value); }
+	=	"1"? "c" value:color? { return new Tags.PrimaryColor((value !== "") ? value : null); }
 
 outlineColorTag
-	=	"3c" value:color? { return new Tags.OutlineColor(value); }
+	=	"3c" value:color? { return new Tags.OutlineColor((value !== "") ? value : null); }
 
 alphaTag
-	=	"alpha" value:alpha? { return new Tags.Alpha(value); }
+	=	"alpha" value:alpha? { return new Tags.Alpha((value !== "") ? value : null); }
 
 primaryAlphaTag
-	=	"1a" value:alpha? { return new Tags.PrimaryAlpha(value); }
+	=	"1a" value:alpha? { return new Tags.PrimaryAlpha((value !== "") ? value : null); }
 
 outlineAlphaTag
-	=	"3a" value:alpha? { return new Tags.OutlineAlpha(value); }
+	=	"3a" value:alpha? { return new Tags.OutlineAlpha((value !== "") ? value : null); }
 
 alignmentTag
-	=	"an" value:[1-9]? { return new Tags.Alignment(value); }
+	=	"an" value:[1-9]? { return new Tags.Alignment((value !== "") ? parseInt(value) : null); }
 
 resetTag
-	=	"r" value:[^\\}]* { return new Tags.Reset(value); }
+	=	"r" value:[^\\}]* { return new Tags.Reset((value !== "") ? value : null); }
 
 posTag
 	=	"pos(" x:decimal "," y:decimal ")" { return new Tags.Pos(x, y); }
 
 fadeTag
-	=	"fad(" start:decimal "," end:decimal ")" { return new Tags.Fade((parseFloat(start) || 0) / 1000, (parseFloat(end) || 0) / 1000); }
+	=	"fad(" start:decimal "," end:decimal ")" { start = parseFloat(start); return new Tags.Fade(parseFloat(start) / 1000, parseFloat(end) / 1000); }
 
 decimal
-	=	value:([0-9]+ ("." [0-9]+)?) { return value[0].join("") + (value[1][0] || "") + (value[1][1] && value[1][1].join("") || ""); }
+	=	sign:"-"? characteristic:[0-9]+ mantissa:("." [0-9]+)? { return parseFloat(sign + characteristic.join("") + (mantissa[0] || "") + (mantissa[1] && mantissa[1].join("") || "")); }
 
 enableDisable
-	=	"0" / "1"
+	=	value:("0" / "1") { return parseInt(value); }
 
 hex
 	=	[0-9a-fA-F]

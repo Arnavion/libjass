@@ -41,7 +41,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 		m_sub.style.marginTop = m_sub.style.marginBottom = (scaleX * style.marginVertical) + "px";
 
 		var currentItalic = style.italic;
-		var currentBold = style.bold ? "bold" : "";
+		var currentBold = style.bold;
 		var currentUnderline = style.underline;
 		var currentStrikethrough = style.strikethrough;
 
@@ -84,7 +84,10 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				currentSpan.style.fontStyle = "italic";
 			}
 
-			if (currentBold) {
+			if (currentBold === true) {
+				currentSpan.style.fontWeight = "bold";
+			}
+			else if (currentBold !== false) {
 				currentSpan.style.fontWeight = currentBold;
 			}
 
@@ -102,7 +105,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 			currentSpan.style.fontSize = ((72 / dpi) * scaleY * currentFontSize) + "px";
 			currentSpan.style.lineHeight = (scaleY * currentFontSize) + "px";
 
-			currentSpan.style.color = currentPrimaryColor;
+			currentSpan.style.color = currentPrimaryColor.toRGBA();
 
 			var blurRadius = scaleX * currentOutlineWidth;
 			if (currentBlur > 0) {
@@ -110,7 +113,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 			}
 			currentSpan.style.textShadow =
 				[[1, 1], [1, -1], [-1, 1], [-1, -1]].map(function (pair) {
-					return pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + currentOutlineColor;
+					return pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + currentOutlineColor.toRGBA();
 				}).join(", ");
 		};
 		updateSpanStyles();
@@ -127,12 +130,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 			}
 
 			else if (part instanceof Tags.Bold) {
-				var newBold;
-				switch (part.value) {
-					case true: newBold = "bold"; break;
-					case false: newBold = ""; break;
-					default: newBold = part.value; break;
-				}
+				var newBold = part.value;
 				if (currentBold !== newBold) {
 					currentBold = newBold;
 					spanStylesChanged = true;
@@ -208,7 +206,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 			}
 
 			else if (part instanceof Tags.PrimaryColor) {
-				var newPrimaryColor = "#" + part.value;
+				var newPrimaryColor = part.value;
 				if (currentPrimaryColor !== newPrimaryColor) {
 					currentPrimaryColor = newPrimaryColor;
 					spanStylesChanged = true;
@@ -216,7 +214,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 			}
 
 			else if (part instanceof Tags.OutlineColor) {
-				var newOutlineColor = "#" + part.value;
+				var newOutlineColor = part.value;
 				if (currentOutlineColor !== newOutlineColor) {
 					currentOutlineColor = newOutlineColor;
 					spanStylesChanged = true;
@@ -243,17 +241,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				else {
 					var newStyle = this.ass.styles.filter(function (style) { return style.name === part.value; })[0];
 					currentItalic = newStyle.italic;
-					switch (newStyle.bold) {
-						case true:
-							currentBold = "bold";
-							break;
-						case false:
-							currentBold = "";
-							break;
-						default:
-							currentBold = newStyle.bold.value;
-							break;
-					}
+					currentBold = newStyle.bold;
 					currentUnderline = newStyle.underline;
 					currentStrikethrough = newStyle.strikethrough;
 					currentOutlineWidth = newStyle.outlineWidth;
@@ -463,38 +451,38 @@ var Tags = new function () {
 		}
 	});
 	this.Bold = this.Tag(function (value) {
-		if (value === "1") {
+		if (value === 1) {
 			return true;
 		}
-		else if (value === "0") {
+		else if (value === 0) {
 			return false;
 		}
 		else {
-			return parseFloat(value);
+			return value;
 		}
 	});
 	this.Underline = this.Tag(function (value) {
-		if (value === "1") {
+		if (value === 1) {
 			return true;
 		}
-		else if (value === "0") {
+		else if (value === 0) {
 			return false;
 		}
 	});
 	this.Strikeout = this.Tag();
 
-	this.Border = this.Tag(parseFloat);
+	this.Border = this.Tag();
 
-	this.Blur = this.Tag(parseFloat);
+	this.Blur = this.Tag();
 
 	this.FontName = this.Tag();
-	this.FontSize = this.Tag(parseFloat);
+	this.FontSize = this.Tag();
 
-	this.Frx = this.Tag(parseFloat);
-	this.Fry = this.Tag(parseFloat);
-	this.Frz = this.Tag(parseFloat);
-	this.Fax = this.Tag(parseFloat);
-	this.Fay = this.Tag(parseFloat);
+	this.Frx = this.Tag();
+	this.Fry = this.Tag();
+	this.Frz = this.Tag();
+	this.Fax = this.Tag();
+	this.Fay = this.Tag();
 
 	this.PrimaryColor = this.Tag();
 	this.OutlineColor = this.Tag();
@@ -503,13 +491,13 @@ var Tags = new function () {
 	this.PrimaryAlpha = this.Tag();
 	this.OutlineAlpha = this.Tag();
 
-	this.Alignment = this.Tag(parseInt);
+	this.Alignment = this.Tag();
 
 	this.Reset = this.Tag();
 
 	this.Pos = function (x, y) {
-		this.x = parseFloat(x);
-		this.y = parseFloat(y);
+		this.x = x;
+		this.y = y;
 	};
 
 	this.Fade = function (start, end) {
