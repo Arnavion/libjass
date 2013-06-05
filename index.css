@@ -55,3 +55,8 @@ body, #video {
 	height: 1in;
 	visibility: hidden;
 }
+
+#subs-wrapper.paused * {
+	animation-play-state: paused;
+	-webkit-animation-play-state: paused;
+}

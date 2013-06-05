@@ -141,6 +141,14 @@ addEventListener("DOMContentLoaded", function () {
 				});
 				currentSubs = [];
 			});
+
+			video.addEventListener("pause", function () {
+				subsWrapper.className = "paused";
+			}, false);
+
+			video.addEventListener("playing", function () {
+				subsWrapper.className = "";
+			}, false);
 		};
 	}
 
