@@ -15,8 +15,10 @@ addEventListener("DOMContentLoaded", function () {
 		};
 
 		defaultSubDiv.constructor.prototype.remove = function () {
-			this.parentElement.removeChild(this);
-			this.dialogue.erase();
+			if (this.parentElement !== null) {
+				this.parentElement.removeChild(this);
+				this.dialogue.erase();
+			}
 		};
 	})();
 

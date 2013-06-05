@@ -25,12 +25,17 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 			var scaleY = info.scaleY;
 			var dpi = info.dpi;
 
+			var animationEndCallback = m_sub.remove.bind(m_sub);
+
 			m_sub.style.animationName = "dialogue-" + id;
 			m_sub.style.animationDuration = (end - start) + "s";
 			m_sub.style.animationDelay = (start - currentTime) + "s";
+			m_sub.addEventListener("animationend", animationEndCallback, false);
+
 			m_sub.style.webkitAnimationName = "dialogue-" + id;
 			m_sub.style.webkitAnimationDuration = (end - start) + "s";
 			m_sub.style.webkitAnimationDelay = (start - currentTime) + "s";
+			m_sub.addEventListener("webkitAnimationEnd", animationEndCallback, false);
 
 			m_sub.style.marginLeft = (scaleX * style.marginLeft) + "px";
 			m_sub.style.marginRight = (scaleX * style.marginRight) + "px";
