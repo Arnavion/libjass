@@ -41,16 +41,16 @@ text
 	=	value:. { return new Tags.Text(value); }
 
 italicTag
-	=	"i" value:enableDisable? { return new Tags.Italic(value || null); }
+	=	"i" value:enableDisable? { return new Tags.Italic((value !== "") ? value : null); }
 
 boldTag
 	=	"b" value:(decimal)? { switch (value) { case "1": return true; case "0": return false; case "": return null; default: return parseFloat(value); } }
 
 underlineTag
-	=	"u" value:enableDisable? { return new Tags.Underline(value || null); }
+	=	"u" value:enableDisable? { return new Tags.Underline((value !== "") ? value : null); }
 
 strikeoutTag
-	=	"s" value:enableDisable? { return new Tags.Strikeout(value || null); }
+	=	"s" value:enableDisable? { return new Tags.Strikeout((value !== "") ? value : null); }
 
 borderTag
 	=	"bord" value:decimal? { return new Tags.Border((value !== "") ? value : null); }
