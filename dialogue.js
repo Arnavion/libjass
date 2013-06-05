@@ -15,7 +15,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 
 	var m_sub = null;
 
-	this.drawTo = function (sub) {
+	this.drawTo = function (sub, currentTime) {
 		m_sub = sub;
 
 		// Magic happens here (TODO: styling)
@@ -27,8 +27,10 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 
 			m_sub.style.animationName = "dialogue-" + id;
 			m_sub.style.animationDuration = (end - start) + "s";
+			m_sub.style.animationDelay = (start - currentTime) + "s";
 			m_sub.style.webkitAnimationName = "dialogue-" + id;
 			m_sub.style.webkitAnimationDuration = (end - start) + "s";
+			m_sub.style.webkitAnimationDelay = (start - currentTime) + "s";
 
 			m_sub.style.marginLeft = (scaleX * style.marginLeft) + "px";
 			m_sub.style.marginRight = (scaleX * style.marginRight) + "px";

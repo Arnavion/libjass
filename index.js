@@ -6,10 +6,10 @@ addEventListener("DOMContentLoaded", function () {
 	(function () {
 		var defaultSubDiv = document.createElement("div");
 
-		createSubDiv = function (dialogue) {
+		createSubDiv = function (dialogue, currentTime) {
 			var result = defaultSubDiv.cloneNode(true);
 			result.dialogue = dialogue;
-			dialogue.drawTo(result);
+			dialogue.drawTo(result, currentTime);
 			wrappers[dialogue.layer][dialogue.alignment].appendChild(result);
 			return result;
 		};
@@ -117,7 +117,7 @@ addEventListener("DOMContentLoaded", function () {
 			}).filter(function (dialogue) {
 				return dialogue.end >= currentTime && !dialogue.isDrawn();
 			}).map(function (dialogue) {
-				return createSubDiv(dialogue);
+				return createSubDiv(dialogue, currentTime);
 			});
 			video.addEventListener("timeupdate", function () {
 				currentTime = video.currentTime;
