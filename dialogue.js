@@ -1,9 +1,10 @@
 "use strict";
 
-var Dialogue = function (parts, style, start, end, layer) {
+var Dialogue = function (id, parts, style, start, end, layer) {
 	var m_alignment = style.alignment;
 
 	Object.defineProperties(this, {
+		id: { value: id },
 		start: { value: start },
 		end: { value: end },
 		alignment: { value: m_alignment },
@@ -23,6 +24,11 @@ var Dialogue = function (parts, style, start, end, layer) {
 			var scaleX = info.scaleX;
 			var scaleY = info.scaleY;
 			var dpi = info.dpi;
+
+			m_sub.style.animationName = "dialogue-" + id;
+			m_sub.style.animationDuration = (end - start) + "s";
+			m_sub.style.webkitAnimationName = "dialogue-" + id;
+			m_sub.style.webkitAnimationDuration = (end - start) + "s";
 
 			m_sub.style.marginLeft = (scaleX * style.marginLeft) + "px";
 			m_sub.style.marginRight = (scaleX * style.marginRight) + "px";
@@ -106,7 +112,7 @@ var Dialogue = function (parts, style, start, end, layer) {
 			var spanStylesChanged = false;
 
 			parts.forEach(function (part) {
-				if (part instanceof Tags.Italic) {
+				if (part.constructor === Tags.Italic) {
 					var newItalic = part.value;
 					if (currentItalic !== newItalic) {
 						currentItalic = newItalic;
@@ -114,7 +120,7 @@ var Dialogue = function (parts, style, start, end, layer) {
 					}
 				}
 
-				else if (part instanceof Tags.Bold) {
+				else if (part.constructor === Tags.Bold) {
 					var newBold;
 					switch (part.value) {
 						case true: newBold = "bold"; break;
@@ -127,7 +133,7 @@ var Dialogue = function (parts, style, start, end, layer) {
 					}
 				}
 
-				else if (part instanceof Tags.Underline) {
+				else if (part.constructor === Tags.Underline) {
 					var newUnderline = part.value;
 					if (newUnderline !== currentUnderline) {
 						currentUnderline = newUnderline;
@@ -135,7 +141,7 @@ var Dialogue = function (parts, style, start, end, layer) {
 					}
 				}
 
-				else if (part instanceof Tags.Strikeout) {
+				else if (part.constructor === Tags.Strikeout) {
 					var newStrikethrough = part.value;
 					if (newStrikethrough !== currentStrikethrough) {
 						currentStrikethrough = newStrikethrough;
@@ -143,7 +149,7 @@ var Dialogue = function (parts, style, start, end, layer) {
 					}
 				}
 
-				else if (part instanceof Tags.Border) {
+				else if (part.constructor === Tags.Border) {
 					var newOutlineWidth = part.value;
 					if (currentOutlineWidth !== newOutlineWidth) {
 						currentOutlineWidth = newOutlineWidth;
@@ -151,7 +157,7 @@ var Dialogue = function (parts, style, start, end, layer) {
 					}
 				}
 
-				else if (part instanceof Tags.Blur) {
+				else if (part.constructor === Tags.Blur) {
 					var newBlur = part.value;
 					if (currentBlur !== newBlur) {
 						currentBlur = newBlur;
@@ -159,7 +165,7 @@ var Dialogue = function (parts, style, start, end, layer) {
 					}
 				}
 
-				else if (part instanceof Tags.FontName) {
+				else if (part.constructor === Tags.FontName) {
 					var newFontName = part.value;
 					if (currentFontName !== newFontName) {
 						currentFontName = newFontName;
@@ -167,7 +173,7 @@ var Dialogue = function (parts, style, start, end, layer) {
 					}
 				}
 
-				else if (part instanceof Tags.FontSize) {
+				else if (part.constructor === Tags.FontSize) {
 					var newFontSize = part.value;
 					if (currentFontSize !== newFontSize) {
 						currentFontSize = newFontSize;
@@ -175,27 +181,27 @@ var Dialogue = function (parts, style, start, end, layer) {
 					}
 				}
 
-				else if (part instanceof Tags.Frx) {
+				else if (part.constructor === Tags.Frx) {
 					transformStyle += " rotateX(" + part.value + "deg)";
 				}
 
-				else if (part instanceof Tags.Fry) {
+				else if (part.constructor === Tags.Fry) {
 					transformStyle += " rotateY(" + part.value + "deg)";
 				}
 
-				else if (part instanceof Tags.Frz) {
+				else if (part.constructor === Tags.Frz) {
 					transformStyle += " rotateZ(" + (-1 * part.value) + "deg)";
 				}
 
-				else if (part instanceof Tags.Fax) {
+				else if (part.constructor === Tags.Fax) {
 					transformStyle += " skewX(" + (45 * part.value) + "deg)";
 				}
 
-				else if (part instanceof Tags.Fay) {
+				else if (part.constructor === Tags.Fay) {
 					transformStyle += " skewY(" + (45 * part.value) + "deg)";
 				}
 
-				else if (part instanceof Tags.PrimaryColor) {
+				else if (part.constructor === Tags.PrimaryColor) {
 					var newPrimaryColor = "#" + part.value;
 					if (currentPrimaryColor !== newPrimaryColor) {
 						currentPrimaryColor = newPrimaryColor;
@@ -203,7 +209,7 @@ var Dialogue = function (parts, style, start, end, layer) {
 					}
 				}
 
-				else if (part instanceof Tags.OutlineColor) {
+				else if (part.constructor === Tags.OutlineColor) {
 					var newOutlineColor = "#" + part.value;
 					if (currentOutlineColor !== newOutlineColor) {
 						currentOutlineColor = newOutlineColor;
@@ -211,11 +217,11 @@ var Dialogue = function (parts, style, start, end, layer) {
 					}
 				}
 
-				else if (part instanceof Tags.Alignment) {
+				else if (part.constructor === Tags.Alignment) {
 					m_alignment = part.value;
 				}
 
-				else if (part instanceof Tags.Reset) {
+				else if (part.constructor === Tags.Reset) {
 					if (part.value === null) {
 						currentItalic = null;
 						currentBold = null;
@@ -253,7 +259,7 @@ var Dialogue = function (parts, style, start, end, layer) {
 					}
 				}
 
-				else if (part instanceof Tags.Pos) {
+				else if (part.constructor === Tags.Pos) {
 					m_sub.style.position = "absolute";
 					m_sub.style.left = (scaleX * part.x) + "px";
 					m_sub.style.top = (scaleY * part.y) + "px";
@@ -269,32 +275,20 @@ var Dialogue = function (parts, style, start, end, layer) {
 					currentSpanContainer = relativeWrapper;
 				}
 
-				else if (part instanceof Tags.Fade) {
-					if (part.start !== 0) {
-						m_sub.style.animationDuration = part.start + "s";
-						m_sub.style.animationName = "fad-in";
-						m_sub.style.webkitAnimationDuration = part.start + "s";
-						m_sub.style.webkitAnimationName = "fad-in";
-					}
-					else if (part.end !== 0) {
-						m_sub.style.animationDuration = part.end + "s";
-						m_sub.style.animationName = "fad-out";
-						m_sub.style.webkitAnimationDuration = part.end + "s";
-						m_sub.style.webkitAnimationName = "fad-out";
-					}
+				else if (part.constructor === Tags.Fade) {
 				}
 
-				else if (part instanceof Tags.NewLine) {
+				else if (part.constructor === Tags.NewLine) {
 					currentSpanContainer.appendChild(document.createElement("br"));
 					createNewSpan = true;
 				}
 
-				else if (part instanceof Tags.HardSpace) {
+				else if (part.constructor === Tags.HardSpace) {
 					currentSpan.appendChild(document.createTextNode("\u00A0"));
 					createNewSpan = true;
 				}
 
-				else if (part instanceof Tags.Text) {
+				else if (part.constructor === Tags.Text) {
 					currentSpan.appendChild(document.createTextNode(part.value));
 					createNewSpan = true;
 				}
@@ -335,46 +329,96 @@ Dialogue.Parser = function (pegjs) {
 	};
 };
 
-Dialogue.create = function (parser, text, style, start, end, layer) {
-	start = start.toTime();
-	end = end.toTime();
+(function () {
+	var lastDialogueId = -1;
 
-	layer = ((layer >= 0) ? layer : 0);
+	var animationStyleNode = null;
 
-	var parts = parser.parse(text);
-	parts = parts.reduce(function (previous, current) {
-		var result;
+	Dialogue.create = function (parser, text, style, start, end, layer) {
+		var id = ++lastDialogueId;
+		start = start.toTime();
+		end = end.toTime();
 
-		if (current instanceof Tags.Text && previous[previous.length - 1] instanceof Tags.Text) {
-			previous[previous.length - 1].value += current.value;
-			result = previous;
+		layer = ((layer >= 0) ? layer : 0);
+
+		var parts = parser.parse(text);
+
+		// Merge consecutive text parts into one part
+		parts = parts.reduce(function (previous, current) {
+			var result;
+
+			if (current.constructor === Tags.Text && previous[previous.length - 1] && previous[previous.length - 1].constructor === Tags.Text) {
+				previous[previous.length - 1].value += current.value;
+				result = previous;
+			}
+			else {
+				result = previous.concat(current);
+			}
+
+			return result;
+		}, []);
+
+		// Create an animation if there is a part that requires it
+
+		var keyframes = {};
+		var addKeyframe = function (step, property, value) {
+			step = (100 * (step - start) / (end - start)) + "%";
+			keyframes[step] = keyframes[step] || {};
+			keyframes[step][property] = value;
+		};
+
+		parts.forEach(function (part) {
+			if (part.constructor === Tags.Fade) {
+				if (part.start !== 0) {
+					addKeyframe(start, "opacity", "0");
+					addKeyframe(start + part.start, "opacity", "1");
+				}
+				if (part.end !== 0) {
+					addKeyframe(end - part.end, "opacity", "1")
+					addKeyframe(end, "opacity", "0");
+				}
+			}
+		});
+
+		var steps = Object.keys(keyframes);
+		if (steps.length > 0) {
+			/*
+			@keyframes fad-out {
+				from {
+					opacity: 1;
+				}
+				to {
+					opacity: 0;
+				}
+			}
+			*/
+
+			var cssText = "";
+			steps.forEach(function (step) {
+				cssText += "\t" + step + " {\n";
+				var properties = keyframes[step];
+				Object.keys(properties).forEach(function (property) {
+					cssText += "\t\t" + property + ": " + properties[property] + ";\n";
+				});
+				cssText += "\t}\n";
+			});
+
+			if (animationStyleNode === null) {
+				var animationStyleElement = document.createElement("style");
+				document.querySelector("head").appendChild(animationStyleElement);
+
+				animationStyleNode = document.createTextNode("");
+				animationStyleElement.appendChild(animationStyleNode);
+			}
+
+			animationStyleNode.textContent += "@keyframes dialogue-" + id + " {\n" + cssText + "}\n\n" + "@-webkit-keyframes dialogue-" + id + " {\n" + cssText + "}\n\n";
 		}
-		else {
-			result = previous.concat(current);
-		}
+
+		var result = new Dialogue(id, parts, style, start, end, layer);
 
 		return result;
-	}, []);
-
-	var secondDialogueParts;
-	var oldEnd;
-	parts.forEach(function (part, index) {
-		if (part instanceof Tags.Fade && part.start !== 0 && part.end !== 0) {
-			secondDialogueParts = parts.slice(0);
-			secondDialogueParts[index] = new Tags.Fade(0, part.end);
-			oldEnd = end;
-			end -= part.end;
-			part.end = 0;
-		}
-	});
-
-	var result = [new Dialogue(parts, style, start, end, layer)];
-	if (secondDialogueParts) {
-		result.push(new Dialogue(secondDialogueParts, style, end, oldEnd, layer));
-	}
-
-	return result;
-};
+	};
+})();
 
 var Tags = new function () {
 	this.Comment = function (value) {
