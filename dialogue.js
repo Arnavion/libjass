@@ -118,7 +118,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 		var spanStylesChanged = false;
 
 		parts.forEach(function (part) {
-			if (part.constructor === Tags.Italic) {
+			if (part instanceof Tags.Italic) {
 				var newItalic = part.value;
 				if (currentItalic !== newItalic) {
 					currentItalic = newItalic;
@@ -126,7 +126,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part.constructor === Tags.Bold) {
+			else if (part instanceof Tags.Bold) {
 				var newBold;
 				switch (part.value) {
 					case true: newBold = "bold"; break;
@@ -139,7 +139,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part.constructor === Tags.Underline) {
+			else if (part instanceof Tags.Underline) {
 				var newUnderline = part.value;
 				if (newUnderline !== currentUnderline) {
 					currentUnderline = newUnderline;
@@ -147,7 +147,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part.constructor === Tags.Strikeout) {
+			else if (part instanceof Tags.Strikeout) {
 				var newStrikethrough = part.value;
 				if (newStrikethrough !== currentStrikethrough) {
 					currentStrikethrough = newStrikethrough;
@@ -155,7 +155,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part.constructor === Tags.Border) {
+			else if (part instanceof Tags.Border) {
 				var newOutlineWidth = part.value;
 				if (currentOutlineWidth !== newOutlineWidth) {
 					currentOutlineWidth = newOutlineWidth;
@@ -163,7 +163,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part.constructor === Tags.Blur) {
+			else if (part instanceof Tags.Blur) {
 				var newBlur = part.value;
 				if (currentBlur !== newBlur) {
 					currentBlur = newBlur;
@@ -171,7 +171,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part.constructor === Tags.FontName) {
+			else if (part instanceof Tags.FontName) {
 				var newFontName = part.value;
 				if (currentFontName !== newFontName) {
 					currentFontName = newFontName;
@@ -179,7 +179,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part.constructor === Tags.FontSize) {
+			else if (part instanceof Tags.FontSize) {
 				var newFontSize = part.value;
 				if (currentFontSize !== newFontSize) {
 					currentFontSize = newFontSize;
@@ -187,27 +187,27 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part.constructor === Tags.Frx) {
+			else if (part instanceof Tags.Frx) {
 				transformStyle += " rotateX(" + part.value + "deg)";
 			}
 
-			else if (part.constructor === Tags.Fry) {
+			else if (part instanceof Tags.Fry) {
 				transformStyle += " rotateY(" + part.value + "deg)";
 			}
 
-			else if (part.constructor === Tags.Frz) {
+			else if (part instanceof Tags.Frz) {
 				transformStyle += " rotateZ(" + (-1 * part.value) + "deg)";
 			}
 
-			else if (part.constructor === Tags.Fax) {
+			else if (part instanceof Tags.Fax) {
 				transformStyle += " skewX(" + (45 * part.value) + "deg)";
 			}
 
-			else if (part.constructor === Tags.Fay) {
+			else if (part instanceof Tags.Fay) {
 				transformStyle += " skewY(" + (45 * part.value) + "deg)";
 			}
 
-			else if (part.constructor === Tags.PrimaryColor) {
+			else if (part instanceof Tags.PrimaryColor) {
 				var newPrimaryColor = "#" + part.value;
 				if (currentPrimaryColor !== newPrimaryColor) {
 					currentPrimaryColor = newPrimaryColor;
@@ -215,7 +215,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part.constructor === Tags.OutlineColor) {
+			else if (part instanceof Tags.OutlineColor) {
 				var newOutlineColor = "#" + part.value;
 				if (currentOutlineColor !== newOutlineColor) {
 					currentOutlineColor = newOutlineColor;
@@ -223,11 +223,11 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part.constructor === Tags.Alignment) {
+			else if (part instanceof Tags.Alignment) {
 				m_alignment = part.value;
 			}
 
-			else if (part.constructor === Tags.Reset) {
+			else if (part instanceof Tags.Reset) {
 				if (part.value === null) {
 					currentItalic = null;
 					currentBold = null;
@@ -265,7 +265,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part.constructor === Tags.Pos) {
+			else if (part instanceof Tags.Pos) {
 				m_sub.style.position = "absolute";
 				m_sub.style.left = (scaleX * part.x) + "px";
 				m_sub.style.top = (scaleY * part.y) + "px";
@@ -281,20 +281,20 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				currentSpanContainer = relativeWrapper;
 			}
 
-			else if (part.constructor === Tags.Fade) {
+			else if (part instanceof Tags.Fade) {
 			}
 
-			else if (part.constructor === Tags.NewLine) {
+			else if (part instanceof Tags.NewLine) {
 				currentSpanContainer.appendChild(document.createElement("br"));
 				createNewSpan = true;
 			}
 
-			else if (part.constructor === Tags.HardSpace) {
+			else if (part instanceof Tags.HardSpace) {
 				currentSpan.appendChild(document.createTextNode("\u00A0"));
 				createNewSpan = true;
 			}
 
-			else if (part.constructor === Tags.Text) {
+			else if (part instanceof Tags.Text) {
 				currentSpan.appendChild(document.createTextNode(part.value));
 				createNewSpan = true;
 			}
@@ -352,7 +352,7 @@ Dialogue.Parser = function (pegjs) {
 		parts = parts.reduce(function (previous, current) {
 			var result;
 
-			if (current.constructor === Tags.Text && previous[previous.length - 1] && previous[previous.length - 1].constructor === Tags.Text) {
+			if (current instanceof Tags.Text && previous[previous.length - 1] instanceof Tags.Text) {
 				previous[previous.length - 1].value += current.value;
 				result = previous;
 			}
@@ -373,7 +373,7 @@ Dialogue.Parser = function (pegjs) {
 		};
 
 		parts.forEach(function (part) {
-			if (part.constructor === Tags.Fade) {
+			if (part instanceof Tags.Fade) {
 				if (part.start !== 0) {
 					addKeyframe(start, "opacity", "0");
 					addKeyframe(start + part.start, "opacity", "1");
