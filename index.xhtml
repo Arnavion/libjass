@@ -16,7 +16,9 @@
 	</head>
 	<body>
 		<div class="zoomed">
-			<video id="video" src="video/gc-01.webm" data-subs="video/gc-01.ass" data-format="ass" controls="" />
+			<video id="video" src="video/gc-01.webm" controls="">
+				<track src="video/gc-01.ass" kind="metadata" data-format="ass" />
+			</video>
 			<div id="subs-wrapper" />
 		</div>
 		<div id="dpi-div" />

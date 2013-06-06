@@ -177,8 +177,9 @@ addEventListener("DOMContentLoaded", function () {
 	}, false);
 	parserRequest.send(null);
 
+	var track = document.querySelector("#video > track[data-format='ass']");
 	var subsRequest = new XMLHttpRequest();
-	subsRequest.open("GET", (video.dataset && video.dataset.subs) || video.getAttribute("data-subs"), true);
+	subsRequest.open("GET", track.src || track.getAttribute("src"), true);
 	subsRequest.addEventListener("readystatechange", function () {
 		if (subsRequest.readyState === XMLHttpRequest.DONE) {
 			rawASS = subsRequest.responseText;
