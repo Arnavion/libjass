@@ -116,7 +116,7 @@ hex
 	=	[0-9a-fA-F]
 
 color
-	=	"&H" value:(hex hex hex hex hex hex) "&" { return value.join("").toRGB(); }
+	=	"&H" value:(hex hex hex hex hex hex) "&" { return value.join(""); }
 
 alpha
 	=	"&H" value:(hex hex) { return value.join(""); };

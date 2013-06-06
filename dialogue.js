@@ -105,7 +105,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 			currentSpan.style.fontSize = ((72 / dpi) * scaleY * currentFontSize) + "px";
 			currentSpan.style.lineHeight = (scaleY * currentFontSize) + "px";
 
-			currentSpan.style.color = currentPrimaryColor.toRGBA();
+			currentSpan.style.color = currentPrimaryColor.toColor();
 
 			var blurRadius = scaleX * currentOutlineWidth;
 			if (currentBlur > 0) {
@@ -113,7 +113,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 			}
 			currentSpan.style.textShadow =
 				[[1, 1], [1, -1], [-1, 1], [-1, -1]].map(function (pair) {
-					return pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + currentOutlineColor.toRGBA();
+					return pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + currentOutlineColor.toColor();
 				}).join(", ");
 		};
 		updateSpanStyles();

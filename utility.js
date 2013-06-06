@@ -24,21 +24,19 @@ String.prototype.endsWith = function (str) {
 };
 
 /**
- * Converts this string into a CSS rgb color string. This string must be 6 hexadecimal digits in the form BBGGRR.
+ * Converts this string into a CSS rgba color string. This string must be 6 hexadecimal digits in the form BBGGRR,
+ * or 8 hexadecimal digits in the form AABBGGRR.
  */
-String.prototype.toRGB = function () {
-	return this.split(/([0-9a-fA-F]{2})/).reverse().join("");
-};
-
-/**
- * Converts this string into a CSS rgba color string. This string must be 8 hexadecimal digits in the form AABBGGRR.
- */
-String.prototype.toRGBA = function () {
+String.prototype.toColor = function () {
+	var parts = this.split(/([0-9a-fA-F]{2})/).filter(function (part) {
+		return part !== "";
+	});
+	if (parts.length === 3) {
+		parts.unshift("00");
+	}
 	return (
 		"rgba(" +
-		this.split(/([0-9a-fA-F]{2})/).filter(function (part) {
-			return part !== "";
-		}).map(function (part, index) {
+		parts.map(function (part, index) {
 			var result = parseInt(part, 16);
 			if (index === 0) {
 				result = 1 - result / 255;
