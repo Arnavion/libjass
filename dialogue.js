@@ -105,7 +105,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 			currentSpan.style.fontSize = ((72 / dpi) * scaleY * currentFontSize) + "px";
 			currentSpan.style.lineHeight = (scaleY * currentFontSize) + "px";
 
-			currentSpan.style.color = currentPrimaryColor.toColor();
+			currentSpan.style.color = currentPrimaryColor;
 
 			var blurRadius = scaleX * currentOutlineWidth;
 			if (currentBlur > 0) {
@@ -113,7 +113,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 			}
 			currentSpan.style.textShadow =
 				[[1, 1], [1, -1], [-1, 1], [-1, -1]].map(function (pair) {
-					return pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + currentOutlineColor.toColor();
+					return pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + currentOutlineColor;
 				}).join(", ");
 		};
 		updateSpanStyles();
@@ -317,8 +317,8 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 Dialogue.Parser = function (pegjs) {
 	var parser = PEG.buildParser(pegjs);
 
-	this.parse = function (text) {
-		return parser.parse(text, "dialogue");
+	this.parse = function (text, rule) {
+		return parser.parse(text, rule || "dialogue");
 	};
 };
 
@@ -327,10 +327,19 @@ Dialogue.Parser = function (pegjs) {
 
 	var animationStyleNode = null;
 
+	/**
+	 * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
+	 */
+	var toTime = function (string) {
+		return string.split(":").reduce(function (previousValue, currentValue) {
+			return previousValue * 60 + parseFloat(currentValue);
+		}, 0);
+	};
+
 	Dialogue.create = function (parser, text, style, start, end, layer) {
 		var id = ++lastDialogueId;
-		start = start.toTime();
-		end = end.toTime();
+		start = toTime(start);
+		end = toTime(end);
 
 		layer = ((layer >= 0) ? layer : 0);
 
@@ -338,17 +347,14 @@ Dialogue.Parser = function (pegjs) {
 
 		// Merge consecutive text parts into one part
 		parts = parts.reduce(function (previous, current) {
-			var result;
-
 			if (current instanceof Tags.Text && previous[previous.length - 1] instanceof Tags.Text) {
-				previous[previous.length - 1].value += current.value;
-				result = previous;
+				previous[previous.length - 1] = new Tags.Text(previous[previous.length - 1].value + current.value);
 			}
 			else {
-				result = previous.concat(current);
+				previous.push(current);
 			}
 
-			return result;
+			return previous;
 		}, []);
 
 		// Create an animation if there is a part that requires it
@@ -375,17 +381,6 @@ Dialogue.Parser = function (pegjs) {
 
 		var steps = Object.keys(keyframes);
 		if (steps.length > 0) {
-			/*
-			@keyframes fad-out {
-				from {
-					opacity: 1;
-				}
-				to {
-					opacity: 0;
-				}
-			}
-			*/
-
 			var cssText = "";
 			steps.forEach(function (step) {
 				cssText += "\t" + step + " {\n";
@@ -414,94 +409,68 @@ Dialogue.Parser = function (pegjs) {
 })();
 
 var Tags = new function () {
-	this.Comment = function (value) {
-		this.value = value;
-	};
-
-	this.HardSpace = function () {
-	};
-
-	this.NewLine = function () {
-	};
-
-	this.Text = function (value) {
-		this.value = value;
-	};
-
-	this.Tag = function (func) {
-		return function (value) {
-			if (value === "") {
-				this.value = null;
-			}
-			else if (func) {
-				this.value = func(value);
-			}
-			else {
-				this.value = value;
-			}
+	this.TagPrototype = function (name, propertyNames) {
+		this.toString = function () {
+			var that = this;
+			return name + " { " + propertyNames.map(function (name) { return name + ": " + that[name] }).join(", ") + " }";
 		};
+	}
+
+	this.Tag = function (name) {
+		var propertyNames = [].slice.call(arguments, 1);
+
+		var result = function () {
+			var values = arguments;
+			var that = this;
+			Object.defineProperty(this, "name", { value: name, enumerable: true });
+			propertyNames.forEach(function (name, index) {
+				Object.defineProperty(that, name, { value: values[index], enumerable: true });
+			});
+		};
+
+		result.prototype = new this.TagPrototype(name, propertyNames);
+
+		return result;
 	};
 
-	this.Italic = this.Tag(function (value) {
-		if (value === "1") {
-			return true;
-		}
-		else if (value === "0") {
-			return false;
-		}
-	});
-	this.Bold = this.Tag(function (value) {
-		if (value === 1) {
-			return true;
-		}
-		else if (value === 0) {
-			return false;
-		}
-		else {
-			return value;
-		}
-	});
-	this.Underline = this.Tag(function (value) {
-		if (value === 1) {
-			return true;
-		}
-		else if (value === 0) {
-			return false;
-		}
-	});
-	this.Strikeout = this.Tag();
+	this.Comment = this.Tag("Comment", "value");
 
-	this.Border = this.Tag();
+	this.HardSpace = this.Tag("HardSpace");
 
-	this.Blur = this.Tag();
+	this.NewLine = this.Tag("NewLine");
 
-	this.FontName = this.Tag();
-	this.FontSize = this.Tag();
+	this.Text = this.Tag("Text", "value");
 
-	this.Frx = this.Tag();
-	this.Fry = this.Tag();
-	this.Frz = this.Tag();
-	this.Fax = this.Tag();
-	this.Fay = this.Tag();
+	this.Italic = this.Tag("Italic", "value");
+	this.Bold = this.Tag("Bold", "value");
+	this.Underline = this.Tag("Underline", "value");
+	this.Strikeout = this.Tag("Strikeout", "value");
 
-	this.PrimaryColor = this.Tag();
-	this.OutlineColor = this.Tag();
+	this.Border = this.Tag("Border", "value");
 
-	this.Alpha = this.Tag();
-	this.PrimaryAlpha = this.Tag();
-	this.OutlineAlpha = this.Tag();
+	this.Blur = this.Tag("Blur", "value");
 
-	this.Alignment = this.Tag();
+	this.FontName = this.Tag("FontName", "value");
+	this.FontSize = this.Tag("FontSize", "value");
 
-	this.Reset = this.Tag();
+	this.Frx = this.Tag("Frx", "value");
+	this.Fry = this.Tag("Fry", "value");
+	this.Frz = this.Tag("Frz", "value");
+	this.Fax = this.Tag("Fax", "value");
+	this.Fay = this.Tag("Fay", "value");
 
-	this.Pos = function (x, y) {
-		this.x = x;
-		this.y = y;
-	};
+	this.PrimaryColor = this.Tag("PrimaryColor", "value");
+	this.OutlineColor = this.Tag("OutlineColor", "value");
 
-	this.Fade = function (start, end) {
-		this.start = start;
-		this.end = end;
-	};
+	this.Alpha = this.Tag("Alpha", "value");
+	this.PrimaryAlpha = this.Tag("PrimaryAlpha", "value");
+	this.OutlineAlpha = this.Tag("OutlineAlpha", "value");
+
+	this.Alignment = this.Tag("Alignment", "value");
+
+	this.Reset = this.Tag("Reset", "value");
+
+	this.Pos = this.Tag("Pos", "x", "y");
+
+	this.Fade = this.Tag("Fade", "start", "end");
 };

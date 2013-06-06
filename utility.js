@@ -23,39 +23,6 @@ String.prototype.endsWith = function (str) {
 	return this.indexOf(str) === this.length - str.length;
 };
 
-/**
- * Converts this string into a CSS rgba color string. This string must be 6 hexadecimal digits in the form BBGGRR,
- * or 8 hexadecimal digits in the form AABBGGRR.
- */
-String.prototype.toColor = function () {
-	var parts = this.split(/([0-9a-fA-F]{2})/).filter(function (part) {
-		return part !== "";
-	});
-	if (parts.length === 3) {
-		parts.unshift("00");
-	}
-	return (
-		"rgba(" +
-		parts.map(function (part, index) {
-			var result = parseInt(part, 16);
-			if (index === 0) {
-				result = 1 - result / 255;
-			}
-			return result;
-		}).reverse().join(",") +
-		")"
-	);
-};
-
-/**
- * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
- */
-String.prototype.toTime = function () {
-	return this.split(":").reduce(function (previousValue, currentValue) {
-		return previousValue * 60 + parseFloat(currentValue);
-	}, 0);
-};
-
 // Replace the in-built parseInt with one which always parses to base 10 ints if the second parameter is undefined
 (function () {
 	var oldParseInt = window.parseInt;
