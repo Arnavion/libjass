@@ -71,7 +71,7 @@ addEventListener("DOMContentLoaded", function () {
 			});
 			dialogues.forEach(function (dialogue) {
 				dialogue.parts.forEach(function (part) {
-					if (part instanceof Tags.FontName) {
+					if (part instanceof ASS.Tags.FontName) {
 						allFonts.add(part.value);
 					}
 				});

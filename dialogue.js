@@ -121,7 +121,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 		var spanStylesChanged = false;
 
 		parts.forEach(function (part) {
-			if (part instanceof Tags.Italic) {
+			if (part instanceof ASS.Tags.Italic) {
 				var newItalic = part.value;
 				if (currentItalic !== newItalic) {
 					currentItalic = newItalic;
@@ -129,7 +129,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part instanceof Tags.Bold) {
+			else if (part instanceof ASS.Tags.Bold) {
 				var newBold = part.value;
 				if (currentBold !== newBold) {
 					currentBold = newBold;
@@ -137,7 +137,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part instanceof Tags.Underline) {
+			else if (part instanceof ASS.Tags.Underline) {
 				var newUnderline = part.value;
 				if (newUnderline !== currentUnderline) {
 					currentUnderline = newUnderline;
@@ -145,7 +145,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part instanceof Tags.Strikeout) {
+			else if (part instanceof ASS.Tags.Strikeout) {
 				var newStrikethrough = part.value;
 				if (newStrikethrough !== currentStrikethrough) {
 					currentStrikethrough = newStrikethrough;
@@ -153,7 +153,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part instanceof Tags.Border) {
+			else if (part instanceof ASS.Tags.Border) {
 				var newOutlineWidth = part.value;
 				if (currentOutlineWidth !== newOutlineWidth) {
 					currentOutlineWidth = newOutlineWidth;
@@ -161,7 +161,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part instanceof Tags.Blur) {
+			else if (part instanceof ASS.Tags.Blur) {
 				var newBlur = part.value;
 				if (currentBlur !== newBlur) {
 					currentBlur = newBlur;
@@ -169,7 +169,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part instanceof Tags.FontName) {
+			else if (part instanceof ASS.Tags.FontName) {
 				var newFontName = part.value;
 				if (currentFontName !== newFontName) {
 					currentFontName = newFontName;
@@ -177,7 +177,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part instanceof Tags.FontSize) {
+			else if (part instanceof ASS.Tags.FontSize) {
 				var newFontSize = part.value;
 				if (currentFontSize !== newFontSize) {
 					currentFontSize = newFontSize;
@@ -185,27 +185,27 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part instanceof Tags.Frx) {
+			else if (part instanceof ASS.Tags.Frx) {
 				transformStyle += " rotateX(" + part.value + "deg)";
 			}
 
-			else if (part instanceof Tags.Fry) {
+			else if (part instanceof ASS.Tags.Fry) {
 				transformStyle += " rotateY(" + part.value + "deg)";
 			}
 
-			else if (part instanceof Tags.Frz) {
+			else if (part instanceof ASS.Tags.Frz) {
 				transformStyle += " rotateZ(" + (-1 * part.value) + "deg)";
 			}
 
-			else if (part instanceof Tags.Fax) {
+			else if (part instanceof ASS.Tags.Fax) {
 				transformStyle += " skewX(" + (45 * part.value) + "deg)";
 			}
 
-			else if (part instanceof Tags.Fay) {
+			else if (part instanceof ASS.Tags.Fay) {
 				transformStyle += " skewY(" + (45 * part.value) + "deg)";
 			}
 
-			else if (part instanceof Tags.PrimaryColor) {
+			else if (part instanceof ASS.Tags.PrimaryColor) {
 				var newPrimaryColor = part.value;
 				if (currentPrimaryColor !== newPrimaryColor) {
 					currentPrimaryColor = newPrimaryColor;
@@ -213,7 +213,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part instanceof Tags.OutlineColor) {
+			else if (part instanceof ASS.Tags.OutlineColor) {
 				var newOutlineColor = part.value;
 				if (currentOutlineColor !== newOutlineColor) {
 					currentOutlineColor = newOutlineColor;
@@ -221,11 +221,11 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part instanceof Tags.Alignment) {
+			else if (part instanceof ASS.Tags.Alignment) {
 				m_alignment = part.value;
 			}
 
-			else if (part instanceof Tags.Reset) {
+			else if (part instanceof ASS.Tags.Reset) {
 				if (part.value === null) {
 					currentItalic = null;
 					currentBold = null;
@@ -253,7 +253,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				}
 			}
 
-			else if (part instanceof Tags.Pos) {
+			else if (part instanceof ASS.Tags.Pos) {
 				m_sub.style.position = "absolute";
 				m_sub.style.left = (scaleX * part.x) + "px";
 				m_sub.style.top = (scaleY * part.y) + "px";
@@ -269,20 +269,20 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 				currentSpanContainer = relativeWrapper;
 			}
 
-			else if (part instanceof Tags.Fade) {
+			else if (part instanceof ASS.Tags.Fade) {
 			}
 
-			else if (part instanceof Tags.NewLine) {
+			else if (part instanceof ASS.Tags.NewLine) {
 				currentSpanContainer.appendChild(document.createElement("br"));
 				createNewSpan = true;
 			}
 
-			else if (part instanceof Tags.HardSpace) {
+			else if (part instanceof ASS.Tags.HardSpace) {
 				currentSpan.appendChild(document.createTextNode("\u00A0"));
 				createNewSpan = true;
 			}
 
-			else if (part instanceof Tags.Text) {
+			else if (part instanceof ASS.Tags.Text) {
 				currentSpan.appendChild(document.createTextNode(part.value));
 				createNewSpan = true;
 			}
@@ -347,8 +347,8 @@ Dialogue.Parser = function (pegjs) {
 
 		// Merge consecutive text parts into one part
 		parts = parts.reduce(function (previous, current) {
-			if (current instanceof Tags.Text && previous[previous.length - 1] instanceof Tags.Text) {
-				previous[previous.length - 1] = new Tags.Text(previous[previous.length - 1].value + current.value);
+			if (current instanceof ASS.Tags.Text && previous[previous.length - 1] instanceof ASS.Tags.Text) {
+				previous[previous.length - 1] = new ASS.Tags.Text(previous[previous.length - 1].value + current.value);
 			}
 			else {
 				previous.push(current);
@@ -367,7 +367,7 @@ Dialogue.Parser = function (pegjs) {
 		};
 
 		parts.forEach(function (part) {
-			if (part instanceof Tags.Fade) {
+			if (part instanceof ASS.Tags.Fade) {
 				if (part.start !== 0) {
 					addKeyframe(start, "opacity", "0");
 					addKeyframe(start + part.start, "opacity", "1");

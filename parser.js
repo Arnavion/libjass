@@ -231,7 +231,7 @@ ASS.parse = function (rawASS, dialogueParser) {
 	return new ASS(info, styles, dialogues);
 }
 
-var Tags = new function () {
+ASS.Tags = new function () {
 	this.TagPrototype = function (name, propertyNames) {
 		this.toString = function () {
 			var that = this;
