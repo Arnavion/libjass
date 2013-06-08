@@ -345,18 +345,6 @@ Dialogue.Parser = function (pegjs) {
 
 		var parts = parser.parse(text);
 
-		// Merge consecutive text parts into one part
-		parts = parts.reduce(function (previous, current) {
-			if (current instanceof ASS.Tags.Text && previous[previous.length - 1] instanceof ASS.Tags.Text) {
-				previous[previous.length - 1] = new ASS.Tags.Text(previous[previous.length - 1].value + current.value);
-			}
-			else {
-				previous.push(current);
-			}
-
-			return previous;
-		}, []);
-
 		// Create an animation if there is a part that requires it
 
 		var keyframes = {};

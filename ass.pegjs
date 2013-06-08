@@ -1,8 +1,26 @@
 dialogue
 	=	parts:(enclosedTags / comment / newline / hardspace / text)* {
-			return parts.reduce(function (previous, current) {
+			// Flatten parts
+			parts = parts.reduce(function (previous, current) {
 				return previous.concat(current);
 			}, []);
+
+			// Merge consecutive text and comment parts into one part
+			parts = parts.reduce(function (previous, current) {
+				if (current instanceof ASS.Tags.Text && previous[previous.length - 1] instanceof ASS.Tags.Text) {
+					previous[previous.length - 1] = new ASS.Tags.Text(previous[previous.length - 1].value + current.value);
+				}
+				else if (current instanceof ASS.Tags.Comment && previous[previous.length - 1] instanceof ASS.Tags.Comment) {
+					previous[previous.length - 1] = new ASS.Tags.Comment(previous[previous.length - 1].value + current.value);
+				}
+				else {
+					previous.push(current);
+				}
+
+				return previous;
+			}, []);
+
+			return parts;
 		}
 
 enclosedTags
