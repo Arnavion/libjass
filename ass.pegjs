@@ -113,7 +113,7 @@ blurTag
 fontNameTag
 	=	"fn" value:[^\\}]* {
 			return new Tags.FontName(
-				(value !== "") ? value : null
+				(value.length > 0) ? value.join("") : null
 			);
 		}
 
