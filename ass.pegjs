@@ -226,7 +226,7 @@ fadeTag
 
 decimal
 	=	sign:"-"? unsignedDecimal:unsignedDecimal {
-			return sign === "" ? unsignedDecimal : -unsignedDecimal;
+			return (sign === "") ? unsignedDecimal : -unsignedDecimal;
 		}
 
 unsignedDecimal
