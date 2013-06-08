@@ -64,12 +64,3 @@ if (!window.Set || !window.Set.prototype.iterator) {
 	Set.prototype = new Set();
 	Set.prototype.__iterator__ = Set.prototype.iterator;
 }
-
-/**
- * Converts this set into an array.
- * 
- * @return An array of the elements of this set
- */
-window.Set.prototype.toArray = function () {
-	return this.iterator().toArray();
-};

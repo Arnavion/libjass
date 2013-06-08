@@ -54,7 +54,7 @@ addEventListener("DOMContentLoaded", function () {
 			dialogues.forEach(function (dialogue) {
 				layers.add(dialogue.layer);
 			});
-			layers.toArray().sort().forEach(function (layer) {
+			layers.iterator().toArray().sort().forEach(function (layer) {
 				var i;
 				wrappers[layer] = {};
 				for (i = 1; i <= 9; ++i) {
