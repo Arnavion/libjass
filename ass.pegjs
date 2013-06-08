@@ -256,8 +256,8 @@ color
 				"rgba(" +
 				[red.join(""), green.join(""), blue.join("")].map(function (part) {
 					return parseInt(part, 16);
-				}).join(",") +
-				",1)"
+				}).join(", ") +
+				", 1)"
 			);
 		}
 
@@ -271,9 +271,8 @@ colorWithAlpha
 			return (
 				"rgba(" +
 				[red.join(""), green.join(""), blue.join("")].map(function (part) {
-					return parseInt(part, 16);
-				}).join(",") +
-				"," +
+					return parseInt(part, 16) + ", ";
+				}).join("") +
 				(1 - parseInt(alpha.join(""), 16) / 255) +
 				")"
 			);
