@@ -204,7 +204,7 @@ alignmentTag
 resetTag
 	=	"r" value:[^\\}]* {
 			return new Tags.Reset(
-				(value !== "") ? value : null
+				(value.length > 0) ? value.join("") : null
 			);
 		}
 
