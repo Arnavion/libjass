@@ -9,22 +9,16 @@
  * @param dialogues The array of {@link Dialogue} objects
  */
 var ASS = function (info, styles, dialogues) {
-	// Set the ass property of the Info object, each of the Style objects and each of the Dialogue objects
-	info.ass = this;
-
-	styles.forEach(function (style) {
-		style.ass = this;
-	}, this);
-
-	dialogues.forEach(function (dialogue) {
-		dialogue.ass = this;
-	}, this);
-
 	Object.defineProperties(this, {
 		info: { value: info },
 		styles: { value: styles },
 		dialogues: { value: dialogues }
 	});
+
+	// Set the ass property of each of the Dialogue objects
+	dialogues.forEach(function (dialogue) {
+		dialogue.ass = this;
+	}, this);
 };
 
 /**
@@ -52,8 +46,7 @@ var Info = function (playResX, playResY) {
 	Object.defineProperties(this, {
 		scaleX: { get: function () { return scaleX; } },
 		scaleY: { get: function () { return scaleY; } },
-		dpi: { writable: true },
-		ass: { writable: true }
+		dpi: { writable: true }
 	});
 };
 
@@ -91,8 +84,7 @@ var Style = function (name, italic, bold, underline, strikethrough, outlineWidth
 		alignment: { value: alignment },
 		marginLeft: { value: marginLeft },
 		marginRight: { value: marginRight },
-		marginVertical: { value: marginVertical },
-		ass: { writable: true }
+		marginVertical: { value: marginVertical }
 	});
 };
 
