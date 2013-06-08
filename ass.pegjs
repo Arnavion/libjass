@@ -78,7 +78,7 @@ boldTag
 				case "":
 					return new Tags.Bold(null);
 				default:
-					return new Tags.Bold(parseFloat(value));
+					return new Tags.Bold(parseInt(value));
 			}
 		}
 
