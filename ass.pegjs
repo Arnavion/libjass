@@ -195,9 +195,9 @@ outlineAlphaTag
 		}
 
 alignmentTag
-	=	"an" value:[1-9]? {
+	=	"an" value:[1-9] {
 			return new Tags.Alignment(
-				(value !== "") ? parseInt(value) : null
+				parseInt(value)
 			);
 		}
 
