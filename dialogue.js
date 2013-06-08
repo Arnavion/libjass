@@ -310,7 +310,7 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 	this.isDrawn = function () { return m_sub !== null; };
 
 	this.toString = function () {
-		return "[" + start + " - " + end + "] " + parts.join("");
+		return "[" + start.toFixed(3) + "-" + end.toFixed(3) + "] " + parts.join(", ");
 	};
 };
 
@@ -412,7 +412,13 @@ var Tags = new function () {
 	this.TagPrototype = function (name, propertyNames) {
 		this.toString = function () {
 			var that = this;
-			return name + " { " + propertyNames.map(function (name) { return name + ": " + that[name] }).join(", ") + " }";
+			return (
+				name + " { " +
+				propertyNames.map(function (name) {
+					return name + ": " + that[name]
+				}).join(", ") + ((propertyNames.length > 0) ? " " : "") +
+				"}"
+			);
 		};
 	}
 
