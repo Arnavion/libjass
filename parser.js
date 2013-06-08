@@ -10,9 +10,9 @@
  */
 var ASS = function (info, styles, dialogues) {
 	Object.defineProperties(this, {
-		info: { value: info },
-		styles: { value: styles },
-		dialogues: { value: dialogues }
+		info: { value: info, enumerable: true },
+		styles: { value: styles, enumerable: true },
+		dialogues: { value: dialogues, enumerable: true }
 	});
 
 	// Set the ass property of each of the Dialogue objects
@@ -44,9 +44,9 @@ var Info = function (playResX, playResY) {
 	};
 
 	Object.defineProperties(this, {
-		scaleX: { get: function () { return scaleX; } },
-		scaleY: { get: function () { return scaleY; } },
-		dpi: { writable: true }
+		scaleX: { get: function () { return scaleX; }, enumerable: true },
+		scaleY: { get: function () { return scaleY; }, enumerable: true },
+		dpi: { writable: true, enumerable: true }
 	});
 };
 
@@ -71,20 +71,20 @@ var Info = function (playResX, playResY) {
  */
 var Style = function (name, italic, bold, underline, strikethrough, outlineWidth, fontName, fontSize, primaryColor, outlineColor, alignment, marginLeft, marginRight, marginVertical) {
 	Object.defineProperties(this, {
-		name: { value: name },
-		italic: { value: italic },
-		bold: { value: bold },
-		underline: { value: underline },
-		strikethrough: { value: strikethrough },
-		outlineWidth: { value: outlineWidth },
-		fontName: { value: fontName },
-		fontSize: { value: fontSize },
-		primaryColor: { value: primaryColor },
-		outlineColor: { value: outlineColor },
-		alignment: { value: alignment },
-		marginLeft: { value: marginLeft },
-		marginRight: { value: marginRight },
-		marginVertical: { value: marginVertical }
+		name: { value: name, enumerable: true },
+		italic: { value: italic, enumerable: true },
+		bold: { value: bold, enumerable: true },
+		underline: { value: underline, enumerable: true },
+		strikethrough: { value: strikethrough, enumerable: true },
+		outlineWidth: { value: outlineWidth, enumerable: true },
+		fontName: { value: fontName, enumerable: true },
+		fontSize: { value: fontSize, enumerable: true },
+		primaryColor: { value: primaryColor, enumerable: true },
+		outlineColor: { value: outlineColor, enumerable: true },
+		alignment: { value: alignment, enumerable: true },
+		marginLeft: { value: marginLeft, enumerable: true },
+		marginRight: { value: marginRight, enumerable: true },
+		marginVertical: { value: marginVertical, enumerable: true }
 	});
 };
 

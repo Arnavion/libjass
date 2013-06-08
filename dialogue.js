@@ -4,13 +4,13 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 	var m_alignment = style.alignment;
 
 	Object.defineProperties(this, {
-		id: { value: id },
-		start: { value: start },
-		end: { value: end },
-		alignment: { value: m_alignment },
-		layer: { value: layer },
-		parts: { value: parts },
-		ass: { writable: true }
+		id: { value: id, enumerable: true },
+		start: { value: start, enumerable: true },
+		end: { value: end, enumerable: true },
+		alignment: { value: m_alignment, enumerable: true },
+		layer: { value: layer, enumerable: true },
+		parts: { value: parts, enumerable: true },
+		ass: { writable: true, enumerable: true }
 	});
 
 	var m_sub = null;
