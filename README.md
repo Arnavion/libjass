@@ -27,4 +27,4 @@ libjass is a Javascript framework to render ASS subs on HTML5 video in the brows
 * <del>Change dialogue parser implementation from regexes to an automatic parser like Antlr. This will make supporting \t possible. Alternatively, port libass's parse_tag to Javascript.</del> (Completed)
 
 # Links
-* [Plorky's documentation on ASS](http://plorkyeran.com/manual/ASS_Tags/)
+* [Aegisub's documentation on ASS](http://docs.aegisub.org/3.0/ASS_Tags/)
