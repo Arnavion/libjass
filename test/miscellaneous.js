@@ -1,5 +1,5 @@
-tests.push(["Miscellaneous",
-	["herkz", "{\\pos(311,4)\\blur0.8\\fs40\\bord0\\c&H3F171F&\\t(3820,3820,\\blur6}Chi{\\c&H422CB1&}tose {\\c&H3F171F&}Furu", "dialogue", function (result, parseException) {
+sections.push(new Section("Miscellaneous",
+	new Test("herkz", "{\\pos(311,4)\\blur0.8\\fs40\\bord0\\c&H3F171F&\\t(3820,3820,\\blur6}Chi{\\c&H422CB1&}tose {\\c&H3F171F&}Furu", "dialogue", function (result, parseException) {
 		Assert.SuccessfulParse(arguments, Array);
 		Assert.Equals(result.length, 6);
 
@@ -20,5 +20,5 @@ tests.push(["Miscellaneous",
 
 		Assert.IsInstanceOf(result[5], ASS.Tags.Text);
 		Assert.Equals(result[5].value, "Furu");
-	}],
-]);
+	})
+));

@@ -2,6 +2,25 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
 		<title>Parser tests</title>
+		<style type="text/css">
+		<![CDATA[
+			.section {
+				border-top: 1px solid black;
+			}
+
+			.section:last-child {
+				border-bottom: 1px solid black;
+			}
+
+			.log, .error {
+				padding-left: 2em;
+			}
+
+			.error, .runner-error {
+				color: red;
+			}
+		]]>
+		</style>
 		<script src="../peg-0.7.0.js" />
 		<script src="../parser.js" />
 		<script src="index.js" />
@@ -10,5 +29,6 @@
 		<script src="miscellaneous.js" />
 	</head>
 	<body>
+		<div id="output" />
 	</body>
 </html>
