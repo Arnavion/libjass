@@ -149,15 +149,6 @@ addEventListener("DOMContentLoaded", function () {
 			video.addEventListener("playing", function () {
 				subsWrapper.className = "";
 			}, false);
-
-			video.addEventListener("click", function () {
-				if (video.paused) {
-					video.play();
-				}
-				else {
-					video.pause();
-				}
-			}, false);
 		};
 	}
 
