@@ -210,7 +210,7 @@ ASS.parse = function (rawASS, dialogueParser) {
 		// Read all the dialogues and add them to the dialogues array
 		if (line.startsWith("Dialogue:")) {
 			var lineParts = line.substring("Dialogue:".length).trimLeft().split(",");
-			dialogues.push(Dialogue.create(
+			dialogues.push(new Dialogue(
 				dialogueParser,
 				lineParts.slice(textIndex).join(","),
 				styles.filter(function (aStyle) { return aStyle.name === lineParts[styleIndex]; })[0],
