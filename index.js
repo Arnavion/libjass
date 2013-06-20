@@ -176,7 +176,7 @@ addEventListener("DOMContentLoaded", function () {
 	parserRequest.open("GET", "ass.pegjs", true);
 	parserRequest.addEventListener("readystatechange", function () {
 		if (parserRequest.readyState === XMLHttpRequest.DONE) {
-			parser = new Dialogue.Parser(parserRequest.responseText);
+			parser = PEG.buildParser(parserRequest.responseText);
 
 			if (rawASS) {
 				ass = ASS.parse(rawASS, parser);

@@ -314,14 +314,6 @@ var Dialogue = function (id, parts, style, start, end, layer) {
 	};
 };
 
-Dialogue.Parser = function (pegjs) {
-	var parser = PEG.buildParser(pegjs);
-
-	this.parse = function (text, rule) {
-		return parser.parse(text, rule || "dialogue");
-	};
-};
-
 (function () {
 	var lastDialogueId = -1;
 
