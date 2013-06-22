@@ -5,7 +5,7 @@ var Dialogue = (function () {
 
 	var animationStyleElement = null;
 
-	return function (parser, text, style, start, end, layer) {
+	return function (text, style, start, end, layer, parser, info, styles) {
 		var id = ++lastDialogueId;
 
 		layer = ((layer >= 0) ? layer : 0);
@@ -47,8 +47,7 @@ var Dialogue = (function () {
 			end: { value: end, enumerable: true },
 			alignment: { value: alignment, enumerable: true },
 			layer: { value: layer, enumerable: true },
-			parts: { value: parts, enumerable: true },
-			ass: { writable: true, enumerable: true }
+			parts: { value: parts, enumerable: true }
 		});
 
 		var m_sub = null;
@@ -57,7 +56,6 @@ var Dialogue = (function () {
 		this.drawTo = function (sub, currentTime) {
 			m_sub = sub;
 
-			var info = this.ass.info;
 			var scaleX = info.scaleX;
 			var scaleY = info.scaleY;
 			var dpi = info.dpi;
@@ -276,7 +274,7 @@ var Dialogue = (function () {
 						spanStylesChanged = true;
 					}
 					else {
-						var newStyle = this.ass.styles.filter(function (style) { return style.name === part.value; })[0];
+						var newStyle = styles.filter(function (style) { return style.name === part.value; })[0];
 						currentItalic = newStyle.italic;
 						currentBold = newStyle.bold;
 						currentUnderline = newStyle.underline;

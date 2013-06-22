@@ -14,11 +14,6 @@ var ASS = function (info, styles, dialogues) {
 		styles: { value: styles, enumerable: true },
 		dialogues: { value: dialogues, enumerable: true }
 	});
-
-	// Set the ass property of each of the Dialogue objects
-	dialogues.forEach(function (dialogue) {
-		dialogue.ass = this;
-	}, this);
 };
 
 /**
@@ -90,12 +85,13 @@ var Style = function (name, italic, bold, underline, strikethrough, outlineWidth
 
 // Parses the raw ASS string into an ASS object
 ASS.parse = function (rawASS, dialogueParser) {
-	var styles = [];
-	var dialogues = [];
-
 	// Info variables
+	var info = null;
 	var playResX;
 	var playResY;
+
+	// Style variables
+	var styles = [];
 
 	// The indices of the various constituents of a Style in a "Style: " line
 	var nameIndex;
@@ -112,6 +108,9 @@ ASS.parse = function (rawASS, dialogueParser) {
 	var marginLeftIndex;
 	var marginRightIndex;
 	var marginVerticalIndex;
+
+	// Dialogue variables
+	var dialogues = [];
 
 	// The indices of the various constituents of a Dialogue in a "Dialogue: " line
 	var styleIndex;
@@ -141,6 +140,9 @@ ASS.parse = function (rawASS, dialogueParser) {
 
 		return result;
 	}).skipWhile(function (line) {
+		// Create the script info object
+		info = new Info(playResX, playResY);
+
 		// In the styles section, skip till we find the format specifier line
 		var result = !line.startsWith("Format:");
 
@@ -211,18 +213,17 @@ ASS.parse = function (rawASS, dialogueParser) {
 		if (line.startsWith("Dialogue:")) {
 			var lineParts = line.substring("Dialogue:".length).trimLeft().split(",");
 			dialogues.push(new Dialogue(
-				dialogueParser,
 				lineParts.slice(textIndex).join(","),
 				styles.filter(function (aStyle) { return aStyle.name === lineParts[styleIndex]; })[0],
 				toTime(lineParts[startIndex]),
 				toTime(lineParts[endIndex]),
-				parseInt(lineParts[layerIndex])
+				parseInt(lineParts[layerIndex]),
+				dialogueParser,
+				info,
+				styles
 			));
 		}
 	});
-
-	// Create the script info object
-	var info = new Info(playResX, playResY);
 
 	// Sort the dialogues array by start time
 	dialogues.sort(function (dialogue1, dialogue2) { return dialogue1.start - dialogue2.start; });
