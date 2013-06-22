@@ -1,5 +1,7 @@
 "use strict";
 
+ASS.debugMode = (location.search === "?debug");
+
 addEventListener("DOMContentLoaded", function () {
 	var createSubDiv;
 	var wrappers = {};
@@ -171,6 +173,9 @@ addEventListener("DOMContentLoaded", function () {
 
 			if (rawASS) {
 				ass = ASS.parse(rawASS, parser);
+				if (ASS.debugMode) {
+					window.ass = ass;
+				}
 				testVideoAndASSLoaded();
 			}
 		}
@@ -186,6 +191,9 @@ addEventListener("DOMContentLoaded", function () {
 
 			if (parser) {
 				ass = ASS.parse(rawASS, parser);
+				if (ASS.debugMode) {
+					window.ass = ass;
+				}
 				testVideoAndASSLoaded();
 			}
 		}

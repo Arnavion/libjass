@@ -319,7 +319,7 @@ var Dialogue = (function () {
 					createNewSpan = true;
 				}
 
-				else if (part instanceof ASS.Tags.Text || part instanceof ASS.Tags.Comment) {
+				else if (part instanceof ASS.Tags.Text || (ASS.debugMode && part instanceof ASS.Tags.Comment)) {
 					currentSpan.appendChild(document.createTextNode(part.value));
 					createNewSpan = true;
 				}
