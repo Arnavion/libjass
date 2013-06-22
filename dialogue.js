@@ -5,69 +5,37 @@ var Dialogue = (function () {
 
 	var animationStyleNode = null;
 
-	/**
-	 * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
-	 */
-	var toTime = function (string) {
-		return string.split(":").reduce(function (previousValue, currentValue) {
-			return previousValue * 60 + parseFloat(currentValue);
-		}, 0);
-	};
-
 	return function (parser, text, style, start, end, layer) {
 		var id = ++lastDialogueId;
-
-		start = toTime(start);
-		end = toTime(end);
 
 		layer = ((layer >= 0) ? layer : 0);
 
 		var parts = parser.parse(text);
 
 		// Create an animation if there is a part that requires it
-
-		var keyframes = {};
-		var addKeyframe = function (step, property, value) {
-			step = (100 * (step - start) / (end - start)) + "%";
-			keyframes[step] = keyframes[step] || {};
-			keyframes[step][property] = value;
-		};
+		var keyframes = new Dialogue.KeyframeCollection(id, start, end);
 
 		parts.forEach(function (part) {
 			if (part instanceof ASS.Tags.Fade) {
 				if (part.start !== 0) {
-					addKeyframe(start, "opacity", "0");
-					addKeyframe(start + part.start, "opacity", "1");
+					keyframes.add(start, "opacity", "0");
+					keyframes.add(start + part.start, "opacity", "1");
 				}
 				if (part.end !== 0) {
-					addKeyframe(end - part.end, "opacity", "1")
-					addKeyframe(end, "opacity", "0");
+					keyframes.add(end - part.end, "opacity", "1")
+					keyframes.add(end, "opacity", "0");
 				}
 			}
 		});
 
-		var steps = Object.keys(keyframes);
-		if (steps.length > 0) {
-			var cssText = "";
-			steps.forEach(function (step) {
-				cssText += "\t" + step + " {\n";
-				var properties = keyframes[step];
-				Object.keys(properties).forEach(function (property) {
-					cssText += "\t\t" + property + ": " + properties[property] + ";\n";
-				});
-				cssText += "\t}\n";
-			});
+		if (animationStyleNode === null) {
+			var animationStyleElement = document.createElement("style");
+			document.querySelector("head").appendChild(animationStyleElement);
 
-			if (animationStyleNode === null) {
-				var animationStyleElement = document.createElement("style");
-				document.querySelector("head").appendChild(animationStyleElement);
-
-				animationStyleNode = document.createTextNode("");
-				animationStyleElement.appendChild(animationStyleNode);
-			}
-
-			animationStyleNode.textContent += "@keyframes dialogue-" + id + " {\n" + cssText + "}\n\n" + "@-webkit-keyframes dialogue-" + id + " {\n" + cssText + "}\n\n";
+			animationStyleNode = document.createTextNode("");
+			animationStyleElement.appendChild(animationStyleNode);
 		}
+		animationStyleNode.textContent += keyframes.toCSS();
 
 		var alignment = style.alignment;
 
@@ -383,6 +351,38 @@ var Dialogue = (function () {
 		this.isDrawn = function () { return m_sub !== null; };
 	};
 })();
+
+Dialogue.KeyframeCollection = function (id, start, end) {
+	var keyframes = {};
+
+	this.add = function (time, property, value) {
+		var step = (100 * (time - start) / (end - start)) + "%";
+		keyframes[step] = keyframes[step] || {};
+		keyframes[step][property] = value;
+	};
+
+	this.toCSS = function () {
+		var result = "";
+
+		var steps = Object.keys(keyframes);
+		if (steps.length > 0) {
+			var cssText = "";
+
+			steps.forEach(function (step) {
+				cssText += "\t" + step + " {\n";
+				var properties = keyframes[step];
+				Object.keys(properties).forEach(function (property) {
+					cssText += "\t\t" + property + ": " + properties[property] + ";\n";
+				});
+				cssText += "\t}\n";
+			});
+
+			result = "@keyframes dialogue-" + id + " {\n" + cssText + "}\n\n" + "@-webkit-keyframes dialogue-" + id + " {\n" + cssText + "}\n\n";
+		}
+
+		return result;
+	};
+};
 
 Dialogue.prototype.toString = function () {
 	return "[" + this.start.toFixed(3) + "-" + this.end.toFixed(3) + "] " + this.parts.join(", ");

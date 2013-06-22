@@ -214,8 +214,8 @@ ASS.parse = function (rawASS, dialogueParser) {
 				dialogueParser,
 				lineParts.slice(textIndex).join(","),
 				styles.filter(function (aStyle) { return aStyle.name === lineParts[styleIndex]; })[0],
-				lineParts[startIndex],
-				lineParts[endIndex],
+				toTime(lineParts[startIndex]),
+				toTime(lineParts[endIndex]),
 				parseInt(lineParts[layerIndex])
 			));
 		}
@@ -302,4 +302,13 @@ ASS.Tags = new function () {
 	this.Pos = this.Tag("Pos", "x", "y");
 
 	this.Fade = this.Tag("Fade", "start", "end");
+};
+
+/**
+ * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
+ */
+var toTime = function (string) {
+	return string.split(":").reduce(function (previousValue, currentValue) {
+		return previousValue * 60 + parseFloat(currentValue);
+	}, 0);
 };
