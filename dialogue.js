@@ -3,7 +3,7 @@
 var Dialogue = (function () {
 	var lastDialogueId = -1;
 
-	var animationStyleNode = null;
+	var animationStyleElement = null;
 
 	return function (parser, text, style, start, end, layer) {
 		var id = ++lastDialogueId;
@@ -28,14 +28,10 @@ var Dialogue = (function () {
 			}
 		});
 
-		if (animationStyleNode === null) {
-			var animationStyleElement = document.createElement("style");
-			document.querySelector("head").appendChild(animationStyleElement);
-
-			animationStyleNode = document.createTextNode("");
-			animationStyleElement.appendChild(animationStyleNode);
+		if (animationStyleElement === null) {
+			animationStyleElement = document.querySelector("#animation-styles");
 		}
-		animationStyleNode.textContent += keyframes.toCSS();
+		animationStyleElement.appendChild(document.createTextNode(keyframes.toCSS()));
 
 		var alignment = style.alignment;
 
