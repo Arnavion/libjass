@@ -217,7 +217,7 @@ ASS.parse = function (rawASS, dialogueParser) {
 				styles.filter(function (aStyle) { return aStyle.name === lineParts[styleIndex]; })[0],
 				toTime(lineParts[startIndex]),
 				toTime(lineParts[endIndex]),
-				parseInt(lineParts[layerIndex]),
+				Math.max(parseInt(lineParts[layerIndex]), 0),
 				dialogueParser,
 				info,
 				styles

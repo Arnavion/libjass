@@ -8,8 +8,6 @@ var Dialogue = (function () {
 	return function (text, style, start, end, layer, parser, info, styles) {
 		var id = ++lastDialogueId;
 
-		layer = ((layer >= 0) ? layer : 0);
-
 		var parts = parser.parse(text);
 
 		// Create an animation if there is a part that requires it
