@@ -10,40 +10,13 @@ var Dialogue = (function () {
 
 		var parts = parser.parse(text);
 
-		// Create an animation if there is a part that requires it
-		var keyframes = new Dialogue.KeyframeCollection(id, start, end);
-
-		parts.forEach(function (part) {
-			if (part instanceof ASS.Tags.Fade) {
-				if (part.start !== 0) {
-					keyframes.add(start, "opacity", "0");
-					keyframes.add(start + part.start, "opacity", "1");
-				}
-				if (part.end !== 0) {
-					keyframes.add(end - part.end, "opacity", "1")
-					keyframes.add(end, "opacity", "0");
-				}
-			}
-		});
-
-		if (animationStyleElement === null) {
-			animationStyleElement = document.querySelector("#animation-styles");
-		}
-		animationStyleElement.appendChild(document.createTextNode(keyframes.toCSS()));
-
 		var alignment = style.alignment;
-
-		parts.forEach(function (part) {
-			if (part instanceof ASS.Tags.Alignment) {
-				alignment = part.value;
-			}
-		});
 
 		Object.defineProperties(this, {
 			id: { value: id, enumerable: true },
 			start: { value: start, enumerable: true },
 			end: { value: end, enumerable: true },
-			alignment: { value: alignment, enumerable: true },
+			alignment: { get: function () { return alignment; }, enumerable: true },
 			layer: { value: layer, enumerable: true },
 			parts: { value: parts, enumerable: true }
 		});
@@ -53,6 +26,31 @@ var Dialogue = (function () {
 		// Magic happens here (TODO: styling)
 		this.drawTo = function (sub, currentTime) {
 			m_sub = sub;
+
+			// Create an animation if there is a part that requires it
+			var keyframes = new Dialogue.KeyframeCollection(id, start, end);
+
+			parts.forEach(function (part) {
+				if (part instanceof ASS.Tags.Alignment) {
+					alignment = part.value;
+				}
+
+				else if (part instanceof ASS.Tags.Fade) {
+					if (part.start !== 0) {
+						keyframes.add(start, "opacity", "0");
+						keyframes.add(start + part.start, "opacity", "1");
+					}
+					if (part.end !== 0) {
+						keyframes.add(end - part.end, "opacity", "1")
+						keyframes.add(end, "opacity", "0");
+					}
+				}
+			});
+
+			if (animationStyleElement === null) {
+				animationStyleElement = document.querySelector("#animation-styles");
+			}
+			animationStyleElement.appendChild(document.createTextNode(keyframes.toCSS()));
 
 			var scaleX = info.scaleX;
 			var scaleY = info.scaleY;
