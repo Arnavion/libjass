@@ -24,7 +24,7 @@ libjass is a Javascript framework to render ASS subs on HTML5 video in the brows
 * Write tests. Seriously, there's only so many times I can watch the first 2 minutes of Guilty Crown ep 1. At least Euterpe is a good song. (In progress)
 * Evaluate the benefits of DOM-based drawing over canvas.
 * <del>Change dialogue parser implementation from regexes to an automatic parser like Antlr. This will make supporting \t possible. Alternatively, port libass's parse_tag to Javascript.</del> (Completed)
-* <del>Only preload fonts actually used in the subs.</dev> (Completed)
+* <del>Only preload fonts actually used in the subs.</del> (Completed)
 
 # Links
 * [Aegisub's documentation on ASS](http://docs.aegisub.org/3.0/ASS_Tags/)
