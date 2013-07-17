@@ -123,17 +123,16 @@ var Dialogue = (function () {
 					currentSpan.style.fontWeight = currentBold;
 				}
 
-				currentSpan.style.textDecoration = "";
-
+				var textDecoration = "";
 				if (currentUnderline) {
-					currentSpan.style.textDecoration = "underline";
+					textDecoration = "underline";
 				}
-
 				if (currentStrikethrough) {
-					currentSpan.style.textDecoration += " line-through";
+					textDecoration += " line-through";
 				}
+				currentSpan.style.textDecoration = textDecoration.trim();
 
-				currentSpan.style.fontFamily = "\"" + currentFontName + "\"";
+				currentSpan.style.fontFamily = currentFontName;
 				currentSpan.style.fontSize = ((72 / dpi) * scaleY * currentFontSize) + "px";
 				currentSpan.style.lineHeight = (scaleY * currentFontSize) + "px";
 
@@ -290,13 +289,17 @@ var Dialogue = (function () {
 					sub.style.top = (scaleY * part.y) + "px";
 
 					var relativeWrapper = document.createElement("div");
+
 					relativeWrapper.style.position = "relative";
+					relativeWrapper.style.top = ((9 - alignment) / 3 * -50) + "% ";
+					relativeWrapper.style.left = (((alignment - 1) % 3) * -50) + "% ";
+
 					while (sub.firstElementChild) {
 						relativeWrapper.appendChild(sub.firstElementChild);
 					}
-					relativeWrapper.style.top = ((9 - alignment) / 3 * -50) + "% ";
-					relativeWrapper.style.left = (((alignment - 1) % 3) * -50) + "% ";
+
 					sub.appendChild(relativeWrapper);
+
 					currentSpanContainer = relativeWrapper;
 				}
 
