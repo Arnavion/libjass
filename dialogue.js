@@ -41,11 +41,11 @@ var Dialogue = (function () {
 			parts: { value: parts, enumerable: true }
 		});
 
-		var m_sub = null;
-
 		// Magic happens here (TODO: styling)
-		this.drawTo = function (sub, currentTime) {
-			m_sub = sub;
+		this.draw = function (currentTime) {
+			var sub = document.createElement("div");
+
+			sub.dialogue = this;
 
 			// Create an animation if there is a part that requires it
 			var keyframes = new Dialogue.KeyframeCollection(id, start, end);
@@ -357,11 +357,9 @@ var Dialogue = (function () {
 				currentSpanContainer.style.perspective = "400";
 				currentSpanContainer.style.webkitPerspective = "400";
 			}
+
+			return sub;
 		};
-
-		this.erase = function () { m_sub = null; };
-
-		this.isDrawn = function () { return m_sub !== null; };
 	};
 })();
 

@@ -80,7 +80,13 @@ if (!window.Set || !window.Set.prototype.iterator) {
 			}));
 		};
 	};
-	
+
 	Set.prototype = new Set();
 	Set.prototype.__iterator__ = Set.prototype.iterator;
 }
+
+HTMLDivElement.prototype.remove = function () {
+	if (this.parentElement !== null) {
+		this.parentElement.removeChild(this);
+	}
+};

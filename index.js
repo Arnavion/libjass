@@ -23,26 +23,7 @@
 ASS.debugMode = (location.search === "?debug");
 
 addEventListener("DOMContentLoaded", function () {
-	var createSubDiv;
 	var wrappers = {};
-	(function () {
-		var defaultSubDiv = document.createElement("div");
-
-		createSubDiv = function (dialogue, currentTime) {
-			var result = defaultSubDiv.cloneNode(true);
-			result.dialogue = dialogue;
-			dialogue.drawTo(result, currentTime);
-			wrappers[dialogue.layer][dialogue.alignment].appendChild(result);
-			return result;
-		};
-
-		defaultSubDiv.constructor.prototype.remove = function () {
-			if (this.parentElement !== null) {
-				this.parentElement.removeChild(this);
-				this.dialogue.erase();
-			}
-		};
-	})();
 
 	var video = document.querySelector("#video");
 
@@ -131,7 +112,9 @@ addEventListener("DOMContentLoaded", function () {
 			}
 
 			var currentTime;
+
 			var currentSubs = [];
+
 			var newSubs = dialogues.toIterable().map(function (entry) {
 				return entry[1];
 			}).skipWhile(function (dialogue) {
@@ -139,10 +122,11 @@ addEventListener("DOMContentLoaded", function () {
 			}).takeWhile(function (dialogue) {
 				return dialogue.start <= currentTime;
 			}).filter(function (dialogue) {
-				return dialogue.end >= currentTime && !dialogue.isDrawn();
+				return dialogue.end >= currentTime && currentSubs.every(function (sub) { return sub.dialogue !== dialogue; });
 			}).map(function (dialogue) {
-				return createSubDiv(dialogue, currentTime);
+				return wrappers[dialogue.layer][dialogue.alignment].appendChild(dialogue.draw(currentTime));
 			});
+
 			video.addEventListener("timeupdate", function () {
 				currentTime = video.currentTime;
 
