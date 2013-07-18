@@ -155,21 +155,38 @@ addEventListener("DOMContentLoaded", function () {
 						return false;
 					}
 				}).concat(Iterator(newSubs).toArray());
+
+				if (ASS.debugMode) {
+					console.log("video.timeupdate: video.paused = " + video.paused + ", video.seeking = " + video.seeking);
+				}
 			}, false);
 
 			video.addEventListener("seeking", function () {
 				currentSubs.forEach(function (sub) {
 					sub.remove();
 				});
+
 				currentSubs = [];
-			});
+
+				if (ASS.debugMode) {
+					console.log("video.seeking: video.paused = " + video.paused + ", video.seeking = " + video.seeking);
+				}
+			}, false);
 
 			video.addEventListener("pause", function () {
 				subsWrapper.className = "paused";
+
+				if (ASS.debugMode) {
+					console.log("video.pause: video.paused = " + video.paused + ", video.seeking = " + video.seeking);
+				}
 			}, false);
 
 			video.addEventListener("playing", function () {
 				subsWrapper.className = "";
+
+				if (ASS.debugMode) {
+					console.log("video.playing: video.paused = " + video.paused + ", video.seeking = " + video.seeking);
+				}
 			}, false);
 		};
 	}
