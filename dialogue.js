@@ -20,6 +20,17 @@
 
 "use strict";
 
+/**
+ * @constructor
+ * @param {string} text
+ * @param {string} style
+ * @param {number} start
+ * @param {number} end
+ * @param {number} layer
+ * @param {{parse: function(string, string=): !(Object|string)}} parser
+ * @param {!Info} info
+ * @param {!Array.<Style>} styles
+ */
 var Dialogue = (function () {
 	var lastDialogueId = -1;
 
@@ -42,8 +53,12 @@ var Dialogue = (function () {
 		});
 
 		// Magic happens here (TODO: styling)
+		/**
+		 * @param {number} currentTime
+		 * @return {HTMLDivElement}
+		 */
 		this.draw = function (currentTime) {
-			var sub = document.createElement("div");
+			var sub = /** @type {HTMLDivElement} */ (document.createElement("div"));
 
 			sub.dialogue = this;
 
@@ -363,15 +378,53 @@ var Dialogue = (function () {
 	};
 })();
 
+/** @type {number} */
+Dialogue.prototype.id;
+/** @type {number} */
+Dialogue.prototype.start;
+/** @type {number} */
+Dialogue.prototype.end;
+/** @type {number} */
+Dialogue.prototype.alignment;
+/** @type {number} */
+Dialogue.prototype.layer;
+/** @type {!Array.<!Object>} */
+Dialogue.prototype.parts;
+
+/**
+ * @return {string}
+ */
+Dialogue.prototype.toString = function () {
+	return "[" + this.start.toFixed(3) + "-" + this.end.toFixed(3) + "] " + this.parts.join(", ");
+};
+
+/** @type {Dialogue} */
+HTMLDivElement.prototype.dialogue;
+
+/**
+ * @constructor
+ * @param {number} id
+ * @param {number} start
+ * @param {number} end
+ */
 Dialogue.KeyframeCollection = function (id, start, end) {
+	/** @type {!Object.<string, !Object.<string, string>>} */
 	var keyframes = {};
 
+	/**
+	 * @param {number} time
+	 * @param {string} property
+	 * @param {string} value
+	 */
 	this.add = function (time, property, value) {
 		var step = (100 * (time - start) / (end - start)) + "%";
 		keyframes[step] = keyframes[step] || {};
 		keyframes[step][property] = value;
 	};
 
+	/**
+	 * @return {string}
+	 */
 	this.toCSS = function () {
 		var result = "";
 
@@ -393,8 +446,4 @@ Dialogue.KeyframeCollection = function (id, start, end) {
 
 		return result;
 	};
-};
-
-Dialogue.prototype.toString = function () {
-	return "[" + this.start.toFixed(3) + "-" + this.end.toFixed(3) + "] " + this.parts.join(", ");
 };

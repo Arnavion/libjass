@@ -22,54 +22,81 @@
 
 // String.trimLeft for browsers which don't support it
 if (String.prototype.trimLeft === undefined) {
+	/**
+	 * @return {string}
+	 * @suppress {duplicate} Closure compiler thinks this is redefining its own exposed API despite the check for undefined above
+	 */
 	String.prototype.trimLeft = function () {
 		return this.match(/^\s*(.*)$/)[1];
 	};
 }
 
 /**
- * @param str
- * @return <code>true</code> if this string starts with <code>str<code>
+ * @param {string} str
+ * @return {boolean} true if this string starts with str
  */
 String.prototype.startsWith = function (str) {
 	return this.indexOf(str) === 0;
 };
 
 /**
- * @param str
- * @return <code>true</code> if this string ends with <code>str<code>
+ * @param {string} str
+ * @return {boolean} true if this string ends with str
  */
 String.prototype.endsWith = function (str) {
 	return this.indexOf(str) === this.length - str.length;
 };
 
-// Replace the in-built parseInt with one which always parses to base 10 ints if the second parameter is undefined
-(function () {
-	var oldParseInt = window.parseInt;
-
-	window.parseInt = function (str) {
-		// If str starts with 0x, then it is to be parsed as base 16 even if the second parameter is not given.
-		// PEGjs requires this.
-		return oldParseInt(str, arguments[1] || (!str.startsWith("0x") && 10));
-	};
-})();
+/**
+ * An alternative to window.parseInt that defaults to parsing input in base 10 if the second parameter is undefined.
+ *
+ * @param {string} str
+ * @param {number=} opt_base
+ * @return {number}
+ */
+window["parseInteger"] = function (str, opt_base) {
+	// If str starts with 0x, then it is to be parsed as base 16 even if the second parameter is not given.
+	// PEGjs requires this.
+	if (opt_base === undefined) {
+		if (str.startsWith("0x")) {
+			opt_base = 16;
+		}
+		else {
+			opt_base = 10;
+		}
+	}
+	return parseInt(str, opt_base);
+};
 
 /* Set and Set.iterator implementation for browsers that don't support them. Only supports String elements.
  * Elements are stored as properties of an object, prefixed with the ">" character to avoid collisions with pre-defined
  * properties.
  */
-if (!window.Set || !window.Set.prototype.iterator) {
-	window.Set = function () {
+if (!window["Set"] || !window["Set"].prototype.iterator) {
+	/**
+	 * @constructor
+	 */
+	window["Set"] = function () {
 		var data = {};
 
+		/**
+		 * @param {string} element
+		 */
 		this.add = function (element) {
 			data[">" + element] = true;
 		};
 
+		/**
+		 * @param {string} element
+		 * @return boolean
+		 */
 		this.has = function (element) {
 			return data.hasOwnProperty(">" + element);
 		};
 
+		/**
+		 * @return {{next: function(): Object}}
+		 */
 		this.iterator = function () {
 			return Iterator(Object.keys(data).toIterable().map(function (entry) {
 				return entry[1];

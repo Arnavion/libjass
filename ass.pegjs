@@ -116,7 +116,7 @@ boldTag
 				case "":
 					return new ASS.Tags.Bold(null);
 				default:
-					return new ASS.Tags.Bold(parseInt(value));
+					return new ASS.Tags.Bold(parseInteger(value));
 			}
 		}
 
@@ -235,7 +235,7 @@ outlineAlphaTag
 alignmentTag
 	=	"an" value:[1-9] {
 			return new ASS.Tags.Alignment(
-				parseInt(value)
+				parseInteger(value)
 			);
 		}
 
@@ -293,7 +293,7 @@ color
 			return (
 				"rgba(" +
 				[red.join(""), green.join(""), blue.join("")].map(function (part) {
-					return parseInt(part, 16);
+					return parseInteger(part, 16);
 				}).join(", ") +
 				", 1)"
 			);
@@ -309,9 +309,9 @@ colorWithAlpha
 			return (
 				"rgba(" +
 				[red.join(""), green.join(""), blue.join("")].map(function (part) {
-					return parseInt(part, 16) + ", ";
+					return parseInteger(part, 16) + ", ";
 				}).join("") +
-				(1 - parseInt(alpha.join(""), 16) / 255) +
+				(1 - parseInteger(alpha.join(""), 16) / 255) +
 				")"
 			);
 		}

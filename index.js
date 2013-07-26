@@ -101,7 +101,7 @@ addEventListener("DOMContentLoaded", function () {
 								video.play();
 							}
 						}
-					});
+					}, false);
 					xhr.send(null);
 					return xhr;
 				})
@@ -195,7 +195,7 @@ addEventListener("DOMContentLoaded", function () {
 			if (rawASS) {
 				ass = ASS.parse(rawASS, parser);
 				if (ASS.debugMode) {
-					window.ass = ass;
+					window["ass"] = ass;
 				}
 				testVideoAndASSLoaded();
 			}
@@ -213,7 +213,7 @@ addEventListener("DOMContentLoaded", function () {
 			if (parser) {
 				ass = ASS.parse(rawASS, parser);
 				if (ASS.debugMode) {
-					window.ass = ass;
+					window["ass"] = ass;
 				}
 				testVideoAndASSLoaded();
 			}
