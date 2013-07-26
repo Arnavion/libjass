@@ -1,51 +1,136 @@
 @font-face {
 	font-family: "Amienne";
-	src: url("fonts/Amienne.ttf");
+	src: url("/fonts/Amienne.ttf");
+}
+
+@font-face {
+	font-family: "ArtificeSSK";
+	src: url("/fonts/ArtificeSSK.ttf");
+}
+
+@font-face {
+	font-family: "Baar Sophia";
+	src: url("/fonts/BAARS.TTF");
 }
 
 @font-face {
 	font-family: "CAC Moose";
-	src: url("fonts/CAC Moose.ttf");
+	src: url("/fonts/CAC%20Moose.ttf");
+}
+
+@font-face {
+	font-family: "Charme";
+	src: url("/fonts/CHARME.TTF");
+}
+
+@font-face {
+	font-family: "Chinacat";
+	src: url("/fonts/chinrg.ttf");
 }
 
 @font-face {
 	font-family: "Complete in Him";
-	src: url("fonts/Complete in Him.ttf");
+	src: url("/fonts/Complete%20in%20Him.ttf");
+}
+
+@font-face {
+	font-family: "Consolas";
+	src: url("/fonts/consola.ttf");
+}
+
+@font-face {
+	font-family: "Consolas";
+	src: url("/fonts/consolab.ttf");
+}
+
+@font-face {
+	font-family: "Continuum Bold";
+	src: url("/fonts/contb.ttf");
+}
+
+@font-face {
+	font-family: "Elephant";
+	src: url("/fonts/ELEPHNT.TTF");
+}
+
+@font-face {
+	font-family: "EngraversGothic BT";
+	src: url("/fonts/Engrvgot.TTF");
+}
+
+@font-face {
+	font-family: "Essai";
+	src: url("/fonts/Essai.ttf");
+}
+
+@font-face {
+	font-family: "Forte";
+	src: url("/fonts/FORTE.TTF");
 }
 
 @font-face {
 	font-family: "HandelGotDBol";
-	src: url("fonts/HANDGOTB.TTF");
+	src: url("/fonts/HANDGOTB.TTF");
 }
 
 @font-face {
 	font-family: "HandelGothic BT";
-	src: url("fonts/HANDGOTN.TTF");
+	src: url("/fonts/HANDGOTN.TTF");
+}
+
+@font-face {
+	font-family: "HZHandwrite";
+	src: url("/fonts/HZHandwrite.ttf");
 }
 
 @font-face {
 	font-family: "LTFinnegan Medium";
-	src: url("fonts/LT.ttf");
+	src: url("/fonts/LT.ttf");
 }
 
 @font-face {
 	font-family: "LTFinnegan Medium";
-	src: url("fonts/LT_3italic.ttf");
+	src: url("/fonts/LT_3italic.ttf");
 	font-style: italic;
 }
 
 @font-face {
-	font-family: "Profile";
-	src: url("fonts/Profile-Medium.otf");
+	font-family: "Macron Finnetier Medium";
+	src: url("/fonts/macron%20finnetier%200.3.ttf");
+}
+
+@font-face {
+	font-family: "Old Block";
+	src: url("/fonts/OBGB.TTF");
+}
+
+@font-face {
+	font-family: "PaintyPaint";
+	src: url("/fonts/PAINP.TTF");
+}
+
+@font-face {
+	font-family: "PaintyPaint";
+	src: url("/fonts/PAINP_0.TTF");
 }
 
 @font-face {
 	font-family: "Profile";
-	src: url("fonts/Profile-Regular.otf");
+	src: url("/fonts/Profile-Medium.otf");
+}
+
+@font-face {
+	font-family: "Profile";
+	src: url("/fonts/Profile-Regular.otf");
+}
+
+@font-face {
+	font-family: "Prototype";
+	src: url("/fonts/Prototype.ttf");
 }
 
 @font-face {
 	font-family: "Swis721 Md BT";
-	src: url("fonts/SWZ721M.TTF");
+	src: url("/fonts/SWZ721M.TTF");
 }
 
