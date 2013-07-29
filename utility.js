@@ -68,12 +68,13 @@ window["parseInteger"] = function (str, opt_base) {
 	return parseInt(str, opt_base);
 };
 
-/* Set and Set.iterator implementation for browsers that don't support them. Only supports String elements.
- * Elements are stored as properties of an object, prefixed with the ">" character to avoid collisions with pre-defined
- * properties.
- */
-if (!window["Set"] || !window["Set"].prototype.iterator) {
-	/**
+if (!window["Set"] || (!window["Set"].prototype.iterator && !window["Set"].prototype.forEach)) {
+	/* Set and Set.iterator implementation for browsers that don't support them. Only supports String elements.
+	 * Elements are stored as properties of an object, prefixed with the ">" character to avoid collisions with pre-defined
+	 * properties.
+	 */
+
+	 /**
 	 * @constructor
 	 */
 	window["Set"] = function () {
@@ -108,8 +109,22 @@ if (!window["Set"] || !window["Set"].prototype.iterator) {
 		};
 	};
 
-	Set.prototype = new Set();
-	Set.prototype.__iterator__ = Set.prototype.iterator;
+	window["Set"].prototype = new window["Set"]();
+	window["Set"].prototype.__iterator__ = Set.prototype.iterator;
+}
+else if (!window["Set"].prototype.iterator && window["Set"].prototype.forEach) {
+	/**
+	 * Set.iterator implementation for browsers that support Set and Set.forEach but not Set.iterator (IE11).
+	 */
+	window["Set"].prototype.iterator = function () {
+		var elements = [];
+		this.forEach(function (element) {
+			elements.push(element);
+		});
+		return Iterator(elements.toIterable().map(function (entry) {
+			return entry[1];
+		}));
+	};
 }
 
 HTMLDivElement.prototype.remove = function () {

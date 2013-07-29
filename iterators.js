@@ -85,7 +85,7 @@ if (!window.Iterator) {
 		var currentIndex = 0;
 
 		/**
-		 * @return {!Array.<Object>} Returns a tuple [index, element]
+		 * @return {Object} Returns a tuple [index, element]
 		 */
 		this.next = function () {
 			// Loop through the array looking for an element to return
@@ -194,7 +194,7 @@ if (!window["StopIteration"]) {
  */
 var ArrayIterable = function (array) {
 	/**
-	 * @return {{next: function(): Array.<Object>}}
+	 * @return {!{next: function(): Object}}
 	 */
 	this.__iterator__ = function () {
 		return Iterator(array);

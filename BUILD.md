@@ -17,7 +17,12 @@ rm libjass.js; for file in $files; do grep -Ev '^"use strict";$' $file >> libjas
 // @js_externs /** @type {function(string): {parse: function(string, string=): (string|!Object)}} */ PEG.buildParser;
 // @js_externs /** @type {string} */ CSSStyleDeclaration.prototype.animationDuration;
 // @js_externs /** @const @type {number} */ HTMLMediaElement.HAVE_METADATA = 1;
-// @js_externs /** @type {!{next: function(): Object}} */ window.Set.prototype.iterator;
+// @js_externs /** @type {!{next: function(): Object}} */ window.Iterator;
+// @js_externs /** @type {function(Object)} */ window.Set.prototype.add;
+// @js_externs /** @type {function(Object): boolean} */ window.Set.prototype.has;
+// @js_externs /** @type {function(): !{next: function(): Object}} */ window.Set.prototype.iterator;
+// @js_externs /** @type {function(function())} */ window.Set.prototype.forEach;
+// @js_externs /** @type {function(): !{next: function(): Object}} */ Object.prototype.__iterator__;
 // ==/ClosureCompiler==
 ```
 
