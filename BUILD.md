@@ -17,6 +17,7 @@ rm libjass.js; for file in $files; do grep -Ev '^"use strict";$' $file >> libjas
 // @js_externs /** @type {function(string): {parse: function(string, string=): (string|!Object)}} */ PEG.buildParser;
 // @js_externs /** @type {string} */ CSSStyleDeclaration.prototype.animationDuration;
 // @js_externs /** @const @type {number} */ HTMLMediaElement.HAVE_METADATA = 1;
+// @js_externs /** @type {!{next: function(): Object}} */ window.Set.prototype.iterator;
 // ==/ClosureCompiler==
 ```
 

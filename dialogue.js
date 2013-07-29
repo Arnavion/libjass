@@ -29,7 +29,7 @@
  * @param {number} layer
  * @param {{parse: function(string, string=): !(Object|string)}} parser
  * @param {!Info} info
- * @param {!Array.<Style>} styles
+ * @param {!Array.<!Style>} styles
  */
 var Dialogue = (function () {
 	var lastDialogueId = -1;
@@ -55,7 +55,7 @@ var Dialogue = (function () {
 		// Magic happens here (TODO: styling)
 		/**
 		 * @param {number} currentTime
-		 * @return {HTMLDivElement}
+		 * @return {!HTMLDivElement}
 		 */
 		this.draw = function (currentTime) {
 			var sub = /** @type {HTMLDivElement} */ (document.createElement("div"));
