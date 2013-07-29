@@ -369,9 +369,6 @@ ASS.parse = function (rawASS, dialogueParser) {
 		return false;
 	});
 
-	// Sort the dialogues array by start time
-	dialogues.sort(function (dialogue1, dialogue2) { return dialogue1.start - dialogue2.start; });
-
 	// Return an ASS object with the info, list of styles and list of dialogues parsed from the raw ASS string
 	return new ASS(info, styles, dialogues);
 }

@@ -52,8 +52,19 @@ addEventListener("DOMContentLoaded", function () {
 
 			info.dpi = parseFloat(getComputedStyle(document.querySelector("#dpi-div")).height.match(/(\d+)px/)[1]);
 
+			var dialogues = ass.dialogues.slice();
+			// Sort the dialogues array by start time and then by their original position in the script (id)
+			dialogues.sort(function (dialogue1, dialogue2) {
+				var result = dialogue1.start - dialogue2.start;
+
+				if (result === 0) {
+					result = dialogue1.id - dialogue2.id;
+				}
+
+				return result;
+			});
+
 			var layers = new Set();
-			var dialogues = ass.dialogues;
 			dialogues.forEach(function (dialogue) {
 				layers.add(dialogue.layer);
 			});
@@ -122,7 +133,7 @@ addEventListener("DOMContentLoaded", function () {
 			}).takeWhile(function (dialogue) {
 				return dialogue.start <= currentTime;
 			}).filter(function (dialogue) {
-				return dialogue.end >= currentTime && currentSubs.every(function (sub) { return sub.dialogue !== dialogue; });
+				return dialogue.end >= currentTime && currentSubs.every(function (sub) { return parseInteger(sub.getAttribute("data-dialogue-id")) !== dialogue.id; });
 			}).map(function (dialogue) {
 				return wrappers[dialogue.layer][dialogue.alignment].appendChild(dialogue.draw(currentTime));
 			});
@@ -131,7 +142,9 @@ addEventListener("DOMContentLoaded", function () {
 				currentTime = video.currentTime;
 
 				currentSubs = currentSubs.filter(function (sub) {
-					if (sub.dialogue.start <= currentTime && sub.dialogue.end > currentTime) {
+					var subDialogue = ass.dialogues[parseInteger(sub.getAttribute("data-dialogue-id"))];
+
+					if (subDialogue.start <= currentTime && subDialogue.end > currentTime) {
 						return true;
 					}
 					else {

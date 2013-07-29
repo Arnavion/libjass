@@ -60,7 +60,7 @@ var Dialogue = (function () {
 		this.draw = function (currentTime) {
 			var sub = /** @type {HTMLDivElement} */ (document.createElement("div"));
 
-			sub.dialogue = this;
+			sub.setAttribute("data-dialogue-id", id);
 
 			// Create an animation if there is a part that requires it
 			var keyframes = new Dialogue.KeyframeCollection(id, start, end);
@@ -397,9 +397,6 @@ Dialogue.prototype.parts;
 Dialogue.prototype.toString = function () {
 	return "[" + this.start.toFixed(3) + "-" + this.end.toFixed(3) + "] " + this.parts.join(", ");
 };
-
-/** @type {Dialogue} */
-HTMLDivElement.prototype.dialogue;
 
 /**
  * @constructor
