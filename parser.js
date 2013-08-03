@@ -258,20 +258,20 @@ ASS["parse"] = function (rawASS, dialogueParser) {
 		// else if this is a style line
 		else if (line.startsWith("Style:")) {
 			if (
-				nameIndex == -1 ||
-				italicIndex == -1 ||
-				boldIndex == -1 ||
-				underlineIndex == -1 ||
-				strikethroughIndex == -1 ||
-				outlineWidthIndex == -1 ||
-				fontNameIndex == -1 ||
-				fontSizeIndex == -1 ||
-				primaryColorIndex == -1 ||
-				outlineColorIndex == -1 ||
-				alignmentIndex == -1 ||
-				marginLeftIndex == -1 ||
-				marginRightIndex == -1 ||
-				marginVerticalIndex == -1
+				nameIndex === -1 ||
+				italicIndex === -1 ||
+				boldIndex === -1 ||
+				underlineIndex === -1 ||
+				strikethroughIndex === -1 ||
+				outlineWidthIndex === -1 ||
+				fontNameIndex === -1 ||
+				fontSizeIndex === -1 ||
+				primaryColorIndex === -1 ||
+				outlineColorIndex === -1 ||
+				alignmentIndex === -1 ||
+				marginLeftIndex === -1 ||
+				marginRightIndex === -1 ||
+				marginVerticalIndex === -1
 			) {
 				throw new Error("All required line styles not found.");
 			}
@@ -318,11 +318,11 @@ ASS["parse"] = function (rawASS, dialogueParser) {
 		// else if this is a dialogue line
 		else if (line.startsWith("Dialogue:")) {
 			if (
-				styleIndex == -1 ||
-				startIndex == -1 ||
-				endIndex == -1 ||
-				textIndex == -1 ||
-				layerIndex == -1
+				styleIndex === -1 ||
+				startIndex === -1 ||
+				endIndex === -1 ||
+				textIndex === -1 ||
+				layerIndex === -1
 			) {
 				throw new Error("All required event styles not found.");
 			}
