@@ -101,7 +101,7 @@ if (!window.Iterator) {
 					// ... return it
 					return [oldCurrentIndex, array[oldCurrentIndex]];
 				}
-					// Else advance to the next index
+				// Else advance to the next index
 				else {
 					currentIndex++;
 				}

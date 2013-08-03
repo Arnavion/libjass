@@ -390,7 +390,7 @@ Dialogue.prototype.alignment;
 Dialogue.prototype.layer;
 /** @expose @type {!Array.<!Object>} */
 Dialogue.prototype.parts;
-/** @expose @type {(number): HTMLDivElement} */
+/** @expose @type {(number): !HTMLDivElement} */
 Dialogue.prototype.draw;
 
 /**
