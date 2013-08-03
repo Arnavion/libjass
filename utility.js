@@ -23,6 +23,7 @@
 // String.trimLeft for browsers which don't support it
 if (String.prototype.trimLeft === undefined) {
 	/**
+	 * @expose
 	 * @return {string}
 	 * @suppress {duplicate} Closure compiler thinks this is redefining its own exposed API despite the check for undefined above
 	 */
@@ -32,6 +33,7 @@ if (String.prototype.trimLeft === undefined) {
 }
 
 /**
+ * @expose
  * @param {string} str
  * @return {boolean} true if this string starts with str
  */
@@ -40,6 +42,7 @@ String.prototype.startsWith = function (str) {
 };
 
 /**
+ * @expose
  * @param {string} str
  * @return {boolean} true if this string ends with str
  */
@@ -96,7 +99,7 @@ if (!window["Set"] || (!window["Set"].prototype.iterator && !window["Set"].proto
 		};
 
 		/**
-		 * @return {{next: function(): Object}}
+		 * @return {{next: function(): string}}
 		 */
 		this.iterator = function () {
 			return Iterator(Object.keys(data).toIterable().map(function (entry) {

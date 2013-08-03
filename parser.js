@@ -37,11 +37,11 @@ var ASS = function (info, styles, dialogues) {
 	});
 };
 
-/** @type {!Info} */
+/** @expose @type {!Info} */
 ASS.prototype.info;
-/** @type {!Array.<!Style>} */
+/** @expose @type {!Array.<!Style>} */
 ASS.prototype.styles;
-/** @type {!Array.<!Dialogue>} */
+/** @expose @type {!Array.<!Dialogue>} */
 ASS.prototype.dialogues;
 
 /**
@@ -74,12 +74,14 @@ var Info = function (playResX, playResY) {
 	});
 };
 
-/** @type {number} */
+/** @expose @type {number} */
 Info.prototype.scaleX;
-/** @type {number} */
+/** @expose @type {number} */
 Info.prototype.scaleY;
-/** @type {number} */
+/** @expose @type {number} */
 Info.prototype.dpi;
+/** @expose @type {(number, number)} */
+Info.prototype.scaleTo;
 
 /**
  * This class represents a single global style declaration in an ASS script. The styles can be obtained via the ASS.styles property.
@@ -119,33 +121,33 @@ var Style = function (name, italic, bold, underline, strikethrough, outlineWidth
 	});
 };
 
-/** @type {string} */
+/** @expose @type {string} */
 Style.prototype.name;
-/** @type {boolean} */
+/** @expose @type {boolean} */
 Style.prototype.italic;
-/** @type {boolean} */
+/** @expose @type {boolean} */
 Style.prototype.bold;
-/** @type {boolean} */
+/** @expose @type {boolean} */
 Style.prototype.underline;
-/** @type {boolean} */
+/** @expose @type {boolean} */
 Style.prototype.strikethrough;
-/** @type {number} */
+/** @expose @type {number} */
 Style.prototype.outlineWidth;
-/** @type {string} */
+/** @expose @type {string} */
 Style.prototype.fontName;
-/** @type {number} */
+/** @expose @type {number} */
 Style.prototype.fontSize;
-/** @type {string} */
+/** @expose @type {string} */
 Style.prototype.primaryColor;
-/** @type {string} */
+/** @expose @type {string} */
 Style.prototype.outlineColor;
-/** @type {number} */
+/** @expose @type {number} */
 Style.prototype.alignment;
-/** @type {number} */
+/** @expose @type {number} */
 Style.prototype.marginLeft;
-/** @type {number} */
+/** @expose @type {number} */
 Style.prototype.marginRight;
-/** @type {number} */
+/** @expose @type {number} */
 Style.prototype.marginVertical;
 
 
@@ -153,10 +155,10 @@ Style.prototype.marginVertical;
  * Parses the raw ASS string into an ASS object
  *
  * @param {string} rawASS
- * @param {{parse: function(string, string=): !(Object|string)}} dialogueParser
+ * @param {{parse: function(string, string=): !*}} dialogueParser
  * @return {ASS}
  */
-ASS.parse = function (rawASS, dialogueParser) {
+ASS["parse"] = function (rawASS, dialogueParser) {
 	// Info variables
 	var info = null;
 	var playResX = -1;
@@ -197,19 +199,10 @@ ASS.parse = function (rawASS, dialogueParser) {
 		return entry[1];
 	});
 
-	var skipOneLine = true;
-
 	Iterator(lines.skipWhile(function (line) {
 		// Skip all lines till the script info section begins
 		return line !== "[Script Info]";
-	}).skipWhile(function (line) {
-		if (skipOneLine) {
-			skipOneLine = !skipOneLine;
-			return true;
-		}
-		
-		return false;
-	}).takeWhile(function (line) {
+	}).skip(1).takeWhile(function (line) {
 		// Take all the lines till the script resolution is found or the script info section ends
 		return (playResX === -1 || playResY === -1) && !line.startsWith("[");
 	})).forEach(function (line) {
@@ -235,19 +228,10 @@ ASS.parse = function (rawASS, dialogueParser) {
 	info = /** type {!Info} */ (info); // To tell closure compiler info can't be null now.
 
 
-	skipOneLine = true;
-
 	Iterator(lines.skipWhile(function (line) {
 		// Skip all lines till the line styles section begins
 		return line !== "[V4+ Styles]";
-	}).skipWhile(function (line) {
-		if (skipOneLine) {
-			skipOneLine = !skipOneLine;
-			return true;
-		}
-		
-		return false;
-	}).takeWhile(function (line) {
+	}).skip(1).takeWhile(function (line) {
 		// Take all the lines till the lines styles section ends
 		return !line.startsWith("[");
 	})).forEach(function (line) {
@@ -314,19 +298,10 @@ ASS.parse = function (rawASS, dialogueParser) {
 	});
 
 
-	skipOneLine = true;
-
 	Iterator(lines.skipWhile(function (line) {
 		// Skip all lines till the events section begins
 		return line !== "[Events]";
-	}).skipWhile(function (line) {
-		if (skipOneLine) {
-			skipOneLine = !skipOneLine;
-			return true;
-		}
-		
-		return false;
-	}).takeWhile(function (line) {
+	}).skip(1).takeWhile(function (line) {
 		// Take all the lines till the events section ends
 		return !line.startsWith("[");
 	})).forEach(function (line) {

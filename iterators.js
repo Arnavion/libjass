@@ -25,43 +25,49 @@
  *
  * @constructor
  */
-var Iterable = function () {};
+var Iterable = function () { };
+window["Iterable"] = Iterable;
 
 /**
- * @template T, U
- * @this {Iterable.<T>}
- * @param {function(T): U} transform A function (element) -> (transformedElement)
- * @return {!SelectIterable.<T, U>} A new Iterable with the given transform applied
+ * @expose
+ * @param {function(*): *} transform A function (element) -> (transformedElement)
+ * @return {!Iterable} A new Iterable with the given transform applied
  */
 Iterable.prototype.map = function (transform) {
 	return new SelectIterable(this, transform);
 };
 
 /**
- * @template T
- * @this {Iterable.<T>}
- * @param {function(T): boolean} filter A function (element) -> (Boolean). Returns true if element should remain in the enumeration.
- * @return {!WhereIterable.<T>} A new Iterable with the given filter applied
+ * @expose
+ * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns true if element should remain in the enumeration.
+ * @return {!Iterable} A new Iterable with the given filter applied
  */
 Iterable.prototype.filter = function (filter) {
 	return new WhereIterable(this, filter);
 };
 
 /**
- * @template T
- * @this {Iterable.<T>}
- * @param {function(T): boolean} filter A function (element) -> (Boolean). Returns false for an element if enumeration of this Iterable should stop at that element.
- * @return {!TakeWhileIterable.<T>} A new Iterable with the given filter applied
+ * @expose
+ * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns false for an element if enumeration of this Iterable should stop at that element.
+ * @return {!Iterable} A new Iterable with the given filter applied
  */
 Iterable.prototype.takeWhile = function (filter) {
 	return new TakeWhileIterable(this, filter);
 };
 
 /**
- * @template T
- * @this {Iterable.<T>}
- * @param {function(T): boolean} filter A function (element) -> (Boolean). Returns true for an element if enumeration of this Iterable should skip all elements upto that element.
- * @return {!SkipWhileIterable.<T>} A new Iterable with the given filter applied
+ * @expose
+ * @param {number} count The number of elements to skip
+ * @return {!Iterable} A new Iterable that skips the given number of elements
+ */
+Iterable.prototype.skip = function (count) {
+	return new SkipIterable(this, count);
+};
+
+/**
+ * @expose
+ * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns true for an element if enumeration of this Iterable should skip all elements upto that element.
+ * @return {!Iterable} A new Iterable with the given filter applied
  */
 Iterable.prototype.skipWhile = function (filter) {
 	return new SkipWhileIterable(this, filter);
@@ -76,16 +82,14 @@ if (!window.Iterator) {
 	 * A default Iterator for arrays in case Iterator(Array) is not defined by the browser.
 	 *
 	 * @constructor
-	 * @template T
-	 * @this {ArrayIterator.<T>}
-	 * @param {!Array.<T>} array
+	 * @param {!Array} array
 	 */
 	var ArrayIterator = function (array) {
 		// The index of the element which will be returned in the next call to next()
 		var currentIndex = 0;
 
 		/**
-		 * @return {Object} Returns a tuple [index, element]
+		 * @return {!Array} Returns a tuple [index, element]
 		 */
 		this.next = function () {
 			// Loop through the array looking for an element to return
@@ -97,7 +101,7 @@ if (!window.Iterator) {
 					// ... return it
 					return [oldCurrentIndex, array[oldCurrentIndex]];
 				}
-				// Else advance to the next index
+					// Else advance to the next index
 				else {
 					currentIndex++;
 				}
@@ -110,9 +114,9 @@ if (!window.Iterator) {
 	/**
 	 * A default function for creating iterators in case it is not defined by the browser.
 	 *
-	 * @param {!Object} collection
+	 * @param {!*} collection
 	 * @param {boolean=} keysOnly
-	 * @return {!{next: function(): Object}}
+	 * @return {!{next: function(): *}}
 	 */
 	window["Iterator"] = function (collection, keysOnly) {
 		var result;
@@ -122,7 +126,7 @@ if (!window.Iterator) {
 		}
 		else {
 			// Assume collection is an Array (or at least supports .length and the [] operator). Everything else is unsupported.
-			result = new ArrayIterator(/** @type {!Array.<Object>} */ (collection));
+			result = new ArrayIterator(/** @type {!Array} */(collection));
 		}
 
 		if (!keysOnly) {
@@ -146,8 +150,9 @@ else {
 /**
  * Calls the provided function for each element in this Iterable.
  *
- * @this {{next: function(): Object}}
- * @param {function(Object)} func A function (element)
+ * @expose
+ * @this {{next: function(): *}}
+ * @param {function(*)} func A function (element)
  */
 iteratorPrototype.forEach = function (func) {
 	try {
@@ -166,8 +171,9 @@ iteratorPrototype.forEach = function (func) {
 /**
  * Evaluates this iterable.
  *
- * @this {{next: function(): Object}}
- * @return {!Array.<Object>} An array of the elements of this Iterable
+ * @expose
+ * @this {{next: function(): *}}
+ * @return {!Array} An array of the elements of this Iterable
  */
 iteratorPrototype.toArray = function () {
 	var result = [];
@@ -186,15 +192,13 @@ if (!window["StopIteration"]) {
  * This class is an Iterable returned by Array.toIterable() and represents an Iterable backed by the
  * elements of that array.
  *
- * @template T
  * @constructor
- * @this {ArrayIterable.<T>}
- * @extends {Iterable.<T>}
- * @param {!Array.<T>} array
+ * @extends {Iterable}
+ * @param {!Array} array
  */
 var ArrayIterable = function (array) {
 	/**
-	 * @return {!{next: function(): Object}}
+	 * @return {!{next: function(): *}}
 	 */
 	this.__iterator__ = function () {
 		return Iterator(array);
@@ -203,9 +207,8 @@ var ArrayIterable = function (array) {
 ArrayIterable.prototype = iterablePrototype;
 
 /**
- * @template T
- * @this {Array.<T>}
- * @return {!ArrayIterable.<T>} An Iterable backed by this Array
+ * @expose
+ * @return {!Iterable} An Iterable backed by this Array
  */
 Array.prototype.toIterable = function () {
 	return new ArrayIterable(this);
@@ -215,15 +218,13 @@ Array.prototype.toIterable = function () {
  * An Iterable returned from Iterable.map()
  *
  * @constructor
- * @template T, U
- * @this {SelectIterable.<T, U>}
- * @extends {Iterable.<U>}
- * @param {!Object} previous The underlying iterable
- * @param {function(T): U} transform The transform function (element) -> (transformedElement)
+ * @extends {Iterable}
+ * @param {!*} previous The underlying iterable
+ * @param {function(*): *} transform The transform function (element) -> (transformedElement)
  */
 var SelectIterable = function (previous, transform) {
 	/**
-	 * @return {!SelectIterator.<T, U>}
+	 * @return {!SelectIterator}
 	 */
 	this.__iterator__ = function () {
 		return new SelectIterator(Iterator(previous), transform);
@@ -233,16 +234,14 @@ SelectIterable.prototype = iterablePrototype;
 
 /**
  * @constructor
- * @template T, U
- * @this {SelectIterator.<T, U>}
- * @param {!{next: function(): T}} previous
- * @param {function(T): U} transform
+ * @param {!{next: function(): *}} previous
+ * @param {function(*): *} transform
  */
 var SelectIterator = function (previous, transform) {
 	var currentIndex = 0;
 
 	/**
-	 * @return {U}
+	 * @return {*}
 	 */
 	this.next = function () {
 		// Apply the transform function and return the transformed value
@@ -255,15 +254,13 @@ SelectIterator.prototype = iteratorPrototype;
  * An Iterable returned from Iterable.filter()
  *
  * @constructor
- * @template T
- * @this {WhereIterable.<T>}
- * @extends {Iterable.<T>}
- * @param {!Object} previous The underlying iterable
- * @param {function(T): boolean} filter The filter function (element) -> (Boolean)
+ * @extends {Iterable}
+ * @param {!*} previous The underlying iterable
+ * @param {function(*): boolean} filter The filter function (element) -> (Boolean)
  */
 var WhereIterable = function (previous, filter) {
 	/**
-	 * @return {!WhereIterator.<T>}
+	 * @return {!WhereIterator}
 	 */
 	this.__iterator__ = function () {
 		return new WhereIterator(Iterator(previous), filter);
@@ -273,14 +270,12 @@ WhereIterable.prototype = iterablePrototype;
 
 /**
  * @constructor
- * @template T
- * @this {WhereIterator.<T>}
- * @param {!{next: function(): T}} previous
- * @param {function(T): boolean} filter
+ * @param {!{next: function(): *}} previous
+ * @param {function(*): boolean} filter
  */
 var WhereIterator = function (previous, filter) {
 	/**
-	 * @return {T}
+	 * @return {*}
 	 */
 	this.next = function () {
 		// Loop to find the next element from the underlying Iterable which passes the filter and return it
@@ -297,15 +292,13 @@ WhereIterator.prototype = iteratorPrototype;
  * An Iterable returned from Iterable.takeWhile()
  *
  * @constructor
- * @template T
- * @this {TakeWhileIterable.<T>}
- * @extends {Iterable.<T>}
- * @param {!Object} previous The underlying iterable
- * @param {function(T): boolean} filter The filter function (element) -> (Boolean)
+ * @extends {Iterable}
+ * @param {!*} previous The underlying iterable
+ * @param {function(*): boolean} filter The filter function (element) -> (Boolean)
  */
 var TakeWhileIterable = function (previous, filter) {
 	/**
-	 * @return {!TakeWhileIterator.<T>}
+	 * @return {!TakeWhileIterator}
 	 */
 	this.__iterator__ = function () {
 		return new TakeWhileIterator(Iterator(previous), filter);
@@ -315,17 +308,15 @@ TakeWhileIterable.prototype = iterablePrototype;
 
 /**
  * @constructor
- * @template T
- * @this {TakeWhileIterator.<T>}
- * @param {!{next: function(): T}} previous
- * @param {function(T): boolean} filter
+ * @param {!{next: function(): *}} previous
+ * @param {function(*): boolean} filter
  */
 var TakeWhileIterator = function (previous, filter) {
 	// Set to true when an element not matching the filter is found
 	var foundEnd = false;
 
 	/**
-	 * @return {T}
+	 * @return {*}
 	 */
 	this.next = function () {
 		var result = null; // Assigned null to silence closure compiler warning
@@ -350,18 +341,55 @@ var TakeWhileIterator = function (previous, filter) {
 TakeWhileIterator.prototype = iteratorPrototype;
 
 /**
+ * An Iterable returned from Iterable.skip()
+ *
+ * @constructor
+ * @extends {Iterable}
+ * @param {!*} previous The underlying iterable
+ * @param {number} count The number of elements to skip
+ */
+var SkipIterable = function (previous, count) {
+	/**
+	 * @return {!SkipIterator}
+	 */
+	this.__iterator__ = function () {
+		return new SkipIterator(Iterator(previous), count);
+	};
+};
+SkipIterable.prototype = iterablePrototype;
+
+/**
+ * @constructor
+ * @param {!{next: function(): *}} previous
+ * @param {number} count
+ */
+var SkipIterator = function (previous, count) {
+	var skippedCount = 0;
+
+	/**
+	 * @return {*}
+	 */
+	this.next = function () {
+		for (; skippedCount < count; skippedCount++) {
+			previous.next();
+		}
+
+		return previous.next();
+	};
+};
+SkipIterator.prototype = iteratorPrototype;
+
+/**
  * An Iterable returned from Iterable.skipWhile()
  *
  * @constructor
- * @template T
- * @this {SkipWhileIterable.<T>}
- * @extends {Iterable.<T>}
- * @param {!Object} previous The underlying iterable
- * @param {function(T): boolean} filter The filter function (element) -> (Boolean)
+ * @extends {Iterable}
+ * @param {!*} previous The underlying iterable
+ * @param {function(*): boolean} filter The filter function (element) -> (Boolean)
  */
 var SkipWhileIterable = function (previous, filter) {
 	/**
-	 * @return {!SkipWhileIterator.<T>}
+	 * @return {!SkipWhileIterator}
 	 */
 	this.__iterator__ = function () {
 		return new SkipWhileIterator(Iterator(previous), filter);
@@ -371,17 +399,15 @@ SkipWhileIterable.prototype = iterablePrototype;
 
 /**
  * @constructor
- * @template T
- * @this {SkipWhileIterator.<T>}
- * @param {!{next: function(): T}} previous
- * @param {function(T): boolean} filter
+ * @param {!{next: function(): *}} previous
+ * @param {function(*): boolean} filter
  */
 var SkipWhileIterator = function (previous, filter) {
 	// Set to true when an element matching the filter is found
 	var foundStart = false;
 
 	/**
-	 * @return {T}
+	 * @return {*}
 	 */
 	this.next = function () {
 		var result;

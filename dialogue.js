@@ -27,7 +27,7 @@
  * @param {number} start
  * @param {number} end
  * @param {number} layer
- * @param {{parse: function(string, string=): !(Object|string)}} parser
+ * @param {{parse: function(string, string=): !*}} parser
  * @param {!Info} info
  * @param {!Array.<!Style>} styles
  */
@@ -378,18 +378,20 @@ var Dialogue = (function () {
 	};
 })();
 
-/** @type {number} */
+/** @expose @type {number} */
 Dialogue.prototype.id;
-/** @type {number} */
+/** @expose @type {number} */
 Dialogue.prototype.start;
-/** @type {number} */
+/** @expose @type {number} */
 Dialogue.prototype.end;
-/** @type {number} */
+/** @expose @type {number} */
 Dialogue.prototype.alignment;
-/** @type {number} */
+/** @expose @type {number} */
 Dialogue.prototype.layer;
-/** @type {!Array.<!Object>} */
+/** @expose @type {!Array.<!Object>} */
 Dialogue.prototype.parts;
+/** @expose @type {(number): HTMLDivElement} */
+Dialogue.prototype.draw;
 
 /**
  * @return {string}
