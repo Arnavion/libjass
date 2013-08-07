@@ -365,7 +365,7 @@ var Dialogue = (function () {
 				currentSpanContainer.style.transform = transformStyle;
 				currentSpanContainer.style.webkitTransform = transformStyle;
 
-				var transformOrigin = (((alignment - 1) % 3) * 50) + "% " + ((5 - alignment) / 3 * 50) + "%";
+				var transformOrigin = (((alignment - 1) % 3) * 50) + "% " + ((2 - (((alignment - 1) / 3) | 0)) * 50) + "%";
 				currentSpanContainer.style.transformOrigin = transformOrigin;
 				currentSpanContainer.style.webkitTransformOrigin = transformOrigin;
 
