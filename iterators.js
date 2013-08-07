@@ -238,8 +238,6 @@ SelectIterable.prototype = iterablePrototype;
  * @param {function(*): *} transform
  */
 var SelectIterator = function (previous, transform) {
-	var currentIndex = 0;
-
 	/**
 	 * @return {*}
 	 */
