@@ -1,8 +1,8 @@
-libjass is a Javascript framework to render ASS subs on HTML5 video in the browser.
+libjass is a JavaScript library written in TypeScript to render ASS subs on HTML5 video in the browser.
 
 # Unique features
-* Easy to deploy. A static hosting is all that's needed.
 * Requires no tweaks to the ASS from the original video.
+* Easy to deploy. A static hosting is all that's needed.
 * Uses DOM elements and CSS3 transforms for rendering and effects, instead of drawing on an HTML5 canvas. This allows all the layout and rendering to be handled by the browser instead of requiring complex drawing and animation code. This will especially be useful when \t gets support.
 
 # Supported features

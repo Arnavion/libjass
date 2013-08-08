@@ -27,11 +27,11 @@ dialogue
 
 			// Merge consecutive text and comment parts into one part
 			parts = parts.reduce(function (previous, current) {
-				if (current instanceof ASS.Tags.Text && previous[previous.length - 1] instanceof ASS.Tags.Text) {
-					previous[previous.length - 1] = new ASS.Tags.Text(previous[previous.length - 1].value + current.value);
+				if (current instanceof libjass.tags.Text && previous[previous.length - 1] instanceof libjass.tags.Text) {
+					previous[previous.length - 1] = new libjass.tags.Text(previous[previous.length - 1].value + current.value);
 				}
-				else if (current instanceof ASS.Tags.Comment && previous[previous.length - 1] instanceof ASS.Tags.Comment) {
-					previous[previous.length - 1] = new ASS.Tags.Comment(previous[previous.length - 1].value + current.value);
+				else if (current instanceof libjass.tags.Comment && previous[previous.length - 1] instanceof libjass.tags.Comment) {
+					previous[previous.length - 1] = new libjass.tags.Comment(previous[previous.length - 1].value + current.value);
 				}
 				else {
 					previous.push(current);
@@ -74,31 +74,31 @@ enclosedTags
 
 comment
 	=	"{" value:[^}]* "}" {
-			return new ASS.Tags.Comment(
+			return new libjass.tags.Comment(
 				value.join("")
 			);
 		}
 
 newline
 	=	"\\N" {
-			return new ASS.Tags.NewLine();
+			return new libjass.tags.NewLine();
 		}
 
 hardspace
 	=	"\\h" {
-			return new ASS.Tags.HardSpace();
+			return new libjass.tags.HardSpace();
 		}
 
 text
 	=	value:. {
-			return new ASS.Tags.Text(
+			return new libjass.tags.Text(
 				value
 			);
 		}
 
 italicTag
 	=	"i" value:enableDisable? {
-			return new ASS.Tags.Italic(
+			return new libjass.tags.Italic(
 				(value !== "") ? value : null
 			);
 		}
@@ -110,145 +110,145 @@ boldTag
 			}
 			switch (value) {
 				case "1":
-					return new ASS.Tags.Bold(true);
+					return new libjass.tags.Bold(true);
 				case "0":
-					return new ASS.Tags.Bold(false);
+					return new libjass.tags.Bold(false);
 				case "":
-					return new ASS.Tags.Bold(null);
+					return new libjass.tags.Bold(null);
 				default:
-					return new ASS.Tags.Bold(parseInteger(value));
+					return new libjass.tags.Bold(parseInteger(value));
 			}
 		}
 
 underlineTag
 	=	"u" value:enableDisable? {
-			return new ASS.Tags.Underline(
+			return new libjass.tags.Underline(
 				(value !== "") ? value : null
 			);
 		}
 
 strikeoutTag
 	=	"s" value:enableDisable? {
-			return new ASS.Tags.Strikeout(
+			return new libjass.tags.Strikeout(
 				(value !== "") ? value : null
 			);
 		}
 
 borderTag
 	=	"bord" value:decimal? {
-			return new ASS.Tags.Border(
+			return new libjass.tags.Border(
 				(value !== "") ? value : null
 			);
 		}
 
 blurTag
 	=	"blur" value:decimal? {
-			return new ASS.Tags.Blur(
+			return new libjass.tags.Blur(
 				(value !== "") ? value : null
 			);
 		}
 
 fontNameTag
 	=	"fn" value:[^\\}]* {
-			return new ASS.Tags.FontName(
+			return new libjass.tags.FontName(
 				(value.length > 0) ? value.join("") : null
 			);
 		}
 
 fontSizeTag
 	=	"fs" value:decimal? {
-			return new ASS.Tags.FontSize(
+			return new libjass.tags.FontSize(
 				(value !== "") ? value : null
 			);
 		}
 
 frxTag
 	=	"frx" value:decimal? {
-			return new ASS.Tags.Frx(
+			return new libjass.tags.Frx(
 				(value !== "") ? value : null
 			);
 		}
 
 fryTag
 	=	"fry" value:decimal? {
-			return new ASS.Tags.Fry(
+			return new libjass.tags.Fry(
 				(value !== "") ? value : null
 			);
 		}
 
 frzTag
 	=	"frz" value:decimal? {
-			return new ASS.Tags.Frz(
+			return new libjass.tags.Frz(
 				(value !== "") ? value : null
 			);
 		}
 
 faxTag
 	=	"fax" value:decimal? {
-			return new ASS.Tags.Fax(
+			return new libjass.tags.Fax(
 				(value !== "") ? value : null
 			);
 		}
 
 fayTag
 	=	"fay" value:decimal? {
-			return new ASS.Tags.Fay(
+			return new libjass.tags.Fay(
 				(value !== "") ? value : null
 			);
 		}
 
 primaryColorTag
 	=	"1"? "c" value:color? {
-			return new ASS.Tags.PrimaryColor(
+			return new libjass.tags.PrimaryColor(
 				(value !== "") ? value : null
 			);
 		}
 
 outlineColorTag
 	=	"3c" value:color? {
-			return new ASS.Tags.OutlineColor(
+			return new libjass.tags.OutlineColor(
 				(value !== "") ? value : null
 			);
 		}
 
 alphaTag
 	=	"alpha" value:alpha? {
-			return new ASS.Tags.Alpha(
+			return new libjass.tags.Alpha(
 				(value !== "") ? value : null
 			);
 		}
 
 primaryAlphaTag
 	=	"1a" value:alpha? {
-			return new ASS.Tags.PrimaryAlpha(
+			return new libjass.tags.PrimaryAlpha(
 				(value !== "") ? value : null
 			);
 		}
 
 outlineAlphaTag
 	=	"3a" value:alpha? {
-			return new ASS.Tags.OutlineAlpha(
+			return new libjass.tags.OutlineAlpha(
 				(value !== "") ? value : null
 			);
 		}
 
 alignmentTag
 	=	"an" value:[1-9] {
-			return new ASS.Tags.Alignment(
+			return new libjass.tags.Alignment(
 				parseInteger(value)
 			);
 		}
 
 resetTag
 	=	"r" value:[^\\}]* {
-			return new ASS.Tags.Reset(
+			return new libjass.tags.Reset(
 				(value.length > 0) ? value.join("") : null
 			);
 		}
 
 posTag
 	=	"pos(" x:decimal "," y:decimal ")" {
-			return new ASS.Tags.Pos(
+			return new libjass.tags.Pos(
 				x,
 				y
 			);
@@ -256,7 +256,7 @@ posTag
 
 fadeTag
 	=	"fad(" start:decimal "," end:decimal ")" {
-			return new ASS.Tags.Fade(
+			return new libjass.tags.Fade(
 				parseFloat(start) / 1000,
 				parseFloat(end) / 1000
 			);

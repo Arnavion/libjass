@@ -20,9 +20,11 @@
 
 "use strict";
 
-ASS.debugMode = (location.search === "?debug");
+libjass.ASS.debugMode = (location.search === "?debug");
 
 addEventListener("DOMContentLoaded", function () {
+	var ASS = libjass.ASS;
+
 	var wrappers = {};
 
 	var video = document.querySelector("#video");
@@ -68,7 +70,7 @@ addEventListener("DOMContentLoaded", function () {
 			dialogues.forEach(function (dialogue) {
 				layers.add(dialogue.layer);
 			});
-			layers.iterator().toArray().sort().forEach(function (layer) {
+			Iterator(layers).toArray().sort().forEach(function (layer) {
 				var i;
 				wrappers[layer] = {};
 				for (i = 1; i <= 9; ++i) {
@@ -85,7 +87,7 @@ addEventListener("DOMContentLoaded", function () {
 			});
 			dialogues.forEach(function (dialogue) {
 				dialogue.parts.forEach(function (part) {
-					if (part instanceof ASS.Tags.FontName) {
+					if (part instanceof libjass.tags.FontName) {
 						allFonts.add(part.value);
 					}
 				});
