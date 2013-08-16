@@ -93,7 +93,8 @@ String.prototype.startsWith = function (str: string) {
  */
 String.prototype.endsWith = function (str: string) {
 	var self: string = this;
-	return self.indexOf(str) === self.length - str.length;
+	var index = self.indexOf(str);
+	return index !== -1 && index === self.length - str.length;
 };
 
 /**
