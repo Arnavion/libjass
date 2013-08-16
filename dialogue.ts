@@ -80,7 +80,7 @@ module libjass {
 		 * @param {number} currentTime
 		 * @return {!HTMLDivElement}
 		 */
-		draw(currentTime: number) {
+		draw(currentTime: number): HTMLDivElement {
 			var sub = document.createElement("div");
 
 			sub.setAttribute("data-dialogue-id", String(this._id));
@@ -115,7 +115,7 @@ module libjass {
 			var scaleY = this._info.scaleY;
 			var dpi = this._info.dpi;
 
-			var animationEndCallback = sub.remove.bind(sub);
+			var animationEndCallback: () => void = sub.remove.bind(sub);
 
 			sub.style.animationName = "dialogue-" + this._id;
 			sub.style.animationDuration = (this._end - this._start) + "s";

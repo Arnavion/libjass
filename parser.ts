@@ -262,8 +262,7 @@ module libjass {
 		private _scaleY: number;
 		private _dpi: number;
 
-		constructor(private _playResX: number, private _playResY: number) {
-		}
+		constructor(private _playResX: number, private _playResY: number) { }
 
 		/**
 		 * This method takes in the actual video height and width and prepares the scaleX and scaleY
@@ -272,7 +271,7 @@ module libjass {
 		 * @param {number} videoWidth The width of the video, in pixels
 		 * @param {number} videoHeight The height of the video, in pixels
 		 */
-		scaleTo(videoWidth: number, videoHeight: number) {
+		scaleTo(videoWidth: number, videoHeight: number): void {
 			this._scaleX = videoWidth / this._playResX;
 			this._scaleY = videoHeight / this._playResY;
 		}
@@ -320,8 +319,7 @@ module libjass {
 			private _fontName: string, private _fontSize: number,
 			private _primaryColor: string, private _outlineColor: string,
 			private _alignment: number,
-			private _marginLeft: number, private _marginRight: number, private _marginVertical: number) {
-		}
+			private _marginLeft: number, private _marginRight: number, private _marginVertical: number) { }
 
 		get name(): string {
 			return this._name;
@@ -406,7 +404,7 @@ module libjass {
 				super("Comment", "value");
 			}
 
-			get value() {
+			get value(): string {
 				return this._value;
 			}
 		}
@@ -428,7 +426,7 @@ module libjass {
 				super("Text", "value");
 			}
 
-			get value() {
+			get value(): string {
 				return this._value;
 			}
 		}
@@ -438,7 +436,7 @@ module libjass {
 				super("Italic", "value");
 			}
 
-			get value() {
+			get value(): boolean {
 				return this._value;
 			}
 		}
@@ -447,7 +445,7 @@ module libjass {
 				super("Bold", "value");
 			}
 
-			get value() {
+			get value(): Object {
 				return this._value;
 			}
 		}
@@ -456,7 +454,7 @@ module libjass {
 				super("Underline", "value");
 			}
 
-			get value() {
+			get value(): boolean {
 				return this._value;
 			}
 		}
@@ -465,7 +463,7 @@ module libjass {
 				super("Strikeout", "value");
 			}
 
-			get value() {
+			get value(): boolean {
 				return this._value;
 			}
 		}
@@ -475,7 +473,7 @@ module libjass {
 				super("Border", "value");
 			}
 
-			get value() {
+			get value(): number {
 				return this._value;
 			}
 		}
@@ -485,7 +483,7 @@ module libjass {
 				super("Blur", "value");
 			}
 
-			get value() {
+			get value(): number {
 				return this._value;
 			}
 		}
@@ -495,7 +493,7 @@ module libjass {
 				super("FontName", "value");
 			}
 
-			get value() {
+			get value(): string {
 				return this._value;
 			}
 		}
@@ -504,7 +502,7 @@ module libjass {
 				super("FontSize", "value");
 			}
 
-			get value() {
+			get value(): number {
 				return this._value;
 			}
 		}
@@ -514,7 +512,7 @@ module libjass {
 				super("Frx", "value");
 			}
 
-			get value() {
+			get value(): number {
 				return this._value;
 			}
 		}
@@ -523,7 +521,7 @@ module libjass {
 				super("Fry", "value");
 			}
 
-			get value() {
+			get value(): number {
 				return this._value;
 			}
 		}
@@ -532,7 +530,7 @@ module libjass {
 				super("Frz", "value");
 			}
 
-			get value() {
+			get value(): number {
 				return this._value;
 			}
 		}
@@ -550,7 +548,7 @@ module libjass {
 				super("Fay", "value");
 			}
 
-			get value() {
+			get value(): number {
 				return this._value;
 			}
 		}
@@ -560,7 +558,7 @@ module libjass {
 				super("PrimaryColor", "value");
 			}
 
-			get value() {
+			get value(): string {
 				return this._value;
 			}
 		}
@@ -569,7 +567,7 @@ module libjass {
 				super("OutlineColor", "value");
 			}
 
-			get value() {
+			get value(): string {
 				return this._value;
 			}
 		}
@@ -579,7 +577,7 @@ module libjass {
 				super("Alpha", "value");
 			}
 
-			get value() {
+			get value(): number {
 				return this._value;
 			}
 		}
@@ -588,7 +586,7 @@ module libjass {
 				super("PrimaryAlpha", "value");
 			}
 
-			get value() {
+			get value(): number {
 				return this._value;
 			}
 		}
@@ -597,7 +595,7 @@ module libjass {
 				super("OutlineAlpha", "value");
 			}
 
-			get value() {
+			get value(): number {
 				return this._value;
 			}
 		}
@@ -607,7 +605,7 @@ module libjass {
 				super("Alignment", "value");
 			}
 
-			get value() {
+			get value(): number {
 				return this._value;
 			}
 		}
@@ -617,7 +615,7 @@ module libjass {
 				super("Reset", "value");
 			}
 
-			get value() {
+			get value(): string {
 				return this._value;
 			}
 		}
@@ -627,11 +625,11 @@ module libjass {
 				super("Pos", "x", "y");
 			}
 
-			get x() {
+			get x(): number {
 				return this._x;
 			}
 
-			get y() {
+			get y(): number {
 				return this._y;
 			}
 		}

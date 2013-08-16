@@ -81,7 +81,6 @@ module libjass {
 	if (!window.StopIteration) {
 		window.StopIteration = {};
 	}
-	var StopIteration = window.StopIteration;
 
 	class IteratorBase implements Iterator {
 		constructor() { }
@@ -178,7 +177,7 @@ module libjass {
 	 * @this {{next: function(): *}}
 	 * @param {function(*)} func A function (element)
 	 */
-	iteratorPrototype.forEach = function (func) {
+	iteratorPrototype.forEach = function (func: (element: any) => void) {
 		try {
 			for (; ;) {
 				var result = this.next();
@@ -198,7 +197,7 @@ module libjass {
 	 * @this {{next: function(): *}}
 	 * @return {!Array} An array of the elements of this Iterable
 	 */
-	iteratorPrototype.toArray = function () {
+	iteratorPrototype.toArray = function (): Array {
 		var self = <Iterator>this;
 		var result: Array = [];
 		self.forEach(element => {
@@ -231,7 +230,7 @@ module libjass {
 	/**
 	 * @return {!Iterable} An Iterable backed by this Array
 	 */
-	Array.prototype.toIterable = function () {
+	Array.prototype.toIterable = function (): Iterable {
 		return new ArrayIterable(this);
 	}
 
@@ -325,10 +324,10 @@ module libjass {
 	 * @constructor
 	 * @extends {Iterable}
 	 * @param {!*} previous The underlying iterable
-	 * @param {function(*): boolean} filter The filter function (element) -> (Boolean)
+	 * @param {function(*): boolean} predicate The predicate function (element) -> (Boolean)
 	 */
 	class TakeWhileIterable extends Iterable {
-		constructor(private _previous: any, private _filter: (element: any) => boolean) {
+		constructor(private _previous: any, private _predicate: (element: any) => boolean) {
 			super();
 		}
 
@@ -336,20 +335,20 @@ module libjass {
 		 * @return {!TakeWhileIterator}
 		 */
 		__iterator__(): TakeWhileIterator {
-			return new TakeWhileIterator(Iterator(this._previous), this._filter);
+			return new TakeWhileIterator(Iterator(this._previous), this._predicate);
 		}
 	}
 
 	/**
 	 * @constructor
 	 * @param {!{next: function(): *}} previous
-	 * @param {function(*): boolean} filter
+	 * @param {function(*): boolean} predicate
 	 */
 	class TakeWhileIterator extends IteratorBase {
-		// Set to true when an element not matching the filter is found
+		// Set to true when an element not matching the predicate is found
 		private _foundEnd = false;
 
-		constructor(private _previous: Iterator, private _filter: (element: any) => boolean) {
+		constructor(private _previous: Iterator, private _predicate: (element: any) => boolean) {
 			super();
 		}
 
@@ -363,7 +362,7 @@ module libjass {
 			if (!this._foundEnd) {
 				// Get the next element from the underlying Iterable and see if we've found the end now
 				result = this._previous.next();
-				this._foundEnd = !this._filter.call(this, result);
+				this._foundEnd = !this._predicate.call(this, result);
 			}
 
 			// If we haven't found the end, return the element
@@ -428,10 +427,10 @@ module libjass {
 	 * @constructor
 	 * @extends {Iterable}
 	 * @param {!*} previous The underlying iterable
-	 * @param {function(*): boolean} filter The filter function (element) -> (Boolean)
+	 * @param {function(*): boolean} predicate The predicate function (element) -> (Boolean)
 	 */
 	class SkipWhileIterable extends Iterable {
-		constructor(private _previous: any, private _filter: (element: any) => boolean) {
+		constructor(private _previous: any, private _predicate: (element: any) => boolean) {
 			super();
 		}
 
@@ -439,20 +438,20 @@ module libjass {
 		 * @return {!SkipWhileIterator}
 		 */
 		__iterator__(): SkipWhileIterator {
-			return new SkipWhileIterator(Iterator(this._previous), this._filter);
+			return new SkipWhileIterator(Iterator(this._previous), this._predicate);
 		}
 	}
 
 	/**
 	 * @constructor
 	 * @param {!{next: function(): *}} previous
-	 * @param {function(*): boolean} filter
+	 * @param {function(*): boolean} predicate
 	 */
 	class SkipWhileIterator extends IteratorBase {
 		// Set to true when an element not matching the filter is found
 		private _foundStart = false;
 
-		constructor(private _previous: Iterator, private _filter: (element: any) => boolean) {
+		constructor(private _previous: Iterator, private _predicate: (element: any) => boolean) {
 			super();
 		}
 
@@ -466,7 +465,7 @@ module libjass {
 				// Get the next element
 				result = this._previous.next();
 				// and see if we've already found the start, or if we've found it now
-				this._foundStart = this._foundStart || !this._filter.call(this, result);
+				this._foundStart = this._foundStart || !this._predicate.call(this, result);
 			} while (!this._foundStart); // Keep looping till we find the start
 
 			// We've found the start, so return the element

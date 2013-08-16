@@ -74,7 +74,7 @@ if (typeof String.prototype.trimLeft !== "function") {
 	/**
 	 * @return {string}
 	 */
-	String.prototype.trimLeft = function () {
+	String.prototype.trimLeft = function (): string {
 		return (<string>this).match(/^\s*(.*)$/)[1];
 	};
 }
@@ -83,7 +83,7 @@ if (typeof String.prototype.trimLeft !== "function") {
  * @param {string} str
  * @return {boolean} true if this string starts with str
  */
-String.prototype.startsWith = function (str: string) {
+String.prototype.startsWith = function (str: string): boolean {
 	return (<string>this).indexOf(str) === 0;
 };
 
@@ -174,7 +174,7 @@ module libjass {
 		/**
 		 * @return {{next: function(): string}}
 		 */
-		iterator() {
+		iterator(): Iterator {
 			return Iterator(this);
 		}
 
@@ -217,7 +217,7 @@ module libjass {
 		/**
 		 * Set.iterator implementation for browsers that support Set and Set.forEach but not Set.iterator (IE11).
 		 */
-		window.Set.prototype.iterator = function () {
+		window.Set.prototype.iterator = function (): Iterator {
 			var self = <Set>this;
 			var elements: any[] = [];
 			self.forEach((value: any) => {
@@ -228,7 +228,7 @@ module libjass {
 	}
 }
 
-HTMLDivElement.prototype.remove = function () {
+HTMLDivElement.prototype.remove = function (): void {
 	if (this.parentElement !== null) {
 		this.parentElement.removeChild(this);
 	}
