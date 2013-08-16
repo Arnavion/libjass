@@ -25,46 +25,25 @@
 
 module libjass {
 	export class ASS {
+		private _info: Info;
+		private _styles: Style[];
+		private _dialogues: Dialogue[];
+
 		/**
 		 * This class represents an ASS script. It contains a Info object with global information about the script,
 		 * an array of Styles, and an array of Dialogues.
 		 *
 		 * @constructor
-		 * @param {!Info} info The Info object
-		 * @param {!Array.<!Style>} styles The array of Style objects
-		 * @param {!Array.<!Dialogue>} dialogues The array of Dialogue objects
-		 */
-		constructor(private _info: Info, private _styles: Style[], private _dialogues: Dialogue[]) { }
-
-		get info(): Info {
-			return this._info;
-		}
-
-		get styles(): Style[] {
-			return this._styles;
-		}
-
-		get dialogues(): Dialogue[] {
-			return this._dialogues;
-		}
-
-		static debugMode: boolean;
-
-		/**
-		 * Parses the raw ASS string into an ASS object
-		 *
 		 * @param {string} rawASS
 		 * @param {{parse: function(string, string=): !*}} dialogueParser
-		 * @return {ASS}
 		 */
-		static parse(rawASS: string, dialogueParser: DialogueParser): ASS {
+		constructor(rawASS: string, dialogueParser: DialogueParser) {
 			// Info variables
-			var info: Info = null;
 			var playResX = -1;
 			var playResY = -1;
 
 			// Style variables
-			var styles: Style[] = [];
+			this._styles = [];
 
 			// The indices of the various constituents of a Style in a "Style: " line
 			var nameIndex = -1;
@@ -83,7 +62,7 @@ module libjass {
 			var marginVerticalIndex = -1;
 
 			// Dialogue variables
-			var dialogues: Dialogue[] = [];
+			this._dialogues = [];
 
 			// The indices of the various constituents of a Dialogue in a "Dialogue: " line
 			var styleIndex = -1;
@@ -96,14 +75,12 @@ module libjass {
 			// Remove all lines and make an iterable for all the lines in the script file.
 			var lines = rawASS.replace(/\r$/gm, "").split("\n").toIterable().map((entry: Array) => entry[1]);
 
+
+			// Get script info from the script info section
 			Iterator(
-				lines
-					// Skip all lines till the script info section begins
-					.skipWhile((line: string) => line !== "[Script Info]")
-					// Skip the section header
-					.skip(1)
-					// Take all the lines till the script resolution is found or the script info section ends
-					.takeWhile((line: string) => (playResX === -1 || playResY === -1) && !line.startsWith("["))
+				ASS._readSection(lines, "Script Info")
+					// Take all the lines till the script resolution is found
+					.takeWhile((line: string) => playResX === -1 || playResY === -1)
 			).forEach((line: string) => {
 				// Parse the horizontal script resolution line
 				if (line.startsWith("PlayResX:")) {
@@ -113,27 +90,19 @@ module libjass {
 				else if (line.startsWith("PlayResY:")) {
 					playResY = parseInteger(line.substring("PlayResY:".length).trim());
 				}
-
-				if (playResX !== -1 && playResY !== -1) {
-					// Create the script info object
-					info = new Info(playResX, playResY);
-				}
 			});
 
-			if (info === null) {
+			if (playResX !== -1 && playResY !== -1) {
+				// Create the script info object
+				this._info = new Info(playResX, playResY);
+			}
+			else {
 				throw new Error("Script does not contain script resolution.");
 			}
 
 
-			Iterator(
-				lines
-					// Skip all lines till the line styles section begins
-					.skipWhile((line: string) => line !== "[V4+ Styles]")
-					// Skip the section header
-					.skip(1)
-					// Take all the lines till the lines styles section ends
-					.takeWhile((line: string) => !line.startsWith("["))
-			).forEach((line: string) => {
+			// Get styles from the styles section
+			Iterator(ASS._readSection(lines, "V4+ Styles")).forEach((line: string) => {
 				// If this is the format line
 				if (line.startsWith("Format:")) {
 					// Parse the format line
@@ -177,7 +146,7 @@ module libjass {
 
 					var lineParts = line.substring("Style:".length).trimLeft().split(",");
 					// Create the style and add it into the styles array
-					styles.push(new Style(
+					this._styles.push(new Style(
 						lineParts[nameIndex],
 						lineParts[italicIndex] === "-1",
 						lineParts[boldIndex] === "-1",
@@ -197,15 +166,8 @@ module libjass {
 			});
 
 
-			Iterator(
-				lines
-					// Skip all lines till the events section begins
-					.skipWhile((line: string) => line !== "[Events]")
-					// Skip the section header
-					.skip(1)
-					// Take all the lines till the events section ends
-					.takeWhile((line: string) => !line.startsWith("["))
-			).forEach((line: string) => {
+			// Get dialogues from the events section
+			Iterator(ASS._readSection(lines, "Events")).forEach((line: string) => {
 				// If this is a format line
 				if (line.startsWith("Format:")) {
 					var dialogueFormatParts = line.substring("Format:".length).split(",").map(formatPart => formatPart.trim());
@@ -224,29 +186,60 @@ module libjass {
 						endIndex === -1 ||
 						textIndex === -1 ||
 						layerIndex === -1
-						) {
+					) {
 						throw new Error("All required event styles not found.");
 					}
 
 					var lineParts = line.substring("Dialogue:".length).trimLeft().split(",");
 					// Create the dialogue and add it to the dialogues array
-					dialogues.push(new Dialogue(
+					this._dialogues.push(new Dialogue(
 						lineParts.slice(textIndex).join(","),
-						styles.filter(aStyle => aStyle.name === lineParts[styleIndex])[0],
-						toTime(lineParts[startIndex]),
-						toTime(lineParts[endIndex]),
+						this._styles.filter(aStyle => aStyle.name === lineParts[styleIndex])[0],
+						ASS._toTime(lineParts[startIndex]),
+						ASS._toTime(lineParts[endIndex]),
 						Math.max(parseInteger(lineParts[layerIndex]), 0),
 						dialogueParser,
-						info,
-						styles
+						this._info,
+						this._styles
 					));
 				}
 
 				return false;
 			});
+		}
 
-			// Return an ASS object with the info, list of styles and list of dialogues parsed from the raw ASS string
-			return new ASS(info, styles, dialogues);
+		get info(): Info {
+			return this._info;
+		}
+
+		get styles(): Style[] {
+			return this._styles;
+		}
+
+		get dialogues(): Dialogue[] {
+			return this._dialogues;
+		}
+
+		static debugMode: boolean;
+
+		private static _readSection(lines: Iterable, sectionName: string): Iterable {
+			return lines
+				// Skip all lines till the script info section begins
+				.skipWhile((line: string) => line !== "[" + sectionName + "]")
+				// Skip the section header
+				.skip(1)
+				// Take all the lines till the script resolution is found or the script info section ends
+				.takeWhile((line: string) => !line.startsWith("["));
+		}
+
+		/**
+		 * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
+		 *
+		 * @param {string} string
+		 * @return {number}
+		 */
+		private static _toTime(str: string): number {
+			return str.split(":").reduce((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);
 		}
 	}
 
@@ -639,23 +632,13 @@ module libjass {
 				super("Fade", "start", "end");
 			}
 
-			get start() {
+			get start(): number {
 				return this._start;
 			}
 
-			get end() {
+			get end(): number {
 				return this._end;
 			}
 		}
 	}
-
-	/**
-	 * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
-	 *
-	 * @param {string} string
-	 * @return {number}
-	 */
-	function toTime(str: string) {
-		return str.split(":").reduce((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);
-	};
 }

@@ -208,9 +208,9 @@ addEventListener("DOMContentLoaded", function () {
 			parser = PEG.buildParser(parserRequest.responseText);
 
 			if (rawASS) {
-				ass = ASS.parse(rawASS, parser);
+				ass = new ASS(rawASS, parser);
 				if (ASS.debugMode) {
-					window["ass"] = ass;
+					window.ass = ass;
 				}
 				testVideoAndASSLoaded();
 			}
@@ -226,9 +226,9 @@ addEventListener("DOMContentLoaded", function () {
 			rawASS = subsRequest.responseText;
 
 			if (parser) {
-				ass = ASS.parse(rawASS, parser);
+				ass = new ASS(rawASS, parser);
 				if (ASS.debugMode) {
-					window["ass"] = ass;
+					window.ass = ass;
 				}
 				testVideoAndASSLoaded();
 			}
