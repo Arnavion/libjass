@@ -26,7 +26,7 @@
 module libjass {
 	export class Dialogue {
 		private static _lastDialogueId = -1;
-		private static _animationStyleElement: HTMLDivElement = null;
+		private static _animationStyleElement: HTMLStyleElement = null;
 
 		private _id: number;
 		private _alignment: number;
@@ -107,7 +107,7 @@ module libjass {
 			});
 
 			if (Dialogue._animationStyleElement === null) {
-				Dialogue._animationStyleElement = <HTMLDivElement>document.querySelector("#animation-styles");
+				Dialogue._animationStyleElement = <HTMLStyleElement>document.querySelector("#animation-styles");
 			}
 			Dialogue._animationStyleElement.appendChild(document.createTextNode(keyframes.toCSS()));
 
