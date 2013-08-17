@@ -138,7 +138,7 @@ module libjass {
 		 * @param {T} value
 		 */
 		add(value: T): Set<T> {
-			var key = this.toKey(value);
+			var key = this._toKey(value);
 
 			if (key === null) {
 				throw new Error("This Set implementation only supports string and number values.");
@@ -154,7 +154,7 @@ module libjass {
 		 * @return boolean
 		 */
 		has(value: T): boolean {
-			var key = this.toKey(value);
+			var key = this._toKey(value);
 
 			if (key === null) {
 				return false;
@@ -170,7 +170,7 @@ module libjass {
 			return Iterator(
 				Object.keys(this._data).toIterable()
 					.map((entry: Array): string => String(entry[1]))
-					.filter(key => this.isKey(key))
+					.filter(key => this._isKey(key))
 					.map((key: string): string => this._data[key])
 				);
 		}
@@ -198,7 +198,7 @@ module libjass {
 			throw new Error("This Set implementation doesn't support forEach().");
 		}
 
-		private toKey(value: T): string {
+		private _toKey(value: T): string {
 			if (typeof value == "number") {
 				return "#" + value;
 			}
@@ -209,7 +209,7 @@ module libjass {
 			return null;
 		}
 
-		private isKey(key: string): boolean {
+		private _isKey(key: string): boolean {
 			return this._data.hasOwnProperty(key) && (key.startsWith("#") || key.startsWith("'"));
 		}
 	}
