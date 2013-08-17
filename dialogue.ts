@@ -49,6 +49,11 @@ module libjass {
 
 			this._alignment = this._style.alignment;
 
+			if (libjass.debugMode) {
+				if (this._parts.some(part => part instanceof tags.Comment && (<tags.Comment>part).value.indexOf("\\") !== -1)) {
+					console.warn("Possible incorrect parse: " + this.toString());
+				}
+			}
 		}
 
 		get id(): number {
