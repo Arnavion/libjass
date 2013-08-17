@@ -115,15 +115,15 @@ module libjass {
 
 			var animationEndCallback: () => void = sub.remove.bind(sub);
 
-			sub.style.animationName = "dialogue-" + this._id;
-			sub.style.animationDuration = (this._end - this._start) + "s";
-			sub.style.animationDelay = (this._start - currentTime) + "s";
-			sub.addEventListener("animationend", animationEndCallback, false);
-
 			sub.style.webkitAnimationName = "dialogue-" + this._id;
 			sub.style.webkitAnimationDuration = (this._end - this._start) + "s";
 			sub.style.webkitAnimationDelay = (this._start - currentTime) + "s";
 			sub.addEventListener("webkitAnimationEnd", animationEndCallback, false);
+
+			sub.style.animationName = "dialogue-" + this._id;
+			sub.style.animationDuration = (this._end - this._start) + "s";
+			sub.style.animationDelay = (this._start - currentTime) + "s";
+			sub.addEventListener("animationend", animationEndCallback, false);
 
 			sub.style.marginLeft = (scaleX * this._style.marginLeft) + "px";
 			sub.style.marginRight = (scaleX * this._style.marginRight) + "px";
@@ -361,8 +361,8 @@ module libjass {
 			});
 
 			if (transformStyle) {
-				sub.style.transform = transformStyle;
 				sub.style.webkitTransform = transformStyle;
+				sub.style.transform = transformStyle;
 
 				var transformOriginX: number;
 				var transformOriginY: number;
@@ -470,7 +470,9 @@ module libjass {
 					cssText += "\t}\n";
 				});
 
-				result = "@keyframes dialogue-" + this._id + " {\n" + cssText + "}\n\n" + "@-webkit-keyframes dialogue-" + this._id + " {\n" + cssText + "}\n\n";
+				result =
+					"@-webkit-keyframes dialogue-" + this._id + " {\n" + cssText + "}\n\n" +
+					"@keyframes dialogue-" + this._id + " {\n" + cssText + "}\n\n";
 			}
 
 			return result;

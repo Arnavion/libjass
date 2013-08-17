@@ -49,8 +49,8 @@ addEventListener("DOMContentLoaded", function () {
 			info.scaleTo(videoWidth, videoHeight);
 			var zoom = (1 / info.scaleX);
 			var zoomedDiv = document.querySelector(".zoomed");
-			zoomedDiv.style.transform = "scale(" + zoom + ")";
 			zoomedDiv.style.webkitTransform = "scale(" + zoom + ")";
+			zoomedDiv.style.transform = "scale(" + zoom + ")";
 
 			info.dpi = parseFloat(getComputedStyle(document.querySelector("#dpi-div")).height.match(/(\d+)px/)[1]);
 
