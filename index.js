@@ -142,18 +142,29 @@ addEventListener("DOMContentLoaded", function () {
 
 			var currentTime;
 
+			// Array of subtitle div's that are being displayed right now
 			var currentSubs = [];
 
+			// Iterable of subtitle div's that are also to be displayed
 			var newSubs = dialogues.toIterable().map(function (entry) {
 				return entry[1];
 			}).skipWhile(function (dialogue) {
+				// Skip until dialogues which end at a time later than currentTime
 				return dialogue.end < currentTime;
+			}).filter(function (dialogue) {
+				// Ignore dialogues which end at a time less than currentTime
+				return dialogue.end >= currentTime;
 			}).takeWhile(function (dialogue) {
+				// All these dialogues end after currentTime
+				// Take until dialogue which starts later than currentTime
 				return dialogue.start <= currentTime;
 			}).filter(function (dialogue) {
-				return dialogue.end >= currentTime && currentSubs.every(function (sub) { return parseInt(sub.getAttribute("data-dialogue-id")) !== dialogue.id; });
+				// All these dialogues are visible at currentTime
+				// Ignore those dialogues which have already been displayed
+				return currentSubs.every(function (sub) { return parseInt(sub.getAttribute("data-dialogue-id")) !== dialogue.id; });
 			}).map(function (dialogue) {
 				debug(dialogue.toString());
+				// Display the dialogue and return the drawn subtitle div
 				return wrappers[dialogue.layer][dialogue.alignment].appendChild(dialogue.draw(currentTime));
 			});
 
@@ -163,14 +174,17 @@ addEventListener("DOMContentLoaded", function () {
 				currentSubs = currentSubs.filter(function (sub) {
 					var subDialogue = ass.dialogues[parseInt(sub.getAttribute("data-dialogue-id"))];
 
+					// If the sub should still be displayed at currentTime, keep it...
 					if (subDialogue.start <= currentTime && currentTime < subDialogue.end) {
 						return true;
 					}
+
+					// ... otherwise remove it from the DOM and from this array...
 					else {
 						sub.remove();
 						return false;
 					}
-				}).concat(Iterator(newSubs).toArray());
+				}).concat(Iterator(newSubs).toArray()); // ... and add the new subs that are to be displayed.
 
 				debug("video.timeupdate: video.currentTime = " + currentTime + ", video.paused = " + video.paused + ", video.seeking = " + video.seeking);
 			}, false);
