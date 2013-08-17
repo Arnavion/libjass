@@ -19,136 +19,47 @@
  */
 
 sections.push(new Section("Bold tag - \\b",
-	new Test("True", "b1", "boldTag", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, ASS.Tags.Bold);
-		Assert.Equals(result.value, true);
-	}),
+	new Test("True", "b1", "boldTag", new libjass.tags.Bold(true)),
 
-	new Test("False", "b0", "boldTag", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, ASS.Tags.Bold);
-		Assert.Equals(result.value, false);
-	}),
+	new Test("False", "b0", "boldTag", new libjass.tags.Bold(false)),
 
-	new Test("100", "b100", "boldTag", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, ASS.Tags.Bold);
-		Assert.Equals(result.value, 100);
-	}),
+	new Test("100", "b100", "boldTag", new libjass.tags.Bold(100)),
 
-	new Test("900", "b900", "boldTag", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, ASS.Tags.Bold);
-		Assert.Equals(result.value, 900);
-	}),
+	new Test("900", "b900", "boldTag", new libjass.tags.Bold(900)),
 
-	new Test("null", "b", "boldTag", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, ASS.Tags.Bold);
-		Assert.Equals(result.value, null);
-	}),
+	new Test("null", "b", "boldTag", new libjass.tags.Bold(null)),
 
-	new Test("2", "b2", "boldTag", function (result, parseException) {
-		Assert.UnsuccessfulParse(arguments);
-	}),
+	new Test("2", "b2", "boldTag", null),
 
-	new Test("10", "b10", "boldTag", function (result, parseException) {
-		Assert.UnsuccessfulParse(arguments);
-	}),
+	new Test("10", "b10", "boldTag", null),
 
-	new Test("150", "b150", "boldTag", function (result, parseException) {
-		Assert.UnsuccessfulParse(arguments);
-	}),
+	new Test("150", "b150", "boldTag", null),
 
-	new Test("Enclosed tag", "{\\b1}", "enclosedTags", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, Array);
-		Assert.Equals(result.length, 1);
+	new Test("Enclosed tag", "{\\b1}", "enclosedTags", [new libjass.tags.Bold(true)]),
 
-		Assert.IsInstanceOf(result[0], ASS.Tags.Bold);
-		Assert.Equals(result[0].value, true);
-	}),
+	new Test("Enclosed tag", "{\\b0}", "enclosedTags", [new libjass.tags.Bold(false)]),
 
-	new Test("Enclosed tag", "{\\b0}", "enclosedTags", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, Array);
-		Assert.Equals(result.length, 1);
+	new Test("Enclosed tag", "{\\b100}", "enclosedTags", [new libjass.tags.Bold(100)]),
 
-		Assert.IsInstanceOf(result[0], ASS.Tags.Bold);
-		Assert.Equals(result[0].value, false);
-	}),
+	new Test("Enclosed tag", "{\\b900}", "enclosedTags", [new libjass.tags.Bold(900)]),
 
-	new Test("Enclosed tag", "{\\b100}", "enclosedTags", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, Array);
-		Assert.Equals(result.length, 1);
+	new Test("Enclosed tag", "{\\b}", "enclosedTags", [new libjass.tags.Bold(null)]),
 
-		Assert.IsInstanceOf(result[0], ASS.Tags.Bold);
-		Assert.Equals(result[0].value, 100);
-	}),
+	new Test("Enclosed tag", "{\\b2}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("2")]),
 
-	new Test("Enclosed tag", "{\\b900}", "enclosedTags", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, Array);
-		Assert.Equals(result.length, 1);
+	new Test("Enclosed tag", "{\\b10}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("0")]),
 
-		Assert.IsInstanceOf(result[0], ASS.Tags.Bold);
-		Assert.Equals(result[0].value, 900);
-	}),
-
-	new Test("Enclosed tag", "{\\b}", "enclosedTags", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, Array);
-		Assert.Equals(result.length, 1);
-
-		Assert.IsInstanceOf(result[0], ASS.Tags.Bold);
-		Assert.Equals(result[0].value, null);
-	}),
-
-	new Test("Enclosed tag", "{\\b2}", "enclosedTags", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, Array);
-		Assert.Equals(result.length, 2);
-
-		Assert.IsInstanceOf(result[0], ASS.Tags.Bold);
-		Assert.Equals(result[0].value, null);
-
-		Assert.IsInstanceOf(result[1], ASS.Tags.Comment);
-		Assert.Equals(result[1].value, "2");
-	}),
-
-	new Test("Enclosed tag", "{\\b10}", "enclosedTags", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, Array);
-		Assert.Equals(result.length, 2);
-
-		Assert.IsInstanceOf(result[0], ASS.Tags.Bold);
-		Assert.Equals(result[0].value, true);
-
-		Assert.IsInstanceOf(result[1], ASS.Tags.Comment);
-		Assert.Equals(result[1].value, "0");
-	}),
-
-	new Test("Enclosed tag", "{\\b150}", "enclosedTags", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, Array);
-		Assert.Equals(result.length, 2);
-
-		Assert.IsInstanceOf(result[0], ASS.Tags.Bold);
-		Assert.Equals(result[0].value, true);
-
-		Assert.IsInstanceOf(result[1], ASS.Tags.Comment);
-		Assert.Equals(result[1].value, "50");
-	})
+	new Test("Enclosed tag", "{\\b150}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("50")])
 ));
 
 sections.push(new Section("Primary color tag - \\c or \\1c",
-	new Test("Just the tag", "c&H3F171F&", "primaryColorTag", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, ASS.Tags.PrimaryColor);
-		Assert.Equals(result.value, "rgba(31, 23, 63, 1)");
-	}),
+	new Test("Just the tag", "c&H3F171F&", "primaryColorTag", new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))),
 
-	new Test("Enclosed tag", "{\\c&H3F171F&}", "enclosedTags", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, Array);
-		Assert.Equals(result.length, 1);
+	new Test("Enclosed tag", "{\\c&H3F171F&}", "enclosedTags", [new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))]),
 
-		Assert.IsInstanceOf(result[0], ASS.Tags.PrimaryColor);
-		Assert.Equals(result[0].value, "rgba(31, 23, 63, 1)");
-	}),
+	new Test("Dialogue", "{\\c&H3F171F&}", "dialogue", [new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))])
+));
 
-	new Test("Dialogue", "{\\c&H3F171F&}", "dialogue", function (result, parseException) {
-		Assert.SuccessfulParse(arguments, Array);
-		Assert.Equals(result.length, 1);
-
-		Assert.IsInstanceOf(result[0], ASS.Tags.PrimaryColor);
-		Assert.Equals(result[0].value, "rgba(31, 23, 63, 1)");
-	})
+sections.push(new Section("Alpha tag - \\alpha",
+	new Test("Just the tag", "alpha&H00&", "alphaTag", new libjass.tags.Alpha(1))
 ));

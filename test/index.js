@@ -43,7 +43,7 @@ var Section = (function () {
 var Test = (function () {
 	var lastTestNumber = 0;
 
-	return function (name, input, rule, validate) {
+	return function (name, input, rule, expected) {
 		var number = ++lastTestNumber;
 
 		var succeeded = false;
@@ -54,23 +54,36 @@ var Test = (function () {
 			name: { value: name, enumerable: true },
 			input: { value: input, enumerable: true },
 			rule: { value: rule, enumerable: true },
-			validate: { value: validate, enumerable: true },
+			expected: { value: expected, enumerable: true },
 			succeeded: { get: function () { return succeeded; }, enumerable: true },
 			exception: { get: function () { return exception; }, enumerable: true }
 		});
 
 		this.execute = function () {
 			try {
-				var result = null;
+				var actual = null;
+
 				try {
-					result = parser.parse(this.input, rule);
+					actual = parser.parse(this.input, rule);
 				}
 				catch (parseException) {
-					this.validate(null, parseException);
+					if (expected === null) {
+						succeeded = true;
+						return;
+					}
+					else {
+						throw new Error("Expected parse to succeed but it threw an exception: " + parseException.message);
+					}
 				}
-				if (result !== null) {
-					this.validate(result, null);
+
+				if (expected === null) {
+					throw new Error("Expected parse to fail.");
 				}
+				else if (actual === null) {
+					throw new Error("Parse failed without throwing an exception.");
+				}
+
+				Assert.AreEqual(expected, actual);
 
 				succeeded = true;
 			}
@@ -82,35 +95,48 @@ var Test = (function () {
 })();
 
 var Assert = new function () {
-	this.SuccessfulParse = function (args, expectedType) {
-		if (args[1] !== null) {
-			throw new Error("Expected parse to succeed but it threw an exception: " + args[1].message);
-		}
-		else if (args[0] === null || args[0] === undefined) {
-			throw new Error("Parse failed without throwing an exception.");
+	this.AreEqual = function (expected, actual) {
+		if (expected === undefined) {
+			throw new Error("Expected should not be undefined");
 		}
 
-		this.IsInstanceOf(args[0], expectedType);
-	};
-
-	this.UnsuccessfulParse = function (args) {
-		if (args[1] === null) {
-			throw new Error("Expected parse to fail.");
+		if (actual === undefined) {
+			throw new Error("Actual should not be undefined");
 		}
-		else if (args[0] !== null) {
-			throw new Error("Parse failed and threw an exception but also returned a result.");
-		}
-	};
 
-	this.IsInstanceOf = function (result, type) {
-		if (!(result instanceof type) && (result !== null) && (result !== undefined) && result.constructor !== type) {
+		if (expected === null && actual === null) {
+			return;
+		}
+
+		if (expected === null) {
+			throw new Error("Expected null but got [" + actual + "]");
+		}
+
+		if (actual === null) {
+			throw new Error("Expected [" + expected + "] but got null")
+		}
+
+		if (expected.constructor !== actual.constructor) {
 			throw new Error("Parse result is of wrong type.");
 		}
-	};
 
-	this.Equals = function (actual, expected) {
-		if (expected !== actual) {
-			throw new Error("Expected [" + expected + "] but got [" + actual + "]");
+		switch(typeof expected) {
+			case "boolean":
+			case "number":
+			case "string":
+				if (expected !== actual) {
+					throw new Error("Expected [" + expected + "] but got [" + actual + "]");
+				}
+				break;
+
+			case "object":
+				Object.keys(expected).forEach(function (property) {
+					Assert.AreEqual(expected[property], actual[property]);
+				});
+				break;
+
+			default:
+				throw new Error("Unrecognized type: " + typeof expected);
 		}
 	};
 };
@@ -177,6 +203,9 @@ var Logger = function (outputDiv) {
 	};
 
 	this.writeTotal = function (sections) {
+		currentSectionDiv = sectionDiv.cloneNode();
+		outputDiv.appendChild(currentSectionDiv);
+
 		console.log("");
 
 		var numTotal = sections.map(function (section) {
