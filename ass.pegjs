@@ -290,28 +290,24 @@ hex
 
 color
 	=	"&H" blue:(hex hex) green:(hex hex) red:(hex hex) "&" {
-			return (
-				"rgba(" +
-				[red.join(""), green.join(""), blue.join("")].map(function (part) {
-					return parseInt(part, 16);
-				}).join(", ") +
-				", 1)"
+			return new libjass.tags.Color(
+				parseInt(red.join(""), 16),
+				parseInt(green.join(""), 16),
+				parseInt(blue.join(""), 16)
 			);
 		}
 
 alpha
-	=	"&H" value:(hex hex) {
-			return value.join("");
+	=	"&H" value:(hex hex) "&" {
+			return 1 - parseInt(value.join(""), 16) / 255;
 		}
 
 colorWithAlpha
 	=	"&H" alpha:(hex hex) blue:(hex hex) green:(hex hex) red:(hex hex) {
-			return (
-				"rgba(" +
-				[red.join(""), green.join(""), blue.join("")].map(function (part) {
-					return parseInt(part, 16) + ", ";
-				}).join("") +
-				(1 - parseInt(alpha.join(""), 16) / 255) +
-				")"
+			return new libjass.tags.Color(
+				parseInt(red.join(""), 16),
+				parseInt(green.join(""), 16),
+				parseInt(blue.join(""), 16),
+				1 - parseInt(alpha.join(""), 16) / 255
 			);
 		}

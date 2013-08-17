@@ -20,6 +20,7 @@
 
 ///<reference path="utility.ts" />
 ///<reference path="dialogue.ts" />
+///<reference path="tags.ts" />
 
 "use strict";
 
@@ -155,8 +156,8 @@ module libjass {
 						parseFloat(lineParts[outlineWidthIndex]),
 						lineParts[fontNameIndex],
 						parseFloat(lineParts[fontSizeIndex]),
-						<string>dialogueParser.parse(lineParts[primaryColorIndex], "colorWithAlpha"),
-						<string>dialogueParser.parse(lineParts[outlineColorIndex], "colorWithAlpha"),
+						<tags.Color>dialogueParser.parse(lineParts[primaryColorIndex], "colorWithAlpha"),
+						<tags.Color>dialogueParser.parse(lineParts[outlineColorIndex], "colorWithAlpha"),
 						parseInt(lineParts[alignmentIndex]),
 						parseFloat(lineParts[marginLeftIndex]),
 						parseFloat(lineParts[marginRightIndex]),
@@ -308,7 +309,7 @@ module libjass {
 			private _italic: boolean, private _bold: Object, private _underline: boolean, private _strikethrough: boolean,
 			private _outlineWidth: number,
 			private _fontName: string, private _fontSize: number,
-			private _primaryColor: string, private _outlineColor: string,
+			private _primaryColor: tags.Color, private _outlineColor: tags.Color,
 			private _alignment: number,
 			private _marginLeft: number, private _marginRight: number, private _marginVertical: number) { }
 
@@ -344,11 +345,11 @@ module libjass {
 			return this._fontSize;
 		}
 
-		get primaryColor(): string {
+		get primaryColor(): tags.Color {
 			return this._primaryColor;
 		}
 
-		get outlineColor(): string {
+		get outlineColor(): tags.Color {
 			return this._outlineColor;
 		}
 

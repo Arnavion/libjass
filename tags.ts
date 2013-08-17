@@ -22,6 +22,48 @@
 
 module libjass {
 	export module tags {
+		/**
+		 * Represents a CSS color with red, green, blue and alpha components.
+		 *
+		 * Instances of this class are immutable.
+		 *
+		 * @constructor
+		 */
+		export class Color {
+			constructor(private _red: number, private _green: number, private _blue: number, private _alpha: number = 1) { }
+
+			get red(): number {
+				return this._red;
+			}
+
+			get green(): number {
+				return this._green;
+			}
+
+			get blue(): number {
+				return this._blue;
+			}
+
+			get alpha(): number {
+				return this._alpha;
+			}
+
+			/**
+			 * @param {number} value The new alpha. If null, the existing alpha is used.
+			 * @return {Color} Returns a new Color instance with the same color but the provided alpha.
+			 */
+			withAlpha(value: number): Color {
+				return new Color(this._red, this._green, this._blue, (value !== null) ? value : this._alpha);
+			}
+
+			/**
+			 * @return {string} The CSS representation "rgba(...)" of this color.
+			 */
+			toString(): string {
+				return "rgba(" + this._red + ", " + this._green + ", " + this._blue + ", " + this._alpha + ")";
+			}
+		}
+
 		export interface Tag {
 			toString(): string;
 		}
@@ -197,20 +239,20 @@ module libjass {
 		}
 
 		export class PrimaryColor extends TagBase {
-			constructor(private _value: string) {
+			constructor(private _value: Color) {
 				super("PrimaryColor", "value");
 			}
 
-			get value(): string {
+			get value(): Color {
 				return this._value;
 			}
 		}
 		export class OutlineColor extends TagBase {
-			constructor(private _value: string) {
+			constructor(private _value: Color) {
 				super("OutlineColor", "value");
 			}
 
-			get value(): string {
+			get value(): Color {
 				return this._value;
 			}
 		}

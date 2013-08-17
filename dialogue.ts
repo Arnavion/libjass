@@ -148,6 +148,9 @@ module libjass {
 			var currentPrimaryColor = this._style.primaryColor;
 			var currentOutlineColor = this._style.outlineColor;
 
+			var currentPrimaryAlpha: number = null;
+			var currentOutlineAlpha: number = null;
+
 			var currentBlur = 0;
 			var transformStyle = "";
 			var currentSpan: HTMLSpanElement;
@@ -164,9 +167,12 @@ module libjass {
 				currentBold = Dialogue._valueOrDefault(currentBold, this._style.bold);
 				currentUnderline = Dialogue._valueOrDefault(currentUnderline, this._style.underline);
 				currentStrikethrough = Dialogue._valueOrDefault(currentStrikethrough, this._style.strikethrough);
+
 				currentOutlineWidth = Dialogue._valueOrDefault(currentOutlineWidth, this._style.outlineWidth);
+
 				currentFontName = Dialogue._valueOrDefault(currentFontName, this._style.fontName);
 				currentFontSize = Dialogue._valueOrDefault(currentFontSize, this._style.fontSize);
+
 				currentPrimaryColor = Dialogue._valueOrDefault(currentPrimaryColor, this._style.primaryColor);
 				currentOutlineColor = Dialogue._valueOrDefault(currentOutlineColor, this._style.outlineColor);
 
@@ -194,14 +200,15 @@ module libjass {
 				currentSpan.style.fontSize = ((72 / dpi) * scaleY * currentFontSize) + "px";
 				currentSpan.style.lineHeight = (scaleY * currentFontSize) + "px";
 
-				currentSpan.style.color = currentPrimaryColor;
+				currentSpan.style.color = currentPrimaryColor.withAlpha(currentPrimaryAlpha).toString();
 
 				var blurRadius = scaleX * currentOutlineWidth;
 				if (currentBlur > 0) {
 					blurRadius = currentBlur / 2;
 				}
+				var textShadowColor = currentOutlineColor.withAlpha(currentOutlineAlpha).toString();
 				currentSpan.style.textShadow = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
-					.map(pair => pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + currentOutlineColor).join(", ");
+					.map(pair => pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + textShadowColor).join(", ");
 			};
 			updateSpanStyles();
 
@@ -308,6 +315,34 @@ module libjass {
 					}
 				}
 
+				else if (part instanceof tags.Alpha) {
+					var newAlpha = (<tags.Alpha>part).value;
+					if (currentPrimaryAlpha !== newAlpha) {
+						currentPrimaryAlpha = newAlpha;
+						spanStylesChanged = true;
+					}
+					if (currentOutlineAlpha !== newAlpha) {
+						currentOutlineAlpha = newAlpha;
+						spanStylesChanged = true;
+					}
+				}
+
+				else if (part instanceof tags.PrimaryAlpha) {
+					var newPrimaryAlpha = (<tags.PrimaryAlpha>part).value;
+					if (currentPrimaryAlpha !== newPrimaryAlpha) {
+						currentPrimaryAlpha = newPrimaryAlpha;
+						spanStylesChanged = true;
+					}
+				}
+
+				else if (part instanceof tags.OutlineAlpha) {
+					var newOutlineAlpha = (<tags.OutlineAlpha>part).value;
+					if (currentOutlineAlpha !== newOutlineAlpha) {
+						currentOutlineAlpha = newOutlineAlpha;
+						spanStylesChanged = true;
+					}
+				}
+
 				else if (part instanceof tags.Alignment) {
 				}
 
@@ -323,6 +358,8 @@ module libjass {
 						currentFontSize = null;
 						currentPrimaryColor = null;
 						currentOutlineColor = null;
+						currentPrimaryAlpha = null;
+						currentOutlineAlpha = null;
 						spanStylesChanged = true;
 					}
 					else {
@@ -336,6 +373,8 @@ module libjass {
 						currentFontSize = newStyle.fontSize;
 						currentPrimaryColor = newStyle.primaryColor;
 						currentOutlineColor = newStyle.outlineColor;
+						currentPrimaryAlpha = null;
+						currentOutlineAlpha = null;
 						spanStylesChanged = true;
 					}
 				}
