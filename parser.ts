@@ -40,37 +40,37 @@ module libjass {
 		 */
 		constructor(rawASS: string, dialogueParser: DialogueParser) {
 			// Info variables
-			var playResX = -1;
-			var playResY = -1;
+			var playResX: number = null;
+			var playResY: number = null;
 
 			// Style variables
 			this._styles = [];
 
 			// The indices of the various constituents of a Style in a "Style: " line
-			var nameIndex = -1;
-			var italicIndex = -1;
-			var boldIndex = -1;
-			var underlineIndex = -1;
-			var strikethroughIndex = -1;
-			var outlineWidthIndex = -1;
-			var fontNameIndex = -1;
-			var fontSizeIndex = -1;
-			var primaryColorIndex = -1;
-			var outlineColorIndex = -1;
-			var alignmentIndex = -1;
-			var marginLeftIndex = -1;
-			var marginRightIndex = -1;
-			var marginVerticalIndex = -1;
+			var nameIndex: number = null;
+			var italicIndex: number = null;
+			var boldIndex: number = null;
+			var underlineIndex: number = null;
+			var strikethroughIndex: number = null;
+			var outlineWidthIndex: number = null;
+			var fontNameIndex: number = null;
+			var fontSizeIndex: number = null;
+			var primaryColorIndex: number = null;
+			var outlineColorIndex: number = null;
+			var alignmentIndex: number = null;
+			var marginLeftIndex: number = null;
+			var marginRightIndex: number = null;
+			var marginVerticalIndex: number = null;
 
 			// Dialogue variables
 			this._dialogues = [];
 
 			// The indices of the various constituents of a Dialogue in a "Dialogue: " line
-			var styleIndex = -1;
-			var startIndex = -1;
-			var endIndex = -1;
-			var textIndex = -1;
-			var layerIndex = -1;
+			var styleIndex: number = null;
+			var startIndex: number = null;
+			var endIndex: number = null;
+			var textIndex: number = null;
+			var layerIndex: number = null;
 
 
 			// Remove all lines and make an iterable for all the lines in the script file.
@@ -78,11 +78,7 @@ module libjass {
 
 
 			// Get script info from the script info section
-			Iterator(
-				ASS._readSection(lines, "Script Info")
-					// Take all the lines till the script resolution is found
-					.takeWhile((line: string) => playResX === -1 || playResY === -1)
-			).forEach((line: string) => {
+			Iterator(ASS._readSection(lines, "Script Info")).forEach((line: string) => {
 				// Parse the horizontal script resolution line
 				if (line.startsWith("PlayResX:")) {
 					playResX = parseInt(line.substring("PlayResX:".length).trim());
@@ -93,7 +89,7 @@ module libjass {
 				}
 			});
 
-			if (playResX !== -1 && playResY !== -1) {
+			if (playResX !== null && playResY !== null) {
 				// Create the script info object
 				this._info = new Info(playResX, playResY);
 			}
@@ -127,20 +123,20 @@ module libjass {
 				// else if this is a style line
 				else if (line.startsWith("Style:")) {
 					if (
-						nameIndex === -1 ||
-						italicIndex === -1 ||
-						boldIndex === -1 ||
-						underlineIndex === -1 ||
-						strikethroughIndex === -1 ||
-						outlineWidthIndex === -1 ||
-						fontNameIndex === -1 ||
-						fontSizeIndex === -1 ||
-						primaryColorIndex === -1 ||
-						outlineColorIndex === -1 ||
-						alignmentIndex === -1 ||
-						marginLeftIndex === -1 ||
-						marginRightIndex === -1 ||
-						marginVerticalIndex === -1
+						nameIndex === null ||
+						italicIndex === null ||
+						boldIndex === null ||
+						underlineIndex === null ||
+						strikethroughIndex === null ||
+						outlineWidthIndex === null ||
+						fontNameIndex === null ||
+						fontSizeIndex === null ||
+						primaryColorIndex === null ||
+						outlineColorIndex === null ||
+						alignmentIndex === null ||
+						marginLeftIndex === null ||
+						marginRightIndex === null ||
+						marginVerticalIndex === null
 					) {
 						throw new Error("All required line styles not found.");
 					}
@@ -182,11 +178,11 @@ module libjass {
 				// else if this is a dialogue line
 				else if (line.startsWith("Dialogue:")) {
 					if (
-						styleIndex === -1 ||
-						startIndex === -1 ||
-						endIndex === -1 ||
-						textIndex === -1 ||
-						layerIndex === -1
+						styleIndex === null ||
+						startIndex === null ||
+						endIndex === null ||
+						textIndex === null ||
+						layerIndex === null
 					) {
 						throw new Error("All required event styles not found.");
 					}
@@ -204,8 +200,6 @@ module libjass {
 						this._styles
 					));
 				}
-
-				return false;
 			});
 		}
 
