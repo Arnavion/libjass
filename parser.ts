@@ -84,11 +84,11 @@ module libjass {
 			).forEach((line: string) => {
 				// Parse the horizontal script resolution line
 				if (line.startsWith("PlayResX:")) {
-					playResX = parseInteger(line.substring("PlayResX:".length).trim());
+					playResX = parseInt(line.substring("PlayResX:".length).trim());
 				}
 				// Parse the vertical script resolution line
 				else if (line.startsWith("PlayResY:")) {
-					playResY = parseInteger(line.substring("PlayResY:".length).trim());
+					playResY = parseInt(line.substring("PlayResY:".length).trim());
 				}
 			});
 
@@ -157,7 +157,7 @@ module libjass {
 						parseFloat(lineParts[fontSizeIndex]),
 						<string>dialogueParser.parse(lineParts[primaryColorIndex], "colorWithAlpha"),
 						<string>dialogueParser.parse(lineParts[outlineColorIndex], "colorWithAlpha"),
-						parseInteger(lineParts[alignmentIndex]),
+						parseInt(lineParts[alignmentIndex]),
 						parseFloat(lineParts[marginLeftIndex]),
 						parseFloat(lineParts[marginRightIndex]),
 						parseFloat(lineParts[marginVerticalIndex])
@@ -197,7 +197,7 @@ module libjass {
 						this._styles.filter(aStyle => aStyle.name === lineParts[styleIndex])[0],
 						ASS._toTime(lineParts[startIndex]),
 						ASS._toTime(lineParts[endIndex]),
-						Math.max(parseInteger(lineParts[layerIndex]), 0),
+						Math.max(parseInt(lineParts[layerIndex]), 0),
 						dialogueParser,
 						this._info,
 						this._styles

@@ -116,7 +116,7 @@ boldTag
 				case "":
 					return new libjass.tags.Bold(null);
 				default:
-					return new libjass.tags.Bold(parseInteger(value));
+					return new libjass.tags.Bold(parseInt(value));
 			}
 		}
 
@@ -235,7 +235,7 @@ outlineAlphaTag
 alignmentTag
 	=	"an" value:[1-9] {
 			return new libjass.tags.Alignment(
-				parseInteger(value)
+				parseInt(value)
 			);
 		}
 
@@ -293,7 +293,7 @@ color
 			return (
 				"rgba(" +
 				[red.join(""), green.join(""), blue.join("")].map(function (part) {
-					return parseInteger(part, 16);
+					return parseInt(part, 16);
 				}).join(", ") +
 				", 1)"
 			);
@@ -309,9 +309,9 @@ colorWithAlpha
 			return (
 				"rgba(" +
 				[red.join(""), green.join(""), blue.join("")].map(function (part) {
-					return parseInteger(part, 16) + ", ";
+					return parseInt(part, 16) + ", ";
 				}).join("") +
-				(1 - parseInteger(alpha.join(""), 16) / 255) +
+				(1 - parseInt(alpha.join(""), 16) / 255) +
 				")"
 			);
 		}

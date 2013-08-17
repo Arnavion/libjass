@@ -28,12 +28,10 @@ interface Window {
 	Set: {
 		new(): Set
 	}
-	parseInteger(s: string, radix?: number): number
 }
 
 declare function Iterator(collection: any, keysOnly?: boolean): Iterator
 declare var StopIteration: any
-declare function parseInteger(s: string, radix?: number): number
 
 interface Iterator {
 	next(): any
@@ -69,55 +67,61 @@ interface DialogueParser {
 	parse(input: string, startRule?: string): Object
 }
 
-// String.trimLeft for browsers which don't support it
-if (typeof String.prototype.trimLeft !== "function") {
+module libjass {
+	// String.trimLeft for browsers which don't support it
+	if (typeof String.prototype.trimLeft !== "function") {
+		/**
+		 * @return {string}
+		 */
+		String.prototype.trimLeft = function (): string {
+			return (<string>this).match(/^\s*(.*)$/)[1];
+		};
+	}
+
 	/**
-	 * @return {string}
+	 * @param {string} str
+	 * @return {boolean} true if this string starts with str
 	 */
-	String.prototype.trimLeft = function (): string {
-		return (<string>this).match(/^\s*(.*)$/)[1];
+	String.prototype.startsWith = function (str: string): boolean {
+		return (<string>this).indexOf(str) === 0;
 	};
-}
 
-/**
- * @param {string} str
- * @return {boolean} true if this string starts with str
- */
-String.prototype.startsWith = function (str: string): boolean {
-	return (<string>this).indexOf(str) === 0;
-};
+	/**
+	 * @param {string} str
+	 * @return {boolean} true if this string ends with str
+	 */
+	String.prototype.endsWith = function (str: string): boolean {
+		var self: string = this;
+		var index = self.indexOf(str);
+		return index !== -1 && index === self.length - str.length;
+	};
 
-/**
- * @param {string} str
- * @return {boolean} true if this string ends with str
- */
-String.prototype.endsWith = function (str: string) {
-	var self: string = this;
-	var index = self.indexOf(str);
-	return index !== -1 && index === self.length - str.length;
-};
+	if (parseInt("010") !== 10) {
+		// This browser doesn't parse strings with leading 0's as decimal. Replace its parseInt with an implementation that does.
 
-/**
- * An alternative to window.parseInt that defaults to parsing input in base 10 if the second parameter is undefined.
- *
- * @param {string} s
- * @param {number=} radix
- * @return {number}
- */
-window.parseInteger = (s: string, radix?: number) => {
-	// If str starts with 0x, then it is to be parsed as base 16 even if the second parameter is not given.
-	if (radix === undefined) {
-		if (s.startsWith("0x")) {
-			radix = 16;
-		}
-		else {
-			radix = 10;
+		var oldParseInt = parseInt;
+
+		/**
+		 * An alternative parseInt that defaults to parsing input in base 10 if the second parameter is undefined.
+		 *
+		 * @param {string} s
+		 * @param {number=} radix
+		 * @return {number}
+		 */
+		(<any>window).parseInt = (s: string, radix?: number): number => {
+			// If str starts with 0x, then it is to be parsed as base 16 even if the second parameter is not given.
+			if (radix === undefined) {
+				if (s.startsWith("0x")) {
+					radix = 16;
+				}
+				else {
+					radix = 10;
+				}
+			}
+			return oldParseInt(s, radix);
 		}
 	}
-	return parseInt(s, radix);
-};
 
-module libjass {
 	/**
 	 * Set and Set.iterator implementation for browsers that don't support them. Only supports Number and String elements.
 	 * Elements are stored as properties of an object, with derived names that won't clash with pre-defined properties.
@@ -226,10 +230,10 @@ module libjass {
 			return Iterator(elements.toIterable().map((entry: Array) => entry[1]));
 		};
 	}
-}
 
-HTMLDivElement.prototype.remove = function (): void {
-	if (this.parentElement !== null) {
-		this.parentElement.removeChild(this);
-	}
-};
+	HTMLDivElement.prototype.remove = function (): void {
+		if (this.parentElement !== null) {
+			this.parentElement.removeChild(this);
+		}
+	};
+}

@@ -135,7 +135,7 @@ addEventListener("DOMContentLoaded", function () {
 			}).takeWhile(function (dialogue) {
 				return dialogue.start <= currentTime;
 			}).filter(function (dialogue) {
-				return dialogue.end >= currentTime && currentSubs.every(function (sub) { return parseInteger(sub.getAttribute("data-dialogue-id")) !== dialogue.id; });
+				return dialogue.end >= currentTime && currentSubs.every(function (sub) { return parseInt(sub.getAttribute("data-dialogue-id")) !== dialogue.id; });
 			}).map(function (dialogue) {
 				return wrappers[dialogue.layer][dialogue.alignment].appendChild(dialogue.draw(currentTime));
 			});
@@ -144,7 +144,7 @@ addEventListener("DOMContentLoaded", function () {
 				currentTime = video.currentTime;
 
 				currentSubs = currentSubs.filter(function (sub) {
-					var subDialogue = ass.dialogues[parseInteger(sub.getAttribute("data-dialogue-id"))];
+					var subDialogue = ass.dialogues[parseInt(sub.getAttribute("data-dialogue-id"))];
 
 					if (subDialogue.start <= currentTime && subDialogue.end > currentTime) {
 						return true;
