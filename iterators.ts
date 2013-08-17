@@ -146,21 +146,18 @@ module libjass {
 		 * @return {!{next: function(): *}}
 		 */
 		window.Iterator = (collection: any, keysOnly?: boolean): Iterator => {
-			var result: Iterator;
+			if (keysOnly) {
+				throw new Error("This Iterator implementation doesn't support keysOnly = true.");
+			}
 
 			if (typeof collection.__iterator__ === "function") {
-				result = collection.__iterator__();
+				return <Iterator>collection.__iterator__();
+			}
+			else if (Array.isArray(collection)) {
+				return new ArrayIterator(<Array>collection);
 			}
 			else {
-				// Assume collection is an Array (or at least supports .length and the [] operator). Everything else is unsupported.
-				result = new ArrayIterator(/** @type {!Array} */ (collection));
-			}
-
-			if (!keysOnly) {
-				return result;
-			}
-			else {
-				throw new Error("This Iterator implementation doesn't support keysOnly = true.");
+				throw new Error("This Iterator implementation doesn't support iterating arbitrary objects.");
 			}
 		}
 
@@ -178,10 +175,12 @@ module libjass {
 	 * @param {function(*)} func A function (element)
 	 */
 	iteratorPrototype.forEach = function (func: (element: any) => void) {
+		var self: Iterator = this;
+
 		try {
 			for (; ;) {
-				var result = this.next();
-				func.call(this, result);
+				var result = self.next();
+				func.call(self, result);
 			}
 		}
 		catch (ex) {
@@ -198,7 +197,8 @@ module libjass {
 	 * @return {!Array} An array of the elements of this Iterable
 	 */
 	iteratorPrototype.toArray = function (): Array {
-		var self = <Iterator>this;
+		var self: Iterator = this;
+
 		var result: Array = [];
 		self.forEach(element => {
 			result.push(element);
