@@ -22,6 +22,15 @@
 
 libjass.debugMode = (location.search === "?debug");
 
+var config = {
+	/**
+	 * Subtitles will be pre-rendered for this amount of time (seconds)
+	 *
+	 * @const
+	 */
+	preRenderTime: 5
+};
+
 addEventListener("DOMContentLoaded", function () {
 	var ASS = libjass.ASS;
 
@@ -156,12 +165,23 @@ addEventListener("DOMContentLoaded", function () {
 				return dialogue.end >= currentTime;
 			}).takeWhile(function (dialogue) {
 				// All these dialogues end after currentTime
-				// Take until dialogue which starts later than currentTime
-				return dialogue.start <= currentTime;
+				// Take until dialogue which starts later than currentTime + config.preRenderTime
+				return dialogue.start <= (currentTime + config.preRenderTime);
 			}).filter(function (dialogue) {
-				// All these dialogues are visible at currentTime
+				// All these dialogues are visible at atleast one time in the range [currentTime, currentTime + config.preRenderTime]
 				// Ignore those dialogues which have already been displayed
 				return currentSubs.every(function (sub) { return parseInt(sub.getAttribute("data-dialogue-id")) !== dialogue.id; });
+			}).filter(function (dialogue) {
+				// If the dialogue is to be displayed, keep it to be drawn...
+				if (dialogue.start <= currentTime) {
+					return true;
+				}
+
+				// ... otherwise pre-render it and forget it
+				else {
+					dialogue.preRender();
+					return false;
+				}
 			}).map(function (dialogue) {
 				debug(dialogue.toString());
 				// Display the dialogue and return the drawn subtitle div

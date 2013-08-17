@@ -33,6 +33,8 @@ module libjass {
 		private _alignment: number;
 		private _parts: tags.Tag[];
 
+		private _sub: HTMLDivElement = null;
+
 		/**
 		 * @constructor
 		 * @param {string} text
@@ -81,12 +83,54 @@ module libjass {
 			return this._parts;
 		}
 
-		// Magic happens here (TODO: styling)
 		/**
+		 * The magic happens here. The subtitle div is rendered and stored. Call draw() to get a clone of the div to display.
+		 */
+		preRender(): void {
+			if (this._sub === null) {
+				this._preRender();
+			}
+		}
+
+		/**
+		 * Returns the subtitle div for display. The currentTime is used to shift the animations appropriately, so that at the time the
+		 * div is inserted into the DOM and the animations begin, they are in sync with the video time.
+		 *
 		 * @param {number} currentTime
 		 * @return {!HTMLDivElement}
 		 */
 		draw(currentTime: number): HTMLDivElement {
+			if (this._sub === null) {
+				if (libjass.debugMode) {
+					console.warn("This dialogue was not pre-rendered. Call preRender() before calling draw() so that draw() is faster.");
+				}
+
+				this._preRender();
+			}
+
+			var sub = <HTMLDivElement>this._sub.cloneNode(true);
+
+			var animationEndCallback: () => void = sub.remove.bind(sub);
+
+			sub.style.webkitAnimationDelay = (this._start - currentTime) + "s";
+			sub.addEventListener("webkitAnimationEnd", animationEndCallback, false);
+
+			sub.style.animationDelay = (this._start - currentTime) + "s";
+			sub.addEventListener("animationend", animationEndCallback, false);
+
+			return sub;
+		}
+
+		/**
+		 * @return {string}
+		 */
+		toString(): string {
+			return "#" + this._id + " [" + this._start.toFixed(3) + "-" + this._end.toFixed(3) + "] " + this._parts.join(", ");
+		}
+
+		private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);
+
+		private _preRender(): void {
 			var sub = document.createElement("div");
 
 			// Create an animation if there is a part that requires it
@@ -119,17 +163,11 @@ module libjass {
 			var scaleY = this._info.scaleY;
 			var dpi = this._info.dpi;
 
-			var animationEndCallback: () => void = sub.remove.bind(sub);
-
 			sub.style.webkitAnimationName = "dialogue-" + this._id;
 			sub.style.webkitAnimationDuration = (this._end - this._start) + "s";
-			sub.style.webkitAnimationDelay = (this._start - currentTime) + "s";
-			sub.addEventListener("webkitAnimationEnd", animationEndCallback, false);
 
 			sub.style.animationName = "dialogue-" + this._id;
 			sub.style.animationDuration = (this._end - this._start) + "s";
-			sub.style.animationDelay = (this._start - currentTime) + "s";
-			sub.addEventListener("animationend", animationEndCallback, false);
 
 			sub.style.marginLeft = (scaleX * this._style.marginLeft) + "px";
 			sub.style.marginRight = (scaleX * this._style.marginRight) + "px";
@@ -469,17 +507,8 @@ module libjass {
 
 			sub.setAttribute("data-dialogue-id", String(this._id));
 
-			return sub;
+			this._sub = sub;
 		}
-
-		/**
-		 * @return {string}
-		 */
-		toString(): string {
-			return "#" + this._id + " [" + this._start.toFixed(3) + "-" + this._end.toFixed(3) + "] " + this._parts.join(", ");
-		}
-
-		private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);
 	}
 
 	class KeyframeCollection {
