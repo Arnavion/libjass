@@ -68,13 +68,14 @@ interface DialogueParser {
 }
 
 module libjass {
-	// String.trimLeft for browsers which don't support it
 	if (typeof String.prototype.trimLeft !== "function") {
 		/**
+		 * String.trimLeft implementation for browsers which don't support it.
+		 *
 		 * @return {string}
 		 */
 		String.prototype.trimLeft = function (): string {
-			return (<string>this).match(/^\s*(.*)$/)[1];
+			return (<string>this).replace(/^\s*/, "");
 		};
 	}
 
