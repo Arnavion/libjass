@@ -20,6 +20,7 @@
 
 ///<reference path="utility.ts" />
 ///<reference path="parser.ts" />
+///<reference path="tags.ts" />
 
 "use strict";
 
