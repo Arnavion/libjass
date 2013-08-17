@@ -83,8 +83,6 @@ module libjass {
 		draw(currentTime: number): HTMLDivElement {
 			var sub = document.createElement("div");
 
-			sub.setAttribute("data-dialogue-id", String(this._id));
-
 			// Create an animation if there is a part that requires it
 			var keyframes = new KeyframeCollection(this._id, this._start, this._end);
 
@@ -146,26 +144,25 @@ module libjass {
 
 			var currentBlur = 0;
 			var transformStyle = "";
-			var currentSpanContainer = sub; // Changes to a wrapper if {\pos} is present
 			var currentSpan: HTMLSpanElement;
 
 			var createNewSpan = true;
 			var updateSpanStyles = (): void => {
 				if (createNewSpan) {
 					currentSpan = document.createElement("span");
-					currentSpanContainer.appendChild(currentSpan);
+					sub.appendChild(currentSpan);
 					createNewSpan = false;
 				}
 
-				currentItalic = valueOrDefault(currentItalic, this._style.italic);
-				currentBold = valueOrDefault(currentBold, this._style.bold);
-				currentUnderline = valueOrDefault(currentUnderline, this._style.underline);
-				currentStrikethrough = valueOrDefault(currentStrikethrough, this._style.strikethrough);
-				currentOutlineWidth = valueOrDefault(currentOutlineWidth, this._style.outlineWidth);
-				currentFontName = valueOrDefault(currentFontName, this._style.fontName);
-				currentFontSize = valueOrDefault(currentFontSize, this._style.fontSize);
-				currentPrimaryColor = valueOrDefault(currentPrimaryColor, this._style.primaryColor);
-				currentOutlineColor = valueOrDefault(currentOutlineColor, this._style.outlineColor);
+				currentItalic = Dialogue._valueOrDefault(currentItalic, this._style.italic);
+				currentBold = Dialogue._valueOrDefault(currentBold, this._style.bold);
+				currentUnderline = Dialogue._valueOrDefault(currentUnderline, this._style.underline);
+				currentStrikethrough = Dialogue._valueOrDefault(currentStrikethrough, this._style.strikethrough);
+				currentOutlineWidth = Dialogue._valueOrDefault(currentOutlineWidth, this._style.outlineWidth);
+				currentFontName = Dialogue._valueOrDefault(currentFontName, this._style.fontName);
+				currentFontSize = Dialogue._valueOrDefault(currentFontSize, this._style.fontSize);
+				currentPrimaryColor = Dialogue._valueOrDefault(currentPrimaryColor, this._style.primaryColor);
+				currentOutlineColor = Dialogue._valueOrDefault(currentOutlineColor, this._style.outlineColor);
 
 				if (currentItalic) {
 					currentSpan.style.fontStyle = "italic";
@@ -338,31 +335,13 @@ module libjass {
 				}
 
 				else if (part instanceof tags.Pos) {
-					var posPart = <tags.Pos>part;
-					sub.style.position = "absolute";
-					sub.style.left = (scaleX * posPart.x) + "px";
-					sub.style.top = (scaleY * posPart.y) + "px";
-
-					var relativeWrapper = document.createElement("div");
-
-					relativeWrapper.style.position = "relative";
-					relativeWrapper.style.top = ((9 - this._alignment) / 3 * -50) + "% ";
-					relativeWrapper.style.left = (((this._alignment - 1) % 3) * -50) + "% ";
-
-					while (sub.firstElementChild) {
-						relativeWrapper.appendChild(sub.firstElementChild);
-					}
-
-					sub.appendChild(relativeWrapper);
-
-					currentSpanContainer = relativeWrapper;
 				}
 
 				else if (part instanceof tags.Fade) {
 				}
 
 				else if (part instanceof tags.NewLine) {
-					currentSpanContainer.appendChild(document.createElement("br"));
+					sub.appendChild(document.createElement("br"));
 					createNewSpan = true;
 				}
 
@@ -382,16 +361,65 @@ module libjass {
 			});
 
 			if (transformStyle) {
-				currentSpanContainer.style.transform = transformStyle;
-				currentSpanContainer.style.webkitTransform = transformStyle;
+				sub.style.transform = transformStyle;
+				sub.style.webkitTransform = transformStyle;
 
-				var transformOrigin = (((this._alignment - 1) % 3) * 50) + "% " + ((2 - (((this._alignment - 1) / 3) | 0)) * 50) + "%";
-				currentSpanContainer.style.transformOrigin = transformOrigin;
-				currentSpanContainer.style.webkitTransformOrigin = transformOrigin;
-
-				currentSpanContainer.style.perspective = "400";
-				currentSpanContainer.style.webkitPerspective = "400";
+				var transformOriginX: number;
+				var transformOriginY: number;
+				switch (this._alignment) {
+					case 1: transformOriginX =   0; transformOriginY = 100; break;
+					case 2: transformOriginX =  50; transformOriginY = 100; break;
+					case 3: transformOriginX = 100; transformOriginY = 100; break;
+					case 4: transformOriginX =   0; transformOriginY =  50; break;
+					case 5: transformOriginX =  50; transformOriginY =  50; break;
+					case 6: transformOriginX = 100; transformOriginY =  50; break;
+					case 7: transformOriginX =   0; transformOriginY =   0; break;
+					case 8: transformOriginX =  50; transformOriginY =   0; break;
+					case 9: transformOriginX = 100; transformOriginY =   0; break;
+				}
+				var transformOrigin = transformOriginX + "% " + transformOriginY + "%";
+				sub.style.transformOrigin = transformOrigin;
+				sub.style.webkitTransformOrigin = transformOrigin;
 			}
+
+			this._parts.some(part => {
+				if (part instanceof tags.Pos) {
+					var posPart = <tags.Pos>part;
+
+					var absoluteWrapper = document.createElement("div");
+					absoluteWrapper.style.position = "absolute";
+					absoluteWrapper.style.left = (scaleX * posPart.x) + "px";
+					absoluteWrapper.style.top = (scaleY * posPart.y) + "px";
+
+					sub.style.position = "relative";
+
+					var relativeTop: number;
+					var relativeLeft: number;
+					switch (this._alignment) {
+						case 1: relativeLeft =    0; relativeTop = -100; break;
+						case 2: relativeLeft =  -50; relativeTop = -100; break;
+						case 3: relativeLeft = -100; relativeTop = -100; break;
+						case 4: relativeLeft =    0; relativeTop =  -50; break;
+						case 5: relativeLeft =  -50; relativeTop =  -50; break;
+						case 6: relativeLeft = -100; relativeTop =  -50; break;
+						case 7: relativeLeft =    0; relativeTop =    0; break;
+						case 8: relativeLeft =  -50; relativeTop =    0; break;
+						case 9: relativeLeft = -100; relativeTop =    0; break;
+					}
+					sub.style.left = relativeLeft + "%";
+					sub.style.top = relativeTop + "%";
+
+					absoluteWrapper.appendChild(sub);
+
+					sub = absoluteWrapper;
+
+					return true;
+				}
+
+				return false;
+			});
+
+			sub.setAttribute("data-dialogue-id", String(this._id));
 
 			return sub;
 		}
@@ -402,6 +430,8 @@ module libjass {
 		toString(): string {
 			return "[" + this._start.toFixed(3) + "-" + this._end.toFixed(3) + "] " + this._parts.join(", ");
 		}
+
+		private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);
 	}
 
 	class KeyframeCollection {
@@ -446,6 +476,4 @@ module libjass {
 			return result;
 		}
 	}
-
-	var valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);
 }
