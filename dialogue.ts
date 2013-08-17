@@ -344,6 +344,7 @@ module libjass {
 				}
 
 				else if (part instanceof tags.Alignment) {
+					// Already handled at the beginning of draw()
 				}
 
 				else if (part instanceof tags.Reset) {
@@ -380,9 +381,11 @@ module libjass {
 				}
 
 				else if (part instanceof tags.Pos) {
+					// Will be handled at the end of draw()
 				}
 
 				else if (part instanceof tags.Fade) {
+					// Already handled at the beginning of draw()
 				}
 
 				else if (part instanceof tags.NewLine) {
