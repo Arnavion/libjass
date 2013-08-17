@@ -350,7 +350,7 @@ module libjass {
 					createNewSpan = true;
 				}
 
-				else if (part instanceof tags.Text || (ASS.debugMode && part instanceof tags.Comment)) {
+				else if (part instanceof tags.Text || (libjass.debugMode && part instanceof tags.Comment)) {
 					currentSpan.appendChild(document.createTextNode((<tags.Text>part).value));
 					createNewSpan = true;
 				}

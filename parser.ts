@@ -220,8 +220,6 @@ module libjass {
 			return this._dialogues;
 		}
 
-		static debugMode: boolean;
-
 		private static _readSection(lines: Iterable, sectionName: string): Iterable {
 			return lines
 				// Skip all lines till the script info section begins
@@ -370,6 +368,8 @@ module libjass {
 			return this._marginVertical;
 		}
 	};
+
+	export var debugMode: boolean = false;
 
 	export module tags {
 		export interface Tag {

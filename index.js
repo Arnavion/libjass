@@ -20,13 +20,13 @@
 
 "use strict";
 
-libjass.ASS.debugMode = (location.search === "?debug");
+libjass.debugMode = (location.search === "?debug");
 
 addEventListener("DOMContentLoaded", function () {
 	var ASS = libjass.ASS;
 
 	var debug = function () {
-		if (ASS.debugMode) {
+		if (libjass.debugMode) {
 			console.log.apply(console, arguments);
 		}
 	}
@@ -220,7 +220,7 @@ addEventListener("DOMContentLoaded", function () {
 
 			if (rawASS) {
 				ass = new ASS(rawASS, parser);
-				if (ASS.debugMode) {
+				if (libjass.debugMode) {
 					window.ass = ass;
 				}
 				testVideoAndASSLoaded();
@@ -239,7 +239,7 @@ addEventListener("DOMContentLoaded", function () {
 
 			if (parser) {
 				ass = new ASS(rawASS, parser);
-				if (ASS.debugMode) {
+				if (libjass.debugMode) {
 					window.ass = ass;
 				}
 				testVideoAndASSLoaded();
