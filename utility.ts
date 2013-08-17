@@ -39,10 +39,6 @@ interface Iterator {
 	toArray(): Array
 }
 
-interface Set<T> {
-	iterator(): Iterator
-}
-
 interface CSSStyleDeclaration {
 	webkitAnimationDelay: string
 	webkitAnimationDuration: string
@@ -87,16 +83,6 @@ module libjass {
 		return (<string>this).indexOf(str) === 0;
 	};
 
-	/**
-	 * @param {string} str
-	 * @return {boolean} true if this string ends with str
-	 */
-	String.prototype.endsWith = function (str: string): boolean {
-		var self: string = this;
-		var index = self.indexOf(str);
-		return index !== -1 && index === self.length - str.length;
-	};
-
 	if (parseInt("010") !== 10) {
 		// This browser doesn't parse strings with leading 0's as decimal. Replace its parseInt with an implementation that does.
 
@@ -121,115 +107,6 @@ module libjass {
 			}
 			return oldParseInt(s, radix);
 		}
-	}
-
-	/**
-	 * Set and Set.iterator implementation for browsers that don't support them. Only supports Number and String elements.
-	 * Elements are stored as properties of an object, with derived names that won't clash with pre-defined properties.
-	 */
-	class SimpleSet<T> implements Set<T> {
-		private _data: Object = {};
-
-		/**
-		 * @constructor
-		 */
-		constructor() { }
-
-		/**
-		 * @param {T} value
-		 */
-		add(value: T): Set<T> {
-			var key = this._toKey(value);
-
-			if (key === null) {
-				throw new Error("This Set implementation only supports string and number values.");
-			}
-
-			this._data[key] = value;
-
-			return this;
-		}
-
-		/**
-		 * @param {T} value
-		 * @return boolean
-		 */
-		has(value: T): boolean {
-			var key = this._toKey(value);
-
-			if (key === null) {
-				return false;
-			}
-
-			return this._data.hasOwnProperty(key);
-		}
-
-		/**
-		 * @return {{next: function(): string}}
-		 */
-		__iterator__(): Iterator {
-			return Iterator(
-				Object.keys(this._data).toIterable()
-					.map((entry: Array): string => String(entry[1]))
-					.filter(key => this._isKey(key))
-					.map((key: string): string => this._data[key])
-				);
-		}
-
-		/**
-		 * @return {{next: function(): string}}
-		 */
-		iterator(): Iterator {
-			return Iterator(this);
-		}
-
-		delete(value: string): boolean {
-			throw new Error("This Set implementation doesn't support delete().");
-		}
-
-		clear(): void {
-			throw new Error("This Set implementation doesn't support clear().");
-		}
-
-		get size(): number {
-			throw new Error("This Set implementation doesn't support size.");
-		}
-
-		forEach(callbackfn: (value: string, index: string, set: Set<string>) => void, thisArg?: any): void {
-			throw new Error("This Set implementation doesn't support forEach().");
-		}
-
-		private _toKey(value: T): string {
-			if (typeof value == "number") {
-				return "#" + value;
-			}
-			else if (typeof value == "string") {
-				return "'" + value;
-			}
-
-			return null;
-		}
-
-		private _isKey(key: string): boolean {
-			return this._data.hasOwnProperty(key) && (key.startsWith("#") || key.startsWith("'"));
-		}
-	}
-
-	if (!window.Set || (!window.Set.prototype.iterator && !window.Set.prototype.forEach)) {
-		window.Set = SimpleSet;
-	}
-	else if (!window.Set.prototype.iterator && window.Set.prototype.forEach) {
-		/**
-		 * Set.iterator implementation for browsers that support Set and Set.forEach but not Set.iterator (IE11).
-		 */
-		window.Set.prototype.iterator = function (): Iterator {
-			var self = <Set>this;
-			var elements: any[] = [];
-			self.forEach((value: any) => {
-				elements.push(value);
-			});
-			return Iterator(elements.toIterable().map((entry: Array) => entry[1]));
-		};
 	}
 
 	HTMLDivElement.prototype.remove = function (): void {

@@ -76,14 +76,16 @@ addEventListener("DOMContentLoaded", function () {
 			dialogues.forEach(function (dialogue) {
 				layers.add(dialogue.layer);
 			});
-			Iterator(layers).toArray().sort().forEach(function (layer) {
-				var i;
-				wrappers[layer] = {};
-				for (i = 1; i <= 9; ++i) {
+			var layersArray = [];
+			layers.forEach(function (layer) { layersArray.push(layer); });
+			layersArray.sort().forEach(function (layer) {
+				wrappers[layer] = new Array(9);
+
+				for (var alignment = 1; alignment <= 9; alignment++) {
 					var wrapperDiv = document.createElement("div");
-					wrapperDiv.className = "an" + i + " layer" + layer;
+					wrapperDiv.className = "an" + alignment + " layer" + layer;
 					subsWrapper.appendChild(wrapperDiv);
-					wrappers[layer][i] = wrapperDiv;
+					wrappers[layer][alignment] = wrapperDiv;
 				}
 			});
 
@@ -248,3 +250,73 @@ addEventListener("DOMContentLoaded", function () {
 	}, false);
 	subsRequest.send(null);
 }, false);
+
+String.prototype.endsWith = function (str) {
+	var index = this.indexOf(str);
+	return index !== -1 && index === this.length - str.length;
+};
+
+if (typeof window.Set !== "function" || typeof window.Set.prototype.forEach !== "function") {
+	/**
+	 * Set implementation for browsers that don't support it. Only supports Number and String elements.
+	 *
+	 * Elements are stored as properties of an object, with derived names that won't clash with pre-defined properties.
+	 */
+	window.Set = function () {
+		var data = {};
+
+		var toKey = function (value) {
+			if (typeof value === "number") {
+				return "#" + value;
+			}
+			else if (typeof value === "string") {
+				return "'" + value;
+			}
+
+			return null;
+		};
+
+		var isKey = function (key) {
+			return (key.startsWith("#") || key.startsWith("'"));
+		};
+
+		this.add = function (value) {
+			var key = toKey(value);
+
+			if (key === null) {
+				throw new Error("This Set implementation only supports string and number values.");
+			}
+
+			data[key] = value;
+
+			return this;
+		};
+
+		this.has = function (value) {
+			var key = toKey(value);
+
+			if (key === null) {
+				return false;
+			}
+
+			return data.hasOwnProperty(key);
+		};
+
+		this.forEach = function (callbackfn, thisArg) {
+			if (typeof thisArg === "undefined") {
+				thisArg = window;
+			}
+
+			var that = this;
+
+			Object.keys(data).filter(function (key) {
+				return isKey(key);
+			}).map(function (key) {
+				return data[key];
+			}).forEach(function (value, index) {
+				callbackfn.call(thisArg, value, value, that);
+			});
+		};
+	};
+	Set.prototype = new Set();
+}
