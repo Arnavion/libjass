@@ -25,6 +25,12 @@ libjass.ASS.debugMode = (location.search === "?debug");
 addEventListener("DOMContentLoaded", function () {
 	var ASS = libjass.ASS;
 
+	var debug = function () {
+		if (ASS.debugMode) {
+			console.log.apply(console, arguments);
+		}
+	}
+
 	var wrappers = {};
 
 	var video = document.querySelector("#video");
@@ -81,6 +87,7 @@ addEventListener("DOMContentLoaded", function () {
 				}
 			});
 
+			debug("Preloading fonts...");
 			var allFonts = new Set();
 			ass.styles.forEach(function (style) {
 				allFonts.add(style.fontName);
@@ -92,10 +99,10 @@ addEventListener("DOMContentLoaded", function () {
 					}
 				});
 			});
-			var numFonts = Array.prototype.filter.call(document.styleSheets, function (stylesheet) {
+			var numFonts = [].filter.call(document.styleSheets, function (stylesheet) {
 				return stylesheet.href && stylesheet.href.endsWith("/fonts.css");
 			}).reduce(function (previousValue, currentValue) {
-				return previousValue + Array.prototype.filter.call(currentValue.cssRules, function (rule) {
+				return previousValue + [].filter.call(currentValue.cssRules, function (rule) {
 					return rule.type === CSSRule.FONT_FACE_RULE && allFonts.has(rule.style.getPropertyValue("font-family").match(/^['"]?(.*?)['"]?$/)[1]);
 				}).map(function (fontFaceRule) {
 					var xhr = new XMLHttpRequest();
@@ -109,8 +116,11 @@ addEventListener("DOMContentLoaded", function () {
 					xhr.open("GET", fontSrc, true);
 					xhr.addEventListener("readystatechange", function () {
 						if (xhr.readyState === XMLHttpRequest.DONE) {
+							debug("Preloaded " + fontSrc + ".");
 							--numFonts;
+							debug(numFonts + " fonts left to preload.");
 							if (numFonts === 0) {
+								debug("All fonts have been preloaded. Beginning autoplay.");
 								video.play();
 							}
 						}
@@ -120,7 +130,11 @@ addEventListener("DOMContentLoaded", function () {
 				})
 				.length;
 			}, 0);
+
+			debug(numFonts + " fonts left to preload.");
+
 			if (numFonts === 0) {
+				debug("All fonts have been preloaded. Beginning autoplay.");
 				video.play();
 			}
 
@@ -137,6 +151,7 @@ addEventListener("DOMContentLoaded", function () {
 			}).filter(function (dialogue) {
 				return dialogue.end >= currentTime && currentSubs.every(function (sub) { return parseInt(sub.getAttribute("data-dialogue-id")) !== dialogue.id; });
 			}).map(function (dialogue) {
+				debug(dialogue.toString());
 				return wrappers[dialogue.layer][dialogue.alignment].appendChild(dialogue.draw(currentTime));
 			});
 
@@ -146,7 +161,7 @@ addEventListener("DOMContentLoaded", function () {
 				currentSubs = currentSubs.filter(function (sub) {
 					var subDialogue = ass.dialogues[parseInt(sub.getAttribute("data-dialogue-id"))];
 
-					if (subDialogue.start <= currentTime && subDialogue.end > currentTime) {
+					if (subDialogue.start <= currentTime && currentTime < subDialogue.end) {
 						return true;
 					}
 					else {
@@ -155,9 +170,7 @@ addEventListener("DOMContentLoaded", function () {
 					}
 				}).concat(Iterator(newSubs).toArray());
 
-				if (ASS.debugMode) {
-					console.log("video.timeupdate: video.paused = " + video.paused + ", video.seeking = " + video.seeking);
-				}
+				debug("video.timeupdate: video.currentTime = " + currentTime + ", video.paused = " + video.paused + ", video.seeking = " + video.seeking);
 			}, false);
 
 			video.addEventListener("seeking", function () {
@@ -167,36 +180,32 @@ addEventListener("DOMContentLoaded", function () {
 
 				currentSubs = [];
 
-				if (ASS.debugMode) {
-					console.log("video.seeking: video.paused = " + video.paused + ", video.seeking = " + video.seeking);
-				}
+				debug("video.seeking: video.currentTime = " + video.currentTime + ", video.paused = " + video.paused + ", video.seeking = " + video.seeking);
 			}, false);
 
 			video.addEventListener("pause", function () {
 				subsWrapper.className = "paused";
 
-				if (ASS.debugMode) {
-					console.log("video.pause: video.paused = " + video.paused + ", video.seeking = " + video.seeking);
-				}
+				debug("video.pause: video.currentTime = " + video.currentTime + ", video.paused = " + video.paused + ", video.seeking = " + video.seeking);
 			}, false);
 
 			video.addEventListener("playing", function () {
 				subsWrapper.className = "";
 
-				if (ASS.debugMode) {
-					console.log("video.playing: video.paused = " + video.paused + ", video.seeking = " + video.seeking);
-				}
+				debug("video.playing: video.currentTime = " + video.currentTime + ", video.paused = " + video.paused + ", video.seeking = " + video.seeking);
 			}, false);
 		};
 	}
 
 	if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
 		video.addEventListener("loadedmetadata", function () {
+			debug("Video metadata loaded.");
 			videoMetadataLoaded = true;
 			testVideoAndASSLoaded();
 		}, false);
 	}
 	else {
+		debug("Video metadata loaded.");
 		videoMetadataLoaded = true;
 		testVideoAndASSLoaded();
 	}
@@ -205,7 +214,9 @@ addEventListener("DOMContentLoaded", function () {
 	parserRequest.open("GET", "ass.pegjs", true);
 	parserRequest.addEventListener("readystatechange", function () {
 		if (parserRequest.readyState === XMLHttpRequest.DONE) {
+			debug("Parser data received.");
 			parser = PEG.buildParser(parserRequest.responseText);
+			debug("Parser created.");
 
 			if (rawASS) {
 				ass = new ASS(rawASS, parser);
@@ -223,6 +234,7 @@ addEventListener("DOMContentLoaded", function () {
 	subsRequest.open("GET", track.src || track.getAttribute("src"), true);
 	subsRequest.addEventListener("readystatechange", function () {
 		if (subsRequest.readyState === XMLHttpRequest.DONE) {
+			debug("ASS script received.");
 			rawASS = subsRequest.responseText;
 
 			if (parser) {
