@@ -30,27 +30,31 @@ module libjass {
 		private static _animationStyleElement: HTMLStyleElement = null;
 
 		private _id: number;
+
+		private _style: Style;
+
+		private _start: number;
+		private _end: number;
+
+		private _layer: number;
 		private _alignment: number;
+
 		private _parts: tags.Tag[];
 
 		private _sub: HTMLDivElement = null;
 
-		/**
-		 * @constructor
-		 * @param {string} text
-		 * @param {string} style
-		 * @param {number} start
-		 * @param {number} end
-		 * @param {number} layer
-		 * @param {{parse: function(string, string=): !*}} parser
-		 * @param {!Info} info
-		 * @param {!Array.<!Style>} styles
-		 */
-		constructor(text: string, private _style: Style, private _start: number, private _end: number, private _layer: number, parser: DialogueParser, private _info: Info, private _styles: Style[]) {
+		constructor(template: Object, private _info: Info, private _styles: Style[], dialogueParser: DialogueParser) {
 			this._id = ++Dialogue._lastDialogueId;
-			this._parts = <tags.Tag[]>parser.parse(text);
 
+			this._style = this._styles.filter(aStyle => aStyle.name === template["Style"])[0];
+
+			this._start = Dialogue._toTime(template["Start"]);
+			this._end = Dialogue._toTime(template["End"]);
+
+			this._layer = Math.max(parseInt(template["Layer"]), 0);
 			this._alignment = this._style.alignment;
+
+			this._parts = <tags.Tag[]>dialogueParser.parse(template["Text"]);
 
 			if (libjass.debugMode) {
 				if (this._parts.some(part => part instanceof tags.Comment && (<tags.Comment>part).value.indexOf("\\") !== -1)) {
@@ -126,6 +130,16 @@ module libjass {
 		 */
 		toString(): string {
 			return "#" + this._id + " [" + this._start.toFixed(3) + "-" + this._end.toFixed(3) + "] " + this._parts.join(", ");
+		}
+
+		/**
+		 * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
+		 *
+		 * @param {string} string
+		 * @return {number}
+		 */
+		private static _toTime(str: string): number {
+			return str.split(":").reduce((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);
 		}
 
 		private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);

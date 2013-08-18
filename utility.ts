@@ -50,7 +50,6 @@ interface CSSStyleDeclaration {
 
 
 interface String {
-	trimLeft(): string
 	startsWith(str: string): boolean
 	endsWith(str: string): boolean
 }
@@ -64,17 +63,6 @@ interface DialogueParser {
 }
 
 module libjass {
-	if (typeof String.prototype.trimLeft !== "function") {
-		/**
-		 * String.trimLeft implementation for browsers which don't support it.
-		 *
-		 * @return {string}
-		 */
-		String.prototype.trimLeft = function (): string {
-			return (<string>this).replace(/^\s*/, "");
-		};
-	}
-
 	/**
 	 * @param {string} str
 	 * @return {boolean} true if this string starts with str

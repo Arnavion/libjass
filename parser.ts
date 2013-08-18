@@ -27,8 +27,8 @@
 module libjass {
 	export class ASS {
 		private _info: Info;
-		private _styles: Style[];
-		private _dialogues: Dialogue[];
+		private _styles: Style[] = [];
+		private _dialogues: Dialogue[] = [];
 
 		/**
 		 * This class represents an ASS script. It contains a Info object with global information about the script,
@@ -39,166 +39,48 @@ module libjass {
 		 * @param {{parse: function(string, string=): !*}} dialogueParser
 		 */
 		constructor(rawASS: string, dialogueParser: DialogueParser) {
-			// Info variables
-			var playResX: number = null;
-			var playResY: number = null;
-
-			// Style variables
-			this._styles = [];
-
-			// The indices of the various constituents of a Style in a "Style: " line
-			var nameIndex: number = null;
-			var italicIndex: number = null;
-			var boldIndex: number = null;
-			var underlineIndex: number = null;
-			var strikethroughIndex: number = null;
-			var outlineWidthIndex: number = null;
-			var fontNameIndex: number = null;
-			var fontSizeIndex: number = null;
-			var primaryColorIndex: number = null;
-			var outlineColorIndex: number = null;
-			var alignmentIndex: number = null;
-			var marginLeftIndex: number = null;
-			var marginRightIndex: number = null;
-			var marginVerticalIndex: number = null;
-
-			// Dialogue variables
-			this._dialogues = [];
-
-			// The indices of the various constituents of a Dialogue in a "Dialogue: " line
-			var styleIndex: number = null;
-			var startIndex: number = null;
-			var endIndex: number = null;
-			var textIndex: number = null;
-			var layerIndex: number = null;
+			// Make an iterable for all the lines in the script file.
+			var lines = rawASS.replace(/\r$/gm, "").split("\n").toIterable().map((entry: any[]) => <string>entry[1]);
 
 
-			// Remove all lines and make an iterable for all the lines in the script file.
-			var lines = rawASS.replace(/\r$/gm, "").split("\n").toIterable().map((entry: Array) => entry[1]);
+			// Create the script info object
+			var infoTemplate = {};
 
-
-			// Get script info from the script info section
-			Iterator(ASS._readSection(lines, "Script Info")).forEach((line: string) => {
-				// Parse the horizontal script resolution line
-				if (line.startsWith("PlayResX:")) {
-					playResX = parseInt(line.substring("PlayResX:".length).trim());
-				}
-				// Parse the vertical script resolution line
-				else if (line.startsWith("PlayResY:")) {
-					playResY = parseInt(line.substring("PlayResY:".length).trim());
-				}
+			// Get script info key-value pairs from the script info section
+			Iterator(ASS._readSectionLines(lines, "Script Info")).forEach((keyValuePair: string[]) => {
+				infoTemplate[keyValuePair[0]] = keyValuePair[1];
 			});
-
-			if (playResX !== null && playResY !== null) {
-				// Create the script info object
-				this._info = new Info(playResX, playResY);
-			}
-			else {
-				throw new Error("Script does not contain script resolution.");
-			}
+			this._info = new Info(infoTemplate);
 
 
 			// Get styles from the styles section
-			Iterator(ASS._readSection(lines, "V4+ Styles")).forEach((line: string) => {
-				// If this is the format line
-				if (line.startsWith("Format:")) {
-					// Parse the format line
-					var styleFormatParts = line.substring("Format:".length).split(",").map(formatPart => formatPart.trim());
-					nameIndex = styleFormatParts.indexOf("Name");
-					italicIndex = styleFormatParts.indexOf("Italic");
-					boldIndex = styleFormatParts.indexOf("Bold");
-					underlineIndex = styleFormatParts.indexOf("Underline");
-					strikethroughIndex = styleFormatParts.indexOf("StrikeOut");
-					outlineWidthIndex = styleFormatParts.indexOf("Outline");
-					fontNameIndex = styleFormatParts.indexOf("Fontname");
-					fontSizeIndex = styleFormatParts.indexOf("Fontsize");
-					primaryColorIndex = styleFormatParts.indexOf("PrimaryColour");
-					outlineColorIndex = styleFormatParts.indexOf("OutlineColour");
-					alignmentIndex = styleFormatParts.indexOf("Alignment");
-					marginLeftIndex = styleFormatParts.indexOf("MarginL");
-					marginRightIndex = styleFormatParts.indexOf("MarginR");
-					marginVerticalIndex = styleFormatParts.indexOf("MarginV");
-				}
+			Iterator(ASS._readSectionTemplates(lines, "V4+ Styles")).forEach((templateEntry: any[]) => {
+				var templateType: string = templateEntry[0];
+				if (templateType === "Style") {
+					var template: Object = templateEntry[1];
 
-				// else if this is a style line
-				else if (line.startsWith("Style:")) {
-					if (
-						nameIndex === null ||
-						italicIndex === null ||
-						boldIndex === null ||
-						underlineIndex === null ||
-						strikethroughIndex === null ||
-						outlineWidthIndex === null ||
-						fontNameIndex === null ||
-						fontSizeIndex === null ||
-						primaryColorIndex === null ||
-						outlineColorIndex === null ||
-						alignmentIndex === null ||
-						marginLeftIndex === null ||
-						marginRightIndex === null ||
-						marginVerticalIndex === null
-					) {
-						throw new Error("All required line styles not found.");
+					if (libjass.debugMode) {
+						console.log("Read style: " + JSON.stringify(template));
 					}
 
-					var lineParts = line.substring("Style:".length).trimLeft().split(",");
 					// Create the style and add it into the styles array
-					this._styles.push(new Style(
-						lineParts[nameIndex],
-						lineParts[italicIndex] === "-1",
-						lineParts[boldIndex] === "-1",
-						lineParts[underlineIndex] === "-1",
-						lineParts[strikethroughIndex] === "-1",
-						parseFloat(lineParts[outlineWidthIndex]),
-						lineParts[fontNameIndex],
-						parseFloat(lineParts[fontSizeIndex]),
-						<tags.Color>dialogueParser.parse(lineParts[primaryColorIndex], "colorWithAlpha"),
-						<tags.Color>dialogueParser.parse(lineParts[outlineColorIndex], "colorWithAlpha"),
-						parseInt(lineParts[alignmentIndex]),
-						parseFloat(lineParts[marginLeftIndex]),
-						parseFloat(lineParts[marginRightIndex]),
-						parseFloat(lineParts[marginVerticalIndex])
-					));
+					this._styles.push(new Style(template, dialogueParser));
 				}
 			});
 
 
 			// Get dialogues from the events section
-			Iterator(ASS._readSection(lines, "Events")).forEach((line: string) => {
-				// If this is a format line
-				if (line.startsWith("Format:")) {
-					var dialogueFormatParts = line.substring("Format:".length).split(",").map(formatPart => formatPart.trim());
-					styleIndex = dialogueFormatParts.indexOf("Style");
-					startIndex = dialogueFormatParts.indexOf("Start");
-					endIndex = dialogueFormatParts.indexOf("End");
-					textIndex = dialogueFormatParts.indexOf("Text");
-					layerIndex = dialogueFormatParts.indexOf("Layer");
-				}
+			Iterator(ASS._readSectionTemplates(lines, "Events")).forEach((templateEntry: any[]) => {
+				var templateType: string = templateEntry[0];
+				if (templateType === "Dialogue") {
+					var template: Object = templateEntry[1];
 
-				// else if this is a dialogue line
-				else if (line.startsWith("Dialogue:")) {
-					if (
-						styleIndex === null ||
-						startIndex === null ||
-						endIndex === null ||
-						textIndex === null ||
-						layerIndex === null
-					) {
-						throw new Error("All required event styles not found.");
+					if (libjass.debugMode) {
+						console.log("Read dialogue: " + JSON.stringify(template));
 					}
 
-					var lineParts = line.substring("Dialogue:".length).trimLeft().split(",");
 					// Create the dialogue and add it to the dialogues array
-					this._dialogues.push(new Dialogue(
-						lineParts.slice(textIndex).join(","),
-						this._styles.filter(aStyle => aStyle.name === lineParts[styleIndex])[0],
-						ASS._toTime(lineParts[startIndex]),
-						ASS._toTime(lineParts[endIndex]),
-						Math.max(parseInt(lineParts[layerIndex]), 0),
-						dialogueParser,
-						this._info,
-						this._styles
-					));
+					this._dialogues.push(new Dialogue(template, this._info, this._styles, dialogueParser));
 				}
 			});
 		}
@@ -215,24 +97,72 @@ module libjass {
 			return this._dialogues;
 		}
 
-		private static _readSection(lines: Iterable, sectionName: string): Iterable {
+		/**
+		 * Returns an Iterable of the key-value pairs in the lines in the script from the given section.
+		 *
+		 * @param {Iterable} lines The lines of the script
+		 * @param {string} sectionName The name of the section to parse
+		 * @return {Iterable} An Iterable of key-value pairs. Each key-value pair is an array of two strings, the key and the value.
+		 */
+		private static _readSectionLines(lines: Iterable, sectionName: string): Iterable {
 			return lines
 				// Skip all lines till the script info section begins
 				.skipWhile((line: string) => line !== "[" + sectionName + "]")
 				// Skip the section header
 				.skip(1)
-				// Take all the lines till the script resolution is found or the script info section ends
-				.takeWhile((line: string) => !line.startsWith("["));
+				// Take all the lines till the section ends
+				.takeWhile((line: string) => !line.startsWith("["))
+				// Parse the line into a key-value pair
+				.map((line: string): string[] => {
+					var match = /^([^:]+):\s*(.+)/.exec(line);
+
+					if (match !== null) {
+						return [match[1], match[2]];
+					}
+
+					return null;
+				})
+				.filter((keyValuePair: string[]) => keyValuePair !== null);
 		}
 
 		/**
-		 * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
+		 * Returns an Iterable of the templates in the lines in the script from the given section.
 		 *
-		 * @param {string} string
-		 * @return {number}
+		 * @param {Iterable} lines The lines of the script
+		 * @param {string} sectionName The name of the section to parse
+		 * @return {Iterable} An Iterable of template entries. Each template is an array whose first element is the template type and the second element is the template object.
 		 */
-		private static _toTime(str: string): number {
-			return str.split(":").reduce((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);
+		private static _readSectionTemplates(lines: Iterable, sectionName: string): Iterable {
+			var formatParts: string[] = null;
+
+			return ASS._readSectionLines(lines, sectionName).map((keyValuePair: string[]) => {
+				var key = keyValuePair[0];
+				var value = keyValuePair[1];
+
+				// If this is a format line, parse its constituents...
+				if (key === "Format") {
+					formatParts = value.split(",").map((formatPart: string) => formatPart.trim());
+					return null;
+				}
+
+				// ... else parse this line according to the format constituents
+				if (formatParts === null) {
+					throw new Error("Format specification not found.");
+				}
+
+				var template: Object = {};
+
+				var lineParts = value.split(",");
+				if (lineParts.length > formatParts.length) {
+					lineParts[formatParts.length - 1] = lineParts.slice(formatParts.length - 1).join(",");
+				}
+
+				formatParts.forEach((key, index) => {
+					template[key] = lineParts[index];
+				});
+
+				return [key, template];
+			}).filter((templateEntry: Array) => templateEntry !== null);
 		}
 	}
 
@@ -244,11 +174,21 @@ module libjass {
 	 * @param {number} playResY The vertical script resolution
 	 */
 	export class Info {
+		private _playResX: number;
+		private _playResY: number;
+
 		private _scaleX: number;
 		private _scaleY: number;
+
 		private _dpi: number;
 
-		constructor(private _playResX: number, private _playResY: number) { }
+		constructor(template: Object) {
+			// Parse the horizontal script resolution
+			this._playResX = parseInt(template["PlayResX"]);
+
+			// Parse the vertical script resolution
+			this._playResY = parseInt(template["PlayResY"]);
+		}
 
 		/**
 		 * This method takes in the actual video height and width and prepares the scaleX and scaleY
@@ -298,14 +238,49 @@ module libjass {
 	 * @param {number} marginVertical The vertical margin
 	 */
 	export class Style {
-		constructor(
-			private _name: string,
-			private _italic: boolean, private _bold: Object, private _underline: boolean, private _strikethrough: boolean,
-			private _outlineWidth: number,
-			private _fontName: string, private _fontSize: number,
-			private _primaryColor: tags.Color, private _outlineColor: tags.Color,
-			private _alignment: number,
-			private _marginLeft: number, private _marginRight: number, private _marginVertical: number) { }
+		private _name: string;
+
+		private _italic: boolean;
+		private _bold: Object;
+		private _underline: boolean;
+		private _strikethrough: boolean;
+
+		private _outlineWidth: number;
+
+		private _fontName: string;
+		private _fontSize: number;
+
+		private _primaryColor: tags.Color;
+		private _outlineColor: tags.Color;
+
+		private _alignment: number;
+
+		private _marginLeft: number;
+		private _marginRight: number;
+		private _marginVertical: number;
+
+		constructor(template: Object, dialogueParser: DialogueParser) {
+			this._name = template["Name"];
+
+			this._italic = template["Italic"] === "-1";
+			this._bold = template["Bold"] === "-1";
+			this._underline = template["Underline"] === "-1";
+			this._strikethrough = template["StrikeOut"] === "-1";
+
+			this._outlineWidth = parseFloat(template["Outline"]);
+
+			this._fontName = template["Fontname"];
+			this._fontSize = parseFloat(template["Fontsize"]);
+
+			this._primaryColor = <tags.Color>dialogueParser.parse(template["PrimaryColour"], "colorWithAlpha");
+			this._outlineColor = <tags.Color>dialogueParser.parse(template["OutlineColour"], "colorWithAlpha");
+
+			this._alignment = parseInt(template["Alignment"]);
+
+			this._marginLeft = parseFloat(template["MarginL"]);
+			this._marginRight = parseFloat(template["MarginR"]);
+			this._marginVertical = parseFloat(template["MarginV"]);
+		}
 
 		get name(): string {
 			return this._name;
