@@ -160,18 +160,22 @@ addEventListener("DOMContentLoaded", function () {
 			}).skipWhile(function (dialogue) {
 				// Skip until dialogues which end at a time later than currentTime
 				return dialogue.end < currentTime;
-			}).filter(function (dialogue) {
-				// Ignore dialogues which end at a time less than currentTime
-				return dialogue.end >= currentTime;
 			}).takeWhile(function (dialogue) {
-				// All these dialogues end after currentTime
 				// Take until dialogue which starts later than currentTime + config.preRenderTime
 				return dialogue.start <= (currentTime + config.preRenderTime);
 			}).filter(function (dialogue) {
+				// Ignore dialogues which end at a time less than currentTime
+				if (dialogue.end < currentTime) {
+					return false;
+				}
+
 				// All these dialogues are visible at atleast one time in the range [currentTime, currentTime + config.preRenderTime]
+
 				// Ignore those dialogues which have already been displayed
-				return currentSubs.every(function (sub) { return parseInt(sub.getAttribute("data-dialogue-id")) !== dialogue.id; });
-			}).filter(function (dialogue) {
+				if (currentSubs.some(function (sub) { return parseInt(sub.getAttribute("data-dialogue-id")) === dialogue.id; })) {
+					return false;
+				}
+
 				// If the dialogue is to be displayed, keep it to be drawn...
 				if (dialogue.start <= currentTime) {
 					return true;
