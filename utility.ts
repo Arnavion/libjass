@@ -58,10 +58,6 @@ interface HTMLDivElement {
 	remove(): void
 }
 
-interface DialogueParser {
-	parse(input: string, startRule?: string): Object
-}
-
 module libjass {
 	/**
 	 * @param {string} str

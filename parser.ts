@@ -25,6 +25,10 @@
 "use strict";
 
 module libjass {
+	export interface Parser {
+		parse(input: string, startRule?: string): any
+	}
+
 	export class ASS {
 		private _info: Info;
 		private _styles: Style[] = [];
@@ -36,9 +40,9 @@ module libjass {
 		 *
 		 * @constructor
 		 * @param {string} rawASS
-		 * @param {{parse: function(string, string=): !*}} dialogueParser
+		 * @param {{parse: function(string, string=): !*}} parser
 		 */
-		constructor(rawASS: string, dialogueParser: DialogueParser) {
+		constructor(rawASS: string, parser: Parser) {
 			// Make an iterable for all the lines in the script file.
 			var lines = rawASS.replace(/\r$/gm, "").split("\n").toIterable().map((entry: any[]) => <string>entry[1]);
 
@@ -64,7 +68,7 @@ module libjass {
 					}
 
 					// Create the style and add it into the styles array
-					this._styles.push(new Style(template, dialogueParser));
+					this._styles.push(new Style(template, parser));
 				}
 			});
 
@@ -80,7 +84,7 @@ module libjass {
 					}
 
 					// Create the dialogue and add it to the dialogues array
-					this._dialogues.push(new Dialogue(template, this._info, this._styles, dialogueParser));
+					this._dialogues.push(new Dialogue(template, this._info, this._styles, parser));
 				}
 			});
 		}
@@ -259,7 +263,7 @@ module libjass {
 		private _marginRight: number;
 		private _marginVertical: number;
 
-		constructor(template: Object, dialogueParser: DialogueParser) {
+		constructor(template: Object, parser: Parser) {
 			this._name = template["Name"];
 
 			this._italic = template["Italic"] === "-1";
@@ -272,8 +276,8 @@ module libjass {
 			this._fontName = template["Fontname"];
 			this._fontSize = parseFloat(template["Fontsize"]);
 
-			this._primaryColor = <tags.Color>dialogueParser.parse(template["PrimaryColour"], "colorWithAlpha");
-			this._outlineColor = <tags.Color>dialogueParser.parse(template["OutlineColour"], "colorWithAlpha");
+			this._primaryColor = <tags.Color>parser.parse(template["PrimaryColour"], "colorWithAlpha");
+			this._outlineColor = <tags.Color>parser.parse(template["OutlineColour"], "colorWithAlpha");
 
 			this._alignment = parseInt(template["Alignment"]);
 

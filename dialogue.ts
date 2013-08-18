@@ -43,7 +43,7 @@ module libjass {
 
 		private _sub: HTMLDivElement = null;
 
-		constructor(template: Object, private _info: Info, private _styles: Style[], dialogueParser: DialogueParser) {
+		constructor(template: Object, private _info: Info, private _styles: Style[], parser: Parser) {
 			this._id = ++Dialogue._lastDialogueId;
 
 			this._style = this._styles.filter(aStyle => aStyle.name === template["Style"])[0];
@@ -54,7 +54,7 @@ module libjass {
 			this._layer = Math.max(parseInt(template["Layer"]), 0);
 			this._alignment = this._style.alignment;
 
-			this._parts = <tags.Tag[]>dialogueParser.parse(template["Text"]);
+			this._parts = <tags.Tag[]>parser.parse(template["Text"]);
 
 			if (libjass.debugMode) {
 				if (this._parts.some(part => part instanceof tags.Comment && (<tags.Comment>part).value.indexOf("\\") !== -1)) {
