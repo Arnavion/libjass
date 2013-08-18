@@ -157,7 +157,7 @@ module libjass {
 			if (Dialogue._animationStyleElement === null) {
 				Dialogue._animationStyleElement = <HTMLStyleElement>document.querySelector("#animation-styles");
 			}
-			Dialogue._animationStyleElement.appendChild(document.createTextNode(keyframes.toCSS()));
+			Dialogue._animationStyleElement.appendChild(document.createTextNode(keyframes.toString()));
 
 			var scaleX = this._info.scaleX;
 			var scaleY = this._info.scaleY;
@@ -529,9 +529,11 @@ module libjass {
 		}
 
 		/**
+		 * Creates a CSS3 animations representation of this keyframe collection.
+		 *
 		 * @return {string}
 		 */
-		toCSS(): string {
+		toString(): string {
 			var result = "";
 
 			var steps = Object.keys(this._keyframes);
