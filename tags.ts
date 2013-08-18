@@ -18,6 +18,8 @@
  * limitations under the License.
  */
 
+///<reference path="libjass.ts" />
+
 "use strict";
 
 module libjass {

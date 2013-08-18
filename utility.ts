@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-///<reference path="iterators.ts" />
+///<reference path="libjass.ts" />
 
 "use strict";
 

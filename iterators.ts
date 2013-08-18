@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-///<reference path="utility.ts" />
+///<reference path="libjass.ts" />
 
 "use strict";
 
