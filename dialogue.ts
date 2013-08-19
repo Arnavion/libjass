@@ -186,14 +186,14 @@ module libjass {
 
 			sub.style.marginLeft = (scaleX * this._style.marginLeft) + "px";
 			sub.style.marginRight = (scaleX * this._style.marginRight) + "px";
-			sub.style.marginTop = sub.style.marginBottom = (scaleX * this._style.marginVertical) + "px";
+			sub.style.marginTop = sub.style.marginBottom = (scaleY * this._style.marginVertical) + "px";
 
 			var divTransformStyle = "";
 
 			var currentSpan: HTMLSpanElement = null;
 			var currentSpanStyles: SpanStyles = null;
 
-			var createNewSpan = (): void => {
+			var startNewSpan = (): void => {
 				if (currentSpanStyles !== null) {
 					currentSpanStyles.setStylesOnSpan();
 				}
@@ -203,7 +203,7 @@ module libjass {
 
 				currentSpanStyles = new SpanStyles(currentSpan, this._style, this._transformOrigin, scaleX, scaleY, dpi);
 			};
-			createNewSpan();
+			startNewSpan();
 
 			this._parts.forEach(part => {
 				if (part instanceof tags.Italic) {
@@ -314,17 +314,17 @@ module libjass {
 
 				else if (part instanceof tags.NewLine) {
 					sub.appendChild(document.createElement("br"));
-					createNewSpan();
+					startNewSpan();
 				}
 
 				else if (part instanceof tags.HardSpace) {
 					currentSpan.appendChild(document.createTextNode("\u00A0"));
-					createNewSpan();
+					startNewSpan();
 				}
 
 				else if (part instanceof tags.Text || (libjass.debugMode && part instanceof tags.Comment)) {
 					currentSpan.appendChild(document.createTextNode((<tags.Text>part).value));
-					createNewSpan();
+					startNewSpan();
 				}
 			});
 
@@ -467,7 +467,7 @@ module libjass {
 		private _primaryAlpha: number = null;
 		private _outlineAlpha: number = null;
 
-		private _blur: number = 0;
+		private _blur: number = null;
 
 		constructor(private _span: HTMLSpanElement, private _style: Style, private _transformOrigin: string, private _scaleX: number, private _scaleY: number, private _dpi: number) {
 			this.reset();
@@ -484,6 +484,9 @@ module libjass {
 			this._fontName = SpanStyles._valueOrDefault(this._fontName, newStyle.fontName);
 			this._fontSize = SpanStyles._valueOrDefault(this._fontSize, newStyle.fontSize);
 
+			this._fontScaleX = SpanStyles._valueOrDefault(this._fontScaleX, newStyle.fontScaleX);
+			this._fontScaleY = SpanStyles._valueOrDefault(this._fontScaleY, newStyle.fontScaleY);
+
 			this._letterSpacing = SpanStyles._valueOrDefault(this._letterSpacing, newStyle.letterSpacing);
 
 			this._primaryColor = SpanStyles._valueOrDefault(this._primaryColor, newStyle.primaryColor);
@@ -491,6 +494,8 @@ module libjass {
 
 			this._primaryAlpha = null;
 			this._outlineAlpha = null;
+
+			this._blur = null;
 		}
 
 		setStylesOnSpan(): void {
@@ -528,12 +533,14 @@ module libjass {
 			this._span.style.color = this._primaryColor.withAlpha(this._primaryAlpha).toString();
 
 			var blurRadius = this._scaleX * this._outlineWidth;
-			if (this._blur > 0) {
+			if (this._blur !== null && this._blur > 0) {
 				blurRadius = this._blur / 2;
 			}
-			var textShadowColor = this._outlineColor.withAlpha(this._outlineAlpha).toString();
-			this._span.style.textShadow = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
-				.map(pair => pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + textShadowColor).join(", ");
+			if (blurRadius > 0) {
+				var textShadowColor = this._outlineColor.withAlpha(this._outlineAlpha).toString();
+				this._span.style.textShadow = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
+					.map(pair => pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + textShadowColor).join(", ");
+			}
 		}
 
 		set italic(value: boolean) {
