@@ -253,6 +253,8 @@ module libjass {
 		private _fontScaleX: number;
 		private _fontScaleY: number;
 
+		private _letterSpacing: number;
+
 		private _primaryColor: tags.Color;
 		private _outlineColor: tags.Color;
 
@@ -277,6 +279,8 @@ module libjass {
 
 			this._fontScaleX = parseFloat(template["ScaleX"]) / 100;
 			this._fontScaleY = parseFloat(template["ScaleY"]) / 100;
+
+			this._letterSpacing = parseFloat(template["Spacing"]);
 
 			this._primaryColor = <tags.Color>parser.parse(template["PrimaryColour"], "colorWithAlpha");
 			this._outlineColor = <tags.Color>parser.parse(template["OutlineColour"], "colorWithAlpha");
@@ -324,6 +328,10 @@ module libjass {
 
 		get fontScaleY(): number {
 			return this._fontScaleY;
+		}
+
+		get letterSpacing(): number {
+			return this._letterSpacing;
 		}
 
 		get primaryColor(): tags.Color {

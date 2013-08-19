@@ -213,6 +213,16 @@ module libjass {
 			}
 		}
 
+		export class LetterSpacing extends TagBase {
+			constructor(private _value: number) {
+				super("LetterSpacing", "value");
+			}
+
+			get value(): number {
+				return this._value;
+			}
+		}
+
 		export class RotateX extends TagBase {
 			constructor(private _value: number) {
 				super("RotateX", "value");

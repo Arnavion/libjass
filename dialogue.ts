@@ -188,21 +188,23 @@ module libjass {
 			sub.style.marginRight = (scaleX * this._style.marginRight) + "px";
 			sub.style.marginTop = sub.style.marginBottom = (scaleX * this._style.marginVertical) + "px";
 
-			var currentItalic = this._style.italic;
-			var currentBold = this._style.bold;
-			var currentUnderline = this._style.underline;
-			var currentStrikethrough = this._style.strikethrough;
+			var currentItalic: boolean = null;
+			var currentBold: Object = null;
+			var currentUnderline: boolean = null;
+			var currentStrikethrough: boolean = null;
 
-			var currentFontScaleX = this._style.fontScaleX;
-			var currentFontScaleY = this._style.fontScaleY;
+			var currentFontScaleX: number = null;
+			var currentFontScaleY: number = null;
 
-			var currentOutlineWidth = this._style.outlineWidth;
+			var currentLetterSpacing: number = null;
 
-			var currentFontName = this._style.fontName;
-			var currentFontSize = this._style.fontSize;
+			var currentFontName: string = null;
+			var currentFontSize: number = null;
 
-			var currentPrimaryColor = this._style.primaryColor;
-			var currentOutlineColor = this._style.outlineColor;
+			var currentPrimaryColor: tags.Color = null;
+			var currentOutlineColor: tags.Color = null;
+
+			var currentOutlineWidth: number = null;
 
 			var currentPrimaryAlpha: number = null;
 			var currentOutlineAlpha: number = null;
@@ -230,6 +232,8 @@ module libjass {
 
 				currentFontName = Dialogue._valueOrDefault(currentFontName, this._style.fontName);
 				currentFontSize = Dialogue._valueOrDefault(currentFontSize, this._style.fontSize);
+
+				currentLetterSpacing = Dialogue._valueOrDefault(currentLetterSpacing, this._style.letterSpacing);
 
 				currentPrimaryColor = Dialogue._valueOrDefault(currentPrimaryColor, this._style.primaryColor);
 				currentOutlineColor = Dialogue._valueOrDefault(currentOutlineColor, this._style.outlineColor);
@@ -262,6 +266,8 @@ module libjass {
 				currentSpan.style.webkitTransformOrigin = this._transformOrigin;
 				currentSpan.style.transform = "scaleX(" + currentFontScaleX + ") scaleY(" + currentFontScaleY + ")";
 				currentSpan.style.transformOrigin = this._transformOrigin;
+
+				currentSpan.style.letterSpacing = (scaleX * currentLetterSpacing) + "px";
 
 				currentSpan.style.color = currentPrimaryColor.withAlpha(currentPrimaryAlpha).toString();
 
@@ -358,6 +364,14 @@ module libjass {
 					}
 				}
 
+				else if (part instanceof tags.LetterSpacing) {
+					var newLetterSpacing = (<tags.LetterSpacing>part).value;
+					if (currentLetterSpacing !== newLetterSpacing) {
+						currentLetterSpacing = newLetterSpacing;
+						spanStylesChanged = true;
+					}
+				}
+
 				else if (part instanceof tags.RotateX) {
 					transformStyle += " rotateX(" + (<tags.RotateX>part).value + "deg)";
 				}
@@ -440,6 +454,8 @@ module libjass {
 						currentFontScaleX = null;
 						currentFontScaleY = null;
 
+						currentLetterSpacing = null;
+
 						currentPrimaryColor = null;
 						currentOutlineColor = null;
 
@@ -463,6 +479,8 @@ module libjass {
 
 						currentFontScaleX = newStyle.fontScaleX;
 						currentFontScaleY = newStyle.fontScaleY;
+
+						currentLetterSpacing = newStyle.letterSpacing;
 
 						currentPrimaryColor = newStyle.primaryColor;
 						currentOutlineColor = newStyle.outlineColor;

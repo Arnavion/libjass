@@ -52,6 +52,7 @@ enclosedTags
 			"\\" tag_fscx /
 			"\\" tag_fscy /
 
+			"\\" tag_fsp /
 			"\\" tag_frx /
 			"\\" tag_fry /
 			"\\" tag_frz /
@@ -180,6 +181,13 @@ tag_fscy
 	=	"fscy" value:decimal? {
 			return new libjass.tags.FontScaleY(
 				(value !== "") ? (value / 100) : null
+			);
+		}
+
+tag_fsp
+	=	"fsp" value:decimal? {
+			return new libjass.tags.LetterSpacing(
+				(value !== "") ? value : null
 			);
 		}
 
