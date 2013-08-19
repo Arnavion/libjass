@@ -164,6 +164,24 @@ module libjass {
 				return this._value;
 			}
 		}
+		export class BorderX extends TagBase {
+			constructor(private _value: number) {
+				super("BorderX", "value");
+			}
+
+			get value(): number {
+				return this._value;
+			}
+		}
+		export class BorderY extends TagBase {
+			constructor(private _value: number) {
+				super("BorderY", "value");
+			}
+
+			get value(): number {
+				return this._value;
+			}
+		}
 
 		export class Blur extends TagBase {
 			constructor(private _value: number) {

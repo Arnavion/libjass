@@ -46,6 +46,8 @@ dialogue
 enclosedTags
 	=	"{" tagsWithSlashes:(
 			"\\" tag_alpha /
+			"\\" tag_xbord /
+			"\\" tag_ybord /
 
 			"\\" tag_bord /
 			"\\" tag_blur /
@@ -145,6 +147,20 @@ tag_s
 tag_bord
 	=	"bord" value:decimal? {
 			return new libjass.tags.Border(
+				(value !== "") ? value : null
+			);
+		}
+
+tag_xbord
+	=	"bord" value:decimal? {
+			return new libjass.tags.BorderX(
+				(value !== "") ? value : null
+			);
+		}
+
+tag_ybord
+	=	"bord" value:decimal? {
+			return new libjass.tags.BorderY(
 				(value !== "") ? value : null
 			);
 		}

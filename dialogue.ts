@@ -191,17 +191,15 @@ module libjass {
 			var divTransformStyle = "";
 
 			var currentSpan: HTMLSpanElement = null;
-			var currentSpanStyles: SpanStyles = null;
+			var currentSpanStyles = new SpanStyles(this._style, this._transformOrigin, scaleX, scaleY, dpi);
 
 			var startNewSpan = (): void => {
-				if (currentSpanStyles !== null) {
-					currentSpanStyles.setStylesOnSpan();
+				if (currentSpan !== null) {
+					currentSpanStyles.setStylesOnSpan(currentSpan);
 				}
 
 				currentSpan = document.createElement("span");
 				sub.appendChild(currentSpan);
-
-				currentSpanStyles = new SpanStyles(currentSpan, this._style, this._transformOrigin, scaleX, scaleY, dpi);
 			};
 			startNewSpan();
 
@@ -223,7 +221,16 @@ module libjass {
 				}
 
 				else if (part instanceof tags.Border) {
-					currentSpanStyles.outlineWidth = (<tags.Border>part).value;
+					currentSpanStyles.outlineWidthX = (<tags.Border>part).value;
+					currentSpanStyles.outlineWidthY = (<tags.Border>part).value;
+				}
+
+				else if (part instanceof tags.BorderX) {
+					currentSpanStyles.outlineWidthX = (<tags.BorderX>part).value;
+				}
+
+				else if (part instanceof tags.BorderY) {
+					currentSpanStyles.outlineWidthY = (<tags.BorderY>part).value;
 				}
 
 				else if (part instanceof tags.Blur) {
@@ -446,68 +453,70 @@ module libjass {
 	}
 
 	class SpanStyles {
-		private _italic: boolean = null;
-		private _bold: Object = null;
-		private _underline: boolean = null;
-		private _strikeThrough: boolean = null;
+		private _italic: boolean;
+		private _bold: Object;
+		private _underline: boolean;
+		private _strikeThrough: boolean;
 
-		private _outlineWidth: number = null;
+		private _outlineWidthX: number;
+		private _outlineWidthY: number;
 
-		private _fontScaleX: number = null;
-		private _fontScaleY: number = null;
+		private _fontName: string;
+		private _fontSize: number;
 
-		private _letterSpacing: number = null;
+		private _fontScaleX: number;
+		private _fontScaleY: number;
 
-		private _fontName: string = null;
-		private _fontSize: number = null;
+		private _letterSpacing: number;
 
-		private _primaryColor: tags.Color = null;
-		private _outlineColor: tags.Color = null;
+		private _primaryColor: tags.Color;
+		private _outlineColor: tags.Color;
 
-		private _primaryAlpha: number = null;
-		private _outlineAlpha: number = null;
+		private _primaryAlpha: number;
+		private _outlineAlpha: number;
 
-		private _blur: number = null;
+		private _blur: number;
 
-		constructor(private _span: HTMLSpanElement, private _style: Style, private _transformOrigin: string, private _scaleX: number, private _scaleY: number, private _dpi: number) {
+		constructor(private _style: Style, private _transformOrigin: string, private _scaleX: number, private _scaleY: number, private _dpi: number) {
 			this.reset();
 		}
 
 		reset(newStyle: Style = this._style): void {
-			this._italic = SpanStyles._valueOrDefault(this._italic, newStyle.italic);
-			this._bold = SpanStyles._valueOrDefault(this._bold, newStyle.bold);
-			this._underline = SpanStyles._valueOrDefault(this._underline, newStyle.underline);
-			this._strikeThrough = SpanStyles._valueOrDefault(this._strikeThrough, newStyle.strikeThrough);
+			this.italic = newStyle.italic;
+			this.bold = newStyle.bold;
+			this.underline = newStyle.underline;
+			this.strikeThrough = newStyle.strikeThrough;
 
-			this._outlineWidth = SpanStyles._valueOrDefault(this._outlineWidth, newStyle.outlineWidth);
+			this.outlineWidthX = newStyle.outlineWidth;
+			this.outlineWidthY = newStyle.outlineWidth;
 
-			this._fontName = SpanStyles._valueOrDefault(this._fontName, newStyle.fontName);
-			this._fontSize = SpanStyles._valueOrDefault(this._fontSize, newStyle.fontSize);
+			this.fontName = newStyle.fontName;
+			this.fontSize = newStyle.fontSize;
 
-			this._fontScaleX = SpanStyles._valueOrDefault(this._fontScaleX, newStyle.fontScaleX);
-			this._fontScaleY = SpanStyles._valueOrDefault(this._fontScaleY, newStyle.fontScaleY);
+			this.fontScaleX = newStyle.fontScaleX;
+			this.fontScaleY = newStyle.fontScaleY;
 
-			this._letterSpacing = SpanStyles._valueOrDefault(this._letterSpacing, newStyle.letterSpacing);
+			this.letterSpacing = newStyle.letterSpacing;
 
-			this._primaryColor = SpanStyles._valueOrDefault(this._primaryColor, newStyle.primaryColor);
-			this._outlineColor = SpanStyles._valueOrDefault(this._outlineColor, newStyle.outlineColor);
+			this.primaryColor = newStyle.primaryColor;
+			this.outlineColor = newStyle.outlineColor;
 
-			this._primaryAlpha = null;
-			this._outlineAlpha = null;
+			this.primaryAlpha = null;
+			this.outlineAlpha = null;
 
-			this._blur = null;
+			this.blur = null;
 		}
 
-		setStylesOnSpan(): void {
+		setStylesOnSpan(span: HTMLSpanElement): void {
 			if (this._italic) {
-				this._span.style.fontStyle = "italic";
+				span.style.fontStyle = "italic";
 			}
 
 			if (this._bold === true) {
-				this._span.style.fontWeight = "bold";
+				span.style.fontWeight = "bold";
 			}
 			else if (this._bold !== false) {
-				this._span.style.fontWeight = <string>this._bold;
+				span.style.fontWeight = <string>this._bold;
 			}
 
 			var textDecoration = "";
@@ -517,82 +526,119 @@ module libjass {
 			if (this._strikeThrough) {
 				textDecoration += " line-through";
 			}
-			this._span.style.textDecoration = textDecoration.trim();
+			span.style.textDecoration = textDecoration.trim();
 
-			this._span.style.fontFamily = this._fontName;
-			this._span.style.fontSize = ((72 / this._dpi) * this._scaleY * this._fontSize) + "px";
-			this._span.style.lineHeight = (this._scaleY * this._fontSize) + "px";
+			span.style.fontFamily = this._fontName;
+			span.style.fontSize = span.style.lineHeight = ((72 / this._dpi) * this._scaleY * this._fontSize) + "px";
 
-			this._span.style.webkitTransform = "scaleX(" + this._fontScaleX + ") scaleY(" + this._fontScaleY + ")";
-			this._span.style.webkitTransformOrigin = this._transformOrigin;
-			this._span.style.transform = "scaleX(" + this._fontScaleX + ") scaleY(" + this._fontScaleY + ")";
-			this._span.style.transformOrigin = this._transformOrigin;
+			span.style.webkitTransform = "scaleX(" + this._fontScaleX + ") scaleY(" + this._fontScaleY + ")";
+			span.style.webkitTransformOrigin = this._transformOrigin;
+			span.style.transform = "scaleX(" + this._fontScaleX + ") scaleY(" + this._fontScaleY + ")";
+			span.style.transformOrigin = this._transformOrigin;
 
-			this._span.style.letterSpacing = (this._scaleX * this._letterSpacing) + "px";
+			span.style.letterSpacing = (this._scaleX * this._letterSpacing) + "px";
 
-			this._span.style.color = this._primaryColor.withAlpha(this._primaryAlpha).toString();
+			span.style.color = this._primaryColor.withAlpha(this._primaryAlpha).toString();
 
-			var blurRadius = this._scaleX * this._outlineWidth;
-			if (this._blur !== null && this._blur > 0) {
-				blurRadius = this._blur / 2;
-			}
-			if (blurRadius > 0) {
+			if (this._outlineWidthX > 0 || this._outlineWidthY > 0) {
 				var textShadowColor = this._outlineColor.withAlpha(this._outlineAlpha).toString();
-				this._span.style.textShadow = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
-					.map(pair => pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + textShadowColor).join(", ");
+				var textShadowParts: number[][] = [];
+
+				/* Lay out text-shadows in an ellipse with horizontal radius = this._scaleX * this._outlineWidthX
+				 * and vertical radius = this._scaleY * this._outlineWidthY
+				 * Shadows are laid inside the region of the ellipse, separated by 0.5px
+				 *
+				 * The below loop is an unrolled version of the above algorithm that only roams over one quadrant and adds
+				 * four shadows at a time.
+				 */
+
+				var a = this._scaleX * this._outlineWidthX;
+				var b = this._scaleY * this._outlineWidthY;
+
+				for (var x = 0; x < a; x += 0.5) {
+					for (var y = 0; y < b && ((x / a) * (x / a) + (y / b) * (y / b)) <= 1; y += 0.5) {
+						textShadowParts.push(
+							[x, y, this._scaleX * this._blur],
+							[-x, y, this._scaleX * this._blur],
+							[-x, -y, this._scaleY * this._blur],
+							[x, -y, this._scaleY * this._blur]
+						);
+					}
+				}
+
+				// Make sure the four corner shadows exist
+				textShadowParts.push(
+					[a, 0, this._scaleX * this._blur],
+					[0, b, this._scaleX * this._blur],
+					[-a, 0, this._scaleY * this._blur],
+					[0, -b, this._scaleY * this._blur]
+				);
+
+				span.style.textShadow =
+					textShadowParts
+						.map(triple => triple[0] + "px " + triple[1] + "px " + triple[2] + "px " + textShadowColor)
+						.join(", ");
+			}
+
+			else if (this._blur > 0) {
+				// TODO: Blur text
 			}
 		}
 
 		set italic(value: boolean) {
-			this._italic = value;
+			this._italic = SpanStyles._valueOrDefault(value, this._style.italic);
 		}
 
 		set bold(value: Object) {
-			this._bold = value;
+			this._bold = SpanStyles._valueOrDefault(value, this._style.bold);
 		}
 
 		set underline(value: boolean) {
-			this._underline = value;
+			this._underline = SpanStyles._valueOrDefault(value, this._style.underline);
 		}
 
 		set strikeThrough(value: boolean) {
-			this._strikeThrough = value;
+			this._strikeThrough = SpanStyles._valueOrDefault(value, this._style.strikeThrough);
 		}
 
-		set outlineWidth(value: number) {
-			this._outlineWidth = value;
+		set outlineWidthX(value: number) {
+			this._outlineWidthX = SpanStyles._valueOrDefault(value, this._style.outlineWidth);
+		}
+
+		set outlineWidthY(value: number) {
+			this._outlineWidthY = SpanStyles._valueOrDefault(value, this._style.outlineWidth);
 		}
 
 		set blur(value: number) {
-			this._blur = value;
+			this._blur = SpanStyles._valueOrDefault(value, 0);
 		}
 
 		set fontName(value: string) {
-			this._fontName = value;
+			this._fontName = SpanStyles._valueOrDefault(value, this._style.fontName);
 		}
 
 		set fontSize(value: number) {
-			this._fontSize = value;
+			this._fontSize = SpanStyles._valueOrDefault(value, this._style.fontSize);
 		}
 
 		set fontScaleX(value: number) {
-			this._fontScaleX = value;
+			this._fontScaleX = SpanStyles._valueOrDefault(value, this._style.fontScaleX);
 		}
 
 		set fontScaleY(value: number) {
-			this._fontScaleY = value;
+			this._fontScaleY = SpanStyles._valueOrDefault(value, this._style.fontScaleY);
 		}
 
 		set letterSpacing(value: number) {
-			this._letterSpacing = value;
+			this._letterSpacing = SpanStyles._valueOrDefault(value, this._style.letterSpacing);
 		}
 
 		set primaryColor(value: tags.Color) {
-			this._primaryColor = value;
+			this._primaryColor = SpanStyles._valueOrDefault(value, this._style.primaryColor);
 		}
 
 		set outlineColor(value: tags.Color) {
-			this._outlineColor = value;
+			this._outlineColor = SpanStyles._valueOrDefault(value, this._style.outlineColor);
 		}
 
 		set primaryAlpha(value: number) {
