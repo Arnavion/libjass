@@ -188,252 +188,107 @@ module libjass {
 			sub.style.marginRight = (scaleX * this._style.marginRight) + "px";
 			sub.style.marginTop = sub.style.marginBottom = (scaleX * this._style.marginVertical) + "px";
 
-			var currentItalic: boolean = null;
-			var currentBold: Object = null;
-			var currentUnderline: boolean = null;
-			var currentStrikethrough: boolean = null;
+			var divTransformStyle = "";
 
-			var currentFontScaleX: number = null;
-			var currentFontScaleY: number = null;
+			var currentSpan: HTMLSpanElement = null;
+			var currentSpanStyles: SpanStyles = null;
 
-			var currentLetterSpacing: number = null;
-
-			var currentFontName: string = null;
-			var currentFontSize: number = null;
-
-			var currentPrimaryColor: tags.Color = null;
-			var currentOutlineColor: tags.Color = null;
-
-			var currentOutlineWidth: number = null;
-
-			var currentPrimaryAlpha: number = null;
-			var currentOutlineAlpha: number = null;
-
-			var currentBlur = 0;
-
-			var transformStyle = "";
-
-			var currentSpan: HTMLSpanElement;
-
-			var createNewSpan = true;
-			var updateSpanStyles = (): void => {
-				if (createNewSpan) {
-					currentSpan = document.createElement("span");
-					sub.appendChild(currentSpan);
-					createNewSpan = false;
+			var createNewSpan = (): void => {
+				if (currentSpanStyles !== null) {
+					currentSpanStyles.setStylesOnSpan();
 				}
 
-				currentItalic = Dialogue._valueOrDefault(currentItalic, this._style.italic);
-				currentBold = Dialogue._valueOrDefault(currentBold, this._style.bold);
-				currentUnderline = Dialogue._valueOrDefault(currentUnderline, this._style.underline);
-				currentStrikethrough = Dialogue._valueOrDefault(currentStrikethrough, this._style.strikethrough);
+				currentSpan = document.createElement("span");
+				sub.appendChild(currentSpan);
 
-				currentOutlineWidth = Dialogue._valueOrDefault(currentOutlineWidth, this._style.outlineWidth);
-
-				currentFontName = Dialogue._valueOrDefault(currentFontName, this._style.fontName);
-				currentFontSize = Dialogue._valueOrDefault(currentFontSize, this._style.fontSize);
-
-				currentLetterSpacing = Dialogue._valueOrDefault(currentLetterSpacing, this._style.letterSpacing);
-
-				currentPrimaryColor = Dialogue._valueOrDefault(currentPrimaryColor, this._style.primaryColor);
-				currentOutlineColor = Dialogue._valueOrDefault(currentOutlineColor, this._style.outlineColor);
-
-				if (currentItalic) {
-					currentSpan.style.fontStyle = "italic";
-				}
-
-				if (currentBold === true) {
-					currentSpan.style.fontWeight = "bold";
-				}
-				else if (currentBold !== false) {
-					currentSpan.style.fontWeight = <string>currentBold;
-				}
-
-				var textDecoration = "";
-				if (currentUnderline) {
-					textDecoration = "underline";
-				}
-				if (currentStrikethrough) {
-					textDecoration += " line-through";
-				}
-				currentSpan.style.textDecoration = textDecoration.trim();
-
-				currentSpan.style.fontFamily = currentFontName;
-				currentSpan.style.fontSize = ((72 / dpi) * scaleY * currentFontSize) + "px";
-				currentSpan.style.lineHeight = (scaleY * currentFontSize) + "px";
-
-				currentSpan.style.webkitTransform = "scaleX(" + currentFontScaleX + ") scaleY(" + currentFontScaleY + ")";
-				currentSpan.style.webkitTransformOrigin = this._transformOrigin;
-				currentSpan.style.transform = "scaleX(" + currentFontScaleX + ") scaleY(" + currentFontScaleY + ")";
-				currentSpan.style.transformOrigin = this._transformOrigin;
-
-				currentSpan.style.letterSpacing = (scaleX * currentLetterSpacing) + "px";
-
-				currentSpan.style.color = currentPrimaryColor.withAlpha(currentPrimaryAlpha).toString();
-
-				var blurRadius = scaleX * currentOutlineWidth;
-				if (currentBlur > 0) {
-					blurRadius = currentBlur / 2;
-				}
-				var textShadowColor = currentOutlineColor.withAlpha(currentOutlineAlpha).toString();
-				currentSpan.style.textShadow = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
-					.map(pair => pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + textShadowColor).join(", ");
+				currentSpanStyles = new SpanStyles(currentSpan, this._style, this._transformOrigin, scaleX, scaleY, dpi);
 			};
-			updateSpanStyles();
-
-			var spanStylesChanged = false;
+			createNewSpan();
 
 			this._parts.forEach(part => {
 				if (part instanceof tags.Italic) {
-					var newItalic = (<tags.Italic>part).value;
-					if (currentItalic !== newItalic) {
-						currentItalic = newItalic;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.italic = (<tags.Italic>part).value;
 				}
 
 				else if (part instanceof tags.Bold) {
-					var newBold = (<tags.Bold>part).value;
-					if (currentBold !== newBold) {
-						currentBold = newBold;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.bold = (<tags.Bold>part).value;
 				}
 
 				else if (part instanceof tags.Underline) {
-					var newUnderline = (<tags.Underline>part).value;
-					if (newUnderline !== currentUnderline) {
-						currentUnderline = newUnderline;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.underline = (<tags.Underline>part).value;
 				}
 
 				else if (part instanceof tags.Strikeout) {
-					var newStrikethrough = (<tags.Strikeout>part).value;
-					if (newStrikethrough !== currentStrikethrough) {
-						currentStrikethrough = newStrikethrough;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.strikeThrough = (<tags.Strikeout>part).value;
 				}
 
 				else if (part instanceof tags.Border) {
-					var newOutlineWidth = (<tags.Border>part).value;
-					if (currentOutlineWidth !== newOutlineWidth) {
-						currentOutlineWidth = newOutlineWidth;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.outlineWidth = (<tags.Border>part).value;
 				}
 
 				else if (part instanceof tags.Blur) {
-					var newBlur = (<tags.Blur>part).value;
-					if (currentBlur !== newBlur) {
-						currentBlur = newBlur;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.blur = (<tags.Blur>part).value;
 				}
 
 				else if (part instanceof tags.FontName) {
-					var newFontName = (<tags.FontName>part).value;
-					if (currentFontName !== newFontName) {
-						currentFontName = newFontName;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.fontName = (<tags.FontName>part).value;
 				}
 
 				else if (part instanceof tags.FontSize) {
-					var newFontSize = (<tags.FontSize>part).value;
-					if (currentFontSize !== newFontSize) {
-						currentFontSize = newFontSize;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.fontSize = (<tags.FontSize>part).value;
 				}
 
 				else if (part instanceof tags.FontScaleX) {
-					var newFontScaleX = (<tags.FontScaleX>part).value;
-					if (currentFontScaleX !== newFontScaleX) {
-						currentFontScaleX = newFontScaleX;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.fontScaleX = (<tags.FontScaleX>part).value;
 				}
 
 				else if (part instanceof tags.FontScaleY) {
-					var newFontScaleX = (<tags.FontScaleX>part).value;
-					if (currentFontScaleX !== newFontScaleX) {
-						currentFontScaleX = newFontScaleX;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.fontScaleY = (<tags.FontScaleY>part).value;
 				}
 
 				else if (part instanceof tags.LetterSpacing) {
-					var newLetterSpacing = (<tags.LetterSpacing>part).value;
-					if (currentLetterSpacing !== newLetterSpacing) {
-						currentLetterSpacing = newLetterSpacing;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.letterSpacing = (<tags.LetterSpacing>part).value;
 				}
 
 				else if (part instanceof tags.RotateX) {
-					transformStyle += " rotateX(" + (<tags.RotateX>part).value + "deg)";
+					divTransformStyle += " rotateX(" + (<tags.RotateX>part).value + "deg)";
 				}
 
 				else if (part instanceof tags.RotateY) {
-					transformStyle += " rotateY(" + (<tags.RotateY>part).value + "deg)";
+					divTransformStyle += " rotateY(" + (<tags.RotateY>part).value + "deg)";
 				}
 
 				else if (part instanceof tags.RotateZ) {
-					transformStyle += " rotateZ(" + (-1 * (<tags.RotateZ>part).value) + "deg)";
+					divTransformStyle += " rotateZ(" + (-1 * (<tags.RotateZ>part).value) + "deg)";
 				}
 
 				else if (part instanceof tags.SkewX) {
-					transformStyle += " skewX(" + (45 * (<tags.SkewX>part).value) + "deg)";
+					divTransformStyle += " skewX(" + (45 * (<tags.SkewX>part).value) + "deg)";
 				}
 
 				else if (part instanceof tags.SkewY) {
-					transformStyle += " skewY(" + (45 * (<tags.SkewY>part).value) + "deg)";
+					divTransformStyle += " skewY(" + (45 * (<tags.SkewY>part).value) + "deg)";
 				}
 
 				else if (part instanceof tags.PrimaryColor) {
-					var newPrimaryColor = (<tags.PrimaryColor>part).value;
-					if (currentPrimaryColor !== newPrimaryColor) {
-						currentPrimaryColor = newPrimaryColor;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.primaryColor = (<tags.PrimaryColor>part).value;
 				}
 
 				else if (part instanceof tags.OutlineColor) {
-					var newOutlineColor = (<tags.OutlineColor>part).value;
-					if (currentOutlineColor !== newOutlineColor) {
-						currentOutlineColor = newOutlineColor;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.outlineColor = (<tags.OutlineColor>part).value;
 				}
 
 				else if (part instanceof tags.Alpha) {
-					var newAlpha = (<tags.Alpha>part).value;
-					if (currentPrimaryAlpha !== newAlpha) {
-						currentPrimaryAlpha = newAlpha;
-						spanStylesChanged = true;
-					}
-					if (currentOutlineAlpha !== newAlpha) {
-						currentOutlineAlpha = newAlpha;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.primaryAlpha = (<tags.Alpha>part).value;
+					currentSpanStyles.outlineAlpha = (<tags.Alpha>part).value;
 				}
 
 				else if (part instanceof tags.PrimaryAlpha) {
-					var newPrimaryAlpha = (<tags.PrimaryAlpha>part).value;
-					if (currentPrimaryAlpha !== newPrimaryAlpha) {
-						currentPrimaryAlpha = newPrimaryAlpha;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.primaryAlpha = (<tags.PrimaryAlpha>part).value;
 				}
 
 				else if (part instanceof tags.OutlineAlpha) {
-					var newOutlineAlpha = (<tags.OutlineAlpha>part).value;
-					if (currentOutlineAlpha !== newOutlineAlpha) {
-						currentOutlineAlpha = newOutlineAlpha;
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.outlineAlpha = (<tags.OutlineAlpha>part).value;
 				}
 
 				else if (part instanceof tags.Alignment) {
@@ -441,57 +296,12 @@ module libjass {
 				}
 
 				else if (part instanceof tags.Reset) {
-					var resetPart = <tags.Reset>part;
-					if (resetPart.value === null) {
-						currentItalic = null;
-						currentBold = null;
-						currentUnderline = null;
-						currentStrikethrough = null;
-
-						currentFontName = null;
-						currentFontSize = null;
-
-						currentFontScaleX = null;
-						currentFontScaleY = null;
-
-						currentLetterSpacing = null;
-
-						currentPrimaryColor = null;
-						currentOutlineColor = null;
-
-						currentPrimaryAlpha = null;
-						currentOutlineAlpha = null;
-
-						currentOutlineWidth = null;
-
-						spanStylesChanged = true;
+					var newStyleName = (<tags.Reset>part).value;
+					var newStyle: Style = null;
+					if (newStyleName !== null) {
+						newStyle = this._styles.filter(style => style.name === newStyleName)[0];
 					}
-					else {
-						var newStyle = this._styles.filter(style => style.name === resetPart.value)[0];
-
-						currentItalic = newStyle.italic;
-						currentBold = newStyle.bold;
-						currentUnderline = newStyle.underline;
-						currentStrikethrough = newStyle.strikethrough;
-
-						currentFontName = newStyle.fontName;
-						currentFontSize = newStyle.fontSize;
-
-						currentFontScaleX = newStyle.fontScaleX;
-						currentFontScaleY = newStyle.fontScaleY;
-
-						currentLetterSpacing = newStyle.letterSpacing;
-
-						currentPrimaryColor = newStyle.primaryColor;
-						currentOutlineColor = newStyle.outlineColor;
-
-						currentPrimaryAlpha = null;
-						currentOutlineAlpha = null;
-
-						currentOutlineWidth = newStyle.outlineWidth;
-
-						spanStylesChanged = true;
-					}
+					currentSpanStyles.reset(newStyle);
 				}
 
 				else if (part instanceof tags.Pos) {
@@ -504,29 +314,25 @@ module libjass {
 
 				else if (part instanceof tags.NewLine) {
 					sub.appendChild(document.createElement("br"));
-					createNewSpan = true;
+					createNewSpan();
 				}
 
 				else if (part instanceof tags.HardSpace) {
 					currentSpan.appendChild(document.createTextNode("\u00A0"));
-					createNewSpan = true;
+					createNewSpan();
 				}
 
 				else if (part instanceof tags.Text || (libjass.debugMode && part instanceof tags.Comment)) {
 					currentSpan.appendChild(document.createTextNode((<tags.Text>part).value));
-					createNewSpan = true;
-				}
-
-				if (spanStylesChanged) {
-					updateSpanStyles();
+					createNewSpan();
 				}
 			});
 
-			if (transformStyle) {
-				sub.style.webkitTransform = transformStyle;
+			if (divTransformStyle) {
+				sub.style.webkitTransform = divTransformStyle;
 				sub.style.webkitTransformOrigin = this._transformOrigin;
 
-				sub.style.transform = transformStyle;
+				sub.style.transform = divTransformStyle;
 				sub.style.transformOrigin = this._transformOrigin;
 			}
 
@@ -637,5 +443,159 @@ module libjass {
 
 			return result;
 		}
+	}
+
+	class SpanStyles {
+		private _italic: boolean = null;
+		private _bold: Object = null;
+		private _underline: boolean = null;
+		private _strikeThrough: boolean = null;
+
+		private _outlineWidth: number = null;
+
+		private _fontScaleX: number = null;
+		private _fontScaleY: number = null;
+
+		private _letterSpacing: number = null;
+
+		private _fontName: string = null;
+		private _fontSize: number = null;
+
+		private _primaryColor: tags.Color = null;
+		private _outlineColor: tags.Color = null;
+
+		private _primaryAlpha: number = null;
+		private _outlineAlpha: number = null;
+
+		private _blur: number = 0;
+
+		constructor(private _span: HTMLSpanElement, private _style: Style, private _transformOrigin: string, private _scaleX: number, private _scaleY: number, private _dpi: number) {
+			this.reset();
+		}
+
+		reset(newStyle: Style = this._style): void {
+			this._italic = SpanStyles._valueOrDefault(this._italic, newStyle.italic);
+			this._bold = SpanStyles._valueOrDefault(this._bold, newStyle.bold);
+			this._underline = SpanStyles._valueOrDefault(this._underline, newStyle.underline);
+			this._strikeThrough = SpanStyles._valueOrDefault(this._strikeThrough, newStyle.strikethrough);
+
+			this._outlineWidth = SpanStyles._valueOrDefault(this._outlineWidth, newStyle.outlineWidth);
+
+			this._fontName = SpanStyles._valueOrDefault(this._fontName, newStyle.fontName);
+			this._fontSize = SpanStyles._valueOrDefault(this._fontSize, newStyle.fontSize);
+
+			this._letterSpacing = SpanStyles._valueOrDefault(this._letterSpacing, newStyle.letterSpacing);
+
+			this._primaryColor = SpanStyles._valueOrDefault(this._primaryColor, newStyle.primaryColor);
+			this._outlineColor = SpanStyles._valueOrDefault(this._outlineColor, newStyle.outlineColor);
+
+			this._primaryAlpha = null;
+			this._outlineAlpha = null;
+		}
+
+		setStylesOnSpan(): void {
+			if (this._italic) {
+				this._span.style.fontStyle = "italic";
+			}
+
+			if (this._bold === true) {
+				this._span.style.fontWeight = "bold";
+			}
+			else if (this._bold !== false) {
+				this._span.style.fontWeight = <string>this._bold;
+			}
+
+			var textDecoration = "";
+			if (this._underline) {
+				textDecoration = "underline";
+			}
+			if (this._strikeThrough) {
+				textDecoration += " line-through";
+			}
+			this._span.style.textDecoration = textDecoration.trim();
+
+			this._span.style.fontFamily = this._fontName;
+			this._span.style.fontSize = ((72 / this._dpi) * this._scaleY * this._fontSize) + "px";
+			this._span.style.lineHeight = (this._scaleY * this._fontSize) + "px";
+
+			this._span.style.webkitTransform = "scaleX(" + this._fontScaleX + ") scaleY(" + this._fontScaleY + ")";
+			this._span.style.webkitTransformOrigin = this._transformOrigin;
+			this._span.style.transform = "scaleX(" + this._fontScaleX + ") scaleY(" + this._fontScaleY + ")";
+			this._span.style.transformOrigin = this._transformOrigin;
+
+			this._span.style.letterSpacing = (this._scaleX * this._letterSpacing) + "px";
+
+			this._span.style.color = this._primaryColor.withAlpha(this._primaryAlpha).toString();
+
+			var blurRadius = this._scaleX * this._outlineWidth;
+			if (this._blur > 0) {
+				blurRadius = this._blur / 2;
+			}
+			var textShadowColor = this._outlineColor.withAlpha(this._outlineAlpha).toString();
+			this._span.style.textShadow = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
+				.map(pair => pair[0] + "px " + pair[1] + "px " + blurRadius + "px " + textShadowColor).join(", ");
+		}
+
+		set italic(value: boolean) {
+			this._italic = value;
+		}
+
+		set bold(value: Object) {
+			this._bold = value;
+		}
+
+		set underline(value: boolean) {
+			this._underline = value;
+		}
+
+		set strikeThrough(value: boolean) {
+			this._strikeThrough = value;
+		}
+
+		set outlineWidth(value: number) {
+			this._outlineWidth = value;
+		}
+
+		set blur(value: number) {
+			this._blur = value;
+		}
+
+		set fontName(value: string) {
+			this._fontName = value;
+		}
+
+		set fontSize(value: number) {
+			this._fontSize = value;
+		}
+
+		set fontScaleX(value: number) {
+			this._fontScaleX = value;
+		}
+
+		set fontScaleY(value: number) {
+			this._fontScaleY = value;
+		}
+
+		set letterSpacing(value: number) {
+			this._letterSpacing = value;
+		}
+
+		set primaryColor(value: tags.Color) {
+			this._primaryColor = value;
+		}
+
+		set outlineColor(value: tags.Color) {
+			this._outlineColor = value;
+		}
+
+		set primaryAlpha(value: number) {
+			this._primaryAlpha = value;
+		}
+
+		set outlineAlpha(value: number) {
+			this._outlineAlpha = value;
+		}
+
+		private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);
 	}
 }
