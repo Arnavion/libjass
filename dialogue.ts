@@ -557,12 +557,16 @@ module libjass {
 
 				for (var x = 0; x < a; x += 0.5) {
 					for (var y = 0; y < b && ((x / a) * (x / a) + (y / b) * (y / b)) <= 1; y += 0.5) {
-						textShadowParts.push(
-							[x, y, this._scaleX * this._blur],
-							[-x, y, this._scaleX * this._blur],
-							[-x, -y, this._scaleY * this._blur],
-							[x, -y, this._scaleY * this._blur]
-						);
+						textShadowParts.push([x, y, this._scaleX * this._blur]);
+						if (x !== 0) {
+							textShadowParts.push([-x, y, this._scaleX * this._blur]);
+						}
+						if (x !== 0 && y !== 0) {
+							textShadowParts.push([-x, -y, this._scaleY * this._blur]);
+						}
+						if (y !== 0) {
+							textShadowParts.push([x, -y, this._scaleY * this._blur]);
+						}
 					}
 				}
 
