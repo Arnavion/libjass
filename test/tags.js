@@ -19,21 +19,21 @@
  */
 
 sections.push(new Section("Bold tag - \\b",
-	new Test("True", "b1", "boldTag", new libjass.tags.Bold(true)),
+	new Test("True", "b1", "tag_b", new libjass.tags.Bold(true)),
 
-	new Test("False", "b0", "boldTag", new libjass.tags.Bold(false)),
+	new Test("False", "b0", "tag_b", new libjass.tags.Bold(false)),
 
-	new Test("100", "b100", "boldTag", new libjass.tags.Bold(100)),
+	new Test("100", "b100", "tag_b", new libjass.tags.Bold(100)),
 
-	new Test("900", "b900", "boldTag", new libjass.tags.Bold(900)),
+	new Test("900", "b900", "tag_b", new libjass.tags.Bold(900)),
 
-	new Test("null", "b", "boldTag", new libjass.tags.Bold(null)),
+	new Test("null", "b", "tag_b", new libjass.tags.Bold(null)),
 
-	new Test("2", "b2", "boldTag", null),
+	new Test("2", "b2", "tag_b", null),
 
-	new Test("10", "b10", "boldTag", null),
+	new Test("10", "b10", "tag_b", null),
 
-	new Test("150", "b150", "boldTag", null),
+	new Test("150", "b150", "tag_b", null),
 
 	new Test("Enclosed tag", "{\\b1}", "enclosedTags", [new libjass.tags.Bold(true)]),
 
@@ -53,7 +53,9 @@ sections.push(new Section("Bold tag - \\b",
 ));
 
 sections.push(new Section("Primary color tag - \\c or \\1c",
-	new Test("Just the tag", "c&H3F171F&", "primaryColorTag", new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))),
+	new Test("Just the tag", "1c&H3F171F&", "tag_1c", new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))),
+
+	new Test("Just the tag", "c&H3F171F&", "tag_c", new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))),
 
 	new Test("Enclosed tag", "{\\c&H3F171F&}", "enclosedTags", [new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))]),
 
@@ -61,5 +63,5 @@ sections.push(new Section("Primary color tag - \\c or \\1c",
 ));
 
 sections.push(new Section("Alpha tag - \\alpha",
-	new Test("Just the tag", "alpha&H00&", "alphaTag", new libjass.tags.Alpha(1))
+	new Test("Just the tag", "alpha&H00&", "tag_alpha", new libjass.tags.Alpha(1))
 ));

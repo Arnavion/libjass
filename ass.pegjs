@@ -45,30 +45,35 @@ dialogue
 
 enclosedTags
 	=	"{" tagsWithSlashes:(
-			"\\" alphaTag /
-			"\\" borderTag /
-			"\\" blurTag /
-			"\\" fontScaleXTag /
-			"\\" fontScaleYTag /
-			"\\" fadeTag /
-			"\\" frxTag /
-			"\\" fryTag /
-			"\\" frzTag /
-			"\\" faxTag /
-			"\\" fayTag /
-			"\\" posTag /
-			"\\" fontNameTag /
-			"\\" fontSizeTag /
-			"\\" primaryColorTag /
-			"\\" outlineColorTag /
-			"\\" primaryAlphaTag /
-			"\\" outlineAlphaTag /
-			"\\" alignmentTag /
-			"\\" italicTag /
-			"\\" boldTag /
-			"\\" underlineTag /
-			"\\" strikeoutTag /
-			"\\" resetTag
+			"\\" tag_alpha /
+
+			"\\" tag_bord /
+			"\\" tag_blur /
+			"\\" tag_fscx /
+			"\\" tag_fscy /
+
+			"\\" tag_frx /
+			"\\" tag_fry /
+			"\\" tag_frz /
+			"\\" tag_fax /
+			"\\" tag_fay /
+			"\\" tag_pos /
+			"\\" tag_fad /
+
+			"\\" tag_fn /
+			"\\" tag_fs /
+			"\\" tag_1c /
+			"\\" tag_3c /
+			"\\" tag_1a /
+			"\\" tag_3a /
+			"\\" tag_an /
+
+			"\\" tag_i /
+			"\\" tag_b /
+			"\\" tag_u /
+			"\\" tag_s /
+			"\\" tag_c /
+			"\\" tag_r
 		)+
 		"}" {
 			return tagsWithSlashes.map(function (tagWithSlash) { return tagWithSlash[1]; });
@@ -98,14 +103,14 @@ text
 			);
 		}
 
-italicTag
+tag_i
 	=	"i" value:enableDisable? {
 			return new libjass.tags.Italic(
 				(value !== "") ? value : null
 			);
 		}
 
-boldTag
+tag_b
 	=	"b" value:(([1-9] "0" "0") / "1" / "0")? {
 			if (Array.isArray(value)) {
 				value = value.join("");
@@ -122,147 +127,154 @@ boldTag
 			}
 		}
 
-underlineTag
+tag_u
 	=	"u" value:enableDisable? {
 			return new libjass.tags.Underline(
 				(value !== "") ? value : null
 			);
 		}
 
-strikeoutTag
+tag_s
 	=	"s" value:enableDisable? {
 			return new libjass.tags.Strikeout(
 				(value !== "") ? value : null
 			);
 		}
 
-borderTag
+tag_bord
 	=	"bord" value:decimal? {
 			return new libjass.tags.Border(
 				(value !== "") ? value : null
 			);
 		}
 
-blurTag
+tag_blur
 	=	"blur" value:decimal? {
 			return new libjass.tags.Blur(
 				(value !== "") ? value : null
 			);
 		}
 
-fontNameTag
+tag_fn
 	=	"fn" value:[^\\}]* {
 			return new libjass.tags.FontName(
 				(value.length > 0) ? value.join("") : null
 			);
 		}
 
-fontSizeTag
+tag_fs
 	=	"fs" value:decimal? {
 			return new libjass.tags.FontSize(
 				(value !== "") ? value : null
 			);
 		}
 
-fontScaleXTag
+tag_fscx
 	=	"fscx" value:decimal? {
 			return new libjass.tags.FontScaleX(
 				(value !== "") ? (value / 100) : null
 			);
 		}
 
-fontScaleYTag
+tag_fscy
 	=	"fscy" value:decimal? {
 			return new libjass.tags.FontScaleY(
 				(value !== "") ? (value / 100) : null
 			);
 		}
 
-frxTag
+tag_frx
 	=	"frx" value:decimal? {
 			return new libjass.tags.Frx(
 				(value !== "") ? value : null
 			);
 		}
 
-fryTag
+tag_fry
 	=	"fry" value:decimal? {
 			return new libjass.tags.Fry(
 				(value !== "") ? value : null
 			);
 		}
 
-frzTag
+tag_frz
 	=	"frz" value:decimal? {
 			return new libjass.tags.Frz(
 				(value !== "") ? value : null
 			);
 		}
 
-faxTag
+tag_fax
 	=	"fax" value:decimal? {
 			return new libjass.tags.Fax(
 				(value !== "") ? value : null
 			);
 		}
 
-fayTag
+tag_fay
 	=	"fay" value:decimal? {
 			return new libjass.tags.Fay(
 				(value !== "") ? value : null
 			);
 		}
 
-primaryColorTag
-	=	"1"? "c" value:color? {
+tag_1c
+	=	"1c" value:color? {
 			return new libjass.tags.PrimaryColor(
 				(value !== "") ? value : null
 			);
 		}
 
-outlineColorTag
+tag_c
+	=	"c" value:color? {
+			return new libjass.tags.PrimaryColor(
+				(value !== "") ? value : null
+			);
+		}
+
+tag_3c
 	=	"3c" value:color? {
 			return new libjass.tags.OutlineColor(
 				(value !== "") ? value : null
 			);
 		}
 
-alphaTag
+tag_alpha
 	=	"alpha" value:alpha? {
 			return new libjass.tags.Alpha(
 				(value !== "") ? value : null
 			);
 		}
 
-primaryAlphaTag
+tag_1a
 	=	"1a" value:alpha? {
 			return new libjass.tags.PrimaryAlpha(
 				(value !== "") ? value : null
 			);
 		}
 
-outlineAlphaTag
+tag_3a
 	=	"3a" value:alpha? {
 			return new libjass.tags.OutlineAlpha(
 				(value !== "") ? value : null
 			);
 		}
 
-alignmentTag
+tag_an
 	=	"an" value:[1-9] {
 			return new libjass.tags.Alignment(
 				parseInt(value)
 			);
 		}
 
-resetTag
+tag_r
 	=	"r" value:[^\\}]* {
 			return new libjass.tags.Reset(
 				(value.length > 0) ? value.join("") : null
 			);
 		}
 
-posTag
+tag_pos
 	=	"pos(" x:decimal "," y:decimal ")" {
 			return new libjass.tags.Pos(
 				x,
@@ -270,7 +282,7 @@ posTag
 			);
 		}
 
-fadeTag
+tag_fad
 	=	"fad(" start:decimal "," end:decimal ")" {
 			return new libjass.tags.Fade(
 				parseFloat(start) / 1000,
