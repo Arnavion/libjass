@@ -42,7 +42,11 @@ module libjass {
 		 */
 		constructor(rawASS: string, parser: Parser) {
 			// Make an iterable for all the lines in the script file.
-			var lines = rawASS.replace(/\r$/gm, "").split("\n").toIterable().map((entry: any[]) => <string>entry[1]);
+			var lines =
+				rawASS.replace(/\r$/gm, "").split("\n")
+					.toIterable()
+					.map((entry: any[]) => <string>entry[1])
+					.filter((line: string) => !line.startsWith(";")); // Skip comments
 
 
 			// Create the script info object
@@ -52,6 +56,11 @@ module libjass {
 			Iterator(ASS._readSectionLines(lines, "Script Info")).forEach((keyValuePair: string[]) => {
 				infoTemplate[keyValuePair[0]] = keyValuePair[1];
 			});
+
+			if (libjass.verboseMode) {
+				console.log("Read script info: " + JSON.stringify(infoTemplate), infoTemplate);
+			}
+
 			this._info = new Info(infoTemplate);
 
 
