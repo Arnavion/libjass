@@ -196,10 +196,10 @@ module libjass {
 			var startNewSpan = (): void => {
 				if (currentSpan !== null) {
 					currentSpanStyles.setStylesOnSpan(currentSpan);
+					sub.appendChild(currentSpan);
 				}
 
 				currentSpan = document.createElement("span");
-				sub.appendChild(currentSpan);
 			};
 			startNewSpan();
 
