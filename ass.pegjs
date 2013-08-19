@@ -48,6 +48,8 @@ enclosedTags
 			"\\" alphaTag /
 			"\\" borderTag /
 			"\\" blurTag /
+			"\\" fontScaleXTag /
+			"\\" fontScaleYTag /
 			"\\" fadeTag /
 			"\\" frxTag /
 			"\\" fryTag /
@@ -159,6 +161,20 @@ fontSizeTag
 	=	"fs" value:decimal? {
 			return new libjass.tags.FontSize(
 				(value !== "") ? value : null
+			);
+		}
+
+fontScaleXTag
+	=	"fscx" value:decimal? {
+			return new libjass.tags.FontScaleX(
+				(value !== "") ? (value / 100) : null
+			);
+		}
+
+fontScaleYTag
+	=	"fscy" value:decimal? {
+			return new libjass.tags.FontScaleY(
+				(value !== "") ? (value / 100) : null
 			);
 		}
 

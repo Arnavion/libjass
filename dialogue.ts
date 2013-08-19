@@ -36,6 +36,7 @@ module libjass {
 
 		private _layer: number;
 		private _alignment: number;
+		private _transformOrigin: string;
 
 		private _parts: tags.Tag[];
 
@@ -51,6 +52,7 @@ module libjass {
 
 			this._layer = Math.max(parseInt(template["Layer"]), 0);
 			this._alignment = this._style.alignment;
+			this._setTransformOrigin();
 
 			this._parts = <tags.Tag[]>parser.parse(template["Text"]);
 
@@ -151,6 +153,7 @@ module libjass {
 			this._parts.forEach(part => {
 				if (part instanceof tags.Alignment) {
 					this._alignment = (<tags.Alignment>part).value;
+					this._setTransformOrigin();
 				}
 
 				else if (part instanceof tags.Fade) {
@@ -190,6 +193,9 @@ module libjass {
 			var currentUnderline = this._style.underline;
 			var currentStrikethrough = this._style.strikethrough;
 
+			var currentFontScaleX = this._style.fontScaleX;
+			var currentFontScaleY = this._style.fontScaleY;
+
 			var currentOutlineWidth = this._style.outlineWidth;
 
 			var currentFontName = this._style.fontName;
@@ -202,7 +208,9 @@ module libjass {
 			var currentOutlineAlpha: number = null;
 
 			var currentBlur = 0;
+
 			var transformStyle = "";
+
 			var currentSpan: HTMLSpanElement;
 
 			var createNewSpan = true;
@@ -249,6 +257,11 @@ module libjass {
 				currentSpan.style.fontFamily = currentFontName;
 				currentSpan.style.fontSize = ((72 / dpi) * scaleY * currentFontSize) + "px";
 				currentSpan.style.lineHeight = (scaleY * currentFontSize) + "px";
+
+				currentSpan.style.webkitTransform = "scaleX(" + currentFontScaleX + ") scaleY(" + currentFontScaleY + ")";
+				currentSpan.style.webkitTransformOrigin = this._transformOrigin;
+				currentSpan.style.transform = "scaleX(" + currentFontScaleX + ") scaleY(" + currentFontScaleY + ")";
+				currentSpan.style.transformOrigin = this._transformOrigin;
 
 				currentSpan.style.color = currentPrimaryColor.withAlpha(currentPrimaryAlpha).toString();
 
@@ -329,6 +342,22 @@ module libjass {
 					}
 				}
 
+				else if (part instanceof tags.FontScaleX) {
+					var newFontScaleX = (<tags.FontScaleX>part).value;
+					if (currentFontScaleX !== newFontScaleX) {
+						currentFontScaleX = newFontScaleX;
+						spanStylesChanged = true;
+					}
+				}
+
+				else if (part instanceof tags.FontScaleY) {
+					var newFontScaleX = (<tags.FontScaleX>part).value;
+					if (currentFontScaleX !== newFontScaleX) {
+						currentFontScaleX = newFontScaleX;
+						spanStylesChanged = true;
+					}
+				}
+
 				else if (part instanceof tags.Frx) {
 					transformStyle += " rotateX(" + (<tags.Frx>part).value + "deg)";
 				}
@@ -404,28 +433,45 @@ module libjass {
 						currentBold = null;
 						currentUnderline = null;
 						currentStrikethrough = null;
-						currentOutlineWidth = null;
+
 						currentFontName = null;
 						currentFontSize = null;
+
+						currentFontScaleX = null;
+						currentFontScaleY = null;
+
 						currentPrimaryColor = null;
 						currentOutlineColor = null;
+
 						currentPrimaryAlpha = null;
 						currentOutlineAlpha = null;
+
+						currentOutlineWidth = null;
+
 						spanStylesChanged = true;
 					}
 					else {
 						var newStyle = this._styles.filter(style => style.name === resetPart.value)[0];
+
 						currentItalic = newStyle.italic;
 						currentBold = newStyle.bold;
 						currentUnderline = newStyle.underline;
 						currentStrikethrough = newStyle.strikethrough;
-						currentOutlineWidth = newStyle.outlineWidth;
+
 						currentFontName = newStyle.fontName;
 						currentFontSize = newStyle.fontSize;
+
+						currentFontScaleX = newStyle.fontScaleX;
+						currentFontScaleY = newStyle.fontScaleY;
+
 						currentPrimaryColor = newStyle.primaryColor;
 						currentOutlineColor = newStyle.outlineColor;
+
 						currentPrimaryAlpha = null;
 						currentOutlineAlpha = null;
+
+						currentOutlineWidth = newStyle.outlineWidth;
+
 						spanStylesChanged = true;
 					}
 				}
@@ -460,24 +506,10 @@ module libjass {
 
 			if (transformStyle) {
 				sub.style.webkitTransform = transformStyle;
-				sub.style.transform = transformStyle;
+				sub.style.webkitTransformOrigin = this._transformOrigin;
 
-				var transformOriginX: number;
-				var transformOriginY: number;
-				switch (this._alignment) {
-					case 1: transformOriginX =   0; transformOriginY = 100; break;
-					case 2: transformOriginX =  50; transformOriginY = 100; break;
-					case 3: transformOriginX = 100; transformOriginY = 100; break;
-					case 4: transformOriginX =   0; transformOriginY =  50; break;
-					case 5: transformOriginX =  50; transformOriginY =  50; break;
-					case 6: transformOriginX = 100; transformOriginY =  50; break;
-					case 7: transformOriginX =   0; transformOriginY =   0; break;
-					case 8: transformOriginX =  50; transformOriginY =   0; break;
-					case 9: transformOriginX = 100; transformOriginY =   0; break;
-				}
-				var transformOrigin = transformOriginX + "% " + transformOriginY + "%";
-				sub.style.transformOrigin = transformOrigin;
-				sub.style.webkitTransformOrigin = transformOrigin;
+				sub.style.transform = transformStyle;
+				sub.style.transformOrigin = this._transformOrigin;
 			}
 
 			this._parts.some(part => {
@@ -520,6 +552,25 @@ module libjass {
 			sub.setAttribute("data-dialogue-id", String(this._id));
 
 			this._sub = sub;
+		}
+
+		private _setTransformOrigin(): void {
+			var transformOriginX: number;
+			var transformOriginY: number;
+
+			switch (this._alignment) {
+				case 1: transformOriginX =   0; transformOriginY = 100; break;
+				case 2: transformOriginX =  50; transformOriginY = 100; break;
+				case 3: transformOriginX = 100; transformOriginY = 100; break;
+				case 4: transformOriginX =   0; transformOriginY =  50; break;
+				case 5: transformOriginX =  50; transformOriginY =  50; break;
+				case 6: transformOriginX = 100; transformOriginY =  50; break;
+				case 7: transformOriginX =   0; transformOriginY =   0; break;
+				case 8: transformOriginX =  50; transformOriginY =   0; break;
+				case 9: transformOriginX = 100; transformOriginY =   0; break;
+			}
+
+			this._transformOrigin = transformOriginX + "% " + transformOriginY + "%";
 		}
 	}
 

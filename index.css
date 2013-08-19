@@ -69,6 +69,10 @@ body, #video {
 	text-align: right;
 }
 
+#subs-wrapper span {
+	display: inline-block;
+}
+
 #dpi-div {
 	position: absolute;
 	width: 1in;

@@ -194,6 +194,25 @@ module libjass {
 			}
 		}
 
+		export class FontScaleX extends TagBase {
+			constructor(private _value: number) {
+				super("FontScaleX", "value");
+			}
+
+			get value(): number {
+				return this._value;
+			}
+		}
+		export class FontScaleY extends TagBase {
+			constructor(private _value: number) {
+				super("FontScaleX", "value");
+			}
+
+			get value(): number {
+				return this._value;
+			}
+		}
+
 		export class Frx extends TagBase {
 			constructor(private _value: number) {
 				super("Frx", "value");

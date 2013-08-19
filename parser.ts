@@ -247,13 +247,16 @@ module libjass {
 		private _underline: boolean;
 		private _strikethrough: boolean;
 
-		private _outlineWidth: number;
-
 		private _fontName: string;
 		private _fontSize: number;
 
+		private _fontScaleX: number;
+		private _fontScaleY: number;
+
 		private _primaryColor: tags.Color;
 		private _outlineColor: tags.Color;
+
+		private _outlineWidth: number;
 
 		private _alignment: number;
 
@@ -269,13 +272,16 @@ module libjass {
 			this._underline = template["Underline"] === "-1";
 			this._strikethrough = template["StrikeOut"] === "-1";
 
-			this._outlineWidth = parseFloat(template["Outline"]);
-
 			this._fontName = template["Fontname"];
 			this._fontSize = parseFloat(template["Fontsize"]);
 
+			this._fontScaleX = parseFloat(template["ScaleX"]) / 100;
+			this._fontScaleY = parseFloat(template["ScaleY"]) / 100;
+
 			this._primaryColor = <tags.Color>parser.parse(template["PrimaryColour"], "colorWithAlpha");
 			this._outlineColor = <tags.Color>parser.parse(template["OutlineColour"], "colorWithAlpha");
+
+			this._outlineWidth = parseFloat(template["Outline"]);
 
 			this._alignment = parseInt(template["Alignment"]);
 
@@ -304,10 +310,6 @@ module libjass {
 			return this._strikethrough;
 		}
 
-		get outlineWidth(): number {
-			return this._outlineWidth;
-		}
-
 		get fontName(): string {
 			return this._fontName;
 		}
@@ -316,12 +318,24 @@ module libjass {
 			return this._fontSize;
 		}
 
+		get fontScaleX(): number {
+			return this._fontScaleX;
+		}
+
+		get fontScaleY(): number {
+			return this._fontScaleY;
+		}
+
 		get primaryColor(): tags.Color {
 			return this._primaryColor;
 		}
 
 		get outlineColor(): tags.Color {
 			return this._outlineColor;
+		}
+
+		get outlineWidth(): number {
+			return this._outlineWidth;
 		}
 
 		get alignment(): number {
