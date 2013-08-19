@@ -254,7 +254,7 @@ module libjass {
 		private _italic: boolean;
 		private _bold: Object;
 		private _underline: boolean;
-		private _strikethrough: boolean;
+		private _strikeThrough: boolean;
 
 		private _fontName: string;
 		private _fontSize: number;
@@ -281,7 +281,7 @@ module libjass {
 			this._italic = template["Italic"] === "-1";
 			this._bold = template["Bold"] === "-1";
 			this._underline = template["Underline"] === "-1";
-			this._strikethrough = template["StrikeOut"] === "-1";
+			this._strikeThrough = template["StrikeOut"] === "-1";
 
 			this._fontName = template["Fontname"];
 			this._fontSize = parseFloat(template["Fontsize"]);
@@ -319,8 +319,8 @@ module libjass {
 			return this._underline;
 		}
 
-		get strikethrough(): boolean {
-			return this._strikethrough;
+		get strikeThrough(): boolean {
+			return this._strikeThrough;
 		}
 
 		get fontName(): string {

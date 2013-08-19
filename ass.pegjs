@@ -137,7 +137,7 @@ tag_u
 
 tag_s
 	=	"s" value:enableDisable? {
-			return new libjass.tags.Strikeout(
+			return new libjass.tags.StrikeThrough(
 				(value !== "") ? value : null
 			);
 		}

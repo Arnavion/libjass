@@ -218,8 +218,8 @@ module libjass {
 					currentSpanStyles.underline = (<tags.Underline>part).value;
 				}
 
-				else if (part instanceof tags.Strikeout) {
-					currentSpanStyles.strikeThrough = (<tags.Strikeout>part).value;
+				else if (part instanceof tags.StrikeThrough) {
+					currentSpanStyles.strikeThrough = (<tags.StrikeThrough>part).value;
 				}
 
 				else if (part instanceof tags.Border) {
@@ -477,7 +477,7 @@ module libjass {
 			this._italic = SpanStyles._valueOrDefault(this._italic, newStyle.italic);
 			this._bold = SpanStyles._valueOrDefault(this._bold, newStyle.bold);
 			this._underline = SpanStyles._valueOrDefault(this._underline, newStyle.underline);
-			this._strikeThrough = SpanStyles._valueOrDefault(this._strikeThrough, newStyle.strikethrough);
+			this._strikeThrough = SpanStyles._valueOrDefault(this._strikeThrough, newStyle.strikeThrough);
 
 			this._outlineWidth = SpanStyles._valueOrDefault(this._outlineWidth, newStyle.outlineWidth);
 

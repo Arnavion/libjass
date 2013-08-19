@@ -145,9 +145,9 @@ module libjass {
 				return this._value;
 			}
 		}
-		export class Strikeout extends TagBase {
+		export class StrikeThrough extends TagBase {
 			constructor(private _value: boolean) {
-				super("Strikeout", "value");
+				super("StrikeThrough", "value");
 			}
 
 			get value(): boolean {
