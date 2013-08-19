@@ -213,45 +213,45 @@ module libjass {
 			}
 		}
 
-		export class Frx extends TagBase {
+		export class RotateX extends TagBase {
 			constructor(private _value: number) {
-				super("Frx", "value");
+				super("RotateX", "value");
 			}
 
 			get value(): number {
 				return this._value;
 			}
 		}
-		export class Fry extends TagBase {
+		export class RotateY extends TagBase {
 			constructor(private _value: number) {
-				super("Fry", "value");
+				super("RotateY", "value");
 			}
 
 			get value(): number {
 				return this._value;
 			}
 		}
-		export class Frz extends TagBase {
+		export class RotateZ extends TagBase {
 			constructor(private _value: number) {
-				super("Frz", "value");
+				super("RotateZ", "value");
 			}
 
 			get value(): number {
 				return this._value;
 			}
 		}
-		export class Fax extends TagBase {
+		export class SkewX extends TagBase {
 			constructor(private _value: number) {
-				super("Fax", "value");
+				super("SkewX", "value");
 			}
 
 			get value() {
 				return this._value;
 			}
 		}
-		export class Fay extends TagBase {
+		export class SkewY extends TagBase {
 			constructor(private _value: number) {
-				super("Fay", "value");
+				super("SkewY", "value");
 			}
 
 			get value(): number {

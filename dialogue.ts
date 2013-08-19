@@ -358,24 +358,24 @@ module libjass {
 					}
 				}
 
-				else if (part instanceof tags.Frx) {
-					transformStyle += " rotateX(" + (<tags.Frx>part).value + "deg)";
+				else if (part instanceof tags.RotateX) {
+					transformStyle += " rotateX(" + (<tags.RotateX>part).value + "deg)";
 				}
 
-				else if (part instanceof tags.Fry) {
-					transformStyle += " rotateY(" + (<tags.Fry>part).value + "deg)";
+				else if (part instanceof tags.RotateY) {
+					transformStyle += " rotateY(" + (<tags.RotateY>part).value + "deg)";
 				}
 
-				else if (part instanceof tags.Frz) {
-					transformStyle += " rotateZ(" + (-1 * (<tags.Frz>part).value) + "deg)";
+				else if (part instanceof tags.RotateZ) {
+					transformStyle += " rotateZ(" + (-1 * (<tags.RotateZ>part).value) + "deg)";
 				}
 
-				else if (part instanceof tags.Fax) {
-					transformStyle += " skewX(" + (45 * (<tags.Fax>part).value) + "deg)";
+				else if (part instanceof tags.SkewX) {
+					transformStyle += " skewX(" + (45 * (<tags.SkewX>part).value) + "deg)";
 				}
 
-				else if (part instanceof tags.Fay) {
-					transformStyle += " skewY(" + (45 * (<tags.Fay>part).value) + "deg)";
+				else if (part instanceof tags.SkewY) {
+					transformStyle += " skewY(" + (45 * (<tags.SkewY>part).value) + "deg)";
 				}
 
 				else if (part instanceof tags.PrimaryColor) {

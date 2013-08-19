@@ -185,35 +185,35 @@ tag_fscy
 
 tag_frx
 	=	"frx" value:decimal? {
-			return new libjass.tags.Frx(
+			return new libjass.tags.RotateX(
 				(value !== "") ? value : null
 			);
 		}
 
 tag_fry
 	=	"fry" value:decimal? {
-			return new libjass.tags.Fry(
+			return new libjass.tags.RotateY(
 				(value !== "") ? value : null
 			);
 		}
 
 tag_frz
 	=	"frz" value:decimal? {
-			return new libjass.tags.Frz(
+			return new libjass.tags.RotateZ(
 				(value !== "") ? value : null
 			);
 		}
 
 tag_fax
 	=	"fax" value:decimal? {
-			return new libjass.tags.Fax(
+			return new libjass.tags.SkewX(
 				(value !== "") ? value : null
 			);
 		}
 
 tag_fay
 	=	"fay" value:decimal? {
-			return new libjass.tags.Fay(
+			return new libjass.tags.SkewY(
 				(value !== "") ? value : null
 			);
 		}
