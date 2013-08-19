@@ -61,8 +61,8 @@ module libjass {
 				if (templateType === "Style") {
 					var template: Object = templateEntry[1];
 
-					if (libjass.debugMode) {
-						console.log("Read style: " + JSON.stringify(template));
+					if (libjass.verboseMode) {
+						console.log("Read style: " + JSON.stringify(template), template);
 					}
 
 					// Create the style and add it into the styles array
@@ -77,8 +77,8 @@ module libjass {
 				if (templateType === "Dialogue") {
 					var template: Object = templateEntry[1];
 
-					if (libjass.debugMode) {
-						console.log("Read dialogue: " + JSON.stringify(template));
+					if (libjass.verboseMode) {
+						console.log("Read dialogue: " + JSON.stringify(template), template);
 					}
 
 					// Create the dialogue and add it to the dialogues array
@@ -342,4 +342,5 @@ module libjass {
 	};
 
 	export var debugMode: boolean = false;
+	export var verboseMode: boolean = false;
 }

@@ -20,7 +20,8 @@
 
 "use strict";
 
-libjass.debugMode = (location.search === "?debug");
+libjass.debugMode = (location.search === "?debug") || (location.search === "?verbose");
+libjass.verboseMode = (location.search === "?verbose");
 
 var config = {
 	/**
