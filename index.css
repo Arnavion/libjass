@@ -71,6 +71,7 @@ body, #video {
 
 #subs-wrapper span {
 	display: inline-block;
+	white-space: pre-wrap;
 }
 
 #dpi-div {
