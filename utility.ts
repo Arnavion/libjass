@@ -25,9 +25,6 @@
 interface Window {
 	Iterator(collection: any, keysOnly?: boolean): Iterator
 	StopIteration: any
-	Set: {
-		new(): Set
-	}
 }
 
 declare function Iterator(collection: any, keysOnly?: boolean): Iterator
