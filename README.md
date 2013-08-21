@@ -24,6 +24,7 @@ libjass is a JavaScript library written in TypeScript to render ASS subs on HTML
 * Evaluate the benefits of DOM-based drawing over canvas.
 
 ## Links
+* IRC channel - #libjass on irc.rizon.net
 * [Aegisub's documentation on ASS](http://docs.aegisub.org/3.0/ASS_Tags/)
 
 # License
