@@ -18,7 +18,6 @@ libjass is a JavaScript library written in TypeScript to render ASS subs on HTML
 * ASS draw is unsupported.
 
 ## Planned improvements
-* Cache parsed subtitles OR make subtitle rendering multi-threaded.
 * Document browser compatibility.
 * Comment all the things.
 * Write tests. Seriously, there's only so many times I can watch the first 2 minutes of Guilty Crown ep 1. At least Euterpe is a good song.
