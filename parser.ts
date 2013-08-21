@@ -28,7 +28,14 @@ module libjass {
 	}
 
 	export class ASS {
-		private _info: Info;
+		private _resolutionX: number;
+		private _resolutionY: number;
+
+		private _scaleX: number;
+		private _scaleY: number;
+
+		private _dpi: number;
+
 		private _styles: Style[] = [];
 		private _dialogues: Dialogue[] = [];
 
@@ -61,7 +68,11 @@ module libjass {
 				console.log("Read script info: " + JSON.stringify(infoTemplate), infoTemplate);
 			}
 
-			this._info = new Info(infoTemplate);
+			// Parse the horizontal script resolution
+			this._resolutionX = parseInt(infoTemplate["PlayResX"]);
+
+			// Parse the vertical script resolution
+			this._resolutionY = parseInt(infoTemplate["PlayResY"]);
 
 
 			// Get styles from the styles section
@@ -91,13 +102,32 @@ module libjass {
 					}
 
 					// Create the dialogue and add it to the dialogues array
-					this._dialogues.push(new Dialogue(template, this._info, this._styles, parser));
+					this._dialogues.push(new Dialogue(template, this, parser));
 				}
 			});
 		}
 
-		get info(): Info {
-			return this._info;
+		get resolutionX(): number {
+			return this._resolutionX;
+		}
+
+		get resolutionY(): number {
+			return this._resolutionY;
+		}
+
+		get scaleX(): number {
+			return this._scaleX;
+		}
+
+		get scaleY(): number {
+			return this._scaleY;
+		}
+
+		get dpi(): number {
+			return this._dpi;
+		}
+		set dpi(value: number) {
+			this._dpi = value;
 		}
 
 		get styles(): Style[] {
@@ -106,6 +136,23 @@ module libjass {
 
 		get dialogues(): Dialogue[] {
 			return this._dialogues;
+		}
+
+		/**
+		 * This method takes in the actual video height and width and prepares the scaleX and scaleY
+		 * properties according to the script resolution.
+		 *
+		 * @param {number} videoWidth The width of the video, in pixels
+		 * @param {number} videoHeight The height of the video, in pixels
+		 */
+		scaleTo(videoWidth: number, videoHeight: number): void {
+			this._scaleX = videoWidth / this._resolutionX;
+			this._scaleY = videoHeight / this._resolutionY;
+
+			// Any dialogues which have been rendered need to be re-rendered.
+			this._dialogues.forEach(dialogue => {
+				dialogue.unPreRender();
+			});
 		}
 
 		/**
@@ -176,58 +223,6 @@ module libjass {
 			}).filter((templateEntry: Array) => templateEntry !== null);
 		}
 	}
-
-	/**
-	 * This class represents the global information about the ASS script. It is obtained via the ASS.info property.
-	 *
-	 * @constructor
-	 * @param {number} playResX The horizontal script resolution
-	 * @param {number} playResY The vertical script resolution
-	 */
-	export class Info {
-		private _playResX: number;
-		private _playResY: number;
-
-		private _scaleX: number;
-		private _scaleY: number;
-
-		private _dpi: number;
-
-		constructor(template: Object) {
-			// Parse the horizontal script resolution
-			this._playResX = parseInt(template["PlayResX"]);
-
-			// Parse the vertical script resolution
-			this._playResY = parseInt(template["PlayResY"]);
-		}
-
-		/**
-		 * This method takes in the actual video height and width and prepares the scaleX and scaleY
-		 * properties according to the script resolution.
-		 *
-		 * @param {number} videoWidth The width of the video, in pixels
-		 * @param {number} videoHeight The height of the video, in pixels
-		 */
-		scaleTo(videoWidth: number, videoHeight: number): void {
-			this._scaleX = videoWidth / this._playResX;
-			this._scaleY = videoHeight / this._playResY;
-		}
-
-		get scaleX(): number {
-			return this._scaleX;
-		}
-
-		get scaleY(): number {
-			return this._scaleY;
-		}
-
-		get dpi(): number {
-			return this._dpi;
-		}
-		set dpi(value: number) {
-			this._dpi = value;
-		}
-	};
 
 	/**
 	 * This class represents a single global style declaration in an ASS script. The styles can be obtained via the ASS.styles property.

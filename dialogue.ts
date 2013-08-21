@@ -42,10 +42,10 @@ module libjass {
 
 		private _sub: HTMLDivElement = null;
 
-		constructor(template: Object, private _info: Info, private _styles: Style[], parser: Parser) {
+		constructor(template: Object, private _ass: ASS, parser: Parser) {
 			this._id = ++Dialogue._lastDialogueId;
 
-			this._style = this._styles.filter(aStyle => aStyle.name === template["Style"])[0];
+			this._style = this._ass.styles.filter(aStyle => aStyle.name === template["Style"])[0];
 
 			this._start = Dialogue._toTime(template["Start"]);
 			this._end = Dialogue._toTime(template["End"]);
@@ -94,6 +94,13 @@ module libjass {
 			if (this._sub === null) {
 				this._preRender();
 			}
+		}
+
+		/**
+		 * Discards the pre-rendered subtitle div created from an earlier call to preRender().
+		 */
+		unPreRender(): void {
+			this._sub = null;
 		}
 
 		/**
@@ -174,9 +181,9 @@ module libjass {
 			}
 			Dialogue._animationStyleElement.appendChild(document.createTextNode(keyframes.toString()));
 
-			var scaleX = this._info.scaleX;
-			var scaleY = this._info.scaleY;
-			var dpi = this._info.dpi;
+			var scaleX = this._ass.scaleX;
+			var scaleY = this._ass.scaleY;
+			var dpi = this._ass.dpi;
 
 			sub.style.webkitAnimationName = "dialogue-" + this._id;
 			sub.style.webkitAnimationDuration = (this._end - this._start) + "s";
@@ -306,7 +313,7 @@ module libjass {
 					var newStyleName = (<tags.Reset>part).value;
 					var newStyle: Style = null;
 					if (newStyleName !== null) {
-						newStyle = this._styles.filter(style => style.name === newStyleName)[0];
+						newStyle = this._ass.styles.filter(style => style.name === newStyleName)[0];
 					}
 					currentSpanStyles.reset(newStyle);
 				}

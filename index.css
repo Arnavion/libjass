@@ -18,25 +18,36 @@
  * limitations under the License.
  */
 
-body, #video {
+.wrapper {
+	position: relative;
+}
+
+.zoomed, .zoomed * {
+	display: inline-block;
+	font-size: 0;
+}
+
+#subs {
 	position: absolute;
-	top: 0;
-	left: 50%;
-}
-
-.zoomed {
-	height: 100%;
-	-webkit-transform-origin: 50% 0%;
-	transform-origin: 50% 0%;
-}
-
-#subs-wrapper {
-	pointer-events: none;
-}
-
-#subs-wrapper > * {
 	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+}
+
+#subs, #subs * {
+	pointer-events: none;
+	z-index: 2147483647;
+}
+
+#subs > * {
 	position: absolute;
+	width: 100%;
+}
+
+#subs.paused * {
+	-webkit-animation-play-state: paused;
+	animation-play-state: paused;
 }
 
 .an1, .an2, .an3 {
@@ -69,8 +80,7 @@ body, #video {
 	text-align: right;
 }
 
-#subs-wrapper span {
-	display: inline-block;
+#subs span {
 	white-space: pre-wrap;
 }
 
@@ -81,7 +91,6 @@ body, #video {
 	visibility: hidden;
 }
 
-#subs-wrapper.paused * {
-	-webkit-animation-play-state: paused;
-	animation-play-state: paused;
+.settings-form > fieldset {
+	display: inline-block;
 }

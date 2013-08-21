@@ -53,22 +53,9 @@ addEventListener("DOMContentLoaded", function () {
 
 	var testVideoAndASSLoaded = function () {
 		if (videoMetadataLoaded && ass) {
-			var videoWidth = video.videoWidth;
-			var videoHeight = video.videoHeight;
-			document.body.style.width = video.style.width = videoWidth + "px";
-			document.body.style.height = video.style.height = videoHeight + "px";
-			document.body.style.marginLeft = video.style.marginLeft = (-videoWidth / 2) + "px";
+			var subsWrapper = document.querySelector("#subs");
 
-			var subsWrapper = document.querySelector("#subs-wrapper");
-
-			var info = ass.info;
-			info.scaleTo(videoWidth, videoHeight);
-			var zoom = (1 / info.scaleX);
-			var zoomedDiv = document.querySelector(".zoomed");
-			zoomedDiv.style.webkitTransform = "scale(" + zoom + ")";
-			zoomedDiv.style.transform = "scale(" + zoom + ")";
-
-			info.dpi = parseFloat(getComputedStyle(document.querySelector("#dpi-div")).height.match(/(\d+)px/)[1]);
+			ass.dpi = parseFloat(getComputedStyle(document.querySelector("#dpi-div")).height.match(/(\d+)px/)[1]);
 
 			var dialogues = ass.dialogues.slice();
 			// Sort the dialogues array by start time and then by their original position in the script (id)
@@ -235,6 +222,61 @@ addEventListener("DOMContentLoaded", function () {
 
 				debug("video.playing: video.currentTime = " + video.currentTime + ", video.paused = " + video.paused + ", video.seeking = " + video.seeking);
 			}, false);
+
+			var resizeVideo = function (width, height) {
+				currentSubs.forEach(function (sub) {
+					sub.remove();
+				});
+
+				currentSubs = [];
+
+				video.style.width = subsWrapper.style.width = width + "px";
+				video.style.height = subsWrapper.style.height = height + "px";
+
+				ass.scaleTo(width, height);
+
+				video.dispatchEvent(new Event("timeupdate"));
+			};
+
+			var onFullScreenChange = function () {
+				var fullScreenElement = document.fullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || document.webkitFullscreenElement;
+
+				if (fullScreenElement === video) {
+					resizeVideo(screen.width, screen.height);
+				}
+				else {
+					changeVideoSizeSelection();
+				}
+			};
+			video.addEventListener("webkitfullscreenchange", onFullScreenChange, false);
+			video.addEventListener("mozfullscreenchange", onFullScreenChange, false);
+			video.addEventListener("fullscreenchange", onFullScreenChange, false);
+
+			var changeVideoSizeSelection = function (id) {
+				if (typeof id === "undefined") {
+					[].some.call(videoSizeSelector.querySelectorAll("input[name='video-size']"), function (option) {
+						if (option.checked) {
+							id = option.id;
+							return true;
+						}
+
+						return false;
+					});
+				}
+
+				if (id === "video-size-video-radio") {
+					resizeVideo(video.videoWidth, video.videoHeight);
+				}
+
+				else if (id === "video-size-script-radio") {
+					resizeVideo(ass.resolutionX, ass.resolutionY);
+				}
+			};
+
+			var videoSizeSelector = document.querySelector("#video-size-selector");
+			videoSizeSelector.addEventListener("change", function (event) { changeVideoSizeSelection(event.srcElement.id); }, false);
+
+			changeVideoSizeSelection();
 		};
 	}
 
@@ -242,6 +284,10 @@ addEventListener("DOMContentLoaded", function () {
 		video.addEventListener("loadedmetadata", function () {
 			debug("Video metadata loaded.");
 			videoMetadataLoaded = true;
+
+			document.querySelector("#video-resolution-label-width").appendChild(document.createTextNode(video.videoWidth));
+			document.querySelector("#video-resolution-label-height").appendChild(document.createTextNode(video.videoHeight));
+
 			testVideoAndASSLoaded();
 		}, false);
 	}
@@ -264,6 +310,10 @@ addEventListener("DOMContentLoaded", function () {
 				if (libjass.debugMode) {
 					window.ass = ass;
 				}
+
+				document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.resolutionX));
+				document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.resolutionY));
+
 				testVideoAndASSLoaded();
 			}
 		}
@@ -283,6 +333,10 @@ addEventListener("DOMContentLoaded", function () {
 				if (libjass.debugMode) {
 					window.ass = ass;
 				}
+
+				document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.resolutionX));
+				document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.resolutionY));
+
 				testVideoAndASSLoaded();
 			}
 		}

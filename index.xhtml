@@ -45,12 +45,21 @@
 		<style id="animation-styles" type="text/css" />
 	</head>
 	<body>
-		<div class="zoomed">
+		<div class="wrapper">
 			<video id="video" src="/video/gc-01.webm" controls="">
 				<track src="/video/gc-01.ass" kind="metadata" data-format="ass" />
 			</video>
-			<div id="subs-wrapper" />
+			<div id="subs" />
 		</div>
 		<div id="dpi-div" />
+		<form class="settings-form">
+			<fieldset>
+				<legend>Video size</legend>
+				<div id="video-size-selector">
+					<input type="radio" name="video-size" id="video-size-video-radio" checked="checked" /><label for="video-size-video-radio">Video resolution <span id="video-resolution-label-width" />x<span id="video-resolution-label-height" /></label>
+					<input type="radio" name="video-size" id="video-size-script-radio" /><label for="video-size-script-radio">Script resolution <span id="script-resolution-label-width" />x<span id="script-resolution-label-height" /></label>
+				</div>
+			</fieldset>
+		</form>
 	</body>
 </html>
