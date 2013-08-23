@@ -18,6 +18,10 @@
  * limitations under the License.
  */
 
+body {
+	margin: 0;
+}
+
 .wrapper {
 	position: relative;
 }

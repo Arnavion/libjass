@@ -238,19 +238,32 @@ addEventListener("DOMContentLoaded", function () {
 				video.dispatchEvent(new Event("timeupdate"));
 			};
 
+			var videoIsFullScreen = false;
+
 			var onFullScreenChange = function () {
-				var fullScreenElement = document.fullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || document.webkitFullscreenElement;
+				var fullScreenElement = document.fullscreenElement;
+				if (fullScreenElement === undefined) {
+					fullScreenElement = document.mozFullScreenElement;
+				}
+				if (fullScreenElement === undefined) {
+					fullScreenElement = document.msFullscreenElement;
+				}
+				if (fullScreenElement === undefined) {
+					fullScreenElement = document.webkitFullscreenElement;
+				}
 
 				if (fullScreenElement === video) {
 					resizeVideo(screen.width, screen.height);
+					videoIsFullScreen = true;
 				}
-				else {
+				else if (fullScreenElement === null && videoIsFullScreen) {
 					changeVideoSizeSelection();
+					videoIsFullScreen = false;
 				}
 			};
-			video.addEventListener("webkitfullscreenchange", onFullScreenChange, false);
-			video.addEventListener("mozfullscreenchange", onFullScreenChange, false);
-			video.addEventListener("fullscreenchange", onFullScreenChange, false);
+			document.addEventListener("webkitfullscreenchange", onFullScreenChange, false);
+			document.addEventListener("mozfullscreenchange", onFullScreenChange, false);
+			document.addEventListener("fullscreenchange", onFullScreenChange, false);
 
 			var changeVideoSizeSelection = function (id) {
 				if (typeof id === "undefined") {
@@ -274,7 +287,7 @@ addEventListener("DOMContentLoaded", function () {
 			};
 
 			var videoSizeSelector = document.querySelector("#video-size-selector");
-			videoSizeSelector.addEventListener("change", function (event) { changeVideoSizeSelection(event.srcElement.id); }, false);
+			videoSizeSelector.addEventListener("change", function (event) { changeVideoSizeSelection(event.target.id); }, false);
 
 			changeVideoSizeSelection();
 		};
