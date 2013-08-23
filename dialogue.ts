@@ -328,7 +328,6 @@ module libjass {
 
 				else if (part instanceof tags.NewLine) {
 					sub.appendChild(document.createElement("br"));
-					startNewSpan();
 				}
 
 				else if (part instanceof tags.HardSpace) {
