@@ -41,7 +41,7 @@ addEventListener("DOMContentLoaded", function () {
 		}
 	}
 
-	var wrappers = {};
+	var wrappers = Object.create(null);
 
 	var video = document.querySelector("#video");
 
@@ -343,7 +343,7 @@ if (typeof window.Set !== "function" || typeof window.Set.prototype.forEach !== 
 	 * Elements are stored as properties of an object, with derived names that won't clash with pre-defined properties.
 	 */
 	window.Set = function () {
-		var data = {};
+		var data = Object.create(null);
 
 		var toKey = function (value) {
 			if (typeof value === "number") {
@@ -354,10 +354,6 @@ if (typeof window.Set !== "function" || typeof window.Set.prototype.forEach !== 
 			}
 
 			return null;
-		};
-
-		var isKey = function (key) {
-			return (key.startsWith("#") || key.startsWith("'"));
 		};
 
 		this.add = function (value) {
@@ -379,7 +375,7 @@ if (typeof window.Set !== "function" || typeof window.Set.prototype.forEach !== 
 				return false;
 			}
 
-			return data.hasOwnProperty(key);
+			return key in data;
 		};
 
 		this.forEach = function (callbackfn, thisArg) {
@@ -389,9 +385,7 @@ if (typeof window.Set !== "function" || typeof window.Set.prototype.forEach !== 
 
 			var that = this;
 
-			Object.keys(data).filter(function (key) {
-				return isKey(key);
-			}).map(function (key) {
+			Object.keys(data).map(function (key) {
 				return data[key];
 			}).forEach(function (value, index) {
 				callbackfn.call(thisArg, value, value, that);

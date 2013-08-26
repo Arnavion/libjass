@@ -79,7 +79,7 @@ module libjass {
 
 	// If this browser does not have an implementation of StopIteration, mock it
 	if (!window.StopIteration) {
-		window.StopIteration = {};
+		window.StopIteration = Object.create(null);
 	}
 
 	class IteratorBase implements Iterator {

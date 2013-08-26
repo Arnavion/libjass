@@ -58,7 +58,7 @@ module libjass {
 
 
 			// Create the script info object
-			var infoTemplate = {};
+			var infoTemplate = Object.create(null);
 
 			// Get script info key-value pairs from the script info section
 			Iterator(ASS._readSectionLines(lines, "Script Info")).forEach((keyValuePair: string[]) => {
@@ -209,7 +209,7 @@ module libjass {
 					throw new Error("Format specification not found.");
 				}
 
-				var template: Object = {};
+				var template: Object = Object.create(null);
 
 				var lineParts = value.split(",");
 				if (lineParts.length > formatParts.length) {

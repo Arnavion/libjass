@@ -413,7 +413,7 @@ module libjass {
 
 	class KeyframeCollection {
 		/** @type {!Object.<string, !Object.<string, string>>} */
-		private _keyframes: Object = {};
+		private _keyframes: Object = Object.create(null);
 
 		constructor(private _id: number, private _start: number, private _end: number) { }
 
