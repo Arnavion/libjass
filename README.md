@@ -16,19 +16,16 @@ As a result, libjass is able to render subtitles with very low CPU usage. The do
 
 * The .ts files are the source of libjass. They are TypeScript files and must be compiled into JavaScript for the browser using the TypeScript compiler. Instructions are in BUILD.md
 
-* The two peg.js files are the source of [PEG.js](http://pegjs.majda.cz/). This is the parser generator library used to build a parser for the ASS format.
-
-* ass.pegjs is the source of that parser.
+* The ass.pegjs file is the source of a parser for the ASS format.
 
 * The rest of the files - index.xhtml, index.js, index.css, fonts.css are a sample implementation of how to use libjass. These files are not needed to use libjass on your website. They only exist as an example of the libjass API, placement of &lt;div&gt; elements to render the subs, etc.
 
 
 ### I want to use libjass for my website. What do I need to do?
 
-1. You need to build libjass.js using the instructions in BUILD.md
-1. You need to load libjass.js on the page with your video.
+1. You need to build libjass.js and ass.pegjs.js using the instructions in BUILD.md
+1. You need to load libjass.js and ass.pegjs.js on the page with your video.
 1. You need to call the libjass API.
-
 
 ### Where's the API documentation? What API do I need to call to use libjass?
 
@@ -45,8 +42,6 @@ Formal documentation is coming soon. In the meantime, here's an overview:
 * index.js also contains code to change the size of the video based on user input, such as choosing a different resolution or clicking the browser's native fullscreen-video button. It demonstrates the API that should be called to tell the Dialogue objects to start drawing to the new size - ASS.scaleTo()
 
 * Lastly, index.js contains an implementation of preloading all the fonts used in the ASS file. It matches the font names extracted from the script with URLs defined in fonts.css and XHR's the fonts.
-
-* The constructor ASS() also takes in a parser object. This is created by XHR'ing ass.pegjs and using PEG.js to process it. It is also possible to use the PEG.js API server-side to create the parser as a JS file. You can then serve the pre-generated parser along with libjass.js and the rest of your site's JavaScript. Instructions for generating the parser outside the browser (using node.js) are on the PEG.js website linked above.
 
 
 ### Can I contribute?

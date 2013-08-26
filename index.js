@@ -48,7 +48,6 @@ addEventListener("DOMContentLoaded", function () {
 	var videoMetadataLoaded = false;
 	var ass = null;
 
-	var parser = null;
 	var rawASS = null;
 
 	var testVideoAndASSLoaded = function () {
@@ -310,29 +309,6 @@ addEventListener("DOMContentLoaded", function () {
 		testVideoAndASSLoaded();
 	}
 
-	var parserRequest = new XMLHttpRequest();
-	parserRequest.open("GET", "ass.pegjs", true);
-	parserRequest.addEventListener("readystatechange", function () {
-		if (parserRequest.readyState === XMLHttpRequest.DONE) {
-			debug("Parser data received.");
-			parser = PEG.buildParser(parserRequest.responseText);
-			debug("Parser created.");
-
-			if (rawASS) {
-				ass = new ASS(rawASS, parser);
-				if (libjass.debugMode) {
-					window.ass = ass;
-				}
-
-				document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.resolutionX));
-				document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.resolutionY));
-
-				testVideoAndASSLoaded();
-			}
-		}
-	}, false);
-	parserRequest.send(null);
-
 	var track = document.querySelector("#video > track[data-format='ass']");
 	var subsRequest = new XMLHttpRequest();
 	subsRequest.open("GET", track.src || track.getAttribute("src"), true);
@@ -341,17 +317,15 @@ addEventListener("DOMContentLoaded", function () {
 			debug("ASS script received.");
 			rawASS = subsRequest.responseText;
 
-			if (parser) {
-				ass = new ASS(rawASS, parser);
-				if (libjass.debugMode) {
-					window.ass = ass;
-				}
-
-				document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.resolutionX));
-				document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.resolutionY));
-
-				testVideoAndASSLoaded();
+			ass = new ASS(rawASS);
+			if (libjass.debugMode) {
+				window.ass = ass;
 			}
+
+			document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.resolutionX));
+			document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.resolutionY));
+
+			testVideoAndASSLoaded();
 		}
 	}, false);
 	subsRequest.send(null);

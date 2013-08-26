@@ -23,25 +23,17 @@
 		<title>Parser tests</title>
 		<style type="text/css">
 		<![CDATA[
-			.section {
-				border-top: 1px solid black;
+			.test.passed, .section.passed >legend, .total > .passed {
+				color: green;
 			}
 
-			.section:last-child {
-				border-bottom: 1px solid black;
-			}
-
-			.log, .error {
-				padding-left: 2em;
-			}
-
-			.error, .runner-error {
+			.test.failed, .section.failed >legend, .total > .failed {
 				color: red;
 			}
 		]]>
 		</style>
-		<script src="../peg-0.7.0.js" />
 		<script src="../tags.js" />
+		<script src="../ass.pegjs.js" />
 		<script src="index.js" />
 
 		<script src="primitives.js" />

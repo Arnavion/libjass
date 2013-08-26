@@ -42,7 +42,7 @@ module libjass {
 
 		private _sub: HTMLDivElement = null;
 
-		constructor(template: Object, private _ass: ASS, parser: Parser) {
+		constructor(template: Object, private _ass: ASS) {
 			this._id = ++Dialogue._lastDialogueId;
 
 			this._style = this._ass.styles.filter(aStyle => aStyle.name === template["Style"])[0];

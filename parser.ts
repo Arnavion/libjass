@@ -27,6 +27,8 @@ module libjass {
 		parse(input: string, startRule?: string): any
 	}
 
+	export var parser: Parser;
+
 	export class ASS {
 		private _resolutionX: number;
 		private _resolutionY: number;
@@ -45,9 +47,8 @@ module libjass {
 		 *
 		 * @constructor
 		 * @param {string} rawASS
-		 * @param {{parse: function(string, string=): !*}} parser
 		 */
-		constructor(rawASS: string, parser: Parser) {
+		constructor(rawASS: string) {
 			// Make an iterable for all the lines in the script file.
 			var lines =
 				rawASS.replace(/\r$/gm, "").split("\n")
@@ -86,7 +87,7 @@ module libjass {
 					}
 
 					// Create the style and add it into the styles array
-					this._styles.push(new Style(template, parser));
+					this._styles.push(new Style(template));
 				}
 			});
 
@@ -102,7 +103,7 @@ module libjass {
 					}
 
 					// Create the dialogue and add it to the dialogues array
-					this._dialogues.push(new Dialogue(template, this, parser));
+					this._dialogues.push(new Dialogue(template, this));
 				}
 			});
 		}
@@ -270,7 +271,7 @@ module libjass {
 		private _marginRight: number;
 		private _marginVertical: number;
 
-		constructor(template: Object, parser: Parser) {
+		constructor(template: Object) {
 			this._name = template["Name"];
 
 			this._italic = template["Italic"] === "-1";

@@ -35,7 +35,10 @@ var Section = (function () {
 		Object.defineProperties(this, {
 			number: { value: number, enumerable: true },
 			name: { value: name, enumerable: true },
-			tests: { value: tests, enumerable: true }
+			tests: { value: tests, enumerable: true },
+			total: { get: function () { return this.tests.length; }, enumerabe: true },
+			passed: { get: function () { return this.tests.map(function (test) { return (test.passed === true) ? 1 : 0; }).sum(); }, enumerabe: true },
+			failed: { get: function () { return this.tests.map(function (test) { return (test.passed === false) ? 1 : 0; }).sum(); }, enumerabe: true }
 		});
 	};
 })();
@@ -46,7 +49,7 @@ var Test = (function () {
 	return function (name, input, rule, expected) {
 		var number = ++lastTestNumber;
 
-		var succeeded = false;
+		var passed = null;
 		var exception = null;
 
 		Object.defineProperties(this, {
@@ -55,20 +58,22 @@ var Test = (function () {
 			input: { value: input, enumerable: true },
 			rule: { value: rule, enumerable: true },
 			expected: { value: expected, enumerable: true },
-			succeeded: { get: function () { return succeeded; }, enumerable: true },
+			passed: { get: function () { return passed; }, enumerable: true },
 			exception: { get: function () { return exception; }, enumerable: true }
 		});
 
 		this.execute = function () {
 			try {
+				passed = false;
+
 				var actual = null;
 
 				try {
-					actual = parser.parse(this.input, rule);
+					actual = libjass.parser.parse(this.input, rule);
 				}
 				catch (parseException) {
 					if (expected === null) {
-						succeeded = true;
+						passed = true;
 						return;
 					}
 					else {
@@ -85,7 +90,7 @@ var Test = (function () {
 
 				Assert.AreEqual(expected, actual);
 
-				succeeded = true;
+				passed = true;
 			}
 			catch (testException) {
 				exception = testException;
@@ -142,121 +147,101 @@ var Assert = new function () {
 };
 
 var Logger = function (outputDiv) {
-	var logDiv = document.createElement("div");
-	logDiv.className = "log";
-
-	var errorDiv = document.createElement("div");
-	errorDiv.className = "error";
-
-	var sectionDiv = document.createElement("div");
-	sectionDiv.className = "section";
-
 	var testDiv = document.createElement("div");
 	testDiv.className = "test";
 
-	var runnerLogDiv = document.createElement("div");
-	runnerLogDiv.className = "runner-log";
+	var sectionElement = document.createElement("fieldset");
+	sectionElement.className = "section";
+	sectionElement.appendChild(document.createElement("legend"));
 
-	var runnerErrorDiv = document.createElement("div");
-	runnerErrorDiv.className = "runner-error";
+	var totalDiv = document.createElement("div");
 
-	var currentSectionDiv = null;
+	var currentSectionElement = null;
 
 	this.beginSection = function (section) {
-		currentSectionDiv = sectionDiv.cloneNode();
-		outputDiv.appendChild(currentSectionDiv);
-
-		console.log("");
+		currentSectionElement = sectionElement.cloneNode(true);
+		outputDiv.appendChild(currentSectionElement);
 
 		var message = "Section " + section.number + " - \"" + section.name + "\"";
-		console.log(message);
-		append(runnerLogDiv, message);
+		console.group(message);
+		currentSectionElement.querySelector("legend").appendChild(document.createTextNode(message));
 	};
 
 	this.endSection = function (section) {
-		var numTotal = section.tests.length;
-		var numSucceeded = section.tests.map(function (test) { return test.succeeded ? 1 : 0; }).sum();
-		var numFailed = numTotal - numSucceeded;
+		var numTotal = section.total;
+		var numPassed = section.passed;
+		var numFailed = section.failed;
 
-		var message = "Section " + section.number + " - \"" + section.name + "\" - " + numSucceeded + " of " + numTotal + " succeeded.";
+		var currentSectionLegend = currentSectionElement.querySelector("legend");
+
+		var message = numPassed + " of " + numTotal + " tests passed.";
 		console.log(message);
-		append(runnerLogDiv, message);
 
-		if (section.numFailed > 0) {
-			var message = "Section " + section.number + " - \"" + section.name + "\" - " + numFailed + " of " + numTotal + " failed.";
-			console.log(message);
-			append(runnerErrorDiv, message);
+		if (numFailed > 0) {
+			var message = numFailed + " of " + numTotal + " tests failed.";
+			console.warn(message);
+			currentSectionLegend.appendChild(document.createTextNode(" - " + message));
+			currentSectionElement.className += " failed";
 		}
+		else {
+			currentSectionElement.className += " passed";
+		}
+
+		console.groupEnd();
 	};
 
 	this.writeTest = function (test, section) {
-		if (test.succeeded) {
-			var message = "Test " + section.number + "." + test.number + " - \"" + test.name + "\" succeeded.";
+		if (test.passed) {
+			var message = "Test " + section.number + "." + test.number + " - \"" + test.name + "\" - " + test.rule + " [ " + test.input + " ] ";
 			console.log(message);
-			append(logDiv, message);
+			append(testDiv, message).className += " passed";
 		}
 		else {
-			var message = "Test " + section.number + "." + test.number + " - \"" + test.name + "\" failed: " + ((test.exception !== null) ? test.exception.message : "<No exception>");
-			console.error(message);
-			append(errorDiv, message);
+			var message = "Test " + section.number + "." + test.number + " - \"" + test.name + "\" - " + test.rule + " [ " + test.input + " ] " + " : " + ((test.exception !== null) ? test.exception.message : "<No exception>");
+			console.warn(message);
+			append(testDiv, message).className += " failed";
 		}
 	};
 
 	this.writeTotal = function (sections) {
-		currentSectionDiv = sectionDiv.cloneNode();
-		outputDiv.appendChild(currentSectionDiv);
+		currentSectionElement = sectionElement.cloneNode(true);
+		outputDiv.appendChild(currentSectionElement);
+		currentSectionElement.className = "total";
 
-		console.log("");
+		console.group("Total");
+		currentSectionElement.querySelector("legend").appendChild(document.createTextNode("Total"));
 
-		var numTotal = sections.map(function (section) {
-			return section.tests.length;
-		}).sum();
+		var numTotal = sections.map(function (section) { return section.total; }).sum();
+		var numPassed = sections.map(function (section) { return section.passed; }).sum();
+		var numFailed = sections.map(function (section) { return section.failed; }).sum();
 
-		var numSucceeded = sections.map(function (section) {
-			return section.tests.map(function (test) { return test.succeeded ? 1 : 0; }).sum();
-		}).sum();
-
-		var numFailed = numTotal - numSucceeded;
-
-		var message = "Total - " + numSucceeded + " of " + numTotal + " succeeded.";
+		var message = numPassed + " of " + numTotal + " tests passed.";
 		console.log(message);
-		append(runnerLogDiv, message);
+		append(totalDiv, message).className = "passed";
 
 		if (numFailed > 0) {
-			var message = "Total - " + numFailed + " of " + numTotal + " failed.";
-			console.log(message);
-			append(runnerErrorDiv, message);
+			var message = numFailed + " of " + numTotal + " tests failed.";
+			console.warn(message);
+			append(totalDiv, message).className = "failed";
 		}
 	};
 
 	var append = function (messageDivType, message) {
 		var messageDiv = messageDivType.cloneNode();
 
-		currentSectionDiv.appendChild(messageDiv);
+		currentSectionElement.appendChild(messageDiv);
 
 		messageDiv.appendChild(document.createTextNode(message));
+
+		return messageDiv;
 	};
 };
 
 var Log = null;
 
-var parser = null;
-
 addEventListener("DOMContentLoaded", function () {
 	Log = new Logger(document.querySelector("#output"));
 
-	var parserRequest = new XMLHttpRequest();
-	parserRequest.open("GET", "../ass.pegjs", true);
-	parserRequest.addEventListener("readystatechange", function () {
-		if (parserRequest.readyState === XMLHttpRequest.DONE) {
-			parser = PEG.buildParser(parserRequest.responseText);
-			parserLoaded();
-		}
-	}, false);
-	parserRequest.send(null);
-}, false);
-
-var parserLoaded = function () {
 	sections.forEach(function (section) {
 		Log.beginSection(section);
 		section.tests.forEach(function (test) {
@@ -267,6 +252,6 @@ var parserLoaded = function () {
 	});
 
 	Log.writeTotal(sections);
-}
+}, false);
 
 var sections = [];
