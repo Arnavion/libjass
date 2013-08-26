@@ -75,7 +75,7 @@ addEventListener("DOMContentLoaded", function () {
 			var layersArray = [];
 			layers.forEach(function (layer) { layersArray.push(layer); });
 			layersArray.sort().forEach(function (layer) {
-				wrappers[layer] = new Array(9);
+				wrappers[layer] = new Array(9 + 1); // + 1 because alignments are 1-indexed (1 to 9)
 
 				for (var alignment = 1; alignment <= 9; alignment++) {
 					var wrapperDiv = document.createElement("div");
