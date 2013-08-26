@@ -38,9 +38,9 @@ The next steps are for building the minified file libjass.min.js, and are option
 
 1. Minify libjass.js and ass.pegjs.js to libjass.min.js
 
-    For example, the following command-line for Microsoft AJAX Minifer:
+    For example, use the following command-line for Microsoft AJAX Minifer:
 
-        "C:\Program Files (x86)\Microsoft\Microsoft Ajax Minifier\ajaxmin.exe" G:\src\libjass\libjass.js G:\src\libjass\ass.pegjs.js -enc:in utf-8 -enc:out utf-8 -out G:\src\libjass\libjass.min.js -comments:none -debug:false,console,libjass.debugMode,libjass.verboseMode -esc:true -inline:false -map:V3 G:\src\libjass\libjass.min.js.map -strict:true
+        "C:\Program Files (x86)\Microsoft\Microsoft Ajax Minifier\ajaxmin.exe" libjass.js ass.pegjs.js -enc:in utf-8 -enc:out utf-8 -out libjass.min.js -comments:none -debug:false,console,libjass.debugMode,libjass.verboseMode -esc:true -inline:false -map:V3 libjass.min.js.map -strict:true
 
 1. Prepend the license notice to libjass.min.js from any one of the TS files.
 
