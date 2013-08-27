@@ -31,7 +31,7 @@ As a result, libjass is able to render subtitles with very low CPU usage. The do
 
 Formal documentation is coming soon. In the meantime, here's an overview:
 
-* The constructor ASS() takes in the raw ASS string and returns an object representing the script information, the line styles and dialogue lines in it. The example index.js uses XHR to get this data using a URL specified as a data attribute on the video tag.
+* The constructor ASS() takes in the raw ASS string and returns an object representing the script information, the line styles and dialogue lines in it. The example index.js uses XHR to get this data using the URL specified in a track tag.
 
 * ASS.dialogues is an array of Dialogue objects, each corresponding to a dialogue in the ASS file. These objects have a draw() method that returns a &lt;div&gt; containing the rendered subtitle line.
 
