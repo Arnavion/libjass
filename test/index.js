@@ -36,9 +36,9 @@ var Section = (function () {
 			number: { value: number, enumerable: true },
 			name: { value: name, enumerable: true },
 			tests: { value: tests, enumerable: true },
-			total: { get: function () { return this.tests.length; }, enumerabe: true },
-			passed: { get: function () { return this.tests.map(function (test) { return (test.passed === true) ? 1 : 0; }).sum(); }, enumerabe: true },
-			failed: { get: function () { return this.tests.map(function (test) { return (test.passed === false) ? 1 : 0; }).sum(); }, enumerabe: true }
+			total: { get: function () { return this.tests.length; }, enumerable: true },
+			passed: { get: function () { return this.tests.map(function (test) { return (test.passed === true) ? 1 : 0; }).sum(); }, enumerable: true },
+			failed: { get: function () { return this.tests.map(function (test) { return (test.passed === false) ? 1 : 0; }).sum(); }, enumerable: true }
 		});
 	};
 })();
