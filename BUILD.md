@@ -1,20 +1,12 @@
-1. Install the build tools
-    1. node.js http://nodejs.org/ (or via your package manager)
-    1. TypeScript http://www.typescriptlang.org/#Download
+1. Install node.js from http://nodejs.org/ or via your package manager
 
-            npm install typescript
+1. Change to the directory where you cloned this repository.
 
-    1. PEG.js http://pegjs.majda.cz/
+1. Run the following command
 
-            npm install pegjs
+        npm install
 
-1. Generate libjass.js
-
-        tsc libjass.ts --out libjass.js --sourcemap --noImplicitAny --target ES5
-
-1. Generate ass.pegjs.js
-
-        pegjs --export-var "libjass.parser" ass.pegjs ass.pegjs.js
+    This will install the dependencies - [Jake](https://github.com/mde/jake), [PEG.js](http://pegjs.majda.cz/), [TypeScript](http://www.typescriptlang.org/) and [UglifyJS2](https://github.com/mishoo/UglifyJS2). It will then run Jake to build libjass.js and use UglifyJS2 to minify it into libjass.min.js
 
 1. Set the URLs of the video and the ASS file in index.xhtml
 
@@ -34,24 +26,15 @@ for each font. The name of the font is what it's called in the ASS file.
 
 ***
 
-The next steps are for building the minified file libjass.min.js, and are optional.
+### Alternative ways to minify
 
-1. Minify libjass.js and ass.pegjs.js to libjass.min.js
+* UglifyJS2 via command line
 
-    For example, use the following command-line for Microsoft AJAX Minifer:
+        uglifyjs libjass.js --source-map libjass.min.js.map --in-source-map libjass.js.map --output libjass.min.js --mangle --compress
+
+* Microsoft AJAX Minifer:
 
         "C:\Program Files (x86)\Microsoft\Microsoft Ajax Minifier\ajaxmin.exe" libjass.js ass.pegjs.js -enc:in utf-8 -enc:out utf-8 -out libjass.min.js -comments:none -debug:false,console,libjass.debugMode,libjass.verboseMode -esc:true -inline:false -map:V3 libjass.min.js.map -strict:true
 
-1. Prepend the license notice to libjass.min.js from any one of the TS files.
 
-1. Change index.xhtml to use the minified file.
-```
-	<head>
-		<title>&gt;2012 &gt;Streaman Animu</title>
-		<link rel="stylesheet" href="index.css" />
-		<link rel="stylesheet" href="fonts.css" />
-		<script src="libjass.min.js" />
-		<script src="index.js" />
-		<style id="animation-styles" type="text/css" />
-	</head>
-```
+These commands will not preserve the license notice header in the minified file. Remember to prepend the license notice to libjass.min.js from libjass.js or any one of the TS files.

@@ -14,18 +14,20 @@ As a result, libjass is able to render subtitles with very low CPU usage. The do
 
 ### What are all these files?
 
-* The .ts files are the source of libjass. They are TypeScript files and must be compiled into JavaScript for the browser using the TypeScript compiler. Instructions are in BUILD.md
+* The .ts files are the source of libjass. They are TypeScript files and must be compiled into JavaScript for the browser using the TypeScript compiler.
 
 * The ass.pegjs file is the source of a parser for the ASS format.
 
-* The rest of the files - index.xhtml, index.js, index.css, fonts.css are a sample implementation of how to use libjass. These files are not needed to use libjass on your website. They only exist as an example of the libjass API, placement of &lt;div&gt; elements to render the subs, etc.
+* The rest of the files - index.xhtml, index.js, index.css and fonts.css - are a sample implementation of how to use libjass on a web page. They demonstrate the API to call, how to place &lt;div&gt; elements to render the subs, etc.
 
 
 ### I want to use libjass for my website. What do I need to do?
 
-1. You need to build libjass.js and ass.pegjs.js using the instructions in BUILD.md
-1. You need to load libjass.js and ass.pegjs.js on the page with your video.
+1. You need to build libjass.js using the instructions in BUILD.md
+1. You need to load libjass.js on the page with your video.
 1. You need to call the libjass API.
+
+Only libjass.js is needed to use libjass on your website. The other files are only used during the build process and you don't need to deploy them to your website.
 
 ### Where's the API documentation? What API do I need to call to use libjass?
 

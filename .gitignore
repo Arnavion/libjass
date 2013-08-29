@@ -1,11 +1,11 @@
+node_modules/
+
 dialogue.js
 iterators.js
 libjass.js
 parser.js
 tags.js
 utility.js
-
-ass.pegjs.js
 
 dialogue.min.js
 iterators.min.js
