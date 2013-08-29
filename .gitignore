@@ -14,4 +14,5 @@ parser.min.js
 tags.min.js
 utility.min.js
 
+*.log
 *.map
