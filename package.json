@@ -20,12 +20,12 @@
 		"url": "https://github.com/Arnavion/libjass"
 	},
 	"scripts": {
-		"postinstall": "jake clean && jake"
+		"postinstall": "jake clean && jake --trace"
 	},
 	"dependencies": {
 		"jake": "latest",
 		"pegjs": "0.7.0",
-		"typescript": "~0.9",
+		"typescript": "0.9.1-1",
 		"uglify-js": "~2"
 	}
 }
