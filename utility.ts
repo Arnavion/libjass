@@ -48,51 +48,48 @@ interface CSSStyleDeclaration {
 
 interface String {
 	startsWith(str: string): boolean
-	endsWith(str: string): boolean
 }
 
 interface HTMLDivElement {
 	remove(): void
 }
 
-module libjass {
+/**
+ * @param {string} str
+ * @return {boolean} true if this string starts with str
+ */
+String.prototype.startsWith = function (str: string): boolean {
+	return (<string>this).indexOf(str) === 0;
+};
+
+if (parseInt("010") !== 10) {
+	// This browser doesn't parse strings with leading 0's as decimal. Replace its parseInt with an implementation that does.
+
+	var oldParseInt = parseInt;
+
 	/**
-	 * @param {string} str
-	 * @return {boolean} true if this string starts with str
+	 * An alternative parseInt that defaults to parsing input in base 10 if the second parameter is undefined.
+	 *
+	 * @param {string} s
+	 * @param {number=} radix
+	 * @return {number}
 	 */
-	String.prototype.startsWith = function (str: string): boolean {
-		return (<string>this).indexOf(str) === 0;
-	};
-
-	if (parseInt("010") !== 10) {
-		// This browser doesn't parse strings with leading 0's as decimal. Replace its parseInt with an implementation that does.
-
-		var oldParseInt = parseInt;
-
-		/**
-		 * An alternative parseInt that defaults to parsing input in base 10 if the second parameter is undefined.
-		 *
-		 * @param {string} s
-		 * @param {number=} radix
-		 * @return {number}
-		 */
-		(<any>window).parseInt = (s: string, radix?: number): number => {
-			// If str starts with 0x, then it is to be parsed as base 16 even if the second parameter is not given.
-			if (radix === undefined) {
-				if (s.startsWith("0x")) {
-					radix = 16;
-				}
-				else {
-					radix = 10;
-				}
+	(<any>window).parseInt = (s: string, radix?: number): number => {
+		// If str starts with 0x, then it is to be parsed as base 16 even if the second parameter is not given.
+		if (radix === undefined) {
+			if (s.startsWith("0x")) {
+				radix = 16;
 			}
-			return oldParseInt(s, radix);
+			else {
+				radix = 10;
+			}
 		}
+		return oldParseInt(s, radix);
 	}
-
-	HTMLDivElement.prototype.remove = function (): void {
-		if (this.parentElement !== null) {
-			this.parentElement.removeChild(this);
-		}
-	};
 }
+
+HTMLDivElement.prototype.remove = function (): void {
+	if (this.parentElement !== null) {
+		this.parentElement.removeChild(this);
+	}
+};
