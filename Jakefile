@@ -47,7 +47,20 @@ namespace("_default", function () {
 		var compiled = jake.Task["_default:tscCompile"].value;
 		var parserSource = jake.Task["_default:pegjs"].value;
 
-		return { code: compiled.code + "\n" + parserSource + "\n//# sourceMappingURL=libjass.js.map", sourceMap: compiled.sourceMap };
+		var output = UglifyJS.minify([compiled.code, parserSource], {
+			fromString: true,
+			compress: false,
+			mangle: false,
+			inSourceMap: compiled.sourceMap,
+			outSourceMap: "libjass.js.map",
+			sourceRoot: null,
+			output: {
+				beautify: true,
+				comments: true
+			}
+		});
+
+		return { code: output.code + "\n//# sourceMappingURL=libjass.js.map", sourceMap: JSON.parse(output.map) };
 	});
 
 	task("writeCode", ["_default:combine"], function () {
