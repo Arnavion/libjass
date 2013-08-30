@@ -1,17 +1,32 @@
-var allFiles = [];
+var fs = require("fs");
+var path = require("path");
+var UglifyJS = require("uglify-js");
 
-var fileTask = function (filename, dependencies, callback, options) {
-	file(filename, dependencies, function () {
-		console.log("Building " + filename);
+namespace("_default", function () {
+	task("tscCompile", [], function () {
+		console.log("[" + this.fullName + "]");
 
-		callback.call(this, arguments);
-	}, options);
-	allFiles.push(filename);
-};
+		jake.exec(["tsc libjass.ts --out libjass.js --sourcemap --noImplicitAny --target ES5"], { printStdout: true, printStderr: true }, function () {
+			fs.readFile("libjass.js", { encoding: "utf8" }, function (error, data) {
+				if (error) {
+					throw error;
+				}
 
-fileTask("libjass.js", ["dialogue.ts", "iterators.ts", "parser.ts", "tags.ts", "utility.ts", "ass.pegjs"], function () {
-	jake.exec(["tsc libjass.ts --out libjass.js --sourcemap --noImplicitAny --target ES5"], { printStdout: true, printStderr: true }, function () {
-		var fs = require("fs");
+				var code = data;
+
+				fs.readFile("libjass.js.map", { encoding: "utf8" }, function (error, data) {
+					if (error) {
+						throw error;
+					}
+
+					complete({ code: code, sourceMap: JSON.parse(data) });
+				});
+			});
+		});
+	}, { async: true });
+
+	task("pegjs", [], function () {
+		console.log("[" + this.fullName + "]");
 
 		fs.readFile("ass.pegjs", { encoding: "utf8" }, function (error, data) {
 			if (error) {
@@ -22,61 +37,60 @@ fileTask("libjass.js", ["dialogue.ts", "iterators.ts", "parser.ts", "tags.ts", "
 
 			var parser = PEG.buildParser(data);
 
-			fs.appendFile("libjass.js", "libjass.parser = " + parser.toSource() + ";\n", function (error) {
-				if (error) {
-					throw error;
-				}
-
-				complete();
-			});
+			complete("libjass.parser = " + parser.toSource());
 		});
+	}, { async: true });
+
+	task("combine", ["_default:tscCompile", "_default:pegjs"], function () {
+		console.log("[" + this.fullName + "]");
+
+		var compiled = jake.Task["_default:tscCompile"].value;
+		var parserSource = jake.Task["_default:pegjs"].value;
+
+		return { code: compiled.code + "\n" + parserSource + "\n//# sourceMappingURL=libjass.js.map", sourceMap: compiled.sourceMap };
 	});
-}, { async: true });
 
-fileTask("libjass.min.js", ["libjass.js"], function () {
-	var fs = require("fs");
+	task("writeCode", ["_default:combine"], function () {
+		console.log("[" + this.fullName + "]");
 
-	fs.readFile("libjass.js.map", { encoding: "utf8"}, function (error, data) {
-		if (error) {
-			throw error;
-		}
+		var combined = jake.Task["_default:combine"].value;
 
-		var inputSourceMap = JSON.parse(data);
-
-		fs.readFile("libjass.js", { encoding: "utf8" }, function (error, data) {
+		fs.writeFile("libjass.js", combined.code, function (error) {
 			if (error) {
 				throw error;
 			}
 
-			var UglifyJS = require("uglify-js");
+			complete();
+		});
+	}, { async: true });
 
-			// Parse
-			var ast = UglifyJS.parse(data, {
-				strict: true,
-				filename: "libjass.js"
-			});
-			ast.figure_out_scope();
-			ast.scope_warnings();
+	task("writeSourceMap", ["_default:combine"], function () {
+		console.log("[" + this.fullName + "]");
 
-			// Compress
-			var compressor = UglifyJS.Compressor();
-			ast = ast.transform(compressor);
-			ast.figure_out_scope();
+		var combined = jake.Task["_default:combine"].value;
 
-			// Mangle
-			ast.compute_char_frequency();
-			ast.mangle_names();
+		fs.writeFile("libjass.js.map", JSON.stringify(combined.sourceMap), function (error) {
+			if (error) {
+				throw error;
+			}
 
-			// Output and sourcemap
-			var sourceMap = UglifyJS.SourceMap({
-				file: "libjass.min.js",
-				orig: inputSourceMap,
-				root: inputSourceMap.sourceRoot
-			});
+			complete();
+		});
+	}, { async: true });
 
-			var firstCommentFound = false; // To detect and preserve the first license header
-			var output = UglifyJS.OutputStream({
-				beautify: false,
+	task("minify", ["_default:combine"], function () {
+		console.log("[" + this.fullName + "]");
+
+		var combined = jake.Task["_default:combine"].value;
+
+		var firstCommentFound = false; // To detect and preserve the first license header
+
+		var minified = UglifyJS.minify([combined.code], {
+			fromString: true,
+			inSourceMap: combined.sourceMap,
+			outSourceMap: "libjass.min.js.map",
+			sourceRoot: null,
+			output: {
 				comments: function (node, comment) {
 					if (!firstCommentFound) {
 						firstCommentFound = !firstCommentFound;
@@ -84,50 +98,58 @@ fileTask("libjass.min.js", ["libjass.js"], function () {
 					}
 
 					return false;
-				},
-				source_map: sourceMap
-			});
-			ast.print(output);
-
-			// Write to files
-			fs.writeFile("libjass.min.js.map", sourceMap, function () {
-				if (error) {
-					throw error;
 				}
-
-				var minifiedCode = output.get() + "\n//# sourceMappingURL=libjass.min.js.map";
-
-				fs.writeFile("libjass.min.js", minifiedCode, function (error) {
-					if (error) {
-						throw error;
-					}
-
-					complete();
-				});
-			});
+			}
 		});
+
+		minified.code += "\n//# sourceMappingURL=libjass.min.js.map";
+
+		return minified;
 	});
-}, { async: true });
 
-task("default", ["libjass.min.js"], function () {
-});
+	task("writeMinifiedCode", ["_default:minify"], function () {
+		console.log("[" + this.fullName + "]");
 
-task("clean", function () {
-	var fs = require("fs");
+		var minified = jake.Task["_default:minify"].value;
 
-	var t = function (i) {
-		if (i >= allFiles.length) {
-			complete();
-			return;
-		}
-
-		fs.unlink(allFiles[i], function (error, data) {
-			if (error && error.code !== "ENOENT") {
+		fs.writeFile("libjass.min.js", minified.code, function (error) {
+			if (error) {
 				throw error;
 			}
 
-			t(i + 1);
+			complete();
 		});
-	};
-	t(0);
+	}, { async: true });
+
+	task("writeMinifiedSourceMap", ["_default:minify"], function () {
+		console.log("[" + this.fullName + "]");
+
+		var minified = jake.Task["_default:minify"].value;
+
+		fs.writeFile("libjass.min.js.map", minified.map, function (error) {
+			if (error) {
+				throw error;
+			}
+
+			complete();
+		});
+	}, { async: true });
+});
+
+desc("Build libjass.js, libjass.min.js and their sourcemaps");
+task("default", ["_default:writeCode", "_default:writeSourceMap", "_default:writeMinifiedCode", "_default:writeMinifiedSourceMap"], function () {
+	console.log("[" + this.fullName + "]");
+});
+
+desc("Clean");
+task("clean", function () {
+	console.log("[" + this.fullName + "]");
+
+	["libjass.js", "libjass.js.map", "libjass.min.js", "libjass.min.js.map"].forEach(jake.rmRf.bind(jake));
+}, { async: true });
+
+task("watch", function () {
+	console.log("[" + this.fullName + "]");
+
+	complete();
 }, { async: true });
