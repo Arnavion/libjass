@@ -57,10 +57,10 @@ module libjass {
 					.filter((line: string) => !line.startsWith(";")); // Skip comments
 
 
-			// Create the script info object
+			// Create the script info template
 			var infoTemplate = Object.create(null);
 
-			// Get script info key-value pairs from the script info section
+			// Extract script info key-value pairs from the script info section into the template
 			Iterator(ASS._readSectionLines(lines, "Script Info")).forEach((keyValuePair: string[]) => {
 				infoTemplate[keyValuePair[0]] = keyValuePair[1];
 			});
@@ -165,7 +165,7 @@ module libjass {
 		 */
 		private static _readSectionLines(lines: Iterable, sectionName: string): Iterable {
 			return lines
-				// Skip all lines till the script info section begins
+				// Skip all lines till the section begins
 				.skipWhile((line: string) => line !== "[" + sectionName + "]")
 				// Skip the section header
 				.skip(1)
