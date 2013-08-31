@@ -53,7 +53,6 @@ namespace("_default", function () {
 			mangle: false,
 			inSourceMap: compiled.sourceMap,
 			outSourceMap: "libjass.js.map",
-			sourceRoot: null,
 			output: {
 				beautify: true,
 				comments: true
@@ -102,7 +101,7 @@ namespace("_default", function () {
 			fromString: true,
 			inSourceMap: combined.sourceMap,
 			outSourceMap: "libjass.min.js.map",
-			sourceRoot: null,
+			warnings: true,
 			output: {
 				comments: function (node, comment) {
 					if (!firstCommentFound) {
