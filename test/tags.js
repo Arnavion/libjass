@@ -18,50 +18,52 @@
  * limitations under the License.
  */
 
-sections.push(new Section("Bold tag - \\b",
-	new Test("True", "b1", "tag_b", new libjass.tags.Bold(true)),
+suite("Tags", function () {
+	suite("Bold tag - \\b", function () {
+		parserTest("True", "b1", "tag_b", new libjass.tags.Bold(true));
 
-	new Test("False", "b0", "tag_b", new libjass.tags.Bold(false)),
+		parserTest("False", "b0", "tag_b", new libjass.tags.Bold(false));
 
-	new Test("100", "b100", "tag_b", new libjass.tags.Bold(100)),
+		parserTest("100", "b100", "tag_b", new libjass.tags.Bold(100));
 
-	new Test("900", "b900", "tag_b", new libjass.tags.Bold(900)),
+		parserTest("900", "b900", "tag_b", new libjass.tags.Bold(900));
 
-	new Test("null", "b", "tag_b", new libjass.tags.Bold(null)),
+		parserTest("null", "b", "tag_b", new libjass.tags.Bold(null));
 
-	new Test("2", "b2", "tag_b", null),
+		parserTest("2", "b2", "tag_b", null);
 
-	new Test("10", "b10", "tag_b", null),
+		parserTest("10", "b10", "tag_b", null);
 
-	new Test("150", "b150", "tag_b", null),
+		parserTest("150", "b150", "tag_b", null);
 
-	new Test("Enclosed tag", "{\\b1}", "enclosedTags", [new libjass.tags.Bold(true)]),
+		parserTest("Enclosed tag", "{\\b1}", "enclosedTags", [new libjass.tags.Bold(true)]);
 
-	new Test("Enclosed tag", "{\\b0}", "enclosedTags", [new libjass.tags.Bold(false)]),
+		parserTest("Enclosed tag", "{\\b0}", "enclosedTags", [new libjass.tags.Bold(false)]);
 
-	new Test("Enclosed tag", "{\\b100}", "enclosedTags", [new libjass.tags.Bold(100)]),
+		parserTest("Enclosed tag", "{\\b100}", "enclosedTags", [new libjass.tags.Bold(100)]);
 
-	new Test("Enclosed tag", "{\\b900}", "enclosedTags", [new libjass.tags.Bold(900)]),
+		parserTest("Enclosed tag", "{\\b900}", "enclosedTags", [new libjass.tags.Bold(900)]);
 
-	new Test("Enclosed tag", "{\\b}", "enclosedTags", [new libjass.tags.Bold(null)]),
+		parserTest("Enclosed tag", "{\\b}", "enclosedTags", [new libjass.tags.Bold(null)]);
 
-	new Test("Enclosed tag", "{\\b2}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("2")]),
+		parserTest("Enclosed tag", "{\\b2}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("2")]);
 
-	new Test("Enclosed tag", "{\\b10}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("0")]),
+		parserTest("Enclosed tag", "{\\b10}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("0")]);
 
-	new Test("Enclosed tag", "{\\b150}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("50")])
-));
+		parserTest("Enclosed tag", "{\\b150}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("50")]);
+	});
 
-sections.push(new Section("Primary color tag - \\c or \\1c",
-	new Test("Just the tag", "1c&H3F171F&", "tag_1c", new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))),
+	suite("Primary color tag - \\c or \\1c", function () {
+		parserTest("Just the tag", "1c&H3F171F&", "tag_1c", new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1)));
 
-	new Test("Just the tag", "c&H3F171F&", "tag_c", new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))),
+		parserTest("Just the tag", "c&H3F171F&", "tag_c", new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1)));
 
-	new Test("Enclosed tag", "{\\c&H3F171F&}", "enclosedTags", [new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))]),
+		parserTest("Enclosed tag", "{\\c&H3F171F&}", "enclosedTags", [new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))]);
 
-	new Test("Dialogue", "{\\c&H3F171F&}", "dialogue", [new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))])
-));
+		parserTest("Dialogue", "{\\c&H3F171F&}", "dialogue", [new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))]);
+	});
 
-sections.push(new Section("Alpha tag - \\alpha",
-	new Test("Just the tag", "alpha&H00&", "tag_alpha", new libjass.tags.Alpha(1))
-));
+	suite("Alpha tag - \\alpha", function () {
+		parserTest("Just the tag", "alpha&H00&", "tag_alpha", new libjass.tags.Alpha(1));
+	});
+});

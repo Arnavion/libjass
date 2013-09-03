@@ -18,12 +18,14 @@
  * limitations under the License.
  */
 
-sections.push(new Section("Color",
-	new Test("BBGGRR", "&H3F171F&", "color", new libjass.tags.Color(31, 23, 63, 1)),
+suite("Primitives", function () {
+	suite("Color", function () {
+		parserTest("BBGGRR", "&H3F171F&", "color", new libjass.tags.Color(31, 23, 63, 1));
 
-	new Test("AABBGGRR", "&H00434441", "colorWithAlpha", new libjass.tags.Color(65, 68, 67, 1)),
+		parserTest("AABBGGRR", "&H00434441", "colorWithAlpha", new libjass.tags.Color(65, 68, 67, 1));
 
-	new Test("AABBGGRR", "&HF0434441", "colorWithAlpha", new libjass.tags.Color(65, 68, 67, (1 - 240 / 255))),
+		parserTest("AABBGGRR", "&HF0434441", "colorWithAlpha", new libjass.tags.Color(65, 68, 67, (1 - 240 / 255)));
 
-	new Test("AABBGGRR", "&HFF434441", "colorWithAlpha", new libjass.tags.Color(65, 68, 67, 0))
-));
+		parserTest("AABBGGRR", "&HFF434441", "colorWithAlpha", new libjass.tags.Color(65, 68, 67, 0));
+	});
+});

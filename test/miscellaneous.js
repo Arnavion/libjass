@@ -18,13 +18,13 @@
  * limitations under the License.
  */
 
-sections.push(new Section("Miscellaneous",
-	new Test("herkz", "{\\pos(311,4)\\blur0.8\\fs40\\bord0\\c&H3F171F&\\t(3820,3820,\\blur6}Chi{\\c&H422CB1&}tose {\\c&H3F171F&}Furu", "dialogue", [
+suite("Miscellaneous", function () {
+	parserTest("herkz", "{\\pos(311,4)\\blur0.8\\fs40\\bord0\\c&H3F171F&\\t(3820,3820,\\blur6}Chi{\\c&H422CB1&}tose {\\c&H3F171F&}Furu", "dialogue", [
 		new libjass.tags.Comment("\\pos(311,4)\\blur0.8\\fs40\\bord0\\c&H3F171F&\\t(3820,3820,\\blur6"),
 		new libjass.tags.Text("Chi"),
 		new libjass.tags.PrimaryColor(new libjass.tags.Color(177, 44, 66, 1)),
 		new libjass.tags.Text("tose "),
 		new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1)),
 		new libjass.tags.Text("Furu")
-	])
-));
+	]);
+});

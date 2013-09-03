@@ -24,83 +24,119 @@ Array.prototype.sum = function () {
 	}, 0);
 };
 
-var Section = (function () {
-	var lastSectionNumber = 0;
+var rootSuites = [];
+var suite = null;
+var setup = null;
+var test = null;
 
-	return function (name/*, tests... */) {
-		var tests = [].slice.call(arguments, 1);
+(function () {
+	var Suite = function (name, parent) {
+		this.name = name;
 
-		var number = ++lastSectionNumber;
+		this.children = [];
 
-		Object.defineProperties(this, {
-			number: { value: number, enumerable: true },
-			name: { value: name, enumerable: true },
-			tests: { value: tests, enumerable: true },
-			total: { get: function () { return this.tests.length; }, enumerable: true },
-			passed: { get: function () { return this.tests.map(function (test) { return (test.passed === true) ? 1 : 0; }).sum(); }, enumerable: true },
-			failed: { get: function () { return this.tests.map(function (test) { return (test.passed === false) ? 1 : 0; }).sum(); }, enumerable: true }
-		});
+		this.parent = parent;
+
+		if (this.parent !== null) {
+			this.parent.children.push(this);
+			this.number = this.parent.number + "." + this.parent.children.length;
+		}
+
+		else {
+			rootSuites.push(this);
+			this.number = String(rootSuites.length);
+		}
+	};
+
+	Object.defineProperties(Suite.prototype, {
+		total: { get: function () {
+			return this.children.reduce(function (previous, current) {
+				if (current instanceof Suite) {
+					return previous + current.total;
+				}
+				else {
+					return previous + 1;
+				}
+			}, 0);
+		}, enumerable: true },
+
+		passed: { get: function () {
+			return this.children.reduce(function (previous, current) {
+				if (current instanceof Suite) {
+					return previous + current.passed;
+				}
+				else {
+					return previous + ((current.passed === true) ? 1 : 0);
+				}
+			}, 0);
+		}, enumerable: true },
+
+		failed: { get: function () {
+			return this.children.reduce(function (previous, current) {
+				if (current instanceof Suite) {
+					return previous + current.failed;
+				}
+				else {
+					return previous + ((current.passed === false) ? 1 : 0);
+				}
+			}, 0);
+		}, enumerable: true },
+	});
+
+	Suite.prototype.run = function (logger) {
+		logger.beginSuite(this);
+
+		this.children.forEach(function (child) { child.run(logger); });
+
+		logger.endSuite(this);
+	};
+
+	var Test = function (description, body, parent) {
+		this.description = description;
+		this.body = body;
+
+		parent.children.push(this);
+
+		this.number = parent.number + "." + parent.children.length;
+
+		this.passed = null;
+		this.exception = null;
+	};
+
+	Test.prototype.run = function (logger) {
+		this.passed = false;
+
+		try {
+			this.body();
+
+			this.passed = true;
+		}
+		catch (testException) {
+			this.exception = testException;
+		}
+
+		logger.writeTest(this);
+	};
+
+	var currentSuite = null;
+
+	suite = function (name, body) {
+		var newSuite = new Suite(name, currentSuite);
+
+		currentSuite = newSuite;
+		body();
+		currentSuite = newSuite.parent;
+
+		return newSuite;
+	};
+
+	test = function (description, body) {
+		return new Test(description, body, currentSuite);
 	};
 })();
 
-var Test = (function () {
-	var lastTestNumber = 0;
-
-	return function (name, input, rule, expected) {
-		var number = ++lastTestNumber;
-
-		var passed = null;
-		var exception = null;
-
-		Object.defineProperties(this, {
-			number: { value: number, enumerable: true },
-			name: { value: name, enumerable: true },
-			input: { value: input, enumerable: true },
-			rule: { value: rule, enumerable: true },
-			expected: { value: expected, enumerable: true },
-			passed: { get: function () { return passed; }, enumerable: true },
-			exception: { get: function () { return exception; }, enumerable: true }
-		});
-
-		this.execute = function () {
-			try {
-				passed = false;
-
-				var actual = null;
-
-				try {
-					actual = libjass.parser.parse(this.input, rule);
-				}
-				catch (parseException) {
-					if (expected === null) {
-						passed = true;
-						return;
-					}
-					else {
-						throw new Error("Expected parse to succeed but it threw an exception: " + parseException.message);
-					}
-				}
-
-				if (expected === null) {
-					throw new Error("Expected parse to fail.");
-				}
-				else if (actual === null) {
-					throw new Error("Parse failed without throwing an exception.");
-				}
-
-				Assert.AreEqual(expected, actual);
-
-				passed = true;
-			}
-			catch (testException) {
-				exception = testException;
-			}
-		};
-	};
-})();
-
-var Assert = new function () {
-	this.AreEqual = function (expected, actual) {
+var assert = new function () {
+	this.deepEqual = function (actual, expected) {
 		if (expected === undefined) {
 			throw new Error("Expected should not be undefined");
 		}
@@ -122,7 +158,7 @@ var Assert = new function () {
 		}
 
 		if (expected.constructor !== actual.constructor) {
-			throw new Error("Parse result is of wrong type.");
+			throw new Error("Expected value of type [" + expected.constructor.name + "] but got value of type [" + actual.constructor.name + "].");
 		}
 
 		switch(typeof expected) {
@@ -135,9 +171,33 @@ var Assert = new function () {
 				break;
 
 			case "object":
-				Object.keys(expected).forEach(function (property) {
-					Assert.AreEqual(expected[property], actual[property]);
-				});
+				if (Array.isArray(expected)) {
+					if (!Array.isArray(actual)) {
+						throw new Error("Expected an array but got [" + actual + "]");
+					}
+
+					if (expected.length !== actual.length) {
+						throw new Error("Expected an array of length " + expected.length + " but got array of length " + actual.length);
+					}
+
+					var i;
+					for (i = 0; i < expected.length; i++) {
+						assert.deepEqual(actual[i], expected[i]);
+					}
+				}
+
+				else {
+					var expectedProperties = Object.keys(expected);
+					var actualProperties = Object.keys(actual);
+					expectedProperties.sort();
+					actualProperties.sort();
+
+					assert.deepEqual(actualProperties, expectedProperties);
+
+					expectedProperties.forEach(function (property) {
+						assert.deepEqual(actual[property], expected[property]);
+					});
+				}
 				break;
 
 			default:
@@ -146,74 +206,111 @@ var Assert = new function () {
 	};
 };
 
+var parserTest = function (description, input, rule, expected) {
+	var result = test(description, function () {
+		var actual = null;
+
+		try {
+			actual = libjass.parser.parse(input, rule);
+		}
+		catch (parseException) {
+			if (expected === null) {
+				passed = true;
+				return;
+			}
+			else {
+				throw new Error("Expected parse to succeed but it threw an exception: " + parseException.message);
+			}
+		}
+
+		if (expected === null) {
+			throw new Error("Expected parse to fail.");
+		}
+		else if (actual === null) {
+			throw new Error("Parse failed without throwing an exception.");
+		}
+
+		assert.deepEqual(actual, expected);
+	});
+
+	result.customProperties = Object.create(null);
+	result.customProperties.input = input;
+	result.customProperties.rule = rule;
+
+	return result;
+};
+
 var Logger = function (outputDiv) {
 	var testDiv = document.createElement("div");
 	testDiv.className = "test";
 
-	var sectionElement = document.createElement("fieldset");
-	sectionElement.className = "section";
-	sectionElement.appendChild(document.createElement("legend"));
+	var suiteElement = document.createElement("fieldset");
+	suiteElement.className = "suite";
+	suiteElement.appendChild(document.createElement("legend"));
 
 	var totalDiv = document.createElement("div");
 
-	var currentSectionElement = null;
+	var currentSuiteElement = outputDiv;
 
-	this.beginSection = function (section) {
-		currentSectionElement = sectionElement.cloneNode(true);
-		outputDiv.appendChild(currentSectionElement);
+	this.beginSuite = function (suite) {
+		var newSectionElement = suiteElement.cloneNode(true);
+		currentSuiteElement.appendChild(newSectionElement);
+		currentSuiteElement = newSectionElement;
 
-		var message = "Section " + section.number + " - \"" + section.name + "\"";
+		var message = "Suite " + suite.number + " - \"" + suite.name + "\"";
 		console.group(message);
-		currentSectionElement.querySelector("legend").appendChild(document.createTextNode(message));
+		currentSuiteElement.querySelector("legend").appendChild(document.createTextNode(message));
 	};
 
-	this.endSection = function (section) {
-		var numTotal = section.total;
-		var numPassed = section.passed;
-		var numFailed = section.failed;
-
-		var currentSectionLegend = currentSectionElement.querySelector("legend");
+	this.endSuite = function (suite) {
+		var numTotal = suite.total;
+		var numPassed = suite.passed;
+		var numFailed = suite.failed;
 
 		var message = numPassed + " of " + numTotal + " tests passed.";
+
 		console.log(message);
 
 		if (numFailed > 0) {
 			var message = numFailed + " of " + numTotal + " tests failed.";
+
 			console.warn(message);
-			currentSectionLegend.appendChild(document.createTextNode(" - " + message));
-			currentSectionElement.className += " failed";
+
+			currentSuiteElement.querySelector("legend").appendChild(document.createTextNode(" - " + message));
+			currentSuiteElement.className += " failed";
 		}
 		else {
-			currentSectionElement.className += " passed";
+			currentSuiteElement.className += " passed";
 		}
 
+		currentSuiteElement = currentSuiteElement.parentElement;
 		console.groupEnd();
 	};
 
-	this.writeTest = function (test, section) {
+	this.writeTest = function (test) {
 		if (test.passed) {
-			var message = "Test " + section.number + "." + test.number + " - \"" + test.name + "\" - " + test.rule + " [ " + test.input + " ] ";
+			var message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ] ";
 			console.log(message);
 			append(testDiv, message).className += " passed";
 		}
 		else {
-			var message = "Test " + section.number + "." + test.number + " - \"" + test.name + "\" - " + test.rule + " [ " + test.input + " ] " + " : " + ((test.exception !== null) ? test.exception.message : "<No exception>");
+			var message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ] " + " : " + ((test.exception !== null) ? test.exception.message : "<No exception>");
 			console.warn(message);
 			append(testDiv, message).className += " failed";
 		}
 	};
 
-	this.writeTotal = function (sections) {
-		currentSectionElement = sectionElement.cloneNode(true);
-		outputDiv.appendChild(currentSectionElement);
-		currentSectionElement.className = "total";
+	this.writeTotal = function (suites) {
+		currentSuiteElement = suiteElement.cloneNode(true);
+		outputDiv.appendChild(currentSuiteElement);
+		currentSuiteElement.className = "total";
 
 		console.group("Total");
-		currentSectionElement.querySelector("legend").appendChild(document.createTextNode("Total"));
+		currentSuiteElement.querySelector("legend").appendChild(document.createTextNode("Total"));
 
-		var numTotal = sections.map(function (section) { return section.total; }).sum();
-		var numPassed = sections.map(function (section) { return section.passed; }).sum();
-		var numFailed = sections.map(function (section) { return section.failed; }).sum();
+		var numTotal = suites.map(function (section) { return section.total; }).sum();
+		var numPassed = suites.map(function (section) { return section.passed; }).sum();
+		var numFailed = suites.map(function (section) { return section.failed; }).sum();
 
 		var message = numPassed + " of " + numTotal + " tests passed.";
 		console.log(message);
@@ -224,12 +321,14 @@ var Logger = function (outputDiv) {
 			console.warn(message);
 			append(totalDiv, message).className = "failed";
 		}
+
+		console.groupEnd();
 	};
 
 	var append = function (messageDivType, message) {
 		var messageDiv = messageDivType.cloneNode();
 
-		currentSectionElement.appendChild(messageDiv);
+		currentSuiteElement.appendChild(messageDiv);
 
 		messageDiv.appendChild(document.createTextNode(message));
 
@@ -237,21 +336,10 @@ var Logger = function (outputDiv) {
 	};
 };
 
-var Log = null;
-
 addEventListener("DOMContentLoaded", function () {
-	Log = new Logger(document.querySelector("#output"));
+	var logger = new Logger(document.querySelector("#output"));
 
-	sections.forEach(function (section) {
-		Log.beginSection(section);
-		section.tests.forEach(function (test) {
-			test.execute();
-			Log.writeTest(test, section);
-		});
-		Log.endSection(section);
-	});
+	rootSuites.forEach(function (suite) { suite.run(logger); });
 
-	Log.writeTotal(sections);
+	logger.writeTotal(rootSuites);
 }, false);
-
-var sections = [];
