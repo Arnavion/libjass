@@ -22,20 +22,6 @@
 
 "use strict";
 
-interface Window {
-	Iterator(collection: any, keysOnly?: boolean): Iterator
-	StopIteration: any
-}
-
-declare function Iterator(collection: any, keysOnly?: boolean): Iterator
-declare var StopIteration: any
-
-interface Iterator {
-	next(): any
-	forEach(func: (element: any) => void): void
-	toArray(): Array
-}
-
 interface CSSStyleDeclaration {
 	webkitAnimationDelay: string
 	webkitAnimationDuration: string
@@ -45,14 +31,36 @@ interface CSSStyleDeclaration {
 	webkitPerspective: string
 }
 
-
-interface String {
-	startsWith(str: string): boolean
+interface Document {
+	fullscreenElement: Element
+	mozFullScreenElement: Element
+	webkitFullscreenElement: Element
 }
 
 interface HTMLDivElement {
 	remove(): void
 }
+
+interface Iterator {
+	next(): any
+	forEach(func: (element: any) => void): void
+	toArray(): Array
+}
+
+interface String {
+	startsWith(str: string): boolean
+}
+
+interface Window {
+	Iterator(collection: any, keysOnly?: boolean): Iterator
+	StopIteration: any
+	Set: {
+		new (): Set<any>
+	}
+}
+
+declare function Iterator(collection: any, keysOnly?: boolean): Iterator
+declare var StopIteration: any
 
 /**
  * @param {string} str
@@ -93,3 +101,87 @@ HTMLDivElement.prototype.remove = function (): void {
 		this.parentElement.removeChild(this);
 	}
 };
+
+module libjass {
+	/**
+	 * Set implementation for browsers that don't support it. Only supports Number and String elements.
+	 *
+	 * Elements are stored as properties of an object, with names derived from their type.
+	 */
+	class SimpleSet<T> implements Set<T> {
+		private _data: Object = Object.create(null);
+
+		/**
+		 * @constructor
+		 */
+		constructor() { }
+
+		/**
+		 * @param {T} value
+		 */
+		add(value: T): Set<T> {
+			var key = this._toKey(value);
+
+			if (key === null) {
+				throw new Error("This Set implementation only supports string and number values.");
+			}
+
+			this._data[key] = value;
+
+			return this;
+		}
+
+		/**
+		 * @param {T} value
+		 * @return boolean
+		 */
+		has(value: T): boolean {
+			var key = this._toKey(value);
+
+			if (key === null) {
+				return false;
+			}
+
+			return key in this._data;
+		}
+
+		forEach(callbackfn: (value: string, index: string, set: Set<string>) => void, thisArg?: any): void {
+			if (typeof thisArg === "undefined") {
+				thisArg = window;
+			}
+
+			Object.keys(this._data).map((key: string) => {
+				return this._data[key];
+			}).forEach((value: Object, index: number) => {
+				callbackfn.call(thisArg, value, value, this);
+			});
+		}
+
+		delete(value: string): boolean {
+			throw new Error("This Set implementation doesn't support delete().");
+		}
+
+		clear(): void {
+			throw new Error("This Set implementation doesn't support clear().");
+		}
+
+		get size(): number {
+			throw new Error("This Set implementation doesn't support size.");
+		}
+
+		private _toKey(value: T): string {
+			if (typeof value == "number") {
+				return "#" + value;
+			}
+			else if (typeof value == "string") {
+				return "'" + value;
+			}
+
+			return null;
+		}
+	}
+
+	if (!window.Set || !window.Set.prototype.forEach) {
+		window.Set = SimpleSet;
+	}
+}

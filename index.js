@@ -23,246 +23,31 @@
 libjass.debugMode = (location.search === "?debug") || (location.search === "?verbose");
 libjass.verboseMode = (location.search === "?verbose");
 
-var config = {
-	/**
-	 * Subtitles will be pre-rendered for this amount of time (seconds)
-	 *
-	 * @const
-	 */
-	preRenderTime: 5
-};
-
 addEventListener("DOMContentLoaded", function () {
-	var ASS = libjass.ASS;
-
 	var debug = function () {
 		if (libjass.debugMode) {
 			console.log.apply(console, arguments);
 		}
 	}
 
-	var wrappers = Object.create(null);
-
 	var video = document.querySelector("#video");
 
 	var videoMetadataLoaded = false;
 	var ass = null;
 
-	var rawASS = null;
-
 	var testVideoAndASSLoaded = function () {
 		if (videoMetadataLoaded && ass) {
-			var subsWrapper = document.querySelector("#subs");
-
 			ass.dpi = parseFloat(getComputedStyle(document.querySelector("#dpi-div")).height.match(/(\d+)px/)[1]);
 
-			var dialogues = ass.dialogues.slice();
-			// Sort the dialogues array by start time and then by their original position in the script (id)
-			dialogues.sort(function (dialogue1, dialogue2) {
-				var result = dialogue1.start - dialogue2.start;
-
-				if (result === 0) {
-					result = dialogue1.id - dialogue2.id;
-				}
-
-				return result;
+			var renderer = new libjass.DefaultRenderer(video, document.querySelector("#subs"), ass, {
+				preloadFonts: true,
+				fontMap: libjass.FontMap.fromStyleElement(document.querySelector("#font-map"))
 			});
 
-			var layers = new Set();
-			dialogues.forEach(function (dialogue) {
-				layers.add(dialogue.layer);
-			});
-			var layersArray = [];
-			layers.forEach(function (layer) { layersArray.push(layer); });
-			layersArray.sort().forEach(function (layer) {
-				wrappers[layer] = new Array(9 + 1); // + 1 because alignments are 1-indexed (1 to 9)
-
-				for (var alignment = 1; alignment <= 9; alignment++) {
-					var wrapperDiv = document.createElement("div");
-					wrapperDiv.className = "an" + alignment + " layer" + layer;
-					subsWrapper.appendChild(wrapperDiv);
-					wrappers[layer][alignment] = wrapperDiv;
-				}
-			});
-
-			debug("Preloading fonts...");
-			var allFonts = new Set();
-			ass.styles.forEach(function (style) {
-				allFonts.add(style.fontName);
-			});
-			dialogues.forEach(function (dialogue) {
-				dialogue.parts.forEach(function (part) {
-					if (part instanceof libjass.tags.FontName) {
-						allFonts.add(part.value);
-					}
-				});
-			});
-			var numFonts = [].filter.call(document.styleSheets, function (stylesheet) {
-				return stylesheet.href && stylesheet.href.endsWith("/fonts.css");
-			}).reduce(function (previousValue, currentValue) {
-				return previousValue + [].filter.call(currentValue.cssRules, function (rule) {
-					return rule.type === CSSRule.FONT_FACE_RULE && allFonts.has(rule.style.getPropertyValue("font-family").match(/^['"]?(.*?)['"]?$/)[1]);
-				}).map(function (fontFaceRule) {
-					var xhr = new XMLHttpRequest();
-					var fontSrc = fontFaceRule.style.src;
-					if (fontSrc) {
-						fontSrc = fontSrc.match(/url\((.+)\)$/)[1];
-					}
-					else {
-						fontSrc = fontFaceRule.cssText.match(/url\("?(.+?)"?\)/)[1];
-					}
-					xhr.open("GET", fontSrc, true);
-					xhr.addEventListener("readystatechange", function () {
-						if (xhr.readyState === XMLHttpRequest.DONE) {
-							debug("Preloaded " + fontSrc + ".");
-							--numFonts;
-							debug(numFonts + " fonts left to preload.");
-							if (numFonts === 0) {
-								debug("All fonts have been preloaded. Beginning autoplay.");
-								video.play();
-							}
-						}
-					}, false);
-					xhr.send(null);
-					return xhr;
-				})
-				.length;
-			}, 0);
-
-			debug(numFonts + " fonts left to preload.");
-
-			if (numFonts === 0) {
+			renderer.addEventListener("ready", function () {
 				debug("All fonts have been preloaded. Beginning autoplay.");
 				video.play();
-			}
-
-			var currentTime;
-
-			// Array of subtitle div's that are being displayed right now
-			var currentSubs = [];
-
-			// Iterable of subtitle div's that are also to be displayed
-			var newSubs = dialogues.toIterable().map(function (entry) {
-				return entry[1];
-			}).skipWhile(function (dialogue) {
-				// Skip until dialogues which end at a time later than currentTime
-				return dialogue.end < currentTime;
-			}).takeWhile(function (dialogue) {
-				// Take until dialogue which starts later than currentTime + config.preRenderTime
-				return dialogue.start <= (currentTime + config.preRenderTime);
-			}).filter(function (dialogue) {
-				// Ignore dialogues which end at a time less than currentTime
-				if (dialogue.end < currentTime) {
-					return false;
-				}
-
-				// All these dialogues are visible at atleast one time in the range [currentTime, currentTime + config.preRenderTime]
-
-				// Ignore those dialogues which have already been displayed
-				if (currentSubs.some(function (sub) { return parseInt(sub.getAttribute("data-dialogue-id")) === dialogue.id; })) {
-					return false;
-				}
-
-				// If the dialogue is to be displayed, keep it to be drawn...
-				if (dialogue.start <= currentTime) {
-					return true;
-				}
-
-				// ... otherwise pre-render it and forget it
-				else {
-					dialogue.preRender();
-					return false;
-				}
-			}).map(function (dialogue) {
-				debug(dialogue.toString());
-				// Display the dialogue and return the drawn subtitle div
-				return wrappers[dialogue.layer][dialogue.alignment].appendChild(dialogue.draw(currentTime));
 			});
-
-			video.addEventListener("timeupdate", function () {
-				currentTime = video.currentTime;
-
-				currentSubs = currentSubs.filter(function (sub) {
-					var subDialogue = ass.dialogues[parseInt(sub.getAttribute("data-dialogue-id"))];
-
-					// If the sub should still be displayed at currentTime, keep it...
-					if (subDialogue.start <= currentTime && currentTime < subDialogue.end) {
-						return true;
-					}
-
-					// ... otherwise remove it from the DOM and from this array...
-					else {
-						sub.remove();
-						return false;
-					}
-				}).concat(Iterator(newSubs).toArray()); // ... and add the new subs that are to be displayed.
-
-				debug("video.timeupdate: video.currentTime = " + currentTime + ", video.paused = " + video.paused + ", video.seeking = " + video.seeking);
-			}, false);
-
-			video.addEventListener("seeking", function () {
-				currentSubs.forEach(function (sub) {
-					sub.remove();
-				});
-
-				currentSubs = [];
-
-				debug("video.seeking: video.currentTime = " + video.currentTime + ", video.paused = " + video.paused + ", video.seeking = " + video.seeking);
-			}, false);
-
-			video.addEventListener("pause", function () {
-				subsWrapper.className = "paused";
-
-				debug("video.pause: video.currentTime = " + video.currentTime + ", video.paused = " + video.paused + ", video.seeking = " + video.seeking);
-			}, false);
-
-			video.addEventListener("playing", function () {
-				subsWrapper.className = "";
-
-				debug("video.playing: video.currentTime = " + video.currentTime + ", video.paused = " + video.paused + ", video.seeking = " + video.seeking);
-			}, false);
-
-			var resizeVideo = function (width, height) {
-				currentSubs.forEach(function (sub) {
-					sub.remove();
-				});
-
-				currentSubs = [];
-
-				video.style.width = subsWrapper.style.width = width + "px";
-				video.style.height = subsWrapper.style.height = height + "px";
-
-				ass.scaleTo(width, height);
-
-				video.dispatchEvent(new Event("timeupdate"));
-			};
-
-			var videoIsFullScreen = false;
-
-			var onFullScreenChange = function () {
-				var fullScreenElement = document.fullscreenElement;
-				if (fullScreenElement === undefined) {
-					fullScreenElement = document.mozFullScreenElement;
-				}
-				if (fullScreenElement === undefined) {
-					fullScreenElement = document.msFullscreenElement;
-				}
-				if (fullScreenElement === undefined) {
-					fullScreenElement = document.webkitFullscreenElement;
-				}
-
-				if (fullScreenElement === video) {
-					resizeVideo(screen.width, screen.height);
-					videoIsFullScreen = true;
-				}
-				else if (fullScreenElement === null && videoIsFullScreen) {
-					changeVideoSizeSelection();
-					videoIsFullScreen = false;
-				}
-			};
-			document.addEventListener("webkitfullscreenchange", onFullScreenChange, false);
-			document.addEventListener("mozfullscreenchange", onFullScreenChange, false);
-			document.addEventListener("fullscreenchange", onFullScreenChange, false);
 
 			var changeVideoSizeSelection = function (id) {
 				if (typeof id === "undefined") {
@@ -277,16 +62,22 @@ addEventListener("DOMContentLoaded", function () {
 				}
 
 				if (id === "video-size-video-radio") {
-					resizeVideo(video.videoWidth, video.videoHeight);
+					renderer.resizeVideo(video.videoWidth, video.videoHeight);
 				}
 
 				else if (id === "video-size-script-radio") {
-					resizeVideo(ass.resolutionX, ass.resolutionY);
+					renderer.resizeVideo(ass.resolutionX, ass.resolutionY);
 				}
 			};
 
 			var videoSizeSelector = document.querySelector("#video-size-selector");
 			videoSizeSelector.addEventListener("change", function (event) { changeVideoSizeSelection(event.target.id); }, false);
+
+			renderer.addEventListener("fullScreenChange", function (newState) {
+				if (newState === false) {
+					changeVideoSizeSelection();
+				}
+			});
 
 			changeVideoSizeSelection();
 		};
@@ -315,9 +106,8 @@ addEventListener("DOMContentLoaded", function () {
 	subsRequest.addEventListener("readystatechange", function () {
 		if (subsRequest.readyState === XMLHttpRequest.DONE) {
 			debug("ASS script received.");
-			rawASS = subsRequest.responseText;
 
-			ass = new ASS(rawASS);
+			ass = new libjass.ASS(subsRequest.responseText);
 			if (libjass.debugMode) {
 				window.ass = ass;
 			}
@@ -330,67 +120,3 @@ addEventListener("DOMContentLoaded", function () {
 	}, false);
 	subsRequest.send(null);
 }, false);
-
-String.prototype.endsWith = function (str) {
-	var index = this.indexOf(str);
-	return index !== -1 && index === this.length - str.length;
-};
-
-if (typeof window.Set !== "function" || typeof window.Set.prototype.forEach !== "function") {
-	/**
-	 * Set implementation for browsers that don't support it. Only supports Number and String elements.
-	 *
-	 * Elements are stored as properties of an object, with derived names that won't clash with pre-defined properties.
-	 */
-	window.Set = function () {
-		var data = Object.create(null);
-
-		var toKey = function (value) {
-			if (typeof value === "number") {
-				return "#" + value;
-			}
-			else if (typeof value === "string") {
-				return "'" + value;
-			}
-
-			return null;
-		};
-
-		this.add = function (value) {
-			var key = toKey(value);
-
-			if (key === null) {
-				throw new Error("This Set implementation only supports string and number values.");
-			}
-
-			data[key] = value;
-
-			return this;
-		};
-
-		this.has = function (value) {
-			var key = toKey(value);
-
-			if (key === null) {
-				return false;
-			}
-
-			return key in data;
-		};
-
-		this.forEach = function (callbackfn, thisArg) {
-			if (typeof thisArg === "undefined") {
-				thisArg = window;
-			}
-
-			var that = this;
-
-			Object.keys(data).map(function (key) {
-				return data[key];
-			}).forEach(function (value, index) {
-				callbackfn.call(thisArg, value, value, that);
-			});
-		};
-	};
-	Set.prototype = new Set();
-}

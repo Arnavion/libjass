@@ -1,18 +1,7 @@
 node_modules/
 
-dialogue.js
-iterators.js
 libjass.js
-parser.js
-tags.js
-utility.js
-
-dialogue.min.js
-iterators.min.js
 libjass.min.js
-parser.min.js
-tags.min.js
-utility.min.js
+*.map
 
 *.log
-*.map

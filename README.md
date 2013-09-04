@@ -7,7 +7,7 @@ libjass is a JavaScript library written in TypeScript to render ASS subs on HTML
 
 * It's easy to deploy. There is no server-side support required. A static hosting is all that's needed.
 
-* One way to render subtitles on an HTML5 video is to draw them on an HTML5 &lt;canvas&gt;. However, libjass uses the browser's native CSS engine by converting the components of each line in the ASS script into a series of styled &lt;div&gt; and &lt;span&gt; elements. This allows all the layout and rendering to be handled by the browser instead of requiring complex and costly drawing and animation code. For example, libjass uses CSS3 animations to simulate tags such as \fad. While a canvas-drawing library would have to re-draw such a subtitle on the canvas for every frame of the video, libjass only renders it once and lets the browser render the fade effect.
+* libjass uses the browser's native CSS engine by converting the components of each line in the ASS script into a series of styled &lt;div&gt; and &lt;span&gt; elements. This allows all the layout and rendering to be handled by the browser instead of requiring complex and costly drawing and animation code. For example, libjass uses CSS3 animations to simulate tags such as \fad. While a canvas-drawing library would have to re-draw such a subtitle on the canvas for every frame of the video, libjass only renders it once and lets the browser render the fade effect.
 
 As a result, libjass is able to render subtitles with very low CPU usage. The downside to libjass's aproach is that it is hard (and potentially impossible) to map all effects possible in ASS (using \t, ASS draw) etc. into DOM elements. As of now, the subset of tags supported by libjass has no such problems.
 
@@ -16,7 +16,7 @@ As a result, libjass is able to render subtitles with very low CPU usage. The do
 
 * The .ts files are the source of libjass. They are TypeScript files and must be compiled into JavaScript for the browser using the TypeScript compiler.
 
-* The ass.pegjs file is the source of a parser for the ASS format.
+* The ass.pegjs file is the source of a parser for the ASS format. It is compiled to JavaScript along with the .ts files.
 
 * The rest of the files - index.xhtml, index.js, index.css and fonts.css - are a sample implementation of how to use libjass on a web page. They demonstrate the API to call, how to place &lt;div&gt; elements to render the subs, etc.
 
@@ -29,6 +29,7 @@ As a result, libjass is able to render subtitles with very low CPU usage. The do
 
 Only libjass.js is needed to use libjass on your website. The other files are only used during the build process and you don't need to deploy them to your website.
 
+
 ### Where's the API documentation? What API do I need to call to use libjass?
 
 Formal documentation is coming soon. In the meantime, here's an overview:
@@ -37,13 +38,13 @@ Formal documentation is coming soon. In the meantime, here's an overview:
 
 * ASS.dialogues is an array of Dialogue objects, each corresponding to a dialogue in the ASS file. These objects have a draw() method that returns a &lt;div&gt; containing the rendered subtitle line.
 
-* index.js uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (#subs) containing div's corresponding to the 9 alignment directions, 9 for each layer in the ASS script. index.css contains styles for these div's to render them at the correct location.
+* index.js initializes a default renderer that libjass ships with, the DefaultRenderer. This renderer uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (#subs) containing div's corresponding to the 9 alignment directions, 9 for each layer in the ASS script. index.css contains styles for these div's to render them at the correct location.
 
-* It then listens for the video element's "timeupdate" event. In the event handler, it determines the set of dialogues to be shown, calls draw() on each of them, and appendChild's the result into the appropriate layer+alignment div. It only does this if the dialogue has not already been drawn by a previous timeupdate.
+* The renderer listens for the video element's "timeupdate" event. In the event handler, it determines the set of dialogues to be shown, calls draw() on each of them, and appendChild's the result into the appropriate layer+alignment div. It only does this if the dialogue has not already been drawn by a previous timeupdate.
 
-* index.js also contains code to change the size of the video based on user input, such as choosing a different resolution or clicking the browser's native fullscreen-video button. It demonstrates the API that should be called to tell the Dialogue objects to start drawing to the new size - ASS.scaleTo()
+* The default renderer handles resizing the video and subs when the user clicks the browser's native fullscreen-video button. index.js also contains code to change the size of the video based on user input.
 
-* Lastly, index.js contains an implementation of preloading all the fonts used in the ASS file. It matches the font names extracted from the script with URLs defined in fonts.css and XHR's the fonts.
+* Lastly, the renderer contains an implementation of preloading all the fonts used in the ASS file. It uses a map of font names to URLs provided by index.js - this map is contained in fonts.css in the form of @font-family rules.
 
 
 ### Can I contribute?
@@ -55,7 +56,7 @@ You can also hop by the IRC channel below and ask any questions.
 
 ## Links
 
-* [Website](https://github.com/Arnavion/libjass/)
+* [GitHub](https://github.com/Arnavion/libjass/)
 * IRC channel - #libjass on irc.rizon.net
 * [Aegisub's documentation on ASS](http://docs.aegisub.org/3.0/ASS_Tags/)
 
