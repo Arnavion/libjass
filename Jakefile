@@ -124,19 +124,119 @@ namespace("_default", function () {
 		var compiled = jake.Task["_default:tscCompile"].value;
 		var parserSource = jake.Task["_default:pegjs"].value;
 
-		var output = UglifyJS.minify([compiled.code, parserSource], {
-			fromString: true,
-			compress: false,
-			mangle: false,
-			inSourceMap: compiled.sourceMap,
-			outSourceMap: "libjass.js.map",
-			output: {
-				beautify: true,
-				comments: true
-			}
+		UglifyJS.base54.reset();
+
+
+		// Parse
+		var root = null;
+		root = UglifyJS.parse(compiled.code, {
+			filename: "libjass.js",
+			toplevel: root
+		});
+		root = UglifyJS.parse(parserSource, {
+			filename: "ass.pegjs.js",
+			toplevel: root
 		});
 
-		return { code: output.code + "\n//# sourceMappingURL=libjass.js.map", sourceMap: JSON.parse(output.map) };
+		root.figure_out_scope();
+
+
+		// Remove some things from the AST
+		var nodesToRemove;
+
+		nodesToRemove = [];
+
+		// 1. All but the first top-level "use strict" - UglifyJS considers all but the first as AST_SimpleStatement
+		root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+			if (node instanceof UglifyJS.AST_SimpleStatement && node.body.value === "use strict") {
+				nodesToRemove.push({ node: node, parent: root.body });
+			}
+		}));
+
+
+		// 2. All but the first top-level "var libjass;"
+		var firstVarLibjassFound = false;
+		root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+			if (node instanceof UglifyJS.AST_Var && node.definitions[0].name.name === "libjass") {
+				if (firstVarLibjassFound === false) {
+					firstVarLibjassFound = true;
+				}
+				else {
+					nodesToRemove.push({ node: node, parent: root.body });
+				}
+			}
+		}));
+
+		// Repeat because removing some declarations may make others unreferenced
+		for (;;) {
+			// 3. Unreferenced variable and function declarations, and unreferenced terminal function arguments
+			root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+				if (node instanceof UglifyJS.AST_SymbolDeclaration && node.unreferenced()) {
+					if (node instanceof UglifyJS.AST_SymbolFunarg) {
+						if (this.parent().argnames.indexOf(node) === this.parent().argnames.length - 1) {
+							nodesToRemove.push({ node: node, parent: this.parent().argnames });
+						}
+					}
+					else if (node instanceof UglifyJS.AST_SymbolVar) {
+						nodesToRemove.push({ node: this.parent(), parent: this.parent(1).definitions });
+						if (this.parent(1).definitions.length === 1) {
+							nodesToRemove.push({ node: this.parent(1), parent: this.parent(2).body });
+						}
+					}
+					else if (node instanceof UglifyJS.AST_SymbolDefun) {
+						nodesToRemove.push({ node: this.parent(), parent: this.parent(1).body });
+					}
+				}
+			}));
+
+			if (nodesToRemove.length === 0) {
+				break;
+			}
+
+			nodesToRemove.forEach(function (node) {
+				node.parent.splice(node.parent.indexOf(node.node), 1);
+			});
+
+			nodesToRemove = [];
+
+			root.figure_out_scope();
+		}
+
+
+		// Output
+		var firstLicenseHeaderFound = false; // To detect and preserve the first license header
+
+		var output = {
+			source_map: UglifyJS.SourceMap({
+				file: "libjass.js.map",
+				orig: compiled.sourceMap,
+				root: ""
+			}),
+			beautify: true,
+			comments: {
+				test: function (comment) {
+					if (comment.indexOf("Copyright") !== -1) {
+						if (!firstLicenseHeaderFound) {
+							firstLicenseHeaderFound = true;
+							return true;
+						}
+						else {
+							return false;
+						}
+					}
+
+					return true;
+				}
+			}
+		};
+
+		var stream = UglifyJS.OutputStream(output);
+		root.print(stream);
+
+		return {
+			code: stream.toString() + "\n//# sourceMappingURL=libjass.js.map",
+			sourceMap: JSON.parse(output.source_map.toString())
+		};
 	});
 
 	task("writeCode", ["_default:combine"], function () {
@@ -160,28 +260,132 @@ namespace("_default", function () {
 
 		var combined = jake.Task["_default:combine"].value;
 
-		var firstCommentFound = false; // To detect and preserve the first license header
+		UglifyJS.base54.reset();
 
-		var minified = UglifyJS.minify([combined.code], {
-			fromString: true,
-			inSourceMap: combined.sourceMap,
-			outSourceMap: "libjass.min.js.map",
-			warnings: true,
-			output: {
-				comments: function (node, comment) {
-					if (!firstCommentFound) {
-						firstCommentFound = !firstCommentFound;
+
+		// Parse
+		var root = null;
+		root = UglifyJS.parse(combined.code, {
+			filename: "libjass.js",
+			toplevel: root
+		});
+
+		root.figure_out_scope();
+
+
+		// Suppress some warnings
+		var originalWarn = UglifyJS.AST_Node.warn;
+		UglifyJS.AST_Node.warn = function (text, properties) {
+			if (
+				(text === "{type} {name} is declared but not referenced [{file}:{line},{col}]" && properties.type === "Symbol" && properties.name === "offset" && properties.col === 39)
+			) {
+				return;
+			}
+
+			originalWarn.call(UglifyJS.AST_Node, text, properties);
+		};
+
+		// Warnings
+		root.scope_warnings({
+			func_arguments: false
+		});
+
+
+		// Compress
+		var compressor = UglifyJS.Compressor({
+			warnings: true
+		});
+		root = root.transform(compressor);
+
+
+		// Mangle
+		root.figure_out_scope();
+		root.compute_char_frequency();
+		root.mangle_names();
+
+
+		// Mangle private members
+		var occurrences = Object.create(null);
+
+		root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+			if (
+				node instanceof UglifyJS.AST_PropAccess &&
+				typeof node.property === "string" &&
+				node.property.indexOf("_") === 0 &&
+				node.property !== "__iterator__"
+			) {
+				var occurrence = occurrences[node.property];
+				if (occurrence === undefined) {
+					occurrences[node.property] = 1;
+				}
+				else {
+					occurrences[node.property]++;
+				}
+			}
+		}));
+
+		var identifiers = Object.keys(occurrences);
+		identifiers.sort(function (first, second) { return occurrences[second] - occurrences[first]; });
+
+		var generatedIdentifiers = occurrences;
+
+		var validIdentifierCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$_0123456789";
+		var toIdentifier = function (index) {
+			var result = validIdentifierCharacters[(index % validIdentifierCharacters.length)];
+			index = (index / validIdentifierCharacters.length) | 0;
+
+			while (index > 0) {
+				index--;
+				result = validIdentifierCharacters[index % validIdentifierCharacters.length] + result;
+				index = (index / validIdentifierCharacters.length) | 0;
+			}
+
+			return "_" + result;
+		};
+
+		identifiers.forEach(function (identifier, index) {
+			generatedIdentifiers[identifier] = toIdentifier(index);
+		});
+
+		root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+			if (
+				node instanceof UglifyJS.AST_PropAccess &&
+				typeof node.property === "string" &&
+				node.property in generatedIdentifiers
+			) {
+				node.property = generatedIdentifiers[node.property];
+			}
+		}));
+
+
+		// Output
+		var firstLicenseHeaderFound = false; // To detect and preserve the first license header
+
+		var output = {
+			source_map: UglifyJS.SourceMap({
+				file: "libjass.min.js.map",
+				orig: combined.sourceMap,
+				root: ""
+			}),
+			comments: {
+				test: function (comment) {
+					if (!firstLicenseHeaderFound && comment.indexOf("Copyright") !== -1) {
+						firstLicenseHeaderFound = true;
 						return true;
 					}
 
 					return false;
 				}
 			}
-		});
+		};
 
-		minified.code += "\n//# sourceMappingURL=libjass.min.js.map";
+		var stream = UglifyJS.OutputStream(output);
+		root.print(stream);
 
-		return minified;
+		return {
+			code: stream.toString() + "\n//# sourceMappingURL=libjass.min.js.map",
+			sourceMap: JSON.parse(output.source_map.toString())
+		};
 	});
 
 	task("writeMinifiedCode", ["_default:minify"], function () {
@@ -197,7 +401,7 @@ namespace("_default", function () {
 
 		var minified = jake.Task["_default:minify"].value;
 
-		fs.writeFileSync("libjass.min.js.map", minified.map);
+		fs.writeFileSync("libjass.min.js.map", JSON.stringify(minified.sourceMap));
 	});
 });
 
@@ -210,5 +414,14 @@ desc("Clean");
 task("clean", [], function () {
 	console.log("[" + this.fullName + "]");
 
-	["libjass.js", "libjass.js.map", "libjass.min.js", "libjass.min.js.map"].forEach(fs.unlinkSync.bind(fs));
+	["libjass.js", "libjass.js.map", "libjass.min.js", "libjass.min.js.map"].forEach(function (file) {
+		try {
+			fs.unlinkSync(file);
+		}
+		catch (ex) {
+			if (ex.code !== "ENOENT") {
+				throw ex;
+			}
+		}
+	});
 });
