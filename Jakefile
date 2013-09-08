@@ -3,119 +3,120 @@ var path = require("path");
 var UglifyJS = require("uglify-js");
 
 namespace("_default", function () {
-	task("tscCreate", [], function () {
+	var tscJsResolvedPath = path.resolve("./node_modules/typescript/bin/tsc.js");
+
+	task("tscRequire", [], function () {
 		console.log("[" + this.fullName + "]");
 
-		fs.readFile("./node_modules/typescript/bin/tsc.js", { encoding: "utf8" }, function (error, data) {
-			if (error) {
-				throw error;
-			}
+		var vm = require("vm");
 
-			data =
-				data.substr(0, data.lastIndexOf("})(TypeScript || (TypeScript = {}));") + "})(TypeScript || (TypeScript = {}));".length) +
-				"module.exports = TypeScript;";
+		var data = fs.readFileSync(tscJsResolvedPath, { encoding: "utf8" });
 
-			var m = new module.constructor();
-			m._compile(data, "./node_modules/typescript/bin/tsc.js");
+		data =
+			data.substr(0, data.lastIndexOf("})(TypeScript || (TypeScript = {}));") + "})(TypeScript || (TypeScript = {}));".length) +
+			"module.exports = TypeScript;";
 
-			var TypeScript = m.exports;
-
-			var compiler = new TypeScript.BatchCompiler({
-				arguments: [],
-				directoryExists: function (path) {
-					return fs.existsSync(path) && fs.statSync(path).isDirectory();
-				},
-				dirName: function (file) {
-					var result = path.dirname(file);
-					if (result === file) {
-						result = null;
-					}
-					return result;
-				},
-				fileExists: fs.existsSync.bind(fs),
-				getExecutingFilePath: function () {
-					return "./node_modules/typescript/bin/tsc.js";
-				},
-				quit: function (code) {
-					if (code !== 0) {
-						throw new Error("TypeScript compiler exited with code " + code);
-					}
-				},
-				readFile: function (file, codepage) {
-					return {
-						contents: fs.readFileSync(file, { encoding: "utf8" }),
-						byteOrderMark: 0
-					};
-				},
-				resolvePath: path.resolve.bind(path),
-				stdout: {
-					Write: process.stdout.write.bind(process.stderr),
-					WriteLine: console.log.bind(console)
-				},
-				stderr: {
-					Write: process.stderr.write.bind(process.stderr),
-					WriteLine: console.error.bind(console)
-				},
-				writeFile: function (file, contents, writeByteOrderMark) {
-					file = path.basename(file);
-
-					if (file === "libjass.js") {
-						output.code = contents;
-					}
-					else if (file === "libjass.js.map") {
-						output.sourceMap = JSON.parse(contents);
-					}
-					else {
-						throw new Error("Unrecognized output file: " + file);
-					}
-				}
-			});
-
-			var output = {
-				code: null,
-				sourceMap: null
-			};
-
-			compiler.compilationSettings.codeGenTarget = 1; // ES5
-			compiler.compilationSettings.noImplicitAny = true;
-
-			compiler.inputFiles = ["libjass.ts"];
-			compiler.compilationSettings.outFileOption = "libjass.js";
-			compiler.compilationSettings.mapSourceFiles = true;
-
-			complete(function () {
-				output.code = output.sourceMap = null;
-				compiler.batchCompile();
-				return output;
-			});
+		var TypeScript = {};
+		vm.runInNewContext(data, {
+			module: Object.defineProperty(Object.create(null), "exports", {
+				get: function () { return TypeScript; },
+				set: function (value) { TypeScript = value; }
+			}),
+			require: require,
+			process: process,
+			__filename: tscJsResolvedPath,
+			__dirname:  path.dirname(tscJsResolvedPath)
 		});
-	}, { async: true });
+
+		return TypeScript;
+	});
+
+	task("tscCreate", ["_default:tscRequire"], function () {
+		console.log("[" + this.fullName + "]");
+
+		var TypeScript = jake.Task["_default:tscRequire"].value;
+
+		var compiler = new TypeScript.BatchCompiler({
+			arguments: [],
+			directoryExists: function (path) {
+				return fs.existsSync(path) && fs.statSync(path).isDirectory();
+			},
+			dirName: function (file) {
+				var result = path.dirname(file);
+				if (result === file) {
+					result = null;
+				}
+				return result;
+			},
+			fileExists: fs.existsSync.bind(fs),
+			getExecutingFilePath: function () {
+				return tscJsResolvedPath;
+			},
+			quit: function (code) {
+				if (code !== 0) {
+					throw new Error("TypeScript compiler exited with code " + code);
+				}
+			},
+			readFile: function (file, codepage) {
+				return {
+					contents: fs.readFileSync(file, { encoding: "utf8" }),
+					byteOrderMark: 0
+				};
+			},
+			resolvePath: path.resolve.bind(path),
+			stdout: {
+				Write: process.stdout.write.bind(process.stderr),
+				WriteLine: console.log.bind(console)
+			},
+			stderr: {
+				Write: process.stderr.write.bind(process.stderr),
+				WriteLine: console.error.bind(console)
+			},
+			writeFile: function (file, contents, writeByteOrderMark) {
+				file = path.relative(".", file);
+
+				output[file] = contents;
+			}
+		});
+
+		var output;
+
+		compiler.compilationSettings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
+		compiler.compilationSettings.mapSourceFiles = true;
+		compiler.compilationSettings.noImplicitAny = true;
+
+		return function (inputFilenames, outputFilename) {
+			output = Object.create(null);
+
+			compiler.inputFiles = inputFilenames;
+			compiler.compilationSettings.outFileOption = outputFilename;
+			compiler.batchCompile();
+
+			return output;
+		};
+	});
 
 	task("tscCompile", ["_default:tscCreate"], function () {
 		console.log("[" + this.fullName + "]");
 
 		var compile = jake.Task["_default:tscCreate"].value;
 
-		var output = compile();
+		var output = compile(["libjass.ts"], "libjass.js");
 
-		complete(output);
-	}, { async: true });
+		return { code: output["libjass.js"], sourceMap: JSON.parse(output["libjass.js.map"]) };
+	});
 
 	task("pegjs", [], function () {
 		console.log("[" + this.fullName + "]");
 
-		fs.readFile("ass.pegjs", { encoding: "utf8" }, function (error, data) {
-			if (error) {
-				throw error;
-			}
+		var PEG = require("pegjs");
 
-			var PEG = require("pegjs");
+		var data = fs.readFileSync("ass.pegjs", { encoding: "utf8" });
 
-			var parser = PEG.buildParser(data);
+		var parser = PEG.buildParser(data);
 
-			complete("libjass.parser = " + parser.toSource());
-		});
-	}, { async: true });
+		return "libjass.parser = " + parser.toSource();
+	});
 
 	task("combine", ["_default:tscCompile", "_default:pegjs"], function () {
 		console.log("[" + this.fullName + "]");
@@ -143,28 +144,16 @@ namespace("_default", function () {
 
 		var combined = jake.Task["_default:combine"].value;
 
-		fs.writeFile("libjass.js", combined.code, function (error) {
-			if (error) {
-				throw error;
-			}
-
-			complete();
-		});
-	}, { async: true });
+		fs.writeFileSync("libjass.js", combined.code);
+	});
 
 	task("writeSourceMap", ["_default:combine"], function () {
 		console.log("[" + this.fullName + "]");
 
 		var combined = jake.Task["_default:combine"].value;
 
-		fs.writeFile("libjass.js.map", JSON.stringify(combined.sourceMap), function (error) {
-			if (error) {
-				throw error;
-			}
-
-			complete();
-		});
-	}, { async: true });
+		fs.writeFileSync("libjass.js.map", JSON.stringify(combined.sourceMap));
+	});
 
 	task("minify", ["_default:combine"], function () {
 		console.log("[" + this.fullName + "]");
@@ -200,28 +189,16 @@ namespace("_default", function () {
 
 		var minified = jake.Task["_default:minify"].value;
 
-		fs.writeFile("libjass.min.js", minified.code, function (error) {
-			if (error) {
-				throw error;
-			}
-
-			complete();
-		});
-	}, { async: true });
+		fs.writeFileSync("libjass.min.js", minified.code);
+	});
 
 	task("writeMinifiedSourceMap", ["_default:minify"], function () {
 		console.log("[" + this.fullName + "]");
 
 		var minified = jake.Task["_default:minify"].value;
 
-		fs.writeFile("libjass.min.js.map", minified.map, function (error) {
-			if (error) {
-				throw error;
-			}
-
-			complete();
-		});
-	}, { async: true });
+		fs.writeFileSync("libjass.min.js.map", minified.map);
+	});
 });
 
 desc("Build libjass.js, libjass.min.js and their sourcemaps");
@@ -233,11 +210,5 @@ desc("Clean");
 task("clean", [], function () {
 	console.log("[" + this.fullName + "]");
 
-	["libjass.js", "libjass.js.map", "libjass.min.js", "libjass.min.js.map"].forEach(jake.rmRf.bind(jake));
-}, { async: true });
-
-task("watch", ["_default:tscCreate"], function () {
-	console.log("[" + this.fullName + "]");
-
-	complete();
-}, { async: true });
+	["libjass.js", "libjass.js.map", "libjass.min.js", "libjass.min.js.map"].forEach(fs.unlinkSync.bind(fs));
+});
