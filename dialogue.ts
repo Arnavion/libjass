@@ -54,7 +54,7 @@ module libjass {
 			this._alignment = this._style.alignment;
 			this._setTransformOrigin();
 
-			this._parts = <tags.Tag[]>parser.parse(template["Text"]);
+			this._parts = <tags.Tag[]>parser.parse(template["Text"], "dialogueParts");
 
 			if (libjass.debugMode) {
 				if (this._parts.some(part => part instanceof tags.Comment && (<tags.Comment>part).value.indexOf("\\") !== -1)) {

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-dialogue
+dialogueParts
 	=	parts:(enclosedTags / comment / newline / hardspace / text)* {
 			// Flatten parts
 			parts = parts.reduce(function (previous, current) {
