@@ -61,14 +61,6 @@ module libjass {
 		}
 
 		/**
-		 * @param {number} count The number of elements to skip
-		 * @return {!Iterable} A new Iterable that skips the given number of elements
-		 */
-		skip(count: number): Iterable {
-			return new SkipIterable(this, count);
-		}
-
-		/**
 		 * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns true for an element if enumeration of this Iterable should skip all elements upto that element.
 		 * @return {!Iterable} A new Iterable with the given filter applied
 		 */
@@ -373,51 +365,6 @@ module libjass {
 			else {
 				throw StopIteration;
 			}
-		}
-	}
-
-	/**
-	 * An Iterable returned from Iterable.skip()
-	 *
-	 * @constructor
-	 * @extends {Iterable}
-	 * @param {!*} previous The underlying iterable
-	 * @param {number} count The number of elements to skip
-	 */
-	class SkipIterable extends Iterable {
-		constructor(private _previous: any, private _count: number) {
-			super();
-		}
-
-		/**
-		 * @return {!SkipIterator}
-		 */
-		__iterator__(): SkipIterator {
-			return new SkipIterator(Iterator(this._previous), this._count);
-		}
-	}
-
-	/**
-	 * @constructor
-	 * @param {!{next: function(): *}} previous
-	 * @param {number} count
-	 */
-	class SkipIterator extends IteratorBase {
-		private _skipped = 0;
-
-		constructor(private _previous: Iterator, private _count: number) {
-			super();
-		}
-
-		/**
-		 * @return {*}
-		 */
-		next(): any {
-			for (; this._skipped < this._count; this._skipped++) {
-				this._previous.next();
-			}
-
-			return this._previous.next();
 		}
 	}
 

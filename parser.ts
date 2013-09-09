@@ -49,21 +49,12 @@ module libjass {
 		 * @param {string} rawASS
 		 */
 		constructor(rawASS: string) {
-			// Make an iterable for all the lines in the script file.
-			var lines =
-				rawASS.replace(/\r$/gm, "").split("\n")
-					.toIterable()
-					.map((entry: any[]) => <string>entry[1])
-					.filter((line: string) => !line.startsWith(";")); // Skip comments
+			rawASS = rawASS.replace(/\r$/gm, "");
 
+			var script = libjass.parser.parse(rawASS, "script");
 
-			// Create the script info template
-			var infoTemplate = Object.create(null);
-
-			// Extract script info key-value pairs from the script info section into the template
-			Iterator(ASS._readSectionLines(lines, "Script Info")).forEach((keyValuePair: string[]) => {
-				infoTemplate[keyValuePair[0]] = keyValuePair[1];
-			});
+			// Get the script info template
+			var infoTemplate: Object = script["Script Info"];
 
 			if (libjass.verboseMode) {
 				console.log("Read script info: " + JSON.stringify(infoTemplate), infoTemplate);
@@ -77,33 +68,31 @@ module libjass {
 
 
 			// Get styles from the styles section
-			Iterator(ASS._readSectionTemplates(lines, "V4+ Styles")).forEach((templateEntry: any[]) => {
-				var templateType: string = templateEntry[0];
-				if (templateType === "Style") {
-					var template: Object = templateEntry[1];
+			script["V4+ Styles"].forEach((line: any) => {
+				if (line.type === "Style") {
+					var styleTemplate: Object = line.template;
 
 					if (libjass.verboseMode) {
-						console.log("Read style: " + JSON.stringify(template), template);
+						console.log("Read style: " + JSON.stringify(styleTemplate), styleTemplate);
 					}
 
-					// Create the style and add it into the styles array
-					this._styles.push(new Style(template));
+					// Create the style and add it to the styles array
+					this._styles.push(new Style(styleTemplate));
 				}
 			});
 
 
 			// Get dialogues from the events section
-			Iterator(ASS._readSectionTemplates(lines, "Events")).forEach((templateEntry: any[]) => {
-				var templateType: string = templateEntry[0];
-				if (templateType === "Dialogue") {
-					var template: Object = templateEntry[1];
+			script["Events"].forEach((line: any) => {
+				if (line.type === "Dialogue") {
+					var dialogueTemplate: Object = line.template;
 
 					if (libjass.verboseMode) {
-						console.log("Read dialogue: " + JSON.stringify(template), template);
+						console.log("Read dialogue: " + JSON.stringify(dialogueTemplate), dialogueTemplate);
 					}
 
 					// Create the dialogue and add it to the dialogues array
-					this._dialogues.push(new Dialogue(template, this));
+					this._dialogues.push(new Dialogue(dialogueTemplate, this));
 				}
 			});
 		}
@@ -154,74 +143,6 @@ module libjass {
 			this._dialogues.forEach(dialogue => {
 				dialogue.unPreRender();
 			});
-		}
-
-		/**
-		 * Returns an Iterable of the key-value pairs in the lines in the script from the given section.
-		 *
-		 * @param {Iterable} lines The lines of the script
-		 * @param {string} sectionName The name of the section to parse
-		 * @return {Iterable} An Iterable of key-value pairs. Each key-value pair is an array of two strings, the key and the value.
-		 */
-		private static _readSectionLines(lines: Iterable, sectionName: string): Iterable {
-			return lines
-				// Skip all lines till the section begins
-				.skipWhile((line: string) => line !== "[" + sectionName + "]")
-				// Skip the section header
-				.skip(1)
-				// Take all the lines till the section ends
-				.takeWhile((line: string) => !line.startsWith("["))
-				// Parse the line into a key-value pair
-				.map((line: string): string[] => {
-					var match = /^([^:]+):\s*(.+)/.exec(line);
-
-					if (match !== null) {
-						return [match[1], match[2]];
-					}
-
-					return null;
-				})
-				.filter((keyValuePair: string[]) => keyValuePair !== null);
-		}
-
-		/**
-		 * Returns an Iterable of the templates in the lines in the script from the given section.
-		 *
-		 * @param {Iterable} lines The lines of the script
-		 * @param {string} sectionName The name of the section to parse
-		 * @return {Iterable} An Iterable of template entries. Each template is an array whose first element is the template type and the second element is the template object.
-		 */
-		private static _readSectionTemplates(lines: Iterable, sectionName: string): Iterable {
-			var formatParts: string[] = null;
-
-			return ASS._readSectionLines(lines, sectionName).map((keyValuePair: string[]) => {
-				var key = keyValuePair[0];
-				var value = keyValuePair[1];
-
-				// If this is a format line, parse its constituents...
-				if (key === "Format") {
-					formatParts = value.split(",").map((formatPart: string) => formatPart.trim());
-					return null;
-				}
-
-				// ... else parse this line according to the format constituents
-				if (formatParts === null) {
-					throw new Error("Format specification not found.");
-				}
-
-				var template: Object = Object.create(null);
-
-				var lineParts = value.split(",");
-				if (lineParts.length > formatParts.length) {
-					lineParts[formatParts.length - 1] = lineParts.slice(formatParts.length - 1).join(",");
-				}
-
-				formatParts.forEach((key, index) => {
-					template[key] = lineParts[index];
-				});
-
-				return [key, template];
-			}).filter((templateEntry: Array) => templateEntry !== null);
 		}
 	}
 

@@ -18,6 +18,79 @@
  * limitations under the License.
  */
 
+{
+	var scriptTemplate = Object.create(null);
+	var currentSectionContents;
+	var currentFormatSpecifier;
+}
+
+script
+	=	sections:(script_section eol*)* {
+			return scriptTemplate;
+		}
+
+script_section
+	=	name:script_sectionHeader (
+			script_comment /
+			script_property /
+			eol
+		)* {
+			scriptTemplate[name] = currentSectionContents;
+		}
+
+script_sectionHeader
+	=	"[" name:[^\]\n]+ "]" eol? {
+			currentSectionContents = null;
+			currentFormatSpecifier = null;
+
+			return name.join("");
+		}
+
+script_comment
+	=	";" [^\n]+ eol?
+
+script_property
+	=	key:[^:\n]+ ":" " "* value:[^\n]+ eol? {
+			key = key.join("");
+			value = value.join("");
+
+			if (key === "Format") {
+				currentFormatSpecifier = value.split(",").map(function (formatPart) { return formatPart.trim(); });
+			}
+
+			else if (currentFormatSpecifier !== null) {
+				if (currentSectionContents === null) {
+					currentSectionContents = [];
+				}
+
+				var template = Object.create(null);
+				value = value.split(",");
+
+				if (value.length > currentFormatSpecifier.length) {
+					value[currentFormatSpecifier.length - 1] = value.slice(currentFormatSpecifier.length - 1).join(",");
+				}
+
+				currentFormatSpecifier.forEach(function (formatKey, index) {
+					template[formatKey] = value[index];
+				});
+
+				currentSectionContents.push({ type: key, template: template });
+			}
+
+			else {
+				if (currentSectionContents === null) {
+					currentSectionContents = Object.create(null);
+				}
+
+				currentSectionContents[key] = value;
+			}
+
+			return "";
+		}
+
+eol
+	=	"\n"
+
 dialogueParts
 	=	parts:(enclosedTags / comment / newline / hardspace / text)* {
 			// Flatten parts
