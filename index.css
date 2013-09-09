@@ -50,8 +50,8 @@ body {
 }
 
 #subs.paused * {
-	-webkit-animation-play-state: paused;
-	animation-play-state: paused;
+	-webkit-animation-play-state: paused !important;
+	animation-play-state: paused !important;
 }
 
 .an1, .an2, .an3 {
