@@ -90,7 +90,18 @@ namespace("_default", function () {
 
 			compiler.inputFiles = inputFilenames;
 			compiler.compilationSettings.outFileOption = outputFilename;
-			compiler.batchCompile();
+
+			try {
+				compiler.batchCompile();
+			}
+			catch (ex) {
+				if (ex instanceof Error) {
+					throw ex;
+				}
+				else {
+					throw new Error("Internal compiler error: " + ex.stack + "\n");
+				}
+			}
 
 			return output;
 		};
