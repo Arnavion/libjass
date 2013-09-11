@@ -29,7 +29,7 @@ module libjass {
 		private _currentSubs: HTMLDivElement[] = [];
 
 		// Iterable of subtitle div's that are also to be displayed
-		private _newSubs: LazySequence;
+		private _newSubs: LazySequence<Node>;
 
 		private _videoIsFullScreen: boolean = false;
 
@@ -52,7 +52,6 @@ module libjass {
 
 			this._newSubs =
 				Lazy(this._dialogues)
-					.map((entry: Array) => entry[1])
 					// Skip until dialogues which end at a time later than currentTime
 					.skipWhile((dialogue: Dialogue) => dialogue.end < this._currentTime)
 					// Take until dialogue which starts later than currentTime + settings.preRenderTime

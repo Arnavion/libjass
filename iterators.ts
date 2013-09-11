@@ -28,47 +28,52 @@ declare function Iterator(collection: any, keysOnly?: boolean): Iterator
 declare var StopIteration: any
 
 module libjass {
-	export class LazySequence {
+	export class LazySequence<T> {
 		/**
-		 * The base class of all iterable objects. An iterable is a lazily evaluated sequence.
+		 * The base class of all lazy sequences.
 		 *
 		 * @constructor
+		 * @template T
 		 */
 		constructor() { }
 
 		/**
-		 * @param {function(*): *} transform A function (element) -> (transformedElement)
-		 * @return {!LazySequence} A new LazySequence with the given transform applied
+		 * @template U
+		 * @param transform {function(T): U} A function (element) -> (transformedElement)
+		 * @return {!LazySequence.<U>} A new LazySequence with the given transform applied
 		 */
-		map(transform: (element: any) => any): LazySequence {
-			return new LazySequenceMap(this, transform);
+		map<U>(transform: (element: T) => U): LazySequence<U> {
+			return new LazySequenceMap<T, U>(this, transform);
 		}
 
 		/**
-		 * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns true if element should remain in the enumeration.
-		 * @return {!LazySequence} A new LazySequence with the given filter applied
+		 * @param {function(T): boolean} filter A function (element) -> (Boolean). Returns true if element should remain in the enumeration.
+		 * @return {!LazySequence.<T>} A new LazySequence with the given filter applied
 		 */
-		filter(filter: (element: any) => boolean): LazySequence {
-			return new LazySequenceFilter(this, filter);
+		filter(filter: (element: T) => boolean): LazySequence<T> {
+			return new LazySequenceFilter<T>(this, filter);
 		}
 
 		/**
-		 * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns false for an element if enumeration of this LazySequence should stop at that element.
-		 * @return {!LazySequence} A new LazySequence which returns new elements from the underlying sequence as long as the predicate returns true for all of them
+		 * @param {function(T): boolean} filter A function (element) -> (Boolean). Returns false for an element if enumeration of this LazySequence should stop at that element.
+		 * @return {!LazySequence.<T>} A new LazySequence which returns new elements from the underlying sequence as long as the predicate returns true for all of them
 		 */
-		takeWhile(filter: (element: any) => boolean): LazySequence {
-			return new LazySequenceTakeWhile(this, filter);
+		takeWhile(filter: (element: T) => boolean): LazySequence<T> {
+			return new LazySequenceTakeWhile<T>(this, filter);
 		}
 
 		/**
-		 * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns true for an element if enumeration of this LazySequence should skip all elements upto that element.
-		 * @return {!LazySequence} A new LazySequence which returns new elements from the underlying sequence as soon as the predicate returns true for one of them
+		 * @param {function(T): boolean} filter A function (element) -> (Boolean). Returns true for an element if enumeration of this LazySequence should skip all elements upto that element.
+		 * @return {!LazySequence.<T>} A new LazySequence which returns new elements from the underlying sequence as soon as the predicate returns true for one of them
 		 */
-		skipWhile(filter: (element: any) => boolean): LazySequence {
-			return new LazySequenceSkipWhile(this, filter);
+		skipWhile(filter: (element: T) => boolean): LazySequence<T> {
+			return new LazySequenceSkipWhile<T>(this, filter);
 		}
 
-		toArray(): Array {
+		/**
+		 * @return {Array.<T>}
+		 */
+		toArray(): Array<T> {
 			var result: Array = [];
 
 			var iterator = Iterator(this);
@@ -89,10 +94,12 @@ module libjass {
 	}
 
 	/**
-	 * @return {!LazySequence} A LazySequence backed by this Array
+	 * @template T
+	 * @param {Array.<T>} array
+	 * @return {!LazySequence.<T>} A LazySequence backed by this Array
 	 */
-	export function Lazy(array: Array): LazySequence {
-		return new LazyArray(array);
+	export function Lazy<T>(array: Array<T>): LazySequence<T> {
+		return new LazyArray<T>(array);
 	}
 
 	// If this browser does not have an implementation of StopIteration, mock it
@@ -164,19 +171,38 @@ module libjass {
 	 * This class is a LazySequence returned by Lazy(Array) and represents a LazySequence backed by the elements of that array.
 	 *
 	 * @constructor
-	 * @extends {LazySequence}
+	 * @template T
+	 * @extends {LazySequence.<T>}
 	 * @param {!Array} array
 	 */
-	class LazyArray extends LazySequence {
-		constructor(private _array: Array) {
+	class LazyArray<T> extends LazySequence<T> {
+		constructor(private _array: Array<T>) {
 			super();
 		}
 
 		/**
-		 * @return {{next: function(): !Array}}
+		 * @return {{next: function(): T}}
 		 */
-		__iterator__(): Iterator {
-			return Iterator(this._array);
+		__iterator__(): LazyArrayIterator<T> {
+			return new LazyArrayIterator<T>(Iterator(this._array));
+		}
+	}
+
+	/**
+	 * @constructor
+	 * @template T
+	 * @param {!{next: function(): *}} previous
+	 */
+	class LazyArrayIterator<T> implements Iterator {
+		constructor(private _previous: Iterator) { }
+
+		/**
+		 * @return {T}
+		 */
+		next(): T {
+			var result: Array<any> = this._previous.next();
+
+			return <T>result[1];
 		}
 	}
 
@@ -184,37 +210,39 @@ module libjass {
 	 * A LazySequence returned from LazySequence.map()
 	 *
 	 * @constructor
-	 * @extends {LazySequence}
+	 * @template T, U
+	 * @extends {LazySequence.<U>}
 	 * @param {!*} previous The underlying lazy sequence
-	 * @param {function(*): *} transform The transform function (element) -> (transformedElement)
+	 * @param {function(T): U} transform The transform function (element) -> (transformedElement)
 	 */
-	class LazySequenceMap extends LazySequence {
-		constructor(private _previous: any, private _transform: (element: any) => any) {
+	class LazySequenceMap<T, U> extends LazySequence<U> {
+		constructor(private _previous: any, private _transform: (element: T) => U) {
 			super();
 		}
 
 		/**
-		 * @return {!LazySequenceMapIterator}
+		 * @return {!LazySequenceMapIterator.<T, U>}
 		 */
-		__iterator__(): LazySequenceMapIterator {
-			return new LazySequenceMapIterator(Iterator(this._previous), this._transform);
+		__iterator__(): LazySequenceMapIterator<T, U> {
+			return new LazySequenceMapIterator<T, U>(Iterator(this._previous), this._transform);
 		}
 	}
 
 	/**
 	 * @constructor
-	 * @param {!{next: function(): *}} previous
-	 * @param {function(*): *} transform
+	 * @template T, U
+	 * @param {!{next: function(): T}} previous
+	 * @param {function(T): U} transform
 	 */
-	class LazySequenceMapIterator implements Iterator {
-		constructor(private _previous: Iterator, private _transform: (element: any) => any) { }
+	class LazySequenceMapIterator<T, U> implements Iterator {
+		constructor(private _previous: Iterator, private _transform: (element: T) => U) { }
 
 		/**
-		 * @return {*}
+		 * @return {U}
 		 */
-		next(): any {
+		next(): U {
 			// Apply the transform function and return the transformed value
-			return this._transform(this._previous.next());
+			return this._transform(<T>this._previous.next());
 		}
 	}
 
@@ -222,40 +250,42 @@ module libjass {
 	 * A LazySequence returned from LazySequence.filter()
 	 *
 	 * @constructor
-	 * @extends {LazySequence}
+	 * @template T
+	 * @extends {LazySequence.<T>}
 	 * @param {!*} previous The underlying lazy sequence
-	 * @param {function(*): boolean} filter The filter function (element) -> (Boolean)
+	 * @param {function(T): boolean} filter The filter function (element) -> (Boolean)
 	 */
-	class LazySequenceFilter extends LazySequence {
-		constructor(private _previous: any, private _filter: (element: any) => boolean) {
+	class LazySequenceFilter<T> extends LazySequence<T> {
+		constructor(private _previous: any, private _filter: (element: T) => boolean) {
 			super();
 		}
 
 		/**
-		 * @return {!LazySequenceFilterIterator}
+		 * @return {!LazySequenceFilterIterator.<T>}
 		 */
-		__iterator__(): LazySequenceFilterIterator {
+		__iterator__(): LazySequenceFilterIterator<T> {
 			return new LazySequenceFilterIterator(Iterator(this._previous), this._filter);
 		}
 	}
 
 	/**
 	 * @constructor
-	 * @param {!{next: function(): *}} previous
-	 * @param {function(*): boolean} filter
+	 * @template T
+	 * @param {!{next: function(): T}} previous
+	 * @param {function(T): boolean} filter
 	 */
-	class LazySequenceFilterIterator implements Iterator {
-		constructor(private _previous: Iterator, private _filter: (element: any) => boolean) { }
+	class LazySequenceFilterIterator<T> implements Iterator {
+		constructor(private _previous: Iterator, private _filter: (element: T) => boolean) { }
 
 		/**
-		 * @return {*}
+		 * @return {T}
 		 */
-		next(): any {
+		next(): T {
 			// Loop to find the next element from the underlying lazy sequence which passes the filter and return it
-			var result: any;
+			var result: T;
 
 			do {
-				result = this._previous.next();
+				result = <T>this._previous.next();
 			} while (!this._filter(result));
 
 			return result;
@@ -266,44 +296,46 @@ module libjass {
 	 * A LazySequence returned from LazySequence.takeWhile()
 	 *
 	 * @constructor
-	 * @extends {LazySequence}
+	 * @template T
+	 * @extends {LazySequence.<T>}
 	 * @param {!*} previous The underlying lazy sequence
-	 * @param {function(*): boolean} predicate The predicate function (element) -> (Boolean)
+	 * @param {function(T): boolean} predicate The predicate function (element) -> (Boolean)
 	 */
-	class LazySequenceTakeWhile extends LazySequence {
-		constructor(private _previous: any, private _predicate: (element: any) => boolean) {
+	class LazySequenceTakeWhile<T> extends LazySequence<T> {
+		constructor(private _previous: any, private _predicate: (element: T) => boolean) {
 			super();
 		}
 
 		/**
-		 * @return {!LazySequenceTakeWhileIterator}
+		 * @return {!LazySequenceTakeWhileIterator.<T>}
 		 */
-		__iterator__(): LazySequenceTakeWhileIterator {
-			return new LazySequenceTakeWhileIterator(Iterator(this._previous), this._predicate);
+		__iterator__(): LazySequenceTakeWhileIterator<T> {
+			return new LazySequenceTakeWhileIterator<T>(Iterator(this._previous), this._predicate);
 		}
 	}
 
 	/**
 	 * @constructor
-	 * @param {!{next: function(): *}} previous
-	 * @param {function(*): boolean} predicate
+	 * @template T
+	 * @param {!{next: function(): T}} previous
+	 * @param {function(T): boolean} predicate
 	 */
-	class LazySequenceTakeWhileIterator implements Iterator {
+	class LazySequenceTakeWhileIterator<T> implements Iterator {
 		// Set to true when an element not matching the predicate is found
 		private _foundEnd = false;
 
-		constructor(private _previous: Iterator, private _predicate: (element: any) => boolean) { }
+		constructor(private _previous: Iterator, private _predicate: (element: T) => boolean) { }
 
 		/**
-		 * @return {*}
+		 * @return {T}
 		 */
-		next(): any {
-			var result: any;
+		next(): T {
+			var result: T;
 
 			// If we haven't already found the end in a previous call to next()
 			if (!this._foundEnd) {
 				// Get the next element from the underlying lazy sequence and see if we've found the end now
-				result = this._previous.next();
+				result = <T>this._previous.next();
 				this._foundEnd = !this._predicate(result);
 			}
 
@@ -322,43 +354,45 @@ module libjass {
 	 * A LazySequence returned from LazySequence.skipWhile()
 	 *
 	 * @constructor
-	 * @extends {LazySequence}
+	 * @template T
+	 * @extends {LazySequence.<T>}
 	 * @param {!*} previous The underlying lazy sequence
-	 * @param {function(*): boolean} predicate The predicate function (element) -> (Boolean)
+	 * @param {function(T): boolean} predicate The predicate function (element) -> (Boolean)
 	 */
-	class LazySequenceSkipWhile extends LazySequence {
-		constructor(private _previous: any, private _predicate: (element: any) => boolean) {
+	class LazySequenceSkipWhile<T> extends LazySequence<T> {
+		constructor(private _previous: any, private _predicate: (element: T) => boolean) {
 			super();
 		}
 
 		/**
-		 * @return {!LazySequenceSkipWhileIterator}
+		 * @return {!LazySequenceSkipWhileIterator.<T>}
 		 */
-		__iterator__(): LazySequenceSkipWhileIterator {
-			return new LazySequenceSkipWhileIterator(Iterator(this._previous), this._predicate);
+		__iterator__(): LazySequenceSkipWhileIterator<T> {
+			return new LazySequenceSkipWhileIterator<T>(Iterator(this._previous), this._predicate);
 		}
 	}
 
 	/**
 	 * @constructor
-	 * @param {!{next: function(): *}} previous
-	 * @param {function(*): boolean} predicate
+	 * @template T
+	 * @param {!{next: function(): T}} previous
+	 * @param {function(T): boolean} predicate
 	 */
-	class LazySequenceSkipWhileIterator implements Iterator {
+	class LazySequenceSkipWhileIterator<T> implements Iterator {
 		// Set to true when an element not matching the predicate is found
 		private _foundStart = false;
 
-		constructor(private _previous: Iterator, private _predicate: (element: any) => boolean) { }
+		constructor(private _previous: Iterator, private _predicate: (element: T) => boolean) { }
 
 		/**
-		 * @return {*}
+		 * @return {T}
 		 */
-		next(): any {
-			var result: any;
+		next(): T {
+			var result: T;
 
 			do {
 				// Get the next element
-				result = this._previous.next();
+				result = <T>this._previous.next();
 				// and see if we've already found the start, or if we've found it now
 				this._foundStart = this._foundStart || !this._predicate(result);
 			} while (!this._foundStart); // Keep looping till we find the start
