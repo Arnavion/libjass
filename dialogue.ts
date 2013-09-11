@@ -20,8 +20,6 @@
 
 ///<reference path="libjass.ts" />
 
-"use strict";
-
 module libjass {
 	export class Dialogue {
 		private static _lastDialogueId = -1;
@@ -121,7 +119,7 @@ module libjass {
 
 			var sub = <HTMLDivElement>this._sub.cloneNode(true);
 
-			var animationEndCallback: () => void = sub.remove.bind(sub);
+			var animationEndCallback: () => void = () => removeElement(sub);
 
 			sub.style.webkitAnimationDelay = (this._start - currentTime) + "s";
 			sub.addEventListener("webkitAnimationEnd", animationEndCallback, false);

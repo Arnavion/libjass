@@ -37,72 +37,15 @@ interface Document {
 	webkitFullscreenElement: Element
 }
 
-interface HTMLDivElement {
-	remove(): void
-}
-
-interface Iterator {
-	next(): any
-	forEach(func: (element: any) => void): void
-	toArray(): Array
-}
-
-interface String {
-	startsWith(str: string): boolean
-}
-
-interface Window {
-	Iterator(collection: any, keysOnly?: boolean): Iterator
-	StopIteration: any
-	Set: {
-		new (): Set<any>
-	}
-}
-
-declare function Iterator(collection: any, keysOnly?: boolean): Iterator
-declare var StopIteration: any
-
-/**
- * @param {string} str
- * @return {boolean} true if this string starts with str
- */
-String.prototype.startsWith = function (str: string): boolean {
-	return (<string>this).indexOf(str) === 0;
-};
-
-if (parseInt("010") !== 10) {
-	// This browser doesn't parse strings with leading 0's as decimal. Replace its parseInt with an implementation that does.
-
-	var oldParseInt = parseInt;
-
-	/**
-	 * An alternative parseInt that defaults to parsing input in base 10 if the second parameter is undefined.
-	 *
-	 * @param {string} s
-	 * @param {number=} radix
-	 * @return {number}
-	 */
-	(<any>window).parseInt = (s: string, radix?: number): number => {
-		// If str starts with 0x, then it is to be parsed as base 16 even if the second parameter is not given.
-		if (radix === undefined) {
-			if (s.startsWith("0x")) {
-				radix = 16;
-			}
-			else {
-				radix = 10;
-			}
-		}
-		return oldParseInt(s, radix);
-	}
-}
-
-HTMLDivElement.prototype.remove = function (): void {
-	if (this.parentElement !== null) {
-		this.parentElement.removeChild(this);
-	}
-};
+var global: any = (0, eval)("this");
 
 module libjass {
+	export function removeElement(element: Element): void {
+		if (element.parentNode !== null) {
+			element.parentNode.removeChild(element);
+		}
+	}
+
 	/**
 	 * Set implementation for browsers that don't support it. Only supports Number and String elements.
 	 *
@@ -146,10 +89,6 @@ module libjass {
 		}
 
 		forEach(callbackfn: (value: string, index: string, set: Set<string>) => void, thisArg?: any): void {
-			if (typeof thisArg === "undefined") {
-				thisArg = window;
-			}
-
 			Object.keys(this._data).map((key: string) => {
 				return this._data[key];
 			}).forEach((value: Object, index: number) => {
@@ -181,7 +120,13 @@ module libjass {
 		}
 	}
 
-	if (!window.Set || !window.Set.prototype.forEach) {
-		window.Set = SimpleSet;
+	if (typeof Set === "undefined" || typeof Set.prototype.forEach !== "function") {
+		global.Set = SimpleSet;
 	}
+}
+
+var module: any;
+
+if (module && module.exports) {
+	module.exports = libjass;
 }

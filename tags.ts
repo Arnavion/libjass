@@ -20,8 +20,6 @@
 
 ///<reference path="libjass.ts" />
 
-"use strict";
-
 module libjass {
 	export module tags {
 		/**

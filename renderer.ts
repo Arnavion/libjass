@@ -20,8 +20,6 @@
 
 ///<reference path="libjass.ts" />
 
-"use strict";
-
 module libjass {
 	export class DefaultRenderer {
 		private _dialogues: Dialogue[];
@@ -31,7 +29,7 @@ module libjass {
 		private _currentSubs: HTMLDivElement[] = [];
 
 		// Iterable of subtitle div's that are also to be displayed
-		private _newSubs: Iterable;
+		private _newSubs: LazySequence;
 
 		private _videoIsFullScreen: boolean = false;
 
@@ -53,7 +51,7 @@ module libjass {
 			});
 
 			this._newSubs =
-				this._dialogues.toIterable()
+				Lazy(this._dialogues)
 					.map((entry: Array) => entry[1])
 					// Skip until dialogues which end at a time later than currentTime
 					.skipWhile((dialogue: Dialogue) => dialogue.end < this._currentTime)
@@ -94,7 +92,7 @@ module libjass {
 
 
 			// Create layer wrapper div's and the alignment div's inside each layer div
-			var layers = new Set();
+			var layers = new Set<number>();
 			this._dialogues.forEach((dialogue: Dialogue) => {
 				layers.add(dialogue.layer);
 			});
@@ -117,7 +115,7 @@ module libjass {
 			}
 			// Preload fonts
 			else {
-				var allFonts = new Set();
+				var allFonts = new Set<string>();
 
 				this._ass.styles.forEach((style: Style) => {
 					allFonts.add(style.fontName);
@@ -196,9 +194,7 @@ module libjass {
 		}
 
 		public resizeVideo(width: number, height: number): void {
-			this._currentSubs.forEach((sub: HTMLDivElement) => {
-				sub.remove();
-			});
+			this._currentSubs.forEach(removeElement);
 
 			this._currentSubs = [];
 
@@ -236,10 +232,10 @@ module libjass {
 
 				// ... otherwise remove it from the DOM and from this array...
 				else {
-					sub.remove();
+					removeElement(sub);
 					return false;
 				}
-			}).concat(Iterator(this._newSubs).toArray()); // ... and add the new subs that are to be displayed.
+			}).concat(this._newSubs.toArray()); // ... and add the new subs that are to be displayed.
 
 			if (libjass.debugMode) {
 				console.log("video.timeupdate: " + this._getVideoStateLogString());
@@ -247,9 +243,7 @@ module libjass {
 		}
 
 		private _onVideoSeeking(): void {
-			this._currentSubs.forEach((sub: HTMLDivElement) => {
-				sub.remove();
-			});
+			this._currentSubs.forEach(removeElement);
 
 			this._currentSubs = [];
 

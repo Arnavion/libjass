@@ -20,15 +20,15 @@
 
 ///<reference path="libjass.ts" />
 
-"use strict";
-
-interface Array<T> {
-	toIterable(): any
-	// TODO: Change the return type back to libjass.Iterable when https://typescript.codeplex.com/workitem/1454 is fixed.
+interface Iterator {
+	next(): any
 }
 
+declare function Iterator(collection: any, keysOnly?: boolean): Iterator
+declare var StopIteration: any
+
 module libjass {
-	export class Iterable {
+	export class LazySequence {
 		/**
 		 * The base class of all iterable objects. An iterable is a lazily evaluated sequence.
 		 *
@@ -40,54 +40,64 @@ module libjass {
 		 * @param {function(*): *} transform A function (element) -> (transformedElement)
 		 * @return {!Iterable} A new Iterable with the given transform applied
 		 */
-		map(transform: (element: any) => any): Iterable {
-			return new SelectIterable(this, transform);
+		map(transform: (element: any) => any): LazySequence {
+			return new LazySequenceMap(this, transform);
 		}
 
 		/**
 		 * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns true if element should remain in the enumeration.
 		 * @return {!Iterable} A new Iterable with the given filter applied
 		 */
-		filter(filter: (element: any) => boolean): Iterable {
-			return new WhereIterable(this, filter);
+		filter(filter: (element: any) => boolean): LazySequence {
+			return new LazySequenceFilter(this, filter);
 		}
 
 		/**
 		 * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns false for an element if enumeration of this Iterable should stop at that element.
 		 * @return {!Iterable} A new Iterable with the given filter applied
 		 */
-		takeWhile(filter: (element: any) => boolean): Iterable {
-			return new TakeWhileIterable(this, filter);
+		takeWhile(filter: (element: any) => boolean): LazySequence {
+			return new LazySequenceTakeWhile(this, filter);
 		}
 
 		/**
 		 * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns true for an element if enumeration of this Iterable should skip all elements upto that element.
 		 * @return {!Iterable} A new Iterable with the given filter applied
 		 */
-		skipWhile(filter: (element: any) => boolean): Iterable {
-			return new SkipWhileIterable(this, filter);
-		}
-	}
-
-	// If this browser does not have an implementation of StopIteration, mock it
-	if (!window.StopIteration) {
-		window.StopIteration = Object.create(null);
-	}
-
-	class IteratorBase implements Iterator {
-		constructor() { }
-
-		next(): any {
-			throw new Error("Pure virtual method call.");
-		}
-
-		forEach(func: (element: any) => void ): void {
-			throw new Error("Pure virtual method call.");
+		skipWhile(filter: (element: any) => boolean): LazySequence {
+			return new LazySequenceSkipWhile(this, filter);
 		}
 
 		toArray(): Array {
-			throw new Error("Pure virtual method call.");
+			var result: Array = [];
+
+			var iterator = Iterator(this);
+
+			try {
+				for (; ;) {
+					result.push(iterator.next());
+				}
+			}
+			catch (ex) {
+				if (ex !== StopIteration) {
+					throw ex;
+				}
+			}
+
+			return result;
 		}
+	}
+
+	/**
+	 * @return {!Iterable} An Iterable backed by this Array
+	 */
+	export function Lazy(array: Array): LazySequence {
+		return new LazyArray(array);
+	}
+
+	// If this browser does not have an implementation of StopIteration, mock it
+	if (typeof StopIteration === "undefined") {
+		global.StopIteration = Object.create(null);
 	}
 
 	/**
@@ -96,13 +106,11 @@ module libjass {
 	 * @constructor
 	 * @param {!Array} array
 	 */
-	class ArrayIterator extends IteratorBase {
+	class ArrayIterator implements Iterator {
 		// The index of the element which will be returned in the next call to next()
 		private _currentIndex = 0;
 
-		constructor(private _array: Array) {
-			super();
-		}
+		constructor(private _array: Array) { }
 
 		/**
 		 * @return {!Array} Returns a tuple [index, element]
@@ -127,9 +135,7 @@ module libjass {
 		}
 	}
 
-	var iteratorPrototype: Iterator;
-
-	if (!window.Iterator) {
+	if (typeof Iterator === "undefined") {
 		/**
 		 * A default function for creating iterators in case it is not defined by the browser.
 		 *
@@ -137,7 +143,7 @@ module libjass {
 		 * @param {boolean=} keysOnly
 		 * @return {!{next: function(): *}}
 		 */
-		window.Iterator = (collection: any, keysOnly?: boolean): Iterator => {
+		global.Iterator = (collection: any, keysOnly?: boolean): Iterator => {
 			if (keysOnly) {
 				throw new Error("This Iterator implementation doesn't support keysOnly = true.");
 			}
@@ -152,61 +158,17 @@ module libjass {
 				throw new Error("This Iterator implementation doesn't support iterating arbitrary objects.");
 			}
 		}
-
-		iteratorPrototype = IteratorBase.prototype;
-	}
-	else {
-		<any>IteratorBase.prototype = window.Iterator.prototype;
-		iteratorPrototype = window.Iterator.prototype;
 	}
 
 	/**
-	 * Calls the provided function for each element in this Iterable.
-	 *
-	 * @this {{next: function(): *}}
-	 * @param {function(*)} func A function (element)
-	 */
-	iteratorPrototype.forEach = function (func: (element: any) => void) {
-		var self: Iterator = this;
-
-		try {
-			for (; ;) {
-				var result = self.next();
-				func.call(self, result);
-			}
-		}
-		catch (ex) {
-			if (ex !== StopIteration) {
-				throw ex;
-			}
-		}
-	};
-
-	/**
-	 * Evaluates this iterable.
-	 *
-	 * @this {{next: function(): *}}
-	 * @return {!Array} An array of the elements of this Iterable
-	 */
-	iteratorPrototype.toArray = function (): Array {
-		var self: Iterator = this;
-
-		var result: Array = [];
-		self.forEach(element => {
-			result.push(element);
-		});
-		return result;
-	};
-
-	/**
-	 * This class is an Iterable returned by Array.toIterable() and represents an Iterable backed by the
+	 * This class is an LazySequence returned by Lazy(Array) and represents a LazySequence backed by the
 	 * elements of that array.
 	 *
 	 * @constructor
-	 * @extends {Iterable}
+	 * @extends {LazySequence}
 	 * @param {!Array} array
 	 */
-	class ArrayIterable extends Iterable {
+	class LazyArray extends LazySequence {
 		constructor(private _array: Array) {
 			super();
 		}
@@ -220,30 +182,23 @@ module libjass {
 	}
 
 	/**
-	 * @return {!Iterable} An Iterable backed by this Array
-	 */
-	Array.prototype.toIterable = function (): Iterable {
-		return new ArrayIterable(this);
-	}
-
-	/**
-	 * An Iterable returned from Iterable.map()
+	 * An LazySequence returned from LazySequence.map()
 	 *
 	 * @constructor
-	 * @extends {Iterable}
-	 * @param {!*} previous The underlying iterable
+	 * @extends {LazySequence}
+	 * @param {!*} previous The underlying lazy sequence
 	 * @param {function(*): *} transform The transform function (element) -> (transformedElement)
 	 */
-	class SelectIterable extends Iterable {
+	class LazySequenceMap extends LazySequence {
 		constructor(private _previous: any, private _transform: (element: any) => any) {
 			super();
 		}
 
 		/**
-		 * @return {!SelectIterator}
+		 * @return {!LazySequenceMapIterator}
 		 */
-		__iterator__(): SelectIterator {
-			return new SelectIterator(Iterator(this._previous), this._transform);
+		__iterator__(): LazySequenceMapIterator {
+			return new LazySequenceMapIterator(Iterator(this._previous), this._transform);
 		}
 	}
 
@@ -252,38 +207,36 @@ module libjass {
 	 * @param {!{next: function(): *}} previous
 	 * @param {function(*): *} transform
 	 */
-	class SelectIterator extends IteratorBase {
-		constructor(private _previous: Iterator, private _transform: (element: any) => any) {
-			super();
-		}
+	class LazySequenceMapIterator implements Iterator {
+		constructor(private _previous: Iterator, private _transform: (element: any) => any) { }
 
 		/**
 		 * @return {*}
 		 */
 		next(): any {
 			// Apply the transform function and return the transformed value
-			return this._transform.call(this, this._previous.next());
+			return this._transform(this._previous.next());
 		}
 	}
 
 	/**
-	 * An Iterable returned from Iterable.filter()
+	 * An LazySequence returned from LazySequence.filter()
 	 *
 	 * @constructor
-	 * @extends {Iterable}
-	 * @param {!*} previous The underlying iterable
+	 * @extends {LazySequence}
+	 * @param {!*} previous The underlying lazy sequence
 	 * @param {function(*): boolean} filter The filter function (element) -> (Boolean)
 	 */
-	class WhereIterable extends Iterable {
+	class LazySequenceFilter extends LazySequence {
 		constructor(private _previous: any, private _filter: (element: any) => boolean) {
 			super();
 		}
 
 		/**
-		 * @return {!WhereIterator}
+		 * @return {!LazySequenceFilterIterator}
 		 */
-		__iterator__(): WhereIterator {
-			return new WhereIterator(Iterator(this._previous), this._filter);
+		__iterator__(): LazySequenceFilterIterator {
+			return new LazySequenceFilterIterator(Iterator(this._previous), this._filter);
 		}
 	}
 
@@ -292,42 +245,42 @@ module libjass {
 	 * @param {!{next: function(): *}} previous
 	 * @param {function(*): boolean} filter
 	 */
-	class WhereIterator extends IteratorBase {
-		constructor(private _previous: Iterator, private _filter: (element: any) => boolean) {
-			super();
-		}
+	class LazySequenceFilterIterator implements Iterator {
+		constructor(private _previous: Iterator, private _filter: (element: any) => boolean) { }
 
 		/**
 		 * @return {*}
 		 */
 		next(): any {
-			// Loop to find the next element from the underlying Iterable which passes the filter and return it
+			// Loop to find the next element from the underlying lazy sequence which passes the filter and return it
 			var result: any;
+
 			do {
 				result = this._previous.next();
-			} while (!this._filter.call(this, result));
+			} while (!this._filter(result));
+
 			return result;
 		}
 	}
 
 	/**
-	 * An Iterable returned from Iterable.takeWhile()
+	 * An LazySequence returned from LazySequence.takeWhile()
 	 *
 	 * @constructor
-	 * @extends {Iterable}
-	 * @param {!*} previous The underlying iterable
+	 * @extends {LazySequence}
+	 * @param {!*} previous The underlying lazy sequence
 	 * @param {function(*): boolean} predicate The predicate function (element) -> (Boolean)
 	 */
-	class TakeWhileIterable extends Iterable {
+	class LazySequenceTakeWhile extends LazySequence {
 		constructor(private _previous: any, private _predicate: (element: any) => boolean) {
 			super();
 		}
 
 		/**
-		 * @return {!TakeWhileIterator}
+		 * @return {!LazySequenceTakeWhileIterator}
 		 */
-		__iterator__(): TakeWhileIterator {
-			return new TakeWhileIterator(Iterator(this._previous), this._predicate);
+		__iterator__(): LazySequenceTakeWhileIterator {
+			return new LazySequenceTakeWhileIterator(Iterator(this._previous), this._predicate);
 		}
 	}
 
@@ -336,25 +289,23 @@ module libjass {
 	 * @param {!{next: function(): *}} previous
 	 * @param {function(*): boolean} predicate
 	 */
-	class TakeWhileIterator extends IteratorBase {
+	class LazySequenceTakeWhileIterator implements Iterator {
 		// Set to true when an element not matching the predicate is found
 		private _foundEnd = false;
 
-		constructor(private _previous: Iterator, private _predicate: (element: any) => boolean) {
-			super();
-		}
+		constructor(private _previous: Iterator, private _predicate: (element: any) => boolean) { }
 
 		/**
 		 * @return {*}
 		 */
 		next(): any {
-			var result: any; // Assigned null to silence closure compiler warning
+			var result: any;
 
 			// If we haven't already found the end in a previous call to next()
 			if (!this._foundEnd) {
-				// Get the next element from the underlying Iterable and see if we've found the end now
+				// Get the next element from the underlying lazy sequence and see if we've found the end now
 				result = this._previous.next();
-				this._foundEnd = !this._predicate.call(this, result);
+				this._foundEnd = !this._predicate(result);
 			}
 
 			// If we haven't found the end, return the element
@@ -369,23 +320,23 @@ module libjass {
 	}
 
 	/**
-	 * An Iterable returned from Iterable.skipWhile()
+	 * An LazySequence returned from LazySequence.skipWhile()
 	 *
 	 * @constructor
-	 * @extends {Iterable}
-	 * @param {!*} previous The underlying iterable
+	 * @extends {LazySequence}
+	 * @param {!*} previous The underlying lazy sequence
 	 * @param {function(*): boolean} predicate The predicate function (element) -> (Boolean)
 	 */
-	class SkipWhileIterable extends Iterable {
+	class LazySequenceSkipWhile extends LazySequence {
 		constructor(private _previous: any, private _predicate: (element: any) => boolean) {
 			super();
 		}
 
 		/**
-		 * @return {!SkipWhileIterator}
+		 * @return {!LazySequenceSkipWhileIterator}
 		 */
-		__iterator__(): SkipWhileIterator {
-			return new SkipWhileIterator(Iterator(this._previous), this._predicate);
+		__iterator__(): LazySequenceSkipWhileIterator {
+			return new LazySequenceSkipWhileIterator(Iterator(this._previous), this._predicate);
 		}
 	}
 
@@ -394,13 +345,11 @@ module libjass {
 	 * @param {!{next: function(): *}} previous
 	 * @param {function(*): boolean} predicate
 	 */
-	class SkipWhileIterator extends IteratorBase {
-		// Set to true when an element not matching the filter is found
+	class LazySequenceSkipWhileIterator implements Iterator {
+		// Set to true when an element not matching the predicate is found
 		private _foundStart = false;
 
-		constructor(private _previous: Iterator, private _predicate: (element: any) => boolean) {
-			super();
-		}
+		constructor(private _previous: Iterator, private _predicate: (element: any) => boolean) { }
 
 		/**
 		 * @return {*}
@@ -412,7 +361,7 @@ module libjass {
 				// Get the next element
 				result = this._previous.next();
 				// and see if we've already found the start, or if we've found it now
-				this._foundStart = this._foundStart || !this._predicate.call(this, result);
+				this._foundStart = this._foundStart || !this._predicate(result);
 			} while (!this._foundStart); // Keep looping till we find the start
 
 			// We've found the start, so return the element

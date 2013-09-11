@@ -157,15 +157,7 @@ namespace("_default", function () {
 
 		nodesToRemove = [];
 
-		// 1. All but the first top-level "use strict" - UglifyJS considers all but the first as AST_SimpleStatement
-		root.walk(new UglifyJS.TreeWalker(function (node, descend) {
-			if (node instanceof UglifyJS.AST_SimpleStatement && node.body.value === "use strict") {
-				nodesToRemove.push({ node: node, parent: root.body });
-			}
-		}));
-
-
-		// 2. All but the first top-level "var libjass;"
+		// 1. All but the first top-level "var libjass;"
 		var firstVarLibjassFound = false;
 		root.walk(new UglifyJS.TreeWalker(function (node, descend) {
 			if (node instanceof UglifyJS.AST_Var && node.definitions[0].name.name === "libjass") {
@@ -180,7 +172,7 @@ namespace("_default", function () {
 
 		// Repeat because removing some declarations may make others unreferenced
 		for (;;) {
-			// 3. Unreferenced variable and function declarations, and unreferenced terminal function arguments
+			// 2. Unreferenced variable and function declarations, and unreferenced terminal function arguments
 			root.walk(new UglifyJS.TreeWalker(function (node, descend) {
 				if (node instanceof UglifyJS.AST_SymbolDeclaration && node.unreferenced()) {
 					if (node instanceof UglifyJS.AST_SymbolFunarg) {
@@ -288,7 +280,8 @@ namespace("_default", function () {
 		var originalWarn = UglifyJS.AST_Node.warn;
 		UglifyJS.AST_Node.warn = function (text, properties) {
 			if (
-				(text === "{type} {name} is declared but not referenced [{file}:{line},{col}]" && properties.type === "Symbol" && properties.name === "offset" && properties.col === 39)
+				(text === "{type} {name} is declared but not referenced [{file}:{line},{col}]" && properties.type === "Symbol" && properties.name === "offset" && properties.col === 39) ||
+				(text === "Eval is used [{file}:{line},{col}]" && properties.file === "libjass.js" && properties.line === 23)
 			) {
 				return;
 			}
