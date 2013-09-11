@@ -38,7 +38,7 @@ module libjass {
 
 		/**
 		 * @param {function(*): *} transform A function (element) -> (transformedElement)
-		 * @return {!Iterable} A new Iterable with the given transform applied
+		 * @return {!LazySequence} A new LazySequence with the given transform applied
 		 */
 		map(transform: (element: any) => any): LazySequence {
 			return new LazySequenceMap(this, transform);
@@ -46,23 +46,23 @@ module libjass {
 
 		/**
 		 * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns true if element should remain in the enumeration.
-		 * @return {!Iterable} A new Iterable with the given filter applied
+		 * @return {!LazySequence} A new LazySequence with the given filter applied
 		 */
 		filter(filter: (element: any) => boolean): LazySequence {
 			return new LazySequenceFilter(this, filter);
 		}
 
 		/**
-		 * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns false for an element if enumeration of this Iterable should stop at that element.
-		 * @return {!Iterable} A new Iterable with the given filter applied
+		 * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns false for an element if enumeration of this LazySequence should stop at that element.
+		 * @return {!LazySequence} A new LazySequence which returns new elements from the underlying sequence as long as the predicate returns true for all of them
 		 */
 		takeWhile(filter: (element: any) => boolean): LazySequence {
 			return new LazySequenceTakeWhile(this, filter);
 		}
 
 		/**
-		 * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns true for an element if enumeration of this Iterable should skip all elements upto that element.
-		 * @return {!Iterable} A new Iterable with the given filter applied
+		 * @param {function(*): boolean} filter A function (element) -> (Boolean). Returns true for an element if enumeration of this LazySequence should skip all elements upto that element.
+		 * @return {!LazySequence} A new LazySequence which returns new elements from the underlying sequence as soon as the predicate returns true for one of them
 		 */
 		skipWhile(filter: (element: any) => boolean): LazySequence {
 			return new LazySequenceSkipWhile(this, filter);
@@ -89,7 +89,7 @@ module libjass {
 	}
 
 	/**
-	 * @return {!Iterable} An Iterable backed by this Array
+	 * @return {!LazySequence} A LazySequence backed by this Array
 	 */
 	export function Lazy(array: Array): LazySequence {
 		return new LazyArray(array);
@@ -161,8 +161,7 @@ module libjass {
 	}
 
 	/**
-	 * This class is an LazySequence returned by Lazy(Array) and represents a LazySequence backed by the
-	 * elements of that array.
+	 * This class is a LazySequence returned by Lazy(Array) and represents a LazySequence backed by the elements of that array.
 	 *
 	 * @constructor
 	 * @extends {LazySequence}
@@ -182,7 +181,7 @@ module libjass {
 	}
 
 	/**
-	 * An LazySequence returned from LazySequence.map()
+	 * A LazySequence returned from LazySequence.map()
 	 *
 	 * @constructor
 	 * @extends {LazySequence}
@@ -220,7 +219,7 @@ module libjass {
 	}
 
 	/**
-	 * An LazySequence returned from LazySequence.filter()
+	 * A LazySequence returned from LazySequence.filter()
 	 *
 	 * @constructor
 	 * @extends {LazySequence}
@@ -264,7 +263,7 @@ module libjass {
 	}
 
 	/**
-	 * An LazySequence returned from LazySequence.takeWhile()
+	 * A LazySequence returned from LazySequence.takeWhile()
 	 *
 	 * @constructor
 	 * @extends {LazySequence}
@@ -320,7 +319,7 @@ module libjass {
 	}
 
 	/**
-	 * An LazySequence returned from LazySequence.skipWhile()
+	 * A LazySequence returned from LazySequence.skipWhile()
 	 *
 	 * @constructor
 	 * @extends {LazySequence}
