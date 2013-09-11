@@ -20,8 +20,6 @@
 
 ///<reference path="libjass.ts" />
 
-"use strict";
-
 module libjass {
 	export interface Parser {
 		parse(input: string, startRule?: string): any
@@ -42,8 +40,7 @@ module libjass {
 		private _dialogues: Dialogue[] = [];
 
 		/**
-		 * This class represents an ASS script. It contains a Info object with global information about the script,
-		 * an array of Styles, and an array of Dialogues.
+		 * This class represents an ASS script. It contains information about the script, an array of Styles, and an array of Dialogues.
 		 *
 		 * @constructor
 		 * @param {string} rawASS
