@@ -18,8 +18,11 @@
  * limitations under the License.
  */
 
+var libjass = require("../libjass.js");
+var parserTest = require("./parser-test.js");
+
 suite("Miscellaneous", function () {
-	parserTest("herkz", "{\\pos(311,4)\\blur0.8\\fs40\\bord0\\c&H3F171F&\\t(3820,3820,\\blur6}Chi{\\c&H422CB1&}tose {\\c&H3F171F&}Furu", "dialogue", [
+	parserTest("herkz", "{\\pos(311,4)\\blur0.8\\fs40\\bord0\\c&H3F171F&\\t(3820,3820,\\blur6}Chi{\\c&H422CB1&}tose {\\c&H3F171F&}Furu", "dialogueParts", [
 		new libjass.tags.Comment("\\pos(311,4)\\blur0.8\\fs40\\bord0\\c&H3F171F&\\t(3820,3820,\\blur6"),
 		new libjass.tags.Text("Chi"),
 		new libjass.tags.PrimaryColor(new libjass.tags.Color(177, 44, 66, 1)),

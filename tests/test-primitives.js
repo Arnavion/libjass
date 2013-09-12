@@ -18,6 +18,9 @@
  * limitations under the License.
  */
 
+var libjass = require("../libjass.js");
+var parserTest = require("./parser-test.js");
+
 suite("Primitives", function () {
 	suite("Color", function () {
 		parserTest("BBGGRR", "&H3F171F&", "color", new libjass.tags.Color(31, 23, 63, 1));

@@ -18,6 +18,9 @@
  * limitations under the License.
  */
 
+var libjass = require("../libjass.js");
+var parserTest = require("./parser-test.js");
+
 suite("Tags", function () {
 	suite("Bold tag - \\b", function () {
 		parserTest("True", "b1", "tag_b", new libjass.tags.Bold(true));
@@ -60,7 +63,7 @@ suite("Tags", function () {
 
 		parserTest("Enclosed tag", "{\\c&H3F171F&}", "enclosedTags", [new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))]);
 
-		parserTest("Dialogue", "{\\c&H3F171F&}", "dialogue", [new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))]);
+		parserTest("Dialogue", "{\\c&H3F171F&}", "dialogueParts", [new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1))]);
 	});
 
 	suite("Alpha tag - \\alpha", function () {

@@ -429,3 +429,27 @@ task("clean", [], function () {
 		}
 	});
 });
+
+desc("Test");
+task("test", [], function () {
+	var Mocha = require("mocha");
+
+	var mocha = new Mocha({
+		ui: "tdd"
+	});
+	fs.readdirSync("./tests/").filter(function (filename) {
+		if (filename.indexOf("test-") === 0) {
+			var extensionIndex = filename.lastIndexOf(".js");
+			if (extensionIndex !== -1 && extensionIndex === filename.length - ".js".length) {
+				return true;
+			}
+		}
+
+		return false;
+	}).forEach(function (filename) {
+		mocha.addFile("./tests/" + filename);
+	});
+
+	mocha.run();
+	// .\node_modules\.bin\mocha -u tdd tests/test*.js
+});

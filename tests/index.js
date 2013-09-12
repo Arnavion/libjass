@@ -29,6 +29,21 @@ var suite = null;
 var setup = null;
 var test = null;
 
+var require = function (name) {
+	if (name === "../libjass.js") {
+		return libjass;
+	}
+	else if (name === "assert") {
+		return assert;
+	}
+	else if (name === "./parser-test.js") {
+		return parserTest;
+	}
+	else {
+		throw new Error("Cannot require unmocked module: " + name);
+	}
+};
+
 (function () {
 	var Suite = function (name, parent) {
 		this.name = name;
@@ -204,40 +219,6 @@ var assert = new function () {
 				throw new Error("Unrecognized type: " + typeof expected);
 		}
 	};
-};
-
-var parserTest = function (description, input, rule, expected) {
-	var result = test(description, function () {
-		var actual = null;
-
-		try {
-			actual = libjass.parser.parse(input, rule);
-		}
-		catch (parseException) {
-			if (expected === null) {
-				passed = true;
-				return;
-			}
-			else {
-				throw new Error("Expected parse to succeed but it threw an exception: " + parseException.message);
-			}
-		}
-
-		if (expected === null) {
-			throw new Error("Expected parse to fail.");
-		}
-		else if (actual === null) {
-			throw new Error("Parse failed without throwing an exception.");
-		}
-
-		assert.deepEqual(actual, expected);
-	});
-
-	result.customProperties = Object.create(null);
-	result.customProperties.input = input;
-	result.customProperties.rule = rule;
-
-	return result;
 };
 
 var Logger = function (outputDiv) {
