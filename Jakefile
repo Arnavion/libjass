@@ -436,25 +436,18 @@ task("clean", [], function () {
 });
 
 desc("Test");
-task("test", [], function () {
+task("test", ["clean", "_default:writeCode"], function () {
+	console.log("[" + this.fullName + "]");
+
 	var Mocha = require("mocha");
 
 	var mocha = new Mocha({
 		ui: "tdd"
 	});
-	fs.readdirSync("./tests/").filter(function (filename) {
-		if (filename.indexOf("test-") === 0) {
-			var extensionIndex = filename.lastIndexOf(".js");
-			if (extensionIndex !== -1 && extensionIndex === filename.length - ".js".length) {
-				return true;
-			}
-		}
 
-		return false;
-	}).forEach(function (filename) {
-		mocha.addFile("./tests/" + filename);
+	(new jake.FileList("./tests/test-*.js")).toArray().forEach(function (filename) {
+		mocha.addFile(filename);
 	});
 
 	mocha.run();
-	// .\node_modules\.bin\mocha -u tdd tests/test*.js
 });
