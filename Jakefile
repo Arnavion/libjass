@@ -36,6 +36,8 @@ namespace("_default", function () {
 
 		var TypeScript = jake.Task["_default:tscRequire"].value;
 
+		var compilerOutput;
+
 		var compiler = new TypeScript.BatchCompiler({
 			arguments: [],
 			directoryExists: function (path) {
@@ -75,24 +77,27 @@ namespace("_default", function () {
 			writeFile: function (file, contents, writeByteOrderMark) {
 				file = path.relative(".", file);
 
-				output[file] = contents;
+				compilerOutput[file] = contents;
 			}
 		});
-
-		var output;
 
 		compiler.compilationSettings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
 		compiler.compilationSettings.mapSourceFiles = true;
 		compiler.compilationSettings.noImplicitAny = true;
 
 		return function (inputFilenames, outputFilename) {
-			output = Object.create(null);
+			console.log("Compiling " + JSON.stringify(inputFilenames) + " to " + outputFilename + "...");
+
+			compiler.fileNameToSourceFile = new TypeScript.StringHashTable();
+
+			compilerOutput = Object.create(null);
 
 			compiler.inputFiles = inputFilenames;
 			compiler.compilationSettings.outFileOption = outputFilename;
 
 			try {
 				compiler.batchCompile();
+				console.log("Compile succeeded.");
 			}
 			catch (ex) {
 				if (ex instanceof Error) {
@@ -103,7 +108,7 @@ namespace("_default", function () {
 				}
 			}
 
-			return output;
+			return compilerOutput;
 		};
 	});
 
