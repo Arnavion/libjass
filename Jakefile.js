@@ -12,3 +12,8 @@ desc("Test");
 task("test", ["_test:run"], function () {
 	console.log("[" + this.fullName + "]");
 });
+
+desc("Watch");
+task("watch", ["_watch:run"], function () {
+	console.log("[" + this.fullName + "]");
+});
