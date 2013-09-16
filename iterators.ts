@@ -39,7 +39,7 @@ module libjass {
 
 		/**
 		 * @template U
-		 * @param transform {function(T): U} A function (element) -> (transformedElement)
+		 * @param {function(T): U} transform A function (element) -> (transformedElement)
 		 * @return {!LazySequence.<U>} A new LazySequence with the given transform applied
 		 */
 		map<U>(transform: (element: T) => U): LazySequence<U> {

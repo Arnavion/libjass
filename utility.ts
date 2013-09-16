@@ -76,7 +76,7 @@ module libjass {
 
 		/**
 		 * @param {T} value
-		 * @return boolean
+		 * @return {boolean}
 		 */
 		has(value: T): boolean {
 			var key = this._toKey(value);
