@@ -19,7 +19,7 @@ namespace("_watch", function () {
 		spawnSubProcess();
 	}, { async: true });
 
-	task("runUntilError", [], function () {
+	task("runUntilError", ["_default:tscCreate"], function () {
 		console.log("[" + this.fullName + "]");
 
 		var tasksToReEnable = [];
