@@ -67,7 +67,7 @@ module libjass {
 			// Get styles from the styles section
 			script["V4+ Styles"].forEach((line: any) => {
 				if (line.type === "Style") {
-					var styleTemplate: Object = line.template;
+					var styleTemplate: Template = line.template;
 
 					if (libjass.verboseMode) {
 						console.log("Read style: " + JSON.stringify(styleTemplate), styleTemplate);
@@ -82,7 +82,7 @@ module libjass {
 			// Get dialogues from the events section
 			script["Events"].forEach((line: any) => {
 				if (line.type === "Dialogue") {
-					var dialogueTemplate: Object = line.template;
+					var dialogueTemplate: Template = line.template;
 
 					if (libjass.verboseMode) {
 						console.log("Read dialogue: " + JSON.stringify(dialogueTemplate), dialogueTemplate);
@@ -189,7 +189,7 @@ module libjass {
 		private _marginRight: number;
 		private _marginVertical: number;
 
-		constructor(template: Object) {
+		constructor(template: Template) {
 			this._name = template["Name"];
 
 			this._italic = template["Italic"] === "-1";
@@ -285,6 +285,13 @@ module libjass {
 			return this._marginVertical;
 		}
 	};
+
+	/**
+	 * A template object. It is a map of string keys and string values.
+	 */
+	export interface Template {
+		[key: string]: string;
+	}
 
 	export var debugMode: boolean = false;
 	export var verboseMode: boolean = false;

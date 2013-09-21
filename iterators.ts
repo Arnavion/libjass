@@ -74,7 +74,7 @@ module libjass {
 		 * @return {Array.<T>}
 		 */
 		toArray(): Array<T> {
-			var result: Array = [];
+			var result: Array<T> = [];
 
 			var iterator = Iterator(this);
 
@@ -117,7 +117,7 @@ module libjass {
 		// The index of the element which will be returned in the next call to next()
 		private _currentIndex = 0;
 
-		constructor(private _array: Array) { }
+		constructor(private _array: Array<any>) { }
 
 		/**
 		 * @return {!Array} Returns a tuple [index, element]
@@ -159,7 +159,7 @@ module libjass {
 				return <Iterator>collection.__iterator__();
 			}
 			else if (Array.isArray(collection)) {
-				return new ArrayIterator(<Array>collection);
+				return new ArrayIterator(<Array<any>>collection);
 			}
 			else {
 				throw new Error("This Iterator implementation doesn't support iterating arbitrary objects.");

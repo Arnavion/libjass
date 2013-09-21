@@ -186,7 +186,7 @@ module libjass {
 		}
 
 		public addEventListener(type: string, listener: Object): void {
-			var listeners = <Array>this._eventListeners[type];
+			var listeners = <Array<Object>>this._eventListeners[type];
 			if (listeners) {
 				listeners.push(listener);
 			}
@@ -295,7 +295,7 @@ module libjass {
 		}
 
 		private _dispatchEvent(type: string, ...args: Object[]): void {
-			var listeners = <Array>this._eventListeners[type];
+			var listeners = <Array<Object>>this._eventListeners[type];
 			if (listeners) {
 				listeners.forEach((listener: Function) => {
 					listener.apply(this, args);

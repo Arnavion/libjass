@@ -88,15 +88,15 @@ module libjass {
 			return key in this._data;
 		}
 
-		forEach(callbackfn: (value: string, index: string, set: Set<string>) => void, thisArg?: any): void {
+		forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void {
 			Object.keys(this._data).map((key: string) => {
 				return this._data[key];
-			}).forEach((value: Object, index: number) => {
+			}).forEach((value: T, index: number) => {
 				callbackfn.call(thisArg, value, value, this);
 			});
 		}
 
-		delete(value: string): boolean {
+		delete(value: T): boolean {
 			throw new Error("This Set implementation doesn't support delete().");
 		}
 
