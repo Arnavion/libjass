@@ -52,7 +52,7 @@ namespace("_watch", function () {
 
 			timeoutId = setTimeout(function () {
 				tasksToReEnable.forEach(function (task) { task.reenable(); });
-				jake.Task["test"].invoke();
+				jake.Task["_test:run"].invoke(false);
 			}, 1000);
 		});
 	});

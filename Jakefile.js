@@ -9,7 +9,7 @@ task("clean", ["_clean:run"], function () {
 });
 
 desc("Test");
-task("test", ["_test:run"], function () {
+task("test", ["_test:run[true]"], function () {
 	console.log("[" + this.fullName + "]");
 });
 

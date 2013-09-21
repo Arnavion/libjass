@@ -2,21 +2,29 @@ var path = require("path");
 var Mocha = require("mocha");
 
 namespace("_test", function () {
-	task("run", ["clean", "_default:writeCode"], function () {
+	task("run", ["clean", "_default:writeCode"], function (failTaskOnFailure) {
 		console.log("[" + this.fullName + "]");
+
+		failTaskOnFailure = (failTaskOnFailure === true) || (failTaskOnFailure === "true");
 
 		var mocha = new Mocha({
 			ui: "tdd",
 			reporter: "spec",
-			loadInNewContext: true
+			loadInNewContext: !failTaskOnFailure
 		});
 
 		(new jake.FileList("./tests/test-*.js")).toArray().forEach(function (filename) {
 			mocha.addFile(filename);
 		});
 
-		mocha.run();
-	});
+		mocha.run(function (failures) {
+			if (failTaskOnFailure && failures > 0) {
+				fail(failures + " test(s) failed.");
+			}
+
+			complete();
+		});
+	}, { async: true });
 });
 
 Mocha.prototype.loadFiles = function (fn){
