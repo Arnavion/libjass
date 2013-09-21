@@ -119,15 +119,17 @@ var require = function (name) {
 	};
 
 	Test.prototype.run = function (logger) {
-		this.passed = false;
+		if (this.body) {
+			this.passed = false;
 
-		try {
-			this.body();
+			try {
+				this.body();
 
-			this.passed = true;
-		}
-		catch (testException) {
-			this.exception = testException;
+				this.passed = true;
+			}
+			catch (testException) {
+				this.exception = testException;
+			}
 		}
 
 		logger.writeTest(this);
@@ -248,12 +250,12 @@ var Logger = function (outputDiv) {
 		var numPassed = suite.passed;
 		var numFailed = suite.failed;
 
-		var message = numPassed + " of " + numTotal + " tests passed.";
+		var message = numPassed + " of " + numTotal + " tests passed";
 
 		console.log(message);
 
 		if (numFailed > 0) {
-			var message = numFailed + " of " + numTotal + " tests failed.";
+			var message = numFailed + " of " + numTotal + " tests failed";
 
 			console.warn(message);
 
@@ -264,20 +266,33 @@ var Logger = function (outputDiv) {
 			currentSuiteElement.className += " passed";
 		}
 
+		if (numTotal > numPassed + numFailed) {
+			var message = (numTotal - (numPassed + numFailed)) + " of " + numTotal + " tests skipped";
+
+			console.log(message);
+
+			currentSuiteElement.querySelector("legend").appendChild(document.createTextNode(" - " + message));
+		}
+
 		currentSuiteElement = currentSuiteElement.parentElement;
 		console.groupEnd();
 	};
 
 	this.writeTest = function (test) {
-		if (test.passed) {
+		if (test.passed === true) {
 			var message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ] ";
 			console.log(message);
 			append(testDiv, message).className += " passed";
 		}
-		else {
+		else if (test.passed === false) {
 			var message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ] " + " : " + ((test.exception !== null) ? test.exception.message : "<No exception>");
 			console.warn(message);
 			append(testDiv, message).className += " failed";
+		}
+		else {
+			var message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ] " + " : Skipped";
+			console.log(message);
+			append(testDiv, message).className += " skipped";
 		}
 	};
 
@@ -301,6 +316,12 @@ var Logger = function (outputDiv) {
 			var message = numFailed + " of " + numTotal + " tests failed.";
 			console.warn(message);
 			append(totalDiv, message).className = "failed";
+		}
+
+		if (numTotal > numPassed + numFailed) {
+			var message = (numTotal - (numPassed + numFailed)) + " of " + numTotal + " tests skipped.";
+			console.warn(message);
+			append(totalDiv, message).className = "skipped";
 		}
 
 		console.groupEnd();

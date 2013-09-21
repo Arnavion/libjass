@@ -49,11 +49,11 @@ suite("Tags", function () {
 
 		parserTest("Enclosed tag", "{\\b}", "enclosedTags", [new libjass.tags.Bold(null)]);
 
-		parserTest("Enclosed tag", "{\\b2}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("2")]);
+		parserTest.skip("Enclosed tag", "{\\b2}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("2")]);
 
-		parserTest("Enclosed tag", "{\\b10}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("0")]);
+		parserTest.skip("Enclosed tag", "{\\b10}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("0")]);
 
-		parserTest("Enclosed tag", "{\\b150}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("50")]);
+		parserTest.skip("Enclosed tag", "{\\b150}", "enclosedTags", [new libjass.tags.Bold(null), new libjass.tags.Comment("50")]);
 	});
 
 	suite("Primary color tag - \\c or \\1c", function () {
