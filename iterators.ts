@@ -126,7 +126,7 @@ module libjass {
 			// Loop through the array looking for an element to return
 			while (this._currentIndex < this._array.length) {
 				// If the index is less than the array's length and an element is in the array at that index
-				if (this._currentIndex in this._array) {
+				if (String(this._currentIndex) in this._array) {
 					var oldCurrentIndex = this._currentIndex;
 					this._currentIndex++;
 					// ... return it
