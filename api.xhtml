@@ -1,0 +1,1260 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+	<head>
+		<title>libjass API Documentation</title>
+		<style type="text/css">
+		<![CDATA[
+			html, body, .namespaces, .content {
+				height: 100%;
+				margin: 0;
+			}
+
+			.namespaces, .content {
+				overflow-y: scroll;
+			}
+
+			.namespaces {
+				float: left;
+				background-color: white;
+				padding: 0 20px;
+				margin-right: 20px;
+			}
+
+			.content > section:not(:last-child) {
+				border-bottom: 1px solid black;
+			}
+
+			.function, .constructor {
+				margin-left: 30px;
+				padding: 10px;
+			}
+
+			section > .function:nth-child(2n), section > .constructor:nth-child(2n) {
+				background-color: rgb(221, 250, 238);
+			}
+
+			section > .function:nth-child(2n + 1), section > .constructor:nth-child(2n + 1) {
+				background-color: rgb(244, 250, 221);
+			}
+
+			.function > .name, .constructor > .name {
+				font-size: x-large;
+			}
+
+			.function > .usage, .constructor > .usage {
+				font-size: large;
+			}
+
+			.function > .usage, .constructor > .usage {
+				font-style: italic;
+			}
+
+			.constructor .function {
+				background-color: rgb(250, 241, 221);
+			}
+
+			.parameter.name {
+				font-size: large;
+			}
+
+			.type {
+				font-style: italic;
+			}
+
+			.type:before {
+				content: "Type: ";
+			}
+
+			.abstract > .name:before {
+				content: "abstract ";
+			}
+
+			.private > .name:before {
+				content: "private ";
+			}
+
+			.abstract.private > .name:before {
+				content: "abstract private ";
+			}
+		]]>
+		</style>
+	</head>
+	<body>
+		<section class="namespaces">
+			<h2>Namespaces</h2>
+			<span class="namespace"><a href="#libjass">libjass</a></span>
+			<ul class="namespace-elements">
+				<li><a href="#libjass.ASS">ASS</a></li>
+				<li><a href="#libjass.Dialogue">Dialogue</a></li>
+				<li><a href="#libjass.Style">Style</a></li>
+				<li><a href="#libjass.SimpleMap">SimpleMap</a></li>
+				<li><a href="#libjass.SimpleSet">SimpleSet</a></li>
+			</ul>
+
+			<span class="namespace"><a href="#libjass.renderers">libjass.renderers</a></span>
+			<ul class="namespace-elements">
+				<li><a href="#libjass.renderers.DefaultRenderer">DefaultRenderer</a></li>
+				<li><a href="#libjass.renderers.NullRenderer">NullRenderer</a></li>
+				<li><a href="#libjass.renderers.RendererSettings">RendererSettings</a></li>
+				<li><a href="#libjass.renderers.KeyframeCollection">KeyframeCollection</a></li>
+				<li><a href="#libjass.renderers.SpanStyles">SpanStyles</a></li>
+			</ul>
+
+			<span class="namespace"><a href="#libjass.tags">libjass.tags</a></span>
+			<ul class="namespace-elements">
+				<li><a href="#libjass.tags.Alignment">Alignment</a></li>
+				<li><a href="#libjass.tags.Alpha">Alpha</a></li>
+				<li><a href="#libjass.tags.Blur">Blur</a></li>
+				<li><a href="#libjass.tags.Bold">Bold</a></li>
+				<li><a href="#libjass.tags.Border">Border</a></li>
+				<li><a href="#libjass.tags.BorderX">BorderX</a></li>
+				<li><a href="#libjass.tags.BorderY">BorderY</a></li>
+				<li><a href="#libjass.tags.Color">Color</a></li>
+				<li><a href="#libjass.tags.Comment">Comment</a></li>
+				<li><a href="#libjass.tags.Fade">Fade</a></li>
+				<li><a href="#libjass.tags.FontName">FontName</a></li>
+				<li><a href="#libjass.tags.FontScaleX">FontScaleX</a></li>
+				<li><a href="#libjass.tags.FontScaleY">FontScaleY</a></li>
+				<li><a href="#libjass.tags.FontSize">FontSize</a></li>
+				<li><a href="#libjass.tags.HardSpace">HardSpace</a></li>
+				<li><a href="#libjass.tags.Italic">Italic</a></li>
+				<li><a href="#libjass.tags.LetterSpacing">LetterSpacing</a></li>
+				<li><a href="#libjass.tags.NewLine">NewLine</a></li>
+				<li><a href="#libjass.tags.OutlineAlpha">OutlineAlpha</a></li>
+				<li><a href="#libjass.tags.OutlineColor">OutlineColor</a></li>
+				<li><a href="#libjass.tags.Pos">Pos</a></li>
+				<li><a href="#libjass.tags.PrimaryAlpha">PrimaryAlpha</a></li>
+				<li><a href="#libjass.tags.PrimaryColor">PrimaryColor</a></li>
+				<li><a href="#libjass.tags.Reset">Reset</a></li>
+				<li><a href="#libjass.tags.RotateX">RotateX</a></li>
+				<li><a href="#libjass.tags.RotateY">RotateY</a></li>
+				<li><a href="#libjass.tags.RotateZ">RotateZ</a></li>
+				<li><a href="#libjass.tags.SkewX">SkewX</a></li>
+				<li><a href="#libjass.tags.SkewY">SkewY</a></li>
+				<li><a href="#libjass.tags.StrikeThrough">StrikeThrough</a></li>
+				<li><a href="#libjass.tags.TagBase">TagBase</a></li>
+				<li><a href="#libjass.tags.Text">Text</a></li>
+				<li><a href="#libjass.tags.Underline">Underline</a></li>
+			</ul>
+
+		</section>
+		<div class="content">
+
+			<section>
+				<h1 id="libjass">libjass</h1>
+
+				<section>
+					<h2>Classes</h2>
+					<dl class="constructor" id="libjass.ASS">
+						<dt class="name">class <a href="#libjass.ASS">ASS</a></dt>
+						<dd class="description">
+							<p>This class represents an ASS script. It contains information about the script, an array of Styles, and an array of Dialogues.</p>
+						</dd>
+						<dd class="usage">var ass = new ASS(rawASS);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">rawASS</dt>
+									<dd class="parameter type">string</dd>
+									<dd class="parameter description">The raw text of the ASS script.</dd>
+								</dl>
+							</dd>
+						<dd>
+							<dl class="function" id="libjass.ASS.scaleTo">
+								<dt class="name"><a href="#libjass.ASS.scaleTo">scaleTo</a></dt>
+								<dd class="description">
+									<p>This method takes in the actual video height and width and prepares the scaleX and scaleY properties according to the script resolution.</p>
+								</dd>
+								<dd class="usage">ass.scaleTo(videoWidth, videoHeight);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">videoWidth</dt>
+											<dd class="parameter type">number</dd>
+											<dd class="parameter description">The width of the video, in pixels</dd>
+											<dt class="parameter name">videoHeight</dt>
+											<dd class="parameter type">number</dd>
+											<dd class="parameter description">The height of the video, in pixels</dd>
+										</dl>
+									</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.Dialogue">
+						<dt class="name">class <a href="#libjass.Dialogue">Dialogue</a></dt>
+						<dd class="description">
+							<p>This class represents a dialogue in an ASS script.</p>
+						</dd>
+						<dd class="usage">var dialogue = new Dialogue(template, ass);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">template</dt>
+									<dd class="parameter type">!Object</dd>
+									<dd class="parameter description">The template object that contains the dialogue's properties. It is a map of the string values read from the ASS file.</dd>
+										<dd>
+											<dl class="parameters">
+												<dt class="parameter name">"Style"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The name of the default style of this dialogue</dd>
+												<dt class="parameter name">"Start"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The start time</dd>
+												<dt class="parameter name">"End"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The end time</dd>
+												<dt class="parameter name">"Layer"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The layer number</dd>
+												<dt class="parameter name">"Text"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The text of this dialogue</dd>
+											</dl>
+										</dd>
+									<dt class="parameter name">ass</dt>
+									<dd class="parameter type">ASS</dd>
+									<dd class="parameter description">The ASS object to which this dialogue belongs</dd>
+								</dl>
+							</dd>
+						<dd>
+							<dl class="function" id="libjass.Dialogue.toString">
+								<dt class="name"><a href="#libjass.Dialogue.toString">toString</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = dialogue.toString();</dd>
+								<dt>Returns</dt>
+								<dd class="return type">string</dd>
+								<dd class="return description">A simple representation of this dialogue's properties and tags.</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.Style">
+						<dt class="name">class <a href="#libjass.Style">Style</a></dt>
+						<dd class="description">
+							<p>This class represents a single global style declaration in an ASS script. The styles can be obtained via the ASS.styles property.</p>
+						</dd>
+						<dd class="usage">var style = new Style(template);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">template</dt>
+									<dd class="parameter type">!Object</dd>
+									<dd class="parameter description">The template object that contains the style's properties. It is a map of the string values read from the ASS file.</dd>
+										<dd>
+											<dl class="parameters">
+												<dt class="parameter name">"Name"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The name of the style</dd>
+												<dt class="parameter name">"Italic"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">-1 if the style is italicized</dd>
+												<dt class="parameter name">"Bold"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">-1 if the style is bold</dd>
+												<dt class="parameter name">"Underline"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">-1 if the style is underlined</dd>
+												<dt class="parameter name">"StrikeOut"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">-1 if the style is struck-through</dd>
+												<dt class="parameter name">"OutlineWidth"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The outline width</dd>
+												<dt class="parameter name">"Fontname"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The name of the font</dd>
+												<dt class="parameter name">"Fontsize"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The size of the font</dd>
+												<dt class="parameter name">"ScaleX"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The horizontal scaling of the font</dd>
+												<dt class="parameter name">"ScaleY"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The vertical scaling of the font</dd>
+												<dt class="parameter name">"Spacing"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The letter spacing of the font</dd>
+												<dt class="parameter name">"PrimaryColor"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The primary color</dd>
+												<dt class="parameter name">"OutlineColor"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The outline color</dd>
+												<dt class="parameter name">"Outline"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The outline width</dd>
+												<dt class="parameter name">"Alignment"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The alignment number</dd>
+												<dt class="parameter name">"MarginL"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The left margin</dd>
+												<dt class="parameter name">"MarginR"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The right margin</dd>
+												<dt class="parameter name">"MarginV"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The vertical margin</dd>
+											</dl>
+										</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor private" id="libjass.SimpleMap">
+						<dt class="name">class <a href="#libjass.SimpleMap">SimpleMap.&lt;K, V&gt;</a></dt>
+						<dd class="description">
+							<p>Map implementation for browsers that don't support it. Only supports Number and String keys. Keys and values are stored as properties of an object, with property names derived from the key type.</p>
+						</dd>
+						<dd class="usage">var simpleMap = new SimpleMap();</dd>
+						<dd>
+							<dl class="function" id="libjass.SimpleMap.forEach">
+								<dt class="name"><a href="#libjass.SimpleMap.forEach">forEach</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">simpleMap.forEach(callbackfn);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">callbackfn</dt>
+											<dd class="parameter type">function(V, K, libjass.Map.&lt;K, V&gt;)</dd>
+											<dd class="parameter description">A function that is called with each key and value in the map.</dd>
+										</dl>
+									</dd>
+							</dl>
+							<dl class="function" id="libjass.SimpleMap.get">
+								<dt class="name"><a href="#libjass.SimpleMap.get">get</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = simpleMap.get(key);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">key</dt>
+											<dd class="parameter type">K</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">V</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.SimpleMap.has">
+								<dt class="name"><a href="#libjass.SimpleMap.has">has</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = simpleMap.has(key);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">key</dt>
+											<dd class="parameter type">K</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">boolean</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.SimpleMap.set">
+								<dt class="name"><a href="#libjass.SimpleMap.set">set</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = simpleMap.set(key, value);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">key</dt>
+											<dd class="parameter type">K</dd>
+											<dd class="parameter description"></dd>
+											<dt class="parameter name">value</dt>
+											<dd class="parameter type">V</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">libjass.Map.&lt;K, V&gt;</dd>
+								<dd class="return description">This map</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor private" id="libjass.SimpleSet">
+						<dt class="name">class <a href="#libjass.SimpleSet">SimpleSet.&lt;T&gt;</a></dt>
+						<dd class="description">
+							<p>Set implementation for browsers that don't support it. Only supports Number and String elements. Elements are stored as properties of an object, with names derived from their type.</p>
+						</dd>
+						<dd class="usage">var simpleSet = new SimpleSet();</dd>
+						<dd>
+							<dl class="function" id="libjass.SimpleSet.add">
+								<dt class="name"><a href="#libjass.SimpleSet.add">add</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = simpleSet.add(value);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">value</dt>
+											<dd class="parameter type">T</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">libjass.Set.&lt;T&gt;</dd>
+								<dd class="return description">This set</dd>
+							</dl>
+							<dl class="function" id="libjass.SimpleSet.forEach">
+								<dt class="name"><a href="#libjass.SimpleSet.forEach">forEach</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">simpleSet.forEach(callbackfn);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">callbackfn</dt>
+											<dd class="parameter type">function(T, T, libjass.Set.&lt;T&gt;)</dd>
+											<dd class="parameter description">A function that is called with each value in the set.</dd>
+										</dl>
+									</dd>
+							</dl>
+							<dl class="function" id="libjass.SimpleSet.has">
+								<dt class="name"><a href="#libjass.SimpleSet.has">has</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = simpleSet.has(value);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">value</dt>
+											<dd class="parameter type">T</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">boolean</dd>
+								<dd class="return description"></dd>
+							</dl>
+						</dd>
+					</dl>
+				</section>
+
+			</section>
+			<section>
+				<h1 id="libjass.renderers">libjass.renderers</h1>
+
+				<section>
+					<h2>Classes</h2>
+					<dl class="constructor" id="libjass.renderers.DefaultRenderer">
+						<dt class="name">class <a href="#libjass.renderers.DefaultRenderer">DefaultRenderer</a> extends <a href="#libjass.renderers.NullRenderer">NullRenderer</a></dt>
+						<dd class="description">
+							<p>A default renderer implementation.</p>
+						</dd>
+						<dd class="usage">var defaultRenderer = new DefaultRenderer(video, ass, settings);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">video</dt>
+									<dd class="parameter type">!HTMLVideoElement</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">ass</dt>
+									<dd class="parameter type">!libjass.ASS</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">settings</dt>
+									<dd class="parameter type">!libjass.RendererSettings</dd>
+									<dd class="parameter description"></dd>
+								</dl>
+							</dd>
+						<dd>
+							<dl class="function" id="libjass.renderers.DefaultRenderer.addEventListener">
+								<dt class="name"><a href="#libjass.renderers.DefaultRenderer.addEventListener">addEventListener</a></dt>
+								<dd class="description">
+									<p>Add a listener for the given event. The "ready" event is fired when fonts have been preloaded if settings.preLoadFonts is true, or in the next tick after the DefaultRenderer object is constructed otherwise. The "fullScreenChange" event is fired when the browser's fullscreenchange event is fired for the video element.</p>
+								</dd>
+								<dd class="usage">defaultRenderer.addEventListener(type, listener);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">type</dt>
+											<dd class="parameter type">string</dd>
+											<dd class="parameter description">The type of event to attach the listener for. One of "ready" and "fullScreenChange".</dd>
+											<dt class="parameter name">listener</dt>
+											<dd class="parameter type">!Function</dd>
+											<dd class="parameter description">The listener</dd>
+										</dl>
+									</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.DefaultRenderer.draw">
+								<dt class="name"><a href="#libjass.renderers.DefaultRenderer.draw">draw</a></dt>
+								<dd class="description">
+									<p>Returns the subtitle div for display. The currentTime is used to shift the animations appropriately, so that at the time the div is inserted into the DOM and the animations begin, they are in sync with the video time.</p>
+								</dd>
+								<dd class="usage">defaultRenderer.draw(dialogue);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">dialogue</dt>
+											<dd class="parameter type">!libjass.Dialogue</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.DefaultRenderer.resizeVideo">
+								<dt class="name"><a href="#libjass.renderers.DefaultRenderer.resizeVideo">resizeVideo</a></dt>
+								<dd class="description">
+									<p>Resize the video element and subtitles to the new dimensions.</p>
+								</dd>
+								<dd class="usage">defaultRenderer.resizeVideo(width, height);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">width</dt>
+											<dd class="parameter type">number</dd>
+											<dd class="parameter description"></dd>
+											<dt class="parameter name">height</dt>
+											<dd class="parameter type">number</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+							<dl class="function private" id="libjass.renderers.DefaultRenderer._dispatchEvent">
+								<dt class="name"><a href="#libjass.renderers.DefaultRenderer._dispatchEvent">_dispatchEvent</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">defaultRenderer._dispatchEvent(type, args);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">type</dt>
+											<dd class="parameter type">string</dd>
+											<dd class="parameter description"></dd>
+											<dt class="parameter name">args</dt>
+											<dd class="parameter type">...*</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.renderers.NullRenderer">
+						<dt class="name">class <a href="#libjass.renderers.NullRenderer">NullRenderer</a></dt>
+						<dd class="description">
+							<p>A renderer implementation that doesn't output anything.</p>
+						</dd>
+						<dd class="usage">var nullRenderer = new NullRenderer(video, ass, settings);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">video</dt>
+									<dd class="parameter type">!HTMLVideoElement</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">ass</dt>
+									<dd class="parameter type">!libjass.ASS</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">settings</dt>
+									<dd class="parameter type">!libjass.RendererSettings</dd>
+									<dd class="parameter description"></dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.renderers.RendererSettings">
+						<dt class="name">class <a href="#libjass.renderers.RendererSettings">RendererSettings</a></dt>
+						<dd class="description">
+							<p>Settings for the default renderer.</p>
+						</dd>
+						<dd class="usage">var rendererSettings = new RendererSettings();</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor private" id="libjass.renderers.KeyframeCollection">
+						<dt class="name">class <a href="#libjass.renderers.KeyframeCollection">KeyframeCollection</a></dt>
+						<dd class="description">
+							<p>This class represents a collection of keyframes. Each keyframe contains one or more CSS properties. The collection can then be converted to a CSS3 representation.</p>
+						</dd>
+						<dd class="usage">var keyframeCollection = new KeyframeCollection(id, start, end);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">id</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description">The ID of the dialogue that this keyframe is associated with</dd>
+									<dt class="parameter name">start</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description">The start time of the dialogue that this keyframe is associated with</dd>
+									<dt class="parameter name">end</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description">The end time of the dialogue that this keyframe is associated with</dd>
+								</dl>
+							</dd>
+						<dd>
+							<dl class="function" id="libjass.renderers.KeyframeCollection.add">
+								<dt class="name"><a href="#libjass.renderers.KeyframeCollection.add">add</a></dt>
+								<dd class="description">
+									<p>Add a new keyframe at the given time that sets the given CSS property to the given value.</p>
+								</dd>
+								<dd class="usage">keyframeCollection.add(time, property, value);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">time</dt>
+											<dd class="parameter type">number</dd>
+											<dd class="parameter description"></dd>
+											<dt class="parameter name">property</dt>
+											<dd class="parameter type">string</dd>
+											<dd class="parameter description"></dd>
+											<dt class="parameter name">value</dt>
+											<dd class="parameter type">string</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.KeyframeCollection.toString">
+								<dt class="name"><a href="#libjass.renderers.KeyframeCollection.toString">toString</a></dt>
+								<dd class="description">
+									<p>Creates a CSS3 animations representation of this keyframe collection.</p>
+								</dd>
+								<dd class="usage">var result = keyframeCollection.toString();</dd>
+								<dt>Returns</dt>
+								<dd class="return type">string</dd>
+								<dd class="return description"></dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor private" id="libjass.renderers.SpanStyles">
+						<dt class="name">class <a href="#libjass.renderers.SpanStyles">SpanStyles</a></dt>
+						<dd class="description">
+							<p>This class represents the style attribute of a span. As a Dialogue's div is rendered, individual tags are added to span's, and this class is used to maintain the style attribute of those.</p>
+						</dd>
+						<dd class="usage">var spanStyles = new SpanStyles(style, transformOrigin, scaleX, scaleY, dpi);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">style</dt>
+									<dd class="parameter type">!libjass.Style</dd>
+									<dd class="parameter description">The default style for the dialogue this object is associated with</dd>
+									<dt class="parameter name">transformOrigin</dt>
+									<dd class="parameter type">string</dd>
+									<dd class="parameter description">The transform origin of the dialogue this object is associated with</dd>
+									<dt class="parameter name">scaleX</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description">The horizontal scaling of the dialogue this object is associated with</dd>
+									<dt class="parameter name">scaleY</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description">The vertical scaling of the dialogue this object is associated with</dd>
+									<dt class="parameter name">dpi</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description">The DPI of the ASS script this object is associated with</dd>
+								</dl>
+							</dd>
+						<dd>
+							<dl class="function" id="libjass.renderers.SpanStyles.reset">
+								<dt class="name"><a href="#libjass.renderers.SpanStyles.reset">reset</a></dt>
+								<dd class="description">
+									<p>Resets the styles to the defaults provided by the argument.</p>
+								</dd>
+								<dd class="usage">spanStyles.reset(newStyle);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">newStyle</dt>
+											<dd class="parameter type">!libjass.Style=</dd>
+											<dd class="parameter description">The new defaults to reset the style to. If unspecified, the new style is the original style this object was created with.</dd>
+										</dl>
+									</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.SpanStyles.setStylesOnSpan">
+								<dt class="name"><a href="#libjass.renderers.SpanStyles.setStylesOnSpan">setStylesOnSpan</a></dt>
+								<dd class="description">
+									<p>Sets the style attribute on the given span element.</p>
+								</dd>
+								<dd class="usage">spanStyles.setStylesOnSpan(span);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">span</dt>
+											<dd class="parameter type">!HTMLSpanElement</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+						</dd>
+					</dl>
+				</section>
+
+			</section>
+			<section>
+				<h1 id="libjass.tags">libjass.tags</h1>
+
+				<section>
+					<h2>Classes</h2>
+					<dl class="constructor" id="libjass.tags.Alignment">
+						<dt class="name">class <a href="#libjass.tags.Alignment">Alignment</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>An alignment tag {\an}</p>
+						</dd>
+						<dd class="usage">var alignment = new Alignment(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\an###} -&gt; alignment (number), {\an} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.Alpha">
+						<dt class="name">class <a href="#libjass.tags.Alpha">Alpha</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>An alpha tag {\alpha}</p>
+						</dd>
+						<dd class="usage">var alpha = new Alpha(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\alpha###} -&gt; alpha (number), {\alpha} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.Blur">
+						<dt class="name">class <a href="#libjass.tags.Blur">Blur</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A blur tag {\blur}</p>
+						</dd>
+						<dd class="usage">var blur = new Blur(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\blur###} -&gt; strength (number), {\blur} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.Bold">
+						<dt class="name">class <a href="#libjass.tags.Bold">Bold</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A bold tag {\b}</p>
+						</dd>
+						<dd class="usage">var bold = new Bold(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">*</dd>
+									<dd class="parameter description">{\b1} -&gt; true, {\b0} -&gt; false, {\b###} -&gt; weight of the bold (number), {\b} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.Border">
+						<dt class="name">class <a href="#libjass.tags.Border">Border</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A border tag {\bord}</p>
+						</dd>
+						<dd class="usage">var border = new Border(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\bord###} -&gt; width (number), {\bord} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.BorderX">
+						<dt class="name">class <a href="#libjass.tags.BorderX">BorderX</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A horizontal border tag {\xbord}</p>
+						</dd>
+						<dd class="usage">var borderX = new BorderX(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\xbord###} -&gt; width (number), {\xbord} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.BorderY">
+						<dt class="name">class <a href="#libjass.tags.BorderY">BorderY</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A vertical border tag {\ybord}</p>
+						</dd>
+						<dd class="usage">var borderY = new BorderY(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\ybord###} -&gt; height (number), {\ybord} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.Color">
+						<dt class="name">class <a href="#libjass.tags.Color">Color</a></dt>
+						<dd class="description">
+							<p>Represents a CSS color with red, green, blue and alpha components. Instances of this class are immutable.</p>
+						</dd>
+						<dd class="usage">var color = new Color(red, green, blue, alpha);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">red</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">green</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">blue</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">alpha</dt>
+									<dd class="parameter type">number=1</dd>
+									<dd class="parameter description"></dd>
+								</dl>
+							</dd>
+						<dd>
+							<dl class="function" id="libjass.tags.Color.toString">
+								<dt class="name"><a href="#libjass.tags.Color.toString">toString</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = color.toString();</dd>
+								<dt>Returns</dt>
+								<dd class="return type">string</dd>
+								<dd class="return description">The CSS representation "rgba(...)" of this color.</dd>
+							</dl>
+							<dl class="function" id="libjass.tags.Color.withAlpha">
+								<dt class="name"><a href="#libjass.tags.Color.withAlpha">withAlpha</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = color.withAlpha(value);</dd>
+									<dd>
+										<dl class="parameters">
+											<dt class="parameter name">value</dt>
+											<dd class="parameter type">number</dd>
+											<dd class="parameter description">The new alpha. If null, the existing alpha is used.</dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!libjass.tags.Color</dd>
+								<dd class="return description">Returns a new Color instance with the same color but the provided alpha.</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.Comment">
+						<dt class="name">class <a href="#libjass.tags.Comment">Comment</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A comment, i.e., any text enclosed in {} that is not understood as an ASS tag.</p>
+						</dd>
+						<dd class="usage">var comment = new Comment(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">string</dd>
+									<dd class="parameter description">The text of this comment</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.Fade">
+						<dt class="name">class <a href="#libjass.tags.Fade">Fade</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A simple fade tag {\fad}</p>
+						</dd>
+						<dd class="usage">var fade = new Fade(start, end);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">start</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">end</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.FontName">
+						<dt class="name">class <a href="#libjass.tags.FontName">FontName</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A font name tag {\fn}</p>
+						</dd>
+						<dd class="usage">var fontName = new FontName(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?string</dd>
+									<dd class="parameter description">{\fn###} -&gt; name (string), {\fn} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.FontScaleX">
+						<dt class="name">class <a href="#libjass.tags.FontScaleX">FontScaleX</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A horizontal font scaling tag {\fscx}</p>
+						</dd>
+						<dd class="usage">var fontScaleX = new FontScaleX(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\fscx###} -&gt; scale (number), {\fscx} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.FontScaleY">
+						<dt class="name">class <a href="#libjass.tags.FontScaleY">FontScaleY</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A vertical font scaling tag {\fscy}</p>
+						</dd>
+						<dd class="usage">var fontScaleY = new FontScaleY(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\fscy###} -&gt; scale (number), {\fscy} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.FontSize">
+						<dt class="name">class <a href="#libjass.tags.FontSize">FontSize</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A font size tag {\fs}</p>
+						</dd>
+						<dd class="usage">var fontSize = new FontSize(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\fs###} -&gt; size (number), {\fs} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.HardSpace">
+						<dt class="name">class <a href="#libjass.tags.HardSpace">HardSpace</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A hard space \h</p>
+						</dd>
+						<dd class="usage">var hardSpace = new HardSpace();</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.Italic">
+						<dt class="name">class <a href="#libjass.tags.Italic">Italic</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>An italic tag {\i}</p>
+						</dd>
+						<dd class="usage">var italic = new Italic(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?boolean</dd>
+									<dd class="parameter description">{\i1} -&gt; true, {\i0} -&gt; false, {\i} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.LetterSpacing">
+						<dt class="name">class <a href="#libjass.tags.LetterSpacing">LetterSpacing</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A letter spacing tag {\fsp}</p>
+						</dd>
+						<dd class="usage">var letterSpacing = new LetterSpacing(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\fsp###} -&gt; spacing (number), {\fsp} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.NewLine">
+						<dt class="name">class <a href="#libjass.tags.NewLine">NewLine</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A newline \N</p>
+						</dd>
+						<dd class="usage">var newLine = new NewLine(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">string</dd>
+									<dd class="parameter description">The text of this comment</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.OutlineAlpha">
+						<dt class="name">class <a href="#libjass.tags.OutlineAlpha">OutlineAlpha</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>An outline alpha tag {\3a}</p>
+						</dd>
+						<dd class="usage">var outlineAlpha = new OutlineAlpha(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\3a###} -&gt; alpha (number), {\3a} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.OutlineColor">
+						<dt class="name">class <a href="#libjass.tags.OutlineColor">OutlineColor</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>An outline color tag {\3c}</p>
+						</dd>
+						<dd class="usage">var outlineColor = new OutlineColor(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">Color</dd>
+									<dd class="parameter description">{\3c###} -&gt; color (Color), {\3c} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.Pos">
+						<dt class="name">class <a href="#libjass.tags.Pos">Pos</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A position tag {\pos}</p>
+						</dd>
+						<dd class="usage">var pos = new Pos(x, y);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">x</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">y</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.PrimaryAlpha">
+						<dt class="name">class <a href="#libjass.tags.PrimaryAlpha">PrimaryAlpha</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A primary alpha tag {\1a}</p>
+						</dd>
+						<dd class="usage">var primaryAlpha = new PrimaryAlpha(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\1a###} -&gt; alpha (number), {\1a} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.PrimaryColor">
+						<dt class="name">class <a href="#libjass.tags.PrimaryColor">PrimaryColor</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A primary color tag {\c} and {\1c}</p>
+						</dd>
+						<dd class="usage">var primaryColor = new PrimaryColor(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">Color</dd>
+									<dd class="parameter description">{\1c###} -&gt; color (Color), {\1c} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.Reset">
+						<dt class="name">class <a href="#libjass.tags.Reset">Reset</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A style reset tag {\r}</p>
+						</dd>
+						<dd class="usage">var reset = new Reset(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?string</dd>
+									<dd class="parameter description">{\r###} -&gt; style name (string), {\r} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.RotateX">
+						<dt class="name">class <a href="#libjass.tags.RotateX">RotateX</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>An X-axis rotation tag {\frx}</p>
+						</dd>
+						<dd class="usage">var rotateX = new RotateX(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\frx###} -&gt; angle (number), {\frx} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.RotateY">
+						<dt class="name">class <a href="#libjass.tags.RotateY">RotateY</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A Y-axis rotation tag {\fry}</p>
+						</dd>
+						<dd class="usage">var rotateY = new RotateY(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\fry###} -&gt; angle (number), {\fry} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.RotateZ">
+						<dt class="name">class <a href="#libjass.tags.RotateZ">RotateZ</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A Z-axis rotation tag {\frz}</p>
+						</dd>
+						<dd class="usage">var rotateZ = new RotateZ(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\frz###} -&gt; angle (number), {\frz} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.SkewX">
+						<dt class="name">class <a href="#libjass.tags.SkewX">SkewX</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>An X-axis shearing tag {\fax} A comment, i.e., any text enclosed in {} that is not understood as an ASS tag.</p>
+						</dd>
+						<dd class="usage">var skewX = new SkewX(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\fax###} -&gt; angle (number), {\fax} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.SkewY">
+						<dt class="name">class <a href="#libjass.tags.SkewY">SkewY</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A Y-axis shearing tag {\fay}</p>
+						</dd>
+						<dd class="usage">var skewY = new SkewY(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?number</dd>
+									<dd class="parameter description">{\fay###} -&gt; angle (number), {\fay} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.StrikeThrough">
+						<dt class="name">class <a href="#libjass.tags.StrikeThrough">StrikeThrough</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A strike-through tag {\s}</p>
+						</dd>
+						<dd class="usage">var strikeThrough = new StrikeThrough(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?boolean</dd>
+									<dd class="parameter description">{\s1} -&gt; true, {\s0} -&gt; false, {\s} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor abstract" id="libjass.tags.TagBase">
+						<dt class="name">class <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>The base class of the ASS tag classes.</p>
+						</dd>
+						<dd class="usage">var tagBase = new TagBase(name, propertyNames);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">name</dt>
+									<dd class="parameter type">string</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">propertyNames</dt>
+									<dd class="parameter type">...string</dd>
+									<dd class="parameter description"></dd>
+								</dl>
+							</dd>
+						<dd>
+							<dl class="function" id="libjass.tags.TagBase.toString">
+								<dt class="name"><a href="#libjass.tags.TagBase.toString">toString</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = tagBase.toString();</dd>
+								<dt>Returns</dt>
+								<dd class="return type">string</dd>
+								<dd class="return description">A simple representation of this tag's name and properties.</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.Text">
+						<dt class="name">class <a href="#libjass.tags.Text">Text</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>A block of text, i.e., any text not enclosed in {}.</p>
+						</dd>
+						<dd class="usage">var text = new Text(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">string</dd>
+									<dd class="parameter description">The content of this block of text</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.tags.Underline">
+						<dt class="name">class <a href="#libjass.tags.Underline">Underline</a> extends <a href="#libjass.tags.TagBase">TagBase</a></dt>
+						<dd class="description">
+							<p>An underline tag {\u}</p>
+						</dd>
+						<dd class="usage">var underline = new Underline(value);</dd>
+							<dd>
+								<dl class="parameters">
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?boolean</dd>
+									<dd class="parameter description">{\u1} -&gt; true, {\u0} -&gt; false, {\u} -&gt; null</dd>
+								</dl>
+							</dd>
+						<dd>
+						</dd>
+					</dl>
+				</section>
+
+			</section>
+		</div>
+	</body>
+</html>
