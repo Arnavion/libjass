@@ -40,6 +40,13 @@ interface Document {
 var global: any = (0, eval)("this");
 
 module libjass {
+	/**
+	 * Removes a DOM element from its parent node.
+	 *
+	 * @param {Element} element The element to remove
+	 *
+	 * @memberof libjass
+	 */
 	export function removeElement(element: Element): void {
 		if (element.parentNode !== null) {
 			element.parentNode.removeChild(element);
@@ -50,17 +57,21 @@ module libjass {
 	 * Set implementation for browsers that don't support it. Only supports Number and String elements.
 	 *
 	 * Elements are stored as properties of an object, with names derived from their type.
+	 *
+	 * @constructor
+	 * @template T
+	 *
+	 * @private
+	 * @memberof libjass
 	 */
 	class SimpleSet<T> implements Set<T> {
 		private _data: Object = Object.create(null);
 
-		/**
-		 * @constructor
-		 */
 		constructor() { }
 
 		/**
 		 * @param {T} value
+		 * @return {Set.<T>} This set
 		 */
 		add(value: T): Set<T> {
 			var key = this._toKey(value);
@@ -88,6 +99,9 @@ module libjass {
 			return key in this._data;
 		}
 
+		/**
+		 * @param {function(T, T, Set<T>)} callbackfn A function that is called with each value in the set.
+		 */
 		forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void {
 			Object.keys(this._data).map((key: string) => {
 				return this._data[key];

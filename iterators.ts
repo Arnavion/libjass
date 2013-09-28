@@ -28,17 +28,23 @@ declare function Iterator(collection: any, keysOnly?: boolean): Iterator
 declare var StopIteration: any
 
 module libjass {
+	/**
+	 * The base class of all lazy sequences.
+	 *
+	 * @constructor
+	 * @template T
+	 *
+	 * @abstract
+	 * @memberof libjass
+	 */
 	export class LazySequence<T> {
-		/**
-		 * The base class of all lazy sequences.
-		 *
-		 * @constructor
-		 * @template T
-		 */
 		constructor() { }
 
 		/**
+		 * Applies a transform to the elements of this sequence.
+		 *
 		 * @template U
+		 *
 		 * @param {function(T): U} transform A function (element) -> (transformedElement)
 		 * @return {!LazySequence.<U>} A new LazySequence with the given transform applied
 		 */
@@ -47,6 +53,8 @@ module libjass {
 		}
 
 		/**
+		 * Filters the elements of this sequence.
+		 *
 		 * @param {function(T): boolean} filter A function (element) -> (Boolean). Returns true if element should remain in the enumeration.
 		 * @return {!LazySequence.<T>} A new LazySequence with the given filter applied
 		 */
@@ -55,23 +63,29 @@ module libjass {
 		}
 
 		/**
-		 * @param {function(T): boolean} filter A function (element) -> (Boolean). Returns false for an element if enumeration of this LazySequence should stop at that element.
+		 * Takes elements from this sequence while the given condition holds.
+		 *
+		 * @param {function(T): boolean} predicate A function (element) -> (Boolean). Returns false for an element if enumeration of this LazySequence should stop at that element.
 		 * @return {!LazySequence.<T>} A new LazySequence which returns new elements from the underlying sequence as long as the predicate returns true for all of them
 		 */
-		takeWhile(filter: (element: T) => boolean): LazySequence<T> {
-			return new LazySequenceTakeWhile<T>(this, filter);
+		takeWhile(predicate: (element: T) => boolean): LazySequence<T> {
+			return new LazySequenceTakeWhile<T>(this, predicate);
 		}
 
 		/**
-		 * @param {function(T): boolean} filter A function (element) -> (Boolean). Returns true for an element if enumeration of this LazySequence should skip all elements upto that element.
+		 * Skips elements from this sequence while the given condition holds, then returns the rest.
+		 *
+		 * @param {function(T): boolean} predicate A function (element) -> (Boolean). Returns true for an element if enumeration of this LazySequence should skip all elements upto that element.
 		 * @return {!LazySequence.<T>} A new LazySequence which returns new elements from the underlying sequence as soon as the predicate returns true for one of them
 		 */
-		skipWhile(filter: (element: T) => boolean): LazySequence<T> {
-			return new LazySequenceSkipWhile<T>(this, filter);
+		skipWhile(predicate: (element: T) => boolean): LazySequence<T> {
+			return new LazySequenceSkipWhile<T>(this, predicate);
 		}
 
 		/**
-		 * @return {Array.<T>}
+		 * Evaluates this LazySequence.
+		 *
+		 * @return {Array.<T>} An array containing the elements of this LazySequence
 		 */
 		toArray(): Array<T> {
 			var result: Array<T> = [];
@@ -94,9 +108,14 @@ module libjass {
 	}
 
 	/**
+	 * Creates a LazySequence backed by an array.
+	 *
 	 * @template T
+	 *
 	 * @param {Array.<T>} array
 	 * @return {!LazySequence.<T>} A LazySequence backed by this Array
+	 *
+	 * @memberof libjass
 	 */
 	export function Lazy<T>(array: Array<T>): LazySequence<T> {
 		return new LazyArray<T>(array);
@@ -111,7 +130,11 @@ module libjass {
 	 * A default Iterator for arrays in case Iterator(Array) is not defined by the browser.
 	 *
 	 * @constructor
+	 *
 	 * @param {!Array} array
+	 *
+	 * @private
+	 * @memberof libjass
 	 */
 	class ArrayIterator implements Iterator {
 		// The index of the element which will be returned in the next call to next()
@@ -147,8 +170,10 @@ module libjass {
 		 * A default function for creating iterators in case it is not defined by the browser.
 		 *
 		 * @param {!*} collection
-		 * @param {boolean=} keysOnly
+		 * @param {boolean=false} keysOnly
 		 * @return {!{next: function(): *}}
+		 *
+		 * @private
 		 */
 		global.Iterator = (collection: any, keysOnly?: boolean): Iterator => {
 			if (keysOnly) {
@@ -172,8 +197,12 @@ module libjass {
 	 *
 	 * @constructor
 	 * @template T
-	 * @extends {LazySequence.<T>}
+	 *
 	 * @param {!Array} array
+	 *
+	 * @extends {libjass.LazySequence.<T>}
+	 * @private
+	 * @memberof libjass
 	 */
 	class LazyArray<T> extends LazySequence<T> {
 		constructor(private _array: Array<T>) {
@@ -189,9 +218,15 @@ module libjass {
 	}
 
 	/**
+	 * The Iterator of a LazyArray.
+	 *
 	 * @constructor
 	 * @template T
+	 *
 	 * @param {!{next: function(): *}} previous
+	 *
+	 * @private
+	 * @memberof libjass
 	 */
 	class LazyArrayIterator<T> implements Iterator {
 		constructor(private _previous: Iterator) { }
@@ -211,9 +246,13 @@ module libjass {
 	 *
 	 * @constructor
 	 * @template T, U
-	 * @extends {LazySequence.<U>}
+	 *
 	 * @param {!*} previous The underlying lazy sequence
 	 * @param {function(T): U} transform The transform function (element) -> (transformedElement)
+	 *
+	 * @extends {libjass.LazySequence.<U>}
+	 * @private
+	 * @memberof libjass
 	 */
 	class LazySequenceMap<T, U> extends LazySequence<U> {
 		constructor(private _previous: any, private _transform: (element: T) => U) {
@@ -231,8 +270,12 @@ module libjass {
 	/**
 	 * @constructor
 	 * @template T, U
+	 *
 	 * @param {!{next: function(): T}} previous
 	 * @param {function(T): U} transform
+	 *
+	 * @private
+	 * @memberof libjass
 	 */
 	class LazySequenceMapIterator<T, U> implements Iterator {
 		constructor(private _previous: Iterator, private _transform: (element: T) => U) { }
@@ -251,9 +294,13 @@ module libjass {
 	 *
 	 * @constructor
 	 * @template T
-	 * @extends {LazySequence.<T>}
+	 *
 	 * @param {!*} previous The underlying lazy sequence
 	 * @param {function(T): boolean} filter The filter function (element) -> (Boolean)
+	 *
+	 * @extends {libjass.LazySequence.<T>}
+	 * @private
+	 * @memberof libjass
 	 */
 	class LazySequenceFilter<T> extends LazySequence<T> {
 		constructor(private _previous: any, private _filter: (element: T) => boolean) {
@@ -271,8 +318,12 @@ module libjass {
 	/**
 	 * @constructor
 	 * @template T
+	 *
 	 * @param {!{next: function(): T}} previous
 	 * @param {function(T): boolean} filter
+	 *
+	 * @private
+	 * @memberof libjass
 	 */
 	class LazySequenceFilterIterator<T> implements Iterator {
 		constructor(private _previous: Iterator, private _filter: (element: T) => boolean) { }
@@ -297,9 +348,13 @@ module libjass {
 	 *
 	 * @constructor
 	 * @template T
-	 * @extends {LazySequence.<T>}
+	 *
 	 * @param {!*} previous The underlying lazy sequence
 	 * @param {function(T): boolean} predicate The predicate function (element) -> (Boolean)
+	 *
+	 * @extends {libjass.LazySequence.<T>}
+	 * @private
+	 * @memberof libjass
 	 */
 	class LazySequenceTakeWhile<T> extends LazySequence<T> {
 		constructor(private _previous: any, private _predicate: (element: T) => boolean) {
@@ -317,8 +372,12 @@ module libjass {
 	/**
 	 * @constructor
 	 * @template T
+	 *
 	 * @param {!{next: function(): T}} previous
 	 * @param {function(T): boolean} predicate
+	 *
+	 * @private
+	 * @memberof libjass
 	 */
 	class LazySequenceTakeWhileIterator<T> implements Iterator {
 		// Set to true when an element not matching the predicate is found
@@ -355,9 +414,13 @@ module libjass {
 	 *
 	 * @constructor
 	 * @template T
-	 * @extends {LazySequence.<T>}
+	 *
 	 * @param {!*} previous The underlying lazy sequence
 	 * @param {function(T): boolean} predicate The predicate function (element) -> (Boolean)
+	 *
+	 * @extends {libjass.LazySequence.<T>}
+	 * @private
+	 * @memberof libjass
 	 */
 	class LazySequenceSkipWhile<T> extends LazySequence<T> {
 		constructor(private _previous: any, private _predicate: (element: T) => boolean) {
@@ -375,8 +438,12 @@ module libjass {
 	/**
 	 * @constructor
 	 * @template T
+	 *
 	 * @param {!{next: function(): T}} previous
 	 * @param {function(T): boolean} predicate
+	 *
+	 * @private
+	 * @memberof libjass
 	 */
 	class LazySequenceSkipWhileIterator<T> implements Iterator {
 		// Set to true when an element not matching the predicate is found

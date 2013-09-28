@@ -21,6 +21,20 @@
 ///<reference path="libjass.ts" />
 
 module libjass {
+	/**
+	 * This class represents a dialogue in an ASS script.
+	 *
+	 * @constructor
+	 * @param {!Object} template The template object that contains the dialogue's properties. It is a map of the string values read from the ASS file.
+	 * @param {string} template["Style"] The name of the default style of this dialogue
+	 * @param {string} template["Start"] The start time
+	 * @param {string} template["End"] The end time
+	 * @param {string} template["Layer"] The layer number
+	 * @param {string} template["Text"] The text of this dialogue
+	 * @param {ASS} ass The ASS object to which this dialogue belongs
+	 *
+	 * @memberof libjass
+	 */
 	export class Dialogue {
 		private static _lastDialogueId = -1;
 		private static _animationStyleElement: HTMLStyleElement = null;
@@ -61,26 +75,57 @@ module libjass {
 			}
 		}
 
+		/**
+		 * The unique ID of this dialogue. Auto-generated.
+		 *
+		 * @type {number}
+		 */
 		get id(): number {
 			return this._id;
 		}
 
+		/**
+		 * The start time of this dialogue.
+		 *
+		 * @type {number}
+		 */
 		get start(): number {
 			return this._start;
 		}
 
+		/**
+		 * The end time of this dialogue.
+		 *
+		 * @type {number}
+		 */
 		get end(): number {
 			return this._end;
 		}
 
+		/**
+		 * The alignment number of this dialogue.
+		 * Defaults to the alignment specified in the style but can change after preRender() is called if the dialogue contains {\an} tags.
+		 *
+		 * @type {number}
+		 */
 		get alignment(): number {
 			return this._alignment;
 		}
 
+		/**
+		 * The layer number of this dialogue.
+		 *
+		 * @type {number}
+		 */
 		get layer(): number {
 			return this._layer;
 		}
 
+		/**
+		 * The parts of this dialogue.
+		 *
+		 * @type {!Array.<!libjass.tags.Tag>}
+		 */
 		get parts(): tags.Tag[] {
 			return this._parts;
 		}
@@ -131,7 +176,7 @@ module libjass {
 		}
 
 		/**
-		 * @return {string}
+		 * @return {string} A simple representation of this dialogue's properties and tags.
 		 */
 		toString(): string {
 			return "#" + this._id + " [" + this._start.toFixed(3) + "-" + this._end.toFixed(3) + "] " + this._parts.join(", ");
@@ -142,12 +187,12 @@ module libjass {
 		 *
 		 * @param {string} string
 		 * @return {number}
+		 *
+		 * @private
 		 */
 		private static _toTime(str: string): number {
 			return str.split(":").reduce((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);
 		}
-
-		private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);
 
 		private _preRender(): void {
 			var sub = document.createElement("div");
@@ -409,6 +454,17 @@ module libjass {
 		}
 	}
 
+	/**
+	 * This class represents a collection of keyframes. Each keyframe contains one or more CSS properties.
+	 * The collection can then be converted to a CSS3 representation.
+	 *
+	 * @constructor
+	 * @param {number} id The ID of the dialogue that this keyframe is associated with
+	 * @param {number} start The start time of the dialogue that this keyframe is associated with
+	 * @param {number} end The end time of the dialogue that this keyframe is associated with
+	 *
+	 * @private
+	 */
 	class KeyframeCollection {
 		/** @type {!Object.<string, !Object.<string, string>>} */
 		private _keyframes: Object = Object.create(null);
@@ -416,6 +472,8 @@ module libjass {
 		constructor(private _id: number, private _start: number, private _end: number) { }
 
 		/**
+		 * Add a new keyframe at the given time that sets the given CSS property to the given value.
+		 *
 		 * @param {number} time
 		 * @param {string} property
 		 * @param {string} value
@@ -456,6 +514,19 @@ module libjass {
 		}
 	}
 
+	/**
+	 * This class represents the style attribute of a span.
+	 * As a Dialogue's div is rendered, individual tags are added to span's, and this class is used to maintain the style attribute of those.
+	 *
+	 * @constructor
+	 * @param {!libjass.Style} style The default style for the dialogue this object is associated with
+	 * @param {string} transformOrigin The transform origin of the dialogue this object is associated with
+	 * @param {number} scaleX The horizontal scaling of the dialogue this object is associated with
+	 * @param {number} scaleY The vertical scaling of the dialogue this object is associated with
+	 * @param {number} dpi The DPI of the ASS script this object is associated with
+	 *
+	 * @private
+	 */
 	class SpanStyles {
 		private _italic: boolean;
 		private _bold: Object;
@@ -485,6 +556,11 @@ module libjass {
 			this.reset();
 		}
 
+		/**
+		 * Resets the styles to the defaults provided by the argument.
+		 *
+		 * @param {!libjass.Style=} newStyle The new defaults to reset the style to. If unspecified, the new style is the original style this object was created with.
+		 */
 		reset(newStyle: Style = this._style): void {
 			this.italic = newStyle.italic;
 			this.bold = newStyle.bold;
@@ -511,6 +587,11 @@ module libjass {
 			this.blur = null;
 		}
 
+		/**
+		 * Sets the style attribute on the given span element.
+		 *
+		 * @param {!HTMLSpanElement} span
+		 */
 		setStylesOnSpan(span: HTMLSpanElement): void {
 			if (this._italic) {
 				span.style.fontStyle = "italic";
@@ -593,66 +674,146 @@ module libjass {
 			}
 		}
 
+		/**
+		 * Sets the italic property. null defaults it to the style's original value.
+		 *
+		 * @type {?boolean}
+		 */
 		set italic(value: boolean) {
 			this._italic = SpanStyles._valueOrDefault(value, this._style.italic);
 		}
 
+		/**
+		 * Sets the bold property. null defaults it to the style's original value.
+		 *
+		 * @type {(?number|?boolean)}
+		 */
 		set bold(value: Object) {
 			this._bold = SpanStyles._valueOrDefault(value, this._style.bold);
 		}
 
+		/**
+		 * Sets the underline property. null defaults it to the style's original value.
+		 *
+		 * @type {?boolean}
+		 */
 		set underline(value: boolean) {
 			this._underline = SpanStyles._valueOrDefault(value, this._style.underline);
 		}
 
+		/**
+		 * Sets the strike-through property. null defaults it to the style's original value.
+		 *
+		 * @type {?boolean}
+		 */
 		set strikeThrough(value: boolean) {
 			this._strikeThrough = SpanStyles._valueOrDefault(value, this._style.strikeThrough);
 		}
 
+		/**
+		 * Sets the outline width property. null defaults it to the style's original outline width value.
+		 *
+		 * @type {?number}
+		 */
 		set outlineWidthX(value: number) {
 			this._outlineWidthX = SpanStyles._valueOrDefault(value, this._style.outlineWidth);
 		}
 
+		/**
+		 * Sets the outline height property. null defaults it to the style's original outline width value.
+		 *
+		 * @type {?number}
+		 */
 		set outlineWidthY(value: number) {
 			this._outlineWidthY = SpanStyles._valueOrDefault(value, this._style.outlineWidth);
 		}
 
+		/**
+		 * Sets the blur property. null defaults it to 0.
+		 *
+		 * @type {?number}
+		 */
 		set blur(value: number) {
 			this._blur = SpanStyles._valueOrDefault(value, 0);
 		}
 
+		/**
+		 * Sets the font name property. null defaults it to the style's original value.
+		 *
+		 * @type {?string}
+		 */
 		set fontName(value: string) {
 			this._fontName = SpanStyles._valueOrDefault(value, this._style.fontName);
 		}
 
+		/**
+		 * Sets the font size property. null defaults it to the style's original value.
+		 *
+		 * @type {?number}
+		 */
 		set fontSize(value: number) {
 			this._fontSize = SpanStyles._valueOrDefault(value, this._style.fontSize);
 		}
 
+		/**
+		 * Sets the horizontal font scaling property. null defaults it to the style's original value.
+		 *
+		 * @type {?number}
+		 */
 		set fontScaleX(value: number) {
 			this._fontScaleX = SpanStyles._valueOrDefault(value, this._style.fontScaleX);
 		}
 
+		/**
+		 * Sets the vertical font scaling property. null defaults it to the style's original value.
+		 *
+		 * @type {?number}
+		 */
 		set fontScaleY(value: number) {
 			this._fontScaleY = SpanStyles._valueOrDefault(value, this._style.fontScaleY);
 		}
 
+		/**
+		 * Sets the letter spacing property. null defaults it to the style's original value.
+		 *
+		 * @type {?number}
+		 */
 		set letterSpacing(value: number) {
 			this._letterSpacing = SpanStyles._valueOrDefault(value, this._style.letterSpacing);
 		}
 
+		/**
+		 * Sets the primary color property. null defaults it to the style's original value.
+		 *
+		 * @type {libjass.tags.Color}
+		 */
 		set primaryColor(value: tags.Color) {
 			this._primaryColor = SpanStyles._valueOrDefault(value, this._style.primaryColor);
 		}
 
+		/**
+		 * Sets the outline color property. null defaults it to the style's original value.
+		 *
+		 * @type {libjass.tags.Color}
+		 */
 		set outlineColor(value: tags.Color) {
 			this._outlineColor = SpanStyles._valueOrDefault(value, this._style.outlineColor);
 		}
 
+		/**
+		 * Sets the primary alpha property.
+		 *
+		 * @type {?number}
+		 */
 		set primaryAlpha(value: number) {
 			this._primaryAlpha = value;
 		}
 
+		/**
+		 * Sets the outline alpha property.
+		 *
+		 * @type {?number}
+		 */
 		set outlineAlpha(value: number) {
 			this._outlineAlpha = value;
 		}
