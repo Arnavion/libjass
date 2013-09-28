@@ -27,7 +27,7 @@ interface Iterator {
 declare function Iterator(collection: any, keysOnly?: boolean): Iterator
 declare var StopIteration: any
 
-module libjass {
+module libjass.iterators {
 	/**
 	 * The base class of all lazy sequences.
 	 *
@@ -35,7 +35,7 @@ module libjass {
 	 * @template T
 	 *
 	 * @abstract
-	 * @memberof libjass
+	 * @memberof libjass.iterators
 	 */
 	export class LazySequence<T> {
 		constructor() { }
@@ -115,7 +115,7 @@ module libjass {
 	 * @param {Array.<T>} array
 	 * @return {!LazySequence.<T>} A LazySequence backed by this Array
 	 *
-	 * @memberof libjass
+	 * @memberof libjass.iterators
 	 */
 	export function Lazy<T>(array: Array<T>): LazySequence<T> {
 		return new LazyArray<T>(array);
@@ -134,7 +134,7 @@ module libjass {
 	 * @param {!Array} array
 	 *
 	 * @private
-	 * @memberof libjass
+	 * @memberof libjass.iterators
 	 */
 	class ArrayIterator implements Iterator {
 		// The index of the element which will be returned in the next call to next()
@@ -200,9 +200,9 @@ module libjass {
 	 *
 	 * @param {!Array} array
 	 *
-	 * @extends {libjass.LazySequence.<T>}
+	 * @extends {libjass.iterators.LazySequence.<T>}
 	 * @private
-	 * @memberof libjass
+	 * @memberof libjass.iterators
 	 */
 	class LazyArray<T> extends LazySequence<T> {
 		constructor(private _array: Array<T>) {
@@ -226,7 +226,7 @@ module libjass {
 	 * @param {!{next: function(): *}} previous
 	 *
 	 * @private
-	 * @memberof libjass
+	 * @memberof libjass.iterators
 	 */
 	class LazyArrayIterator<T> implements Iterator {
 		constructor(private _previous: Iterator) { }
@@ -250,9 +250,9 @@ module libjass {
 	 * @param {!*} previous The underlying lazy sequence
 	 * @param {function(T): U} transform The transform function (element) -> (transformedElement)
 	 *
-	 * @extends {libjass.LazySequence.<U>}
+	 * @extends {libjass.iterators.LazySequence.<U>}
 	 * @private
-	 * @memberof libjass
+	 * @memberof libjass.iterators
 	 */
 	class LazySequenceMap<T, U> extends LazySequence<U> {
 		constructor(private _previous: any, private _transform: (element: T) => U) {
@@ -275,7 +275,7 @@ module libjass {
 	 * @param {function(T): U} transform
 	 *
 	 * @private
-	 * @memberof libjass
+	 * @memberof libjass.iterators
 	 */
 	class LazySequenceMapIterator<T, U> implements Iterator {
 		constructor(private _previous: Iterator, private _transform: (element: T) => U) { }
@@ -298,9 +298,9 @@ module libjass {
 	 * @param {!*} previous The underlying lazy sequence
 	 * @param {function(T): boolean} filter The filter function (element) -> (Boolean)
 	 *
-	 * @extends {libjass.LazySequence.<T>}
+	 * @extends {libjass.iterators.LazySequence.<T>}
 	 * @private
-	 * @memberof libjass
+	 * @memberof libjass.iterators
 	 */
 	class LazySequenceFilter<T> extends LazySequence<T> {
 		constructor(private _previous: any, private _filter: (element: T) => boolean) {
@@ -323,7 +323,7 @@ module libjass {
 	 * @param {function(T): boolean} filter
 	 *
 	 * @private
-	 * @memberof libjass
+	 * @memberof libjass.iterators
 	 */
 	class LazySequenceFilterIterator<T> implements Iterator {
 		constructor(private _previous: Iterator, private _filter: (element: T) => boolean) { }
@@ -352,9 +352,9 @@ module libjass {
 	 * @param {!*} previous The underlying lazy sequence
 	 * @param {function(T): boolean} predicate The predicate function (element) -> (Boolean)
 	 *
-	 * @extends {libjass.LazySequence.<T>}
+	 * @extends {libjass.iterators.LazySequence.<T>}
 	 * @private
-	 * @memberof libjass
+	 * @memberof libjass.iterators
 	 */
 	class LazySequenceTakeWhile<T> extends LazySequence<T> {
 		constructor(private _previous: any, private _predicate: (element: T) => boolean) {
@@ -377,7 +377,7 @@ module libjass {
 	 * @param {function(T): boolean} predicate
 	 *
 	 * @private
-	 * @memberof libjass
+	 * @memberof libjass.iterators
 	 */
 	class LazySequenceTakeWhileIterator<T> implements Iterator {
 		// Set to true when an element not matching the predicate is found
@@ -418,9 +418,9 @@ module libjass {
 	 * @param {!*} previous The underlying lazy sequence
 	 * @param {function(T): boolean} predicate The predicate function (element) -> (Boolean)
 	 *
-	 * @extends {libjass.LazySequence.<T>}
+	 * @extends {libjass.iterators.LazySequence.<T>}
 	 * @private
-	 * @memberof libjass
+	 * @memberof libjass.iterators
 	 */
 	class LazySequenceSkipWhile<T> extends LazySequence<T> {
 		constructor(private _previous: any, private _predicate: (element: T) => boolean) {
@@ -443,7 +443,7 @@ module libjass {
 	 * @param {function(T): boolean} predicate
 	 *
 	 * @private
-	 * @memberof libjass
+	 * @memberof libjass.iterators
 	 */
 	class LazySequenceSkipWhileIterator<T> implements Iterator {
 		// Set to true when an element not matching the predicate is found
