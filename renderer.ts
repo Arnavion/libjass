@@ -399,8 +399,17 @@ module libjass.renderers {
 			});
 
 			if (DefaultRenderer._animationStyleElement === null) {
-				DefaultRenderer._animationStyleElement = <HTMLStyleElement>document.querySelector("#animation-styles");
+				var existingStyleElement = <HTMLStyleElement>document.querySelector("#libjass-animation-styles");
+				if (existingStyleElement === null) {
+					existingStyleElement = document.createElement("style");
+					existingStyleElement.id = "libjass-animation-styles";
+					existingStyleElement.type = "text/css";
+					document.querySelector("head").appendChild(existingStyleElement);
+				}
+
+				DefaultRenderer._animationStyleElement = existingStyleElement;
 			}
+
 			DefaultRenderer._animationStyleElement.appendChild(document.createTextNode(keyframes.toString()));
 
 			var scaleX = this._ass.scaleX;
