@@ -171,11 +171,6 @@ module libjass {
 		scaleTo(videoWidth: number, videoHeight: number): void {
 			this._scaleX = videoWidth / this._resolutionX;
 			this._scaleY = videoHeight / this._resolutionY;
-
-			// Any dialogues which have been rendered need to be re-rendered.
-			this._dialogues.forEach(dialogue => {
-				dialogue.unPreRender();
-			});
 		}
 	}
 
@@ -413,6 +408,169 @@ module libjass {
 			return this._marginVertical;
 		}
 	};
+
+	/**
+	 * This class represents a dialogue in an ASS script.
+	 *
+	 * @constructor
+	 * @param {!Object} template The template object that contains the dialogue's properties. It is a map of the string values read from the ASS file.
+	 * @param {string} template["Style"] The name of the default style of this dialogue
+	 * @param {string} template["Start"] The start time
+	 * @param {string} template["End"] The end time
+	 * @param {string} template["Layer"] The layer number
+	 * @param {string} template["Text"] The text of this dialogue
+	 * @param {ASS} ass The ASS object to which this dialogue belongs
+	 *
+	 * @memberof libjass
+	 */
+	export class Dialogue {
+		private static _lastDialogueId = -1;
+
+		private _id: number;
+
+		private _style: Style;
+
+		private _start: number;
+		private _end: number;
+
+		private _layer: number;
+		private _alignment: number;
+		private _transformOrigin: string;
+
+		private _parts: tags.Tag[];
+
+		private _sub: HTMLDivElement = null;
+
+		constructor(template: Template, ass: ASS) {
+			this._id = ++Dialogue._lastDialogueId;
+
+			this._style = ass.styles.filter(aStyle => aStyle.name === template["Style"])[0];
+
+			this._start = Dialogue._toTime(template["Start"]);
+			this._end = Dialogue._toTime(template["End"]);
+
+			this._layer = Math.max(parseInt(template["Layer"]), 0);
+
+			this._alignment = this._style.alignment;
+
+			this._parts = <tags.Tag[]>parser.parse(template["Text"], "dialogueParts");
+
+			this._parts.forEach(part => {
+				if (part instanceof tags.Alignment) {
+					this._alignment = (<tags.Alignment>part).value;
+				}
+			});
+
+			this._setTransformOrigin();
+
+			if (libjass.debugMode) {
+				if (this._parts.some(part => part instanceof tags.Comment && (<tags.Comment>part).value.indexOf("\\") !== -1)) {
+					console.warn("Possible incorrect parse: " + this.toString());
+				}
+			}
+		}
+
+		/**
+		 * The unique ID of this dialogue. Auto-generated.
+		 *
+		 * @type {number}
+		 */
+		get id(): number {
+			return this._id;
+		}
+
+		/**
+		 * The start time of this dialogue.
+		 *
+		 * @type {number}
+		 */
+		get start(): number {
+			return this._start;
+		}
+
+		/**
+		 * The end time of this dialogue.
+		 *
+		 * @type {number}
+		 */
+		get end(): number {
+			return this._end;
+		}
+
+		get style(): Style {
+			return this._style;
+		}
+
+		/**
+		 * The alignment number of this dialogue.
+		 * Defaults to the alignment specified in the style but can change after preRender() is called if the dialogue contains {\an} tags.
+		 *
+		 * @type {number}
+		 */
+		get alignment(): number {
+			return this._alignment;
+		}
+
+		get transformOrigin(): string {
+			return this._transformOrigin;
+		}
+
+		/**
+		 * The layer number of this dialogue.
+		 *
+		 * @type {number}
+		 */
+		get layer(): number {
+			return this._layer;
+		}
+
+		/**
+		 * The parts of this dialogue.
+		 *
+		 * @type {!Array.<!libjass.tags.Tag>}
+		 */
+		get parts(): tags.Tag[] {
+			return this._parts;
+		}
+
+		/**
+		 * @return {string} A simple representation of this dialogue's properties and tags.
+		 */
+		toString(): string {
+			return "#" + this._id + " [" + this._start.toFixed(3) + "-" + this._end.toFixed(3) + "] " + this._parts.join(", ");
+		}
+
+		/**
+		 * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
+		 *
+		 * @param {string} string
+		 * @return {number}
+		 *
+		 * @private
+		 */
+		private static _toTime(str: string): number {
+			return str.split(":").reduce((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);
+		}
+
+		private _setTransformOrigin(): void {
+			var transformOriginX: number;
+			var transformOriginY: number;
+
+			switch (this._alignment) {
+				case 1: transformOriginX =   0; transformOriginY = 100; break;
+				case 2: transformOriginX =  50; transformOriginY = 100; break;
+				case 3: transformOriginX = 100; transformOriginY = 100; break;
+				case 4: transformOriginX =   0; transformOriginY =  50; break;
+				case 5: transformOriginX =  50; transformOriginY =  50; break;
+				case 6: transformOriginX = 100; transformOriginY =  50; break;
+				case 7: transformOriginX =   0; transformOriginY =   0; break;
+				case 8: transformOriginX =  50; transformOriginY =   0; break;
+				case 9: transformOriginX = 100; transformOriginY =   0; break;
+			}
+
+			this._transformOrigin = transformOriginX + "% " + transformOriginY + "%";
+		}
+	}
 
 	/**
 	 * A template object. It is a map of string keys and string values.
