@@ -21,6 +21,18 @@
 ///<reference path="libjass.ts" />
 
 module libjass {
+	/**
+	 * A default renderer implementation.
+	 *
+	 * @constructor
+	 *
+	 * @param {!HTMLVideoElement} video
+	 * @param {!HTMLDivElement} subsWrapper
+	 * @param {!libjass.ASS} ass
+	 * @param {!libjass.RendererSettings} settings
+	 *
+	 * @memberof libjass
+	 */
 	export class DefaultRenderer {
 		private static _animationStyleElement: HTMLStyleElement = null;
 
@@ -37,7 +49,7 @@ module libjass {
 
 		private _videoIsFullScreen: boolean = false;
 
-		private _eventListeners: Object = Object.create(null);
+		private _eventListeners: EventListenersMap = Object.create(null);
 
 		constructor(private _video: HTMLVideoElement, private _subsWrapper: HTMLDivElement, private _ass: ASS, private _settings: RendererSettings) {
 			RendererSettings.prototype.initializeUnsetProperties.call(_settings);
@@ -193,7 +205,7 @@ module libjass {
 		 * Returns the subtitle div for display. The currentTime is used to shift the animations appropriately, so that at the time the
 		 * div is inserted into the DOM and the animations begin, they are in sync with the video time.
 		 *
-		 * @param {libjass.Dialogue} dialogue
+		 * @param {!libjass.Dialogue} dialogue
 		 * @return {!HTMLDivElement}
 		 */
 		public draw(dialogue: Dialogue): HTMLDivElement {
@@ -220,13 +232,29 @@ module libjass {
 			return result;
 		}
 
-		public addEventListener(type: string, listener: Object): void {
-			var listeners = <Array<Object>>this._eventListeners[type];
+		/**
+		 * Add a listener for the given event.
+		 *
+		 * The "ready" event is fired when fonts have been preloaded if settings.preLoadFonts is true, or in the next tick after the DefaultRenderer object is constructed otherwise.
+		 *
+		 * The "fullScreenChange" event is fired when the browser's fullscreenchange event is fired for the video element.
+		 *
+		 * @param {string} type The type of event to attach the listener for. One of "ready" and "fullScreenChange".
+		 * @param {!Function} listener The listener
+		 */
+		public addEventListener(type: string, listener: Function): void {
+			var listeners = <Function[]>this._eventListeners[type];
 			if (listeners) {
 				listeners.push(listener);
 			}
 		}
 
+		/**
+		 * Resize the video element and subtitles to the new dimensions.
+		 *
+		 * @param {number} width
+		 * @param {number} height
+		 */
 		public resizeVideo(width: number, height: number): void {
 			this._currentSubs.forEach(removeElement);
 
@@ -237,7 +265,7 @@ module libjass {
 
 			this._ass.scaleTo(width, height);
 
-			// Any dialogues which have been rendered need to be re-rendered.
+			// Any dialogues which have been pre-rendered will need to be pre-rendered again.
 			Object.keys(this._preRenderedSubs).forEach(key => {
 				delete this._preRenderedSubs[key];
 			});
@@ -335,7 +363,7 @@ module libjass {
 		}
 
 		private _dispatchEvent(type: string, ...args: Object[]): void {
-			var listeners = <Array<Object>>this._eventListeners[type];
+			var listeners = <Function[]>this._eventListeners[type];
 			if (listeners) {
 				listeners.forEach((listener: Function) => {
 					listener.apply(this, args);
@@ -591,9 +619,17 @@ module libjass {
 		 * Discards the pre-rendered subtitle div created from an earlier call to _preRender().
 		 */
 		private _unPreRender(dialogue: Dialogue): void {
+			delete this._preRenderedSubs[String(dialogue.id)];
 		}
 	}
 
+	/**
+	 * Settings for the default renderer.
+	 *
+	 * @constructor
+	 *
+	 * @memberof libjass
+	 */
 	export class RendererSettings {
 		public preLoadFonts: boolean;
 		public fontMap: FontMap;
@@ -646,6 +682,10 @@ module libjass {
 		private static _stripQuotes(str: string): string {
 			return str.match(/^["']?(.*?)["']?/)[1];
 		}
+	}
+
+	interface EventListenersMap {
+		[key: string]: Function[];
 	}
 
 	interface PreRenderedSubsMap {
