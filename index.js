@@ -39,9 +39,9 @@ addEventListener("DOMContentLoaded", function () {
 		if (videoMetadataLoaded && ass) {
 			ass.dpi = parseFloat(getComputedStyle(document.querySelector("#dpi-div")).height.match(/(\d+)px/)[1]);
 
-			var renderer = new libjass.DefaultRenderer(video, document.querySelector("#subs"), ass, {
+			var renderer = new libjass.renderers.DefaultRenderer(video, document.querySelector("#subs"), ass, {
 				preloadFonts: true,
-				fontMap: libjass.FontMap.fromStyleElement(document.querySelector("#font-map"))
+				fontMap: libjass.renderers.FontMap.fromStyleElement(document.querySelector("#font-map"))
 			});
 
 			renderer.addEventListener("ready", function () {

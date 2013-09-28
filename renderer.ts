@@ -20,7 +20,7 @@
 
 ///<reference path="libjass.ts" />
 
-module libjass {
+module libjass.renderers {
 	/**
 	 * A default renderer implementation.
 	 *
@@ -31,7 +31,7 @@ module libjass {
 	 * @param {!libjass.ASS} ass
 	 * @param {!libjass.RendererSettings} settings
 	 *
-	 * @memberof libjass
+	 * @memberof libjass.renderers
 	 */
 	export class DefaultRenderer {
 		private static _animationStyleElement: HTMLStyleElement = null;
@@ -628,7 +628,7 @@ module libjass {
 	 *
 	 * @constructor
 	 *
-	 * @memberof libjass
+	 * @memberof libjass.renderers
 	 */
 	export class RendererSettings {
 		public preLoadFonts: boolean;
