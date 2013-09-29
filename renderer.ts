@@ -686,7 +686,7 @@ module libjass.renderers {
 		public removeAllDialogues(): void {
 			super.removeAllDialogues();
 
-			(<HTMLDivElement[]>([].slice.call(this._subsWrapper.querySelectorAll("[data-dialogue-id]")))).forEach(libjass.removeElement);
+			(<HTMLDivElement[]>(Array.prototype.slice.call(this._subsWrapper.querySelectorAll("[data-dialogue-id]")))).forEach(libjass.removeElement);
 		}
 
 		/**
