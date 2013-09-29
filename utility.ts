@@ -48,7 +48,7 @@ module libjass {
 	 * @memberof libjass
 	 */
 	export function removeElement(element: Element): void {
-		if (element.parentNode !== null) {
+		if (element !== null && element.parentNode !== null) {
 			element.parentNode.removeChild(element);
 		}
 	}
