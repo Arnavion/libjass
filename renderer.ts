@@ -328,7 +328,7 @@ module libjass.renderers {
 			this._subsWrapper.style.left = ((width - subsWrapperWidth) / 2) + "px";
 			this._subsWrapper.style.top = ((height - subsWrapperHeight) / 2) + "px";
 
-			this.ass.scaleTo(width, height);
+			this.ass.scaleTo(subsWrapperWidth, subsWrapperHeight);
 
 			// Any dialogues which have been pre-rendered will need to be pre-rendered again.
 			Object.keys(this._preRenderedSubs).forEach(key => {
