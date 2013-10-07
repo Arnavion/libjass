@@ -90,12 +90,8 @@ module libjass.iterators {
 		toArray(): Array<T> {
 			var result: Array<T> = [];
 
-			var iterator = Iterator(this);
-
 			try {
-				for (; ;) {
-					result.push(iterator.next());
-				}
+				this._toArray(result);
 			}
 			catch (ex) {
 				if (ex !== StopIteration) {
@@ -104,6 +100,21 @@ module libjass.iterators {
 			}
 
 			return result;
+		}
+
+		/**
+		 * This is the implementation of the body of the try-catch in toArray(). It's a separate method since JS engines don't optimize functions with try-catch blocks.
+		 *
+		 * @param {Array.<T>} result The array to fill with elements
+		 *
+		 * @private
+		 */
+		_toArray(result: Array<T>): void {
+			var iterator = Iterator(this);
+
+			for (; ;) {
+				result.push(iterator.next());
+			}
 		}
 	}
 
