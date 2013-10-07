@@ -222,7 +222,7 @@ module libjass.renderers {
 			else {
 				var allFonts = new Set<string>();
 
-				this.ass.styles.forEach((style: Style) => {
+				Object.keys(this.ass.styles).map((name: string) => this.ass.styles[name]).forEach((style: Style) => {
 					allFonts.add(style.fontName);
 				});
 
@@ -569,7 +569,7 @@ module libjass.renderers {
 					var newStyleName = (<tags.Reset>part).value;
 					var newStyle: Style = null;
 					if (newStyleName !== null) {
-						newStyle = this.ass.styles.filter(style => style.name === newStyleName)[0];
+						newStyle = this.ass.styles[newStyleName];
 					}
 					currentSpanStyles.reset(newStyle);
 				}

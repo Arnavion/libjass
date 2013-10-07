@@ -27,6 +27,10 @@ module libjass {
 
 	export var parser: Parser;
 
+	export interface StyleMap {
+		[name: string]: Style;
+	}
+
 	/**
 	 * This class represents an ASS script. It contains information about the script, an array of Styles, and an array of Dialogues.
 	 *
@@ -44,7 +48,7 @@ module libjass {
 
 		private _dpi: number;
 
-		private _styles: Style[] = [];
+		private _styles: StyleMap = Object.create(null);
 		private _dialogues: Dialogue[] = [];
 
 		constructor(rawASS: string) {
@@ -74,8 +78,9 @@ module libjass {
 						console.log("Read style: " + JSON.stringify(styleTemplate), styleTemplate);
 					}
 
-					// Create the style and add it to the styles array
-					this._styles.push(new Style(styleTemplate));
+					// Create the style and add it to the styles map
+					var newStyle = new Style(styleTemplate);
+					this._styles[newStyle.name] = newStyle;
 				}
 			});
 
@@ -145,10 +150,9 @@ module libjass {
 		/**
 		 * The styles in this script.
 		 *
-		 * @type {!Array.<!libjass.Style>}
+		 * @type {!Object.<string, !libjass.Style>}
 		 */
-
-		get styles(): Style[] {
+		get styles(): StyleMap {
 			return this._styles;
 		}
 
@@ -444,7 +448,7 @@ module libjass {
 		constructor(template: Template, ass: ASS) {
 			this._id = ++Dialogue._lastDialogueId;
 
-			this._style = ass.styles.filter(aStyle => aStyle.name === template["Style"])[0];
+			this._style = ass.styles[template["Style"]];
 
 			this._start = Dialogue._toTime(template["Start"]);
 			this._end = Dialogue._toTime(template["End"]);
