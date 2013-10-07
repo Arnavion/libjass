@@ -19,6 +19,21 @@
 }
 
 @font-face {
+	font-family: "CenturyOldStyle-Light";
+	src: url("/fonts/CENTURYO.TTF");
+}
+
+@font-face {
+	font-family: "CenturyOldStyle-Light";
+	src: url("/fonts/CenturyOldStyle-Light%20Bold.ttf");
+}
+
+@font-face {
+	font-family: "CenturyOldStyle-Light";
+	src: url("/fonts/CenturyOldStyle-Light.ttf");
+}
+
+@font-face {
 	font-family: "Charme";
 	src: url("/fonts/CHARME.TTF");
 }
@@ -64,6 +79,11 @@
 }
 
 @font-face {
+	font-family: "Estrangelo Edessa";
+	src: url("/fonts/estre.ttf");
+}
+
+@font-face {
 	font-family: "Forte";
 	src: url("/fonts/FORTE.TTF");
 }
@@ -84,6 +104,21 @@
 }
 
 @font-face {
+	font-family: "Iwata Mincho Pro-Madoka";
+	src: url("/fonts/IwaMinPro-Lt-Madoka.ttf");
+}
+
+@font-face {
+	font-family: "Iwata Mincho Old Pro-Fate";
+	src: url("/fonts/IwaOMinPro-Bd-Fate.ttf");
+}
+
+@font-face {
+	font-family: "JanieHmkBold";
+	src: url("/fonts/JANIHB.TTF");
+}
+
+@font-face {
 	font-family: "LTFinnegan Medium";
 	src: url("/fonts/LT.ttf");
 }
@@ -95,8 +130,30 @@
 }
 
 @font-face {
+	font-family: "LTFinnegan Medium";
+	src: url("/fonts/LT_italic.ttf");
+	font-style: italic;
+}
+
+@font-face {
 	font-family: "Macron Finnetier Medium";
 	src: url("/fonts/macron%20finnetier%200.3.ttf");
+}
+
+@font-face {
+	font-family: "Montara";
+	src: url("/fonts/Montara-Gothic.otf");
+}
+
+@font-face {
+	font-family: "Montara";
+	src: url("/fonts/Montara-Italic.otf");
+	font-style: italic;
+}
+
+@font-face {
+	font-family: "NewBaskerville";
+	src: url("/fonts/NEWBASK.TTF");
 }
 
 @font-face {
@@ -127,6 +184,11 @@
 @font-face {
 	font-family: "Prototype";
 	src: url("/fonts/Prototype.ttf");
+}
+
+@font-face {
+	font-family: "Reswysokr";
+	src: url("/fonts/Reswysokr.otf");
 }
 
 @font-face {
