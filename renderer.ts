@@ -597,50 +597,45 @@ module libjass.renderers {
 				}
 			});
 
-			if (divTransformStyle) {
-				sub.style.webkitTransform = divTransformStyle;
-				sub.style.webkitTransformOrigin = dialogue.transformOrigin;
-
-				sub.style.transform = divTransformStyle;
-				sub.style.transformOrigin = dialogue.transformOrigin;
-			}
-
 			dialogue.parts.some(part => {
 				if (part instanceof tags.Pos) {
 					var posPart = <tags.Pos>part;
 
-					var absoluteWrapper = document.createElement("div");
-					absoluteWrapper.style.position = "absolute";
-					absoluteWrapper.style.left = (scaleX * posPart.x) + "px";
-					absoluteWrapper.style.top = (scaleY * posPart.y) + "px";
+					sub.style.position = "absolute";
+					sub.style.left = (scaleX * posPart.x) + "px";
+					sub.style.top = (scaleY * posPart.y) + "px";
 
-					sub.style.position = "relative";
-
-					var relativeTop: number;
-					var relativeLeft: number;
+					var translateY: number;
+					var translateX: number;
 					switch (dialogue.alignment) {
-						case 1: relativeLeft =    0; relativeTop = -100; break;
-						case 2: relativeLeft =  -50; relativeTop = -100; break;
-						case 3: relativeLeft = -100; relativeTop = -100; break;
-						case 4: relativeLeft =    0; relativeTop =  -50; break;
-						case 5: relativeLeft =  -50; relativeTop =  -50; break;
-						case 6: relativeLeft = -100; relativeTop =  -50; break;
-						case 7: relativeLeft =    0; relativeTop =    0; break;
-						case 8: relativeLeft =  -50; relativeTop =    0; break;
-						case 9: relativeLeft = -100; relativeTop =    0; break;
+						case 1: translateX =    0; translateY = -100; break;
+						case 2: translateX =  -50; translateY = -100; break;
+						case 3: translateX = -100; translateY = -100; break;
+						case 4: translateX =    0; translateY =  -50; break;
+						case 5: translateX =  -50; translateY =  -50; break;
+						case 6: translateX = -100; translateY =  -50; break;
+						case 7: translateX =    0; translateY =    0; break;
+						case 8: translateX =  -50; translateY =    0; break;
+						case 9: translateX = -100; translateY =    0; break;
 					}
-					sub.style.left = relativeLeft + "%";
-					sub.style.top = relativeTop + "%";
 
-					absoluteWrapper.appendChild(sub);
-
-					sub = absoluteWrapper;
+					divTransformStyle =
+						"translate(" + translateX + "%, " + translateY + "%) translate(-" + sub.style.marginLeft + ", -" + sub.style.marginTop + ") " +
+						divTransformStyle;
 
 					return true;
 				}
 
 				return false;
 			});
+
+			if (divTransformStyle !== "") {
+				sub.style.webkitTransform = divTransformStyle;
+				sub.style.webkitTransformOrigin = dialogue.transformOrigin;
+
+				sub.style.transform = divTransformStyle;
+				sub.style.transformOrigin = dialogue.transformOrigin;
+			}
 
 			sub.setAttribute("data-dialogue-id", String(dialogue.id));
 
