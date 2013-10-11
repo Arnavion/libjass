@@ -137,6 +137,115 @@ module libjass {
 	if (typeof Set === "undefined" || typeof Set.prototype.forEach !== "function") {
 		global.Set = SimpleSet;
 	}
+
+	/**
+	 * Map implementation for browsers that don't support it. Only supports Number and String keys.
+	 *
+	 * Keys and values are stored as properties of an object, with property names derived from the key type.
+	 *
+	 * @constructor
+	 * @template K, V
+	 *
+	 * @private
+	 * @memberof libjass
+	 */
+	class SimpleMap<K, V> implements Map<K, V> {
+		private _data: Object = Object.create(null);
+
+		constructor() { }
+
+		/**
+		 * @param {K} key
+		 * @return {V}
+		 */
+		get(key: K): V {
+			var property = this._keyToProperty(key);
+
+			if (property === null) {
+				return undefined;
+			}
+
+			return this._data[property];
+		}
+
+		/**
+		 * @param {K} key
+		 * @return {boolean}
+		 */
+		has(key: K): boolean {
+			var property = this._keyToProperty(key);
+
+			if (property === null) {
+				return false;
+			}
+
+			return property in this._data;
+		}
+
+		/**
+		 * @param {K} key
+		 * @param {V} value
+		 * @return {Map.<K, V>} This map
+		 */
+		set(key: K, value: V): Map<K, V> {
+			var property = this._keyToProperty(key);
+
+			if (property === null) {
+				throw new Error("This Set implementation only supports string and number values.");
+			}
+
+			this._data[property] = value;
+
+			return this;
+		}
+
+		/**
+		 * @param {function(V, K, Map<K, V>)} callbackfn A function that is called with each key and value in the map.
+		 */
+		forEach(callbackfn: (value: V, index: K, map: Map<K, V>) => void, thisArg?: any): void {
+			Object.keys(this._data).forEach((property: string, index: number): void => {
+				callbackfn.call(thisArg, this._data[property], this._propertyToKey(property), this);
+			});
+		}
+
+		delete(key: K): boolean {
+			throw new Error("This Set implementation doesn't support delete().");
+		}
+
+		clear(): void {
+			throw new Error("This Set implementation doesn't support clear().");
+		}
+
+		get size(): number {
+			throw new Error("This Set implementation doesn't support size.");
+		}
+
+		private _keyToProperty(key: K): string {
+			if (typeof key == "number") {
+				return "#" + key;
+			}
+			else if (typeof key == "string") {
+				return "'" + key;
+			}
+
+			return null;
+		}
+
+		private _propertyToKey(property: string): Object {
+			if (property[0] === "#") {
+				return parseInt(property);
+			}
+			else if (property[0] === "'") {
+				return property.substr(1);
+			}
+
+			return null;
+		}
+	}
+
+	if (typeof Map === "undefined" || typeof Map.prototype.forEach !== "function") {
+		global.Map = SimpleMap;
+	}
 }
 
 var module: any;
