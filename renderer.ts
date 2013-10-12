@@ -319,16 +319,16 @@ module libjass.renderers {
 		public resizeVideo(width: number, height: number): void {
 			this.removeAllDialogues();
 
-			this.video.style.width = width + "px";
-			this.video.style.height = height + "px";
+			this.video.style.width = width.toFixed(3) + "px";
+			this.video.style.height = height.toFixed(3) + "px";
 
 			var ratio = Math.min(width / this.ass.resolutionX, height / this.ass.resolutionY);
 			var subsWrapperWidth = this.ass.resolutionX * ratio;
 			var subsWrapperHeight = this.ass.resolutionY * ratio;
-			this._subsWrapper.style.width = subsWrapperWidth + "px";
-			this._subsWrapper.style.height = subsWrapperHeight + "px";
-			this._subsWrapper.style.left = ((width - subsWrapperWidth) / 2) + "px";
-			this._subsWrapper.style.top = ((height - subsWrapperHeight) / 2) + "px";
+			this._subsWrapper.style.width = subsWrapperWidth.toFixed(3) + "px";
+			this._subsWrapper.style.height = subsWrapperHeight.toFixed(3) + "px";
+			this._subsWrapper.style.left = ((width - subsWrapperWidth) / 2).toFixed(3) + "px";
+			this._subsWrapper.style.top = ((height - subsWrapperHeight) / 2).toFixed(3) + "px";
 
 			this.ass.scaleTo(subsWrapperWidth, subsWrapperHeight);
 
