@@ -26,6 +26,10 @@ body {
 	position: relative;
 }
 
+.libjass-full-screen .wrapper {
+	position: static;
+}
+
 .zoomed, .zoomed * {
 	display: inline-block;
 	font-size: 0;

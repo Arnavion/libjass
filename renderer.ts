@@ -345,6 +345,8 @@ module libjass.renderers {
 			document.addEventListener("mozfullscreenchange", this._onFullScreenChange.bind(this), false);
 			document.addEventListener("fullscreenchange", this._onFullScreenChange.bind(this), false);
 
+			this.resizeVideo(parseInt(this.video.style.width), parseInt(this.video.style.height));
+
 			this._dispatchEvent("ready");
 		}
 
@@ -379,10 +381,17 @@ module libjass.renderers {
 			}
 
 			if (fullScreenElement === this.video) {
+				document.body.className += " libjass-full-screen";
+
 				this.resizeVideo(screen.width, screen.height);
+
 				this._videoIsFullScreen = true;
+
+				this._dispatchEvent("fullScreenChange", this._videoIsFullScreen);
 			}
 			else if (fullScreenElement === null && this._videoIsFullScreen) {
+				document.body.className = document.body.className.replace(/(\s?libjass-full-screen)/g, "");
+
 				this._videoIsFullScreen = false;
 
 				this._dispatchEvent("fullScreenChange", this._videoIsFullScreen);
