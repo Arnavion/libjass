@@ -1,6 +1,21 @@
 @font-face {
+	font-family: "???? Pro";
+	src: url("/fonts/Yryr%20minc%20R.ttf");
+}
+
+@font-face {
 	font-family: "Amienne";
 	src: url("/fonts/Amienne.ttf");
+}
+
+@font-face {
+	font-family: "Arial";
+	src: url("/fonts/arial.ttf");
+}
+
+@font-face {
+	font-family: "ArialMT";
+	src: url("/fonts/arial.ttf");
 }
 
 @font-face {
@@ -14,23 +29,40 @@
 }
 
 @font-face {
+	font-family: "BaarSophia";
+	src: url("/fonts/BAARS.TTF");
+}
+
+@font-face {
+	font-family: "BlueBrush";
+	src: url("/fonts/BlueBrush.otf");
+}
+
+@font-face {
 	font-family: "CAC Moose";
 	src: url("/fonts/CAC%20Moose.ttf");
 }
 
 @font-face {
+	font-family: "CACMoose";
+	src: url("/fonts/CAC%20Moose.ttf");
+}
+
+@font-face {
 	font-family: "CenturyOldStyle-Light";
-	src: url("/fonts/CENTURYO.TTF");
+	src: url("/fonts/CENTURYO.TTF"), url("/fonts/CenturyOldStyle-Light.ttf");
 }
 
 @font-face {
 	font-family: "CenturyOldStyle-Light";
 	src: url("/fonts/CenturyOldStyle-Light%20Bold.ttf");
+	font-weight: bold;
 }
 
 @font-face {
-	font-family: "CenturyOldStyle-Light";
-	src: url("/fonts/CenturyOldStyle-Light.ttf");
+	font-family: "CenturyOldStyle-Light-Bold";
+	src: url("/fonts/CenturyOldStyle-Light%20Bold.ttf");
+	font-weight: bold;
 }
 
 @font-face {
@@ -49,6 +81,11 @@
 }
 
 @font-face {
+	font-family: "CompleteinHim";
+	src: url("/fonts/Complete%20in%20Him.ttf");
+}
+
+@font-face {
 	font-family: "Consolas";
 	src: url("/fonts/consola.ttf");
 }
@@ -56,6 +93,13 @@
 @font-face {
 	font-family: "Consolas";
 	src: url("/fonts/consolab.ttf");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "Consolas-Bold";
+	src: url("/fonts/consolab.ttf");
+	font-weight: bold;
 }
 
 @font-face {
@@ -64,12 +108,44 @@
 }
 
 @font-face {
+	font-family: "ContinuumBold";
+	src: url("/fonts/contb.ttf");
+}
+
+@font-face {
+	font-family: "Designosaur";
+	src: url("/fonts/Designosaur-Regular.ttf");
+}
+
+@font-face {
+	font-family: "Designosaur";
+	src: url("/fonts/Designosaur-Italic.ttf");
+	font-style: italic;
+}
+
+@font-face {
+	font-family: "Designosaur-Italic";
+	src: url("/fonts/Designosaur-Italic.ttf");
+	font-style: italic;
+}
+
+@font-face {
 	font-family: "Elephant";
 	src: url("/fonts/ELEPHNT.TTF");
 }
 
 @font-face {
+	font-family: "Elephant-Regular";
+	src: url("/fonts/ELEPHNT.TTF");
+}
+
+@font-face {
 	font-family: "EngraversGothic BT";
+	src: url("/fonts/Engrvgot.TTF");
+}
+
+@font-face {
+	font-family: "EngraversGothicBT-Regular";
 	src: url("/fonts/Engrvgot.TTF");
 }
 
@@ -84,12 +160,63 @@
 }
 
 @font-face {
+	font-family: "EstrangeloEdessa";
+	src: url("/fonts/estre.ttf");
+}
+
+@font-face {
+	font-family: "Euphemia";
+	src: url("/fonts/Euphemia_0.ttf");
+}
+
+@font-face {
+	font-family: "EuphemiaCAS";
+	src: url("/fonts/Euphemia_0.ttf");
+}
+
+@font-face {
 	font-family: "Forte";
 	src: url("/fonts/FORTE.TTF");
 }
 
 @font-face {
+	font-family: "ForteMT";
+	src: url("/fonts/FORTE.TTF");
+}
+
+@font-face {
+	font-family: "Gandhi Sans";
+	src: url("/fonts/GandhiSans-Bold.otf");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "Gandhi Sans";
+	src: url("/fonts/GandhiSans-BoldItalic.otf");
+	font-weight: bold;
+	font-style: italic;
+}
+
+@font-face {
+	font-family: "GandhiSans-Bold";
+	src: url("/fonts/GandhiSans-Bold.otf");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "GandhiSans-BoldItalic";
+	src: url("/fonts/GandhiSans-BoldItalic.otf");
+	font-weight: bold;
+	font-style: italic;
+}
+
+@font-face {
 	font-family: "HandelGotDBol";
+	src: url("/fonts/HANDGOTB.TTF");
+}
+
+@font-face {
+	font-family: "HandelGotD-Bold";
 	src: url("/fonts/HANDGOTB.TTF");
 }
 
@@ -99,13 +226,23 @@
 }
 
 @font-face {
+	font-family: "HandelGothicBT-Regular";
+	src: url("/fonts/HANDGOTN.TTF");
+}
+
+@font-face {
 	font-family: "HZHandwrite";
 	src: url("/fonts/HZHandwrite.ttf");
 }
 
 @font-face {
-	font-family: "Iwata Mincho Pro-Madoka";
+	font-family: "IwaMinPro-Madoka-Lt";
 	src: url("/fonts/IwaMinPro-Lt-Madoka.ttf");
+}
+
+@font-face {
+	font-family: "IwaOMinPro-Fate-Bd";
+	src: url("/fonts/IwaOMinPro-Bd-Fate.ttf");
 }
 
 @font-face {
@@ -114,30 +251,91 @@
 }
 
 @font-face {
+	font-family: "Iwata Mincho Old Pro-Fate B";
+	src: url("/fonts/IwaOMinPro-Bd-Fate.ttf");
+}
+
+@font-face {
+	font-family: "Iwata Mincho Pro-Madoka";
+	src: url("/fonts/IwaMinPro-Lt-Madoka.ttf");
+}
+
+@font-face {
+	font-family: "Iwata Mincho Pro-Madoka L";
+	src: url("/fonts/IwaMinPro-Lt-Madoka.ttf");
+}
+
+@font-face {
 	font-family: "JanieHmkBold";
 	src: url("/fonts/JANIHB.TTF");
 }
 
 @font-face {
-	font-family: "LTFinnegan Medium";
-	src: url("/fonts/LT.ttf");
+	font-family: "KozGoPro-Heavy-Madoka";
+	src: url("/fonts/KozGoProH-Madoka.ttf");
+	font-weight: bold;
 }
 
 @font-face {
-	font-family: "LTFinnegan Medium";
-	src: url("/fonts/LT_3italic.ttf");
+	font-family: "Kozuka Gothic Pro";
+	src: url("/fonts/KozGoProH-Madoka.ttf");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "KozukaGothicProH-Madoka";
+	src: url("/fonts/KozGoProH-Madoka.ttf");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "LinotypeFinnegan-Medium";
+	src: url("/fonts/LT.ttf"), url("/fonts/macron%20finnetier%200.3.ttf");
+}
+
+@font-face {
+	font-family: "LinotypeFinnegan-MediumIt";
+	src: url("/fonts/LT_3italic.ttf"), url("/fonts/LT_italic.ttf");
 	font-style: italic;
 }
 
 @font-face {
 	font-family: "LTFinnegan Medium";
-	src: url("/fonts/LT_italic.ttf");
+	src: url("/fonts/LT.ttf"), url("/fonts/macron%20finnetier%200.3.ttf");
+}
+
+@font-face {
+	font-family: "LTFinnegan Medium";
+	src: url("/fonts/LT_3italic.ttf"), url("/fonts/LT_italic.ttf");
 	font-style: italic;
 }
 
 @font-face {
 	font-family: "Macron Finnetier Medium";
 	src: url("/fonts/macron%20finnetier%200.3.ttf");
+}
+
+@font-face {
+	font-family: "MacronFinnetier-Medium";
+	src: url("/fonts/macron%20finnetier%200.3.ttf");
+}
+
+@font-face {
+	font-family: "Mentone";
+	src: url("/fonts/mentone-semibol.otf");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "Mentone Lig";
+	src: url("/fonts/mentone-semibol.otf");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "Mentone-SemiBold";
+	src: url("/fonts/mentone-semibol.otf");
+	font-weight: bold;
 }
 
 @font-face {
@@ -152,6 +350,33 @@
 }
 
 @font-face {
+	font-family: "Montara  Gothic";
+	src: url("/fonts/Montara-Gothic.otf");
+}
+
+@font-face {
+	font-family: "Montara  Gothic";
+	src: url("/fonts/Montara-Italic.otf");
+	font-style: italic;
+}
+
+@font-face {
+	font-family: "Montara-Gothic";
+	src: url("/fonts/Montara-Gothic.otf");
+}
+
+@font-face {
+	font-family: "Montara-Italic";
+	src: url("/fonts/Montara-Italic.otf");
+	font-style: italic;
+}
+
+@font-face {
+	font-family: "New";
+	src: url("/fonts/OBGB.TTF");
+}
+
+@font-face {
 	font-family: "NewBaskerville";
 	src: url("/fonts/NEWBASK.TTF");
 }
@@ -162,22 +387,42 @@
 }
 
 @font-face {
-	font-family: "PaintyPaint";
-	src: url("/fonts/PAINP.TTF");
+	font-family: "Old Block Black";
+	src: url("/fonts/OBGB.TTF");
 }
 
 @font-face {
 	font-family: "PaintyPaint";
-	src: url("/fonts/PAINP_0.TTF");
+	src: url("/fonts/PAINP.TTF"), url("/fonts/PAINP_0.TTF");
+}
+
+@font-face {
+	font-family: "PaintyPaint1";
+	src: url("/fonts/PAINP.TTF"), url("/fonts/PAINP_0.TTF");
+}
+
+@font-face {
+	font-family: "Pencilfied";
+	src: url("/fonts/pencilfied.ttf");
+}
+
+@font-face {
+	font-family: "PencilfiedX";
+	src: url("/fonts/pencilfied.ttf");
 }
 
 @font-face {
 	font-family: "Profile";
+	src: url("/fonts/Profile-Medium.otf"), url("/fonts/Profile-Regular.otf");
+}
+
+@font-face {
+	font-family: "Profile-Medium";
 	src: url("/fonts/Profile-Medium.otf");
 }
 
 @font-face {
-	font-family: "Profile";
+	font-family: "Profile-Regular";
 	src: url("/fonts/Profile-Regular.otf");
 }
 
@@ -192,7 +437,32 @@
 }
 
 @font-face {
+	font-family: "Swis721 Hv BT";
+	src: url("/fonts/SWZ721H.TTF");
+}
+
+@font-face {
 	font-family: "Swis721 Md BT";
 	src: url("/fonts/SWZ721M.TTF");
+}
+
+@font-face {
+	font-family: "Swiss721BT-Heavy";
+	src: url("/fonts/SWZ721H.TTF");
+}
+
+@font-face {
+	font-family: "Swiss721BT-Medium";
+	src: url("/fonts/SWZ721M.TTF");
+}
+
+@font-face {
+	font-family: "Yryr minc R";
+	src: url("/fonts/Yryr%20minc%20R.ttf");
+}
+
+@font-face {
+	font-family: "YryrmincR";
+	src: url("/fonts/Yryr%20minc%20R.ttf");
 }
 
