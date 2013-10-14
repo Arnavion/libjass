@@ -235,9 +235,9 @@ module libjass.renderers {
 				});
 
 				var urlsToPreload: string[] = [];
-				this.settings.fontMap.forEach((src: string, name: string) => {
+				this.settings.fontMap.forEach((src: string[], name: string) => {
 					if (allFonts.has(name)) {
-						urlsToPreload.push(src);
+						urlsToPreload.unshift.apply(urlsToPreload, src);
 					}
 				});
 
@@ -699,26 +699,32 @@ module libjass.renderers {
 			(<HTMLDivElement[]>(Array.prototype.slice.call(this._subsWrapper.querySelectorAll("[data-dialogue-id]")))).forEach(libjass.removeElement);
 		}
 
-		public static makeFontMapFromStyleElement(styleElement: HTMLStyleElement): Map<string, string> {
-			var map = new Map<string, string>();
+		public static makeFontMapFromStyleElement(styleElement: HTMLStyleElement): Map<string, string[]> {
+			var map = new Map<string, string[]>();
 
 			var styleSheet = <CSSStyleSheet>styleElement.sheet;
 			var rules: CSSFontFaceRule[] = Array.prototype.filter.call(styleSheet.cssRules, (rule: CSSRule) => rule.type === CSSRule.FONT_FACE_RULE);
 			rules.forEach((rule: CSSFontFaceRule) => {
 				var src = rule.style.getPropertyValue("src");
-				if (src) {
-					src = src.match(/^url\((.+)\)$/)[1];
-				}
-				else {
+				var urls: string[] = [];
+
+				if (!src) {
 					src = rule.cssText.split("\n")
-						.map((line: string) => line.match(/src: url\((.+)\);/))
+						.map((line: string) => line.match(/src: ([^;]+);/))
 						.filter((matches: string[]) => matches !== null)
 						.map((matches: string[]) => matches[1])[0];
 				}
 
-				if (src) {
+				urls = src.split(/,\s*/).map((url: string) => url.match(/^url\((.+)\)$/)[1]);
+
+				if (urls.length > 0) {
 					var name = DefaultRenderer._stripQuotes(rule.style.getPropertyValue("font-family"));
-					map.set(name, DefaultRenderer._stripQuotes(src));
+					var existingList = map.get(name);
+					if (existingList === undefined) {
+						existingList = [];
+						map.set(name, existingList);
+					}
+					existingList.unshift.apply(existingList, urls.map(DefaultRenderer._stripQuotes));
 				}
 			});
 
@@ -746,7 +752,7 @@ module libjass.renderers {
 	 */
 	export class RendererSettings {
 		public preLoadFonts: boolean;
-		public fontMap: Map<string, string>;
+		public fontMap: Map<string, string[]>;
 
 		/**
 		 * Subtitles will be pre-rendered for this amount of time (seconds)
