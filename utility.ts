@@ -41,19 +41,6 @@ var global: any = (0, eval)("this");
 
 module libjass {
 	/**
-	 * Removes a DOM element from its parent node.
-	 *
-	 * @param {Element} element The element to remove
-	 *
-	 * @memberof libjass
-	 */
-	export function removeElement(element: Element): void {
-		if (element !== null && element.parentNode !== null) {
-			element.parentNode.removeChild(element);
-		}
-	}
-
-	/**
 	 * Set implementation for browsers that don't support it. Only supports Number and String elements.
 	 *
 	 * Elements are stored as properties of an object, with names derived from their type.

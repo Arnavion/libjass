@@ -691,7 +691,7 @@ module libjass.renderers {
 
 			var result = <HTMLDivElement>preRenderedSub.cloneNode(true);
 
-			var animationEndCallback: () => void = () => libjass.removeElement(result);
+			var animationEndCallback: () => void = () => DefaultRenderer._removeElement(result);
 
 			result.style.webkitAnimationDelay = (dialogue.start - this.currentTime) + "s";
 			result.addEventListener("webkitAnimationEnd", animationEndCallback, false);
@@ -703,13 +703,13 @@ module libjass.renderers {
 		}
 
 		public removeDialogue(dialogue: Dialogue): void {
-			libjass.removeElement(document.querySelector("[data-dialogue-id='" + dialogue.id + "']"));
+			DefaultRenderer._removeElement(document.querySelector("[data-dialogue-id='" + dialogue.id + "']"));
 		}
 
 		public removeAllDialogues(): void {
 			super.removeAllDialogues();
 
-			(<HTMLDivElement[]>(Array.prototype.slice.call(this._subsWrapper.querySelectorAll("[data-dialogue-id]")))).forEach(libjass.removeElement);
+			(<HTMLDivElement[]>(Array.prototype.slice.call(this._subsWrapper.querySelectorAll("[data-dialogue-id]")))).forEach(DefaultRenderer._removeElement);
 		}
 
 		public static makeFontMapFromStyleElement(styleElement: HTMLStyleElement): Map<string, string[]> {
@@ -760,6 +760,20 @@ module libjass.renderers {
 			var existingIndex = classNames.indexOf(className);
 			if (existingIndex !== -1) {
 				element.className = classNames.slice(0, existingIndex).join(" ") + " " + classNames.slice(existingIndex + 1).join(" ");
+			}
+		}
+
+		/**
+		 * Removes a DOM element from its parent node.
+		 *
+		 * @param {Element} element The element to remove
+		 *
+		 * @private
+		 * @memberof libjass
+		 */
+		private static _removeElement(element: Element): void {
+			if (element !== null && element.parentNode !== null) {
+				element.parentNode.removeChild(element);
 			}
 		}
 
