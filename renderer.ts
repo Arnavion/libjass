@@ -281,11 +281,13 @@ module libjass.renderers {
 				}
 
 				if (urlsLeftToPreload === 0) {
-					if (libjass.debugMode) {
-						console.log("All fonts have been preloaded.");
-					}
+					setTimeout(() => {
+						if (libjass.debugMode) {
+							console.log("All fonts have been preloaded.");
+						}
 
-					this._ready();
+						this._ready();
+					}, 0);
 				}
 			}
 
