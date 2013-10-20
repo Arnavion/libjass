@@ -184,6 +184,8 @@ module libjass.renderers {
 	export class DefaultRenderer extends NullRenderer {
 		private static _animationStyleElement: HTMLStyleElement = null;
 
+		private _wrapper: HTMLDivElement;
+		private _subsWrapper: HTMLDivElement;
 		private _wrappers: HTMLDivElement[][] = [];
 
 		private _preRenderedSubs: PreRenderedSubsMap = Object.create(null);
@@ -192,9 +194,18 @@ module libjass.renderers {
 
 		private _eventListeners: EventListenersMap = Object.create(null);
 
-		constructor(video: HTMLVideoElement, private _subsWrapper: HTMLDivElement, ass: ASS, settings: RendererSettings) {
+		constructor(video: HTMLVideoElement, ass: ASS, settings: RendererSettings) {
 			super(video, ass, settings);
 
+			this._wrapper = document.createElement("div");
+			video.parentElement.replaceChild(this._wrapper, video);
+
+			this._wrapper.className = "wrapper";
+			this._wrapper.appendChild(video);
+
+			this._subsWrapper = document.createElement("div");
+			this._wrapper.appendChild(this._subsWrapper);
+			this._subsWrapper.id = "libjass-subs";
 
 			// Create layer wrapper div's and the alignment div's inside each layer div
 			var layers = new Set<number>();
