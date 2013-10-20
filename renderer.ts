@@ -365,13 +365,13 @@ module libjass.renderers {
 		public onVideoPause(): void {
 			super.onVideoPause();
 
-			this._subsWrapper.className = "paused";
+			DefaultRenderer._addClass(this._subsWrapper, "paused");
 		}
 
 		public onVideoPlaying(): void {
 			super.onVideoPlaying();
 
-			this._subsWrapper.className = "";
+			DefaultRenderer._removeClass(this._subsWrapper, "paused");
 		}
 
 		private _onFullScreenChange() {
@@ -387,7 +387,7 @@ module libjass.renderers {
 			}
 
 			if (fullScreenElement === this.video) {
-				document.body.className += " libjass-full-screen";
+				DefaultRenderer._addClass(document.body, "libjass-full-screen");
 
 				this.resizeVideo(screen.width, screen.height);
 
@@ -396,7 +396,7 @@ module libjass.renderers {
 				this._dispatchEvent("fullScreenChange", this._videoIsFullScreen);
 			}
 			else if (fullScreenElement === null && this._videoIsFullScreen) {
-				document.body.className = document.body.className.replace(/(\s?libjass-full-screen)/g, "");
+				DefaultRenderer._removeClass(document.body, "libjass-full-screen");
 
 				this._videoIsFullScreen = false;
 
@@ -735,6 +735,21 @@ module libjass.renderers {
 
 		private static _stripQuotes(str: string): string {
 			return str.match(/^["']?(.*?)["']?$/)[1];
+		}
+
+		private static _addClass(element: HTMLElement, className: string): void {
+			var classNames = element.className.split(" ").map(className => className.trim()).filter(className => !!className);
+			if (classNames.indexOf(className) === -1) {
+				element.className += " " + className;
+			}
+		}
+
+		private static _removeClass(element: HTMLElement, className: string): void {
+			var classNames = element.className.split(" ").map(className => className.trim()).filter(className => !!className);
+			var existingIndex = classNames.indexOf(className);
+			if (existingIndex !== -1) {
+				element.className = classNames.slice(0, existingIndex).join(" ") + " " + classNames.slice(existingIndex + 1).join(" ");
+			}
 		}
 
 		/**
