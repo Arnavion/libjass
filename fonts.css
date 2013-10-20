@@ -323,19 +323,19 @@
 @font-face {
 	font-family: "Mentone";
 	src: url("/fonts/mentone-semibol.otf");
-	font-weight: bold;
+	font-weight: 600;
 }
 
 @font-face {
 	font-family: "Mentone Lig";
 	src: url("/fonts/mentone-semibol.otf");
-	font-weight: bold;
+	font-weight: 600;
 }
 
 @font-face {
 	font-family: "Mentone-SemiBold";
 	src: url("/fonts/mentone-semibol.otf");
-	font-weight: bold;
+	font-weight: 600;
 }
 
 @font-face {
