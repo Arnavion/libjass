@@ -30,9 +30,6 @@ module libjass.renderers {
 
 		private _timeUpdateIntervalHandle: number = null;
 
-		// Iterable of dialogues that are also to be displayed
-		private _newDialogues: iterators.LazySequence<Dialogue>;
-
 		constructor(private _video: HTMLVideoElement, private _ass: ASS, private _settings: RendererSettings) {
 			RendererSettings.prototype.initializeUnsetProperties.call(this._settings);
 
@@ -47,47 +44,6 @@ module libjass.renderers {
 
 				return result;
 			});
-
-			this._newDialogues =
-				iterators.Lazy(this._dialogues)
-					// Skip until dialogues which end at a time later than currentTime
-					.skipWhile((dialogue: Dialogue) => dialogue.end < this._currentTime)
-					// Take until dialogue which starts later than currentTime + settings.preRenderTime
-					.takeWhile((dialogue: Dialogue) => dialogue.start <= (this._currentTime + this._settings.preRenderTime))
-					.filter((dialogue: Dialogue) => {
-						// Ignore dialogues which end at a time less than currentTime
-						if (dialogue.end < this._currentTime) {
-							return false;
-						}
-
-						// All these dialogues are visible at atleast one time in the range [currentTime, currentTime + settings.preRenderTime]
-
-						// Ignore those dialogues which have already been displayed
-						if (this._currentDialogues.indexOf(dialogue) !== -1) {
-							return false;
-						}
-
-						// If the dialogue is to be displayed, keep it to be drawn...
-						if (dialogue.start <= this._currentTime) {
-							return true;
-						}
-
-						// ... otherwise pre-render it and forget it
-						this.preRender(dialogue);
-
-						return false;
-					})
-					.map((dialogue: Dialogue) => {
-						if (libjass.debugMode) {
-							console.log(dialogue.toString());
-						}
-
-						// Display the dialogue...
-						this.draw(dialogue);
-
-						// ... and return it
-						return dialogue;
-					});
 
 			if (!this._settings.useHighResolutionTimer) {
 				this._video.addEventListener("timeupdate", this.onVideoTimeUpdate.bind(this), false);
@@ -120,6 +76,45 @@ module libjass.renderers {
 		public onVideoTimeUpdate(): void {
 			this._currentTime = this._video.currentTime;
 
+			var newDialogues: Dialogue[] = [];
+
+			var i = 0;
+
+			for (; i < this._dialogues.length; i++) {
+				if (this._dialogues[i].end >= this._currentTime) {
+					break;
+				}
+			}
+
+			for (; i < this._dialogues.length; i++) {
+				var dialogue = this._dialogues[i];
+
+				if (dialogue.start > (this._currentTime + this._settings.preRenderTime)) {
+					break;
+				}
+
+				// Ignore dialogues which end at a time less than currentTime, and those which have already been displayed
+				if (dialogue.end >= this._currentTime && this._currentDialogues.indexOf(dialogue) === -1) {
+					// This dialogue is visible at atleast one time in the range [currentTime, currentTime + settings.preRenderTime]
+
+					// If the dialogue is to be displayed later, pre-render it...
+					if (dialogue.start > this._currentTime) {
+						this.preRender(dialogue);
+					}
+
+					// ... otherwise draw it
+					else {
+						if (libjass.debugMode) {
+							console.log(dialogue.toString());
+						}
+
+						this.draw(dialogue);
+
+						newDialogues.push(dialogue);
+					}
+				}
+			}
+
 			this._currentDialogues = this._currentDialogues.filter((dialogue: Dialogue) => {
 				// If the dialogue should still be displayed at currentTime, keep it
 				if (dialogue.start <= this._currentTime && this._currentTime < dialogue.end) {
@@ -130,7 +125,7 @@ module libjass.renderers {
 
 					return false;
 				}
-			}).concat(this._newDialogues.toArray()); // ... and add the new dialogues that are to be displayed.
+			}).concat(newDialogues); // ... and add the new dialogues that are to be displayed.
 
 			if (libjass.debugMode) {
 				console.log("video.timeupdate: " + this._getVideoStateLogString());
