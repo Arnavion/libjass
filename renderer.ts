@@ -25,7 +25,10 @@ module libjass.renderers {
 		private static _highResolutionTimerInterval: number = 41;
 
 		private _dialogues: Dialogue[];
+
+		private _state: VideoState;
 		private _currentTime: number;
+
 		private _currentDialogues: Dialogue[] = [];
 
 		private _timeUpdateIntervalHandle: number = null;
@@ -45,12 +48,10 @@ module libjass.renderers {
 				return result;
 			});
 
-			if (!this._settings.useHighResolutionTimer) {
-				this._video.addEventListener("timeupdate", this.onVideoTimeUpdate.bind(this), false);
-			}
-			this._video.addEventListener("seeking", this.onVideoSeeking.bind(this), false);
-			this._video.addEventListener("pause", this.onVideoPause.bind(this), false);
-			this._video.addEventListener("playing", this.onVideoPlaying.bind(this), false);
+			this._video.addEventListener("timeupdate", this._onVideoTimeUpdate.bind(this), false);
+			this._video.addEventListener("seeking", this._onVideoSeeking.bind(this), false);
+			this._video.addEventListener("pause", this._onVideoPause.bind(this), false);
+			this._video.addEventListener("playing", this._onVideoPlaying.bind(this), false);
 		}
 
 		get video(): HTMLVideoElement {
@@ -75,6 +76,10 @@ module libjass.renderers {
 
 		public onVideoTimeUpdate(): void {
 			this._currentTime = this._video.currentTime;
+
+			if (libjass.debugMode) {
+				console.log("video.timeupdate: " + this._getVideoStateLogString());
+			}
 
 			var newDialogues: Dialogue[] = [];
 
@@ -126,10 +131,6 @@ module libjass.renderers {
 					return false;
 				}
 			}).concat(newDialogues); // ... and add the new dialogues that are to be displayed.
-
-			if (libjass.debugMode) {
-				console.log("video.timeupdate: " + this._getVideoStateLogString());
-			}
 		}
 
 		public onVideoSeeking(): void {
@@ -157,7 +158,7 @@ module libjass.renderers {
 			}
 
 			if (this._settings.useHighResolutionTimer && this._timeUpdateIntervalHandle === null) {
-				this._timeUpdateIntervalHandle = setInterval(() => this.onVideoTimeUpdate(), NullRenderer._highResolutionTimerInterval);
+				this._timeUpdateIntervalHandle = setInterval(() => this._onVideoTimeChange(), NullRenderer._highResolutionTimerInterval);
 			}
 		}
 
@@ -174,9 +175,62 @@ module libjass.renderers {
 			this._currentDialogues = [];
 		}
 
+		private _onVideoTimeUpdate(): void {
+			if (this._state === VideoState.Seeking) {
+				if (this._currentTime !== this._video.currentTime) {
+					this._onVideoPlaying();
+				}
+			}
+			else if (this._state === VideoState.Playing && !this._settings.useHighResolutionTimer) {
+				this._onVideoTimeChange();
+			}
+		}
+
+		private _onVideoTimeChange(): void {
+			if (this._currentTime !== this._video.currentTime) {
+				if (this._state !== VideoState.Playing) {
+					this._onVideoPlaying();
+				}
+
+				this.onVideoTimeUpdate();
+			}
+		}
+
+		private _onVideoSeeking(): void {
+			if (this._state !== VideoState.Seeking) {
+				this._onVideoPause();
+
+				this._state = VideoState.Seeking;
+			}
+
+			if (this._currentTime !== this._video.currentTime) {
+				this._currentTime = this._video.currentTime;
+
+				this.onVideoSeeking();
+			}
+		}
+
+		private _onVideoPause(): void {
+			this._state = VideoState.Paused;
+
+			this.onVideoPause();
+		}
+
+		private _onVideoPlaying(): void {
+			this._state = VideoState.Playing;
+
+			this.onVideoPlaying();
+		}
+
 		private _getVideoStateLogString(): string {
 			return "video.currentTime = " + this._video.currentTime + ", video.paused = " + this._video.paused + ", video.seeking = " + this._video.seeking;
 		}
+	}
+
+	enum VideoState {
+		Playing = 0,
+		Paused = 1,
+		Seeking = 2,
 	}
 
 	/**
