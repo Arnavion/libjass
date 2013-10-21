@@ -22,15 +22,19 @@
 
 module libjass.renderers {
 	export class NullRenderer {
+		private static _highResolutionTimerInterval: number = 41;
+
 		private _dialogues: Dialogue[];
 		private _currentTime: number;
 		private _currentDialogues: Dialogue[] = [];
+
+		private _timeUpdateIntervalHandle: number = null;
 
 		// Iterable of dialogues that are also to be displayed
 		private _newDialogues: iterators.LazySequence<Dialogue>;
 
 		constructor(private _video: HTMLVideoElement, private _ass: ASS, private _settings: RendererSettings) {
-			RendererSettings.prototype.initializeUnsetProperties.call(_settings);
+			RendererSettings.prototype.initializeUnsetProperties.call(this._settings);
 
 			// Sort the dialogues array by start time and then by their original position in the script (id)
 			this._dialogues = this._ass.dialogues.slice(0);
@@ -85,7 +89,9 @@ module libjass.renderers {
 						return dialogue;
 					});
 
-			this._video.addEventListener("timeupdate", this.onVideoTimeUpdate.bind(this), false);
+			if (!this._settings.useHighResolutionTimer) {
+				this._video.addEventListener("timeupdate", this.onVideoTimeUpdate.bind(this), false);
+			}
 			this._video.addEventListener("seeking", this.onVideoSeeking.bind(this), false);
 			this._video.addEventListener("pause", this.onVideoPause.bind(this), false);
 			this._video.addEventListener("playing", this.onVideoPlaying.bind(this), false);
@@ -132,22 +138,31 @@ module libjass.renderers {
 		}
 
 		public onVideoSeeking(): void {
-			this._currentDialogues = [];
-
 			if (libjass.debugMode) {
 				console.log("video.seeking: " + this._getVideoStateLogString());
 			}
+
+			this._currentDialogues = [];
 		}
 
 		public onVideoPause(): void {
 			if (libjass.debugMode) {
 				console.log("video.pause: " + this._getVideoStateLogString());
 			}
+
+			if (this._timeUpdateIntervalHandle !== null) {
+				clearInterval(this._timeUpdateIntervalHandle);
+				this._timeUpdateIntervalHandle = null;
+			}
 		}
 
 		public onVideoPlaying(): void {
 			if (libjass.debugMode) {
 				console.log("video.playing: " + this._getVideoStateLogString());
+			}
+
+			if (this._settings.useHighResolutionTimer && this._timeUpdateIntervalHandle === null) {
+				this._timeUpdateIntervalHandle = setInterval(() => this.onVideoTimeUpdate(), NullRenderer._highResolutionTimerInterval);
 			}
 		}
 
@@ -807,6 +822,16 @@ module libjass.renderers {
 		 */
 		public preRenderTime: number;
 
+		/**
+		 * If true, subtitles wil be rendered using a 41ms timer. If false, subtitles will be rendered using a 250ms timer (the exact value is browser-specific but most browsers have decided on 250ms).
+		 *
+		 * The period of the timer influences how much subtitles lag the video. For example, using the 250ms timer means that subtitles will be rendered between zero and 250ms after the time
+		 * they should have been rendered.
+		 *
+		 * Defaults to true.
+		 */
+		public useHighResolutionTimer: boolean;
+
 		public initializeUnsetProperties(): void {
 			if (this.preLoadFonts === undefined) {
 				this.preLoadFonts = false;
@@ -818,6 +843,10 @@ module libjass.renderers {
 
 			if (this.preRenderTime === undefined) {
 				this.preRenderTime = 5;
+			}
+
+			if (this.useHighResolutionTimer === undefined) {
+				this.useHighResolutionTimer = true;
 			}
 		}
 	}
