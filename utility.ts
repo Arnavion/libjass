@@ -58,7 +58,7 @@ module libjass {
 
 		/**
 		 * @param {T} value
-		 * @return {Set.<T>} This set
+		 * @return {libjass.Set.<T>} This set
 		 */
 		add(value: T): Set<T> {
 			var key = this._toKey(value);
@@ -87,7 +87,7 @@ module libjass {
 		}
 
 		/**
-		 * @param {function(T, T, Set.<T>)} callbackfn A function that is called with each value in the set.
+		 * @param {function(T, T, libjass.Set.<T>)} callbackfn A function that is called with each value in the set.
 		 */
 		forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void {
 			Object.keys(this._data).map((key: string) => {
@@ -121,8 +121,16 @@ module libjass {
 		}
 	}
 
-	if (typeof Set === "undefined" || typeof Set.prototype.forEach !== "function") {
-		global.Set = SimpleSet;
+	export var Set: {
+		new <T>(): Set<T>;
+	}
+
+	// Use this browser's implementation of Set if it has one
+	if (typeof global.Set !== "undefined" && typeof global.Set.prototype.forEach === "function") {
+		Set = global.Set;
+	}
+	else {
+		Set = SimpleSet;
 	}
 
 	/**
@@ -172,7 +180,7 @@ module libjass {
 		/**
 		 * @param {K} key
 		 * @param {V} value
-		 * @return {Map.<K, V>} This map
+		 * @return {libjass.Map.<K, V>} This map
 		 */
 		set(key: K, value: V): Map<K, V> {
 			var property = this._keyToProperty(key);
@@ -187,7 +195,7 @@ module libjass {
 		}
 
 		/**
-		 * @param {function(V, K, Map.<K, V>)} callbackfn A function that is called with each key and value in the map.
+		 * @param {function(V, K, libjass.Map.<K, V>)} callbackfn A function that is called with each key and value in the map.
 		 */
 		forEach(callbackfn: (value: V, index: K, map: Map<K, V>) => void, thisArg?: any): void {
 			Object.keys(this._data).forEach((property: string, index: number): void => {
@@ -230,8 +238,16 @@ module libjass {
 		}
 	}
 
-	if (typeof Map === "undefined" || typeof Map.prototype.forEach !== "function") {
-		global.Map = SimpleMap;
+	export var Map: {
+		new <K, V>(): Map<K, V>;
+	}
+
+	// Use this browser's implementation of Map if it has one
+	if (typeof global.Map !== "undefined" && typeof global.Map.prototype.forEach === "function") {
+		Map = global.Map;
+	}
+	else {
+		Map = SimpleMap;
 	}
 }
 

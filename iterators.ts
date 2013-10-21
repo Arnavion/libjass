@@ -20,14 +20,11 @@
 
 ///<reference path="libjass.ts" />
 
-interface Iterator {
-	next(): any
-}
-
-declare function Iterator(collection: any, keysOnly?: boolean): Iterator
-declare var StopIteration: any
-
 module libjass.iterators {
+	export interface Iterator {
+		next(): any
+	}
+
 	/**
 	 * The base class of all lazy sequences.
 	 *
@@ -132,9 +129,14 @@ module libjass.iterators {
 		return new LazyArray<T>(array);
 	}
 
-	// If this browser does not have an implementation of StopIteration, mock it
-	if (typeof StopIteration === "undefined") {
-		global.StopIteration = Object.create(null);
+	export var StopIteration: any;
+
+	// Use this browser's implementation of StopIteration if it has one
+	if (typeof global.StopIteration !== "undefined") {
+		StopIteration = global.StopIteration;
+	}
+	else {
+		StopIteration = Object.create(null);
 	}
 
 	/**
@@ -176,7 +178,15 @@ module libjass.iterators {
 		}
 	}
 
-	if (typeof Iterator === "undefined") {
+	export var Iterator: {
+		(collection: any, keysOnly?: boolean): Iterator
+	}
+
+	// Use this browser's implementation of Iterator if it has one
+	if (typeof global.Iterator !== "undefined") {
+		Iterator = global.Iterator;
+	}
+	else {
 		/**
 		 * A default function for creating iterators in case it is not defined by the browser.
 		 *
@@ -186,7 +196,7 @@ module libjass.iterators {
 		 *
 		 * @private
 		 */
-		global.Iterator = (collection: any, keysOnly?: boolean): Iterator => {
+		Iterator = (collection: any, keysOnly?: boolean): Iterator => {
 			if (keysOnly) {
 				throw new Error("This Iterator implementation doesn't support keysOnly = true.");
 			}
