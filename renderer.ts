@@ -173,6 +173,7 @@ module libjass.renderers {
 	 * A default renderer implementation.
 	 *
 	 * @constructor
+	 * @extends {libjass.renderers.NullRenderer}
 	 *
 	 * @param {!HTMLVideoElement} video
 	 * @param {!HTMLDivElement} subsWrapper
@@ -415,6 +416,12 @@ module libjass.renderers {
 			}
 		}
 
+		/**
+		 * @param {string} type
+		 * @param {...*} args
+		 *
+		 * @private
+		 */
 		private _dispatchEvent(type: string, ...args: Object[]): void {
 			var listeners = <Function[]>this._eventListeners[type];
 			if (listeners) {
@@ -675,7 +682,6 @@ module libjass.renderers {
 		 * div is inserted into the DOM and the animations begin, they are in sync with the video time.
 		 *
 		 * @param {!libjass.Dialogue} dialogue
-		 * @return {!HTMLDivElement}
 		 */
 		public draw(dialogue: Dialogue): void {
 			var preRenderedSub = this._preRenderedSubs[String(dialogue.id)];
@@ -1039,9 +1045,10 @@ module libjass.renderers {
 					.join(", ");
 			}
 
+			/* TODO: Blur text
 			else if (this._blur > 0) {
-				// TODO: Blur text
 			}
+			*/
 		}
 
 		/**

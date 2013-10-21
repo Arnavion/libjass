@@ -123,7 +123,7 @@ module libjass.iterators {
 	 *
 	 * @template T
 	 *
-	 * @param {Array.<T>} array
+	 * @param {!Array.<T>} array
 	 * @return {!LazySequence.<T>} A LazySequence backed by this Array
 	 *
 	 * @memberof libjass.iterators
@@ -209,7 +209,7 @@ module libjass.iterators {
 	 * @constructor
 	 * @template T
 	 *
-	 * @param {!Array} array
+	 * @param {!Array.<T>} array
 	 *
 	 * @extends {libjass.iterators.LazySequence.<T>}
 	 * @private
