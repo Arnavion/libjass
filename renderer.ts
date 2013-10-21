@@ -366,11 +366,7 @@ module libjass.renderers {
 				delete this._preRenderedSubs[key];
 			});
 
-			try {
-				this.video.dispatchEvent(new (<any>Event)("timeupdate"));
-			}
-			catch (ex) {
-			}
+			this.onVideoTimeUpdate();
 		}
 
 		private _ready(): void {
