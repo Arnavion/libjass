@@ -201,7 +201,7 @@ module libjass.renderers {
 			this._wrapper = document.createElement("div");
 			video.parentElement.replaceChild(this._wrapper, video);
 
-			this._wrapper.className = "wrapper";
+			this._wrapper.className = "libjass-wrapper";
 			this._wrapper.appendChild(video);
 
 			this._subsWrapper = document.createElement("div");

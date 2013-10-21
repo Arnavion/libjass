@@ -22,11 +22,11 @@ body {
 	margin: 0;
 }
 
-.wrapper {
+.libjass-wrapper {
 	position: relative;
 }
 
-.libjass-full-screen .wrapper {
+.libjass-full-screen .libjass-wrapper {
 	position: static;
 }
 
