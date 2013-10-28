@@ -19,15 +19,12 @@ task("watch", ["_watch:run"], function () {
 });
 
 desc("Generate API documentation");
-task("doc", [], function (outputFilename, outputPrivate) {
+task("doc", [], function (outputFilename) {
 	console.log("[" + this.fullName + "]");
 
 	if (outputFilename === undefined) {
 		throw new Error("outputFilename not specified.");
 	}
 
-	outputPrivate = (outputPrivate === "true");
-
-	jake.Task["_doc:makeHtml"].invoke(outputPrivate);
 	jake.Task["_doc:writeHtml"].invoke(outputFilename);
 });

@@ -1,4 +1,4 @@
-// cls && .\node_modules\.bin\jake _default:writeCode && .\node_modules\.bin\jake doc[C:\Users\Arnavion\Desktop\api.xhtml] && .\node_modules\.bin\jake doc[C:\Users\Arnavion\Desktop\api-private.xhtml,true]
+// .\node_modules\.bin\jake doc[..\libjass-gh-pages\api.xhtml]
 
 var assert = require("assert");
 var fs = require("fs");
@@ -93,11 +93,6 @@ namespace("_doc", function () {
 			else if (node instanceof UglifyJS.AST_Var) {
 				nameParts.unshift(node.definitions[0].name.name);
 
-				(function () {
-					var t = node.definitions[0].value;
-					if (t.start.line > 1760 || t.end.line < 1740) { return; }
-					console.log("================", getNodeType(t), require("util").inspect(t));
-				})();
 				if (node.definitions[0] instanceof UglifyJS.AST_Function) {
 					nodeType = NodeType.FUNCTION;
 				}
@@ -283,6 +278,27 @@ namespace("_doc", function () {
 
 		var allNames = jake.Task["_doc:readComments"].value;
 
+		var findType = function (nameParts) {
+			var result = null;
+
+			Object.keys(allNames).some(function (key) {
+				if (!(allNames[key] instanceof Constructor)) {
+					return false;
+				}
+
+				try {
+					assert.deepEqual(nameParts, allNames[key].name.parts);
+					result = allNames[key];
+					return true;
+				}
+				catch (ex) {
+					return false;
+				}
+			});
+
+			return result;
+		}
+
 		var findTypeEndingWith = function (nameParts) {
 			var result = null;
 
@@ -310,13 +326,18 @@ namespace("_doc", function () {
 			var key = keyValuePair[0];
 			var value = keyValuePair[1];
 
-			if (value instanceof Function || value instanceof Property) {
+			if (value instanceof Constructor) {
+				if (value.parentType !== null) {
+					value.parentType = findType(value.parentType.split("."));
+				}
+			}
+
+			else if (value instanceof Function || value instanceof Property) {
 				var thisTypeNameParts = null;
 
 				if (value.thisType === null) {
 					if (value.name.parts[value.name.parts.length - 2] === "prototype") {
 						thisTypeNameParts = value.name.parts.slice(0, value.name.parts.length - 2);
-						value.name = new Name([value.name.parts[value.name.parts.length - 1]]);
 					}
 				}
 				else {
@@ -333,6 +354,7 @@ namespace("_doc", function () {
 					allNames[thisTypeName] = thisType = new Constructor(thisTypeName, "", [], [], null, false, false);
 				}
 
+				value.name = new Name(thisType.name.parts.concat(value.name.toShortString()));
 				value.thisType = thisType;
 				thisType.members.push(value);
 
@@ -342,16 +364,10 @@ namespace("_doc", function () {
 			}
 		});
 
-		var allProperties = Object.keys(allNames).filter(function (key) { return allNames[key] instanceof Property; });
-		console.log(require("util").inspect(allProperties, {
-			depth: null,
-			colors: true
-		}));
-
 		return allNames;
 	});
 
-	task("makeHtml", ["_doc:link"], function (outputPrivate) {
+	task("makeHtml", ["_doc:link"], function () {
 		console.log("[" + this.fullName + "]");
 
 		var allNames = jake.Task["_doc:link"].value;
@@ -360,10 +376,6 @@ namespace("_doc", function () {
 
 		Object.keys(allNames).forEach(function (key) {
 			var value = allNames[key];
-
-			if (!outputPrivate && value.isPrivate) {
-				return;
-			}
 
 			var nameParts = allNames[key].name.parts;
 
@@ -384,38 +396,63 @@ namespace("_doc", function () {
 			return ns1.toString().localeCompare(ns2.toString());
 		});
 
-		namespaceNames.forEach(function (namespaceName) {
-			namespaces[namespaceName].sort(function (value1, value2) {
-				if (value1 instanceof Function) {
-					if (value2 instanceof Function) {
-						return value1.name.parts[value1.name.parts.length - 1].localeCompare(value2.name.parts[value2.name.parts.length - 1]);
+		var sorter = (function () {
+			var types = [Function, Property, Constructor];
+			var typeSorter = function (value1, value2) {
+				var type1Index = -1;
+				var type2Index = -1;
+
+				types.every(function (type, index) {
+					if (value1 instanceof type) {
+						type1Index = index;
 					}
-					else {
-						return -1;
+					if (value2 instanceof type) {
+						type2Index = index;
 					}
+					return (type1Index === -1) || (type2Index === -1);
+				});
+
+				return type1Index - type2Index;
+			};
+
+			var visibilitySorter = function (value1, value2) {
+				if (value1.isPrivate === value2.isPrivate) {
+					return 0;
 				}
-				else if (value1 instanceof Constructor) {
-					if (value2 instanceof Function) {
-						return 1;
-					}
-					else if (value2 instanceof Constructor) {
-						return value1.name.parts[value1.name.parts.length - 1].localeCompare(value2.name.parts[value2.name.parts.length - 1]);
-					}
-					else {
-						return -1;
-					}
-				}
-				else if (value1 instanceof Property) {
-					if (value2 instanceof Property) {
-						return value1.name.parts[value1.name.parts.length - 1].localeCompare(value2.name.parts[value2.name.parts.length - 1]);
-					}
-					else {
-						return 1;
-					}
+				else if (value1.isPrivate) {
+					return 1;
 				}
 				else {
-					throw new Error("Unrecognized type of value1.");
+					return -1;
 				}
+			};
+
+			var nameSorter = function (value1, value2) {
+				return value1.name.toShortString().localeCompare(value2.name.toShortString());
+			};
+
+			var sorters = [typeSorter, visibilitySorter, nameSorter];
+
+			return function (value1, value2) {
+				for (var i = 0; i < sorters.length; i++) {
+					var result = sorters[i](value1, value2);
+
+					if (result !== 0) {
+						return result;
+					}
+				}
+
+				return 0;
+			};
+		})();
+
+		namespaceNames.forEach(function (namespaceName) {
+			namespaces[namespaceName].sort(sorter);
+
+			namespaces[namespaceName].filter(function (value) {
+				return value instanceof Constructor;
+			}).forEach(function (constructor) {
+				constructor.members.sort(sorter);
 			});
 		});
 
@@ -438,7 +475,7 @@ namespace("_doc", function () {
 					'<ul class="namespace-elements">'
 				].concatMany(namespace.map(function (value) {
 					return (
-					'	<li><a href="#' + sanitize(value.name.toString()) + '">' + sanitize(value.name.parts[value.name.parts.length - 1]) + '</a></li>'
+					'	<li><a href="#' + sanitize(value.name.toString()) + '">' + sanitize(value.name.toShortString()) + '</a></li>'
 					);
 				})).concat([
 					'</ul>',
@@ -449,12 +486,16 @@ namespace("_doc", function () {
 
 		var writeFunction = function (func, indent) {
 			return [
-				'<dl class="function" id="' + sanitize(func.name.toString()) + '">',
-				'	<dt class="name">' + sanitize(writeFunctionName(func)) + '</dt>',
+				'<dl class="function' +
+					(func.isAbstract ? ' abstract' : '') +
+					(func.isPrivate ? ' private' : '') +
+					'" id="' + sanitize(func.name.toString()) +
+					'">',
+				'	<dt class="name">' + writeFunctionName(func) + '</dt>',
 				'	<dd class="description">',
 				'		<p>' + sanitize(func.description) + '</p>',
 				'	</dd>',
-				'	<dd class="usage">' + sanitize(writeFunctionUsage(func)) + '</dd>'
+				'	<dd class="usage">' + writeFunctionUsage(func) + '</dd>'
 			].concat(writeParameters(func, 2)).concat(writeReturns(func, 1)).concat([
 				'</dl>'
 			]).map(indenter(indent));
@@ -462,12 +503,17 @@ namespace("_doc", function () {
 
 		var writeConstructor = function (constructor, indent) {
 			return [
-				'<dl class="constructor" id="' + sanitize(constructor.name.toString()) + '">',
-				'	<dt class="name">' + sanitize(writeConstructorName(constructor)) + '</dt>',
+				'<dl class="constructor' +
+					(constructor.isAbstract ? ' abstract' : '') +
+					(constructor.isPrivate ? ' private' : '') +
+					'" id="' +
+					sanitize(constructor.name.toString()) +
+					'">',
+				'	<dt class="name">' + writeConstructorName(constructor) + '</dt>',
 				'	<dd class="description">',
 				'		<p>' + sanitize(constructor.description) + '</p>',
 				'	</dd>',
-				'	<dd class="usage">' + sanitize(writeConstructorUsage(constructor)) + '</dd>'
+				'	<dd class="usage">' + writeConstructorUsage(constructor) + '</dd>'
 			].concat(writeParameters(constructor, 2)).concat([
 				'	<dd>'
 			]).concatMany(constructor.members.filter(function (member) {
@@ -480,44 +526,45 @@ namespace("_doc", function () {
 			]).map(indenter(indent));
 		};
 
-		var writeFunctionName = function (func) {
+		var writeCallableName = function (callable) {
 			return (
-				(func.isAbstract ? 'abstract ' : '') +
-				func.name.parts[func.name.parts.length - 1] +
-				((func.generics.length > 0) ? ('.<' + func.generics.join(', ') + '>') : '')
+				'<a href="#' + sanitize(callable.name.toString()) + '">' +
+				sanitize(
+					callable.name.toShortString() +
+					((callable.generics.length > 0) ? ('.<' + callable.generics.join(', ') + '>') : '')
+				) +
+				'</a>'
 			);
+		};
+
+		var writeFunctionName = function (func) {
+			return writeCallableName(func);
 		};
 
 		var writeConstructorName = function (constructor) {
 			return (
-				(constructor.isAbstract ? 'abstract ' : '') + 'class ' +
-				constructor.name.parts[constructor.name.parts.length - 1] +
-				((constructor.generics.length > 0) ? ('.<' + constructor.generics.join(', ') + '>') : '') +
-				((constructor.parentType !== null) ? (' extends ' + constructor.parentType) : '')
+				'class ' +
+				writeCallableName(constructor) +
+				((constructor.parentType !== null) ? (' extends <a href="#' + sanitize(constructor.parentType.name.toString()) + '">' + sanitize(constructor.parentType.name.toShortString()) + '</a>') : '')
 			);
 		};
 
 		var writeFunctionUsage = function (func) {
-			return (
+			return sanitize(
 				((func.returnType !== null) ? 'var result = ' : '') +
 				((func.thisType !== null) ? (toVariableName(func.thisType) + '.') : '') +
-				func.name + '(' +
-				func.parameters.filter(function (parameter) {
-					return parameter.name.toString().indexOf('.') === -1;
-				}).map(function (parameter) {
+				func.name.toShortString() + '(' +
+				func.parameters.map(function (parameter) {
 					return parameter.name;
 				}).join(', ') + ');'
 			);
 		};
 
 		var writeConstructorUsage = function (constructor) {
-			return (
+			return sanitize(
 				'var ' + toVariableName(constructor) + ' = ' +
-				'new ' + constructor.name +
-				'(' +
-				constructor.parameters.filter(function (parameter) {
-					return parameter.name.toString().indexOf('.') === -1;
-				}).map(function (parameter) {
+				'new ' + constructor.name.toShortString() +  '(' +
+				constructor.parameters.map(function (parameter) {
 					return parameter.name;
 				}).join(', ') + ');'
 			);
@@ -562,7 +609,7 @@ namespace("_doc", function () {
 		var toVariableName = function (constructor) {
 			// TODO: Handle non-letters (are both their toLowerCase() and toUpperCase())
 
-			var name = constructor.name.parts[constructor.name.parts.length - 1];
+			var name = constructor.name.toShortString();
 			var result = "";
 
 			for (var i = 0; i < name.length; i++) {
@@ -673,6 +720,18 @@ namespace("_doc", function () {
 			'			.type:before {',
 			'				content: "Type: ";',
 			'			}',
+			'',
+			'			.abstract > .name:before {',
+			'				content: "abstract ";',
+			'			}',
+			'',
+			'			.private > .name:before {',
+			'				content: "private ";',
+			'			}',
+			'',
+			'			.abstract.private > .name:before {',
+			'				content: "abstract private ";',
+			'			}',
 			'		]]>',
 			'		</style>',
 			'	</head>',
@@ -754,6 +813,10 @@ var Name = function (parts) {
 	this.type = "Name";
 
 	this.parts = parts;
+};
+
+Name.prototype.toShortString = function () {
+	return this.parts[this.parts.length - 1];
 };
 
 Name.prototype.toString = function () {
