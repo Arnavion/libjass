@@ -21,6 +21,17 @@
 ///<reference path="libjass.ts" />
 
 module libjass.renderers {
+	/**
+	 * A renderer implementation that doesn't output anything.
+	 *
+	 * @constructor
+	 *
+	 * @param {!HTMLVideoElement} video
+	 * @param {!libjass.ASS} ass
+	 * @param {!libjass.RendererSettings} settings
+	 *
+	 * @memberof libjass.renderers
+	 */
 	export class NullRenderer {
 		private static _highResolutionTimerInterval: number = 41;
 
@@ -240,7 +251,6 @@ module libjass.renderers {
 	 * @extends {libjass.renderers.NullRenderer}
 	 *
 	 * @param {!HTMLVideoElement} video
-	 * @param {!HTMLDivElement} subsWrapper
 	 * @param {!libjass.ASS} ass
 	 * @param {!libjass.RendererSettings} settings
 	 *
@@ -835,7 +845,6 @@ module libjass.renderers {
 		 * @param {Element} element The element to remove
 		 *
 		 * @private
-		 * @memberof libjass
 		 */
 		private static _removeElement(element: Element): void {
 			if (element !== null && element.parentNode !== null) {
@@ -914,6 +923,7 @@ module libjass.renderers {
 	 * @param {number} end The end time of the dialogue that this keyframe is associated with
 	 *
 	 * @private
+	 * @memberof libjass.renderers
 	 */
 	class KeyframeCollection {
 		/** @type {!Object.<string, !Object.<string, string>>} */
@@ -976,6 +986,7 @@ module libjass.renderers {
 	 * @param {number} dpi The DPI of the ASS script this object is associated with
 	 *
 	 * @private
+	 * @memberof libjass.renderers
 	 */
 	class SpanStyles {
 		private _italic: boolean;
