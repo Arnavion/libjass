@@ -34,17 +34,15 @@ Only libjass.js is needed to use libjass on your website. The other files are on
 
 ### Where's the API documentation? What API do I need to call to use libjass?
 
-Formal documentation is coming soon. In the meantime, here's an overview:
+The API documentation is linked in the Links section below. Here's an overview:
 
 * The constructor ASS() takes in the raw ASS string and returns an object representing the script information, the line styles and dialogue lines in it. The example index.js uses XHR to get this data using the URL specified in a track tag.
 
-* ASS.dialogues is an array of Dialogue objects, each corresponding to a dialogue in the ASS file. These objects have a draw() method that returns a &lt;div&gt; containing the rendered subtitle line.
+* index.js initializes a default renderer that libjass ships with, the DefaultRenderer. This renderer uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (#libjass-subs) containing div's corresponding to the 9 alignment directions, 9 for each layer in the ASS script. index.css contains styles for these div's to render them at the correct location.
 
-* index.js initializes a default renderer that libjass ships with, the DefaultRenderer. This renderer uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (#subs) containing div's corresponding to the 9 alignment directions, 9 for each layer in the ASS script. index.css contains styles for these div's to render them at the correct location.
+* The renderer starts a timer that ticks ever 41ms. In each tick, it determines the set of dialogues to be shown at the current video time, renders each of them as a div, and appendChild's the result into the appropriate layer+alignment div.
 
-* The renderer listens for the video element's "timeupdate" event. In the event handler, it determines the set of dialogues to be shown, calls draw() on each of them, and appendChild's the result into the appropriate layer+alignment div. It only does this if the dialogue has not already been drawn by a previous timeupdate.
-
-* The default renderer handles resizing the video and subs when the user clicks the browser's native fullscreen-video button. index.js also contains code to change the size of the video based on user input.
+* The renderer handles resizing the video and subs when the user clicks the browser's native fullscreen-video button. index.js also contains code to change the size of the video based on user input.
 
 * Lastly, the renderer contains an implementation of preloading all the fonts used in the ASS file. It uses a map of font names to URLs provided by index.js - this map is contained in fonts.css in the form of @font-family rules.
 
@@ -60,6 +58,7 @@ You can also hop by the IRC channel below and ask any questions.
 
 * [GitHub](https://github.com/Arnavion/libjass/)
 * IRC channel - #libjass on irc.rizon.net
+* [API documentation](http://arnavion.github.io/libjass/api.xhtml)
 * [Aegisub's documentation on ASS](http://docs.aegisub.org/3.0/ASS_Tags/)
 
 
@@ -77,6 +76,7 @@ You can also hop by the IRC channel below and ask any questions.
 * Font sizes aren't pixel perfect.
 * \blur uses an approximation instead of Gaussian blur.
 * ASS draw is unsupported.
+* Subs don't show over a fullscreen video in IE.
 
 
 ## Planned improvements
