@@ -34,7 +34,7 @@ var parserTest = function (description, input, rule, expected) {
 				return;
 			}
 			else {
-				throw new Error("Expected parse to succeed but it threw an exception: " + parseException.message);
+				throw new Error("Expected parse to succeed but it threw an exception: " + parseException.stack);
 			}
 		}
 
