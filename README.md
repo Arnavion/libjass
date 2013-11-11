@@ -18,8 +18,6 @@ As a result, libjass is able to render subtitles with very low CPU usage. The do
 
 * The .ts files are the source of libjass. They are TypeScript files and must be compiled into JavaScript for the browser using the TypeScript compiler.
 
-* The ass.pegjs file is the source of a parser for the ASS format. It is compiled to JavaScript along with the .ts files.
-
 * The rest of the files - index.xhtml, index.js, index.css and fonts.css - are a sample implementation of how to use libjass on a web page. They demonstrate the API to call, how to place &lt;div&gt; elements to render the subs, etc.
 
 

@@ -23,7 +23,13 @@ var parserTest = require("./parser-test.js");
 
 suite("Miscellaneous", function () {
 	parserTest("herkz", "{\\pos(311,4)\\blur0.8\\fs40\\bord0\\c&H3F171F&\\t(3820,3820,\\blur6}Chi{\\c&H422CB1&}tose {\\c&H3F171F&}Furu", "dialogueParts", [
-		new libjass.tags.Comment("\\pos(311,4)\\blur0.8\\fs40\\bord0\\c&H3F171F&\\t(3820,3820,\\blur6"),
+		new libjass.tags.Pos(311,4),
+		new libjass.tags.Blur(0.8),
+		new libjass.tags.FontSize(40),
+		new libjass.tags.Border(0),
+		new libjass.tags.PrimaryColor(new libjass.tags.Color(31, 23, 63, 1)),
+		new libjass.tags.Comment("\\t(3820,3820,"),
+		new libjass.tags.Blur(6),
 		new libjass.tags.Text("Chi"),
 		new libjass.tags.PrimaryColor(new libjass.tags.Color(177, 44, 66, 1)),
 		new libjass.tags.Text("tose "),

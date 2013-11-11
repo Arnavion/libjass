@@ -122,36 +122,18 @@ namespace("_default", function () {
 		return { code: output["libjass.js"], sourceMap: JSON.parse(output["libjass.js.map"]) };
 	});
 
-	task("pegjs", [], function () {
-		console.log("[" + this.fullName + "]");
-
-		var PEG = require("pegjs");
-
-		var data = fs.readFileSync("ass.pegjs", { encoding: "utf8" });
-
-		var parser = PEG.buildParser(data);
-
-		return "libjass.parser = " + parser.toSource();
-	});
-
-	task("combine", ["_default:tscCompile", "_default:pegjs"], function () {
+	task("combine", ["_default:tscCompile"], function () {
 		console.log("[" + this.fullName + "]");
 
 		var compiled = jake.Task["_default:tscCompile"].value;
-		var parserSource = jake.Task["_default:pegjs"].value;
 
 		UglifyJS.base54.reset();
 
 
 		// Parse
-		var root = null;
-		root = UglifyJS.parse(compiled.code, {
+		var root = UglifyJS.parse(compiled.code, {
 			filename: "libjass.js",
-			toplevel: root
-		});
-		root = UglifyJS.parse(parserSource, {
-			filename: "ass.pegjs.js",
-			toplevel: root
+			toplevel: null
 		});
 
 		root.figure_out_scope();
@@ -285,7 +267,6 @@ namespace("_default", function () {
 		var originalWarn = UglifyJS.AST_Node.warn;
 		UglifyJS.AST_Node.warn = function (text, properties) {
 			if (
-				(text === "{type} {name} is declared but not referenced [{file}:{line},{col}]" && properties.type === "Symbol" && properties.name === "offset" && properties.col === 39) ||
 				(text === "Eval is used [{file}:{line},{col}]" && properties.file === "libjass.js" && properties.line === 23)
 			) {
 				return;
@@ -321,7 +302,7 @@ namespace("_default", function () {
 				node instanceof UglifyJS.AST_PropAccess &&
 				typeof node.property === "string" &&
 				node.property.indexOf("_") === 0 &&
-				node.property !== "__iterator__"
+				node.property.indexOf("_parse_") !== 0 // Parse functions are looked up by name
 			) {
 				var occurrence = occurrences[node.property];
 				if (occurrence === undefined) {

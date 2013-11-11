@@ -26,7 +26,6 @@
 	"dependencies": {
 		"jake": "latest",
 		"mocha": "~1.14",
-		"pegjs": "0.7.0",
 		"typescript": "0.9.1-1",
 		"uglify-js": "~2"
 	}

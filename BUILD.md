@@ -6,7 +6,7 @@
 
         npm install
 
-    This will install the dependencies - [Jake](https://github.com/mde/jake), [PEG.js](http://pegjs.majda.cz/), [TypeScript](http://www.typescriptlang.org/) and [UglifyJS2](https://github.com/mishoo/UglifyJS2). It will then run Jake to build libjass.js and use UglifyJS2 to minify it into libjass.min.js
+    This will install the dependencies - [Jake](https://github.com/mde/jake), [TypeScript](http://www.typescriptlang.org/) and [UglifyJS2](https://github.com/mishoo/UglifyJS2). It will then run Jake to build libjass.js and use UglifyJS2 to minify it into libjass.min.js
 
 1. Set the URLs of the video and the ASS file in index.xhtml
 

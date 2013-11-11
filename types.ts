@@ -21,12 +21,6 @@
 ///<reference path="libjass.ts" />
 
 module libjass {
-	export interface Parser {
-		parse(input: string, startRule?: string): any
-	}
-
-	export var parser: Parser;
-
 	export interface StyleMap {
 		[name: string]: Style;
 	}
@@ -54,7 +48,7 @@ module libjass {
 		constructor(rawASS: string) {
 			rawASS = rawASS.replace(/\r$/gm, "");
 
-			var script = libjass.parser.parse(rawASS, "script");
+			var script = parser.parse(rawASS, "script");
 
 			// Get the script info template
 			var infoTemplate: Object = script["Script Info"];

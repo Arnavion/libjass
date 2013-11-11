@@ -47,7 +47,7 @@ namespace("_watch", function () {
 			}
 
 			var extension = path.extname(filename);
-			if (extension !== ".ts" && extension !== ".pegjs") {
+			if (extension !== ".ts") {
 				return;
 			}
 
