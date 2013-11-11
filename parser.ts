@@ -279,12 +279,12 @@ module libjass.parser {
 						var textNode = this._parse_text(current);
 
 						if (textNode !== null) {
-							if (current.value[current.value.length - 1] instanceof libjass.tags.Text) {
+							if (current.value[current.value.length - 1] instanceof tags.Text) {
 								// Merge consecutive text parts into one part
 								current.value[current.value.length - 1] =
-									new libjass.tags.Text(
-										(<libjass.tags.Text>current.value[current.value.length - 1]).value +
-										(<libjass.tags.Text>textNode.value).value
+									new tags.Text(
+										(<tags.Text>current.value[current.value.length - 1]).value +
+										(<tags.Text>textNode.value).value
 									);
 							}
 							else {
@@ -369,12 +369,12 @@ module libjass.parser {
 				}
 
 				if (childNode !== null) {
-					if (childNode.value instanceof libjass.tags.Comment && current.value[current.value.length - 1] instanceof libjass.tags.Comment) {
+					if (childNode.value instanceof tags.Comment && current.value[current.value.length - 1] instanceof tags.Comment) {
 						// Merge consecutive comment parts into one part
 						current.value[current.value.length - 1] =
-							new libjass.tags.Comment(
-								(<libjass.tags.Comment>current.value[current.value.length - 1]).value +
-								(<libjass.tags.Comment>childNode.value).value
+							new tags.Comment(
+								(<tags.Comment>current.value[current.value.length - 1]).value +
+								(<tags.Comment>childNode.value).value
 							);
 					}
 					else {
@@ -419,16 +419,28 @@ module libjass.parser {
 		}
 
 		private _parse_text(parent: ParseNode) {
+			var value = this._peek();
+
+			if (value.length === 0) {
+				return null;
+			}
+
 			var current = new ParseNode(parent);
-			current.value = new tags.Text(this._peek());
+			current.value = new tags.Text(value);
 			current.end++;
 
 			return current;
 		}
 
 		private _parse_comment(parent: ParseNode) {
+			var value = this._peek();
+
+			if (value.length === 0) {
+				return null;
+			}
+
 			var current = new ParseNode(parent);
-			current.value = new tags.Comment(this._peek());
+			current.value = new tags.Comment(value);
 			current.end++;
 
 			return current;
