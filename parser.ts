@@ -356,6 +356,7 @@ module libjass.parser {
 						this._parse_tag_i(current) ||
 						this._parse_tag_r(current) ||
 						this._parse_tag_s(current) ||
+						this._parse_tag_t(current) ||
 						this._parse_tag_u(current);
 
 					if (childNode === null) {
@@ -1158,6 +1159,167 @@ module libjass.parser {
 			else {
 				current.value = new tags.StrikeThrough(null);
 			}
+
+			return current;
+		}
+
+		private _parse_tag_t(parent: ParseNode) {
+			if (this._peek("t".length) !== "t") {
+				return null;
+			}
+
+			var current = new ParseNode(parent);
+
+			var nameNode = new ParseNode(current);
+			nameNode.value = "t";
+			nameNode.end += "t".length;
+
+			if (this._peek() !== "(") {
+				parent.pop();
+				return null;
+			}
+
+			var openingParaenthesesNode = new ParseNode(current);
+			openingParaenthesesNode.value = "(";
+			openingParaenthesesNode.end++;
+
+			var startNode: ParseNode = null;
+			var endNode: ParseNode = null;
+			var accelNode: ParseNode = null;
+
+			var firstNode = this._parse_decimal(current);
+			if (firstNode !== null) {
+				if (this._peek() !== ",") {
+					parent.pop();
+					return null;
+				}
+
+				var commaNode = new ParseNode(current);
+				commaNode.value = ",";
+				commaNode.end++;
+
+				var secondNode = this._parse_decimal(current);
+				if (secondNode !== null) {
+					startNode = firstNode;
+					endNode = secondNode;
+
+					if (this._peek() !== ",") {
+						parent.pop();
+						return null;
+					}
+
+					var endCommaNode = new ParseNode(current);
+					endCommaNode.value = ",";
+					endCommaNode.end++;
+
+					var thirdNode = this._parse_decimal(current);
+					if (thirdNode !== null) {
+						accelNode = thirdNode;
+
+						if (this._peek() !== ",") {
+							parent.pop();
+							return null;
+						}
+
+						var accelCommaNode = new ParseNode(current);
+						accelCommaNode.value = ",";
+						accelCommaNode.end++;
+					}
+				}
+				else {
+					accelNode = firstNode;
+
+					if (this._peek() !== ",") {
+						parent.pop();
+						return null;
+					}
+
+					var accelCommaNode = new ParseNode(current);
+					accelCommaNode.value = ",";
+					accelCommaNode.end++;
+				}
+			}
+
+			var transformTags: tags.Tag[] = [];
+
+			for (var next = this._peek(); next !== ")"; next = this._peek()) {
+				var childNode: ParseNode = null;
+
+				if (next === "\\") {
+					var backSlashNode = new ParseNode(current);
+					backSlashNode.value = "\\";
+					backSlashNode.end++;
+
+					childNode =
+						this._parse_tag_alpha(current) ||
+						this._parse_tag_xbord(current) ||
+						this._parse_tag_ybord(current) ||
+
+						this._parse_tag_blur(current) ||
+						this._parse_tag_bord(current) ||
+						this._parse_tag_fscx(current) ||
+						this._parse_tag_fscy(current) ||
+
+						this._parse_tag_fax(current) ||
+						this._parse_tag_fay(current) ||
+						this._parse_tag_frx(current) ||
+						this._parse_tag_fry(current) ||
+						this._parse_tag_frz(current) ||
+						this._parse_tag_fsp(current) ||
+
+						this._parse_tag_fs(current) ||
+						this._parse_tag_1a(current) ||
+						this._parse_tag_1c(current) ||
+						this._parse_tag_3a(current) ||
+						this._parse_tag_3c(current) ||
+
+						this._parse_tag_c(current);
+
+					if (childNode === null) {
+						current.pop(); // Include backslash in comment
+
+						childNode = this._parse_comment(current);
+					}
+				}
+				else {
+					childNode = this._parse_comment(current);
+				}
+
+				if (childNode !== null) {
+					if (childNode.value instanceof tags.Comment && transformTags[transformTags.length - 1] instanceof tags.Comment) {
+						// Merge consecutive comment parts into one part
+						transformTags[transformTags.length - 1] =
+							new tags.Comment(
+								(<tags.Comment>transformTags[transformTags.length - 1]).value +
+								(<tags.Comment>childNode.value).value
+							);
+					}
+					else {
+						transformTags.push(childNode.value);
+					}
+				}
+				else {
+					parent.pop();
+					return null;
+				}
+			}
+
+			if (this._peek() !== ")") {
+				parent.pop();
+				return null;
+			}
+
+			var closingParaenthesesNode = new ParseNode(current);
+			closingParaenthesesNode.value = ")";
+			closingParaenthesesNode.end++;
+
+			current.value =
+				new tags.Transform(
+					(startNode !== null) ? (startNode.value / 1000) : null,
+					(endNode !== null) ? (endNode.value / 1000) : null,
+					(accelNode !== null) ? (accelNode.value / 1000) : null,
+					transformTags
+				);
 
 			return current;
 		}

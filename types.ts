@@ -453,9 +453,22 @@ module libjass {
 
 			this._parts = <tags.Tag[]>parser.parse(template["Text"], "dialogueParts");
 
-			this._parts.forEach(part => {
+			this._parts.forEach((part, index) => {
 				if (part instanceof tags.Alignment) {
 					this._alignment = (<tags.Alignment>part).value;
+				}
+				else if (part instanceof tags.Transform) {
+					var transformPart = <tags.Transform>part;
+
+					if (transformPart.start === null || transformPart.end === null || transformPart.accel === null) {
+						this._parts[index] =
+							new tags.Transform(
+								(transformPart.start === null) ? 0 : transformPart.start,
+								(transformPart.end === null) ? (this._end - this._start) : transformPart.end,
+								(transformPart.accel === null) ? 1 : transformPart.accel,
+								transformPart.tags
+							);
+					}
 				}
 			});
 

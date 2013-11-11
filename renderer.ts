@@ -526,6 +526,17 @@ module libjass.renderers {
 						keyframes.add(dialogue.end, "opacity", "0");
 					}
 				}
+
+				/* TODO
+				else if (part instanceof tags.Transform) {
+					var transformTag = <tags.Transform>part;
+					transformTag.tags.forEach((tag: tags.Tag) => {
+						if (tag instanceof tags.Blur) {
+
+						}
+					});
+				}
+				*/
 			});
 
 			if (DefaultRenderer._animationStyleElement === null) {

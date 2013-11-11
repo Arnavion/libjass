@@ -694,5 +694,39 @@ module libjass {
 				return this._end;
 			}
 		}
+
+		/**
+		 * A transform tag {\t}
+		 *
+		 * @constructor
+		 * @param {number} start
+		 * @param {number} end
+		 * @param {number} accel
+		 * @param {Array.<libjass.tags.Tag>} tags
+		 *
+		 * @extends {libjass.tags.TagBase}
+		 * @memberof libjass.tags
+		 */
+		export class Transform extends TagBase {
+			constructor(private _start: number, private _end: number, private _accel: number, private _tags: Tag[]) {
+				super("Transform", "start", "end", "accel", "tags");
+			}
+
+			get start(): number {
+				return this._start;
+			}
+
+			get end(): number {
+				return this._end;
+			}
+
+			get accel(): number {
+				return this._accel;
+			}
+
+			get tags(): Tag[] {
+				return this._tags;
+			}
+		}
 	}
 }

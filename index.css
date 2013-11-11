@@ -46,6 +46,8 @@ body {
 #libjass-subs, #libjass-subs * {
 	pointer-events: none;
 	z-index: 2147483647;
+	-webkit-animation-fill-mode: forwards;
+	animation-fill-mode: forwards;
 }
 
 #libjass-subs > * {
