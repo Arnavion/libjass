@@ -122,7 +122,7 @@ namespace("_default", function () {
 		return { code: output["libjass.js"], sourceMap: JSON.parse(output["libjass.js.map"]) };
 	});
 
-	task("combine", ["_default:tscCompile"], function () {
+	task("fixup", ["_default:tscCompile"], function () {
 		console.log("[" + this.fullName + "]");
 
 		var compiled = jake.Task["_default:tscCompile"].value;
@@ -229,33 +229,33 @@ namespace("_default", function () {
 		};
 	});
 
-	task("writeCode", ["_default:combine"], function () {
+	task("writeCode", ["_default:fixup"], function () {
 		console.log("[" + this.fullName + "]");
 
-		var combined = jake.Task["_default:combine"].value;
+		var fixedUp = jake.Task["_default:fixup"].value;
 
-		fs.writeFileSync("libjass.js", combined.code);
+		fs.writeFileSync("libjass.js", fixedUp.code);
 	});
 
-	task("writeSourceMap", ["_default:combine"], function () {
+	task("writeSourceMap", ["_default:fixup"], function () {
 		console.log("[" + this.fullName + "]");
 
-		var combined = jake.Task["_default:combine"].value;
+		var fixedUp = jake.Task["_default:fixup"].value;
 
-		fs.writeFileSync("libjass.js.map", JSON.stringify(combined.sourceMap));
+		fs.writeFileSync("libjass.js.map", JSON.stringify(fixedUp.sourceMap));
 	});
 
-	task("minify", ["_default:combine"], function () {
+	task("minify", ["_default:fixup"], function () {
 		console.log("[" + this.fullName + "]");
 
-		var combined = jake.Task["_default:combine"].value;
+		var fixedUp = jake.Task["_default:fixup"].value;
 
 		UglifyJS.base54.reset();
 
 
 		// Parse
 		var root = null;
-		root = UglifyJS.parse(combined.code, {
+		root = UglifyJS.parse(fixedUp.code, {
 			filename: "libjass.js",
 			toplevel: root
 		});
@@ -354,7 +354,7 @@ namespace("_default", function () {
 		var output = {
 			source_map: UglifyJS.SourceMap({
 				file: "libjass.min.js.map",
-				orig: combined.sourceMap,
+				orig: fixedUp.sourceMap,
 				root: ""
 			}),
 			comments: {
