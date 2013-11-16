@@ -55,13 +55,13 @@ module libjass.parser {
 
 			current.value = Object.create(null);
 
-			while (current.end < this._input.length) {
+			while (this._haveMore()) {
 				var scriptSectionNode = this._parse_scriptSection(current);
 
 				if (scriptSectionNode !== null) {
 					current.value[scriptSectionNode.value.name] = scriptSectionNode.value.contents;
 				}
-				else if (!this._parse_eol(current)) {
+				else if (this._read(current, "\n") === null) {
 					parent.pop();
 					return null;
 				}
@@ -86,53 +86,47 @@ module libjass.parser {
 
 			var formatSpecifier: string[] = null;
 
-			while(current.end < this._input.length) {
-				if (this._peek() === "[") {
-					break;
+			while(this._haveMore() && this._peek() !== "[") {
+				var propertyNode = this._parse_scriptProperty(current);
+
+				if (propertyNode !== null) {
+					var property = propertyNode.value;
+
+					if (property.key === "Format") {
+						formatSpecifier = property.value.split(",").map((formatPart: string) => formatPart.trim());
+					}
+
+					else if (formatSpecifier !== null) {
+						if (current.value.contents === null) {
+							current.value.contents = <any[]>[];
+						}
+
+						var template = Object.create(null);
+						var value = property.value.split(",");
+
+						if (value.length > formatSpecifier.length) {
+							value[formatSpecifier.length - 1] = value.slice(formatSpecifier.length - 1).join(",");
+						}
+
+						formatSpecifier.forEach((formatKey, index) => {
+							template[formatKey] = value[index];
+						});
+
+						current.value.contents.push({ type: property.key, template: template });
+					}
+
+					else {
+						if (current.value.contents === null) {
+							current.value.contents = Object.create(null);
+						}
+
+						current.value.contents[property.key] = property.value;
+					}
 				}
 
-				else {
-					var propertyNode = this._parse_scriptProperty(current);
-
-					if (propertyNode !== null) {
-						var property = propertyNode.value;
-
-						if (property.key === "Format") {
-							formatSpecifier = property.value.split(",").map((formatPart: string) => formatPart.trim());
-						}
-
-						else if (formatSpecifier !== null) {
-							if (current.value.contents === null) {
-								current.value.contents = <any[]>[];
-							}
-
-							var template = Object.create(null);
-							var value = property.value.split(",");
-
-							if (value.length > formatSpecifier.length) {
-								value[formatSpecifier.length - 1] = value.slice(formatSpecifier.length - 1).join(",");
-							}
-
-							formatSpecifier.forEach((formatKey, index) => {
-								template[formatKey] = value[index];
-							});
-
-							current.value.contents.push({ type: property.key, template: template });
-						}
-
-						else {
-							if (current.value.contents === null) {
-								current.value.contents = Object.create(null);
-							}
-
-							current.value.contents[property.key] = property.value;
-						}
-					}
-
-					else if (this._parse_scriptComment(current) === null && this._parse_eol(current) === null) {
-						parent.pop();
-						return null;
-					}
+				else if (this._parse_scriptComment(current) === null && this._read(current, "\n") === null) {
+					parent.pop();
+					return null;
 				}
 			}
 
@@ -140,23 +134,17 @@ module libjass.parser {
 		}
 
 		private _parse_scriptSectionHeader(parent: ParseNode): ParseNode {
-			if (this._peek() !== "[") {
+			var current = new ParseNode(parent);
+
+			if (this._read(current, "[") === null) {
+				parent.pop();
 				return null;
 			}
 
-			var current = new ParseNode(parent);
-			current.value = "";
+			var nameNode = new ParseNode(current, "");
 
-			var openingBracketNode = new ParseNode(current);
-			openingBracketNode.value = "[";
-			openingBracketNode.end++;
-
-			var nameNode = new ParseNode(current);
-			nameNode.value = "";
-
-			for (var next = this._peek(); next !== "]" && next !== "\n"; next = this._peek()) {
+			for (var next = this._peek(); this._haveMore() && next !== "]" && next !== "\n"; next = this._peek()) {
 				nameNode.value += next;
-				nameNode.end++;
 			}
 
 			if (nameNode.value.length === 0) {
@@ -166,14 +154,10 @@ module libjass.parser {
 
 			current.value = nameNode.value;
 
-			if (next !== "]") {
+			if (this._read(current, "]") === null) {
 				parent.pop();
 				return null;
 			}
-
-			var closingBracketNode = new ParseNode(current);
-			closingBracketNode.value = "]";
-			closingBracketNode.end++;
 
 			return current;
 		}
@@ -183,19 +167,12 @@ module libjass.parser {
 
 			current.value = Object.create(null);
 
-			var keyNode = new ParseNode(current);
-			keyNode.value = "";
+			var keyNode = new ParseNode(current, "");
 
 			var next: string;
 
-			for (next = this._peek(); next !== ":" && next !== "\n"; next = this._peek()) {
+			for (next = this._peek(); this._haveMore() && next !== ":" && next !== "\n"; next = this._peek()) {
 				keyNode.value += next;
-				keyNode.end++;
-			}
-
-			if (next !== ":") {
-				parent.pop();
-				return null;
 			}
 
 			if (keyNode.value.length === 0) {
@@ -203,24 +180,21 @@ module libjass.parser {
 				return null;
 			}
 
-			var colonNode = new ParseNode(current);
-			colonNode.value = ":";
-			colonNode.end++;
+			if (this._read(current, ":") === null) {
+				parent.pop();
+				return null;
+			}
 
-			var spacesNode = new ParseNode(current);
-			spacesNode.value = "";
+			var spacesNode = new ParseNode(current, "");
 
 			for (next = this._peek(); next === " "; next = this._peek()) {
 				spacesNode.value += next;
-				spacesNode.end++;
 			}
 
-			var valueNode = new ParseNode(current);
-			valueNode.value = "";
+			var valueNode = new ParseNode(current, "");
 
-			for (next = this._peek(); next !== "\n"; next = this._peek()) {
+			for (next = this._peek(); this._haveMore() && next !== "\n"; next = this._peek()) {
 				valueNode.value += next;
-				valueNode.end++;
 			}
 
 			current.value.key = keyNode.value;
@@ -230,30 +204,21 @@ module libjass.parser {
 		}
 
 		private _parse_scriptComment(parent: ParseNode): ParseNode {
-			if (this._peek() !== ";") {
+			var current = new ParseNode(parent);
+
+			if (this._read(current, ";") === null) {
+				parent.pop();
 				return null;
 			}
 
-			var current = new ParseNode(parent);
-			current.value = "";
-
-			for (var next = this._peek(); next !== "\n"; next = this._peek()) {
-				current.value += next;
-				current.end++;
+			var valueNode = new ParseNode(current, "");
+			for (var next = this._peek(); this._haveMore() && next !== "\n"; next = this._peek()) {
+				valueNode.value += next;
 			}
+
+			current.value = valueNode.value;
 
 			return current;
-		}
-
-		private _parse_eol(parent: ParseNode): ParseNode {
-			if (this._peek() !== "\n") {
-				return null;
-			}
-
-			var emptyLineNode = new ParseNode(parent);
-			emptyLineNode.value = "\n";
-			emptyLineNode.end++;
-			return emptyLineNode;
 		}
 
 		private _parse_dialogueParts(parent: ParseNode): ParseNode {
@@ -261,7 +226,7 @@ module libjass.parser {
 
 			current.value = [];
 
-			while (current.end < this._input.length) {
+			while (this._haveMore()) {
 				var enclosedTagsNode = this._parse_enclosedTags(current);
 
 				if (enclosedTagsNode !== null) {
@@ -304,26 +269,19 @@ module libjass.parser {
 		}
 
 		private _parse_enclosedTags(parent: ParseNode): ParseNode {
-			if (this._peek() !== "{") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
 			current.value = [];
 
-			var openingBraceNode = new ParseNode(current);
-			openingBraceNode.value = "{";
-			openingBraceNode.end++;
+			if (this._read(current, "{") === null) {
+				parent.pop();
+				return null;
+			}
 
-			for (var next = this._peek(); next !== "}"; next = this._peek()) {
-				var childNode: ParseNode;
+			for (var next = this._peek(); this._haveMore() && next !== "}"; next = this._peek()) {
+				var childNode: ParseNode = null;
 
-				if (next === "\\") {
-					var backSlashNode = new ParseNode(current);
-					backSlashNode.value = "\\";
-					backSlashNode.end++;
-
+				if (this._read(current, "\\") !== null) {
 					childNode =
 						this._parse_tag_alpha(current) ||
 						this._parse_tag_xbord(current) ||
@@ -360,12 +318,11 @@ module libjass.parser {
 						this._parse_tag_u(current);
 
 					if (childNode === null) {
-						current.pop(); // Include backslash in comment
-
-						childNode = this._parse_comment(current);
+						current.pop(); // Unread backslash
 					}
 				}
-				else {
+
+				if (childNode === null) {
 					childNode = this._parse_comment(current);
 				}
 
@@ -388,33 +345,36 @@ module libjass.parser {
 				}
 			}
 
-			var closingBraceNode = new ParseNode(current);
-			closingBraceNode.value = "}";
-			closingBraceNode.end++;
+			if (this._read(current, "}") === null) {
+				parent.pop();
+				return null;
+			}
 
 			return current;
 		}
 
 		private _parse_newline(parent: ParseNode) {
-			if (this._peek(2) !== "\\N") {
+			var current = new ParseNode(parent);
+
+			if (this._read(current, "\\N") === null) {
+				parent.pop();
 				return null;
 			}
 
-			var current = new ParseNode(parent);
 			current.value = new tags.NewLine();
-			current.end += 2;
 
 			return current;
 		}
 
 		private _parse_hardspace(parent: ParseNode) {
-			if (this._peek(2) !== "\\h") {
+			var current = new ParseNode(parent);
+
+			if (this._read(current, "\\h") === null) {
+				parent.pop();
 				return null;
 			}
 
-			var current = new ParseNode(parent);
 			current.value = new tags.HardSpace();
-			current.end += 2;
 
 			return current;
 		}
@@ -422,13 +382,10 @@ module libjass.parser {
 		private _parse_text(parent: ParseNode) {
 			var value = this._peek();
 
-			if (value.length === 0) {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
-			current.value = new tags.Text(value);
-			current.end++;
+			var valueNode = new ParseNode(current, value);
+
+			current.value = new tags.Text(valueNode.value);
 
 			return current;
 		}
@@ -436,27 +393,21 @@ module libjass.parser {
 		private _parse_comment(parent: ParseNode) {
 			var value = this._peek();
 
-			if (value.length === 0) {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
-			current.value = new tags.Comment(value);
-			current.end++;
+			var valueNode = new ParseNode(current, value);
+
+			current.value = new tags.Comment(valueNode.value);
 
 			return current;
 		}
 
 		private _parse_tag_alpha(parent: ParseNode) {
-			if (this._peek("alpha".length) !== "alpha") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "alpha";
-			nameNode.end += "alpha".length;
+			if (this._read(current, "alpha") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_alpha(current);
 
@@ -471,15 +422,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_xbord(parent: ParseNode) {
-			if (this._peek("xbord".length) !== "xbord") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "xbord";
-			nameNode.end += "xbord".length;
+			if (this._read(current, "xbord") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_decimal(current);
 
@@ -494,15 +442,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_ybord(parent: ParseNode) {
-			if (this._peek("ybord".length) !== "ybord") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "ybord";
-			nameNode.end += "ybord".length;
+			if (this._read(current, "ybord") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_decimal(current);
 
@@ -517,15 +462,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_bord(parent: ParseNode) {
-			if (this._peek("bord".length) !== "bord") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "bord";
-			nameNode.end += "bord".length;
+			if (this._read(current, "bord") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_decimal(current);
 
@@ -540,15 +482,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_blur(parent: ParseNode) {
-			if (this._peek("blur".length) !== "blur") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "blur";
-			nameNode.end += "blur".length;
+			if (this._read(current, "blur") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_decimal(current);
 
@@ -563,15 +502,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_fscx(parent: ParseNode) {
-			if (this._peek("fscx".length) !== "fscx") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "fscx";
-			nameNode.end += "fscx".length;
+			if (this._read(current, "fscx") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_decimal(current);
 
@@ -586,15 +522,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_fscy(parent: ParseNode) {
-			if (this._peek("fscy".length) !== "fscy") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "fscy";
-			nameNode.end += "fscy".length;
+			if (this._read(current, "fscy") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_decimal(current);
 
@@ -609,24 +542,17 @@ module libjass.parser {
 		}
 
 		private _parse_tag_fad(parent: ParseNode) {
-			if (this._peek("fad".length) !== "fad") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "fad";
-			nameNode.end += "fad".length;
-
-			if (this._peek() !== "(") {
+			if (this._read(current, "fad") === null) {
 				parent.pop();
 				return null;
 			}
 
-			var openingParaenthesesNode = new ParseNode(current);
-			openingParaenthesesNode.value = "(";
-			openingParaenthesesNode.end++;
+			if (this._read(current, "(") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var startNode = this._parse_decimal(current);
 			if (startNode === null) {
@@ -634,14 +560,10 @@ module libjass.parser {
 				return null;
 			}
 
-			if (this._peek() !== ",") {
+			if (this._read(current, ",") === null) {
 				parent.pop();
 				return null;
 			}
-
-			var commaNode = new ParseNode(current);
-			commaNode.value = ",";
-			commaNode.end++;
 
 			var endNode = this._parse_decimal(current);
 			if (endNode === null) {
@@ -649,14 +571,10 @@ module libjass.parser {
 				return null;
 			}
 
-			if (this._peek() !== ")") {
+			if (this._read(current, ")") === null) {
 				parent.pop();
 				return null;
 			}
-
-			var closingParaenthesesNode = new ParseNode(current);
-			closingParaenthesesNode.value = ")";
-			closingParaenthesesNode.end++;
 
 			current.value = new tags.Fade(startNode.value / 1000, endNode.value / 1000);
 
@@ -664,15 +582,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_fax(parent: ParseNode) {
-			if (this._peek("fax".length) !== "fax") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "fax";
-			nameNode.end += "fax".length;
+			if (this._read(current, "fax") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_decimal(current);
 
@@ -687,15 +602,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_fay(parent: ParseNode) {
-			if (this._peek("fay".length) !== "fay") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "fay";
-			nameNode.end += "fay".length;
+			if (this._read(current, "fay") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_decimal(current);
 
@@ -710,15 +622,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_frx(parent: ParseNode) {
-			if (this._peek("frx".length) !== "frx") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "frx";
-			nameNode.end += "frx".length;
+			if (this._read(current, "frx") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_decimal(current);
 
@@ -733,15 +642,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_fry(parent: ParseNode) {
-			if (this._peek("fry".length) !== "fry") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "fry";
-			nameNode.end += "fry".length;
+			if (this._read(current, "fry") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_decimal(current);
 
@@ -756,15 +662,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_frz(parent: ParseNode) {
-			if (this._peek("frz".length) !== "frz") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "frz";
-			nameNode.end += "frz".length;
+			if (this._read(current, "frz") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_decimal(current);
 
@@ -779,15 +682,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_fsp(parent: ParseNode) {
-			if (this._peek("fsp".length) !== "fsp") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "fsp";
-			nameNode.end += "fsp".length;
+			if (this._read(current, "fsp") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_decimal(current);
 
@@ -802,24 +702,17 @@ module libjass.parser {
 		}
 
 		private _parse_tag_pos(parent: ParseNode) {
-			if (this._peek("pos".length) !== "pos") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "pos";
-			nameNode.end += "pos".length;
-
-			if (this._peek() !== "(") {
+			if (this._read(current, "pos") === null) {
 				parent.pop();
 				return null;
 			}
 
-			var openParaenthesesNode = new ParseNode(current);
-			openParaenthesesNode.value = "(";
-			openParaenthesesNode.end++;
+			if (this._read(current, "(") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var xNode = this._parse_decimal(current);
 			if (xNode === null) {
@@ -827,14 +720,10 @@ module libjass.parser {
 				return null;
 			}
 
-			if (this._peek() !== ",") {
+			if (this._read(current, ",") === null) {
 				parent.pop();
 				return null;
 			}
-
-			var commaNode = new ParseNode(current);
-			commaNode.value = ",";
-			commaNode.end++;
 
 			var yNode = this._parse_decimal(current);
 			if (yNode === null) {
@@ -842,14 +731,10 @@ module libjass.parser {
 				return null;
 			}
 
-			if (this._peek() !== ")") {
+			if (this._read(current, ")") === null) {
 				parent.pop();
 				return null;
 			}
-
-			var closeParaenthesesNode = new ParseNode(current);
-			closeParaenthesesNode.value = ")";
-			closeParaenthesesNode.end++;
 
 			current.value = new tags.Pos(xNode.value, yNode.value);
 
@@ -857,26 +742,21 @@ module libjass.parser {
 		}
 
 		private _parse_tag_an(parent: ParseNode) {
-			if (this._peek("an".length) !== "an") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "an";
-			nameNode.end += "an".length;
-
-			var next = this._peek();
-
-			if (next < "0" && next > "9") {
+			if (this._read(current, "an") === null) {
 				parent.pop();
 				return null;
 			}
 
-			var valueNode = new ParseNode(current);
-			valueNode.value = next;
-			valueNode.end++;
+			var next = this._peek();
+
+			if (next < "0" || next > "9") {
+				parent.pop();
+				return null;
+			}
+
+			var valueNode = new ParseNode(current, next);
 
 			current.value = new tags.Alignment(parseInt(valueNode.value));
 
@@ -884,21 +764,17 @@ module libjass.parser {
 		}
 
 		private _parse_tag_fn(parent: ParseNode) {
-			if (this._peek("fn".length) !== "fn") {
+			var current = new ParseNode(parent);
+
+			if (this._read(current, "fn") === null) {
+				parent.pop();
 				return null;
 			}
 
-			var current = new ParseNode(parent);
+			var valueNode = new ParseNode(current, "");
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "fn";
-			nameNode.end += "fn".length;
-
-			var valueNode = new ParseNode(current);
-			valueNode.value = "";
-			for (var next = this._peek(); next !== "\\" && next !== "}"; next = this._peek()) {
+			for (var next = this._peek(); this._haveMore() && next !== "\\" && next !== "}"; next = this._peek()) {
 				valueNode.value += next;
-				valueNode.end++;
 			}
 
 			if (valueNode.value.length > 0) {
@@ -912,15 +788,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_fs(parent: ParseNode) {
-			if (this._peek("fs".length) !== "fs") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "fs";
-			nameNode.end += "fs".length;
+			if (this._read(current, "fs") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_decimal(current);
 
@@ -935,15 +808,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_1a(parent: ParseNode) {
-			if (this._peek("1a".length) !== "1a") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "1a";
-			nameNode.end += "1a".length;
+			if (this._read(current, "1a") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_alpha(current);
 
@@ -958,15 +828,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_1c(parent: ParseNode) {
-			if (this._peek("1c".length) !== "1c") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "1c";
-			nameNode.end += "1c".length;
+			if (this._read(current, "1c") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_color(current);
 
@@ -981,15 +848,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_3a(parent: ParseNode) {
-			if (this._peek("3a".length) !== "3a") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "3a";
-			nameNode.end += "3a".length;
+			if (this._read(current, "3a") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_alpha(current);
 
@@ -1004,15 +868,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_3c(parent: ParseNode) {
-			if (this._peek("3c".length) !== "3c") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "3c";
-			nameNode.end += "3c".length;
+			if (this._read(current, "3c") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_color(current);
 
@@ -1027,15 +888,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_b(parent: ParseNode) {
-			if (this._peek("b".length) !== "b") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "b";
-			nameNode.end += "b".length;
+			if (this._read(current, "b") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode: ParseNode = null;
 
@@ -1044,15 +902,12 @@ module libjass.parser {
 			if (next >= "1" && next <= "9") {
 				next = this._peek(3);
 				if (next.substr(1) === "00") {
-					valueNode = new ParseNode(current);
-					valueNode.value = parseInt(next);
-					valueNode.end += 3;
+					valueNode = new ParseNode(current, next);
+					valueNode.value = parseInt(valueNode.value);
 				}
 			}
 
 			if (valueNode === null) {
-				next = this._peek(3);
-
 				valueNode = this._parse_enableDisable(current);
 			}
 
@@ -1067,15 +922,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_c(parent: ParseNode) {
-			if (this._peek("c".length) !== "c") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "c";
-			nameNode.end += "c".length;
+			if (this._read(current, "c") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_color(current);
 
@@ -1090,15 +942,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_i(parent: ParseNode) {
-			if (this._peek("i".length) !== "i") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "i";
-			nameNode.end += "i".length;
+			if (this._read(current, "i") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_enableDisable(current);
 
@@ -1113,21 +962,17 @@ module libjass.parser {
 		}
 
 		private _parse_tag_r(parent: ParseNode) {
-			if (this._peek("r".length) !== "r") {
+			var current = new ParseNode(parent);
+
+			if (this._read(current, "r") === null) {
+				parent.pop();
 				return null;
 			}
 
-			var current = new ParseNode(parent);
+			var valueNode = new ParseNode(current, "");
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "r";
-			nameNode.end += "r".length;
-
-			var valueNode = new ParseNode(current);
-			valueNode.value = "";
-			for (var next = this._peek(); next !== "\\" && next !== "}"; next = this._peek()) {
+			for (var next = this._peek(); this._haveMore() && next !== "\\" && next !== "}"; next = this._peek()) {
 				valueNode.value += next;
-				valueNode.end++;
 			}
 
 			if (valueNode.value.length > 0) {
@@ -1141,15 +986,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_s(parent: ParseNode) {
-			if (this._peek("s".length) !== "s") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "s";
-			nameNode.end += "s".length;
+			if (this._read(current, "s") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_enableDisable(current);
 
@@ -1164,24 +1006,17 @@ module libjass.parser {
 		}
 
 		private _parse_tag_t(parent: ParseNode) {
-			if (this._peek("t".length) !== "t") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "t";
-			nameNode.end += "t".length;
-
-			if (this._peek() !== "(") {
+			if (this._read(current, "t") === null) {
 				parent.pop();
 				return null;
 			}
 
-			var openingParaenthesesNode = new ParseNode(current);
-			openingParaenthesesNode.value = "(";
-			openingParaenthesesNode.end++;
+			if (this._read(current, "(") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var startNode: ParseNode = null;
 			var endNode: ParseNode = null;
@@ -1189,67 +1024,47 @@ module libjass.parser {
 
 			var firstNode = this._parse_decimal(current);
 			if (firstNode !== null) {
-				if (this._peek() !== ",") {
+				if (this._read(current, ",") === null) {
 					parent.pop();
 					return null;
 				}
-
-				var commaNode = new ParseNode(current);
-				commaNode.value = ",";
-				commaNode.end++;
 
 				var secondNode = this._parse_decimal(current);
 				if (secondNode !== null) {
 					startNode = firstNode;
 					endNode = secondNode;
 
-					if (this._peek() !== ",") {
+					if (this._read(current, ",") === null) {
 						parent.pop();
 						return null;
 					}
-
-					var endCommaNode = new ParseNode(current);
-					endCommaNode.value = ",";
-					endCommaNode.end++;
 
 					var thirdNode = this._parse_decimal(current);
 					if (thirdNode !== null) {
 						accelNode = thirdNode;
 
-						if (this._peek() !== ",") {
+						if (this._read(current, ",") === null) {
 							parent.pop();
 							return null;
 						}
-
-						var accelCommaNode = new ParseNode(current);
-						accelCommaNode.value = ",";
-						accelCommaNode.end++;
 					}
 				}
 				else {
 					accelNode = firstNode;
 
-					if (this._peek() !== ",") {
+					if (this._read(current, ",") === null) {
 						parent.pop();
 						return null;
 					}
-
-					var accelCommaNode = new ParseNode(current);
-					accelCommaNode.value = ",";
-					accelCommaNode.end++;
 				}
 			}
 
 			var transformTags: tags.Tag[] = [];
 
-			for (var next = this._peek(); next !== ")"; next = this._peek()) {
+			for (var next = this._peek(); this._haveMore() && next !== ")"; next = this._peek()) {
 				var childNode: ParseNode = null;
 
-				if (next === "\\") {
-					var backSlashNode = new ParseNode(current);
-					backSlashNode.value = "\\";
-					backSlashNode.end++;
-
+				if (this._read(current, "\\") !== null) {
 					childNode =
 						this._parse_tag_alpha(current) ||
 						this._parse_tag_xbord(current) ||
@@ -1276,12 +1091,11 @@ module libjass.parser {
 						this._parse_tag_c(current);
 
 					if (childNode === null) {
-						current.pop(); // Include backslash in comment
-
-						childNode = this._parse_comment(current);
+						current.pop(); // Unread backslash
 					}
 				}
-				else {
+
+				if (childNode === null) {
 					childNode = this._parse_comment(current);
 				}
 
@@ -1304,14 +1118,10 @@ module libjass.parser {
 				}
 			}
 
-			if (this._peek() !== ")") {
+			if (this._read(current, ")") === null) {
 				parent.pop();
 				return null;
 			}
-
-			var closingParaenthesesNode = new ParseNode(current);
-			closingParaenthesesNode.value = ")";
-			closingParaenthesesNode.end++;
 
 			current.value =
 				new tags.Transform(
@@ -1325,15 +1135,12 @@ module libjass.parser {
 		}
 
 		private _parse_tag_u(parent: ParseNode) {
-			if (this._peek("u".length) !== "u") {
-				return null;
-			}
-
 			var current = new ParseNode(parent);
 
-			var nameNode = new ParseNode(current);
-			nameNode.value = "u";
-			nameNode.end += "u".length;
+			if (this._read(current, "u") === null) {
+				parent.pop();
+				return null;
+			}
 
 			var valueNode = this._parse_enableDisable(current);
 
@@ -1350,14 +1157,7 @@ module libjass.parser {
 		private _parse_decimal(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
-			var next = this._peek();
-
-			var negative = (next === "-");
-			if (negative) {
-				var signNode = new ParseNode(current);
-				signNode.value = "-";
-				signNode.end++;
-			}
+			var negative = (this._read(current, "-") !== null);
 
 			var numericalPart = this._parse_unsignedDecimal(current);
 
@@ -1378,15 +1178,13 @@ module libjass.parser {
 		private _parse_unsignedDecimal(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
-			var characteristicNode = new ParseNode(current);
-			characteristicNode.value = "";
+			var characteristicNode = new ParseNode(current, "");
 
 			var mantissaNode: ParseNode = null;
 
 			var next: string;
-			for (next = this._peek(); next >= "0" && next <= "9"; next = this._peek()) {
+			for (next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
 				characteristicNode.value += next;
-				characteristicNode.end++;
 			}
 
 			if (characteristicNode.value.length === 0) {
@@ -1394,17 +1192,11 @@ module libjass.parser {
 				return null;
 			}
 
-			if (this._peek() === ".") {
-				var decimalPointNode = new ParseNode(current);
-				decimalPointNode.value = ".";
-				decimalPointNode.end++;
+			if (this._read(current, ".") !== null) {
+				mantissaNode = new ParseNode(current, "");
 
-				mantissaNode = new ParseNode(current);
-				mantissaNode.value = "";
-
-				for (next = this._peek(); next >= "0" && next <= "9"; next = this._peek()) {
+				for (next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
 					mantissaNode.value += next;
-					mantissaNode.end++;
 				}
 
 				if (mantissaNode.value.length === 0) {
@@ -1422,9 +1214,8 @@ module libjass.parser {
 			var next = this._peek();
 
 			if (next === "0" || next === "1") {
-				var result = new ParseNode(parent);
-				result.value = (next === "1");
-				result.end++;
+				var result = new ParseNode(parent, next);
+				result.value = (result.value === "1");
 
 				return result;
 			}
@@ -1436,131 +1227,117 @@ module libjass.parser {
 			var next = this._peek();
 
 			if ((next >= "0" && next <= "9") || (next >= "a" && next <= "f") || (next >= "A" && next <= "F")) {
-				var current = new ParseNode(parent);
-				current.value = next;
-				current.end++;
-				return current;
+				return new ParseNode(parent, next);
 			}
 
 			return null;
 		}
 
 		private _parse_color(parent: ParseNode): ParseNode {
-			switch (this._peek(2)) {
-				case "&H":
-					var current = new ParseNode(parent);
+			var current = new ParseNode(parent);
 
-					var beginNode = new ParseNode(current);
-					beginNode.value = "&H";
-					beginNode.end += 2;
-
-					var digitNodes = Array<ParseNode>(6);
-
-					for (var i = 0; i < digitNodes.length; i++) {
-						var digitNode = this._parse_hex(current);
-						if (digitNode === null) {
-							parent.pop();
-							return null;
-						}
-						digitNodes[i] = digitNode;
-					}
-
-					if (this._peek() !== "&") {
-						parent.pop();
-						return null;
-					}
-
-					current.value = new tags.Color(
-						parseInt(digitNodes[4].value + digitNodes[5].value, 16),
-						parseInt(digitNodes[2].value + digitNodes[3].value, 16),
-						parseInt(digitNodes[0].value + digitNodes[1].value, 16)
-					);
-
-					var endNode = new ParseNode(current);
-					endNode.value = "&";
-					endNode.end++;
-
-					return current;
-
-				default:
-					return null;
+			if (this._read(current, "&H") === null) {
+				parent.pop();
+				return null;
 			}
+
+			var digitNodes = Array<ParseNode>(6);
+
+			for (var i = 0; i < digitNodes.length; i++) {
+				var digitNode = this._parse_hex(current);
+				if (digitNode === null) {
+					parent.pop();
+					return null;
+				}
+				digitNodes[i] = digitNode;
+			}
+
+			if (this._read(current, "&") === null) {
+				parent.pop();
+				return null;
+			}
+
+			current.value = new tags.Color(
+				parseInt(digitNodes[4].value + digitNodes[5].value, 16),
+				parseInt(digitNodes[2].value + digitNodes[3].value, 16),
+				parseInt(digitNodes[0].value + digitNodes[1].value, 16)
+			);
+
+			return current;
 		}
 
 		private _parse_alpha(parent: ParseNode): ParseNode {
-			switch (this._peek(2)) {
-				case "&H":
-					var current = new ParseNode(parent);
+			var current = new ParseNode(parent);
 
-					var beginNode = new ParseNode(current);
-					beginNode.value = "&H";
-					beginNode.end += 2;
-
-					var digitNodes = Array<ParseNode>(2);
-
-					for (var i = 0; i < digitNodes.length; i++) {
-						var digitNode = this._parse_hex(current);
-						if (digitNode === null) {
-							parent.pop();
-							return null;
-						}
-						digitNodes[i] = digitNode;
-					}
-
-					if (this._peek() !== "&") {
-						parent.pop();
-						return null;
-					}
-
-					current.value = 1 - parseInt(digitNodes[0].value + digitNodes[1].value, 16) / 255;
-
-					var endNode = new ParseNode(current);
-					endNode.value = "&";
-					endNode.end++;
-
-					return current;
-
-				default:
-					return null;
+			if (this._read(current, "&H") === null) {
+				parent.pop();
+				return null;
 			}
+
+			var digitNodes = Array<ParseNode>(2);
+
+			for (var i = 0; i < digitNodes.length; i++) {
+				var digitNode = this._parse_hex(current);
+				if (digitNode === null) {
+					parent.pop();
+					return null;
+				}
+				digitNodes[i] = digitNode;
+			}
+
+			if (this._read(current, "&") === null) {
+				parent.pop();
+				return null;
+			}
+
+			current.value = 1 - parseInt(digitNodes[0].value + digitNodes[1].value, 16) / 255;
+
+			return current;
 		}
 
 		private _parse_colorWithAlpha(parent: ParseNode): ParseNode {
-			switch (this._peek(2)) {
-				case "&H":
-					var current = new ParseNode(parent);
+			var current = new ParseNode(parent);
 
-					var beginNode = new ParseNode(current);
-					beginNode.value = "&H";
-					beginNode.end += 2;
-
-					var digitNodes = Array<ParseNode>(8);
-
-					for (var i = 0; i < digitNodes.length; i++) {
-						var digitNode = this._parse_hex(current);
-						if (digitNode === null) {
-							parent.pop();
-							return null;
-						}
-						digitNodes[i] = digitNode;
-					}
-
-					current.value = new tags.Color(
-						parseInt(digitNodes[6].value + digitNodes[7].value, 16),
-						parseInt(digitNodes[4].value + digitNodes[5].value, 16),
-						parseInt(digitNodes[2].value + digitNodes[3].value, 16),
-						1 - parseInt(digitNodes[0].value + digitNodes[1].value, 16) / 255
-					);
-
-					return current;
-
-				default:
-					return null;
+			if (this._read(current, "&H") === null) {
+				parent.pop();
+				return null;
 			}
+
+			var digitNodes = Array<ParseNode>(8);
+
+			for (var i = 0; i < digitNodes.length; i++) {
+				var digitNode = this._parse_hex(current);
+				if (digitNode === null) {
+					parent.pop();
+					return null;
+				}
+				digitNodes[i] = digitNode;
+			}
+
+			current.value = new tags.Color(
+				parseInt(digitNodes[6].value + digitNodes[7].value, 16),
+				parseInt(digitNodes[4].value + digitNodes[5].value, 16),
+				parseInt(digitNodes[2].value + digitNodes[3].value, 16),
+				1 - parseInt(digitNodes[0].value + digitNodes[1].value, 16) / 255
+			);
+
+			return current;
 		}
 
 		private _peek(count: number = 1) {
 			return this._input.substr(this._parseTree.end, count);
+		}
+
+		private _read(parent: ParseNode, next: string) {
+			if (this._peek(next.length) !== next) {
+				return null;
+			}
+
+			return new ParseNode(parent, next);
+		}
+
+		private _haveMore(): boolean {
+			return this._parseTree.end < this._input.length;
 		}
 	};
 
@@ -1578,14 +1355,19 @@ module libjass.parser {
 		private _end: number;
 		private _value: any;
 
-		constructor(private _parent: ParseNode) {
+		constructor(private _parent: ParseNode, value: string = null) {
 			if (_parent !== null) {
 				_parent._children.push(this);
 			}
 
 			this._start = ((_parent !== null) ? _parent.end : 0);
 
-			this.end = this._start;
+			if (value !== null) {
+				this.value = value;
+			}
+			else {
+				this._setEnd(this._start);
+			}
 		}
 
 		get start(): number {
@@ -1594,14 +1376,6 @@ module libjass.parser {
 
 		get end(): number {
 			return this._end;
-		}
-
-		set end(value: number) {
-			this._end = value;
-
-			if (this._parent !== null && this._parent.end !== this._end) {
-				this._parent.end = this._end;
-			}
 		}
 
 		get parent(): ParseNode {
@@ -1618,16 +1392,28 @@ module libjass.parser {
 
 		set value(newValue: any) {
 			this._value = newValue;
+
+			if (this._value.constructor === String && this._children.length === 0) {
+				this._setEnd(this._start + this._value.length);
+			}
 		}
 
 		pop(): void {
 			this._children.splice(this._children.length - 1, 1);
 
 			if (this._children.length > 0) {
-				this.end = this._children[this._children.length - 1].end;
+				this._setEnd(this._children[this._children.length - 1].end);
 			}
 			else {
-				this.end = this.start;
+				this._setEnd(this.start);
+			}
+		}
+
+		private _setEnd(newEnd: number): void {
+			this._end = newEnd;
+
+			if (this._parent !== null && this._parent.end !== this._end) {
+				this._parent._setEnd(this._end);
 			}
 		}
 	}
