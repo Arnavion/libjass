@@ -92,7 +92,7 @@ module libjass {
 		forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void {
 			Object.keys(this._data).map((key: string) => {
 				return this._data[key];
-			}).forEach((value: T, index: number) => {
+			}).forEach((value: T) => {
 				callbackfn.call(thisArg, value, value, this);
 			});
 		}
@@ -198,7 +198,7 @@ module libjass {
 		 * @param {function(V, K, libjass.Map.<K, V>)} callbackfn A function that is called with each key and value in the map.
 		 */
 		forEach(callbackfn: (value: V, index: K, map: Map<K, V>) => void, thisArg?: any): void {
-			Object.keys(this._data).forEach((property: string, index: number): void => {
+			Object.keys(this._data).forEach((property: string): void => {
 				callbackfn.call(thisArg, this._data[property], this._propertyToKey(property), this);
 			});
 		}
