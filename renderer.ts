@@ -531,7 +531,7 @@ module libjass.renderers {
 				else if (part instanceof tags.Transform) {
 					var transformTag = <tags.Transform>part;
 					transformTag.tags.forEach((tag: tags.Tag) => {
-						if (tag instanceof tags.Blur) {
+						if (tag instanceof tags.GaussianBlur) {
 
 						}
 					});
@@ -612,8 +612,8 @@ module libjass.renderers {
 					currentSpanStyles.outlineWidthY = (<tags.BorderY>part).value;
 				}
 
-				else if (part instanceof tags.Blur) {
-					currentSpanStyles.blur = (<tags.Blur>part).value;
+				else if (part instanceof tags.GaussianBlur) {
+					currentSpanStyles.blur = (<tags.GaussianBlur>part).value;
 				}
 
 				else if (part instanceof tags.FontName) {
@@ -678,7 +678,7 @@ module libjass.renderers {
 				}
 
 				else if (part instanceof tags.Alignment) {
-					// Already handled at the beginning of draw()
+					// Already handled in Dialogue constructor
 				}
 
 				else if (part instanceof tags.Reset) {
@@ -690,12 +690,12 @@ module libjass.renderers {
 					currentSpanStyles.reset(newStyle);
 				}
 
-				else if (part instanceof tags.Pos) {
-					// Will be handled at the end of draw()
+				else if (part instanceof tags.Position) {
+					// Will be handled at the end of preRender()
 				}
 
 				else if (part instanceof tags.Fade) {
-					// Already handled at the beginning of draw()
+					// Already handled at the beginning of preRender()
 				}
 
 				else if (part instanceof tags.NewLine) {
@@ -714,8 +714,8 @@ module libjass.renderers {
 			});
 
 			dialogue.parts.some(part => {
-				if (part instanceof tags.Pos) {
-					var posPart = <tags.Pos>part;
+				if (part instanceof tags.Position) {
+					var posPart = <tags.Position>part;
 
 					sub.style.position = "absolute";
 					sub.style.left = (scaleX * posPart.x) + "px";

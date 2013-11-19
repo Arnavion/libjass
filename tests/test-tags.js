@@ -69,4 +69,8 @@ suite("Tags", function () {
 	suite("Alpha tag - \\alpha", function () {
 		parserTest("Just the tag", "alpha&H00&", "tag_alpha", new libjass.tags.Alpha(1));
 	});
+
+	suite("Transform tag - \\t", function () {
+		parserTest("No tags", "{\\t(100,200)}", "enclosedTags", [new libjass.tags.Comment("\\t(100,200)")]);
+	});
 });

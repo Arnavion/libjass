@@ -457,6 +457,17 @@ module libjass {
 				if (part instanceof tags.Alignment) {
 					this._alignment = (<tags.Alignment>part).value;
 				}
+				else if (part instanceof tags.Move) {
+					var movePart = <tags.Move>part;
+
+					if (movePart.t1 === null || movePart.t2 === null) {
+						this._parts[index] =
+							new tags.Move(
+								movePart.x1, movePart.x2, movePart.y1, movePart.y2,
+								0, this._end - this._start
+							);
+					}
+				}
 				else if (part instanceof tags.Transform) {
 					var transformPart = <tags.Transform>part;
 

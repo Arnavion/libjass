@@ -301,8 +301,7 @@ namespace("_default", function () {
 			if (
 				node instanceof UglifyJS.AST_PropAccess &&
 				typeof node.property === "string" &&
-				node.property.indexOf("_") === 0 &&
-				node.property.indexOf("_parse_") !== 0 // Parse functions are looked up by name
+				node.property.indexOf("_") === 0
 			) {
 				var occurrence = occurrences[node.property];
 				if (occurrence === undefined) {
