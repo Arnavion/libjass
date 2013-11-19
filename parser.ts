@@ -1023,7 +1023,7 @@ module libjass.parser {
 
 			current.value = new tags.Move(
 				x1Node.value, y1Node.value, x2Node.value, y2Node.value,
-				(t1Node !== null) ? t1Node.value : null, (t2Node !== null) ? t2Node.value : null
+				(t1Node !== null) ? (t1Node.value / 1000) : null, (t2Node !== null) ? (t2Node.value / 1000) : null
 			);
 
 			return current;
