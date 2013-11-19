@@ -55,11 +55,15 @@ module libjass {
 			}
 
 			/**
-			 * @param {number} value The new alpha. If null, the existing alpha is used.
+			 * @param {?number} value The new alpha. If null, the existing alpha is used.
 			 * @return {!libjass.tags.Color} Returns a new Color instance with the same color but the provided alpha.
 			 */
 			withAlpha(value: number): Color {
-				return new Color(this._red, this._green, this._blue, (value !== null) ? value : this._alpha);
+				if (value !== null) {
+					return new Color(this._red, this._green, this._blue, value);
+				}
+
+				return this;
 			}
 
 			/**
