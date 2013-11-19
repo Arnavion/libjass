@@ -312,7 +312,7 @@ module libjass {
 		 * A shadow tag {\shad}
 		 *
 		 * @constructor
-		 * @param {?number} value {\shad###} -> width (number), {\shad} -> null
+		 * @param {?number} value {\shad###} -> depth (number), {\shad} -> null
 		 *
 		 * @extends {libjass.tags.TagBase}
 		 * @memberof libjass.tags
@@ -331,7 +331,7 @@ module libjass {
 		 * A horizontal shadow tag {\xshad}
 		 *
 		 * @constructor
-		 * @param {?number} value {\xshad###} -> width (number), {\xshad} -> null
+		 * @param {?number} value {\xshad###} -> depth (number), {\xshad} -> null
 		 *
 		 * @extends {libjass.tags.TagBase}
 		 * @memberof libjass.tags
@@ -350,7 +350,7 @@ module libjass {
 		 * A vertical shadow tag {\yshad}
 		 *
 		 * @constructor
-		 * @param {?number} value {\yshad###} -> height (number), {\yshad} -> null
+		 * @param {?number} value {\yshad###} -> depth (number), {\yshad} -> null
 		 *
 		 * @extends {libjass.tags.TagBase}
 		 * @memberof libjass.tags
@@ -557,7 +557,6 @@ module libjass {
 
 		/**
 		 * An X-axis shearing tag {\fax}
-		 * A comment, i.e., any text enclosed in {} that is not understood as an ASS tag.
 		 *
 		 * @constructor
 		 * @param {?number} value {\fax###} -> angle (number), {\fax} -> null
