@@ -475,8 +475,16 @@ module libjass {
 			this._setTransformOrigin();
 
 			if (libjass.debugMode) {
-				if (this._parts.some(part => part instanceof tags.Comment && (<tags.Comment>part).value.indexOf("\\") !== -1)) {
-					console.warn("Possible incorrect parse: " + this.toString());
+				var possiblyIncorrectParses = this._parts.filter(part => part instanceof tags.Comment && (<tags.Comment>part).value.indexOf("\\") !== -1);
+				if (possiblyIncorrectParses.length > 0) {
+					console.warn(
+						"Possible incorrect parse:\n" +
+						template["Text"] + "\n" +
+						"was parsed as\n" +
+						this.toString() + "\n" +
+						"The possibly incorrect parses are:\n" +
+						possiblyIncorrectParses.join("\n")
+					);
 				}
 			}
 		}
