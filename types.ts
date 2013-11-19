@@ -433,6 +433,8 @@ module libjass {
 
 		private _layer: number;
 		private _alignment: number;
+		private _transformOriginX: number;
+		private _transformOriginY: number;
 		private _transformOrigin: string;
 
 		private _parts: tags.Tag[];
@@ -541,6 +543,14 @@ module libjass {
 			return this._alignment;
 		}
 
+		get transformOriginX(): number {
+			return this._transformOriginX;
+		}
+
+		get transformOriginY(): number {
+			return this._transformOriginY;
+		}
+
 		get transformOrigin(): string {
 			return this._transformOrigin;
 		}
@@ -583,22 +593,19 @@ module libjass {
 		}
 
 		private _setTransformOrigin(): void {
-			var transformOriginX: number;
-			var transformOriginY: number;
-
 			switch (this._alignment) {
-				case 1: transformOriginX =   0; transformOriginY = 100; break;
-				case 2: transformOriginX =  50; transformOriginY = 100; break;
-				case 3: transformOriginX = 100; transformOriginY = 100; break;
-				case 4: transformOriginX =   0; transformOriginY =  50; break;
-				case 5: transformOriginX =  50; transformOriginY =  50; break;
-				case 6: transformOriginX = 100; transformOriginY =  50; break;
-				case 7: transformOriginX =   0; transformOriginY =   0; break;
-				case 8: transformOriginX =  50; transformOriginY =   0; break;
-				case 9: transformOriginX = 100; transformOriginY =   0; break;
+				case 1: this._transformOriginX =   0; this._transformOriginY = 100; break;
+				case 2: this._transformOriginX =  50; this._transformOriginY = 100; break;
+				case 3: this._transformOriginX = 100; this._transformOriginY = 100; break;
+				case 4: this._transformOriginX =   0; this._transformOriginY =  50; break;
+				case 5: this._transformOriginX =  50; this._transformOriginY =  50; break;
+				case 6: this._transformOriginX = 100; this._transformOriginY =  50; break;
+				case 7: this._transformOriginX =   0; this._transformOriginY =   0; break;
+				case 8: this._transformOriginX =  50; this._transformOriginY =   0; break;
+				case 9: this._transformOriginX = 100; this._transformOriginY =   0; break;
 			}
 
-			this._transformOrigin = transformOriginX + "% " + transformOriginY + "%";
+			this._transformOrigin = this._transformOriginX + "% " + this._transformOriginY + "%";
 		}
 	}
 

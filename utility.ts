@@ -23,9 +23,8 @@
 "use strict";
 
 interface CSSStyleDeclaration {
+	webkitAnimation: string
 	webkitAnimationDelay: string
-	webkitAnimationDuration: string
-	webkitAnimationName: string
 	webkitTransform: string
 	webkitTransformOrigin: string
 	webkitPerspective: string

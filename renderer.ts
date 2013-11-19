@@ -511,61 +511,15 @@ module libjass.renderers {
 
 			var sub = document.createElement("div");
 
-			// Create an animation if there is a part that requires it
-			var keyframes = new KeyframeCollection(dialogue.id, dialogue.start, dialogue.end);
-
-			dialogue.parts.forEach(part => {
-				if (part instanceof tags.Fade) {
-					var fadePart = <tags.Fade>part;
-					if (fadePart.start !== 0) {
-						keyframes.add(dialogue.start, "opacity", "0");
-						keyframes.add(dialogue.start + fadePart.start, "opacity", "1");
-					}
-					if (fadePart.end !== 0) {
-						keyframes.add(dialogue.end - fadePart.end, "opacity", "1");
-						keyframes.add(dialogue.end, "opacity", "0");
-					}
-				}
-
-				/* TODO
-				else if (part instanceof tags.Transform) {
-					var transformTag = <tags.Transform>part;
-					transformTag.tags.forEach((tag: tags.Tag) => {
-						if (tag instanceof tags.GaussianBlur) {
-
-						}
-					});
-				}
-				*/
-			});
-
-			if (DefaultRenderer._animationStyleElement === null) {
-				var existingStyleElement = <HTMLStyleElement>document.querySelector("#libjass-animation-styles");
-				if (existingStyleElement === null) {
-					existingStyleElement = document.createElement("style");
-					existingStyleElement.id = "libjass-animation-styles";
-					existingStyleElement.type = "text/css";
-					document.querySelector("head").appendChild(existingStyleElement);
-				}
-
-				DefaultRenderer._animationStyleElement = existingStyleElement;
-			}
-
-			DefaultRenderer._animationStyleElement.appendChild(document.createTextNode(keyframes.toString()));
-
 			var scaleX = this.ass.scaleX;
 			var scaleY = this.ass.scaleY;
 			var dpi = this.ass.dpi;
 
-			sub.style.webkitAnimationName = "dialogue-" + dialogue.id;
-			sub.style.webkitAnimationDuration = (dialogue.end - dialogue.start) + "s";
-
-			sub.style.animationName = "dialogue-" + dialogue.id;
-			sub.style.animationDuration = (dialogue.end - dialogue.start) + "s";
-
 			sub.style.marginLeft = (scaleX * dialogue.style.marginLeft) + "px";
 			sub.style.marginRight = (scaleX * dialogue.style.marginRight) + "px";
 			sub.style.marginTop = sub.style.marginBottom = (scaleY * dialogue.style.marginVertical) + "px";
+
+			var animationCollection = new AnimationCollection(dialogue.id);
 
 			var divTransformStyle = "";
 
@@ -691,11 +645,42 @@ module libjass.renderers {
 				}
 
 				else if (part instanceof tags.Position) {
-					// Will be handled at the end of preRender()
+					var positionPart = <tags.Position>part;
+
+					sub.style.position = "absolute";
+					sub.style.left = (scaleX * positionPart.x) + "px";
+					sub.style.top = (scaleY * positionPart.y) + "px";
+				}
+
+				else if (part instanceof tags.Move) {
+					var movePart = <tags.Move>part;
+
+					sub.style.position = "absolute";
+					animationCollection.add(movePart.t1, movePart.t2, {
+						left: (scaleX * movePart.x1) + "px",
+						top: (scaleY * movePart.y1) +"px"
+					}, {
+						left: (scaleX * movePart.x2).toFixed(3) +"px",
+						top: (scaleY * movePart.y2).toFixed(3) +"px"
+					});
 				}
 
 				else if (part instanceof tags.Fade) {
-					// Already handled at the beginning of preRender()
+					var fadePart = <tags.Fade>part;
+					if (fadePart.start !== 0) {
+						animationCollection.add(0, fadePart.start, {
+							opacity: "0"
+						}, {
+							opacity: "1"
+						});
+					}
+					if (fadePart.end !== 0) {
+						animationCollection.add((dialogue.end - dialogue.start) - fadePart.end, dialogue.end - dialogue.start, {
+							opacity: "1"
+						}, {
+							opacity: "0"
+						});
+					}
 				}
 
 				else if (part instanceof tags.NewLine) {
@@ -714,26 +699,9 @@ module libjass.renderers {
 			});
 
 			dialogue.parts.some(part => {
-				if (part instanceof tags.Position) {
-					var posPart = <tags.Position>part;
-
-					sub.style.position = "absolute";
-					sub.style.left = (scaleX * posPart.x) + "px";
-					sub.style.top = (scaleY * posPart.y) + "px";
-
-					var translateY: number;
-					var translateX: number;
-					switch (dialogue.alignment) {
-						case 1: translateX =    0; translateY = -100; break;
-						case 2: translateX =  -50; translateY = -100; break;
-						case 3: translateX = -100; translateY = -100; break;
-						case 4: translateX =    0; translateY =  -50; break;
-						case 5: translateX =  -50; translateY =  -50; break;
-						case 6: translateX = -100; translateY =  -50; break;
-						case 7: translateX =    0; translateY =    0; break;
-						case 8: translateX =  -50; translateY =    0; break;
-						case 9: translateX = -100; translateY =    0; break;
-					}
+				if (part instanceof tags.Position || part instanceof tags.Move) {
+					var translateX = -dialogue.transformOriginX;
+					var translateY = -dialogue.transformOriginY;
 
 					divTransformStyle =
 						"translate(" + translateX + "%, " + translateY + "%) translate(-" + sub.style.marginLeft + ", -" + sub.style.marginTop + ") " +
@@ -752,6 +720,23 @@ module libjass.renderers {
 				sub.style.transform = divTransformStyle;
 				sub.style.transformOrigin = dialogue.transformOrigin;
 			}
+
+			if (DefaultRenderer._animationStyleElement === null) {
+				var existingStyleElement = <HTMLStyleElement>document.querySelector("#libjass-animation-styles");
+				if (existingStyleElement === null) {
+					existingStyleElement = document.createElement("style");
+					existingStyleElement.id = "libjass-animation-styles";
+					existingStyleElement.type = "text/css";
+					document.querySelector("head").appendChild(existingStyleElement);
+				}
+
+				DefaultRenderer._animationStyleElement = existingStyleElement;
+			}
+
+			DefaultRenderer._animationStyleElement.appendChild(document.createTextNode(animationCollection.cssText));
+
+			sub.style.webkitAnimation = animationCollection.animationStyle;
+			sub.style.animation = animationCollection.animationStyle;
 
 			sub.setAttribute("data-dialogue-id", String(dialogue.id));
 
@@ -778,13 +763,20 @@ module libjass.renderers {
 
 			var result = <HTMLDivElement>preRenderedSub.cloneNode(true);
 
-			var animationEndCallback: () => void = () => DefaultRenderer._removeElement(result);
+			var defaultAnimationDelay = result.style.webkitAnimationDelay;
+			if (defaultAnimationDelay === undefined) {
+				defaultAnimationDelay = result.style.animationDelay;
+			}
+			if (defaultAnimationDelay !== "") {
+				var animationDelay =
+					defaultAnimationDelay
+					.split(",")
+					.map(delay => (parseFloat(delay) + dialogue.start - this.currentTime).toFixed(3) + "s")
+					.join(",");
 
-			result.style.webkitAnimationDelay = (dialogue.start - this.currentTime) + "s";
-			result.addEventListener("webkitAnimationEnd", animationEndCallback, false);
-
-			result.style.animationDelay = (dialogue.start - this.currentTime) + "s";
-			result.addEventListener("animationend", animationEndCallback, false);
+				result.style.webkitAnimationDelay = animationDelay;
+				result.style.animationDelay = animationDelay;
+			}
 
 			this._wrappers[dialogue.layer][dialogue.alignment].appendChild(result);
 		}
@@ -936,52 +928,68 @@ module libjass.renderers {
 	 * @private
 	 * @memberof libjass.renderers
 	 */
-	class KeyframeCollection {
-		/** @type {!Object.<string, !Object.<string, string>>} */
-		private _keyframes: Object = Object.create(null);
+	class AnimationCollection {
+		private _cssText: string = "";
+		private _animationStyle: string = "";
+		private _numAnimations: number = 0;
 
-		constructor(private _id: number, private _start: number, private _end: number) { }
+		constructor(private _id: number) { }
+
+		get cssText(): string {
+			return this._cssText;
+		}
+
+		get animationStyle(): string {
+			return this._animationStyle;
+		}
 
 		/**
 		 * Add a new keyframe at the given time that sets the given CSS property to the given value.
 		 *
-		 * @param {number} time
-		 * @param {string} property
-		 * @param {string} value
+		 * @param {number} startTime
+		 * @param {number} endTime
+		 * @param {!Object.<string, string>} startProperties
+		 * @param {!Object.<string, string>} endProperties
 		 */
-		add(time: number, property: string, value: string) {
-			var step = (100 * (time - this._start) / (this._end - this._start)) + "%";
-			this._keyframes[step] = this._keyframes[step] || {};
-			this._keyframes[step][property] = value;
-		}
+		add(startTime: number, endTime: number, startProperties: Object, endProperties: Object) {
+			var animationName: string = null;
 
-		/**
-		 * Creates a CSS3 animations representation of this keyframe collection.
-		 *
-		 * @return {string}
-		 */
-		toString(): string {
-			var result = "";
-
-			var steps = Object.keys(this._keyframes);
-			if (steps.length > 0) {
-				var cssText = "";
-
-				steps.forEach(step => {
-					cssText += "\t" + step + " {\n";
-					var properties: Object = this._keyframes[step];
-					Object.keys(properties).forEach(property => {
-						cssText += "\t\t" + property + ": " + properties[property] + ";\n";
-					});
-					cssText += "\t}\n";
-				});
-
-				result =
-				"@-webkit-keyframes dialogue-" + this._id + " {\n" + cssText + "}\n\n" +
-				"@keyframes dialogue-" + this._id + " {\n" + cssText + "}\n\n";
+			if (Object.keys(startProperties).length === 1 && startProperties.hasOwnProperty("opacity") && Object.keys(endProperties).length === 1 && endProperties.hasOwnProperty("opacity")) {
+				if (startProperties["opacity"] === "0" && endProperties["opacity"] === "1") {
+					animationName = "fade-in";
+				}
+				else if (startProperties["opacity"] === "1" && endProperties["opacity"] === "0") {
+					animationName = "fade-out";
+				}
 			}
 
-			return result;
+			if (animationName === null) {
+				var ruleCssText = "\tfrom {\n";
+
+				Object.keys(startProperties).forEach((propertyName: string) => {
+					ruleCssText += "\t\t" + propertyName + ": " + startProperties[propertyName] + ";\n";
+				});
+
+				ruleCssText += "\t}\n";
+
+				ruleCssText += "\tto {\n";
+
+				Object.keys(endProperties).forEach((propertyName: string) => {
+					ruleCssText += "\t\t" + propertyName + ": " + endProperties[propertyName] + ";\n";
+				});
+
+				ruleCssText += "\t}\n";
+
+				animationName = "dialogue-" + this._id + "-" + this._numAnimations++;
+				this._cssText +=
+					"@-webkit-keyframes " + animationName + " {\n" + ruleCssText + "}\n\n" +
+					"@keyframes " + animationName + " {\n" + ruleCssText + "}\n\n";
+			}
+
+			if (this._animationStyle !== "") {
+				this._animationStyle += ",";
+			}
+			this._animationStyle += animationName + " " + (endTime - startTime).toFixed(3) + "s " + "linear " + startTime.toFixed(3) + "s";
 		}
 	}
 
