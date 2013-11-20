@@ -313,9 +313,9 @@ module libjass.renderers {
 				});
 
 				this.dialogues.forEach((dialogue: Dialogue) => {
-					dialogue.parts.forEach((part: tags.Tag) => {
-						if (part instanceof tags.FontName) {
-							allFonts.add((<tags.FontName>part).value);
+					dialogue.parts.forEach((part: parts.Tag) => {
+						if (part instanceof parts.FontName) {
+							allFonts.add((<parts.FontName>part).value);
 						}
 					});
 				});
@@ -537,106 +537,106 @@ module libjass.renderers {
 			startNewSpan();
 
 			dialogue.parts.forEach(part => {
-				if (part instanceof tags.Italic) {
-					currentSpanStyles.italic = (<tags.Italic>part).value;
+				if (part instanceof parts.Italic) {
+					currentSpanStyles.italic = (<parts.Italic>part).value;
 				}
 
-				else if (part instanceof tags.Bold) {
-					currentSpanStyles.bold = (<tags.Bold>part).value;
+				else if (part instanceof parts.Bold) {
+					currentSpanStyles.bold = (<parts.Bold>part).value;
 				}
 
-				else if (part instanceof tags.Underline) {
-					currentSpanStyles.underline = (<tags.Underline>part).value;
+				else if (part instanceof parts.Underline) {
+					currentSpanStyles.underline = (<parts.Underline>part).value;
 				}
 
-				else if (part instanceof tags.StrikeThrough) {
-					currentSpanStyles.strikeThrough = (<tags.StrikeThrough>part).value;
+				else if (part instanceof parts.StrikeThrough) {
+					currentSpanStyles.strikeThrough = (<parts.StrikeThrough>part).value;
 				}
 
-				else if (part instanceof tags.Border) {
-					currentSpanStyles.outlineWidthX = (<tags.Border>part).value;
-					currentSpanStyles.outlineWidthY = (<tags.Border>part).value;
+				else if (part instanceof parts.Border) {
+					currentSpanStyles.outlineWidthX = (<parts.Border>part).value;
+					currentSpanStyles.outlineWidthY = (<parts.Border>part).value;
 				}
 
-				else if (part instanceof tags.BorderX) {
-					currentSpanStyles.outlineWidthX = (<tags.BorderX>part).value;
+				else if (part instanceof parts.BorderX) {
+					currentSpanStyles.outlineWidthX = (<parts.BorderX>part).value;
 				}
 
-				else if (part instanceof tags.BorderY) {
-					currentSpanStyles.outlineWidthY = (<tags.BorderY>part).value;
+				else if (part instanceof parts.BorderY) {
+					currentSpanStyles.outlineWidthY = (<parts.BorderY>part).value;
 				}
 
-				else if (part instanceof tags.GaussianBlur) {
-					currentSpanStyles.blur = (<tags.GaussianBlur>part).value;
+				else if (part instanceof parts.GaussianBlur) {
+					currentSpanStyles.blur = (<parts.GaussianBlur>part).value;
 				}
 
-				else if (part instanceof tags.FontName) {
-					currentSpanStyles.fontName = (<tags.FontName>part).value;
+				else if (part instanceof parts.FontName) {
+					currentSpanStyles.fontName = (<parts.FontName>part).value;
 				}
 
-				else if (part instanceof tags.FontSize) {
-					currentSpanStyles.fontSize = (<tags.FontSize>part).value;
+				else if (part instanceof parts.FontSize) {
+					currentSpanStyles.fontSize = (<parts.FontSize>part).value;
 				}
 
-				else if (part instanceof tags.FontScaleX) {
-					currentSpanStyles.fontScaleX = (<tags.FontScaleX>part).value;
+				else if (part instanceof parts.FontScaleX) {
+					currentSpanStyles.fontScaleX = (<parts.FontScaleX>part).value;
 				}
 
-				else if (part instanceof tags.FontScaleY) {
-					currentSpanStyles.fontScaleY = (<tags.FontScaleY>part).value;
+				else if (part instanceof parts.FontScaleY) {
+					currentSpanStyles.fontScaleY = (<parts.FontScaleY>part).value;
 				}
 
-				else if (part instanceof tags.LetterSpacing) {
-					currentSpanStyles.letterSpacing = (<tags.LetterSpacing>part).value;
+				else if (part instanceof parts.LetterSpacing) {
+					currentSpanStyles.letterSpacing = (<parts.LetterSpacing>part).value;
 				}
 
-				else if (part instanceof tags.RotateX) {
-					divTransformStyle += " rotateX(" + (<tags.RotateX>part).value + "deg)";
+				else if (part instanceof parts.RotateX) {
+					divTransformStyle += " rotateX(" + (<parts.RotateX>part).value + "deg)";
 				}
 
-				else if (part instanceof tags.RotateY) {
-					divTransformStyle += " rotateY(" + (<tags.RotateY>part).value + "deg)";
+				else if (part instanceof parts.RotateY) {
+					divTransformStyle += " rotateY(" + (<parts.RotateY>part).value + "deg)";
 				}
 
-				else if (part instanceof tags.RotateZ) {
-					divTransformStyle += " rotateZ(" + (-1 * (<tags.RotateZ>part).value) + "deg)";
+				else if (part instanceof parts.RotateZ) {
+					divTransformStyle += " rotateZ(" + (-1 * (<parts.RotateZ>part).value) + "deg)";
 				}
 
-				else if (part instanceof tags.SkewX) {
-					divTransformStyle += " skewX(" + (45 * (<tags.SkewX>part).value) + "deg)";
+				else if (part instanceof parts.SkewX) {
+					divTransformStyle += " skewX(" + (45 * (<parts.SkewX>part).value) + "deg)";
 				}
 
-				else if (part instanceof tags.SkewY) {
-					divTransformStyle += " skewY(" + (45 * (<tags.SkewY>part).value) + "deg)";
+				else if (part instanceof parts.SkewY) {
+					divTransformStyle += " skewY(" + (45 * (<parts.SkewY>part).value) + "deg)";
 				}
 
-				else if (part instanceof tags.PrimaryColor) {
-					currentSpanStyles.primaryColor = (<tags.PrimaryColor>part).value;
+				else if (part instanceof parts.PrimaryColor) {
+					currentSpanStyles.primaryColor = (<parts.PrimaryColor>part).value;
 				}
 
-				else if (part instanceof tags.OutlineColor) {
-					currentSpanStyles.outlineColor = (<tags.OutlineColor>part).value;
+				else if (part instanceof parts.OutlineColor) {
+					currentSpanStyles.outlineColor = (<parts.OutlineColor>part).value;
 				}
 
-				else if (part instanceof tags.Alpha) {
-					currentSpanStyles.primaryAlpha = (<tags.Alpha>part).value;
-					currentSpanStyles.outlineAlpha = (<tags.Alpha>part).value;
+				else if (part instanceof parts.Alpha) {
+					currentSpanStyles.primaryAlpha = (<parts.Alpha>part).value;
+					currentSpanStyles.outlineAlpha = (<parts.Alpha>part).value;
 				}
 
-				else if (part instanceof tags.PrimaryAlpha) {
-					currentSpanStyles.primaryAlpha = (<tags.PrimaryAlpha>part).value;
+				else if (part instanceof parts.PrimaryAlpha) {
+					currentSpanStyles.primaryAlpha = (<parts.PrimaryAlpha>part).value;
 				}
 
-				else if (part instanceof tags.OutlineAlpha) {
-					currentSpanStyles.outlineAlpha = (<tags.OutlineAlpha>part).value;
+				else if (part instanceof parts.OutlineAlpha) {
+					currentSpanStyles.outlineAlpha = (<parts.OutlineAlpha>part).value;
 				}
 
-				else if (part instanceof tags.Alignment) {
+				else if (part instanceof parts.Alignment) {
 					// Already handled in Dialogue constructor
 				}
 
-				else if (part instanceof tags.Reset) {
-					var newStyleName = (<tags.Reset>part).value;
+				else if (part instanceof parts.Reset) {
+					var newStyleName = (<parts.Reset>part).value;
 					var newStyle: Style = null;
 					if (newStyleName !== null) {
 						newStyle = this.ass.styles[newStyleName];
@@ -644,16 +644,16 @@ module libjass.renderers {
 					currentSpanStyles.reset(newStyle);
 				}
 
-				else if (part instanceof tags.Position) {
-					var positionPart = <tags.Position>part;
+				else if (part instanceof parts.Position) {
+					var positionPart = <parts.Position>part;
 
 					sub.style.position = "absolute";
 					sub.style.left = (scaleX * positionPart.x) + "px";
 					sub.style.top = (scaleY * positionPart.y) + "px";
 				}
 
-				else if (part instanceof tags.Move) {
-					var movePart = <tags.Move>part;
+				else if (part instanceof parts.Move) {
+					var movePart = <parts.Move>part;
 
 					sub.style.position = "absolute";
 					animationCollection.add(movePart.t1, movePart.t2, {
@@ -665,8 +665,8 @@ module libjass.renderers {
 					});
 				}
 
-				else if (part instanceof tags.Fade) {
-					var fadePart = <tags.Fade>part;
+				else if (part instanceof parts.Fade) {
+					var fadePart = <parts.Fade>part;
 					if (fadePart.start !== 0) {
 						animationCollection.add(0, fadePart.start, {
 							opacity: "0"
@@ -683,23 +683,23 @@ module libjass.renderers {
 					}
 				}
 
-				else if (part instanceof tags.NewLine) {
+				else if (part instanceof parts.NewLine) {
 					sub.appendChild(document.createElement("br"));
 				}
 
-				else if (part instanceof tags.HardSpace) {
+				else if (part instanceof parts.HardSpace) {
 					currentSpan.appendChild(document.createTextNode("\u00A0"));
 					startNewSpan();
 				}
 
-				else if (part instanceof tags.Text || (libjass.debugMode && part instanceof tags.Comment)) {
-					currentSpan.appendChild(document.createTextNode((<tags.Text>part).value));
+				else if (part instanceof parts.Text || (libjass.debugMode && part instanceof parts.Comment)) {
+					currentSpan.appendChild(document.createTextNode((<parts.Text>part).value));
 					startNewSpan();
 				}
 			});
 
 			dialogue.parts.some(part => {
-				if (part instanceof tags.Position || part instanceof tags.Move) {
+				if (part instanceof parts.Position || part instanceof parts.Move) {
 					var translateX = -dialogue.transformOriginX;
 					var translateY = -dialogue.transformOriginY;
 
@@ -995,7 +995,7 @@ module libjass.renderers {
 
 	/**
 	 * This class represents the style attribute of a span.
-	 * As a Dialogue's div is rendered, individual tags are added to span's, and this class is used to maintain the style attribute of those.
+	 * As a Dialogue's div is rendered, individual parts are added to span's, and this class is used to maintain the style attribute of those.
 	 *
 	 * @constructor
 	 * @param {!libjass.Style} style The default style for the dialogue this object is associated with
@@ -1024,8 +1024,8 @@ module libjass.renderers {
 
 		private _letterSpacing: number;
 
-		private _primaryColor: tags.Color;
-		private _outlineColor: tags.Color;
+		private _primaryColor: parts.Color;
+		private _outlineColor: parts.Color;
 
 		private _primaryAlpha: number;
 		private _outlineAlpha: number;
@@ -1266,18 +1266,18 @@ module libjass.renderers {
 		/**
 		 * Sets the primary color property. null defaults it to the style's original value.
 		 *
-		 * @type {libjass.tags.Color}
+		 * @type {libjass.parts.Color}
 		 */
-		set primaryColor(value: tags.Color) {
+		set primaryColor(value: parts.Color) {
 			this._primaryColor = SpanStyles._valueOrDefault(value, this._style.primaryColor);
 		}
 
 		/**
 		 * Sets the outline color property. null defaults it to the style's original value.
 		 *
-		 * @type {libjass.tags.Color}
+		 * @type {libjass.parts.Color}
 		 */
-		set outlineColor(value: tags.Color) {
+		set outlineColor(value: parts.Color) {
 			this._outlineColor = SpanStyles._valueOrDefault(value, this._style.outlineColor);
 		}
 

@@ -244,12 +244,12 @@ module libjass.parser {
 						var textNode = this.parse_text(current);
 
 						if (textNode !== null) {
-							if (current.value[current.value.length - 1] instanceof tags.Text) {
+							if (current.value[current.value.length - 1] instanceof parts.Text) {
 								// Merge consecutive text parts into one part
 								current.value[current.value.length - 1] =
-									new tags.Text(
-										(<tags.Text>current.value[current.value.length - 1]).value +
-										(<tags.Text>textNode.value).value
+									new parts.Text(
+										(<parts.Text>current.value[current.value.length - 1]).value +
+										(<parts.Text>textNode.value).value
 									);
 							}
 							else {
@@ -349,12 +349,12 @@ module libjass.parser {
 				}
 
 				if (childNode !== null) {
-					if (childNode.value instanceof tags.Comment && current.value[current.value.length - 1] instanceof tags.Comment) {
+					if (childNode.value instanceof parts.Comment && current.value[current.value.length - 1] instanceof parts.Comment) {
 						// Merge consecutive comment parts into one part
 						current.value[current.value.length - 1] =
-							new tags.Comment(
-								(<tags.Comment>current.value[current.value.length - 1]).value +
-								(<tags.Comment>childNode.value).value
+							new parts.Comment(
+								(<parts.Comment>current.value[current.value.length - 1]).value +
+								(<parts.Comment>childNode.value).value
 							);
 					}
 					else {
@@ -383,7 +383,7 @@ module libjass.parser {
 				return null;
 			}
 
-			current.value = new tags.NewLine();
+			current.value = new parts.NewLine();
 
 			return current;
 		}
@@ -396,7 +396,7 @@ module libjass.parser {
 				return null;
 			}
 
-			current.value = new tags.HardSpace();
+			current.value = new parts.HardSpace();
 
 			return current;
 		}
@@ -407,7 +407,7 @@ module libjass.parser {
 			var current = new ParseNode(parent);
 			var valueNode = new ParseNode(current, value);
 
-			current.value = new tags.Text(valueNode.value);
+			current.value = new parts.Text(valueNode.value);
 
 			return current;
 		}
@@ -418,7 +418,7 @@ module libjass.parser {
 			var current = new ParseNode(parent);
 			var valueNode = new ParseNode(current, value);
 
-			current.value = new tags.Comment(valueNode.value);
+			current.value = new parts.Comment(valueNode.value);
 
 			return current;
 		}
@@ -500,7 +500,7 @@ module libjass.parser {
 					break;
 			}
 
-			current.value = new tags.Alignment(value);
+			current.value = new parts.Alignment(value);
 
 			return current;
 		}
@@ -526,7 +526,7 @@ module libjass.parser {
 
 			var valueNode = new ParseNode(current, next);
 
-			current.value = new tags.Alignment(parseInt(valueNode.value));
+			current.value = new parts.Alignment(parseInt(valueNode.value));
 
 			return current;
 		}
@@ -556,10 +556,10 @@ module libjass.parser {
 			}
 
 			if (valueNode !== null) {
-				current.value = new tags.Bold(valueNode.value);
+				current.value = new parts.Bold(valueNode.value);
 			}
 			else {
-				current.value = new tags.Bold(null);
+				current.value = new parts.Bold(null);
 			}
 
 			return current;
@@ -630,7 +630,7 @@ module libjass.parser {
 
 				y2Node = this.parse_decimal(current);
 
-				current.value = new tags.RectangularClip(x1Node.value, y1Node.value, x2Node.value, y2Node.value, true);
+				current.value = new parts.RectangularClip(x1Node.value, y1Node.value, x2Node.value, y2Node.value, true);
 			}
 			else {
 				commandsNode = new ParseNode(current, "");
@@ -639,7 +639,7 @@ module libjass.parser {
 					commandsNode.value += next;
 				}
 
-				current.value = new tags.VectorClip((scaleNode !== null) ? scaleNode.value : 1, commandsNode.value, true);
+				current.value = new parts.VectorClip((scaleNode !== null) ? scaleNode.value : 1, commandsNode.value, true);
 			}
 
 			if (this.read(current, ")") === null) {
@@ -685,7 +685,7 @@ module libjass.parser {
 				return null;
 			}
 
-			current.value = new tags.Fade(startNode.value / 1000, endNode.value / 1000);
+			current.value = new parts.Fade(startNode.value / 1000, endNode.value / 1000);
 
 			return current;
 		}
@@ -781,7 +781,7 @@ module libjass.parser {
 			}
 
 			current.value =
-				new tags.ComplexFade(
+				new parts.ComplexFade(
 					1 - a1Node.value / 255, 1 - a2Node.value / 255, 1 - a3Node.value / 255,
 					t1Node.value / 1000, t2Node.value / 1000, t3Node.value / 1000, t4Node.value / 1000
 				);
@@ -812,10 +812,10 @@ module libjass.parser {
 			}
 
 			if (valueNode.value.length > 0) {
-				current.value = new tags.FontName(valueNode.value);
+				current.value = new parts.FontName(valueNode.value);
 			}
 			else {
-				current.value = new tags.FontName(null);
+				current.value = new parts.FontName(null);
 			}
 
 			return current;
@@ -906,7 +906,7 @@ module libjass.parser {
 
 				y2Node = this.parse_decimal(current);
 
-				current.value = new tags.RectangularClip(x1Node.value, y1Node.value, x2Node.value, y2Node.value, false);
+				current.value = new parts.RectangularClip(x1Node.value, y1Node.value, x2Node.value, y2Node.value, false);
 			}
 			else {
 				commandsNode = new ParseNode(current, "");
@@ -915,7 +915,7 @@ module libjass.parser {
 					commandsNode.value += next;
 				}
 
-				current.value = new tags.VectorClip((scaleNode !== null) ? scaleNode.value : 1, commandsNode.value, false);
+				current.value = new parts.VectorClip((scaleNode !== null) ? scaleNode.value : 1, commandsNode.value, false);
 			}
 
 			if (this.read(current, ")") === null) {
@@ -1021,7 +1021,7 @@ module libjass.parser {
 				return null;
 			}
 
-			current.value = new tags.Move(
+			current.value = new parts.Move(
 				x1Node.value, y1Node.value, x2Node.value, y2Node.value,
 				(t1Node !== null) ? (t1Node.value / 1000) : null, (t2Node !== null) ? (t2Node.value / 1000) : null
 			);
@@ -1064,7 +1064,7 @@ module libjass.parser {
 				return null;
 			}
 
-			current.value = new tags.RotationOrigin(xNode.value, yNode.value);
+			current.value = new parts.RotationOrigin(xNode.value, yNode.value);
 
 			return current;
 		}
@@ -1112,7 +1112,7 @@ module libjass.parser {
 				return null;
 			}
 
-			current.value = new tags.Position(xNode.value, yNode.value);
+			current.value = new parts.Position(xNode.value, yNode.value);
 
 			return current;
 		}
@@ -1134,7 +1134,7 @@ module libjass.parser {
 
 			var valueNode = new ParseNode(current, next);
 
-			current.value = new tags.WrappingStyle(parseInt(valueNode.value));
+			current.value = new parts.WrappingStyle(parseInt(valueNode.value));
 
 			return current;
 		}
@@ -1154,10 +1154,10 @@ module libjass.parser {
 			}
 
 			if (valueNode.value.length > 0) {
-				current.value = new tags.Reset(valueNode.value);
+				current.value = new parts.Reset(valueNode.value);
 			}
 			else {
-				current.value = new tags.Reset(null);
+				current.value = new parts.Reset(null);
 			}
 
 			return current;
@@ -1225,7 +1225,7 @@ module libjass.parser {
 				}
 			}
 
-			var transformTags: tags.Tag[] = [];
+			var transformTags: parts.Tag[] = [];
 
 			for (var next = this._peek(); this._haveMore() && next !== ")" && next !== "}"; next = this._peek()) {
 				var childNode: ParseNode = null;
@@ -1277,12 +1277,12 @@ module libjass.parser {
 				}
 
 				if (childNode !== null) {
-					if (childNode.value instanceof tags.Comment && transformTags[transformTags.length - 1] instanceof tags.Comment) {
+					if (childNode.value instanceof parts.Comment && transformTags[transformTags.length - 1] instanceof parts.Comment) {
 						// Merge consecutive comment parts into one part
 						transformTags[transformTags.length - 1] =
-							new tags.Comment(
-								(<tags.Comment>transformTags[transformTags.length - 1]).value +
-								(<tags.Comment>childNode.value).value
+							new parts.Comment(
+								(<parts.Comment>transformTags[transformTags.length - 1]).value +
+								(<parts.Comment>childNode.value).value
 							);
 					}
 					else {
@@ -1301,7 +1301,7 @@ module libjass.parser {
 			}
 
 			current.value =
-				new tags.Transform(
+				new parts.Transform(
 					(startNode !== null) ? (startNode.value / 1000) : null,
 					(endNode !== null) ? (endNode.value / 1000) : null,
 					(accelNode !== null) ? (accelNode.value / 1000) : null,
@@ -1476,7 +1476,7 @@ module libjass.parser {
 				return null;
 			}
 
-			current.value = new tags.Color(
+			current.value = new parts.Color(
 				parseInt(digitNodes[4].value + digitNodes[5].value, 16),
 				parseInt(digitNodes[2].value + digitNodes[3].value, 16),
 				parseInt(digitNodes[0].value + digitNodes[1].value, 16)
@@ -1529,7 +1529,7 @@ module libjass.parser {
 				digitNodes[i] = digitNode;
 			}
 
-			current.value = new tags.Color(
+			current.value = new parts.Color(
 				parseInt(digitNodes[6].value + digitNodes[7].value, 16),
 				parseInt(digitNodes[4].value + digitNodes[5].value, 16),
 				parseInt(digitNodes[2].value + digitNodes[3].value, 16),
@@ -1558,7 +1558,7 @@ module libjass.parser {
 
 	function makeTagParserFunction(
 		tagName: string,
-		tagConstructor: { new(value: any): tags.Tag },
+		tagConstructor: { new (value: any): parts.Tag },
 		valueParser: (current: ParseNode) => ParseNode,
 		required: boolean
 	) {
@@ -1588,43 +1588,43 @@ module libjass.parser {
 		}
 	}
 
-	makeTagParserFunction("alpha", tags.Alpha, ParserRun.prototype.parse_alpha, false);
-	makeTagParserFunction("be", tags.Blur, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("blur", tags.GaussianBlur, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("bord", tags.Border, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("c", tags.PrimaryColor, ParserRun.prototype.parse_color, false);
-	makeTagParserFunction("fax", tags.SkewX, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("fay", tags.SkewY, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("fr", tags.RotateZ, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("frx", tags.RotateX, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("fry", tags.RotateY, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("frz", tags.RotateZ, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("fs", tags.FontSize, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("fscx", tags.FontScaleX, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("fscy", tags.FontScaleY, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("fsp", tags.LetterSpacing, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("i", tags.Italic, ParserRun.prototype.parse_enableDisable, false);
-	makeTagParserFunction("k", tags.ColorKaraoke, ParserRun.prototype.parse_decimal, true);
-	makeTagParserFunction("K", tags.SweepingColorKaraoke, ParserRun.prototype.parse_decimal, true);
-	makeTagParserFunction("kf", tags.SweepingColorKaraoke, ParserRun.prototype.parse_decimal, true);
-	makeTagParserFunction("ko", tags.OutlineKaraoke, ParserRun.prototype.parse_decimal, true);
-	makeTagParserFunction("p", tags.DrawingMode, ParserRun.prototype.parse_decimal, true);
-	makeTagParserFunction("pbo", tags.DrawingBaselineOffset, ParserRun.prototype.parse_decimal, true);
-	makeTagParserFunction("s", tags.StrikeThrough, ParserRun.prototype.parse_enableDisable, false);
-	makeTagParserFunction("shad", tags.Shadow, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("u", tags.Underline, ParserRun.prototype.parse_enableDisable, false);
-	makeTagParserFunction("xbord", tags.BorderX, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("xshad", tags.ShadowX, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("ybord", tags.BorderY, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("yshad", tags.ShadowY, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("1a", tags.PrimaryAlpha, ParserRun.prototype.parse_alpha, false);
-	makeTagParserFunction("1c", tags.PrimaryColor, ParserRun.prototype.parse_color, false);
-	makeTagParserFunction("2a", tags.SecondaryAlpha, ParserRun.prototype.parse_alpha, false);
-	makeTagParserFunction("2c", tags.SecondaryColor, ParserRun.prototype.parse_color, false);
-	makeTagParserFunction("3a", tags.OutlineAlpha, ParserRun.prototype.parse_alpha, false);
-	makeTagParserFunction("3c", tags.OutlineColor, ParserRun.prototype.parse_color, false);
-	makeTagParserFunction("4a", tags.ShadowAlpha, ParserRun.prototype.parse_alpha, false);
-	makeTagParserFunction("4c", tags.ShadowColor, ParserRun.prototype.parse_color, false);
+	makeTagParserFunction("alpha", parts.Alpha, ParserRun.prototype.parse_alpha, false);
+	makeTagParserFunction("be", parts.Blur, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("blur", parts.GaussianBlur, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("bord", parts.Border, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("c", parts.PrimaryColor, ParserRun.prototype.parse_color, false);
+	makeTagParserFunction("fax", parts.SkewX, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("fay", parts.SkewY, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("fr", parts.RotateZ, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("frx", parts.RotateX, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("fry", parts.RotateY, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("frz", parts.RotateZ, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("fs", parts.FontSize, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("fscx", parts.FontScaleX, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("fscy", parts.FontScaleY, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("fsp", parts.LetterSpacing, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("i", parts.Italic, ParserRun.prototype.parse_enableDisable, false);
+	makeTagParserFunction("k", parts.ColorKaraoke, ParserRun.prototype.parse_decimal, true);
+	makeTagParserFunction("K", parts.SweepingColorKaraoke, ParserRun.prototype.parse_decimal, true);
+	makeTagParserFunction("kf", parts.SweepingColorKaraoke, ParserRun.prototype.parse_decimal, true);
+	makeTagParserFunction("ko", parts.OutlineKaraoke, ParserRun.prototype.parse_decimal, true);
+	makeTagParserFunction("p", parts.DrawingMode, ParserRun.prototype.parse_decimal, true);
+	makeTagParserFunction("pbo", parts.DrawingBaselineOffset, ParserRun.prototype.parse_decimal, true);
+	makeTagParserFunction("s", parts.StrikeThrough, ParserRun.prototype.parse_enableDisable, false);
+	makeTagParserFunction("shad", parts.Shadow, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("u", parts.Underline, ParserRun.prototype.parse_enableDisable, false);
+	makeTagParserFunction("xbord", parts.BorderX, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("xshad", parts.ShadowX, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("ybord", parts.BorderY, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("yshad", parts.ShadowY, ParserRun.prototype.parse_decimal, false);
+	makeTagParserFunction("1a", parts.PrimaryAlpha, ParserRun.prototype.parse_alpha, false);
+	makeTagParserFunction("1c", parts.PrimaryColor, ParserRun.prototype.parse_color, false);
+	makeTagParserFunction("2a", parts.SecondaryAlpha, ParserRun.prototype.parse_alpha, false);
+	makeTagParserFunction("2c", parts.SecondaryColor, ParserRun.prototype.parse_color, false);
+	makeTagParserFunction("3a", parts.OutlineAlpha, ParserRun.prototype.parse_alpha, false);
+	makeTagParserFunction("3c", parts.OutlineColor, ParserRun.prototype.parse_color, false);
+	makeTagParserFunction("4a", parts.ShadowAlpha, ParserRun.prototype.parse_alpha, false);
+	makeTagParserFunction("4c", parts.ShadowColor, ParserRun.prototype.parse_color, false);
 
 	var rules = new Map<string, (parent: ParseNode) => ParseNode>();
 	Object.keys(ParserRun.prototype).forEach(key => {

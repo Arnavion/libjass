@@ -19,7 +19,7 @@
  */
 
 ///<reference path="utility.ts" />
-///<reference path="tags.ts" />
+///<reference path="parts.ts" />
 ///<reference path="parser.ts" />
 ///<reference path="renderer.ts" />
 ///<reference path="types.ts" />

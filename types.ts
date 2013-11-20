@@ -214,8 +214,8 @@ module libjass {
 
 		private _letterSpacing: number;
 
-		private _primaryColor: tags.Color;
-		private _outlineColor: tags.Color;
+		private _primaryColor: parts.Color;
+		private _outlineColor: parts.Color;
 
 		private _outlineWidth: number;
 
@@ -241,8 +241,8 @@ module libjass {
 
 			this._letterSpacing = parseFloat(template["Spacing"]);
 
-			this._primaryColor = <tags.Color>parser.parse(template["PrimaryColour"], "colorWithAlpha");
-			this._outlineColor = <tags.Color>parser.parse(template["OutlineColour"], "colorWithAlpha");
+			this._primaryColor = <parts.Color>parser.parse(template["PrimaryColour"], "colorWithAlpha");
+			this._outlineColor = <parts.Color>parser.parse(template["OutlineColour"], "colorWithAlpha");
 
 			this._outlineWidth = parseFloat(template["Outline"]);
 
@@ -346,18 +346,18 @@ module libjass {
 		/**
 		 * The color of this style's font.
 		 *
-		 * @type {!libjass.tags.Color}
+		 * @type {!libjass.parts.Color}
 		 */
-		get primaryColor(): tags.Color {
+		get primaryColor(): parts.Color {
 			return this._primaryColor;
 		}
 
 		/**
 		 * The color of this style's outline.
 		 *
-		 * @type {!libjass.tags.Color}
+		 * @type {!libjass.parts.Color}
 		 */
-		get outlineColor(): tags.Color {
+		get outlineColor(): parts.Color {
 			return this._outlineColor;
 		}
 
@@ -437,7 +437,7 @@ module libjass {
 		private _transformOriginY: number;
 		private _transformOrigin: string;
 
-		private _parts: tags.Tag[];
+		private _parts: parts.Tag[];
 
 		private _sub: HTMLDivElement = null;
 
@@ -453,29 +453,29 @@ module libjass {
 
 			this._alignment = this._style.alignment;
 
-			this._parts = <tags.Tag[]>parser.parse(template["Text"], "dialogueParts");
+			this._parts = <parts.Tag[]>parser.parse(template["Text"], "dialogueParts");
 
 			this._parts.forEach((part, index) => {
-				if (part instanceof tags.Alignment) {
-					this._alignment = (<tags.Alignment>part).value;
+				if (part instanceof parts.Alignment) {
+					this._alignment = (<parts.Alignment>part).value;
 				}
-				else if (part instanceof tags.Move) {
-					var movePart = <tags.Move>part;
+				else if (part instanceof parts.Move) {
+					var movePart = <parts.Move>part;
 
 					if (movePart.t1 === null || movePart.t2 === null) {
 						this._parts[index] =
-							new tags.Move(
+							new parts.Move(
 								movePart.x1, movePart.x2, movePart.y1, movePart.y2,
 								0, this._end - this._start
 							);
 					}
 				}
-				else if (part instanceof tags.Transform) {
-					var transformPart = <tags.Transform>part;
+				else if (part instanceof parts.Transform) {
+					var transformPart = <parts.Transform>part;
 
 					if (transformPart.start === null || transformPart.end === null || transformPart.accel === null) {
 						this._parts[index] =
-							new tags.Transform(
+							new parts.Transform(
 								(transformPart.start === null) ? 0 : transformPart.start,
 								(transformPart.end === null) ? (this._end - this._start) : transformPart.end,
 								(transformPart.accel === null) ? 1 : transformPart.accel,
@@ -488,7 +488,7 @@ module libjass {
 			this._setTransformOrigin();
 
 			if (libjass.debugMode) {
-				var possiblyIncorrectParses = this._parts.filter(part => part instanceof tags.Comment && (<tags.Comment>part).value.indexOf("\\") !== -1);
+				var possiblyIncorrectParses = this._parts.filter(part => part instanceof parts.Comment && (<parts.Comment>part).value.indexOf("\\") !== -1);
 				if (possiblyIncorrectParses.length > 0) {
 					console.warn(
 						"Possible incorrect parse:\n" +
@@ -535,7 +535,6 @@ module libjass {
 
 		/**
 		 * The alignment number of this dialogue.
-		 * Defaults to the alignment specified in the style but can change after preRender() is called if the dialogue contains {\an} tags.
 		 *
 		 * @type {number}
 		 */
@@ -567,9 +566,9 @@ module libjass {
 		/**
 		 * The parts of this dialogue.
 		 *
-		 * @type {!Array.<!libjass.tags.Tag>}
+		 * @type {!Array.<!libjass.parts.Tag>}
 		 */
-		get parts(): tags.Tag[] {
+		get parts(): parts.Tag[] {
 			return this._parts;
 		}
 

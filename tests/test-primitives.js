@@ -23,11 +23,11 @@ var parserTest = require("./parser-test.js");
 
 suite("Primitives", function () {
 	suite("Color", function () {
-		parserTest("Starts with &H", "&H3F171F&", "color", new libjass.tags.Color(31, 23, 63, 1));
+		parserTest("Starts with &H", "&H3F171F&", "color", new libjass.parts.Color(31, 23, 63, 1));
 
-		parserTest("Starts with H", "&3F171F&", "color", new libjass.tags.Color(31, 23, 63, 1));
+		parserTest("Starts with H", "&3F171F&", "color", new libjass.parts.Color(31, 23, 63, 1));
 
-		parserTest("Eight digits", "&H3F171F00&", "color", new libjass.tags.Color(31, 23, 63, 1));
+		parserTest("Eight digits", "&H3F171F00&", "color", new libjass.parts.Color(31, 23, 63, 1));
 
 		parserTest("Eight digits, non-zero alpha", "&H3F171FFF&", "color", null);
 	});
@@ -55,10 +55,10 @@ suite("Primitives", function () {
 	});
 
 	suite("ColorWithAlpha", function () {
-		parserTest("AABBGGRR", "&H00434441", "colorWithAlpha", new libjass.tags.Color(65, 68, 67, 1));
+		parserTest("AABBGGRR", "&H00434441", "colorWithAlpha", new libjass.parts.Color(65, 68, 67, 1));
 
-		parserTest("AABBGGRR", "&HF0434441", "colorWithAlpha", new libjass.tags.Color(65, 68, 67, (1 - 240 / 255)));
+		parserTest("AABBGGRR", "&HF0434441", "colorWithAlpha", new libjass.parts.Color(65, 68, 67, (1 - 240 / 255)));
 
-		parserTest("AABBGGRR", "&HFF434441", "colorWithAlpha", new libjass.tags.Color(65, 68, 67, 0));
+		parserTest("AABBGGRR", "&HFF434441", "colorWithAlpha", new libjass.parts.Color(65, 68, 67, 0));
 	});
 });
