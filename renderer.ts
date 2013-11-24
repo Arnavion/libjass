@@ -525,7 +525,7 @@ module libjass.renderers {
 			sub.style.marginRight = (scaleX * dialogue.style.marginRight) + "px";
 			sub.style.marginTop = sub.style.marginBottom = (scaleY * dialogue.style.marginVertical) + "px";
 
-			var animationCollection = new AnimationCollection(dialogue.id);
+			var animationCollection = new AnimationCollection(dialogue.id, dialogue.start, dialogue.end);
 
 			var divTransformStyle = "";
 
@@ -662,31 +662,46 @@ module libjass.renderers {
 					var movePart = <parts.Move>part;
 
 					sub.style.position = "absolute";
-					animationCollection.add(movePart.t1, movePart.t2, {
-						left: (scaleX * movePart.x1) + "px",
-						top: (scaleY * movePart.y1) +"px"
-					}, {
-						left: (scaleX * movePart.x2).toFixed(3) +"px",
-						top: (scaleY * movePart.y2).toFixed(3) +"px"
-					});
+					animationCollection.addCustom("linear", new Animation(0, {
+						left: (scaleX * movePart.x1).toFixed(3) + "px",
+						top: (scaleY * movePart.y1).toFixed(3) + "px"
+					}), new Animation(movePart.t1, {
+						left: (scaleX * movePart.x1).toFixed(3) + "px",
+						top: (scaleY * movePart.y1).toFixed(3) + "px"
+					}), new Animation(movePart.t2, {
+						left: (scaleX * movePart.x2).toFixed(3) + "px",
+						top: (scaleY * movePart.y2).toFixed(3) + "px"
+					}));
 				}
 
 				else if (part instanceof parts.Fade) {
 					var fadePart = <parts.Fade>part;
+
 					if (fadePart.start !== 0) {
-						animationCollection.add(0, fadePart.start, {
-							opacity: "0"
-						}, {
-							opacity: "1"
-						});
+						animationCollection.addFadeIn(0, fadePart.start);
 					}
+
 					if (fadePart.end !== 0) {
-						animationCollection.add((dialogue.end - dialogue.start) - fadePart.end, dialogue.end - dialogue.start, {
-							opacity: "1"
-						}, {
-							opacity: "0"
-						});
+						animationCollection.addFadeOut(dialogue.end - dialogue.start - fadePart.end, fadePart.end);
 					}
+				}
+
+				else if (part instanceof parts.ComplexFade) {
+					var complexFadePart = <parts.ComplexFade>part;
+
+					animationCollection.addCustom("linear", new Animation(0, {
+						opacity: String(complexFadePart.a1)
+					}), new Animation(complexFadePart.t1, {
+						opacity: String(complexFadePart.a1)
+					}), new Animation(complexFadePart.t2, {
+						opacity: String(complexFadePart.a2)
+					}), new Animation(complexFadePart.t3, {
+						opacity: String(complexFadePart.a2)
+					}), new Animation(complexFadePart.t4, {
+						opacity: String(complexFadePart.a3)
+					}), new Animation(dialogue.end, {
+						opacity: String(complexFadePart.a3)
+					}));
 				}
 
 				else if (part instanceof parts.NewLine) {
@@ -922,6 +937,22 @@ module libjass.renderers {
 		[key: string]: HTMLDivElement;
 	}
 
+	interface AnimationPropertiesMap {
+		[key: string]: string;
+	}
+
+	class Animation {
+		constructor(private _time: number, private _properties: AnimationPropertiesMap) { }
+
+		get time(): number {
+			return this._time;
+		}
+
+		get properties(): Object {
+			return this._properties;
+		}
+	}
+
 	/**
 	 * This class represents a collection of keyframes. Each keyframe contains one or more CSS properties.
 	 * The collection can then be converted to a CSS3 representation.
@@ -939,7 +970,7 @@ module libjass.renderers {
 		private _animationStyle: string = "";
 		private _numAnimations: number = 0;
 
-		constructor(private _id: number) { }
+		constructor(private _id: number, private _start: number, private _end: number) { }
 
 		get cssText(): string {
 			return this._cssText;
@@ -950,52 +981,72 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Add a new keyframe at the given time that sets the given CSS property to the given value.
+		 * Add a fade-in animation.
 		 *
-		 * @param {number} startTime
-		 * @param {number} endTime
-		 * @param {!Object.<string, string>} startProperties
-		 * @param {!Object.<string, string>} endProperties
+		 * @param {number} start The time from the dialogue start to start the fade-in
+		 * @param {number} duration The duration of the fade-in
 		 */
-		add(startTime: number, endTime: number, startProperties: Object, endProperties: Object) {
-			var animationName: string = null;
-
-			if (Object.keys(startProperties).length === 1 && startProperties.hasOwnProperty("opacity") && Object.keys(endProperties).length === 1 && endProperties.hasOwnProperty("opacity")) {
-				if (startProperties["opacity"] === "0" && endProperties["opacity"] === "1") {
-					animationName = "fade-in";
-				}
-				else if (startProperties["opacity"] === "1" && endProperties["opacity"] === "0") {
-					animationName = "fade-out";
-				}
+		addFadeIn(start: number, duration: number) {
+			if (this._animationStyle !== "") {
+				this._animationStyle += ",";
 			}
 
-			if (animationName === null) {
-				var ruleCssText = "\tfrom {\n";
+			this._animationStyle += "fade-in " + duration.toFixed(3) + "s linear " + start.toFixed(3) + "s";
+		}
 
-				Object.keys(startProperties).forEach((propertyName: string) => {
-					ruleCssText += "\t\t" + propertyName + ": " + startProperties[propertyName] + ";\n";
+		/**
+		 * Add a fade-out animation.
+		 *
+		 * @param {number} start The time from the dialogue start to start the fade-out
+		 * @param {number} duration The duration of the fade-out
+		 */
+		addFadeOut(start: number, duration: number) {
+			if (this._animationStyle !== "") {
+				this._animationStyle += ",";
+			}
+
+			this._animationStyle += "fade-out " + duration.toFixed(3) + "s linear " + start.toFixed(3) + "s";
+		}
+
+		/**
+		 * Add a new custom animation.
+		 *
+		 * @param {string} timingFunction
+		 * @param {Array.<!{time: number, properties: Object.<string, string>}>} animations
+		 */
+		addCustom(timingFunction: string, ...animations: Animation[]) {
+			var startTime: number = null;
+			var endTime: number = null;
+
+			var ruleCssText = "";
+
+			animations.forEach(animation => {
+				if (startTime === null) {
+					startTime = animation.time;
+				}
+
+				endTime = animation.time;
+
+				ruleCssText += "\t" + (100 * animation.time / (this._end - this._start)).toFixed(3) + "% {\n";
+
+				Object.keys(animation.properties).forEach(propertyName => {
+					ruleCssText += "\t\t" + propertyName + ": " + animation.properties[propertyName] + ";\n";
 				});
 
 				ruleCssText += "\t}\n";
+			});
 
-				ruleCssText += "\tto {\n";
+			var animationName = "dialogue-" + this._id + "-" + this._numAnimations++;
 
-				Object.keys(endProperties).forEach((propertyName: string) => {
-					ruleCssText += "\t\t" + propertyName + ": " + endProperties[propertyName] + ";\n";
-				});
-
-				ruleCssText += "\t}\n";
-
-				animationName = "dialogue-" + this._id + "-" + this._numAnimations++;
-				this._cssText +=
-					"@-webkit-keyframes " + animationName + " {\n" + ruleCssText + "}\n\n" +
-					"@keyframes " + animationName + " {\n" + ruleCssText + "}\n\n";
-			}
+			this._cssText +=
+				"@-webkit-keyframes " + animationName + " {\n" + ruleCssText + "}\n\n" +
+				"@keyframes " + animationName + " {\n" + ruleCssText + "}\n\n";
 
 			if (this._animationStyle !== "") {
 				this._animationStyle += ",";
 			}
-			this._animationStyle += animationName + " " + (endTime - startTime).toFixed(3) + "s " + "linear " + startTime.toFixed(3) + "s";
+
+			this._animationStyle += animationName + " " + (endTime - startTime).toFixed(3) + "s " + timingFunction + " " + startTime.toFixed(3) + "s";
 		}
 	}
 
