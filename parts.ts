@@ -597,7 +597,7 @@ module libjass {
 		 * A primary color tag {\c} or {\1c}
 		 *
 		 * @constructor
-		 * @param {Color} value {\1c###} -> color (Color), {\1c} -> null
+		 * @param {libjass.parts.Color} value {\1c###} -> color (Color), {\1c} -> null
 		 *
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
@@ -616,7 +616,7 @@ module libjass {
 		 * A secondary color tag {\2c}
 		 *
 		 * @constructor
-		 * @param {Color} value {\2c###} -> color (Color), {\2c} -> null
+		 * @param {libjass.parts.Color} value {\2c###} -> color (Color), {\2c} -> null
 		 *
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
@@ -635,7 +635,7 @@ module libjass {
 		 * An outline color tag {\3c}
 		 *
 		 * @constructor
-		 * @param {Color} value {\3c###} -> color (Color), {\3c} -> null
+		 * @param {libjass.parts.Color} value {\3c###} -> color (Color), {\3c} -> null
 		 *
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
@@ -654,7 +654,7 @@ module libjass {
 		 * A shadow color tag {\4c}
 		 *
 		 * @constructor
-		 * @param {Color} value {\4c###} -> color (Color), {\4c} -> null
+		 * @param {libjass.parts.Color} value {\4c###} -> color (Color), {\4c} -> null
 		 *
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
@@ -787,18 +787,18 @@ module libjass {
 		 * A color karaoke tag {\k}
 		 *
 		 * @constructor
-		 * @param {number} value {\k###} -> duration (number)
+		 * @param {number} duration {\k###} -> duration (number)
 		 *
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
 		export class ColorKaraoke extends TagBase {
-			constructor(private _value: number) {
-				super("ColorKaraoke", "value");
+			constructor(private _duration: number) {
+				super("ColorKaraoke", "duration");
 			}
 
-			get value(): number {
-				return this._value;
+			get duration(): number {
+				return this._duration;
 			}
 		}
 
@@ -806,18 +806,18 @@ module libjass {
 		 * A sweeping color karaoke tag {\K} or {\kf}
 		 *
 		 * @constructor
-		 * @param {number} value {\kf###} -> duration (number)
+		 * @param {number} duration {\kf###} -> duration (number)
 		 *
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
 		export class SweepingColorKaraoke extends TagBase {
-			constructor(private _value: number) {
-				super("SweepingColorKaraoke", "value");
+			constructor(private _duration: number) {
+				super("SweepingColorKaraoke", "duration");
 			}
 
-			get value(): number {
-				return this._value;
+			get duration(): number {
+				return this._duration;
 			}
 		}
 
@@ -825,18 +825,18 @@ module libjass {
 		 * An outline karaoke tag {\ko}
 		 *
 		 * @constructor
-		 * @param {number} value {\ko###} -> duration (number)
+		 * @param {number} duration {\ko###} -> duration (number)
 		 *
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
 		export class OutlineKaraoke extends TagBase {
-			constructor(private _value: number) {
-				super("OutlineKaraoke", "value");
+			constructor(private _duration: number) {
+				super("OutlineKaraoke", "duration");
 			}
 
-			get value(): number {
-				return this._value;
+			get duration(): number {
+				return this._duration;
 			}
 		}
 

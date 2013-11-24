@@ -1141,7 +1141,7 @@ module libjass.renderers {
 					[0, b, this._scaleX * this._blur],
 					[-a, 0, this._scaleY * this._blur],
 					[0, -b, this._scaleY * this._blur]
-					);
+				);
 
 				span.style.textShadow =
 				textShadowParts

@@ -105,15 +105,6 @@ body {
 	display: inline-block;
 }
 
-@keyframes fade-in {
-	from {
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-	}
-}
-
 @-webkit-keyframes fade-in {
 	from {
 		opacity: 0;
@@ -123,7 +114,16 @@ body {
 	}
 }
 
-@keyframes fade-out {
+@keyframes fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@-webkit-keyframes fade-out {
 	from {
 		opacity: 1;
 	}
@@ -132,7 +132,7 @@ body {
 	}
 }
 
-@-webkit-keyframes fade-out {
+@keyframes fade-out {
 	from {
 		opacity: 1;
 	}
