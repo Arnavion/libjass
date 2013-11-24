@@ -425,6 +425,12 @@ module libjass.renderers {
 				delete this._preRenderedSubs[key];
 			});
 
+			if (DefaultRenderer._animationStyleElement !== null) {
+				while (DefaultRenderer._animationStyleElement.firstChild !== null) {
+					DefaultRenderer._animationStyleElement.removeChild(DefaultRenderer._animationStyleElement.firstChild);
+				}
+			}
+
 			this.onVideoTimeUpdate();
 		}
 
