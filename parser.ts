@@ -1504,12 +1504,9 @@ module libjass.parser {
 		parse_alpha(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
-			if (this.read(current, "&") === null) {
-				parent.pop();
-				return null;
+			if (this.read(current, "&") !== null) {
+				this.read(current, "H");
 			}
-
-			this.read(current, "H");
 
 			var firstDigitNode = this.parse_hex(current);
 			if (firstDigitNode === null) {

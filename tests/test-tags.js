@@ -68,6 +68,8 @@ suite("Tags", function () {
 
 	suite("Alpha tag - \\alpha", function () {
 		parserTest("Just the tag", "alpha&H00&", "tag_alpha", new libjass.parts.Alpha(1));
+
+		parserTest("Just the tag", "alpha00", "tag_alpha", new libjass.parts.Alpha(1));
 	});
 
 	suite("Transform tag - \\t", function () {

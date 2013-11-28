@@ -52,6 +52,10 @@ suite("Primitives", function () {
 		parserTest("Starts with &, doesn't end with &", "&F", "alpha", 0);
 
 		parserTest("Starts with &, doesn't end with &", "&0", "alpha", 1);
+
+		parserTest("Doesn't start with &, doesn't end with &", "0", "alpha", 1);
+
+		parserTest("Starts with H", "H0", "alpha", null);
 	});
 
 	suite("ColorWithAlpha", function () {
