@@ -437,7 +437,7 @@ module libjass {
 		private _transformOriginY: number;
 		private _transformOrigin: string;
 
-		private _parts: parts.Tag[];
+		private _parts: parts.Part[];
 
 		private _sub: HTMLDivElement = null;
 
@@ -453,7 +453,7 @@ module libjass {
 
 			this._alignment = this._style.alignment;
 
-			this._parts = <parts.Tag[]>parser.parse(template["Text"], "dialogueParts");
+			this._parts = <parts.Part[]>parser.parse(template["Text"], "dialogueParts");
 
 			this._parts.forEach((part, index) => {
 				if (part instanceof parts.Alignment) {
@@ -568,7 +568,7 @@ module libjass {
 		 *
 		 * @type {!Array.<!libjass.parts.Tag>}
 		 */
-		get parts(): parts.Tag[] {
+		get parts(): parts.Part[] {
 			return this._parts;
 		}
 

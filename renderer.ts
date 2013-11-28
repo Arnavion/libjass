@@ -313,7 +313,7 @@ module libjass.renderers {
 				});
 
 				this.dialogues.forEach((dialogue: Dialogue) => {
-					dialogue.parts.forEach((part: parts.Tag) => {
+					dialogue.parts.forEach((part: parts.Part) => {
 						if (part instanceof parts.FontName) {
 							allFonts.add((<parts.FontName>part).value);
 						}

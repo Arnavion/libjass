@@ -232,7 +232,7 @@ module libjass.parser {
 				var enclosedTagsNode = this.parse_enclosedTags(current);
 
 				if (enclosedTagsNode !== null) {
-					(<parts.TagBase[]>enclosedTagsNode.value).forEach((tag: parts.TagBase) => {
+					(<parts.PartBase[]>enclosedTagsNode.value).forEach((tag: parts.PartBase) => {
 						if (tag instanceof parts.DrawingMode) {
 							inDrawingMode = (<parts.DrawingMode>tag).value !== 0;
 						}
@@ -1241,7 +1241,7 @@ module libjass.parser {
 				}
 			}
 
-			var transformTags: parts.Tag[] = [];
+			var transformTags: parts.Part[] = [];
 
 			for (var next = this._peek(); this._haveMore() && next !== ")" && next !== "}"; next = this._peek()) {
 				var childNode: ParseNode = null;
@@ -1571,7 +1571,7 @@ module libjass.parser {
 
 	function makeTagParserFunction(
 		tagName: string,
-		tagConstructor: { new (value: any): parts.Tag },
+		tagConstructor: { new (value: any): parts.Part },
 		valueParser: (current: ParseNode) => ParseNode,
 		required: boolean
 	) {

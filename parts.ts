@@ -77,7 +77,7 @@ module libjass {
 		/**
 		 * The base interface of the ASS tag classes.
 		 */
-		export interface Tag {
+		export interface Part {
 			toString(): string;
 		}
 
@@ -92,7 +92,7 @@ module libjass {
 		 * @abstract
 		 * @memberof libjass.parts
 		 */
-		export class TagBase implements Tag {
+		export class PartBase implements Part {
 			constructor(private _name: string, ... private _propertyNames: string[]) { }
 
 			/**
@@ -117,7 +117,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Comment extends TagBase {
+		export class Comment extends PartBase {
 			constructor(private _value: string) {
 				super("Comment", "value");
 			}
@@ -136,7 +136,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Text extends TagBase {
+		export class Text extends PartBase {
 			constructor(private _value: string) {
 				super("Text", "value");
 			}
@@ -159,7 +159,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Italic extends TagBase {
+		export class Italic extends PartBase {
 			constructor(private _value: boolean) {
 				super("Italic", "value");
 			}
@@ -178,7 +178,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Bold extends TagBase {
+		export class Bold extends PartBase {
 			constructor(private _value: Object) {
 				super("Bold", "value");
 			}
@@ -197,7 +197,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Underline extends TagBase {
+		export class Underline extends PartBase {
 			constructor(private _value: boolean) {
 				super("Underline", "value");
 			}
@@ -216,7 +216,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class StrikeThrough extends TagBase {
+		export class StrikeThrough extends PartBase {
 			constructor(private _value: boolean) {
 				super("StrikeThrough", "value");
 			}
@@ -235,7 +235,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Border extends TagBase {
+		export class Border extends PartBase {
 			constructor(private _value: number) {
 				super("Border", "value");
 			}
@@ -254,7 +254,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class BorderX extends TagBase {
+		export class BorderX extends PartBase {
 			constructor(private _value: number) {
 				super("BorderX", "value");
 			}
@@ -273,7 +273,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class BorderY extends TagBase {
+		export class BorderY extends PartBase {
 			constructor(private _value: number) {
 				super("BorderY", "value");
 			}
@@ -292,7 +292,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Shadow extends TagBase {
+		export class Shadow extends PartBase {
 			constructor(private _value: number) {
 				super("Shadow", "value");
 			}
@@ -311,7 +311,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class ShadowX extends TagBase {
+		export class ShadowX extends PartBase {
 			constructor(private _value: number) {
 				super("ShadowX", "value");
 			}
@@ -330,7 +330,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class ShadowY extends TagBase {
+		export class ShadowY extends PartBase {
 			constructor(private _value: number) {
 				super("ShadowY", "value");
 			}
@@ -349,7 +349,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Blur extends TagBase {
+		export class Blur extends PartBase {
 			constructor(private _value: number) {
 				super("Blur", "value");
 			}
@@ -368,7 +368,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class GaussianBlur extends TagBase {
+		export class GaussianBlur extends PartBase {
 			constructor(private _value: number) {
 				super("Blur", "value");
 			}
@@ -387,7 +387,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class FontName extends TagBase {
+		export class FontName extends PartBase {
 			constructor(private _value: string) {
 				super("FontName", "value");
 			}
@@ -406,7 +406,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class FontSize extends TagBase {
+		export class FontSize extends PartBase {
 			constructor(private _value: number) {
 				super("FontSize", "value");
 			}
@@ -425,7 +425,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class FontScaleX extends TagBase {
+		export class FontScaleX extends PartBase {
 			constructor(private _value: number) {
 				super("FontScaleX", "value");
 			}
@@ -444,7 +444,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class FontScaleY extends TagBase {
+		export class FontScaleY extends PartBase {
 			constructor(private _value: number) {
 				super("FontScaleX", "value");
 			}
@@ -463,7 +463,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class LetterSpacing extends TagBase {
+		export class LetterSpacing extends PartBase {
 			constructor(private _value: number) {
 				super("LetterSpacing", "value");
 			}
@@ -482,7 +482,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class RotateX extends TagBase {
+		export class RotateX extends PartBase {
 			constructor(private _value: number) {
 				super("RotateX", "value");
 			}
@@ -501,7 +501,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class RotateY extends TagBase {
+		export class RotateY extends PartBase {
 			constructor(private _value: number) {
 				super("RotateY", "value");
 			}
@@ -520,7 +520,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class RotateZ extends TagBase {
+		export class RotateZ extends PartBase {
 			constructor(private _value: number) {
 				super("RotateZ", "value");
 			}
@@ -539,7 +539,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class SkewX extends TagBase {
+		export class SkewX extends PartBase {
 			constructor(private _value: number) {
 				super("SkewX", "value");
 			}
@@ -558,7 +558,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class SkewY extends TagBase {
+		export class SkewY extends PartBase {
 			constructor(private _value: number) {
 				super("SkewY", "value");
 			}
@@ -577,7 +577,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class PrimaryColor extends TagBase {
+		export class PrimaryColor extends PartBase {
 			constructor(private _value: Color) {
 				super("PrimaryColor", "value");
 			}
@@ -596,7 +596,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class SecondaryColor extends TagBase {
+		export class SecondaryColor extends PartBase {
 			constructor(private _value: Color) {
 				super("SecondaryColor", "value");
 			}
@@ -615,7 +615,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class OutlineColor extends TagBase {
+		export class OutlineColor extends PartBase {
 			constructor(private _value: Color) {
 				super("OutlineColor", "value");
 			}
@@ -634,7 +634,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class ShadowColor extends TagBase {
+		export class ShadowColor extends PartBase {
 			constructor(private _value: Color) {
 				super("ShadowColor", "value");
 			}
@@ -653,7 +653,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Alpha extends TagBase {
+		export class Alpha extends PartBase {
 			constructor(private _value: number) {
 				super("Alpha", "value");
 			}
@@ -672,7 +672,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class PrimaryAlpha extends TagBase {
+		export class PrimaryAlpha extends PartBase {
 			constructor(private _value: number) {
 				super("PrimaryAlpha", "value");
 			}
@@ -691,7 +691,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class SecondaryAlpha extends TagBase {
+		export class SecondaryAlpha extends PartBase {
 			constructor(private _value: number) {
 				super("SecondaryAlpha", "value");
 			}
@@ -710,7 +710,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class OutlineAlpha extends TagBase {
+		export class OutlineAlpha extends PartBase {
 			constructor(private _value: number) {
 				super("OutlineAlpha", "value");
 			}
@@ -729,7 +729,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class ShadowAlpha extends TagBase {
+		export class ShadowAlpha extends PartBase {
 			constructor(private _value: number) {
 				super("ShadowAlpha", "value");
 			}
@@ -748,7 +748,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Alignment extends TagBase {
+		export class Alignment extends PartBase {
 			constructor(private _value: number) {
 				super("Alignment", "value");
 			}
@@ -767,7 +767,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class ColorKaraoke extends TagBase {
+		export class ColorKaraoke extends PartBase {
 			constructor(private _duration: number) {
 				super("ColorKaraoke", "duration");
 			}
@@ -786,7 +786,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class SweepingColorKaraoke extends TagBase {
+		export class SweepingColorKaraoke extends PartBase {
 			constructor(private _duration: number) {
 				super("SweepingColorKaraoke", "duration");
 			}
@@ -805,7 +805,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class OutlineKaraoke extends TagBase {
+		export class OutlineKaraoke extends PartBase {
 			constructor(private _duration: number) {
 				super("OutlineKaraoke", "duration");
 			}
@@ -824,7 +824,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class WrappingStyle extends TagBase {
+		export class WrappingStyle extends PartBase {
 			constructor(private _value: number) {
 				super("WrappingStyle", "value");
 			}
@@ -843,7 +843,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Reset extends TagBase {
+		export class Reset extends PartBase {
 			constructor(private _value: string) {
 				super("Reset", "value");
 			}
@@ -863,7 +863,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Position extends TagBase {
+		export class Position extends PartBase {
 			constructor(private _x: number, private _y: number) {
 				super("Position", "x", "y");
 			}
@@ -891,7 +891,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Move extends TagBase {
+		export class Move extends PartBase {
 			constructor(private _x1: number, private _y1: number, private _x2: number, private _y2: number, private _t1: number, private _t2: number) {
 				super("Move", "x1", "y1", "x2", "y2", "t1", "t2");
 			}
@@ -931,7 +931,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class RotationOrigin extends TagBase {
+		export class RotationOrigin extends PartBase {
 			constructor(private _x: number, private _y: number) {
 				super("RotationOrigin", "x", "y");
 			}
@@ -955,7 +955,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Fade extends TagBase {
+		export class Fade extends PartBase {
 			constructor(private _start: number, private _end: number) {
 				super("Fade", "start", "end");
 			}
@@ -984,7 +984,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class ComplexFade extends TagBase {
+		export class ComplexFade extends PartBase {
 			constructor(
 				private _a1: number, private _a2: number, private _a3: number,
 				private _t1: number, private _t2: number, private _t3: number, private _t4: number
@@ -1033,8 +1033,8 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class Transform extends TagBase {
-			constructor(private _start: number, private _end: number, private _accel: number, private _tags: Tag[]) {
+		export class Transform extends PartBase {
+			constructor(private _start: number, private _end: number, private _accel: number, private _tags: Part[]) {
 				super("Transform", "start", "end", "accel", "tags");
 			}
 
@@ -1050,7 +1050,7 @@ module libjass {
 				return this._accel;
 			}
 
-			get tags(): Tag[] {
+			get tags(): Part[] {
 				return this._tags;
 			}
 		}
@@ -1068,7 +1068,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class RectangularClip extends TagBase {
+		export class RectangularClip extends PartBase {
 			constructor(private _x1: number, private _y1: number, private _x2: number, private _y2: number, private _inside: boolean) {
 				super("RectangularClip", "x1", "y1", "x2", "y2", "inside");
 			}
@@ -1105,7 +1105,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class VectorClip extends TagBase {
+		export class VectorClip extends PartBase {
 			constructor(private _scale: number, private _commands: string, private _inside: boolean) {
 				super("VectorClip", "scale", "commands", "inside");
 			}
@@ -1132,7 +1132,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class DrawingMode extends TagBase {
+		export class DrawingMode extends PartBase {
 			constructor(private _value: number) {
 				super("DrawingMode", "value");
 			}
@@ -1151,7 +1151,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class DrawingBaselineOffset extends TagBase {
+		export class DrawingBaselineOffset extends PartBase {
 			constructor(private _value: number) {
 				super("DrawingBaselineOffset", "value");
 			}
@@ -1170,7 +1170,7 @@ module libjass {
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
-		export class DrawingInstructions extends TagBase {
+		export class DrawingInstructions extends PartBase {
 			constructor(private _value: string) {
 				super("DrawingInstructions", "value");
 			}
