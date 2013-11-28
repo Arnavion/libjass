@@ -1124,16 +1124,13 @@ module libjass.renderers {
 		 * @param {!HTMLSpanElement} span
 		 */
 		setStylesOnSpan(span: HTMLSpanElement): void {
-			if (this._italic) {
-				span.style.fontStyle = "italic";
-			}
-
-			if (this._bold === true) {
-				span.style.fontWeight = "bold";
-			}
-			else if (this._bold !== false) {
-				span.style.fontWeight = <string>this._bold;
-			}
+			var fontStyleOrWeight =
+				this._italic ? "italic " :
+				(this._bold === true) ? "bold " :
+				(this._bold !== false) ? (<string>this._bold + " ") :
+				"";
+			var fontSize = ((72 / this._dpi) * this._scaleY * this._fontSize).toFixed(3);
+			span.style.font = fontStyleOrWeight + fontSize + "px/" + fontSize + "px \"" + this._fontName + "\"";
 
 			var textDecoration = "";
 			if (this._underline) {
@@ -1143,9 +1140,6 @@ module libjass.renderers {
 				textDecoration += " line-through";
 			}
 			span.style.textDecoration = textDecoration.trim();
-
-			span.style.fontFamily = this._fontName;
-			span.style.fontSize = span.style.lineHeight = ((72 / this._dpi) * this._scaleY * this._fontSize) + "px";
 
 			span.style.webkitTransform = "scaleX(" + this._fontScaleX + ") scaleY(" + this._fontScaleY + ")";
 			span.style.webkitTransformOrigin = this._transformOrigin;
