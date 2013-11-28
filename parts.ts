@@ -128,36 +128,7 @@ module libjass {
 		}
 
 		/**
-		 * A hard space \h
-		 *
-		 * @constructor
-		 *
-		 * @extends {libjass.parts.TagBase}
-		 * @memberof libjass.parts
-		 */
-		export class HardSpace extends TagBase {
-			constructor() {
-				super("HardSpace");
-			}
-		}
-
-		/**
-		 * A newline \N
-		 *
-		 * @constructor
-		 * @param {string} value The text of this comment
-		 *
-		 * @extends {libjass.parts.TagBase}
-		 * @memberof libjass.parts
-		 */
-		export class NewLine extends TagBase {
-			constructor() {
-				super("NewLine");
-			}
-		}
-
-		/**
-		 * A block of text, i.e., any text not enclosed in {}.
+		 * A block of text, i.e., any text not enclosed in {}. Also includes \h and \N.
 		 *
 		 * @constructor
 		 * @param {string} value The content of this block of text
@@ -172,6 +143,10 @@ module libjass {
 
 			get value(): string {
 				return this._value;
+			}
+
+			toString(): string {
+				return "Text { value: " + this._value.replace(/\u00A0/g, "\\h").replace(/\n/g, "\\N") + " }";
 			}
 		}
 

@@ -704,15 +704,6 @@ module libjass.renderers {
 					}));
 				}
 
-				else if (part instanceof parts.NewLine) {
-					sub.appendChild(document.createElement("br"));
-				}
-
-				else if (part instanceof parts.HardSpace) {
-					currentSpan.appendChild(document.createTextNode("\u00A0"));
-					startNewSpan();
-				}
-
 				else if (part instanceof parts.Text || (libjass.debugMode && part instanceof parts.Comment)) {
 					currentSpan.appendChild(document.createTextNode((<parts.Text>part).value));
 					startNewSpan();

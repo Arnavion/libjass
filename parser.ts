@@ -234,33 +234,25 @@ module libjass.parser {
 				}
 
 				else {
-					var spacingNode = this.parse_newline(current) || this.parse_hardspace(current);
+					var textNode = this.parse_newline(current) || this.parse_hardspace(current) || this.parse_text(current);
 
-					if (spacingNode !== null) {
-						current.value.push(spacingNode.value);
+					if (textNode !== null) {
+						if (current.value[current.value.length - 1] instanceof parts.Text) {
+							// Merge consecutive text parts into one part
+							current.value[current.value.length - 1] =
+								new parts.Text(
+									(<parts.Text>current.value[current.value.length - 1]).value +
+									(<parts.Text>textNode.value).value
+								);
+						}
+						else {
+							current.value.push(textNode.value);
+						}
 					}
 
 					else {
-						var textNode = this.parse_text(current);
-
-						if (textNode !== null) {
-							if (current.value[current.value.length - 1] instanceof parts.Text) {
-								// Merge consecutive text parts into one part
-								current.value[current.value.length - 1] =
-									new parts.Text(
-										(<parts.Text>current.value[current.value.length - 1]).value +
-										(<parts.Text>textNode.value).value
-									);
-							}
-							else {
-								current.value.push(textNode.value);
-							}
-						}
-
-						else {
-							parent.pop();
-							return null;
-						}
+						parent.pop();
+						return null;
 					}
 				}
 			}
@@ -383,7 +375,7 @@ module libjass.parser {
 				return null;
 			}
 
-			current.value = new parts.NewLine();
+			current.value = new parts.Text("\n");
 
 			return current;
 		}
@@ -396,7 +388,7 @@ module libjass.parser {
 				return null;
 			}
 
-			current.value = new parts.HardSpace();
+			current.value = new parts.Text("\u00A0");
 
 			return current;
 		}
