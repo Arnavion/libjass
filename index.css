@@ -31,7 +31,6 @@ body {
 }
 
 .zoomed, .zoomed * {
-	display: inline-block;
 	font-size: 0;
 }
 
@@ -91,6 +90,7 @@ body {
 }
 
 #libjass-subs span {
+	display: inline-block;
 	white-space: pre-wrap;
 }
 
