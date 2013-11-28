@@ -671,6 +671,9 @@ module libjass.renderers {
 					}), new Animation(movePart.t2, {
 						left: (scaleX * movePart.x2).toFixed(3) + "px",
 						top: (scaleY * movePart.y2).toFixed(3) + "px"
+					}), new Animation(dialogue.end - dialogue.start, {
+						left: (scaleX * movePart.x2).toFixed(3) + "px",
+						top: (scaleY * movePart.y2).toFixed(3) + "px"
 					}));
 				}
 
