@@ -90,8 +90,11 @@ body {
 }
 
 #libjass-subs span {
-	display: inline-block;
 	white-space: pre-wrap;
+}
+
+#libjass-subs div {
+	line-height: 0;
 }
 
 #dpi-div {
