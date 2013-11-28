@@ -475,7 +475,7 @@ module libjass.renderers {
 			}
 
 			if (fullScreenElement === this.video) {
-				DefaultRenderer._addClass(document.body, "libjass-full-screen");
+				DefaultRenderer._addClass(this._wrapper, "libjass-full-screen");
 
 				this.resizeVideo(screen.width, screen.height);
 
@@ -484,7 +484,7 @@ module libjass.renderers {
 				this._dispatchEvent("fullScreenChange", this._videoIsFullScreen);
 			}
 			else if (fullScreenElement === null && this._videoIsFullScreen) {
-				DefaultRenderer._removeClass(document.body, "libjass-full-screen");
+				DefaultRenderer._removeClass(this._wrapper, "libjass-full-screen");
 
 				this._videoIsFullScreen = false;
 
