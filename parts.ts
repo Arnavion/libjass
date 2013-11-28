@@ -1160,5 +1160,24 @@ module libjass {
 				return this._value;
 			}
 		}
+
+		/**
+		 * A pseudo-part representing text interpreted as drawing instructions
+		 *
+		 * @constructor
+		 * @param {string} value
+		 *
+		 * @extends {libjass.parts.TagBase}
+		 * @memberof libjass.parts
+		 */
+		export class DrawingInstructions extends TagBase {
+			constructor(private _value: string) {
+				super("DrawingInstructions", "value");
+			}
+
+			get value(): string {
+				return this._value;
+			}
+		}
 	}
 }

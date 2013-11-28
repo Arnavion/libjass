@@ -226,10 +226,17 @@ module libjass.parser {
 
 			current.value = [];
 
+			var inDrawingMode = false;
+
 			while (this._haveMore()) {
 				var enclosedTagsNode = this.parse_enclosedTags(current);
 
 				if (enclosedTagsNode !== null) {
+					(<parts.TagBase[]>enclosedTagsNode.value).forEach((tag: parts.TagBase) => {
+						if (tag instanceof parts.DrawingMode) {
+							inDrawingMode = (<parts.DrawingMode>tag).value !== 0;
+						}
+					});
 					current.value.push.apply(current.value, enclosedTagsNode.value);
 				}
 
@@ -237,16 +244,33 @@ module libjass.parser {
 					var textNode = this.parse_newline(current) || this.parse_hardspace(current) || this.parse_text(current);
 
 					if (textNode !== null) {
-						if (current.value[current.value.length - 1] instanceof parts.Text) {
-							// Merge consecutive text parts into one part
-							current.value[current.value.length - 1] =
-								new parts.Text(
-									(<parts.Text>current.value[current.value.length - 1]).value +
-									(<parts.Text>textNode.value).value
-								);
+						if (!inDrawingMode) {
+							if (current.value[current.value.length - 1] instanceof parts.Text) {
+								// Merge consecutive text parts into one part
+								current.value[current.value.length - 1] =
+									new parts.Text(
+										(<parts.Text>current.value[current.value.length - 1]).value +
+										(<parts.Text>textNode.value).value
+									);
+							}
+							else {
+								current.value.push(textNode.value);
+							}
 						}
 						else {
-							current.value.push(textNode.value);
+							var drawingInstructions = (<parts.Text>textNode.value).value;
+
+							if (current.value[current.value.length - 1] instanceof parts.DrawingInstructions) {
+								// Merge consecutive drawing instructions parts into one part
+								current.value[current.value.length - 1] =
+									new parts.DrawingInstructions(
+										(<parts.DrawingInstructions>current.value[current.value.length - 1]).value +
+										drawingInstructions
+									);
+							}
+							else {
+								current.value.push(new parts.DrawingInstructions((<parts.Text>textNode.value).value));
+							}
 						}
 					}
 
