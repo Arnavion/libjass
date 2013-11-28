@@ -1311,10 +1311,7 @@ module libjass.parser {
 				}
 			}
 
-			if (this.read(current, ")") === null) {
-				parent.pop();
-				return null;
-			}
+			this.read(current, ")");
 
 			current.value =
 				new parts.Transform(
