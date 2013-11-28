@@ -654,8 +654,8 @@ module libjass.renderers {
 					var positionPart = <parts.Position>part;
 
 					sub.style.position = "absolute";
-					sub.style.left = (scaleX * positionPart.x) + "px";
-					sub.style.top = (scaleY * positionPart.y) + "px";
+					sub.style.left = (scaleX * positionPart.x).toFixed(3) + "px";
+					sub.style.top = (scaleY * positionPart.y).toFixed(3) + "px";
 				}
 
 				else if (part instanceof parts.Move) {
@@ -1152,7 +1152,7 @@ module libjass.renderers {
 			span.style.transform = "scaleX(" + this._fontScaleX + ") scaleY(" + this._fontScaleY + ")";
 			span.style.transformOrigin = this._transformOrigin;
 
-			span.style.letterSpacing = (this._scaleX * this._letterSpacing) + "px";
+			span.style.letterSpacing = (this._scaleX * this._letterSpacing).toFixed(3) + "px";
 
 			span.style.color = this._primaryColor.withAlpha(this._primaryAlpha).toString();
 
