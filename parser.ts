@@ -858,11 +858,43 @@ module libjass.parser {
 		}
 
 		parse_tag_fscx(parent: ParseNode): ParseNode {
-			throw new Error("Method not implemented.");
+			var current = new ParseNode(parent);
+
+			if (this.read(current, "fscx") === null) {
+				parent.pop();
+				return null;
+			}
+
+			var valueNode = this.parse_decimal(current);
+
+			if (valueNode === null) {
+				parent.pop();
+				return null;
+			}
+
+			current.value = new parts.FontScaleX(valueNode.value / 100);
+
+			return current;
 		}
 
 		parse_tag_fscy(parent: ParseNode): ParseNode {
-			throw new Error("Method not implemented.");
+			var current = new ParseNode(parent);
+
+			if (this.read(current, "fscy") === null) {
+				parent.pop();
+				return null;
+			}
+
+			var valueNode = this.parse_decimal(current);
+
+			if (valueNode === null) {
+				parent.pop();
+				return null;
+			}
+
+			current.value = new parts.FontScaleY(valueNode.value / 100);
+
+			return current;
 		}
 
 		parse_tag_fsp(parent: ParseNode): ParseNode {
@@ -1610,8 +1642,6 @@ module libjass.parser {
 	makeTagParserFunction("fry", parts.RotateY, ParserRun.prototype.parse_decimal, false);
 	makeTagParserFunction("frz", parts.RotateZ, ParserRun.prototype.parse_decimal, false);
 	makeTagParserFunction("fs", parts.FontSize, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("fscx", parts.FontScaleX, ParserRun.prototype.parse_decimal, false);
-	makeTagParserFunction("fscy", parts.FontScaleY, ParserRun.prototype.parse_decimal, false);
 	makeTagParserFunction("fsp", parts.LetterSpacing, ParserRun.prototype.parse_decimal, false);
 	makeTagParserFunction("i", parts.Italic, ParserRun.prototype.parse_enableDisable, false);
 	makeTagParserFunction("k", parts.ColorKaraoke, ParserRun.prototype.parse_decimal, true);
