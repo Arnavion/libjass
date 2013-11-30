@@ -1093,11 +1093,16 @@ module libjass.renderers {
 		 * @param {!HTMLSpanElement} span
 		 */
 		setStylesOnSpan(span: HTMLSpanElement): void {
-			var fontStyleOrWeight =
-				this._italic ? "italic " :
-				(this._bold === true) ? "bold " :
-				(this._bold !== false) ? (<string>this._bold + " ") :
-				"";
+			var fontStyleOrWeight = "";
+			if (this._italic) {
+				fontStyleOrWeight += "italic ";
+			}
+			if (this._bold === true) {
+				fontStyleOrWeight += "bold ";
+			}
+			else if (this._bold !== false) {
+				fontStyleOrWeight += (<string>this._bold + " ");
+			}
 			var fontSize = ((72 / this._dpi) * this._scaleY * this._fontSize).toFixed(3);
 			span.style.font = fontStyleOrWeight + fontSize + "px/" + fontSize + "px \"" + this._fontName + "\"";
 
