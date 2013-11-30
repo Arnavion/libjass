@@ -144,9 +144,12 @@ module libjass {
 	 * @memberof libjass
 	 */
 	class SimpleMap<K, V> implements Map<K, V> {
-		private _data: Object = Object.create(null);
+		private _keys: { [key: string]: K };
+		private _values: { [key: string]: V };
 
-		constructor() { }
+		constructor() {
+			this.clear();
+		}
 
 		/**
 		 * @param {K} key
@@ -159,7 +162,7 @@ module libjass {
 				return undefined;
 			}
 
-			return this._data[property];
+			return this._values[property];
 		}
 
 		/**
@@ -173,7 +176,7 @@ module libjass {
 				return false;
 			}
 
-			return property in this._data;
+			return property in this._keys;
 		}
 
 		/**
@@ -185,33 +188,54 @@ module libjass {
 			var property = this._keyToProperty(key);
 
 			if (property === null) {
-				throw new Error("This Set implementation only supports string and number values.");
+				throw new Error("This Map implementation only supports Number and String keys.");
 			}
 
-			this._data[property] = value;
+			this._keys[property] = key;
+			this._values[property] = value;
 
 			return this;
+		}
+
+		/**
+		 * @param {K} key
+		 * @return {boolean} true if the key was present before being deleted, false otherwise
+		 */
+		delete(key: K): boolean {
+			var property = this._keyToProperty(key);
+
+			if (property === null) {
+				return false;
+			}
+
+			var result = property in this._keys;
+
+			if (result) {
+				delete this._keys[property];
+				delete this._values[property];
+			}
+
+			return result;
+		}
+
+		clear(): void {
+			this._keys = Object.create(null);
+			this._values = Object.create(null);
 		}
 
 		/**
 		 * @param {function(V, K, libjass.Map.<K, V>)} callbackfn A function that is called with each key and value in the map.
 		 */
 		forEach(callbackfn: (value: V, index: K, map: Map<K, V>) => void, thisArg?: any): void {
-			Object.keys(this._data).forEach((property: string): void => {
-				callbackfn.call(thisArg, this._data[property], this._propertyToKey(property), this);
-			});
-		}
-
-		delete(key: K): boolean {
-			throw new Error("This Set implementation doesn't support delete().");
-		}
-
-		clear(): void {
-			throw new Error("This Set implementation doesn't support clear().");
+			var keysArray = Object.keys(this._keys);
+			for (var i = 0; i < keysArray.length; i++) {
+				var property = keysArray[i];
+				callbackfn.call(thisArg, this._values[property], this._keys[property], this);
+			}
 		}
 
 		get size(): number {
-			throw new Error("This Set implementation doesn't support size.");
+			throw new Error("This Map implementation doesn't support size.");
 		}
 
 		private _keyToProperty(key: K): string {
@@ -220,17 +244,6 @@ module libjass {
 			}
 			else if (typeof key == "string") {
 				return "'" + key;
-			}
-
-			return null;
-		}
-
-		private _propertyToKey(property: string): Object {
-			if (property[0] === "#") {
-				return parseInt(property);
-			}
-			else if (property[0] === "'") {
-				return property.substr(1);
 			}
 
 			return null;
