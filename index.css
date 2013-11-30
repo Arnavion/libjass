@@ -77,18 +77,6 @@ body {
 	top: 0;
 }
 
-.an1, .an4, .an7 {
-	text-align: left;
-}
-
-.an2, .an5, .an8 {
-	text-align: center;
-}
-
-.an3, .an6, .an9 {
-	text-align: right;
-}
-
 #libjass-subs span {
 	white-space: pre-wrap;
 }

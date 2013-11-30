@@ -222,9 +222,9 @@ module libjass.renderers {
 	export class DefaultRenderer extends NullRenderer {
 		private static _animationStyleElement: HTMLStyleElement = null;
 
-		private _wrapper: HTMLDivElement;
+		private _videoSubsWrapper: HTMLDivElement;
 		private _subsWrapper: HTMLDivElement;
-		private _wrappers: HTMLDivElement[][] = [];
+		private _layerAlignmentWrappers: HTMLDivElement[][] = [];
 
 		private _currentSubs: Map<number, HTMLDivElement> = new Map<number, HTMLDivElement>();
 		private _preRenderedSubs: Map<number, HTMLDivElement> = new Map<number, HTMLDivElement>();
@@ -236,34 +236,50 @@ module libjass.renderers {
 		constructor(video: HTMLVideoElement, ass: ASS, settings: RendererSettings) {
 			super(video, ass, settings);
 
-			this._wrapper = document.createElement("div");
-			video.parentElement.replaceChild(this._wrapper, video);
+			this._videoSubsWrapper = document.createElement("div");
+			video.parentElement.replaceChild(this._videoSubsWrapper, video);
 
-			this._wrapper.className = "libjass-wrapper";
-			this._wrapper.appendChild(video);
+			this._videoSubsWrapper.className = "libjass-wrapper";
+			this._videoSubsWrapper.appendChild(video);
 
 			this._subsWrapper = document.createElement("div");
-			this._wrapper.appendChild(this._subsWrapper);
+			this._videoSubsWrapper.appendChild(this._subsWrapper);
 			this._subsWrapper.id = "libjass-subs";
 
 			// Create layer wrapper div's and the alignment div's inside each layer div
-			var layers = new Set<number>();
+			var wrappersMap = new Map<string, number[]>();
 			this.ass.dialogues.forEach((dialogue: Dialogue) => {
-				layers.add(dialogue.layer);
+				wrappersMap.set(dialogue.layer + "," + dialogue.alignment, [dialogue.layer, dialogue.alignment]);
 			});
-			var layersArray: number[] = [];
-			layers.forEach((layer: number) => { layersArray.push(layer); });
-			layersArray.sort().forEach((layer: number) => {
-				this._wrappers[layer] = new Array<HTMLDivElement>(9 + 1); // + 1 because alignments are 1-indexed (1 to 9)
+			var wrappersArray: number[][] = [];
+			wrappersMap.forEach((pair: number[]) => { wrappersArray.push(pair); });
+			wrappersArray.sort((a: number[], b: number[]) => {
+				var result = a[0] - b[0];
 
-				for (var alignment = 1; alignment <= 9; alignment++) {
-					var wrapperDiv = document.createElement("div");
-					wrapperDiv.className = "an" + alignment + " layer" + layer;
-					this._subsWrapper.appendChild(wrapperDiv);
-					this._wrappers[layer][alignment] = wrapperDiv;
+				if (result !== 0) {
+					return result;
 				}
-			});
 
+				return a[1] - b[1];
+			}).forEach((pair: number[]) => {
+				var layer = pair[0];
+				var alignment = pair[1];
+
+				if (this._layerAlignmentWrappers[layer] === undefined) {
+					this._layerAlignmentWrappers[pair[0]] = new Array<HTMLDivElement>(9 + 1); // + 1 because alignments are 1-indexed (1 to 9)
+
+					// 0 is for absolutely-positioned subs
+					var layerAlignmentWrapper = document.createElement("div");
+					layerAlignmentWrapper.className = "layer" + layer + " an" + 0;
+					this._subsWrapper.appendChild(layerAlignmentWrapper);
+					this._layerAlignmentWrappers[layer][0] = layerAlignmentWrapper;
+				}
+
+				var layerAlignmentWrapper = document.createElement("div");
+				layerAlignmentWrapper.className = "layer" + layer + " an" + alignment;
+				this._subsWrapper.appendChild(layerAlignmentWrapper);
+				this._layerAlignmentWrappers[layer][alignment] = layerAlignmentWrapper;
+			});
 
 			if (!this.settings.preLoadFonts) {
 				setTimeout(() => this._ready(), 0);
@@ -444,6 +460,12 @@ module libjass.renderers {
 			sub.style.marginLeft = (scaleX * dialogue.style.marginLeft) + "px";
 			sub.style.marginRight = (scaleX * dialogue.style.marginRight) + "px";
 			sub.style.marginTop = sub.style.marginBottom = (scaleY * dialogue.style.marginVertical) + "px";
+
+			switch (dialogue.alignment) {
+				case 1: case 4: case 7: sub.style.textAlign = "left"; break;
+				case 2: case 5: case 8: sub.style.textAlign = "center"; break;
+				case 3: case 6: case 9: sub.style.textAlign = "right"; break;
+			}
 
 			var animationCollection = new AnimationCollection(dialogue.id, dialogue.start, dialogue.end);
 
@@ -721,7 +743,12 @@ module libjass.renderers {
 				result.style.animationDelay = animationDelay;
 			}
 
-			this._wrappers[dialogue.layer][dialogue.alignment].appendChild(result);
+			if (result.style.position === "absolute") {
+				this._layerAlignmentWrappers[dialogue.layer][0].appendChild(result);
+			}
+			else {
+				this._layerAlignmentWrappers[dialogue.layer][dialogue.alignment].appendChild(result);
+			}
 
 			this._currentSubs.set(dialogue.id, result);
 		}
@@ -749,7 +776,7 @@ module libjass.renderers {
 			}
 
 			if (fullScreenElement === this.video) {
-				DefaultRenderer._addClass(this._wrapper, "libjass-full-screen");
+				DefaultRenderer._addClass(this._videoSubsWrapper, "libjass-full-screen");
 
 				this.resizeVideo(screen.width, screen.height);
 
@@ -758,7 +785,7 @@ module libjass.renderers {
 				this._dispatchEvent("fullScreenChange", this._videoIsFullScreen);
 			}
 			else if (fullScreenElement === null && this._videoIsFullScreen) {
-				DefaultRenderer._removeClass(this._wrapper, "libjass-full-screen");
+				DefaultRenderer._removeClass(this._videoSubsWrapper, "libjass-full-screen");
 
 				this._videoIsFullScreen = false;
 
