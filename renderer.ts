@@ -36,11 +36,10 @@ module libjass.renderers {
 		private static _highResolutionTimerInterval: number = 41;
 
 		private _dialogues: Dialogue[];
+		private _endTimes: number[];
 
 		private _state: VideoState;
 		private _currentTime: number;
-
-		private _currentDialogues: Dialogue[] = [];
 
 		private _timeUpdateIntervalHandle: number = null;
 
@@ -59,10 +58,12 @@ module libjass.renderers {
 				return result;
 			});
 
-			this._video.addEventListener("timeupdate", this._onVideoTimeUpdate.bind(this), false);
-			this._video.addEventListener("seeking", this._onVideoSeeking.bind(this), false);
-			this._video.addEventListener("pause", this._onVideoPause.bind(this), false);
-			this._video.addEventListener("playing", this._onVideoPlaying.bind(this), false);
+			this._endTimes = this._dialogues.map((dialogue: Dialogue) => dialogue.end);
+
+			this._video.addEventListener("timeupdate", () => this._onVideoTimeUpdate(), false);
+			this._video.addEventListener("seeking", () => this._onVideoSeeking(), false);
+			this._video.addEventListener("pause", () => this._onVideoPause(), false);
+			this._video.addEventListener("playing", () => this._onVideoPlaying(), false);
 		}
 
 		get video(): HTMLVideoElement {
@@ -77,10 +78,6 @@ module libjass.renderers {
 			return this._settings;
 		}
 
-		get dialogues(): Dialogue[] {
-			return this._dialogues;
-		}
-
 		get currentTime(): number {
 			return this._currentTime;
 		}
@@ -89,72 +86,48 @@ module libjass.renderers {
 			this._currentTime = this._video.currentTime;
 
 			if (libjass.debugMode) {
-				console.log("video.timeupdate: " + this._getVideoStateLogString());
+				console.log("NullRenderer.onVideoTimeUpdate: " + this._getVideoStateLogString());
 			}
 
-			var newDialogues: Dialogue[] = [];
-
-			var i = 0;
-
-			for (; i < this._dialogues.length; i++) {
-				if (this._dialogues[i].end >= this._currentTime) {
-					break;
-				}
-			}
-
-			for (; i < this._dialogues.length; i++) {
-				var dialogue = this._dialogues[i];
-
-				if (dialogue.start > (this._currentTime + this._settings.preRenderTime)) {
-					break;
-				}
-
-				// Ignore dialogues which end at a time less than currentTime, and those which have already been displayed
-				if (dialogue.end >= this._currentTime && this._currentDialogues.indexOf(dialogue) === -1) {
-					// This dialogue is visible at atleast one time in the range [currentTime, currentTime + settings.preRenderTime]
-
-					// If the dialogue is to be displayed later, pre-render it...
-					if (dialogue.start > this._currentTime) {
-						this.preRender(dialogue);
-					}
-
-					// ... otherwise draw it
-					else {
-						if (libjass.debugMode) {
-							console.log(dialogue.toString());
-						}
-
-						this.draw(dialogue);
-
-						newDialogues.push(dialogue);
-					}
-				}
-			}
-
-			this._currentDialogues = this._currentDialogues.filter((dialogue: Dialogue) => {
-				// If the dialogue should still be displayed at currentTime, keep it
-				if (dialogue.start <= this._currentTime && this._currentTime < dialogue.end) {
-					return true;
+			var searchStart = 0;
+			var searchEnd = this._endTimes.length;
+			while (searchStart !== searchEnd) {
+				var mid = ((searchStart + searchEnd) / 2) | 0;
+				if (this._endTimes[mid] < this._currentTime) {
+					searchStart = mid + 1;
 				}
 				else {
-					this.removeDialogue(dialogue);
-
-					return false;
+					searchEnd = mid;
 				}
-			}).concat(newDialogues); // ... and add the new dialogues that are to be displayed.
+			}
+
+			for (var i = searchStart; i < this._endTimes.length; i++) {
+				var dialogue = this._dialogues[i];
+
+				if (dialogue.start <= this._currentTime) {
+					// This dialogue is visible right now. Draw it.
+					this.draw(dialogue);
+				}
+				else if (dialogue.start <= (this._currentTime + this._settings.preRenderTime)) {
+					// This dialogue will be visible soon. Pre-render it.
+					this.preRender(dialogue);
+				}
+				else {
+					// No more dialogues in the time range [currentTime, currentTime + settings.preRenderTime]
+					break;
+				}
+			}
 		}
 
 		public onVideoSeeking(): void {
 			if (libjass.debugMode) {
-				console.log("video.seeking: " + this._getVideoStateLogString());
+				console.log("NullRenderer.onVideoSeeking: " + this._getVideoStateLogString());
 			}
-
-			this._currentDialogues = [];
 		}
 
 		public onVideoPause(): void {
 			if (libjass.debugMode) {
-				console.log("video.pause: " + this._getVideoStateLogString());
+				console.log("NullRenderer.onVideoPause: " + this._getVideoStateLogString());
 			}
 
 			if (this._timeUpdateIntervalHandle !== null) {
@@ -165,7 +138,7 @@ module libjass.renderers {
 
 		public onVideoPlaying(): void {
 			if (libjass.debugMode) {
-				console.log("video.playing: " + this._getVideoStateLogString());
+				console.log("NullRenderer.onVideoPlaying: " + this._getVideoStateLogString());
 			}
 
 			if (this._timeUpdateIntervalHandle === null) {
@@ -177,13 +150,6 @@ module libjass.renderers {
 		}
 
 		public draw(dialogue: Dialogue): void {
-		}
-
-		public removeDialogue(dialogue: Dialogue): void {
-		}
-
-		public removeAllDialogues(): void {
-			this._currentDialogues = [];
 		}
 
 		private _onVideoTimeUpdate(): void {
@@ -260,11 +226,12 @@ module libjass.renderers {
 		private _subsWrapper: HTMLDivElement;
 		private _wrappers: HTMLDivElement[][] = [];
 
-		private _preRenderedSubs: PreRenderedSubsMap = Object.create(null);
+		private _currentSubs: Map<number, HTMLDivElement> = new Map<number, HTMLDivElement>();
+		private _preRenderedSubs: Map<number, HTMLDivElement> = new Map<number, HTMLDivElement>();
 
 		private _videoIsFullScreen: boolean = false;
 
-		private _eventListeners: EventListenersMap = Object.create(null);
+		private _eventListeners: Map<string, Function[]> = new Map<string, Function[]>();
 
 		constructor(video: HTMLVideoElement, ass: ASS, settings: RendererSettings) {
 			super(video, ass, settings);
@@ -281,7 +248,7 @@ module libjass.renderers {
 
 			// Create layer wrapper div's and the alignment div's inside each layer div
 			var layers = new Set<number>();
-			this.dialogues.forEach((dialogue: Dialogue) => {
+			this.ass.dialogues.forEach((dialogue: Dialogue) => {
 				layers.add(dialogue.layer);
 			});
 			var layersArray: number[] = [];
@@ -299,7 +266,7 @@ module libjass.renderers {
 
 
 			if (!this.settings.preLoadFonts) {
-				setTimeout(() => { this._ready(); }, 0);
+				setTimeout(() => this._ready(), 0);
 			}
 			// Preload fonts
 			else {
@@ -309,7 +276,7 @@ module libjass.renderers {
 					allFonts.add(style.fontName);
 				});
 
-				this.dialogues.forEach((dialogue: Dialogue) => {
+				this.ass.dialogues.forEach((dialogue: Dialogue) => {
 					dialogue.parts.forEach((part: parts.Part) => {
 						if (part instanceof parts.FontName) {
 							allFonts.add((<parts.FontName>part).value);
@@ -374,8 +341,8 @@ module libjass.renderers {
 				}
 			}
 
-			this._eventListeners["ready"] = [];
-			this._eventListeners["fullScreenChange"] = [];
+			this._eventListeners.set("ready", []);
+			this._eventListeners.set("fullScreenChange", []);
 		}
 
 		/**
@@ -389,8 +356,8 @@ module libjass.renderers {
 		 * @param {!Function} listener The listener
 		 */
 		public addEventListener(type: string, listener: Function): void {
-			var listeners = <Function[]>this._eventListeners[type];
-			if (listeners) {
+			var listeners = this._eventListeners.get(type);
+			if (listeners !== null) {
 				listeners.push(listener);
 			}
 		}
@@ -402,7 +369,7 @@ module libjass.renderers {
 		 * @param {number} height
 		 */
 		public resizeVideo(width: number, height: number): void {
-			this.removeAllDialogues();
+			this._removeAllSubs();
 
 			this.video.style.width = width.toFixed(3) + "px";
 			this.video.style.height = height.toFixed(3) + "px";
@@ -418,9 +385,7 @@ module libjass.renderers {
 			this.ass.scaleTo(subsWrapperWidth, subsWrapperHeight);
 
 			// Any dialogues which have been pre-rendered will need to be pre-rendered again.
-			Object.keys(this._preRenderedSubs).forEach(key => {
-				delete this._preRenderedSubs[key];
-			});
+			this._preRenderedSubs.clear();
 
 			if (DefaultRenderer._animationStyleElement !== null) {
 				while (DefaultRenderer._animationStyleElement.firstChild !== null) {
@@ -431,20 +396,23 @@ module libjass.renderers {
 			this.onVideoTimeUpdate();
 		}
 
-		private _ready(): void {
-			document.addEventListener("webkitfullscreenchange", this._onFullScreenChange.bind(this), false);
-			document.addEventListener("mozfullscreenchange", this._onFullScreenChange.bind(this), false);
-			document.addEventListener("fullscreenchange", this._onFullScreenChange.bind(this), false);
-
-			this.resizeVideo(parseInt(this.video.style.width), parseInt(this.video.style.height));
-
-			this._dispatchEvent("ready");
-		}
-
 		public onVideoSeeking(): void {
 			super.onVideoSeeking();
 
-			this.removeAllDialogues();
+			this._removeAllSubs();
+		}
+
+		public onVideoTimeUpdate(): void {
+			super.onVideoTimeUpdate();
+
+			this._currentSubs.forEach((sub: HTMLDivElement, dialogueId: number) => {
+				var dialogue = this.ass.dialogues[dialogueId];
+
+				if (dialogue.start > this.currentTime || dialogue.end < this.currentTime) {
+					this._currentSubs.delete(dialogueId);
+					this._removeSub(sub);
+				}
+			});
 		}
 
 		public onVideoPause(): void {
@@ -459,56 +427,11 @@ module libjass.renderers {
 			DefaultRenderer._removeClass(this._subsWrapper, "paused");
 		}
 
-		private _onFullScreenChange() {
-			var fullScreenElement = document.fullscreenElement;
-			if (fullScreenElement === undefined) {
-				fullScreenElement = document.mozFullScreenElement;
-			}
-			if (fullScreenElement === undefined) {
-				fullScreenElement = document.msFullscreenElement;
-			}
-			if (fullScreenElement === undefined) {
-				fullScreenElement = document.webkitFullscreenElement;
-			}
-
-			if (fullScreenElement === this.video) {
-				DefaultRenderer._addClass(this._wrapper, "libjass-full-screen");
-
-				this.resizeVideo(screen.width, screen.height);
-
-				this._videoIsFullScreen = true;
-
-				this._dispatchEvent("fullScreenChange", this._videoIsFullScreen);
-			}
-			else if (fullScreenElement === null && this._videoIsFullScreen) {
-				DefaultRenderer._removeClass(this._wrapper, "libjass-full-screen");
-
-				this._videoIsFullScreen = false;
-
-				this._dispatchEvent("fullScreenChange", this._videoIsFullScreen);
-			}
-		}
-
-		/**
-		 * @param {string} type
-		 * @param {...*} args
-		 *
-		 * @private
-		 */
-		private _dispatchEvent(type: string, ...args: Object[]): void {
-			var listeners = <Function[]>this._eventListeners[type];
-			if (listeners) {
-				listeners.forEach((listener: Function) => {
-					listener.apply(this, args);
-				});
-			}
-		}
-
 		/**
 		 * The magic happens here. The subtitle div is rendered and stored. Call draw() to get a clone of the div to display.
 		 */
 		public preRender(dialogue: Dialogue): void {
-			if (this._preRenderedSubs[dialogue.id] !== undefined) {
+			if (this._preRenderedSubs.has(dialogue.id)) {
 				return;
 			}
 
@@ -752,7 +675,7 @@ module libjass.renderers {
 
 			sub.setAttribute("data-dialogue-id", String(dialogue.id));
 
-			this._preRenderedSubs[String(dialogue.id)] = sub;
+			this._preRenderedSubs.set(dialogue.id, sub);
 		}
 
 		/**
@@ -762,7 +685,15 @@ module libjass.renderers {
 		 * @param {!libjass.Dialogue} dialogue
 		 */
 		public draw(dialogue: Dialogue): void {
-			var preRenderedSub = this._preRenderedSubs[String(dialogue.id)];
+			if (this._currentSubs.has(dialogue.id)) {
+				return;
+			}
+
+			if (libjass.debugMode) {
+				console.log(dialogue.toString());
+			}
+
+			var preRenderedSub = this._preRenderedSubs.get(dialogue.id);
 
 			if (preRenderedSub === undefined) {
 				if (libjass.debugMode) {
@@ -770,7 +701,7 @@ module libjass.renderers {
 				}
 
 				this.preRender(dialogue);
-				preRenderedSub = this._preRenderedSubs[String(dialogue.id)];
+				preRenderedSub = this._preRenderedSubs.get(dialogue.id);
 			}
 
 			var result = <HTMLDivElement>preRenderedSub.cloneNode(true);
@@ -791,16 +722,72 @@ module libjass.renderers {
 			}
 
 			this._wrappers[dialogue.layer][dialogue.alignment].appendChild(result);
+
+			this._currentSubs.set(dialogue.id, result);
 		}
 
-		public removeDialogue(dialogue: Dialogue): void {
-			DefaultRenderer._removeElement(document.querySelector("[data-dialogue-id='" + dialogue.id + "']"));
+		private _ready(): void {
+			document.addEventListener("webkitfullscreenchange", event => this._onFullScreenChange(), false);
+			document.addEventListener("mozfullscreenchange", event => this._onFullScreenChange(), false);
+			document.addEventListener("fullscreenchange", event => this._onFullScreenChange(), false);
+
+			this.resizeVideo(parseInt(this.video.style.width), parseInt(this.video.style.height));
+
+			this._dispatchEvent("ready");
 		}
 
-		public removeAllDialogues(): void {
-			super.removeAllDialogues();
+		private _onFullScreenChange() {
+			var fullScreenElement = document.fullscreenElement;
+			if (fullScreenElement === undefined) {
+				fullScreenElement = document.mozFullScreenElement;
+			}
+			if (fullScreenElement === undefined) {
+				fullScreenElement = document.msFullscreenElement;
+			}
+			if (fullScreenElement === undefined) {
+				fullScreenElement = document.webkitFullscreenElement;
+			}
 
-			(<HTMLDivElement[]>(Array.prototype.slice.call(this._subsWrapper.querySelectorAll("[data-dialogue-id]")))).forEach(DefaultRenderer._removeElement);
+			if (fullScreenElement === this.video) {
+				DefaultRenderer._addClass(this._wrapper, "libjass-full-screen");
+
+				this.resizeVideo(screen.width, screen.height);
+
+				this._videoIsFullScreen = true;
+
+				this._dispatchEvent("fullScreenChange", this._videoIsFullScreen);
+			}
+			else if (fullScreenElement === null && this._videoIsFullScreen) {
+				DefaultRenderer._removeClass(this._wrapper, "libjass-full-screen");
+
+				this._videoIsFullScreen = false;
+
+				this._dispatchEvent("fullScreenChange", this._videoIsFullScreen);
+			}
+		}
+
+		/**
+		 * @param {string} type
+		 * @param {...*} args
+		 *
+		 * @private
+		 */
+		private _dispatchEvent(type: string, ...args: Object[]): void {
+			var listeners = this._eventListeners.get(type);
+			if (listeners !== null) {
+				listeners.forEach((listener: Function) => {
+					listener.apply(this, args);
+				});
+			}
+		}
+
+		private _removeSub(sub: HTMLDivElement): void {
+			sub.parentNode.removeChild(sub);
+		}
+
+		private _removeAllSubs(): void {
+			this._currentSubs.forEach((sub: HTMLDivElement) => this._removeSub(sub));
+			this._currentSubs.clear();
 		}
 
 		public static makeFontMapFromStyleElement(styleElement: HTMLStyleElement): Map<string, string[]> {
@@ -853,26 +840,6 @@ module libjass.renderers {
 				element.className = classNames.slice(0, existingIndex).join(" ") + " " + classNames.slice(existingIndex + 1).join(" ");
 			}
 		}
-
-		/**
-		 * Removes a DOM element from its parent node.
-		 *
-		 * @param {Element} element The element to remove
-		 *
-		 * @private
-		 */
-		private static _removeElement(element: Element): void {
-			if (element !== null && element.parentNode !== null) {
-				element.parentNode.removeChild(element);
-			}
-		}
-
-		/**
-		 * Discards the pre-rendered subtitle div created from an earlier call to _preRender().
-		 */
-		private _unPreRender(dialogue: Dialogue): void {
-			delete this._preRenderedSubs[String(dialogue.id)];
-		}
 	}
 
 	/**
@@ -906,14 +873,6 @@ module libjass.renderers {
 		}
 	}
 
-	interface EventListenersMap {
-		[key: string]: Function[];
-	}
-
-	interface PreRenderedSubsMap {
-		[key: string]: HTMLDivElement;
-	}
-
 	interface AnimationPropertiesMap {
 		[key: string]: string;
 	}
@@ -925,7 +884,7 @@ module libjass.renderers {
 			return this._time;
 		}
 
-		get properties(): Object {
+		get properties(): AnimationPropertiesMap {
 			return this._properties;
 		}
 	}
