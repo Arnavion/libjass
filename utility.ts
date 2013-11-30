@@ -50,24 +50,30 @@ module libjass {
 	 * @memberof libjass
 	 */
 	class SimpleSet<T> implements Set<T> {
-		private _data: Object = Object.create(null);
+		private _data: Object;
 
-		constructor() { }
+		constructor() {
+			this.clear();
+		}
 
 		/**
 		 * @param {T} value
 		 * @return {libjass.Set.<T>} This set
 		 */
 		add(value: T): Set<T> {
-			var key = this._toKey(value);
+			var property = this._toProperty(value);
 
-			if (key === null) {
-				throw new Error("This Set implementation only supports string and number values.");
+			if (property === null) {
+				throw new Error("This Set implementation only supports Number and String values.");
 			}
 
-			this._data[key] = value;
+			this._data[property] = value;
 
 			return this;
+		}
+
+		clear(): void {
+			this._data = Object.create(null);
 		}
 
 		/**
@@ -75,22 +81,21 @@ module libjass {
 		 * @return {boolean}
 		 */
 		has(value: T): boolean {
-			var key = this._toKey(value);
+			var property = this._toProperty(value);
 
-			if (key === null) {
+			if (property === null) {
 				return false;
 			}
 
-			return key in this._data;
+			return property in this._data;
 		}
 
 		/**
 		 * @param {function(T, T, libjass.Set.<T>)} callbackfn A function that is called with each value in the set.
 		 */
 		forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void {
-			Object.keys(this._data).map((key: string) => {
-				return this._data[key];
-			}).forEach((value: T) => {
+			Object.keys(this._data).map((property: string) => {
+				var value = this._data[property];
 				callbackfn.call(thisArg, value, value, this);
 			});
 		}
@@ -99,15 +104,11 @@ module libjass {
 			throw new Error("This Set implementation doesn't support delete().");
 		}
 
-		clear(): void {
-			throw new Error("This Set implementation doesn't support clear().");
-		}
-
 		get size(): number {
 			throw new Error("This Set implementation doesn't support size.");
 		}
 
-		private _toKey(value: T): string {
+		private _toProperty(value: T): string {
 			if (typeof value == "number") {
 				return "#" + value;
 			}
