@@ -27,7 +27,6 @@ interface CSSStyleDeclaration {
 	webkitAnimationDelay: string
 	webkitTransform: string
 	webkitTransformOrigin: string
-	webkitPerspective: string
 }
 
 interface Document {
