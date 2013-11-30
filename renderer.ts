@@ -168,7 +168,7 @@ module libjass.renderers {
 				console.log("video.playing: " + this._getVideoStateLogString());
 			}
 
-			if (this._settings.useHighResolutionTimer && this._timeUpdateIntervalHandle === null) {
+			if (this._timeUpdateIntervalHandle === null) {
 				this._timeUpdateIntervalHandle = setInterval(() => this._onVideoTimeChange(), NullRenderer._highResolutionTimerInterval);
 			}
 		}
@@ -191,9 +191,6 @@ module libjass.renderers {
 				if (this._currentTime !== this._video.currentTime) {
 					this._onVideoPlaying();
 				}
-			}
-			else if (this._state === VideoState.Playing && !this._settings.useHighResolutionTimer) {
-				this._onVideoTimeChange();
 			}
 		}
 
@@ -894,16 +891,6 @@ module libjass.renderers {
 		 */
 		public preRenderTime: number;
 
-		/**
-		 * If true, subtitles wil be rendered using a 41ms timer. If false, subtitles will be rendered using a 250ms timer (the exact value is browser-specific but most browsers have decided on 250ms).
-		 *
-		 * The period of the timer influences how much subtitles lag the video. For example, using the 250ms timer means that subtitles will be rendered between zero and 250ms after the time
-		 * they should have been rendered.
-		 *
-		 * Defaults to true.
-		 */
-		public useHighResolutionTimer: boolean;
-
 		public initializeUnsetProperties(): void {
 			if (this.preLoadFonts === undefined) {
 				this.preLoadFonts = false;
@@ -915,10 +902,6 @@ module libjass.renderers {
 
 			if (this.preRenderTime === undefined) {
 				this.preRenderTime = 5;
-			}
-
-			if (this.useHighResolutionTimer === undefined) {
-				this.useHighResolutionTimer = true;
 			}
 		}
 	}
