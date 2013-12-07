@@ -259,7 +259,7 @@ module libjass {
 		Map = global.Map;
 	}
 	else {
-		Map = SimpleMap;
+		Map = <any>SimpleMap;
 	}
 }
 

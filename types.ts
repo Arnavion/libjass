@@ -588,7 +588,7 @@ module libjass {
 		 * @private
 		 */
 		private static _toTime(str: string): number {
-			return str.split(":").reduce((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);
+			return str.split(":").reduce<number>((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);
 		}
 
 		private _setTransformOrigin(): void {

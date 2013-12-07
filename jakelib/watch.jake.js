@@ -21,7 +21,7 @@ namespace("_watch", function () {
 		spawnSubProcess();
 	}, { async: true });
 
-	task("runUntilError", ["_default:tscCreate"], function () {
+	task("runUntilError", ["_typescript:getCompilerFactory"], function () {
 		console.log("[" + this.fullName + "]");
 
 		var tasksToReEnable = [];
@@ -32,7 +32,7 @@ namespace("_watch", function () {
 				next = next.substr(0, next.indexOf("["));
 			}
 
-			if (next !== "_default:tscCreate" && tasksToReEnable.indexOf(jake.Task[next]) === -1) {
+			if (next !== "_typescript:getCompilerFactory" && tasksToReEnable.indexOf(jake.Task[next]) === -1) {
 				tasksToReEnable.push(jake.Task[next]);
 
 				stack.push.apply(stack, jake.Task[next].prereqs);

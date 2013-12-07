@@ -18,7 +18,7 @@ namespace("_doc", function () {
 	task("parse", [], function () {
 		console.log("[" + this.fullName + "]");
 
-		var compiled = jake.Task["_default:tscCompile"].value;
+		var compiled = jake.Task["_default:typeScript"].value;
 
 		UglifyJS.base54.reset();
 
