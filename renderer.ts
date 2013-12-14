@@ -1164,7 +1164,7 @@ module libjass.renderers {
 
 				span.style.textShadow =
 				textShadowParts
-					.map(triple => triple[0] + "px " + triple[1] + "px " + triple[2] + "px " + textShadowColor)
+					.map(triple => triple[0].toFixed(3) + "px " + triple[1].toFixed(3) + "px " + triple[2].toFixed(3) + "px " + textShadowColor)
 					.join(", ");
 			}
 
