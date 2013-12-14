@@ -26,7 +26,7 @@
 	position: static;
 }
 
-#libjass-subs {
+.libjass-subs {
 	position: absolute;
 	width: 100%;
 	height: 100%;
@@ -35,18 +35,18 @@
 	overflow: hidden;
 }
 
-#libjass-subs, #libjass-subs * {
+.libjass-subs, .libjass-subs * {
 	pointer-events: none;
 	-webkit-animation-fill-mode: both !important;
 	animation-fill-mode: both !important;
 }
 
-#libjass-subs > * {
+.libjass-subs > * {
 	position: absolute;
 	width: 100%;
 }
 
-#libjass-subs.paused * {
+.libjass-subs.paused * {
 	-webkit-animation-play-state: paused !important;
 	animation-play-state: paused !important;
 }
@@ -69,11 +69,11 @@
 	top: 0;
 }
 
-#libjass-subs span {
+.libjass-subs span {
 	white-space: pre-wrap;
 }
 
-#libjass-subs div {
+.libjass-subs div {
 	line-height: 0;
 }
 

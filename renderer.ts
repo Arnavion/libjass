@@ -244,7 +244,7 @@ module libjass.renderers {
 
 			this._subsWrapper = document.createElement("div");
 			this._videoSubsWrapper.appendChild(this._subsWrapper);
-			this._subsWrapper.id = "libjass-subs";
+			this._subsWrapper.className = "libjass-subs";
 
 			// Create layer wrapper div's and the alignment div's inside each layer div
 			var wrappersMap = new Map<string, number[]>();
