@@ -1053,7 +1053,7 @@ module libjass.renderers {
 		private _blur: number;
 
 		constructor(private _style: Style, private _transformOrigin: string, private _scaleX: number, private _scaleY: number, private _dpi: number) {
-			this.reset();
+			this.reset(null);
 		}
 
 		/**
@@ -1061,7 +1061,11 @@ module libjass.renderers {
 		 *
 		 * @param {!libjass.Style=} newStyle The new defaults to reset the style to. If unspecified, the new style is the original style this object was created with.
 		 */
-		reset(newStyle: Style = this._style): void {
+		reset(newStyle: Style): void {
+			if (newStyle === undefined || newStyle === null) {
+				newStyle = this._style;
+			}
+
 			this.italic = newStyle.italic;
 			this.bold = newStyle.bold;
 			this.underline = newStyle.underline;
