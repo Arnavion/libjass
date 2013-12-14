@@ -22,68 +22,8 @@ body {
 	margin: 0;
 }
 
-.libjass-wrapper {
-	position: relative;
-}
-
-.libjass-wrapper.libjass-full-screen {
-	position: static;
-}
-
-.zoomed, .zoomed * {
-	font-size: 0;
-}
-
 #libjass-subs {
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	left: 0;
-	top: 0;
-	overflow: hidden;
-}
-
-#libjass-subs, #libjass-subs * {
-	pointer-events: none;
 	z-index: 2147483647;
-	-webkit-animation-fill-mode: both !important;
-	animation-fill-mode: both !important;
-}
-
-#libjass-subs > * {
-	position: absolute;
-	width: 100%;
-}
-
-#libjass-subs.paused * {
-	-webkit-animation-play-state: paused !important;
-	animation-play-state: paused !important;
-}
-
-.an1, .an2, .an3 {
-	bottom: 0;
-}
-
-.an4, .an5, .an6 {
-	display: table;
-}
-
-.an4 > *, .an5 > *, .an6 > * {
-	display: table-cell;
-	top: 50%;
-	vertical-align: middle;
-}
-
-.an7, .an8, .an9 {
-	top: 0;
-}
-
-#libjass-subs span {
-	white-space: pre-wrap;
-}
-
-#libjass-subs div {
-	line-height: 0;
 }
 
 #dpi-div {
@@ -95,40 +35,4 @@ body {
 
 .settings-form > fieldset {
 	display: inline-block;
-}
-
-@-webkit-keyframes fade-in {
-	from {
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-	}
-}
-
-@keyframes fade-in {
-	from {
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-	}
-}
-
-@-webkit-keyframes fade-out {
-	from {
-		opacity: 1;
-	}
-	to {
-		opacity: 0;
-	}
-}
-
-@keyframes fade-out {
-	from {
-		opacity: 1;
-	}
-	to {
-		opacity: 0;
-	}
 }
