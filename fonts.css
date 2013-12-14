@@ -289,6 +289,16 @@
 }
 
 @font-face {
+	font-family: "LHF Scriptana";
+	src: url("/fonts/LHF_Scriptana.ttf");
+}
+
+@font-face {
+	font-family: "LHFScriptana-Regular";
+	src: url("/fonts/LHF_Scriptana.ttf");
+}
+
+@font-face {
 	font-family: "LinotypeFinnegan-Medium";
 	src: url("/fonts/LT.ttf"), url("/fonts/macron%20finnetier%200.3.ttf");
 }
@@ -378,7 +388,7 @@
 
 @font-face {
 	font-family: "NewBaskerville";
-	src: url("/fonts/NEWBASK.TTF");
+	src: url("/fonts/NEWBASK.TTF"), url("/fonts/NewBaskerville.ttf");
 }
 
 @font-face {
