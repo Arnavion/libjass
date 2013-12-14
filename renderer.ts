@@ -1115,10 +1115,20 @@ module libjass.renderers {
 			}
 			span.style.textDecoration = textDecoration.trim();
 
-			span.style.webkitTransform = "scaleX(" + this._fontScaleX + ") scaleY(" + this._fontScaleY + ")";
-			span.style.webkitTransformOrigin = this._transformOrigin;
-			span.style.transform = "scaleX(" + this._fontScaleX + ") scaleY(" + this._fontScaleY + ")";
-			span.style.transformOrigin = this._transformOrigin;
+			var transform = "";
+			if (this._fontScaleX != 1) {
+				transform += "scaleX(" + this._fontScaleX + ") ";
+			}
+			if (this._fontScaleY != 1) {
+				transform += "scaleY(" + this._fontScaleY + ")";
+			}
+			if (transform !== "") {
+				span.style.webkitTransform = transform;
+				span.style.webkitTransformOrigin = this._transformOrigin;
+				span.style.transform = transform;
+				span.style.transformOrigin = this._transformOrigin;
+				span.style.display = "inline-block";
+			}
 
 			span.style.letterSpacing = (this._scaleX * this._letterSpacing).toFixed(3) + "px";
 
