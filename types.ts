@@ -465,7 +465,7 @@ module libjass {
 					if (movePart.t1 === null || movePart.t2 === null) {
 						this._parts[index] =
 							new parts.Move(
-								movePart.x1, movePart.x2, movePart.y1, movePart.y2,
+								movePart.x1, movePart.y1, movePart.x2, movePart.y2,
 								0, this._end - this._start
 							);
 					}
