@@ -455,7 +455,6 @@ module libjass.renderers {
 
 			var scaleX = this.ass.scaleX;
 			var scaleY = this.ass.scaleY;
-			var dpi = this.ass.dpi;
 
 			sub.style.marginLeft = (scaleX * dialogue.style.marginLeft) + "px";
 			sub.style.marginRight = (scaleX * dialogue.style.marginRight) + "px";
@@ -472,7 +471,7 @@ module libjass.renderers {
 			var divTransformStyle = "";
 
 			var currentSpan: HTMLSpanElement = null;
-			var currentSpanStyles = new SpanStyles(dialogue.style, dialogue.transformOrigin, scaleX, scaleY, dpi);
+			var currentSpanStyles = new SpanStyles(dialogue.style, dialogue.transformOrigin, scaleX, scaleY);
 
 			var startNewSpan = (): void => {
 				if (currentSpan !== null) {
@@ -1022,7 +1021,6 @@ module libjass.renderers {
 	 * @param {string} transformOrigin The transform origin of the dialogue this object is associated with
 	 * @param {number} scaleX The horizontal scaling of the dialogue this object is associated with
 	 * @param {number} scaleY The vertical scaling of the dialogue this object is associated with
-	 * @param {number} dpi The DPI of the ASS script this object is associated with
 	 *
 	 * @private
 	 * @memberof libjass.renderers
@@ -1052,7 +1050,7 @@ module libjass.renderers {
 
 		private _blur: number;
 
-		constructor(private _style: Style, private _transformOrigin: string, private _scaleX: number, private _scaleY: number, private _dpi: number) {
+		constructor(private _style: Style, private _transformOrigin: string, private _scaleX: number, private _scaleY: number) {
 			this.reset(null);
 		}
 
@@ -1107,7 +1105,7 @@ module libjass.renderers {
 			else if (this._bold !== false) {
 				fontStyleOrWeight += (<string>this._bold + " ");
 			}
-			var fontSize = ((72 / this._dpi) * this._scaleY * this._fontSize).toFixed(3);
+			var fontSize = ((72 / 96) * this._scaleY * this._fontSize).toFixed(3);
 			span.style.font = fontStyleOrWeight + fontSize + "px/" + fontSize + "px \"" + this._fontName + "\"";
 
 			var textDecoration = "";

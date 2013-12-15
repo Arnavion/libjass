@@ -26,13 +26,6 @@ body {
 	z-index: 2147483647;
 }
 
-#dpi-div {
-	position: absolute;
-	width: 1in;
-	height: 1in;
-	visibility: hidden;
-}
-
 .settings-form > fieldset {
 	display: inline-block;
 }

@@ -40,8 +40,6 @@ module libjass {
 		private _scaleX: number;
 		private _scaleY: number;
 
-		private _dpi: number;
-
 		private _styles: StyleMap = Object.create(null);
 		private _dialogues: Dialogue[] = [];
 
@@ -127,18 +125,6 @@ module libjass {
 		 */
 		get scaleY(): number {
 			return this._scaleY;
-		}
-
-		/**
-		 * The DPI of the target device.
-		 *
-		 * @type {number}
-		 */
-		get dpi(): number {
-			return this._dpi;
-		}
-		set dpi(value: number) {
-			this._dpi = value;
 		}
 
 		/**
