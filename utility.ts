@@ -25,6 +25,7 @@
 interface CSSStyleDeclaration {
 	webkitAnimation: string
 	webkitAnimationDelay: string
+	webkitFilter: string
 	webkitTransform: string
 	webkitTransformOrigin: string
 }

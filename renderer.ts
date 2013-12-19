@@ -221,6 +221,7 @@ module libjass.renderers {
 	 */
 	export class DefaultRenderer extends NullRenderer {
 		private static _animationStyleElement: HTMLStyleElement = null;
+		private static _svgDefsElement: SVGDefsElement = null;
 
 		private _videoSubsWrapper: HTMLDivElement;
 		private _subsWrapper: HTMLDivElement;
@@ -270,7 +271,7 @@ module libjass.renderers {
 
 					// 0 is for absolutely-positioned subs
 					var layerAlignmentWrapper = document.createElement("div");
-					layerAlignmentWrapper.className = "layer" + layer + " an" + 0;
+					layerAlignmentWrapper.className = "layer" + layer + " an0";
 					this._subsWrapper.appendChild(layerAlignmentWrapper);
 					this._layerAlignmentWrappers[layer][0] = layerAlignmentWrapper;
 				}
@@ -280,6 +281,15 @@ module libjass.renderers {
 				this._subsWrapper.appendChild(layerAlignmentWrapper);
 				this._layerAlignmentWrappers[layer][alignment] = layerAlignmentWrapper;
 			});
+
+			var svgElement = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			this._videoSubsWrapper.appendChild(svgElement);
+			svgElement.setAttribute("class", "libjass-filters");
+			svgElement.setAttribute("width", "0");
+			svgElement.setAttribute("height", "0");
+
+			DefaultRenderer._svgDefsElement = <SVGDefsElement>document.createElementNS("http://www.w3.org/2000/svg", "defs");
+			svgElement.appendChild(DefaultRenderer._svgDefsElement);
 
 			if (!this.settings.preLoadFonts) {
 				setTimeout(() => this._ready(), 0);
@@ -409,6 +419,10 @@ module libjass.renderers {
 				}
 			}
 
+			while (DefaultRenderer._svgDefsElement.firstChild !== null) {
+				DefaultRenderer._svgDefsElement.removeChild(DefaultRenderer._svgDefsElement.firstChild);
+			}
+
 			this.onVideoTimeUpdate();
 		}
 
@@ -471,7 +485,7 @@ module libjass.renderers {
 			var divTransformStyle = "";
 
 			var currentSpan: HTMLSpanElement = null;
-			var currentSpanStyles = new SpanStyles(dialogue.style, dialogue.transformOrigin, scaleX, scaleY);
+			var currentSpanStyles = new SpanStyles(dialogue.id, dialogue.style, dialogue.transformOrigin, scaleX, scaleY, DefaultRenderer._svgDefsElement);
 
 			var startNewSpan = (): void => {
 				if (currentSpan !== null) {
@@ -1026,6 +1040,8 @@ module libjass.renderers {
 	 * @memberof libjass.renderers
 	 */
 	class SpanStyles {
+		private static _domParser: DOMParser = null;
+
 		private _italic: boolean;
 		private _bold: Object;
 		private _underline: boolean;
@@ -1050,7 +1066,9 @@ module libjass.renderers {
 
 		private _blur: number;
 
-		constructor(private _style: Style, private _transformOrigin: string, private _scaleX: number, private _scaleY: number) {
+		private _nextFilterId = 0;
+
+		constructor(private _id: number, private _style: Style, private _transformOrigin: string, private _scaleX: number, private _scaleY: number, private _svgDefsElement: SVGDefsElement) {
 			this.reset(null);
 		}
 
@@ -1134,56 +1152,108 @@ module libjass.renderers {
 
 			span.style.letterSpacing = (this._scaleX * this._letterSpacing).toFixed(3) + "px";
 
-			span.style.color = this._primaryColor.withAlpha(this._primaryAlpha).toString();
+			var primaryColor = this._primaryColor.withAlpha(this._primaryAlpha);
+			span.style.color = primaryColor.toString();
 
-			if (this._outlineWidthX > 0 || this._outlineWidthY > 0) {
-				var textShadowColor = this._outlineColor.withAlpha(this._outlineAlpha).toString();
-				var textShadowParts: number[][] = [];
+			var outlineColor = this._outlineColor.withAlpha(this._outlineAlpha);
 
-				/* Lay out text-shadows in an ellipse with horizontal radius = this._scaleX * this._outlineWidthX
-				 * and vertical radius = this._scaleY * this._outlineWidthY
-				 * Shadows are laid inside the region of the ellipse, separated by 0.5px
+			var outlineWidthX = (this._scaleX * this._outlineWidthX) / this._fontScaleX;
+			var outlineWidthY = (this._scaleY * this._outlineWidthY) / this._fontScaleY;
+
+			var filterId = "svg-filter-" + this._id + "-" + this._nextFilterId++;
+
+			var points: number[][] = [];
+
+			var outlineFilter = '';
+
+			if (outlineWidthX === 0 && outlineWidthY === 0) {
+				outlineFilter =
+					'\t<feGaussianBlur stdDeviation="' + this._blur + '" in="outlineColor" result="outline" />\n';
+			}
+			else {
+				/* Lay out text-shadows in an ellipse with horizontal radius = (this._scaleX * this._outlineWidthX) / this._fontScaleX
+				 * and vertical radius = (this._scaleY * this._outlineWidthY) / this._fontScaleY
+				 * Shadows are laid inside the region of the ellipse, separated by this._fontScaleX pixels horizontally and this._fontScaleY pixels vertically.
 				 *
 				 * The below loop is an unrolled version of the above algorithm that only roams over one quadrant and adds
 				 * four shadows at a time.
 				 */
 
-				var a = this._scaleX * this._outlineWidthX;
-				var b = this._scaleY * this._outlineWidthY;
+				var a = outlineWidthX - this._fontScaleX;
+				var b = outlineWidthY - this._fontScaleY;
 
-				for (var x = 0; x < a; x += 0.5) {
-					for (var y = 0; y < b && ((x / a) * (x / a) + (y / b) * (y / b)) <= 1; y += 0.5) {
-						textShadowParts.push([x, y, this._scaleX * this._blur]);
+				for (var x = 0; x < a; x += this._fontScaleX) {
+					for (var y = 0; y < b && ((x / a) * (x / a) + (y / b) * (y / b)) <= 1; y += this._fontScaleY) {
+						if (x == 0 && y == 0) {
+							continue;
+						}
+
+						points.push([x, y]);
+
 						if (x !== 0) {
-							textShadowParts.push([-x, y, this._scaleX * this._blur]);
+							points.push([-x, y]);
 						}
+
 						if (x !== 0 && y !== 0) {
-							textShadowParts.push([-x, -y, this._scaleY * this._blur]);
+							points.push([-x, -y]);
 						}
+
 						if (y !== 0) {
-							textShadowParts.push([x, -y, this._scaleY * this._blur]);
+							points.push([x, -y]);
 						}
 					}
 				}
 
 				// Make sure the four corner shadows exist
-				textShadowParts.push(
-					[a, 0, this._scaleX * this._blur],
-					[0, b, this._scaleX * this._blur],
-					[-a, 0, this._scaleY * this._blur],
-					[0, -b, this._scaleY * this._blur]
-				);
+				points.push([a, 0]);
+				points.push([0, b]);
+				points.push([-a, 0]);
+				points.push([0, -b]);
 
-				span.style.textShadow =
-				textShadowParts
-					.map(triple => triple[0].toFixed(3) + "px " + triple[1].toFixed(3) + "px " + triple[2].toFixed(3) + "px " + textShadowColor)
-					.join(", ");
+				var mergeFilter = '';
+
+				points.forEach((pair: number[], index: number) => {
+					var x = pair[0];
+					var y = pair[1];
+
+					outlineFilter +=
+						'\t<feOffset dx="' + pair[0].toFixed(3) + '" dy="' + pair[1].toFixed(3) + '" in="outlineColor" result="outline' + index + '" />\n';
+
+					mergeFilter +=
+						'\t\t<feMergeNode in="outline' + index + '" />\n';
+				});
+
+				outlineFilter +=
+					'\t<feMerge>\n' +
+					mergeFilter +
+					'\t</feMerge>\n' +
+					'\t<feGaussianBlur stdDeviation="' + this._blur + '" result="outline" />\n';
 			}
 
-			/* TODO: Blur text
-			else if (this._blur > 0) {
+			var filterString =
+				'<filter xmlns="http://www.w3.org/2000/svg" id="' + filterId + '">\n' +
+				'\t<feComponentTransfer in="SourceAlpha" result="outlineColor">\n' +
+				'\t\t<feFuncR type="linear" slope="0" intercept="' + (outlineColor.red / 255).toFixed(3) + '" />\n' +
+				'\t\t<feFuncG type="linear" slope="0" intercept="' + (outlineColor.green / 255).toFixed(3) + '" />\n' +
+				'\t\t<feFuncB type="linear" slope="0" intercept="' + (outlineColor.blue / 255).toFixed(3) + '" />\n' +
+				'\t\t<feFuncA type="linear" slope="' + outlineColor.alpha.toFixed(3) + '" intercept="0" />\n' +
+				'\t</feComponentTransfer>\n' +
+				outlineFilter +
+				'\t<feMerge>\n' +
+				'\t\t<feMergeNode in="outline" />\n' +
+				'\t\t<feMergeNode in="SourceGraphic" />\n' +
+				'\t</feMerge>\n' +
+				'</filter>\n';
+
+			if (SpanStyles._domParser === null) {
+				SpanStyles._domParser = new DOMParser();
 			}
-			*/
+
+			var filterElement = SpanStyles._domParser.parseFromString(filterString, "image/svg+xml").childNodes[0];
+
+			this._svgDefsElement.appendChild(filterElement);
+			span.style.webkitFilter = 'url("#' + filterId + '")';
+			span.style.filter = 'url("#' + filterId + '")';
 		}
 
 		/**
