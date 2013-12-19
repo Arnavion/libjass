@@ -1164,16 +1164,19 @@ module libjass.renderers {
 
 			var points: number[][] = [];
 
-			var outlineFilter = '';
+			var outlineColorFilter =
+				'\t<feComponentTransfer in="SourceAlpha" result="outlineColor">\n' +
+				'\t\t<feFuncR type="linear" slope="0" intercept="' + (outlineColor.red / 255).toFixed(3) + '" />\n' +
+				'\t\t<feFuncG type="linear" slope="0" intercept="' + (outlineColor.green / 255).toFixed(3) + '" />\n' +
+				'\t\t<feFuncB type="linear" slope="0" intercept="' + (outlineColor.blue / 255).toFixed(3) + '" />\n' +
+				'\t\t<feFuncA type="linear" slope="' + outlineColor.alpha.toFixed(3) + '" intercept="0" />\n' +
+				'\t</feComponentTransfer>\n';
 
-			if (outlineWidthX === 0 && outlineWidthY === 0) {
-				outlineFilter =
-					'\t<feGaussianBlur stdDeviation="' + this._blur + '" in="outlineColor" result="outline" />\n';
-			}
-			else {
-				/* Lay out text-shadows in an ellipse with horizontal radius = (this._scaleX * this._outlineWidthX) / this._fontScaleX
+			var outlineFilter = '';
+			if (outlineWidthX > 0 || outlineWidthY > 0) {
+				/* Lay out outlines in an ellipse with horizontal radius = (this._scaleX * this._outlineWidthX) / this._fontScaleX
 				 * and vertical radius = (this._scaleY * this._outlineWidthY) / this._fontScaleY
-				 * Shadows are laid inside the region of the ellipse, separated by this._fontScaleX pixels horizontally and this._fontScaleY pixels vertically.
+				 * Outlines are laid inside the region of the ellipse, separated by this._fontScaleX pixels horizontally and this._fontScaleY pixels vertically.
 				 *
 				 * The below loop is an unrolled version of the above algorithm that only roams over one quadrant and adds
 				 * four shadows at a time.
@@ -1204,13 +1207,13 @@ module libjass.renderers {
 					}
 				}
 
-				// Make sure the four corner shadows exist
+				// Add the four corner outlines
 				points.push([a, 0]);
 				points.push([0, b]);
 				points.push([-a, 0]);
 				points.push([0, -b]);
 
-				var mergeFilter = '';
+				var mergeOutlinesFilter = '';
 
 				points.forEach((pair: number[], index: number) => {
 					var x = pair[0];
@@ -1219,28 +1222,29 @@ module libjass.renderers {
 					outlineFilter +=
 						'\t<feOffset dx="' + pair[0].toFixed(3) + '" dy="' + pair[1].toFixed(3) + '" in="outlineColor" result="outline' + index + '" />\n';
 
-					mergeFilter +=
+					mergeOutlinesFilter +=
 						'\t\t<feMergeNode in="outline' + index + '" />\n';
 				});
 
 				outlineFilter +=
 					'\t<feMerge>\n' +
-					mergeFilter +
-					'\t</feMerge>\n' +
-					'\t<feGaussianBlur stdDeviation="' + this._blur + '" result="outline" />\n';
+					mergeOutlinesFilter +
+					'\t</feMerge>\n';
+			}
+
+			var blurFilter = '';
+			if (this._blur > 0) {
+				blurFilter =
+					'\t<feGaussianBlur stdDeviation="' + this._blur + '" />\n';
 			}
 
 			var filterString =
 				'<filter xmlns="http://www.w3.org/2000/svg" id="' + filterId + '">\n' +
-				'\t<feComponentTransfer in="SourceAlpha" result="outlineColor">\n' +
-				'\t\t<feFuncR type="linear" slope="0" intercept="' + (outlineColor.red / 255).toFixed(3) + '" />\n' +
-				'\t\t<feFuncG type="linear" slope="0" intercept="' + (outlineColor.green / 255).toFixed(3) + '" />\n' +
-				'\t\t<feFuncB type="linear" slope="0" intercept="' + (outlineColor.blue / 255).toFixed(3) + '" />\n' +
-				'\t\t<feFuncA type="linear" slope="' + outlineColor.alpha.toFixed(3) + '" intercept="0" />\n' +
-				'\t</feComponentTransfer>\n' +
+				outlineColorFilter +
 				outlineFilter +
+				blurFilter +
 				'\t<feMerge>\n' +
-				'\t\t<feMergeNode in="outline" />\n' +
+				'\t\t<feMergeNode />\n' +
 				'\t\t<feMergeNode in="SourceGraphic" />\n' +
 				'\t</feMerge>\n' +
 				'</filter>\n';
