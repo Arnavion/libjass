@@ -226,17 +226,10 @@ module libjass.parser {
 
 			current.value = [];
 
-			var inDrawingMode = false;
-
 			while (this._haveMore()) {
 				var enclosedTagsNode = this.parse_enclosedTags(current);
 
 				if (enclosedTagsNode !== null) {
-					(<parts.PartBase[]>enclosedTagsNode.value).forEach((tag: parts.PartBase) => {
-						if (tag instanceof parts.DrawingMode) {
-							inDrawingMode = (<parts.DrawingMode>tag).value !== 0;
-						}
-					});
 					current.value.push.apply(current.value, enclosedTagsNode.value);
 				}
 
@@ -244,33 +237,16 @@ module libjass.parser {
 					var textNode = this.parse_newline(current) || this.parse_hardspace(current) || this.parse_text(current);
 
 					if (textNode !== null) {
-						if (!inDrawingMode) {
-							if (current.value[current.value.length - 1] instanceof parts.Text) {
-								// Merge consecutive text parts into one part
-								current.value[current.value.length - 1] =
-									new parts.Text(
-										(<parts.Text>current.value[current.value.length - 1]).value +
-										(<parts.Text>textNode.value).value
-									);
-							}
-							else {
-								current.value.push(textNode.value);
-							}
+						if (current.value[current.value.length - 1] instanceof parts.Text) {
+							// Merge consecutive text parts into one part
+							current.value[current.value.length - 1] =
+								new parts.Text(
+									(<parts.Text>current.value[current.value.length - 1]).value +
+									(<parts.Text>textNode.value).value
+								);
 						}
 						else {
-							var drawingInstructions = (<parts.Text>textNode.value).value;
-
-							if (current.value[current.value.length - 1] instanceof parts.DrawingInstructions) {
-								// Merge consecutive drawing instructions parts into one part
-								current.value[current.value.length - 1] =
-									new parts.DrawingInstructions(
-										(<parts.DrawingInstructions>current.value[current.value.length - 1]).value +
-										drawingInstructions
-									);
-							}
-							else {
-								current.value.push(new parts.DrawingInstructions((<parts.Text>textNode.value).value));
-							}
+							current.value.push(textNode.value);
 						}
 					}
 
@@ -280,6 +256,18 @@ module libjass.parser {
 					}
 				}
 			}
+
+			var inDrawingMode = false;
+
+			current.value.forEach((part: parts.Part, i: number) => {
+				if (part instanceof parts.DrawingMode) {
+					inDrawingMode = (<parts.DrawingMode>part).scale !== 0;
+				}
+
+				else if (part instanceof parts.Text && inDrawingMode) {
+					current.value[i] = new parts.DrawingInstructions(<parts.drawing.Instruction[]>parser.parse((<parts.Text>part).value, "drawingInstructions"));
+				}
+			});
 
 			return current;
 		}
@@ -1406,6 +1394,181 @@ module libjass.parser {
 
 		parse_tag_4c(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
+		}
+
+		parse_drawingInstructions(parent: ParseNode): ParseNode {
+			var current = new ParseNode(parent);
+
+			var lastType: string = null;
+
+			current.value = [];
+
+			while (this._haveMore()) {
+				while (this.read(current, " ") !== null) { }
+
+				var currentType: string = null;
+
+				var typePart = this.parse_text(current);
+				if (typePart === null) {
+					parent.pop();
+					return null;
+				}
+
+				currentType = typePart.value.value;
+				switch (currentType) {
+					case "m":
+					case "l":
+					case "b":
+						lastType = currentType;
+						break;
+
+					default:
+						if (lastType === null) {
+							parent.pop();
+							return null;
+						}
+
+						currentType = lastType;
+						current.pop();
+						break;
+				}
+
+				switch (currentType) {
+					case "m":
+						var movePart = this.parse_drawingInstructionMove(current);
+						if (movePart === null) {
+							parent.pop();
+							return null;
+						}
+
+						current.value.push(movePart.value);
+						break;
+
+					case "l":
+						var linePart = this.parse_drawingInstructionLine(current);
+						if (linePart === null) {
+							parent.pop();
+							return null;
+						}
+
+						current.value.push(linePart.value);
+						break;
+
+					case "b":
+						var cubicBezierCurvePart = this.parse_drawingInstructionCubicBezierCurve(current);
+						if (cubicBezierCurvePart === null) {
+							parent.pop();
+							return null;
+						}
+
+						current.value.push(cubicBezierCurvePart.value);
+						break;
+				}
+			}
+
+			while (this.read(current, " ") !== null) { }
+
+			return current;
+		}
+
+		parse_drawingInstructionMove(parent: ParseNode): ParseNode {
+			var current = new ParseNode(parent);
+
+			while (this.read(current, " ") !== null) { }
+
+			var xPart = this.parse_decimal(current);
+			if (xPart === null) {
+				parent.pop();
+				return null;
+			}
+
+			while (this.read(current, " ") !== null) { }
+
+			var yPart = this.parse_decimal(current);
+			if (yPart === null) {
+				parent.pop();
+				return null;
+			}
+
+			current.value = new parts.drawing.Move(xPart.value, yPart.value);
+
+			return current;
+		}
+
+		parse_drawingInstructionLine(parent: ParseNode): ParseNode {
+			var current = new ParseNode(parent);
+
+			while (this.read(current, " ") !== null) { }
+
+			var xPart = this.parse_decimal(current);
+			if (xPart === null) {
+				parent.pop();
+				return null;
+			}
+
+			while (this.read(current, " ") !== null) { }
+
+			var yPart = this.parse_decimal(current);
+			if (yPart === null) {
+				parent.pop();
+				return null;
+			}
+
+			current.value = new parts.drawing.Line(xPart.value, yPart.value);
+
+			return current;
+		}
+
+		parse_drawingInstructionCubicBezierCurve(parent: ParseNode): ParseNode {
+			var current = new ParseNode(parent);
+
+			while (this.read(current, " ") !== null) { }
+
+			var x1Part = this.parse_decimal(current);
+			if (x1Part === null) {
+				parent.pop();
+				return null;
+			}
+
+			while (this.read(current, " ") !== null) { }
+
+			var y1Part = this.parse_decimal(current);
+			if (y1Part === null) {
+				parent.pop();
+				return null;
+			}
+
+			var x2Part = this.parse_decimal(current);
+			if (x2Part === null) {
+				parent.pop();
+				return null;
+			}
+
+			while (this.read(current, " ") !== null) { }
+
+			var y2Part = this.parse_decimal(current);
+			if (y2Part === null) {
+				parent.pop();
+				return null;
+			}
+
+			var x3Part = this.parse_decimal(current);
+			if (x3Part === null) {
+				parent.pop();
+				return null;
+			}
+
+			while (this.read(current, " ") !== null) { }
+
+			var y3Part = this.parse_decimal(current);
+			if (y3Part === null) {
+				parent.pop();
+				return null;
+			}
+
+			current.value = new parts.drawing.CubicBezierCurve(x1Part.value, y1Part.value, x2Part.value, y2Part.value, x3Part.value, y3Part.value);
+
+			return current;
 		}
 
 		parse_decimal(parent: ParseNode): ParseNode {

@@ -1127,18 +1127,18 @@ module libjass {
 		 * A drawing mode tag {\p}
 		 *
 		 * @constructor
-		 * @param {number} value
+		 * @param {number} scale
 		 *
 		 * @extends {libjass.parts.TagBase}
 		 * @memberof libjass.parts
 		 */
 		export class DrawingMode extends PartBase {
-			constructor(private _value: number) {
+			constructor(private _scale: number) {
 				super("DrawingMode", "value");
 			}
 
-			get value(): number {
-				return this._value;
+			get scale(): number {
+				return this._scale;
 			}
 		}
 
@@ -1171,12 +1171,75 @@ module libjass {
 		 * @memberof libjass.parts
 		 */
 		export class DrawingInstructions extends PartBase {
-			constructor(private _value: string) {
+			constructor(private _instructions: drawing.Instruction[]) {
 				super("DrawingInstructions", "value");
 			}
 
-			get value(): string {
-				return this._value;
+			get value(): drawing.Instruction[] {
+				return this._instructions;
+			}
+		}
+
+		export module drawing {
+			export interface Instruction {
+			}
+
+			export class Move extends PartBase implements Instruction {
+				constructor(private _x: number, private _y: number) {
+					super("DrawingInstructionMove", "x", "y");
+				}
+
+				get x(): number {
+					return this._x;
+				}
+
+				get y(): number {
+					return this._y;
+				}
+			}
+
+			export class Line extends PartBase implements Instruction {
+				constructor(private _x: number, private _y: number) {
+					super("DrawingInstructionLine", "x", "y");
+				}
+
+				get x(): number {
+					return this._x;
+				}
+
+				get y(): number {
+					return this._y;
+				}
+			}
+
+			export class CubicBezierCurve extends PartBase implements Instruction {
+				constructor(private _x1: number, private _y1: number, private _x2: number, private _y2: number, private _x3: number, private _y3: number) {
+					super("DrawingInstructionCubicBezierCurve", "x1", "y1", "x2", "y2", "x3", "y3");
+				}
+
+				get x1(): number {
+					return this._x1;
+				}
+
+				get y1(): number {
+					return this._y1;
+				}
+
+				get x2(): number {
+					return this._x2;
+				}
+
+				get y2(): number {
+					return this._y2;
+				}
+
+				get x3(): number {
+					return this._x3;
+				}
+
+				get y3(): number {
+					return this._y3;
+				}
 			}
 		}
 	}

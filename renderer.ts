@@ -497,6 +497,8 @@ module libjass.renderers {
 			};
 			startNewSpan();
 
+			var currentDrawing: Drawing = null;
+
 			dialogue.parts.forEach(part => {
 				if (part instanceof parts.Italic) {
 					currentSpanStyles.italic = (<parts.Italic>part).value;
@@ -660,6 +662,20 @@ module libjass.renderers {
 					}), new Animation(dialogue.end, {
 						opacity: String(complexFadePart.a3)
 					}));
+				}
+
+				else if (part instanceof parts.DrawingMode) {
+					currentDrawing = new Drawing((<parts.DrawingMode>part).scale);
+				}
+
+				else if (part instanceof parts.DrawingBaselineOffset) {
+					currentDrawing.baselineOffset = (<parts.DrawingBaselineOffset>part).value;
+				}
+
+				else if (part instanceof parts.DrawingInstructions) {
+					currentDrawing.instructions = (<parts.DrawingInstructions>part).value;
+					startNewSpan();
+					sub.appendChild(currentDrawing.toSVG());
 				}
 
 				else if (part instanceof parts.Text || (libjass.debugMode && part instanceof parts.Comment)) {
@@ -1040,8 +1056,6 @@ module libjass.renderers {
 	 * @memberof libjass.renderers
 	 */
 	class SpanStyles {
-		private static _domParser: DOMParser = null;
-
 		private _italic: boolean;
 		private _bold: Object;
 		private _underline: boolean;
@@ -1249,11 +1263,7 @@ module libjass.renderers {
 				'\t</feMerge>\n' +
 				'</filter>\n';
 
-			if (SpanStyles._domParser === null) {
-				SpanStyles._domParser = new DOMParser();
-			}
-
-			var filterElement = SpanStyles._domParser.parseFromString(filterString, "image/svg+xml").childNodes[0];
+			var filterElement = domParser.parseFromString(filterString, "image/svg+xml").childNodes[0];
 
 			this._svgDefsElement.appendChild(filterElement);
 			span.style.webkitFilter = 'url("#' + filterId + '")';
@@ -1405,5 +1415,36 @@ module libjass.renderers {
 		}
 
 		private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);
+	}
+
+	class Drawing {
+		private _baselineOffset: number = 1;
+		private _instructions: parts.drawing.Instruction[] = [];
+
+		constructor(private _scale: number) { }
+
+		set baselineOffset(value: number) {
+			this._baselineOffset = value;
+		}
+
+		set instructions(value: parts.drawing.Instruction[]) {
+			this._instructions = value;
+		}
+
+		toSVG(): SVGSVGElement {
+			var result = '';
+
+			result =
+				'<svg>\n' +
+				result +
+				'</svg>';
+
+			return <SVGSVGElement>domParser.parseFromString(result, "image/svg+xml").childNodes[0];
+		}
+	}
+
+	var domParser: DOMParser;
+	if (typeof DOMParser !== "undefined") {
+		domParser = new DOMParser();
 	}
 }
