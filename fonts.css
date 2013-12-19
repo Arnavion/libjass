@@ -4,6 +4,16 @@
 }
 
 @font-face {
+	font-family: "123 and...";
+	src: url("/fonts/123-and...-Regular.ttf");
+}
+
+@font-face {
+	font-family: "123and";
+	src: url("/fonts/123-and...-Regular.ttf");
+}
+
+@font-face {
 	font-family: "Amienne";
 	src: url("/fonts/Amienne.ttf");
 }
@@ -34,8 +44,28 @@
 }
 
 @font-face {
+	font-family: "Babylon 27";
+	src: url("/fonts/Babylon-27-Babylon-27.ttf");
+}
+
+@font-face {
+	font-family: "Bee Marker Ink";
+	src: url("/fonts/BeeMarkerInk.TTF");
+}
+
+@font-face {
+	font-family: "BeeMarkerInk";
+	src: url("/fonts/BeeMarkerInk.TTF");
+}
+
+@font-face {
 	font-family: "BlueBrush";
 	src: url("/fonts/BlueBrush.otf");
+}
+
+@font-face {
+	font-family: "bylon 27";
+	src: url("/fonts/Babylon-27-Babylon-27.ttf");
 }
 
 @font-face {
@@ -185,6 +215,16 @@
 }
 
 @font-face {
+	font-family: "Franchise";
+	src: url("/fonts/Franchise-Bold-hinted.ttf");
+}
+
+@font-face {
+	font-family: "Franchise-Bold";
+	src: url("/fonts/Franchise-Bold-hinted.ttf");
+}
+
+@font-face {
 	font-family: "Gandhi Sans";
 	src: url("/fonts/GandhiSans-Bold.otf");
 	font-weight: bold;
@@ -228,6 +268,11 @@
 @font-face {
 	font-family: "HandelGothicBT-Regular";
 	src: url("/fonts/HANDGOTN.TTF");
+}
+
+@font-face {
+	font-family: "HiraginoGyoDS-W4";
+	src: url("/fonts/HiraginoGyoDS-W4.ttf");
 }
 
 @font-face {
@@ -402,6 +447,28 @@
 }
 
 @font-face {
+	font-family: "Painfresco";
+	src: url("/fonts/Painfresco-Regular.ttf");
+}
+
+@font-face {
+	font-family: "Painfresco";
+	src: url("/fonts/Painfresco-Italic.ttf");
+	font-style: italic;
+}
+
+@font-face {
+	font-family: "Painfresco-Italic";
+	src: url("/fonts/Painfresco-Italic.ttf");
+	font-style: italic;
+}
+
+@font-face {
+	font-family: "Painfresco-Regular";
+	src: url("/fonts/Painfresco-Regular.ttf");
+}
+
+@font-face {
 	font-family: "PaintyPaint";
 	src: url("/fonts/PAINP.TTF"), url("/fonts/PAINP_0.TTF");
 }
@@ -409,6 +476,17 @@
 @font-face {
 	font-family: "PaintyPaint1";
 	src: url("/fonts/PAINP.TTF"), url("/fonts/PAINP_0.TTF");
+}
+
+@font-face {
+	font-family: "Panefresco800wt-Italic";
+	src: url("/fonts/Painfresco-Italic.ttf");
+	font-style: italic;
+}
+
+@font-face {
+	font-family: "Panefresco800wtKilllaKill-Regular";
+	src: url("/fonts/Painfresco-Regular.ttf");
 }
 
 @font-face {
@@ -447,6 +525,16 @@
 }
 
 @font-face {
+	font-family: "Signika";
+	src: url("/fonts/Signika-Regular.otf");
+}
+
+@font-face {
+	font-family: "Signika-Regular";
+	src: url("/fonts/Signika-Regular.otf");
+}
+
+@font-face {
 	font-family: "Swis721 Hv BT";
 	src: url("/fonts/SWZ721H.TTF");
 }
@@ -464,6 +552,11 @@
 @font-face {
 	font-family: "Swiss721BT-Medium";
 	src: url("/fonts/SWZ721M.TTF");
+}
+
+@font-face {
+	font-family: "Untitled";
+	src: url("/fonts/Babylon-27-Babylon-27.ttf");
 }
 
 @font-face {
