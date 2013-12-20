@@ -46,10 +46,10 @@ module libjass.renderers {
 		constructor(private _video: HTMLVideoElement, private _ass: ASS, private _settings: RendererSettings) {
 			RendererSettings.prototype.initializeUnsetProperties.call(this._settings);
 
-			// Sort the dialogues array by start time and then by their original position in the script (id)
+			// Sort the dialogues array by end time and then by their original position in the script (id)
 			this._dialogues = this._ass.dialogues.slice(0);
 			this._dialogues.sort((dialogue1: Dialogue, dialogue2: Dialogue) => {
-				var result = dialogue1.start - dialogue2.start;
+				var result = dialogue1.end - dialogue2.end;
 
 				if (result === 0) {
 					result = dialogue1.id - dialogue2.id;
