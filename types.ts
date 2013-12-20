@@ -423,7 +423,8 @@ module libjass {
 		private _transformOriginY: number;
 		private _transformOrigin: string;
 
-		private _parts: parts.Part[];
+		private _rawPartsString: string;
+		private _parts: parts.Part[] = null;
 
 		private _sub: HTMLDivElement = null;
 
@@ -439,53 +440,7 @@ module libjass {
 
 			this._alignment = this._style.alignment;
 
-			this._parts = <parts.Part[]>parser.parse(template["Text"], "dialogueParts");
-
-			this._parts.forEach((part, index) => {
-				if (part instanceof parts.Alignment) {
-					this._alignment = (<parts.Alignment>part).value;
-				}
-				else if (part instanceof parts.Move) {
-					var movePart = <parts.Move>part;
-
-					if (movePart.t1 === null || movePart.t2 === null) {
-						this._parts[index] =
-							new parts.Move(
-								movePart.x1, movePart.y1, movePart.x2, movePart.y2,
-								0, this._end - this._start
-							);
-					}
-				}
-				else if (part instanceof parts.Transform) {
-					var transformPart = <parts.Transform>part;
-
-					if (transformPart.start === null || transformPart.end === null || transformPart.accel === null) {
-						this._parts[index] =
-							new parts.Transform(
-								(transformPart.start === null) ? 0 : transformPart.start,
-								(transformPart.end === null) ? (this._end - this._start) : transformPart.end,
-								(transformPart.accel === null) ? 1 : transformPart.accel,
-								transformPart.tags
-							);
-					}
-				}
-			});
-
-			this._setTransformOrigin();
-
-			if (libjass.debugMode) {
-				var possiblyIncorrectParses = this._parts.filter(part => part instanceof parts.Comment && (<parts.Comment>part).value.indexOf("\\") !== -1);
-				if (possiblyIncorrectParses.length > 0) {
-					console.warn(
-						"Possible incorrect parse:\n" +
-						template["Text"] + "\n" +
-						"was parsed as\n" +
-						this.toString() + "\n" +
-						"The possibly incorrect parses are:\n" +
-						possiblyIncorrectParses.join("\n")
-					);
-				}
-			}
+			this._rawPartsString = template["Text"];
 		}
 
 		/**
@@ -525,18 +480,34 @@ module libjass {
 		 * @type {number}
 		 */
 		get alignment(): number {
+			if (this._parts === null) {
+				this._parsePartsString();
+			}
+
 			return this._alignment;
 		}
 
 		get transformOriginX(): number {
+			if (this._parts === null) {
+				this._parsePartsString();
+			}
+
 			return this._transformOriginX;
 		}
 
 		get transformOriginY(): number {
+			if (this._parts === null) {
+				this._parsePartsString();
+			}
+
 			return this._transformOriginY;
 		}
 
 		get transformOrigin(): string {
+			if (this._parts === null) {
+				this._parsePartsString();
+			}
+
 			return this._transformOrigin;
 		}
 
@@ -555,6 +526,10 @@ module libjass {
 		 * @type {!Array.<!libjass.parts.Tag>}
 		 */
 		get parts(): parts.Part[] {
+			if (this._parts === null) {
+				this._parsePartsString();
+			}
+
 			return this._parts;
 		}
 
@@ -562,22 +537,42 @@ module libjass {
 		 * @return {string} A simple representation of this dialogue's properties and tags.
 		 */
 		toString(): string {
-			return "#" + this._id + " [" + this._start.toFixed(3) + "-" + this._end.toFixed(3) + "] " + this._parts.join(", ");
+			return "#" + this._id + " [" + this._start.toFixed(3) + "-" + this._end.toFixed(3) + "] " + ((this._parts !== null) ? this._parts.join(", ") : this._rawPartsString);
 		}
 
-		/**
-		 * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
-		 *
-		 * @param {string} string
-		 * @return {number}
-		 *
-		 * @private
-		 */
-		private static _toTime(str: string): number {
-			return str.split(":").reduce<number>((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);
-		}
+		private _parsePartsString(): void {
+			this._parts = <parts.Part[]>parser.parse(this._rawPartsString, "dialogueParts");
 
-		private _setTransformOrigin(): void {
+			this._parts.forEach((part, index) => {
+				if (part instanceof parts.Alignment) {
+					this._alignment = (<parts.Alignment>part).value;
+				}
+				else if (part instanceof parts.Move) {
+					var movePart = <parts.Move>part;
+
+					if (movePart.t1 === null || movePart.t2 === null) {
+						this._parts[index] =
+							new parts.Move(
+								movePart.x1, movePart.y1, movePart.x2, movePart.y2,
+								0, this._end - this._start
+							);
+					}
+				}
+				else if (part instanceof parts.Transform) {
+					var transformPart = <parts.Transform>part;
+
+					if (transformPart.start === null || transformPart.end === null || transformPart.accel === null) {
+						this._parts[index] =
+							new parts.Transform(
+								(transformPart.start === null) ? 0 : transformPart.start,
+								(transformPart.end === null) ? (this._end - this._start) : transformPart.end,
+								(transformPart.accel === null) ? 1 : transformPart.accel,
+								transformPart.tags
+							);
+					}
+				}
+			});
+
 			switch (this._alignment) {
 				case 1: this._transformOriginX =   0; this._transformOriginY = 100; break;
 				case 2: this._transformOriginX =  50; this._transformOriginY = 100; break;
@@ -591,6 +586,32 @@ module libjass {
 			}
 
 			this._transformOrigin = this._transformOriginX + "% " + this._transformOriginY + "%";
+
+			if (libjass.debugMode) {
+				var possiblyIncorrectParses = this._parts.filter(part => part instanceof parts.Comment && (<parts.Comment>part).value.indexOf("\\") !== -1);
+				if (possiblyIncorrectParses.length > 0) {
+					console.warn(
+						"Possible incorrect parse:\n" +
+						this._rawPartsString + "\n" +
+						"was parsed as\n" +
+						this.toString() + "\n" +
+						"The possibly incorrect parses are:\n" +
+						possiblyIncorrectParses.join("\n")
+					);
+				}
+			}
+		}
+
+		/**
+		 * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
+		 *
+		 * @param {string} string
+		 * @return {number}
+		 *
+		 * @private
+		 */
+		private static _toTime(str: string): number {
+			return str.split(":").reduce<number>((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);
 		}
 	}
 

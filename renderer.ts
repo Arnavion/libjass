@@ -247,41 +247,6 @@ module libjass.renderers {
 			this._videoSubsWrapper.appendChild(this._subsWrapper);
 			this._subsWrapper.className = "libjass-subs";
 
-			// Create layer wrapper div's and the alignment div's inside each layer div
-			var wrappersMap = new Map<string, number[]>();
-			this.ass.dialogues.forEach((dialogue: Dialogue) => {
-				wrappersMap.set(dialogue.layer + "," + dialogue.alignment, [dialogue.layer, dialogue.alignment]);
-			});
-			var wrappersArray: number[][] = [];
-			wrappersMap.forEach((pair: number[]) => { wrappersArray.push(pair); });
-			wrappersArray.sort((a: number[], b: number[]) => {
-				var result = a[0] - b[0];
-
-				if (result !== 0) {
-					return result;
-				}
-
-				return a[1] - b[1];
-			}).forEach((pair: number[]) => {
-				var layer = pair[0];
-				var alignment = pair[1];
-
-				if (this._layerAlignmentWrappers[layer] === undefined) {
-					this._layerAlignmentWrappers[pair[0]] = new Array<HTMLDivElement>(9 + 1); // + 1 because alignments are 1-indexed (1 to 9)
-
-					// 0 is for absolutely-positioned subs
-					var layerAlignmentWrapper = document.createElement("div");
-					layerAlignmentWrapper.className = "layer" + layer + " an0";
-					this._subsWrapper.appendChild(layerAlignmentWrapper);
-					this._layerAlignmentWrappers[layer][0] = layerAlignmentWrapper;
-				}
-
-				var layerAlignmentWrapper = document.createElement("div");
-				layerAlignmentWrapper.className = "layer" + layer + " an" + alignment;
-				this._subsWrapper.appendChild(layerAlignmentWrapper);
-				this._layerAlignmentWrappers[layer][alignment] = layerAlignmentWrapper;
-			});
-
 			var svgElement = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
 			this._videoSubsWrapper.appendChild(svgElement);
 			svgElement.setAttribute("class", "libjass-filters");
@@ -296,25 +261,9 @@ module libjass.renderers {
 			}
 			// Preload fonts
 			else {
-				var allFonts = new Set<string>();
-
-				Object.keys(this.ass.styles).map((name: string) => this.ass.styles[name]).forEach((style: Style) => {
-					allFonts.add(style.fontName);
-				});
-
-				this.ass.dialogues.forEach((dialogue: Dialogue) => {
-					dialogue.parts.forEach((part: parts.Part) => {
-						if (part instanceof parts.FontName) {
-							allFonts.add((<parts.FontName>part).value);
-						}
-					});
-				});
-
 				var urlsToPreload: string[] = [];
 				this.settings.fontMap.forEach((src: string[], name: string) => {
-					if (allFonts.has(name)) {
-						urlsToPreload.unshift.apply(urlsToPreload, src);
-					}
+					urlsToPreload.unshift.apply(urlsToPreload, src);
 				});
 
 				var urlsLeftToPreload = urlsToPreload.length;
@@ -772,12 +721,34 @@ module libjass.renderers {
 				result.style.animationDelay = animationDelay;
 			}
 
-			if (result.style.position === "absolute") {
-				this._layerAlignmentWrappers[dialogue.layer][0].appendChild(result);
+			var layer = dialogue.layer;
+			var alignment = (result.style.position === "absolute") ? 0 : dialogue.alignment; // Alignment 0 is for absolutely-positioned subs
+
+			// Create the layer wrapper div and the alignment div inside it if not already created
+			if (this._layerAlignmentWrappers[layer] === undefined) {
+				this._layerAlignmentWrappers[layer] = new Array<HTMLDivElement>(9 + 1); // + 1 because alignments are 1-indexed (1 to 9)
 			}
-			else {
-				this._layerAlignmentWrappers[dialogue.layer][dialogue.alignment].appendChild(result);
+			if (this._layerAlignmentWrappers[layer][alignment] === undefined) {
+				var layerAlignmentWrapper = document.createElement("div");
+				layerAlignmentWrapper.className = "layer" + layer + " an" + alignment;
+
+				// Find the next greater layer,alignment div and insert this div before that one
+				var insertBeforeElement: HTMLDivElement = null;
+				for (var insertBeforeLayer = layer; insertBeforeLayer < this._layerAlignmentWrappers.length && insertBeforeElement === null; insertBeforeLayer++) {
+					if (this._layerAlignmentWrappers[insertBeforeLayer] !== undefined) {
+						for (var insertBeforeAlignment = (insertBeforeLayer === layer) ? (alignment + 1) : 0; insertBeforeAlignment < 10 && insertBeforeElement === null; insertBeforeAlignment++) {
+							if (this._layerAlignmentWrappers[insertBeforeLayer][insertBeforeAlignment] !== undefined) {
+								insertBeforeElement = this._layerAlignmentWrappers[insertBeforeLayer][insertBeforeAlignment];
+							}
+						}
+					}
+				}
+				this._subsWrapper.insertBefore(layerAlignmentWrapper, insertBeforeElement);
+
+				this._layerAlignmentWrappers[layer][alignment] = layerAlignmentWrapper;
 			}
+
+			this._layerAlignmentWrappers[layer][alignment].appendChild(result);
 
 			this._currentSubs.set(dialogue.id, result);
 		}
