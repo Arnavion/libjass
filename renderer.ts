@@ -615,7 +615,7 @@ module libjass.renderers {
 				}
 
 				else if (part instanceof parts.DrawingMode) {
-					currentDrawing = new Drawing((<parts.DrawingMode>part).scale);
+					currentDrawing = new Drawing((<parts.DrawingMode>part).scale, scaleX, scaleY);
 				}
 
 				else if (part instanceof parts.DrawingBaselineOffset) {
@@ -1402,7 +1402,7 @@ module libjass.renderers {
 		private _baselineOffset: number = 0;
 		private _instructions: parts.drawing.Instruction[] = [];
 
-		constructor(private _scale: number) { }
+		constructor(private _drawingScale: number, private _scaleX: number, private _scaleY: number) { }
 
 		set baselineOffset(value: number) {
 			this._baselineOffset = value;
@@ -1439,8 +1439,8 @@ module libjass.renderers {
 			});
 
 			var result =
-				'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="' + (bboxWidth / this._scale) + 'px" height="' + (bboxHeight / this._scale) + 'px">\n' +
-				'\t<g transform="scale(' + (1 / this._scale) + ')">\n' +
+				'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="' + (bboxWidth / this._drawingScale * this._scaleX).toFixed(3) + 'px" height="' + (bboxHeight / this._drawingScale * this._scaleY).toFixed(3) + 'px">\n' +
+				'\t<g transform="scale(' + (1 / this._drawingScale * this._scaleX).toFixed(3) + ' ' + (1 / this._drawingScale * this._scaleY).toFixed(3) + ')">\n' +
 				'\t\t<path d="' + path + '" />\n' +
 				'\t</g>\n' +
 				'</svg>';
