@@ -624,8 +624,9 @@ module libjass.renderers {
 
 				else if (part instanceof parts.DrawingInstructions) {
 					currentDrawing.instructions = (<parts.DrawingInstructions>part).value;
+					currentSpan.appendChild(currentDrawing.toSVG());
+					currentDrawing = null;
 					startNewSpan();
-					sub.appendChild(currentDrawing.toSVG());
 				}
 
 				else if (part instanceof parts.Text || (libjass.debugMode && part instanceof parts.Comment)) {
@@ -1398,7 +1399,7 @@ module libjass.renderers {
 	}
 
 	class Drawing {
-		private _baselineOffset: number = 1;
+		private _baselineOffset: number = 0;
 		private _instructions: parts.drawing.Instruction[] = [];
 
 		constructor(private _scale: number) { }
@@ -1412,11 +1413,36 @@ module libjass.renderers {
 		}
 
 		toSVG(): SVGSVGElement {
-			var result = '';
+			var path = "";
+			var bboxWidth = 0;
+			var bboxHeight = 0;
 
-			result =
-				'<svg>\n' +
-				result +
+			this._instructions.forEach((instruction: parts.drawing.Instruction) => {
+				if (instruction instanceof parts.drawing.Move) {
+					var movePart = <parts.drawing.Move>instruction;
+					path += " M " + movePart.x + " " + (movePart.y + this._baselineOffset);
+					bboxWidth = Math.max(bboxWidth, movePart.x);
+					bboxHeight = Math.max(bboxHeight, movePart.y + this._baselineOffset);
+				}
+				else if (instruction instanceof parts.drawing.Line) {
+					var linePart = <parts.drawing.Line>instruction;
+					path += " L " + linePart.x + " " + (linePart.y + this._baselineOffset);
+					bboxWidth = Math.max(bboxWidth, linePart.x);
+					bboxHeight = Math.max(bboxHeight, linePart.y + this._baselineOffset);
+				}
+				else if (instruction instanceof parts.drawing.CubicBezierCurve) {
+					var cubicBezierCurvePart = <parts.drawing.CubicBezierCurve>instruction;
+					path += " C " + cubicBezierCurvePart.x1 + " " + (cubicBezierCurvePart.y1 + this._baselineOffset) + ", " + cubicBezierCurvePart.x2 + " " + (cubicBezierCurvePart.y2 + this._baselineOffset) + ", " + cubicBezierCurvePart.x3 + " " + (cubicBezierCurvePart.y3 + this._baselineOffset);
+					bboxWidth = Math.max(bboxWidth, cubicBezierCurvePart.x1, cubicBezierCurvePart.x2, cubicBezierCurvePart.x3);
+					bboxHeight = Math.max(bboxHeight, cubicBezierCurvePart.y1 + this._baselineOffset, cubicBezierCurvePart.y2 + this._baselineOffset, cubicBezierCurvePart.y3 + this._baselineOffset);
+				}
+			});
+
+			var result =
+				'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="' + (bboxWidth / this._scale) + 'px" height="' + (bboxHeight / this._scale) + 'px">\n' +
+				'\t<g transform="scale(' + (1 / this._scale) + ')">\n' +
+				'\t\t<path d="' + path + '" />\n' +
+				'\t</g>\n' +
 				'</svg>';
 
 			return <SVGSVGElement>domParser.parseFromString(result, "image/svg+xml").childNodes[0];
