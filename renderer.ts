@@ -249,6 +249,8 @@ module libjass.renderers {
 
 			var svgElement = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
 			this._videoSubsWrapper.appendChild(svgElement);
+			svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+			svgElement.setAttribute("version", "1.1");
 			svgElement.setAttribute("class", "libjass-filters");
 			svgElement.setAttribute("width", "0");
 			svgElement.setAttribute("height", "0");
