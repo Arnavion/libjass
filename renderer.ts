@@ -438,8 +438,7 @@ module libjass.renderers {
 
 			var startNewSpan = (): void => {
 				if (currentSpan !== null) {
-					currentSpanStyles.setStylesOnSpan(currentSpan);
-					sub.appendChild(currentSpan);
+					sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan));
 				}
 
 				currentSpan = document.createElement("span");
@@ -1097,7 +1096,7 @@ module libjass.renderers {
 		 *
 		 * @param {!HTMLSpanElement} span
 		 */
-		setStylesOnSpan(span: HTMLSpanElement): void {
+		setStylesOnSpan(span: HTMLSpanElement): HTMLSpanElement {
 			var fontStyleOrWeight = "";
 			if (this._italic) {
 				fontStyleOrWeight += "italic ";
@@ -1142,8 +1141,8 @@ module libjass.renderers {
 
 			var outlineColor = this._outlineColor.withAlpha(this._outlineAlpha);
 
-			var outlineWidthX = (this._scaleX * this._outlineWidthX) / this._fontScaleX;
-			var outlineWidthY = (this._scaleY * this._outlineWidthY) / this._fontScaleY;
+			var outlineWidthX = (this._scaleX * this._outlineWidthX);
+			var outlineWidthY = (this._scaleY * this._outlineWidthY);
 
 			var filterId = "svg-filter-" + this._id + "-" + this._nextFilterId++;
 
@@ -1167,11 +1166,11 @@ module libjass.renderers {
 				 * four shadows at a time.
 				 */
 
-				var a = outlineWidthX - this._fontScaleX;
-				var b = outlineWidthY - this._fontScaleY;
+				var a = outlineWidthX - 1;
+				var b = outlineWidthY - 1;
 
-				for (var x = 0; x < a; x += this._fontScaleX) {
-					for (var y = 0; y < b && ((x / a) * (x / a) + (y / b) * (y / b)) <= 1; y += this._fontScaleY) {
+				for (var x = 0; x < a; x++) {
+					for (var y = 0; (x / a) * (x / a) + (y / b) * (y / b) <= 1; y++) {
 						if (x == 0 && y == 0) {
 							continue;
 						}
@@ -1223,22 +1222,30 @@ module libjass.renderers {
 					'\t<feGaussianBlur stdDeviation="' + this._blur + '" />\n';
 			}
 
-			var filterString =
-				'<filter xmlns="http://www.w3.org/2000/svg" id="' + filterId + '">\n' +
-				outlineColorFilter +
-				outlineFilter +
-				blurFilter +
-				'\t<feMerge>\n' +
-				'\t\t<feMergeNode />\n' +
-				'\t\t<feMergeNode in="SourceGraphic" />\n' +
-				'\t</feMerge>\n' +
-				'</filter>\n';
+			var filterWrapperSpan = document.createElement("span");
+			filterWrapperSpan.appendChild(span);
 
-			var filterElement = domParser.parseFromString(filterString, "image/svg+xml").childNodes[0];
+			if (outlineFilter !== '' || blurFilter !== '') {
+				var filterString =
+					'<filter xmlns="http://www.w3.org/2000/svg" id="' + filterId + '">\n' +
+					outlineColorFilter +
+					outlineFilter +
+					blurFilter +
+					'\t<feMerge>\n' +
+					'\t\t<feMergeNode />\n' +
+					'\t\t<feMergeNode in="SourceGraphic" />\n' +
+					'\t</feMerge>\n' +
+					'</filter>\n';
 
-			this._svgDefsElement.appendChild(filterElement);
-			span.style.webkitFilter = 'url("#' + filterId + '")';
-			span.style.filter = 'url("#' + filterId + '")';
+				var filterElement = domParser.parseFromString(filterString, "image/svg+xml").childNodes[0];
+
+				this._svgDefsElement.appendChild(filterElement);
+
+				filterWrapperSpan.style.webkitFilter = 'url("#' + filterId + '")';
+				filterWrapperSpan.style.filter = 'url("#' + filterId + '")';
+			}
+
+			return filterWrapperSpan;
 		}
 
 		/**
