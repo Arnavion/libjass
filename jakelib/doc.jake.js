@@ -43,10 +43,11 @@ namespace("_doc", function () {
 		var NodeType = {
 			FUNCTION: 0,
 			CONSTRUCTOR: 1,
-			PROPERTY: 2
+			GETTER: 2,
+			SETTER: 3,
 		};
 
-		var readComment = function (node, comment) {
+		var readComment = function (node, comment, treeWalker) {
 			var nodeType = null;
 
 			var lines = comment.split("\n").map(function (line) {
@@ -86,9 +87,6 @@ namespace("_doc", function () {
 				if (node.right instanceof UglifyJS.AST_Function) {
 					nodeType = NodeType.FUNCTION;
 				}
-				else {
-					nodeType = NodeType.PROPERTY;
-				}
 			}
 			else if (node instanceof UglifyJS.AST_Var) {
 				nameParts.unshift(node.definitions[0].name.name);
@@ -96,12 +94,29 @@ namespace("_doc", function () {
 				if (node.definitions[0] instanceof UglifyJS.AST_Function) {
 					nodeType = NodeType.FUNCTION;
 				}
-				else {
-					nodeType = NodeType.PROPERTY;
-				}
 			}
-			else {
-				console.log(node);
+			else if (node instanceof UglifyJS.AST_ObjectKeyVal) {
+				var definePropertyNode = treeWalker.find_parent(UglifyJS.AST_Call);
+				if (
+					(node.key === "get" || node.key === "set") &&
+					definePropertyNode.expression.property === "defineProperty" &&
+					definePropertyNode.expression.expression.name === "Object"
+				) {
+					nameParts.unshift(definePropertyNode.args[1].value);
+
+					var walkUp = function (node) {
+						if (node.property !== undefined) {
+							nameParts.unshift(node.property);
+							walkUp(node.expression);
+						}
+						else {
+							nameParts.unshift(node.name);
+						}
+					};
+					walkUp(definePropertyNode.args[0]);
+
+					nodeType = (node.key === "get") ? NodeType.GETTER : NodeType.SETTER;
+				}
 			}
 
 			if (nameParts.length === 0) {
@@ -222,6 +237,24 @@ namespace("_doc", function () {
 						generics.push.apply(generics, remainingLine.split(/,/).map(function (word) { return word.trim(); }));
 						break;
 
+					case "@type":
+						switch (nodeType) {
+							case NodeType.GETTER:
+								var result = readType(remainingLine);
+								var type = result[0];
+
+								returnType = lastRead = type;
+								break;
+
+							case NodeType.SETTER:
+								var result = readType(remainingLine);
+								var type = result[0];
+
+								parameters.push(lastRead = new Parameter("value", type, ""));
+								break;
+						}
+						break;
+
 					default:
 						if (lastRead !== null) {
 							lastRead.description += " " + line;
@@ -244,31 +277,25 @@ namespace("_doc", function () {
 					allNames[name] = new Constructor(name, rootDescription, generics, parameters, parentType, isAbstract, isPrivate);
 					break;
 
-				case NodeType.PROPERTY:
-					// allNames[name] = new Property(name, rootDescription, returnType);
+				case NodeType.GETTER:
+					allNames[name] = new Getter(name, rootDescription, returnType);
 					break;
 
-				default:
-					throw new Error("Unrecognized type: [" + nodeType + "]");
+				case NodeType.SETTER:
+					allNames[name] = new Setter(name, rootDescription, parameters);
+					break;
 			}
 		};
 
-		root.walk(new UglifyJS.TreeWalker(function (node, descend) {
-			if (
-				node instanceof UglifyJS.AST_Node && (
-					node instanceof UglifyJS.AST_Defun ||
-					node instanceof UglifyJS.AST_Assign ||
-					node instanceof UglifyJS.AST_Var
-				)
-			) {
-				node.start.comments_before.forEach(function (comment) {
-					readComment(node, comment.value);
-				});
-				node.end.comments_before.forEach(function (comment) {
-					readComment(node, comment.value);
-				});
-			}
-		}));
+		var treeWalker = new UglifyJS.TreeWalker(function (node, descend) {
+			node.start.comments_before.forEach(function (comment) {
+				readComment(node, comment.value, treeWalker);
+			});
+			node.end.comments_before.forEach(function (comment) {
+				readComment(node, comment.value, treeWalker);
+			});
+		});
+		root.walk(treeWalker);
 
 		return allNames;
 	});
@@ -332,7 +359,7 @@ namespace("_doc", function () {
 				}
 			}
 
-			else if (value instanceof Function || value instanceof Property) {
+			else if (value instanceof Function || value instanceof Getter || value instanceof Setter) {
 				var thisTypeNameParts = null;
 
 				if (value.thisType === null) {
@@ -359,8 +386,6 @@ namespace("_doc", function () {
 				thisType.members.push(value);
 
 				delete allNames[key];
-
-				repeat = true;
 			}
 		});
 
@@ -397,7 +422,7 @@ namespace("_doc", function () {
 		});
 
 		var sorter = (function () {
-			var types = [Function, Property, Constructor];
+			var types = [Function, Getter, Setter, Constructor];
 			var typeSorter = function (value1, value2) {
 				var type1Index = -1;
 				var type2Index = -1;
@@ -515,11 +540,18 @@ namespace("_doc", function () {
 				'	</dd>',
 				'	<dd class="usage">' + writeConstructorUsage(constructor) + '</dd>'
 			].concat(writeParameters(constructor, 2)).concat([
-				'	<dd>'
+				'	<dd class="functions">'
 			]).concatMany(constructor.members.filter(function (member) {
 				return member instanceof Function;
 			}).map(function (member) {
 				return writeFunction(member, 2);
+			})).concat([
+				'	</dd>',
+				'	<dd class="properties">'
+			]).concatMany(constructor.members.filter(function (member) {
+				return (member instanceof Getter) || (member instanceof Setter);
+			}).map(function (property) {
+				return writeProperty(property, 2);
 			})).concat([
 				'	</dd>',
 				'</dl>'
@@ -580,8 +612,8 @@ namespace("_doc", function () {
 			}
 
 			return [
-				'<dd>',
-				'	<dl class="parameters">'
+				'<dd class="parameters">',
+				'	<dl>'
 			].concatMany(parameters.map(function (parameter) {
 					return [
 				'		<dt class="parameter name">' + sanitize(parameter.name) + '</dt>',
@@ -604,6 +636,71 @@ namespace("_doc", function () {
 				'<dd class="return type">' + sanitize(func.returnType.type) + '</dd>',
 				'<dd class="return description">' + sanitize(func.returnType.description) + '</dd>'
 			].map(indenter(indent));
+		};
+
+		var writeProperty = function (property, indent) {
+			if (property instanceof Getter) {
+				return writeGetter(property, indent);
+			}
+			else if (property instanceof Setter) {
+				return writeSetter(property, indent);
+			}
+			else {
+				throw new Error("Unrecognized property type: [" + property.constructor + "]");
+			}
+		}
+
+		var writeGetter = function (getter, indent) {
+			return [
+				'<dl class="getter" id="' + sanitize(getter.name.toString()) + '">',
+				'	<dt class="name">' + writePropertyName(getter) + '</dt>',
+				'	<dd class="description">',
+				'		<p>' + sanitize(getter.description) + '</p>',
+				'	</dd>',
+				'	<dd class="usage">' + writeGetterUsage(getter) + '</dd>'
+			].concat([
+				'	<dd class="return type">' + sanitize(getter.type) + '</dd>',
+			]).concat([
+				'</dl>'
+			]).map(indenter(indent));
+		};
+
+		var writeSetter = function (setter, indent) {
+			return [
+				'<dl class="setter" id="' + sanitize(setter.name.toString()) + '">',
+				'	<dt class="name">' + writePropertyName(setter) + '</dt>',
+				'	<dd class="description">',
+				'		<p>' + sanitize(setter.description) + '</p>',
+				'	</dd>',
+				'	<dd class="usage">' + writeSetterUsage(setter) + '</dd>'
+			].concat(writeParameters(setter, 2)).concat([
+				'</dl>'
+			]).map(indenter(indent));
+		};
+
+		var writePropertyName = function (property) {
+			return (
+				'<a href="#' + sanitize(property.name.toString()) + '">' +
+				sanitize(property.name.toShortString()) +
+				'</a>'
+			);
+		};
+
+		var writeGetterUsage = function (getter) {
+			return sanitize(
+				'var result = ' +
+				toVariableName(getter.thisType) + '.' + getter.name.toShortString() +
+				';'
+			);
+		};
+
+		var writeSetterUsage = function (setter) {
+			return sanitize(
+				toVariableName(setter.thisType) + '.' + setter.name.toShortString() +
+				' = ' +
+				setter.parameters[0].name +
+				';'
+			);
 		};
 
 		var toVariableName = function (constructor) {
@@ -680,7 +777,7 @@ namespace("_doc", function () {
 			'				border-bottom: 1px solid black;',
 			'			}',
 			'',
-			'			.function, .constructor {',
+			'			.function, .constructor, .getter, .setter {',
 			'				margin-left: 30px;',
 			'				padding: 10px;',
 			'			}',
@@ -693,19 +790,16 @@ namespace("_doc", function () {
 			'				background-color: rgb(244, 250, 221);',
 			'			}',
 			'',
-			'			.function > .name, .constructor > .name {',
+			'			.name {',
 			'				font-size: x-large;',
 			'			}',
 			'',
-			'			.function > .usage, .constructor > .usage {',
+			'			.usage {',
 			'				font-size: large;',
-			'			}',
-			'',
-			'			.function > .usage, .constructor > .usage {',
 			'				font-style: italic;',
 			'			}',
 			'',
-			'			.constructor .function {',
+			'			.constructor .function, .constructor .getter, .constructor .setter {',
 			'				background-color: rgb(250, 241, 221);',
 			'			}',
 			'',
@@ -859,12 +953,24 @@ var Constructor = function (name, description, generics, parameters, parentType,
 	this.members = [];
 };
 
-var Property = function (name, description, type) {
+var Getter = function (name, description, type) {
 	this.name = name;
 
 	this.description = description;
 
 	this.type = type;
+
+	this.thisType = null;
+};
+
+var Setter = function (name, description, parameters) {
+	this.name = name;
+
+	this.description = description;
+
+	this.parameters = parameters;
+
+	this.thisType = null;
 };
 
 var Parameter = function (name, type, description) {
