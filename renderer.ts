@@ -1141,9 +1141,9 @@ module libjass.renderers {
 			}
 			if (transform !== "") {
 				span.style.webkitTransform = transform;
-				span.style.webkitTransformOrigin = this._transformOrigin;
+				span.style.webkitTransformOrigin = "50% 50%";
 				span.style.transform = transform;
-				span.style.transformOrigin = this._transformOrigin;
+				span.style.transformOrigin = "50% 50%";
 				span.style.display = "inline-block";
 			}
 
