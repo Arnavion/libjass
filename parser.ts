@@ -25,10 +25,12 @@ module libjass.parser {
 	 * Parses a given string with the specified rule.
 	 *
 	 * @param {string} input
-	 * @param {string="dialogueParts"} startRule
+	 * @param {string} rule
 	 * @return {*}
+	 *
+	 * @memberof libjass.parser
 	 */
-	export function parse(input: string, rule: string = "dialogueParts"): any {
+	export function parse(input: string, rule: string): any {
 		var run = new ParserRun(input, rule);
 
 		if (run.result === null || run.result.end !== input.length) {
