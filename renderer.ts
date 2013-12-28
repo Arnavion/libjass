@@ -35,6 +35,8 @@ module libjass.renderers {
 	export class NullRenderer {
 		private static _highResolutionTimerInterval: number = 41;
 
+		private _settings: RendererSettings;
+
 		private _dialogues: Dialogue[];
 		private _endTimes: number[];
 
@@ -43,8 +45,8 @@ module libjass.renderers {
 
 		private _timeUpdateIntervalHandle: number = null;
 
-		constructor(private _video: HTMLVideoElement, private _ass: ASS, private _settings: RendererSettings) {
-			RendererSettings.prototype.initializeUnsetProperties.call(this._settings);
+		constructor(private _video: HTMLVideoElement, private _ass: ASS, settings: RendererSettings) {
+			this._settings = RendererSettings.from(settings);
 
 			// Sort the dialogues array by end time and then by their original position in the script (id)
 			this._dialogues = this._ass.dialogues.slice(0);
@@ -819,42 +821,6 @@ module libjass.renderers {
 			this._currentSubs.clear();
 		}
 
-		public static makeFontMapFromStyleElement(styleElement: HTMLStyleElement): Map<string, string[]> {
-			var map = new Map<string, string[]>();
-
-			var styleSheet = <CSSStyleSheet>styleElement.sheet;
-			var rules: CSSFontFaceRule[] = Array.prototype.filter.call(styleSheet.cssRules, (rule: CSSRule) => rule.type === CSSRule.FONT_FACE_RULE);
-			rules.forEach((rule: CSSFontFaceRule) => {
-				var src = rule.style.getPropertyValue("src");
-				var urls: string[] = [];
-
-				if (!src) {
-					src = rule.cssText.split("\n")
-						.map((line: string) => line.match(/src: ([^;]+);/))
-						.filter((matches: string[]) => matches !== null)
-						.map((matches: string[]) => matches[1])[0];
-				}
-
-				urls = src.split(/,\s*/).map((url: string) => url.match(/^url\((.+)\)$/)[1]);
-
-				if (urls.length > 0) {
-					var name = DefaultRenderer._stripQuotes(rule.style.getPropertyValue("font-family"));
-					var existingList = map.get(name);
-					if (existingList === undefined) {
-						existingList = [];
-						map.set(name, existingList);
-					}
-					existingList.unshift.apply(existingList, urls.map(DefaultRenderer._stripQuotes));
-				}
-			});
-
-			return map;
-		}
-
-		private static _stripQuotes(str: string): string {
-			return str.match(/^["']?(.*?)["']?$/)[1];
-		}
-
 		private static _addClass(element: HTMLElement, className: string): void {
 			var classNames = element.className.split(" ").map(className => className.trim()).filter(className => !!className);
 			if (classNames.indexOf(className) === -1) {
@@ -886,15 +852,63 @@ module libjass.renderers {
 		 */
 		public preRenderTime: number;
 
-		public initializeUnsetProperties(): void {
+		/**
+		 * A convenience method to create a font map from a <style> or <link> element that contains @font-face rules.
+		 *
+		 * @param {!LinkStyle} linkStyle
+		 * @return {!Map<string, string[]>}
+		 */
+		public static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string[]> {
+			var map = new Map<string, string[]>();
 
-			if (this.fontMap === undefined) {
-				this.fontMap = null;
-			}
+			var styleSheet = <CSSStyleSheet>linkStyle.sheet;
+			var rules: CSSFontFaceRule[] = Array.prototype.filter.call(styleSheet.cssRules, (rule: CSSRule) => rule.type === CSSRule.FONT_FACE_RULE);
+			rules.forEach((rule: CSSFontFaceRule) => {
+				var src = rule.style.getPropertyValue("src");
+				var urls: string[] = [];
 
-			if (this.preRenderTime === undefined) {
-				this.preRenderTime = 5;
-			}
+				if (!src) {
+					src = rule.cssText.split("\n")
+						.map((line: string) => line.match(/src: ([^;]+);/))
+						.filter((matches: string[]) => matches !== null)
+						.map((matches: string[]) => matches[1])[0];
+				}
+
+				urls = src.split(/,\s*/).map((url: string) => url.match(/^url\((.+)\)$/)[1]);
+
+				if (urls.length > 0) {
+					var name = RendererSettings._stripQuotes(rule.style.getPropertyValue("font-family"));
+					var existingList = map.get(name);
+					if (existingList === undefined) {
+						existingList = [];
+						map.set(name, existingList);
+					}
+					existingList.unshift.apply(existingList, urls.map(RendererSettings._stripQuotes));
+				}
+			});
+
+			return map;
+		}
+
+		/**
+		 * Converts an arbitrary object into a RendererSettings object.
+		 *
+		 * @param {!*} object
+		 * @return {!libjass.renderers.RendererSettings}
+		 */
+		public static from(object: any): RendererSettings {
+			return RendererSettings._from(object.fontMap, object.preRenderTime);
+		}
+
+		private static _from(fontMap: Map<string, string[]> = null, preRenderTime: number = 5): RendererSettings {
+			var result = new RendererSettings();
+			result.fontMap = fontMap;
+			result.preRenderTime = preRenderTime;
+			return result;
+		}
+
+		private static _stripQuotes(str: string): string {
+			return str.match(/^["']?(.*?)["']?$/)[1];
 		}
 	}
 
