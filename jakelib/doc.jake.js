@@ -506,7 +506,9 @@ namespace("_doc", function () {
 					'<ul class="namespace-elements">'
 				].concatMany(namespace.map(function (value) {
 					return (
-					'	<li><a href="#' + sanitize(value.name.toString()) + '">' + sanitize(value.name.toShortString()) + '</a></li>'
+					'	<li' +
+					((value.isPrivate === true) ? ' class="private"' : '') +
+					'><a href="#' + sanitize(value.name.toString()) + '">' + sanitize(value.name.toShortString()) + '</a></li>'
 					);
 				})).concat([
 					'</ul>',
@@ -841,11 +843,25 @@ namespace("_doc", function () {
 			'			.private.static > .name:before {',
 			'				content: "static private ";',
 			'			}',
+			'',
+			'			body:not(.show-private) .private {',
+			'				display: none;',
+			'			}',
 			'		]]>',
 			'		</style>',
+			'		<script>',
+			'		<![CDATA[',
+			'			addEventListener("load", function () {',
+			'				document.querySelector("#show-private").addEventListener("change", function (event) {',
+			'					document.body.className = (event.target.checked ? "show-private" : "");',
+			'				}, false);',
+			'			}, false);',
+			'		]]>',
+			'		</script>',
 			'	</head>',
 			'	<body>',
 			'		<section class="namespaces">',
+			'			<label><input type="checkbox" id="show-private" />Show private</label>',
 			'			<h2>Namespaces</h2>'
 		].concat(writeOverview(3)).concat([
 			'		</section>',
