@@ -50,17 +50,15 @@ namespace("_doc", function () {
 		var readComment = function (node, comment, treeWalker) {
 			var nodeType = null;
 
+			if (comment.substr(0, 2) !== "*\n") {
+				return;
+			}
+
 			var lines = comment.split("\n").map(function (line) {
 				return line.replace(/^[ *]*/, "");
 			}).filter(function (line) {
 				return line.length > 0;
 			});
-
-			if (!lines.some(function (line) {
-				return line.indexOf("@") === 0;
-			})) {
-				return;
-			}
 
 			var nameParts = [];
 
