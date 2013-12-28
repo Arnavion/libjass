@@ -87,11 +87,8 @@ namespace("_doc", function () {
 				}
 			}
 			else if (node instanceof UglifyJS.AST_Var) {
+				// Might be a Constructor if the comment contains @constructor
 				nameParts.unshift(node.definitions[0].name.name);
-
-				if (node.definitions[0] instanceof UglifyJS.AST_Function) {
-					nodeType = NodeType.FUNCTION;
-				}
 			}
 			else if (node instanceof UglifyJS.AST_ObjectKeyVal) {
 				var definePropertyNode = treeWalker.find_parent(UglifyJS.AST_Call);
