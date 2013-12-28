@@ -258,7 +258,7 @@ module libjass.renderers {
 			DefaultRenderer._svgDefsElement = <SVGDefsElement>document.createElementNS("http://www.w3.org/2000/svg", "defs");
 			svgElement.appendChild(DefaultRenderer._svgDefsElement);
 
-			if (!this.settings.preLoadFonts) {
+			if (this.settings.fontMap === null) {
 				setTimeout(() => this._ready(), 0);
 			}
 			// Preload fonts
@@ -879,7 +879,6 @@ module libjass.renderers {
 	 * @memberof libjass.renderers
 	 */
 	export class RendererSettings {
-		public preLoadFonts: boolean;
 		public fontMap: Map<string, string[]>;
 
 		/**
@@ -888,9 +887,6 @@ module libjass.renderers {
 		public preRenderTime: number;
 
 		public initializeUnsetProperties(): void {
-			if (this.preLoadFonts === undefined) {
-				this.preLoadFonts = false;
-			}
 
 			if (this.fontMap === undefined) {
 				this.fontMap = null;

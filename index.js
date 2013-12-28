@@ -38,8 +38,7 @@ addEventListener("DOMContentLoaded", function () {
 	var testVideoAndASSLoaded = function () {
 		if (videoMetadataLoaded && ass) {
 			var renderer = new libjass.renderers.DefaultRenderer(video, ass, {
-				preLoadFonts: true,
-				fontMap: libjass.renderers.DefaultRenderer.makeFontMapFromStyleElement(document.querySelector("#font-map"))
+				fontMap: libjass.renderers.RendererSettings.makeFontMapFromStyleElement(document.querySelector("#font-map"))
 			});
 
 			renderer.addEventListener("ready", function () {
