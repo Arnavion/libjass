@@ -433,12 +433,12 @@ module libjass.renderers {
 				case 3: case 6: case 9: sub.style.textAlign = "right"; break;
 			}
 
-			var animationCollection = new AnimationCollection(dialogue.id, dialogue.start, dialogue.end);
+			var animationCollection = new AnimationCollection(dialogue);
 
 			var divTransformStyle = "";
 
 			var currentSpan: HTMLSpanElement = null;
-			var currentSpanStyles = new SpanStyles(dialogue.id, dialogue.style, dialogue.transformOrigin, scaleX, scaleY, DefaultRenderer._svgDefsElement);
+			var currentSpanStyles = new SpanStyles(dialogue, scaleX, scaleY, DefaultRenderer._svgDefsElement);
 
 			var startNewSpan = (): void => {
 				if (currentSpan !== null) {
@@ -571,16 +571,16 @@ module libjass.renderers {
 					var movePart = <parts.Move>part;
 
 					sub.style.position = "absolute";
-					animationCollection.addCustom("linear", new Animation(0, {
+					animationCollection.addCustom("linear", new Keyframe(0, {
 						left: (scaleX * movePart.x1).toFixed(3) + "px",
 						top: (scaleY * movePart.y1).toFixed(3) + "px"
-					}), new Animation(movePart.t1, {
+					}), new Keyframe(movePart.t1, {
 						left: (scaleX * movePart.x1).toFixed(3) + "px",
 						top: (scaleY * movePart.y1).toFixed(3) + "px"
-					}), new Animation(movePart.t2, {
+					}), new Keyframe(movePart.t2, {
 						left: (scaleX * movePart.x2).toFixed(3) + "px",
 						top: (scaleY * movePart.y2).toFixed(3) + "px"
-					}), new Animation(dialogue.end - dialogue.start, {
+					}), new Keyframe(dialogue.end - dialogue.start, {
 						left: (scaleX * movePart.x2).toFixed(3) + "px",
 						top: (scaleY * movePart.y2).toFixed(3) + "px"
 					}));
@@ -601,17 +601,17 @@ module libjass.renderers {
 				else if (part instanceof parts.ComplexFade) {
 					var complexFadePart = <parts.ComplexFade>part;
 
-					animationCollection.addCustom("linear", new Animation(0, {
+					animationCollection.addCustom("linear", new Keyframe(0, {
 						opacity: String(complexFadePart.a1)
-					}), new Animation(complexFadePart.t1, {
+					}), new Keyframe(complexFadePart.t1, {
 						opacity: String(complexFadePart.a1)
-					}), new Animation(complexFadePart.t2, {
+					}), new Keyframe(complexFadePart.t2, {
 						opacity: String(complexFadePart.a2)
-					}), new Animation(complexFadePart.t3, {
+					}), new Keyframe(complexFadePart.t3, {
 						opacity: String(complexFadePart.a2)
-					}), new Animation(complexFadePart.t4, {
+					}), new Keyframe(complexFadePart.t4, {
 						opacity: String(complexFadePart.a3)
-					}), new Animation(dialogue.end, {
+					}), new Keyframe(dialogue.end, {
 						opacity: String(complexFadePart.a3)
 					}));
 				}
@@ -912,18 +912,18 @@ module libjass.renderers {
 		}
 	}
 
-	interface AnimationPropertiesMap {
+	interface KeyframePropertiesMap {
 		[key: string]: string;
 	}
 
-	class Animation {
-		constructor(private _time: number, private _properties: AnimationPropertiesMap) { }
+	class Keyframe {
+		constructor(private _time: number, private _properties: KeyframePropertiesMap) { }
 
 		get time(): number {
 			return this._time;
 		}
 
-		get properties(): AnimationPropertiesMap {
+		get properties(): KeyframePropertiesMap {
 			return this._properties;
 		}
 	}
@@ -941,11 +941,19 @@ module libjass.renderers {
 	 * @memberof libjass.renderers
 	 */
 	class AnimationCollection {
+		private _id: number;
+		private _start: number;
+		private _end: number;
+
 		private _cssText: string = "";
 		private _animationStyle: string = "";
 		private _numAnimations: number = 0;
 
-		constructor(private _id: number, private _start: number, private _end: number) { }
+		constructor(dialogue: Dialogue) {
+			this._id = dialogue.id;
+			this._start = dialogue.start;
+			this._end = dialogue.end;
+		}
 
 		get cssText(): string {
 			return this._cssText;
@@ -989,23 +997,23 @@ module libjass.renderers {
 		 * @param {string} timingFunction
 		 * @param {Array.<!{time: number, properties: Object.<string, string>}>} animations
 		 */
-		addCustom(timingFunction: string, ...animations: Animation[]) {
+		addCustom(timingFunction: string, ...keyframes: Keyframe[]) {
 			var startTime: number = null;
 			var endTime: number = null;
 
 			var ruleCssText = "";
 
-			animations.forEach(animation => {
+			keyframes.forEach(keyframe => {
 				if (startTime === null) {
-					startTime = animation.time;
+					startTime = keyframe.time;
 				}
 
-				endTime = animation.time;
+				endTime = keyframe.time;
 
-				ruleCssText += "\t" + (100 * animation.time / (this._end - this._start)).toFixed(3) + "% {\n";
+				ruleCssText += "\t" + (100 * keyframe.time / (this._end - this._start)).toFixed(3) + "% {\n";
 
-				Object.keys(animation.properties).forEach(propertyName => {
-					ruleCssText += "\t\t" + propertyName + ": " + animation.properties[propertyName] + ";\n";
+				Object.keys(keyframe.properties).forEach(propertyName => {
+					ruleCssText += "\t\t" + propertyName + ": " + keyframe.properties[propertyName] + ";\n";
 				});
 
 				ruleCssText += "\t}\n";
@@ -1039,6 +1047,9 @@ module libjass.renderers {
 	 * @memberof libjass.renderers
 	 */
 	class SpanStyles {
+		private _id: number;
+		private _defaultStyle: Style;
+
 		private _italic: boolean;
 		private _bold: Object;
 		private _underline: boolean;
@@ -1065,7 +1076,10 @@ module libjass.renderers {
 
 		private _nextFilterId = 0;
 
-		constructor(private _id: number, private _style: Style, private _transformOrigin: string, private _scaleX: number, private _scaleY: number, private _svgDefsElement: SVGDefsElement) {
+		constructor(dialogue: Dialogue, private _scaleX: number, private _scaleY: number, private _svgDefsElement: SVGDefsElement) {
+			this._id = dialogue.id;
+			this._defaultStyle = dialogue.style;
+
 			this.reset(null);
 		}
 
@@ -1076,7 +1090,7 @@ module libjass.renderers {
 		 */
 		reset(newStyle: Style): void {
 			if (newStyle === undefined || newStyle === null) {
-				newStyle = this._style;
+				newStyle = this._defaultStyle;
 			}
 
 			this.italic = newStyle.italic;
@@ -1267,7 +1281,7 @@ module libjass.renderers {
 		 * @type {?boolean}
 		 */
 		set italic(value: boolean) {
-			this._italic = SpanStyles._valueOrDefault(value, this._style.italic);
+			this._italic = SpanStyles._valueOrDefault(value, this._defaultStyle.italic);
 		}
 
 		/**
@@ -1276,7 +1290,7 @@ module libjass.renderers {
 		 * @type {(?number|?boolean)}
 		 */
 		set bold(value: Object) {
-			this._bold = SpanStyles._valueOrDefault(value, this._style.bold);
+			this._bold = SpanStyles._valueOrDefault(value, this._defaultStyle.bold);
 		}
 
 		/**
@@ -1285,7 +1299,7 @@ module libjass.renderers {
 		 * @type {?boolean}
 		 */
 		set underline(value: boolean) {
-			this._underline = SpanStyles._valueOrDefault(value, this._style.underline);
+			this._underline = SpanStyles._valueOrDefault(value, this._defaultStyle.underline);
 		}
 
 		/**
@@ -1294,7 +1308,7 @@ module libjass.renderers {
 		 * @type {?boolean}
 		 */
 		set strikeThrough(value: boolean) {
-			this._strikeThrough = SpanStyles._valueOrDefault(value, this._style.strikeThrough);
+			this._strikeThrough = SpanStyles._valueOrDefault(value, this._defaultStyle.strikeThrough);
 		}
 
 		/**
@@ -1303,7 +1317,7 @@ module libjass.renderers {
 		 * @type {?number}
 		 */
 		set outlineWidthX(value: number) {
-			this._outlineWidthX = SpanStyles._valueOrDefault(value, this._style.outlineWidth);
+			this._outlineWidthX = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineWidth);
 		}
 
 		/**
@@ -1312,7 +1326,7 @@ module libjass.renderers {
 		 * @type {?number}
 		 */
 		set outlineWidthY(value: number) {
-			this._outlineWidthY = SpanStyles._valueOrDefault(value, this._style.outlineWidth);
+			this._outlineWidthY = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineWidth);
 		}
 
 		/**
@@ -1330,7 +1344,7 @@ module libjass.renderers {
 		 * @type {?string}
 		 */
 		set fontName(value: string) {
-			this._fontName = SpanStyles._valueOrDefault(value, this._style.fontName);
+			this._fontName = SpanStyles._valueOrDefault(value, this._defaultStyle.fontName);
 		}
 
 		/**
@@ -1339,7 +1353,7 @@ module libjass.renderers {
 		 * @type {?number}
 		 */
 		set fontSize(value: number) {
-			this._fontSize = SpanStyles._valueOrDefault(value, this._style.fontSize);
+			this._fontSize = SpanStyles._valueOrDefault(value, this._defaultStyle.fontSize);
 		}
 
 		/**
@@ -1348,7 +1362,7 @@ module libjass.renderers {
 		 * @type {?number}
 		 */
 		set fontScaleX(value: number) {
-			this._fontScaleX = SpanStyles._valueOrDefault(value, this._style.fontScaleX);
+			this._fontScaleX = SpanStyles._valueOrDefault(value, this._defaultStyle.fontScaleX);
 		}
 
 		/**
@@ -1357,7 +1371,7 @@ module libjass.renderers {
 		 * @type {?number}
 		 */
 		set fontScaleY(value: number) {
-			this._fontScaleY = SpanStyles._valueOrDefault(value, this._style.fontScaleY);
+			this._fontScaleY = SpanStyles._valueOrDefault(value, this._defaultStyle.fontScaleY);
 		}
 
 		/**
@@ -1366,7 +1380,7 @@ module libjass.renderers {
 		 * @type {?number}
 		 */
 		set letterSpacing(value: number) {
-			this._letterSpacing = SpanStyles._valueOrDefault(value, this._style.letterSpacing);
+			this._letterSpacing = SpanStyles._valueOrDefault(value, this._defaultStyle.letterSpacing);
 		}
 
 		/**
@@ -1375,7 +1389,7 @@ module libjass.renderers {
 		 * @type {libjass.parts.Color}
 		 */
 		set primaryColor(value: parts.Color) {
-			this._primaryColor = SpanStyles._valueOrDefault(value, this._style.primaryColor);
+			this._primaryColor = SpanStyles._valueOrDefault(value, this._defaultStyle.primaryColor);
 		}
 
 		/**
@@ -1384,7 +1398,7 @@ module libjass.renderers {
 		 * @type {libjass.parts.Color}
 		 */
 		set outlineColor(value: parts.Color) {
-			this._outlineColor = SpanStyles._valueOrDefault(value, this._style.outlineColor);
+			this._outlineColor = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineColor);
 		}
 
 		/**
