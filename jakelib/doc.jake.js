@@ -120,6 +120,7 @@ namespace("_doc", function () {
 
 			var isAbstract = false;
 			var isPrivate = false;
+			var isStatic = false;
 
 			var generics = [];
 			var parameters = [];
@@ -228,6 +229,10 @@ namespace("_doc", function () {
 
 						break;
 
+					case "@static":
+						isStatic = true;
+						break;
+
 					case "@template":
 						generics.push.apply(generics, remainingLine.split(/,/).map(function (word) { return word.trim(); }));
 						break;
@@ -265,7 +270,7 @@ namespace("_doc", function () {
 
 			switch (nodeType) {
 				case NodeType.FUNCTION:
-					allNames[name] = new Function(name, rootDescription, generics, parameters, returnType, isAbstract, isPrivate);
+					allNames[name] = new Function(name, rootDescription, generics, parameters, returnType, isAbstract, isPrivate, isStatic);
 					break;
 
 				case NodeType.CONSTRUCTOR:
@@ -358,8 +363,14 @@ namespace("_doc", function () {
 				var thisTypeNameParts = null;
 
 				if (value.thisType === null) {
-					if (value.name.parts[value.name.parts.length - 2] === "prototype") {
-						thisTypeNameParts = value.name.parts.slice(0, value.name.parts.length - 2);
+					thisTypeNameParts = value.name.parts.slice(0, value.name.parts.length - 1);
+					if (thisTypeNameParts[thisTypeNameParts.length - 1] === "prototype") {
+						thisTypeNameParts = thisTypeNameParts.slice(0, thisTypeNameParts.length - 1);
+					}
+
+					var firstCharacter = thisTypeNameParts[thisTypeNameParts.length - 1][0];
+					if (firstCharacter.toLowerCase() === firstCharacter) {
+						thisTypeNameParts = null;
 					}
 				}
 				else {
@@ -509,6 +520,7 @@ namespace("_doc", function () {
 				'<dl class="function' +
 					(func.isAbstract ? ' abstract' : '') +
 					(func.isPrivate ? ' private' : '') +
+					(func.isStatic ? ' static' : '') +
 					'" id="' + sanitize(func.name.toString()) +
 					'">',
 				'	<dt class="name">' + writeFunctionName(func) + '</dt>',
@@ -579,7 +591,7 @@ namespace("_doc", function () {
 		var writeFunctionUsage = function (func) {
 			return sanitize(
 				((func.returnType !== null) ? 'var result = ' : '') +
-				((func.thisType !== null) ? (toVariableName(func.thisType) + '.') : '') +
+				((func.thisType !== null) ? ((func.isStatic ? func.thisType.name.toShortString() : toVariableName(func.thisType)) + '.') : '') +
 				func.name.toShortString() + '(' +
 				func.parameters.map(function (parameter) {
 					return parameter.name;
@@ -818,8 +830,16 @@ namespace("_doc", function () {
 			'				content: "private ";',
 			'			}',
 			'',
+			'			.static > .name:before {',
+			'				content: "static ";',
+			'			}',
+			'',
 			'			.abstract.private > .name:before {',
 			'				content: "abstract private ";',
+			'			}',
+			'',
+			'			.private.static > .name:before {',
+			'				content: "static private ";',
 			'			}',
 			'		]]>',
 			'		</style>',
@@ -914,7 +934,7 @@ Name.prototype.toString = function () {
 
 Name.prototype.inspect = Name.prototype.toString;
 
-var Function = function (name, description, generics, parameters, returnType, isAbstract, isPrivate) {
+var Function = function (name, description, generics, parameters, returnType, isAbstract, isPrivate, isStatic) {
 	this.name = name;
 
 	this.description = description;
@@ -927,6 +947,7 @@ var Function = function (name, description, generics, parameters, returnType, is
 
 	this.isAbstract = isAbstract;
 	this.isPrivate = isPrivate;
+	this.isStatic = isStatic;
 
 	this.thisType = null;
 };
