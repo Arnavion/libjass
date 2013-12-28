@@ -419,9 +419,6 @@ module libjass {
 
 		private _layer: number;
 		private _alignment: number;
-		private _transformOriginX: number;
-		private _transformOriginY: number;
-		private _transformOrigin: string;
 
 		private _rawPartsString: string;
 		private _parts: parts.Part[] = null;
@@ -487,30 +484,6 @@ module libjass {
 			return this._alignment;
 		}
 
-		get transformOriginX(): number {
-			if (this._parts === null) {
-				this._parsePartsString();
-			}
-
-			return this._transformOriginX;
-		}
-
-		get transformOriginY(): number {
-			if (this._parts === null) {
-				this._parsePartsString();
-			}
-
-			return this._transformOriginY;
-		}
-
-		get transformOrigin(): string {
-			if (this._parts === null) {
-				this._parsePartsString();
-			}
-
-			return this._transformOrigin;
-		}
-
 		/**
 		 * The layer number of this dialogue.
 		 *
@@ -572,20 +545,6 @@ module libjass {
 					}
 				}
 			});
-
-			switch (this._alignment) {
-				case 1: this._transformOriginX =   0; this._transformOriginY = 100; break;
-				case 2: this._transformOriginX =  50; this._transformOriginY = 100; break;
-				case 3: this._transformOriginX = 100; this._transformOriginY = 100; break;
-				case 4: this._transformOriginX =   0; this._transformOriginY =  50; break;
-				case 5: this._transformOriginX =  50; this._transformOriginY =  50; break;
-				case 6: this._transformOriginX = 100; this._transformOriginY =  50; break;
-				case 7: this._transformOriginX =   0; this._transformOriginY =   0; break;
-				case 8: this._transformOriginX =  50; this._transformOriginY =   0; break;
-				case 9: this._transformOriginX = 100; this._transformOriginY =   0; break;
-			}
-
-			this._transformOrigin = this._transformOriginX + "% " + this._transformOriginY + "%";
 
 			if (libjass.debugMode) {
 				var possiblyIncorrectParses = this._parts.filter(part => part instanceof parts.Comment && (<parts.Comment>part).value.indexOf("\\") !== -1);

@@ -637,10 +637,12 @@ module libjass.renderers {
 				}
 			});
 
+			var transformOriginParts = DefaultRenderer._getTransformOrigin(dialogue);
+
 			dialogue.parts.some(part => {
 				if (part instanceof parts.Position || part instanceof parts.Move) {
-					var translateX = -dialogue.transformOriginX;
-					var translateY = -dialogue.transformOriginY;
+					var translateX = -transformOriginParts[0];
+					var translateY = -transformOriginParts[1];
 
 					divTransformStyle =
 						"translate(" + translateX + "%, " + translateY + "%) translate(-" + sub.style.marginLeft + ", -" + sub.style.marginTop + ") " +
@@ -653,11 +655,12 @@ module libjass.renderers {
 			});
 
 			if (divTransformStyle !== "") {
+				var transformOriginString = transformOriginParts[0] + "% " + transformOriginParts[1] + "%";
 				sub.style.webkitTransform = divTransformStyle;
-				sub.style.webkitTransformOrigin = dialogue.transformOrigin;
+				sub.style.webkitTransformOrigin = transformOriginString;
 
 				sub.style.transform = divTransformStyle;
-				sub.style.transformOrigin = dialogue.transformOrigin;
+				sub.style.transformOrigin = transformOriginString;
 			}
 
 			if (DefaultRenderer._animationStyleElement === null) {
@@ -819,6 +822,25 @@ module libjass.renderers {
 		private _removeAllSubs(): void {
 			this._currentSubs.forEach((sub: HTMLDivElement) => this._removeSub(sub));
 			this._currentSubs.clear();
+		}
+
+		private static _getTransformOrigin(dialogue: Dialogue): number[] {
+			var transformOriginX: number;
+			var transformOriginY: number;
+
+			switch (dialogue.alignment) {
+				case 1: transformOriginX =   0; transformOriginY = 100; break;
+				case 2: transformOriginX =  50; transformOriginY = 100; break;
+				case 3: transformOriginX = 100; transformOriginY = 100; break;
+				case 4: transformOriginX =   0; transformOriginY =  50; break;
+				case 5: transformOriginX =  50; transformOriginY =  50; break;
+				case 6: transformOriginX = 100; transformOriginY =  50; break;
+				case 7: transformOriginX =   0; transformOriginY =   0; break;
+				case 8: transformOriginX =  50; transformOriginY =   0; break;
+				case 9: transformOriginX = 100; transformOriginY =   0; break;
+			}
+
+			return [transformOriginX, transformOriginY];
 		}
 
 		private static _addClass(element: HTMLElement, className: string): void {
