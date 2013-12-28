@@ -513,6 +513,9 @@ module libjass {
 			return "#" + this._id + " [" + this._start.toFixed(3) + "-" + this._end.toFixed(3) + "] " + ((this._parts !== null) ? this._parts.join(", ") : this._rawPartsString);
 		}
 
+		/**
+		 * Parses this dialogue's parts from the raw parts string.
+		 */
 		private _parsePartsString(): void {
 			this._parts = <parts.Part[]>parser.parse(this._rawPartsString, "dialogueParts");
 
@@ -568,6 +571,7 @@ module libjass {
 		 * @return {number}
 		 *
 		 * @private
+		 * @static
 		 */
 		private static _toTime(str: string): number {
 			return str.split(":").reduce<number>((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);

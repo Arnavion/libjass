@@ -73,6 +73,8 @@ module libjass {
 			return this;
 		}
 
+		/**
+		 */
 		clear(): void {
 			this._data = Object.create(null);
 		}
@@ -219,6 +221,8 @@ module libjass {
 			return result;
 		}
 
+		/**
+		 */
 		clear(): void {
 			this._keys = Object.create(null);
 			this._values = Object.create(null);

@@ -40,6 +40,17 @@ module libjass.parser {
 		return run.result.value;
 	}
 
+	/**
+	 * This class represents a single run of the parser.
+	 *
+	 * @constructor
+	 *
+	 * @param {string} input
+	 * @param {string} rule
+	 *
+	 * @private
+	 * @memberof libjass.parser
+	 */
 	class ParserRun {
 		private _parseTree: ParseNode = new ParseNode(null);
 		private _result: ParseNode;
@@ -48,10 +59,17 @@ module libjass.parser {
 			this._result = rules.get(rule).call(this, this._parseTree);
 		}
 
+		/**
+		 * @type {!ParseNode}
+		 */
 		get result(): ParseNode {
 			return this._result;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_script(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -72,6 +90,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_scriptSection(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -135,6 +157,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_scriptSectionHeader(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -164,6 +190,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_scriptProperty(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -205,6 +235,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_scriptComment(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -223,6 +257,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_dialogueParts(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -274,6 +312,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_enclosedTags(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -381,6 +423,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_newline(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -394,6 +440,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_hardspace(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -407,6 +457,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_text(parent: ParseNode): ParseNode {
 			var value = this._peek();
 
@@ -418,6 +472,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_comment(parent: ParseNode): ParseNode {
 			var value = this._peek();
 
@@ -429,6 +487,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_a(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -511,10 +573,18 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_alpha(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_an(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -537,6 +607,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_b(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -571,22 +645,42 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_be(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_blur(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_bord(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_c(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_clip(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -656,6 +750,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_fad(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -696,6 +794,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_fade(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -795,14 +897,26 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_fax(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_fay(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_fn(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -827,26 +941,50 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_fr(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_frx(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_fry(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_frz(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_fs(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_fscx(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -867,6 +1005,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_fscy(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -887,14 +1029,26 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_fsp(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_i(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_iclip(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -964,22 +1118,42 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_k(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_K(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_kf(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_ko(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_move(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1067,6 +1241,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_org(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1107,14 +1285,26 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_p(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_pbo(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_pos(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1155,6 +1345,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_q(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1177,6 +1371,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_r(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1201,14 +1399,26 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_s(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_shad(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_t(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1346,58 +1556,114 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_u(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_xbord(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_xshad(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_ybord(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_yshad(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_1a(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_1c(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_2a(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_2c(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_3a(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_3c(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_4a(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_tag_4c(parent: ParseNode): ParseNode {
 			throw new Error("Method not implemented.");
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_drawingInstructions(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1473,6 +1739,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_drawingInstructionMove(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1497,6 +1767,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_drawingInstructionLine(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1521,6 +1795,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_drawingInstructionCubicBezierCurve(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1573,6 +1851,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_decimal(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1594,6 +1876,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_unsignedDecimal(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1629,6 +1915,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_enableDisable(parent: ParseNode): ParseNode {
 			var next = this._peek();
 
@@ -1642,6 +1932,10 @@ module libjass.parser {
 			return null;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_hex(parent: ParseNode): ParseNode {
 			var next = this._peek();
 
@@ -1652,6 +1946,10 @@ module libjass.parser {
 			return null;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_color(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1695,6 +1993,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_alpha(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1717,6 +2019,10 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
 		parse_colorWithAlpha(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1746,11 +2052,19 @@ module libjass.parser {
 			return current;
 		}
 
+		/**
+		 * @param {number=1} count
+		 */
 		private _peek(count: number = 1) {
 			return this._input.substr(this._parseTree.end, count);
 		}
 
-		read(parent: ParseNode, next: string) {
+		/**
+		 * @param {!ParseNode} parent
+		 * @param {string} next
+		 * @return {!ParseNode}
+		 */
+		read(parent: ParseNode, next: string): ParseNode {
 			if (this._peek(next.length) !== next) {
 				return null;
 			}
@@ -1758,6 +2072,9 @@ module libjass.parser {
 			return new ParseNode(parent, next);
 		}
 
+		/**
+		 * @return {boolean}
+		 */
 		private _haveMore(): boolean {
 			return this._parseTree.end < this._input.length;
 		}
@@ -1838,6 +2155,16 @@ module libjass.parser {
 		}
 	});
 
+	/**
+	 * This class represents a single parse node. It has a start and end position, and an optional value object.
+	 *
+	 * @constructor
+	 * @param {!ParseNode} parent The parent of this parse node. The parent's end position will be updated to the end position of this node whenever the latter changes.
+	 * @param {?string=null} value A shortcut to assign a string to the value property.
+	 *
+	 * @private
+	 * @memberof libjass.parser
+	 */
 	class ParseNode {
 		private _children: ParseNode[] = [];
 
@@ -1860,26 +2187,54 @@ module libjass.parser {
 			}
 		}
 
+		/**
+		 * The start position of this parse node.
+		 *
+		 * @type {number}
+		 */
 		get start(): number {
 			return this._start;
 		}
 
+		/**
+		 * The end position of this parse node.
+		 *
+		 * @type {number}
+		 */
 		get end(): number {
 			return this._end;
 		}
 
+		/**
+		 * @type {!ParseNode}
+		 */
 		get parent(): ParseNode {
 			return this._parent;
 		}
 
+		/**
+		 * @type {!Array.<!ParseNode>}
+		 */
 		get children(): ParseNode[] {
 			return this._children;
 		}
 
+		/**
+		 * An optional object associated with this parse node.
+		 *
+		 * @type {*}
+		 */
 		get value(): any {
 			return this._value;
 		}
 
+		/**
+		 * An optional object associated with this parse node.
+		 *
+		 * If the value is a string, then the end property is updated to be the length of the string.
+		 *
+		 * @type {*}
+		 */
 		set value(newValue: any) {
 			this._value = newValue;
 
@@ -1888,6 +2243,9 @@ module libjass.parser {
 			}
 		}
 
+		/**
+		 * Removes the last child of this node and updates the end position to be end position of the new last child.
+		 */
 		pop(): void {
 			this._children.splice(this._children.length - 1, 1);
 
@@ -1899,6 +2257,11 @@ module libjass.parser {
 			}
 		}
 
+		/**
+		 * Updates the end property of this node and its parent recursively to the root node.
+		 *
+		 * @param {number} newEnd
+		 */
 		private _setEnd(newEnd: number): void {
 			this._end = newEnd;
 

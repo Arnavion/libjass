@@ -68,18 +68,30 @@ module libjass.renderers {
 			this._video.addEventListener("playing", () => this._onVideoPlaying(), false);
 		}
 
+		/**
+		 * @type {!HTMLVideoElement}
+		 */
 		get video(): HTMLVideoElement {
 			return this._video;
 		}
 
+		/**
+		 * @type {!libjass.ASS}
+		 */
 		get ass(): ASS {
 			return this._ass;
 		}
 
+		/**
+		 * @type {!libjass.renderers.RendererSettings}
+		 */
 		get settings(): RendererSettings {
 			return this._settings;
 		}
 
+		/**
+		 * @type {number}
+		 */
 		get currentTime(): number {
 			return this._currentTime;
 		}
@@ -148,9 +160,13 @@ module libjass.renderers {
 			}
 		}
 
+		/**
+		 */
 		public preRender(dialogue: Dialogue): void {
 		}
 
+		/**
+		 */
 		public draw(dialogue: Dialogue): void {
 		}
 
@@ -412,6 +428,8 @@ module libjass.renderers {
 
 		/**
 		 * The magic happens here. The subtitle div is rendered and stored. Call draw() to get a clone of the div to display.
+		 *
+		 * @param {!libjass.Dialogue} dialogue
 		 */
 		public preRender(dialogue: Dialogue): void {
 			if (this._preRenderedSubs.has(dialogue.id)) {
@@ -867,10 +885,19 @@ module libjass.renderers {
 	 * @memberof libjass.renderers
 	 */
 	export class RendererSettings {
+		/**
+		 * A map of font name to one or more URLs of that font. If provided, the fonts in this map are pre-loaded by the DefaultRenderer before it begins playing the video.
+		 *
+		 * If you have a <style> or <link> element on the page containing @font-face rules, you can use the RendererSettings.makeFontMapFromStyleElement() convenience method to create a font map.
+		 *
+		 * @type {!Map<string, string[]>}
+		 */
 		public fontMap: Map<string, string[]>;
 
 		/**
 		 * Subtitles will be pre-rendered for this amount of time (seconds)
+		 *
+		 * @type {number}
 		 */
 		public preRenderTime: number;
 
@@ -938,26 +965,39 @@ module libjass.renderers {
 		[key: string]: string;
 	}
 
+	/**
+	 * This class represents a single keyframe. It has a list of CSS properties (names and values) associated with a point in time. Multiple keyframes make up an animation.
+	 *
+	 * @param {number} time
+	 * @param {!Object.<string, string>} properties
+	 *
+	 * @private
+	 * @memberof libjass.renderers
+	 */
 	class Keyframe {
 		constructor(private _time: number, private _properties: KeyframePropertiesMap) { }
 
+		/**
+		 * @type {number}
+		 */
 		get time(): number {
 			return this._time;
 		}
 
+		/**
+		 * @type {!Object.<string, string>}
+		 */
 		get properties(): KeyframePropertiesMap {
 			return this._properties;
 		}
 	}
 
 	/**
-	 * This class represents a collection of keyframes. Each keyframe contains one or more CSS properties.
+	 * This class represents a collection of animations. Each animation contains one or more keyframes.
 	 * The collection can then be converted to a CSS3 representation.
 	 *
 	 * @constructor
-	 * @param {number} id The ID of the dialogue that this keyframe is associated with
-	 * @param {number} start The start time of the dialogue that this keyframe is associated with
-	 * @param {number} end The end time of the dialogue that this keyframe is associated with
+	 * @param {!libjass.Dialogue} dialogue The Dialogue that this collection is associated with
 	 *
 	 * @private
 	 * @memberof libjass.renderers
@@ -977,16 +1017,26 @@ module libjass.renderers {
 			this._end = dialogue.end;
 		}
 
+		/**
+		 * This string contains the animation definitions and should be inserted into a <style> element.
+		 *
+		 * @type {string}
+		 */
 		get cssText(): string {
 			return this._cssText;
 		}
 
+		/**
+		 * This string should be set as the "animation" CSS property of the target element.
+		 *
+		 * @type {string}
+		 */
 		get animationStyle(): string {
 			return this._animationStyle;
 		}
 
 		/**
-		 * Add a fade-in animation.
+		 * Add a fade-in animation to this collection.
 		 *
 		 * @param {number} start The time from the dialogue start to start the fade-in
 		 * @param {number} duration The duration of the fade-in
@@ -1000,7 +1050,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Add a fade-out animation.
+		 * Add a fade-out animation to this collection.
 		 *
 		 * @param {number} start The time from the dialogue start to start the fade-out
 		 * @param {number} duration The duration of the fade-out
@@ -1014,10 +1064,10 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Add a new custom animation.
+		 * Add a custom animation to this collection. The given keyframes together make one animation.
 		 *
-		 * @param {string} timingFunction
-		 * @param {Array.<!{time: number, properties: Object.<string, string>}>} animations
+		 * @param {string} timingFunction One of the acceptable values for the "animation-timing-function" CSS property
+		 * @param {Array.<!{time: number, properties: !Object.<string, string>}>} keyframes
 		 */
 		addCustom(timingFunction: string, ...keyframes: Keyframe[]) {
 			var startTime: number = null;
@@ -1060,10 +1110,10 @@ module libjass.renderers {
 	 * As a Dialogue's div is rendered, individual parts are added to span's, and this class is used to maintain the style attribute of those.
 	 *
 	 * @constructor
-	 * @param {!libjass.Style} style The default style for the dialogue this object is associated with
-	 * @param {string} transformOrigin The transform origin of the dialogue this object is associated with
-	 * @param {number} scaleX The horizontal scaling of the dialogue this object is associated with
-	 * @param {number} scaleY The vertical scaling of the dialogue this object is associated with
+	 * @param {!libjass.Dialogue} dialogue The Dialogue that this set of styles is associated with
+	 * @param {number} scaleX The horizontal scaling of the subtitles
+	 * @param {number} scaleY The vertical scaling of the subtitles
+	 * @param {!SVGDefsElement} svgDefsElement An SVG <defs> element to append filter definitions to
 	 *
 	 * @private
 	 * @memberof libjass.renderers
@@ -1108,7 +1158,7 @@ module libjass.renderers {
 		/**
 		 * Resets the styles to the defaults provided by the argument.
 		 *
-		 * @param {!libjass.Style=} newStyle The new defaults to reset the style to. If unspecified, the new style is the original style this object was created with.
+		 * @param {libjass.Style} newStyle The new defaults to reset the style to. If null, the styles are reset to the default style of the Dialogue.
 		 */
 		reset(newStyle: Style): void {
 			if (newStyle === undefined || newStyle === null) {
@@ -1144,6 +1194,7 @@ module libjass.renderers {
 		 * Sets the style attribute on the given span element.
 		 *
 		 * @param {!HTMLSpanElement} span
+		 * @return {!HTMLSpanElement} The resulting <span> with the CSS styles applied. This may be a wrapper around the input <span> if the styles were applied using SVG filters.
 		 */
 		setStylesOnSpan(span: HTMLSpanElement): HTMLSpanElement {
 			var fontStyleOrWeight = "";
@@ -1298,7 +1349,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Sets the italic property. null defaults it to the style's original value.
+		 * Sets the italic property. null defaults it to the default style's value.
 		 *
 		 * @type {?boolean}
 		 */
@@ -1307,7 +1358,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Sets the bold property. null defaults it to the style's original value.
+		 * Sets the bold property. null defaults it to the default style's value.
 		 *
 		 * @type {(?number|?boolean)}
 		 */
@@ -1316,7 +1367,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Sets the underline property. null defaults it to the style's original value.
+		 * Sets the underline property. null defaults it to the default style's value.
 		 *
 		 * @type {?boolean}
 		 */
@@ -1325,7 +1376,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Sets the strike-through property. null defaults it to the style's original value.
+		 * Sets the strike-through property. null defaults it to the default style's value.
 		 *
 		 * @type {?boolean}
 		 */
@@ -1361,7 +1412,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Sets the font name property. null defaults it to the style's original value.
+		 * Sets the font name property. null defaults it to the default style's value.
 		 *
 		 * @type {?string}
 		 */
@@ -1370,7 +1421,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Sets the font size property. null defaults it to the style's original value.
+		 * Sets the font size property. null defaults it to the default style's value.
 		 *
 		 * @type {?number}
 		 */
@@ -1379,7 +1430,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Sets the horizontal font scaling property. null defaults it to the style's original value.
+		 * Sets the horizontal font scaling property. null defaults it to the default style's value.
 		 *
 		 * @type {?number}
 		 */
@@ -1388,7 +1439,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Sets the vertical font scaling property. null defaults it to the style's original value.
+		 * Sets the vertical font scaling property. null defaults it to the default style's value.
 		 *
 		 * @type {?number}
 		 */
@@ -1397,7 +1448,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Sets the letter spacing property. null defaults it to the style's original value.
+		 * Sets the letter spacing property. null defaults it to the default style's value.
 		 *
 		 * @type {?number}
 		 */
@@ -1406,7 +1457,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Sets the primary color property. null defaults it to the style's original value.
+		 * Sets the primary color property. null defaults it to the default style's value.
 		 *
 		 * @type {libjass.parts.Color}
 		 */
@@ -1415,7 +1466,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Sets the outline color property. null defaults it to the style's original value.
+		 * Sets the outline color property. null defaults it to the default style's value.
 		 *
 		 * @type {libjass.parts.Color}
 		 */
@@ -1444,20 +1495,41 @@ module libjass.renderers {
 		private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);
 	}
 
+	/**
+	 * This class represents an ASS drawing - a set of drawing instructions between {\p} tags.
+	 *
+	 * @param {number} drawingScale
+	 * @param {number} scaleX
+	 * @param {number} scaleY
+	 *
+	 * @private
+	 * @memberof libjass.renderers
+	 */
 	class Drawing {
 		private _baselineOffset: number = 0;
 		private _instructions: parts.drawing.Instruction[] = [];
 
 		constructor(private _drawingScale: number, private _scaleX: number, private _scaleY: number) { }
 
+		/**
+		 * @type {number}
+		 */
 		set baselineOffset(value: number) {
 			this._baselineOffset = value;
 		}
 
+		/**
+		 * @type {!Array.<!libjass.parts.drawing.Instruction>}
+		 */
 		set instructions(value: parts.drawing.Instruction[]) {
 			this._instructions = value;
 		}
 
+		/**
+		 * Converts this drawing to an <svg> element.
+		 *
+		 * @return {!SVGSVGElement}
+		 */
 		toSVG(): SVGSVGElement {
 			var path = "";
 			var bboxWidth = 0;
