@@ -907,6 +907,8 @@ module libjass.renderers {
 		 *
 		 * @param {!LinkStyle} linkStyle
 		 * @return {!Map<string, string[]>}
+		 *
+		 * @static
 		 */
 		static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string[]> {
 			var map = new Map<string, string[]>();
@@ -945,6 +947,8 @@ module libjass.renderers {
 		 *
 		 * @param {!*} object
 		 * @return {!libjass.renderers.RendererSettings}
+		 *
+		 * @static
 		 */
 		static from(object: any): RendererSettings {
 			return RendererSettings._from(object.fontMap, object.preRenderTime);
