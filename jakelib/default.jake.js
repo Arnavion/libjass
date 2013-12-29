@@ -192,7 +192,7 @@ namespace("_default", function () {
 			if (
 				node instanceof UglifyJS.AST_PropAccess &&
 				typeof node.property === "string" &&
-				node.property.indexOf("_") === 0
+				node.property[0] === "_" && node.property[1] !== "_"
 			) {
 				var occurrence = occurrences[node.property];
 				if (occurrence === undefined) {
