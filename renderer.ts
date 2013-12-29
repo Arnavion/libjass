@@ -233,7 +233,7 @@ module libjass.renderers {
 	 *
 	 * @param {!HTMLVideoElement} video
 	 * @param {!libjass.ASS} ass
-	 * @param {!libjass.RendererSettings} settings
+	 * @param {!libjass.renderers.RendererSettings} settings
 	 *
 	 * @memberof libjass.renderers
 	 */
@@ -565,7 +565,7 @@ module libjass.renderers {
 				}
 
 				else if (part instanceof parts.Alignment) {
-					// Already handled in Dialogue constructor
+					// Already handled in Dialogue
 				}
 
 				else if (part instanceof parts.Reset) {
