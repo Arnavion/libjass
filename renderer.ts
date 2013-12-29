@@ -96,7 +96,7 @@ module libjass.renderers {
 			return this._currentTime;
 		}
 
-		public onVideoTimeUpdate(): void {
+		onVideoTimeUpdate(): void {
 			this._currentTime = this._video.currentTime;
 
 			if (libjass.debugMode) {
@@ -133,13 +133,13 @@ module libjass.renderers {
 			}
 		}
 
-		public onVideoSeeking(): void {
+		onVideoSeeking(): void {
 			if (libjass.debugMode) {
 				console.log("NullRenderer.onVideoSeeking: " + this._getVideoStateLogString());
 			}
 		}
 
-		public onVideoPause(): void {
+		onVideoPause(): void {
 			if (libjass.debugMode) {
 				console.log("NullRenderer.onVideoPause: " + this._getVideoStateLogString());
 			}
@@ -150,7 +150,7 @@ module libjass.renderers {
 			}
 		}
 
-		public onVideoPlaying(): void {
+		onVideoPlaying(): void {
 			if (libjass.debugMode) {
 				console.log("NullRenderer.onVideoPlaying: " + this._getVideoStateLogString());
 			}
@@ -162,12 +162,12 @@ module libjass.renderers {
 
 		/**
 		 */
-		public preRender(dialogue: Dialogue): void {
+		preRender(dialogue: Dialogue): void {
 		}
 
 		/**
 		 */
-		public draw(dialogue: Dialogue): void {
+		draw(dialogue: Dialogue): void {
 		}
 
 		private _onVideoTimeUpdate(): void {
@@ -353,7 +353,7 @@ module libjass.renderers {
 		 * @param {string} type The type of event to attach the listener for. One of "ready" and "fullScreenChange".
 		 * @param {!Function} listener The listener
 		 */
-		public addEventListener(type: string, listener: Function): void {
+		addEventListener(type: string, listener: Function): void {
 			var listeners = this._eventListeners.get(type);
 			if (listeners !== null) {
 				listeners.push(listener);
@@ -366,7 +366,7 @@ module libjass.renderers {
 		 * @param {number} width
 		 * @param {number} height
 		 */
-		public resizeVideo(width: number, height: number): void {
+		resizeVideo(width: number, height: number): void {
 			this._removeAllSubs();
 
 			this.video.style.width = width.toFixed(3) + "px";
@@ -399,13 +399,13 @@ module libjass.renderers {
 			this.onVideoTimeUpdate();
 		}
 
-		public onVideoSeeking(): void {
+		onVideoSeeking(): void {
 			super.onVideoSeeking();
 
 			this._removeAllSubs();
 		}
 
-		public onVideoTimeUpdate(): void {
+		onVideoTimeUpdate(): void {
 			super.onVideoTimeUpdate();
 
 			this._currentSubs.forEach((sub: HTMLDivElement, dialogueId: number) => {
@@ -418,13 +418,13 @@ module libjass.renderers {
 			});
 		}
 
-		public onVideoPause(): void {
+		onVideoPause(): void {
 			super.onVideoPause();
 
 			DefaultRenderer._addClass(this._subsWrapper, "paused");
 		}
 
-		public onVideoPlaying(): void {
+		onVideoPlaying(): void {
 			super.onVideoPlaying();
 
 			DefaultRenderer._removeClass(this._subsWrapper, "paused");
@@ -435,7 +435,7 @@ module libjass.renderers {
 		 *
 		 * @param {!libjass.Dialogue} dialogue
 		 */
-		public preRender(dialogue: Dialogue): void {
+		preRender(dialogue: Dialogue): void {
 			if (this._preRenderedSubs.has(dialogue.id)) {
 				return;
 			}
@@ -710,7 +710,7 @@ module libjass.renderers {
 		 *
 		 * @param {!libjass.Dialogue} dialogue
 		 */
-		public draw(dialogue: Dialogue): void {
+		draw(dialogue: Dialogue): void {
 			if (this._currentSubs.has(dialogue.id)) {
 				return;
 			}
@@ -893,14 +893,14 @@ module libjass.renderers {
 		 *
 		 * @type {!Map<string, string[]>}
 		 */
-		public fontMap: Map<string, string[]>;
+		fontMap: Map<string, string[]>;
 
 		/**
 		 * Subtitles will be pre-rendered for this amount of time (seconds)
 		 *
 		 * @type {number}
 		 */
-		public preRenderTime: number;
+		preRenderTime: number;
 
 		/**
 		 * A convenience method to create a font map from a <style> or <link> element that contains @font-face rules.
@@ -908,7 +908,7 @@ module libjass.renderers {
 		 * @param {!LinkStyle} linkStyle
 		 * @return {!Map<string, string[]>}
 		 */
-		public static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string[]> {
+		static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string[]> {
 			var map = new Map<string, string[]>();
 
 			var styleSheet = <CSSStyleSheet>linkStyle.sheet;
@@ -946,7 +946,7 @@ module libjass.renderers {
 		 * @param {!*} object
 		 * @return {!libjass.renderers.RendererSettings}
 		 */
-		public static from(object: any): RendererSettings {
+		static from(object: any): RendererSettings {
 			return RendererSettings._from(object.fontMap, object.preRenderTime);
 		}
 
