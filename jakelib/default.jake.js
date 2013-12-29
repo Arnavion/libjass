@@ -27,7 +27,7 @@ namespace("_default", function () {
 			toplevel: null
 		});
 
-		root = root.wrap_enclose(['((typeof module !== "undefined") && module.exports) || ((typeof this !== "undefined") && (this.libjass = {})):libjass']);
+		root = root.wrap_enclose(['((typeof module !== "undefined") && module.exports) || (this.libjass = {}):libjass', 'this:global']);
 
 		root.figure_out_scope();
 
@@ -184,7 +184,6 @@ namespace("_default", function () {
 		var originalWarn = UglifyJS.AST_Node.warn;
 		UglifyJS.AST_Node.warn = function (text, properties) {
 			if (
-				(text === "Eval is used [{file}:{line},{col}]" && properties.file === "libjass.js" && properties.line === 22) ||
 				(text === "Couldn't figure out mapping for {file}:{line},{col} → {cline},{ccol} [{name}]" && properties.file === "libjass.js" && properties.line === 1 && properties.col === 0 && properties.cline === 1 && properties.ccol === 1)
 			) {
 				return;
