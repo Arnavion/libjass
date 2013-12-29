@@ -106,20 +106,34 @@ namespace("_default", function () {
 				root: ""
 			}),
 			beautify: true,
-			comments: {
-				test: function (comment) {
-					if (comment.indexOf("Copyright") !== -1) {
-						if (!firstLicenseHeaderFound) {
-							firstLicenseHeaderFound = true;
-							return true;
-						}
-						else {
-							return false;
-						}
+			comments: function (node, comment) {
+				// If this is a license header
+				if (comment.value.indexOf("Copyright") !== -1) {
+					if (!firstLicenseHeaderFound) {
+						firstLicenseHeaderFound = true;
 					}
-
-					return true;
+					else {
+						// This isn't the first license header. Strip it.
+						return false;
+					}
 				}
+
+				// If this is a TypeScript reference comment, strip it.
+				if (comment.value.substr(0, "/<reference path=".length) === "/<reference path=") {
+					return false;
+				}
+
+				/* Align multi-line comments correctly.
+				 * TypeScript shifts them one space left, and UJS shifts them four spaces left,
+				 * so shift each line except the first five spaces right.
+				 */
+				if (comment.type === "comment2") {
+					var lines = comment.value.split("\n");
+					lines = [lines[0]].concat(lines.slice(1).map(function (line) { return '     ' + line; }));
+					comment.value = lines.join('\n');
+				}
+
+				return true;
 			}
 		};
 
@@ -170,7 +184,7 @@ namespace("_default", function () {
 		var originalWarn = UglifyJS.AST_Node.warn;
 		UglifyJS.AST_Node.warn = function (text, properties) {
 			if (
-				(text === "Eval is used [{file}:{line},{col}]" && properties.file === "libjass.js" && properties.line === 23) ||
+				(text === "Eval is used [{file}:{line},{col}]" && properties.file === "libjass.js" && properties.line === 22) ||
 				(text === "Couldn't figure out mapping for {file}:{line},{col} → {cline},{ccol} [{name}]" && properties.file === "libjass.js" && properties.line === 1 && properties.col === 0 && properties.cline === 1 && properties.ccol === 1)
 			) {
 				return;
