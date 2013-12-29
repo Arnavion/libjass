@@ -27,6 +27,8 @@ namespace("_default", function () {
 			toplevel: null
 		});
 
+		root = root.wrap_enclose(['((typeof module !== "undefined") && module.exports) || ((typeof this !== "undefined") && (this.libjass = {})):libjass']);
+
 		root.figure_out_scope();
 
 
@@ -35,22 +37,33 @@ namespace("_default", function () {
 
 		nodesToRemove = [];
 
-		// 1. All but the first top-level "var libjass;"
-		var firstVarLibjassFound = false;
+		// 1. All the top-level "var libjass;"
 		root.walk(new UglifyJS.TreeWalker(function (node, descend) {
 			if (node instanceof UglifyJS.AST_Var && node.definitions[0].name.name === "libjass") {
-				if (firstVarLibjassFound === false) {
-					firstVarLibjassFound = true;
+				nodesToRemove.push({ node: node, parent: this.parent().body });
+			}
+		}));
+
+		// 2. All but the first top-level "var __extends = ..."
+		var firstVarExtendsFound = false;
+		root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+			if (node instanceof UglifyJS.AST_Var && node.definitions[0].name.name === "__extends") {
+				if (firstVarExtendsFound === false) {
+					firstVarExtendsFound = true;
+					// Remove the check for this.__extends
+					node.definitions[0].value = node.definitions[0].value.right;
+					// console.log(require("util").inspect(node.definitions[0]));
+					// throw 5;
 				}
 				else {
-					nodesToRemove.push({ node: node, parent: root.body });
+					nodesToRemove.push({ node: node, parent: this.parent().body });
 				}
 			}
 		}));
 
 		// Repeat because removing some declarations may make others unreferenced
 		for (;;) {
-			// 2. Unreferenced variable and function declarations, and unreferenced terminal function arguments
+			// 3. Unreferenced variable and function declarations, and unreferenced terminal function arguments
 			root.walk(new UglifyJS.TreeWalker(function (node, descend) {
 				if (node instanceof UglifyJS.AST_SymbolDeclaration && node.unreferenced()) {
 					if (node instanceof UglifyJS.AST_SymbolFunarg) {
@@ -82,7 +95,6 @@ namespace("_default", function () {
 
 			root.figure_out_scope();
 		}
-
 
 		// Output
 		var firstLicenseHeaderFound = false; // To detect and preserve the first license header
@@ -158,7 +170,8 @@ namespace("_default", function () {
 		var originalWarn = UglifyJS.AST_Node.warn;
 		UglifyJS.AST_Node.warn = function (text, properties) {
 			if (
-				(text === "Eval is used [{file}:{line},{col}]" && properties.file === "libjass.js" && properties.line === 23)
+				(text === "Eval is used [{file}:{line},{col}]" && properties.file === "libjass.js" && properties.line === 23) ||
+				(text === "Couldn't figure out mapping for {file}:{line},{col} → {cline},{ccol} [{name}]" && properties.file === "libjass.js" && properties.line === 1 && properties.col === 0 && properties.cline === 1 && properties.ccol === 1)
 			) {
 				return;
 			}

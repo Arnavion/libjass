@@ -267,9 +267,3 @@ module libjass {
 		Map = <any>SimpleMap;
 	}
 }
-
-var module: any;
-
-if (module && module.exports) {
-	module.exports = libjass;
-}
