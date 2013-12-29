@@ -28,7 +28,7 @@ module libjass.renderers {
 	 *
 	 * @param {!HTMLVideoElement} video
 	 * @param {!libjass.ASS} ass
-	 * @param {!libjass.RendererSettings} settings
+	 * @param {!libjass.renderers.RendererSettings} settings
 	 *
 	 * @memberof libjass.renderers
 	 */
