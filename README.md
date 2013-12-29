@@ -34,22 +34,22 @@ Only libjass.js is needed to use libjass on your website. The other files are on
 
 The API documentation is linked in the Links section below. Here's an overview:
 
-* The constructor ASS() takes in the raw ASS string and returns an object representing the script information, the line styles and dialogue lines in it. The example index.js uses XHR to get this data using the URL specified in a track tag.
+* The constructor [ASS()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS) takes in the raw ASS string and returns an object representing the script information, the line styles and dialogue lines in it. The example index.js uses XHR to get this data using the URL specified in a track tag.
 
-* index.js initializes a default renderer that libjass ships with, the DefaultRenderer. This renderer uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (#libjass-subs) containing div's corresponding to the 9 alignment directions, 9 for each layer in the ASS script. index.css contains styles for these div's to render them at the correct location.
+* index.js initializes a default renderer that libjass ships with, the [DefaultRenderer](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.DefaultRenderer). This renderer uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (.libjass-subs) containing div's corresponding to the 9 alignment directions, 9 for each layer in the ASS script. libjass.css contains styles for these div's to render them at the correct location.
 
-* The renderer starts a timer that ticks ever 41ms. In each tick, it determines the set of dialogues to be shown at the current video time, renders each of them as a div, and appendChild's the result into the appropriate layer+alignment div.
+* The renderer starts a timer that ticks every 41ms. In each tick, it determines the set of dialogues to be shown at the current video time, renders each of them as a div, and appendChild's the div into the appropriate layer+alignment div.
 
 * The renderer handles resizing the video and subs when the user clicks the browser's native fullscreen-video button. index.js also contains code to change the size of the video based on user input.
 
-* Lastly, the renderer contains an implementation of preloading all the fonts used in the ASS file. It uses a map of font names to URLs provided by index.js - this map is contained in fonts.css in the form of @font-family rules.
+* Lastly, the renderer contains an implementation of preloading fonts before playing the video. It uses a map of font names to URLs - index.js creates this map from the @font-face rules in fonts.css.
 
 
 ### Can I contribute?
 
 Yes! Feature requests, suggestions, bug reports and pull requests are welcome! I'm especially looking for details and edge-cases of the ASS syntax that libjass doesn't support.
 
-You can also hop by the IRC channel below and ask any questions.
+You can also join the IRC channel below and ask any questions.
 
 
 ## Links
@@ -63,18 +63,15 @@ You can also hop by the IRC channel below and ask any questions.
 ## Supported features
 
 * Styles: Italic, Bold, Underline, StrikeOut, FontName, FontSize, ScaleX, ScaleY, Spacing, PrimaryColor, OutlineColor, Outline, Alignment, MarginL, MarginR, MarginV
-* Tags: \i, \b, \u, \s, \bord, \xbord, \ybord, \blur, \fn, \fs, \fscx, \fscy, \fsp, \frx, \fry, \frz, \fax, \fay, \c, \1c, \3c, \alpha, \1a, \3a, \an, \r, \pos, \fad
+* Tags: \i, \b, \u, \s, \bord, \xbord, \ybord, \blur, \fn, \fs, \fscx, \fscy, \fsp, \frx, \fry, \frz, \fr, \fax, \fay, \c, \1c, \3c, \alpha, \1a, \3a, \an, \a, \r, \pos, \move, \fad, \fade, \p
 * Custom fonts, using CSS web fonts.
 
 
 ## Known bugs
 
+* Unsupported tags: \shad, \xshad, \yshad, \be, \fe, \2c, \4c, \2a, \4a, \k, \K, \kf, \ko, \q, \org, \t, \clip, \iclip
 * \an4, \an5, \an6 aren't positioned correctly.
-* Unsupported tags: Everything else, notably \t.
 * Font sizes aren't pixel perfect.
-* \blur uses an approximation instead of Gaussian blur.
-* ASS draw is unsupported.
-* Subs don't show over a fullscreen video in IE.
 
 
 ## Planned improvements
