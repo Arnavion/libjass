@@ -37,9 +37,6 @@ module libjass {
 		private _resolutionX: number;
 		private _resolutionY: number;
 
-		private _scaleX: number;
-		private _scaleY: number;
-
 		private _styles: StyleMap = Object.create(null);
 		private _dialogues: Dialogue[] = [];
 
@@ -110,24 +107,6 @@ module libjass {
 		}
 
 		/**
-		 * After calling ASS.scaleTo(), this is the multiplicative factor to scale horizontal script resolution to video resolution.
-		 *
-		 * @type {number}
-		 */
-		get scaleX(): number {
-			return this._scaleX;
-		}
-
-		/**
-		 * After calling ASS.scaleTo(), this is the multiplicative factor to scale vertical script resolution to video resolution.
-		 *
-		 * @type {number}
-		 */
-		get scaleY(): number {
-			return this._scaleY;
-		}
-
-		/**
 		 * The styles in this script.
 		 *
 		 * @type {!Object.<string, !libjass.Style>}
@@ -143,18 +122,6 @@ module libjass {
 		 */
 		get dialogues(): Dialogue[] {
 			return this._dialogues;
-		}
-
-		/**
-		 * This method takes in the actual video height and width and prepares the scaleX and scaleY
-		 * properties according to the script resolution.
-		 *
-		 * @param {number} videoWidth The width of the video, in pixels
-		 * @param {number} videoHeight The height of the video, in pixels
-		 */
-		scaleTo(videoWidth: number, videoHeight: number): void {
-			this._scaleX = videoWidth / this._resolutionX;
-			this._scaleY = videoHeight / this._resolutionY;
 		}
 	}
 

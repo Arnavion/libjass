@@ -248,6 +248,9 @@ module libjass.renderers {
 		private _currentSubs: Map<number, HTMLDivElement> = new Map<number, HTMLDivElement>();
 		private _preRenderedSubs: Map<number, HTMLDivElement> = new Map<number, HTMLDivElement>();
 
+		private _scaleX: number;
+		private _scaleY: number;
+
 		private _videoIsFullScreen: boolean = false;
 
 		private _eventListeners: Map<string, Function[]> = new Map<string, Function[]>();
@@ -377,7 +380,8 @@ module libjass.renderers {
 			this._subsWrapper.style.left = ((width - subsWrapperWidth) / 2).toFixed(3) + "px";
 			this._subsWrapper.style.top = ((height - subsWrapperHeight) / 2).toFixed(3) + "px";
 
-			this.ass.scaleTo(subsWrapperWidth, subsWrapperHeight);
+			this._scaleX = subsWrapperWidth / this.ass.resolutionX;
+			this._scaleY = subsWrapperHeight / this.ass.resolutionY;
 
 			// Any dialogues which have been pre-rendered will need to be pre-rendered again.
 			this._preRenderedSubs.clear();
@@ -438,12 +442,9 @@ module libjass.renderers {
 
 			var sub = document.createElement("div");
 
-			var scaleX = this.ass.scaleX;
-			var scaleY = this.ass.scaleY;
-
-			sub.style.marginLeft = (scaleX * dialogue.style.marginLeft) + "px";
-			sub.style.marginRight = (scaleX * dialogue.style.marginRight) + "px";
-			sub.style.marginTop = sub.style.marginBottom = (scaleY * dialogue.style.marginVertical) + "px";
+			sub.style.marginLeft = (this._scaleX * dialogue.style.marginLeft) + "px";
+			sub.style.marginRight = (this._scaleX * dialogue.style.marginRight) + "px";
+			sub.style.marginTop = sub.style.marginBottom = (this._scaleY * dialogue.style.marginVertical) + "px";
 
 			switch (dialogue.alignment) {
 				case 1: case 4: case 7: sub.style.textAlign = "left"; break;
@@ -456,7 +457,7 @@ module libjass.renderers {
 			var divTransformStyle = "";
 
 			var currentSpan: HTMLSpanElement = null;
-			var currentSpanStyles = new SpanStyles(dialogue, scaleX, scaleY, DefaultRenderer._svgDefsElement);
+			var currentSpanStyles = new SpanStyles(dialogue, this._scaleX, this._scaleY, DefaultRenderer._svgDefsElement);
 
 			var startNewSpan = (): void => {
 				if (currentSpan !== null) {
@@ -581,8 +582,8 @@ module libjass.renderers {
 					var positionPart = <parts.Position>part;
 
 					sub.style.position = "absolute";
-					sub.style.left = (scaleX * positionPart.x).toFixed(3) + "px";
-					sub.style.top = (scaleY * positionPart.y).toFixed(3) + "px";
+					sub.style.left = (this._scaleX * positionPart.x).toFixed(3) + "px";
+					sub.style.top = (this._scaleY * positionPart.y).toFixed(3) + "px";
 				}
 
 				else if (part instanceof parts.Move) {
@@ -590,17 +591,17 @@ module libjass.renderers {
 
 					sub.style.position = "absolute";
 					animationCollection.addCustom("linear", new Keyframe(0, {
-						left: (scaleX * movePart.x1).toFixed(3) + "px",
-						top: (scaleY * movePart.y1).toFixed(3) + "px"
+						left: (this._scaleX * movePart.x1).toFixed(3) + "px",
+						top: (this._scaleY * movePart.y1).toFixed(3) + "px"
 					}), new Keyframe(movePart.t1, {
-						left: (scaleX * movePart.x1).toFixed(3) + "px",
-						top: (scaleY * movePart.y1).toFixed(3) + "px"
+						left: (this._scaleX * movePart.x1).toFixed(3) + "px",
+						top: (this._scaleY * movePart.y1).toFixed(3) + "px"
 					}), new Keyframe(movePart.t2, {
-						left: (scaleX * movePart.x2).toFixed(3) + "px",
-						top: (scaleY * movePart.y2).toFixed(3) + "px"
+						left: (this._scaleX * movePart.x2).toFixed(3) + "px",
+						top: (this._scaleY * movePart.y2).toFixed(3) + "px"
 					}), new Keyframe(dialogue.end - dialogue.start, {
-						left: (scaleX * movePart.x2).toFixed(3) + "px",
-						top: (scaleY * movePart.y2).toFixed(3) + "px"
+						left: (this._scaleX * movePart.x2).toFixed(3) + "px",
+						top: (this._scaleY * movePart.y2).toFixed(3) + "px"
 					}));
 				}
 
@@ -635,7 +636,7 @@ module libjass.renderers {
 				}
 
 				else if (part instanceof parts.DrawingMode) {
-					currentDrawing = new Drawing((<parts.DrawingMode>part).scale, scaleX, scaleY);
+					currentDrawing = new Drawing((<parts.DrawingMode>part).scale, this._scaleX, this._scaleY);
 				}
 
 				else if (part instanceof parts.DrawingBaselineOffset) {
