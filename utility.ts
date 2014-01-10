@@ -96,10 +96,11 @@ module libjass {
 		}
 
 		private _toProperty(value: T): string {
-			if (typeof value == "number") {
+			if (typeof value === "number") {
 				return "#" + value;
 			}
-			else if (typeof value == "string") {
+
+			if (typeof value === "string") {
 				return "'" + value;
 			}
 
@@ -109,10 +110,10 @@ module libjass {
 
 	export var Set: {
 		new <T>(): Set<T>;
-	}
+	} = null;
 
 	// Use this browser's implementation of Set if it has one
-	if (typeof global.Set !== "undefined" && typeof global.Set.prototype.forEach === "function") {
+	if (global.Set !== undefined && typeof global.Set.prototype.forEach === "function") {
 		Set = global.Set;
 	}
 	else {
@@ -228,10 +229,11 @@ module libjass {
 		}
 
 		private _keyToProperty(key: K): string {
-			if (typeof key == "number") {
+			if (typeof key === "number") {
 				return "#" + key;
 			}
-			else if (typeof key == "string") {
+
+			if (typeof key === "string") {
 				return "'" + key;
 			}
 
@@ -241,12 +243,12 @@ module libjass {
 
 	export var Map: {
 		new <K, V>(): Map<K, V>;
-	}
+	} = null;
 
 	declare var global: any; // Defined as a parameter of the anonymous function wrapper
 
 	// Use this browser's implementation of Map if it has one
-	if (typeof global.Map !== "undefined" && typeof global.Map.prototype.forEach === "function") {
+	if (global.Map !== undefined && typeof global.Map.prototype.forEach === "function") {
 		Map = global.Map;
 	}
 	else {

@@ -1239,10 +1239,10 @@ module libjass.renderers {
 			span.style.textDecoration = textDecoration.trim();
 
 			var transform = "";
-			if (this._fontScaleX != 1) {
+			if (this._fontScaleX !== 1) {
 				transform += "scaleX(" + this._fontScaleX + ") ";
 			}
-			if (this._fontScaleY != 1) {
+			if (this._fontScaleY !== 1) {
 				transform += "scaleY(" + this._fontScaleY + ")";
 			}
 			if (transform !== "") {
@@ -1290,7 +1290,7 @@ module libjass.renderers {
 
 				for (var x = 0; x < a; x++) {
 					for (var y = 0; (x / a) * (x / a) + (y / b) * (y / b) <= 1; y++) {
-						if (x == 0 && y == 0) {
+						if (x === 0 && y === 0) {
 							continue;
 						}
 

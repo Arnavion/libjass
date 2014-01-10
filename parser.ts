@@ -1960,7 +1960,7 @@ module libjass.parser {
 
 			this.read(current, "H");
 
-			var digitNodes = Array<ParseNode>(6);
+			var digitNodes = new Array<ParseNode>(6);
 
 			for (var i = 0; i < digitNodes.length; i++) {
 				var digitNode = this.parse_hex(current);
@@ -2031,7 +2031,7 @@ module libjass.parser {
 				return null;
 			}
 
-			var digitNodes = Array<ParseNode>(8);
+			var digitNodes = new Array<ParseNode>(8);
 
 			for (var i = 0; i < digitNodes.length; i++) {
 				var digitNode = this.parse_hex(current);
