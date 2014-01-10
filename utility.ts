@@ -22,20 +22,6 @@
 
 "use strict";
 
-interface CSSStyleDeclaration {
-	webkitAnimation: string
-	webkitAnimationDelay: string
-	webkitFilter: string
-	webkitTransform: string
-	webkitTransformOrigin: string
-}
-
-interface Document {
-	fullscreenElement: Element
-	mozFullScreenElement: Element
-	webkitFullscreenElement: Element
-}
-
 module libjass {
 	/**
 	 * Set implementation for browsers that don't support it. Only supports Number and String elements.

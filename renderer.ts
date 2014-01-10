@@ -20,6 +20,20 @@
 
 ///<reference path="libjass.ts" />
 
+interface CSSStyleDeclaration {
+	webkitAnimation: string
+	webkitAnimationDelay: string
+	webkitFilter: string
+	webkitTransform: string
+	webkitTransformOrigin: string
+}
+
+interface Document {
+	fullscreenElement: Element
+	mozFullScreenElement: Element
+	webkitFullscreenElement: Element
+}
+
 module libjass.renderers {
 	/**
 	 * A renderer implementation that doesn't output anything.
