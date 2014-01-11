@@ -379,7 +379,7 @@ module libjass.parser {
 						this.parse_tag_c(current) ||
 						this.parse_tag_i(current) ||
 						this.parse_tag_k(current) ||
- 						this.parse_tag_K(current) ||
+						this.parse_tag_K(current) ||
 						this.parse_tag_p(current) ||
 						this.parse_tag_q(current) ||
 						this.parse_tag_r(current) ||
