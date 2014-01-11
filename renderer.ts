@@ -1525,10 +1525,16 @@ module libjass.renderers {
 	 * @memberof libjass.renderers
 	 */
 	class Drawing {
+		private _scaleX: number;
+		private _scaleY: number;
 		private _baselineOffset: number = 0;
 		private _instructions: parts.drawing.Instruction[] = [];
 
-		constructor(private _drawingScale: number, private _scaleX: number, private _scaleY: number) { }
+		constructor(drawingScale: number, scaleX: number, scaleY: number) {
+			var scaleFactor = Math.pow(2, drawingScale - 1);
+			this._scaleX = scaleX / scaleFactor;
+			this._scaleY = scaleY / scaleFactor;
+		}
 
 		/**
 		 * @type {number}
@@ -1576,8 +1582,8 @@ module libjass.renderers {
 			});
 
 			var result =
-				'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="' + (bboxWidth / this._drawingScale * this._scaleX).toFixed(3) + 'px" height="' + (bboxHeight / this._drawingScale * this._scaleY).toFixed(3) + 'px">\n' +
-				'\t<g transform="scale(' + (1 / this._drawingScale * this._scaleX).toFixed(3) + ' ' + (1 / this._drawingScale * this._scaleY).toFixed(3) + ')">\n' +
+				'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="' + (bboxWidth * this._scaleX).toFixed(3) + 'px" height="' + (bboxHeight * this._scaleY).toFixed(3) + 'px">\n' +
+				'\t<g transform="scale(' + this._scaleX.toFixed(3) + ' ' + this._scaleY.toFixed(3) + ')">\n' +
 				'\t\t<path d="' + path + '" />\n' +
 				'\t</g>\n' +
 				'</svg>';
