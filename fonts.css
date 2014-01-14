@@ -49,6 +49,11 @@
 }
 
 @font-face {
+	font-family: "Balzano";
+	src: url("/fonts/BALZANO.ttf");
+}
+
+@font-face {
 	font-family: "Bee Marker Ink";
 	src: url("/fonts/BeeMarkerInk.TTF");
 }
@@ -59,8 +64,30 @@
 }
 
 @font-face {
+	font-family: "Berlin Sans FB Demi";
+	src: url("/fonts/BRLNSDB.TTF"), url("/fonts/BRLNSDB_0.TTF");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "BerlinSansFBDemi-Bold";
+	src: url("/fonts/BRLNSDB.TTF"), url("/fonts/BRLNSDB_0.TTF");
+	font-weight: bold;
+}
+
+@font-face {
 	font-family: "BlueBrush";
 	src: url("/fonts/BlueBrush.otf");
+}
+
+@font-face {
+	font-family: "Brianne's hand";
+	src: url("/fonts/Brianne_s_hand.ttf");
+}
+
+@font-face {
+	font-family: "Brianne'shand";
+	src: url("/fonts/Brianne_s_hand.ttf");
 }
 
 @font-face {
@@ -157,6 +184,28 @@
 	font-family: "Designosaur-Italic";
 	src: url("/fonts/Designosaur-Italic.ttf");
 	font-style: italic;
+}
+
+@font-face {
+	font-family: "Dutch766 BT";
+	src: url("/fonts/Du766Bd.ttf");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "Dutch766BT-BoldA";
+	src: url("/fonts/Du766Bd.ttf");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "EFN Impresja";
+	src: url("/fonts/impresja.ttf");
+}
+
+@font-face {
+	font-family: "EFNImpresja";
+	src: url("/fonts/impresja.ttf");
 }
 
 @font-face {
@@ -271,6 +320,18 @@
 }
 
 @font-face {
+	font-family: "HandVetica";
+	src: url("/fonts/HandVetica.ttf");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "HandVetica-Bold";
+	src: url("/fonts/HandVetica.ttf");
+	font-weight: bold;
+}
+
+@font-face {
 	font-family: "HiraginoGyoDS-W4";
 	src: url("/fonts/HiraginoGyoDS-W4.ttf");
 }
@@ -345,7 +406,7 @@
 
 @font-face {
 	font-family: "LinotypeFinnegan-Medium";
-	src: url("/fonts/LT.ttf"), url("/fonts/macron%20finnetier%200.3.ttf");
+	src: url("/fonts/LT.ttf"), url("/fonts/LT_3.ttf"), url("/fonts/LT_4.ttf"), url("/fonts/macron%20finnetier%200.3.ttf");
 }
 
 @font-face {
@@ -356,7 +417,7 @@
 
 @font-face {
 	font-family: "LTFinnegan Medium";
-	src: url("/fonts/LT.ttf"), url("/fonts/macron%20finnetier%200.3.ttf");
+	src: url("/fonts/LT.ttf"), url("/fonts/LT_3.ttf"), url("/fonts/LT_4.ttf"), url("/fonts/macron%20finnetier%200.3.ttf");
 }
 
 @font-face {
