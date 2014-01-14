@@ -46,7 +46,7 @@ module libjass {
 			var script = parser.parse(rawASS, "script");
 
 			// Get the script info template
-			var infoTemplate: Object = script["Script Info"];
+			var infoTemplate: Template = script["Script Info"];
 
 			if (libjass.verboseMode) {
 				console.log("Read script info: " + JSON.stringify(infoTemplate), infoTemplate);

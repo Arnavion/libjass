@@ -35,7 +35,7 @@ module libjass {
 	 * @memberof libjass
 	 */
 	class SimpleSet<T> implements Set<T> {
-		private _data: Object;
+		private _elements: { [key: string]: T };
 
 		constructor() {
 			this.clear();
@@ -52,7 +52,7 @@ module libjass {
 				throw new Error("This Set implementation only supports Number and String values.");
 			}
 
-			this._data[property] = value;
+			this._elements[property] = value;
 
 			return this;
 		}
@@ -60,7 +60,7 @@ module libjass {
 		/**
 		 */
 		clear(): void {
-			this._data = Object.create(null);
+			this._elements = Object.create(null);
 		}
 
 		/**
@@ -74,16 +74,16 @@ module libjass {
 				return false;
 			}
 
-			return property in this._data;
+			return property in this._elements;
 		}
 
 		/**
 		 * @param {function(T, T, libjass.Set.<T>)} callbackfn A function that is called with each value in the set.
 		 */
 		forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void {
-			Object.keys(this._data).map((property: string) => {
-				var value = this._data[property];
-				callbackfn.call(thisArg, value, value, this);
+			Object.keys(this._elements).map((property: string) => {
+				var element = this._elements[property];
+				callbackfn.call(thisArg, element, element, this);
 			});
 		}
 
