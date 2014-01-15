@@ -527,6 +527,19 @@ module libjass.renderers {
 					currentSpanStyles.outlineHeight = (<parts.BorderY>part).value;
 				}
 
+				else if (part instanceof parts.Shadow) {
+					currentSpanStyles.shadowDepthX = (<parts.Shadow>part).value;
+					currentSpanStyles.shadowDepthY = (<parts.Shadow>part).value;
+				}
+
+				else if (part instanceof parts.ShadowX) {
+					currentSpanStyles.shadowDepthX = (<parts.ShadowX>part).value;
+				}
+
+				else if (part instanceof parts.ShadowY) {
+					currentSpanStyles.shadowDepthY = (<parts.ShadowY>part).value;
+				}
+
 				else if (part instanceof parts.GaussianBlur) {
 					currentSpanStyles.blur = (<parts.GaussianBlur>part).value;
 				}
@@ -579,9 +592,14 @@ module libjass.renderers {
 					currentSpanStyles.outlineColor = (<parts.OutlineColor>part).value;
 				}
 
+				else if (part instanceof parts.ShadowColor) {
+					currentSpanStyles.shadowColor = (<parts.ShadowColor>part).value;
+				}
+
 				else if (part instanceof parts.Alpha) {
 					currentSpanStyles.primaryAlpha = (<parts.Alpha>part).value;
 					currentSpanStyles.outlineAlpha = (<parts.Alpha>part).value;
+					currentSpanStyles.shadowAlpha = (<parts.Alpha>part).value;
 				}
 
 				else if (part instanceof parts.PrimaryAlpha) {
@@ -590,6 +608,10 @@ module libjass.renderers {
 
 				else if (part instanceof parts.OutlineAlpha) {
 					currentSpanStyles.outlineAlpha = (<parts.OutlineAlpha>part).value;
+				}
+
+				else if (part instanceof parts.ShadowAlpha) {
+					currentSpanStyles.shadowAlpha = (<parts.ShadowAlpha>part).value;
 				}
 
 				else if (part instanceof parts.Alignment) {
@@ -1159,6 +1181,9 @@ module libjass.renderers {
 		private _outlineWidth: number;
 		private _outlineHeight: number;
 
+		private _shadowDepthX: number;
+		private _shadowDepthY: number;
+
 		private _fontName: string;
 		private _fontSize: number;
 
@@ -1169,9 +1194,11 @@ module libjass.renderers {
 
 		private _primaryColor: parts.Color;
 		private _outlineColor: parts.Color;
+		private _shadowColor: parts.Color;
 
 		private _primaryAlpha: number;
 		private _outlineAlpha: number;
+		private _shadowAlpha: number;
 
 		private _blur: number;
 
@@ -1202,6 +1229,9 @@ module libjass.renderers {
 			this.outlineWidth = newStyle.outlineThickness;
 			this.outlineHeight = newStyle.outlineThickness;
 
+			this.shadowDepthX = newStyle.shadowDepth;
+			this.shadowDepthY = newStyle.shadowDepth;
+
 			this.fontName = newStyle.fontName;
 			this.fontSize = newStyle.fontSize;
 
@@ -1212,9 +1242,11 @@ module libjass.renderers {
 
 			this.primaryColor = newStyle.primaryColor;
 			this.outlineColor = newStyle.outlineColor;
+			this.shadowColor = newStyle.shadowColor;
 
 			this.primaryAlpha = null;
 			this.outlineAlpha = null;
+			this.shadowAlpha = null;
 
 			this.blur = null;
 		}
@@ -1373,6 +1405,9 @@ module libjass.renderers {
 				filterWrapperSpan.style.filter = 'url("#' + filterId + '")';
 			}
 
+			var shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
+			span.style.textShadow = shadowColor.toString() + " " + (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) + "px " + (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) + "px 0px";
+
 			return filterWrapperSpan;
 		}
 
@@ -1428,6 +1463,24 @@ module libjass.renderers {
 		 */
 		set outlineHeight(value: number) {
 			this._outlineHeight = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineThickness);
+		}
+
+		/**
+		 * Sets the outline width property. null defaults it to the style's original shadow depth X value.
+		 *
+		 * @type {?number}
+		 */
+		set shadowDepthX(value: number) {
+			this._shadowDepthX = SpanStyles._valueOrDefault(value, this._defaultStyle.shadowDepth);
+		}
+
+		/**
+		 * Sets the shadow height property. null defaults it to the style's original shadow depth Y value.
+		 *
+		 * @type {?number}
+		 */
+		set shadowDepthY(value: number) {
+			this._shadowDepthY = SpanStyles._valueOrDefault(value, this._defaultStyle.shadowDepth);
 		}
 
 		/**
@@ -1503,6 +1556,15 @@ module libjass.renderers {
 		}
 
 		/**
+		 * Sets the shadow color property. null defaults it to the default style's value.
+		 *
+		 * @type {libjass.parts.Color}
+		 */
+		set shadowColor(value: parts.Color) {
+			this._shadowColor = SpanStyles._valueOrDefault(value, this._defaultStyle.shadowColor);
+		}
+
+		/**
 		 * Sets the primary alpha property.
 		 *
 		 * @type {?number}
@@ -1518,6 +1580,15 @@ module libjass.renderers {
 		 */
 		set outlineAlpha(value: number) {
 			this._outlineAlpha = value;
+		}
+
+		/**
+		 * Sets the shadow alpha property.
+		 *
+		 * @type {?number}
+		 */
+		set shadowAlpha(value: number) {
+			this._shadowAlpha = value;
 		}
 
 		private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);

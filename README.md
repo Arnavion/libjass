@@ -62,14 +62,14 @@ You can also join the IRC channel below and ask any questions.
 
 ## Supported features
 
-* Styles: Italic, Bold, Underline, StrikeOut, FontName, FontSize, ScaleX, ScaleY, Spacing, PrimaryColor, OutlineColor, Outline, Alignment, MarginL, MarginR, MarginV
-* Tags: \i, \b, \u, \s, \bord, \xbord, \ybord, \blur, \fn, \fs, \fscx, \fscy, \fsp, \frx, \fry, \frz, \fr, \fax, \fay, \c, \1c, \3c, \alpha, \1a, \3a, \an, \a, \r, \pos, \move, \fad, \fade, \p
+* Styles: Italic, Bold, Underline, StrikeOut, FontName, FontSize, ScaleX, ScaleY, Spacing, PrimaryColor, OutlineColor, BackColor, Outline, Shadow, Alignment, MarginL, MarginR, MarginV
+* Tags: \i, \b, \u, \s, \bord, \xbord, \ybord, \shad, \xshad, \yshad, \blur, \fn, \fs, \fscx, \fscy, \fsp, \frx, \fry, \frz, \fr, \fax, \fay, \c, \1c, \3c, \4c, \alpha, \1a, \3a, \4a, \an, \a, \r, \pos, \move, \fad, \fade, \p
 * Custom fonts, using CSS web fonts.
 
 
 ## Known bugs
 
-* Unsupported tags: \shad, \xshad, \yshad, \be, \fe, \2c, \4c, \2a, \4a, \k, \K, \kf, \ko, \q, \org, \t, \clip, \iclip
+* Unsupported tags: \be, \fe, \2c, \2a, \k, \K, \kf, \ko, \q, \org, \t, \clip, \iclip
 * \an4, \an5, \an6 aren't positioned correctly.
 * Font sizes aren't pixel perfect.
 

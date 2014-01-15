@@ -143,7 +143,9 @@ module libjass {
 	 * @param {string} template["Spacing"] The letter spacing of the font
 	 * @param {string} template["PrimaryColor"] The primary color
 	 * @param {string} template["OutlineColor"] The outline color
+	 * @param {string} template["BackColor"] The shadow color
 	 * @param {string} template["Outline"] The outline thickness
+	 * @param {string} template["Shadow"] The shadow depth
 	 * @param {string} template["Alignment"] The alignment number
 	 * @param {string} template["MarginL"] The left margin
 	 * @param {string} template["MarginR"] The right margin
@@ -169,8 +171,11 @@ module libjass {
 
 		private _primaryColor: parts.Color;
 		private _outlineColor: parts.Color;
+		private _shadowColor: parts.Color;
 
 		private _outlineThickness: number;
+
+		private _shadowDepth: number;
 
 		private _alignment: number;
 
@@ -196,8 +201,11 @@ module libjass {
 
 			this._primaryColor = <parts.Color>parser.parse(template["PrimaryColour"], "colorWithAlpha");
 			this._outlineColor = <parts.Color>parser.parse(template["OutlineColour"], "colorWithAlpha");
+			this._shadowColor = <parts.Color>parser.parse(template["BackColour"], "colorWithAlpha");
 
 			this._outlineThickness = parseFloat(template["Outline"]);
+
+			this._shadowDepth = parseFloat(template["Shadow"]);
 
 			this._alignment = parseInt(template["Alignment"]);
 
@@ -315,12 +323,30 @@ module libjass {
 		}
 
 		/**
+		 * The color of this style's shadow.
+		 *
+		 * @type {!libjass.parts.Color}
+		 */
+		get shadowColor(): parts.Color {
+			return this._shadowColor;
+		}
+
+		/**
 		 * The thickness of this style's outline.
 		 *
 		 * @type {number}
 		 */
 		get outlineThickness(): number {
 			return this._outlineThickness;
+		}
+
+		/**
+		 * The depth of this style's shadow.
+		 *
+		 * @type {number}
+		 */
+		get shadowDepth(): number {
+			return this._shadowDepth;
 		}
 
 		/**
