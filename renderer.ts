@@ -48,6 +48,9 @@ module libjass.renderers {
 	 */
 	export class NullRenderer {
 		private static _highResolutionTimerInterval: number = 41;
+		private static _lastRendererId = -1;
+
+		private _id: number;
 
 		private _settings: RendererSettings;
 
@@ -60,6 +63,8 @@ module libjass.renderers {
 		private _timeUpdateIntervalHandle: number = null;
 
 		constructor(private _video: HTMLVideoElement, private _ass: ASS, settings: RendererSettings) {
+			this._id = ++NullRenderer._lastRendererId;
+
 			this._settings = RendererSettings.from(settings);
 
 			// Sort the dialogues array by end time and then by their original position in the script (id)
@@ -80,6 +85,15 @@ module libjass.renderers {
 			this._video.addEventListener("seeking", () => this._onVideoSeeking(), false);
 			this._video.addEventListener("pause", () => this._onVideoPause(), false);
 			this._video.addEventListener("playing", () => this._onVideoPlaying(), false);
+		}
+
+		/**
+		 * The unique ID of this renderer. Auto-generated.
+		 *
+		 * @type {number}
+		 */
+		get id(): number {
+			return this._id;
 		}
 
 		/**
@@ -252,12 +266,11 @@ module libjass.renderers {
 	 * @memberof libjass.renderers
 	 */
 	export class DefaultRenderer extends NullRenderer {
-		private static _animationStyleElement: HTMLStyleElement = null;
-		private static _svgDefsElement: SVGDefsElement = null;
-
 		private _videoSubsWrapper: HTMLDivElement;
 		private _subsWrapper: HTMLDivElement;
 		private _layerAlignmentWrappers: HTMLDivElement[][] = [];
+		private _animationStyleElement: HTMLStyleElement = null;
+		private _svgDefsElement: SVGDefsElement = null;
 
 		private _currentSubs: Map<number, HTMLDivElement> = new Map<number, HTMLDivElement>();
 		private _preRenderedSubs: Map<number, HTMLDivElement> = new Map<number, HTMLDivElement>();
@@ -290,8 +303,8 @@ module libjass.renderers {
 			svgElement.setAttribute("width", "0");
 			svgElement.setAttribute("height", "0");
 
-			DefaultRenderer._svgDefsElement = <SVGDefsElement>document.createElementNS("http://www.w3.org/2000/svg", "defs");
-			svgElement.appendChild(DefaultRenderer._svgDefsElement);
+			this._svgDefsElement = <SVGDefsElement>document.createElementNS("http://www.w3.org/2000/svg", "defs");
+			svgElement.appendChild(this._svgDefsElement);
 
 			if (this.settings.fontMap === null) {
 				setTimeout(() => this._ready(), 0);
@@ -400,14 +413,14 @@ module libjass.renderers {
 			// Any dialogues which have been pre-rendered will need to be pre-rendered again.
 			this._preRenderedSubs.clear();
 
-			if (DefaultRenderer._animationStyleElement !== null) {
-				while (DefaultRenderer._animationStyleElement.firstChild !== null) {
-					DefaultRenderer._animationStyleElement.removeChild(DefaultRenderer._animationStyleElement.firstChild);
+			if (this._animationStyleElement !== null) {
+				while (this._animationStyleElement.firstChild !== null) {
+					this._animationStyleElement.removeChild(this._animationStyleElement.firstChild);
 				}
 			}
 
-			while (DefaultRenderer._svgDefsElement.firstChild !== null) {
-				DefaultRenderer._svgDefsElement.removeChild(DefaultRenderer._svgDefsElement.firstChild);
+			while (this._svgDefsElement.firstChild !== null) {
+				this._svgDefsElement.removeChild(this._svgDefsElement.firstChild);
 			}
 
 			this.onVideoTimeUpdate();
@@ -466,12 +479,12 @@ module libjass.renderers {
 				case 3: case 6: case 9: sub.style.textAlign = "right"; break;
 			}
 
-			var animationCollection = new AnimationCollection(dialogue);
+			var animationCollection = new AnimationCollection(this, dialogue);
 
 			var divTransformStyle = "";
 
 			var currentSpan: HTMLSpanElement = null;
-			var currentSpanStyles = new SpanStyles(dialogue, this._scaleX, this._scaleY, DefaultRenderer._svgDefsElement);
+			var currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this._svgDefsElement);
 
 			var startNewSpan = (): void => {
 				if (currentSpan !== null) {
@@ -696,24 +709,19 @@ module libjass.renderers {
 				sub.style.transformOrigin = transformOriginString;
 			}
 
-			if (DefaultRenderer._animationStyleElement === null) {
-				var existingStyleElement = <HTMLStyleElement>document.querySelector("#libjass-animation-styles");
-				if (existingStyleElement === null) {
-					existingStyleElement = document.createElement("style");
-					existingStyleElement.id = "libjass-animation-styles";
-					existingStyleElement.type = "text/css";
-					document.querySelector("head").appendChild(existingStyleElement);
-				}
-
-				DefaultRenderer._animationStyleElement = existingStyleElement;
+			if (this._animationStyleElement === null) {
+				this._animationStyleElement = document.createElement("style");
+				this._animationStyleElement.id = "libjass-animation-styles-" + this.id;
+				this._animationStyleElement.type = "text/css";
+				document.querySelector("head").appendChild(this._animationStyleElement);
 			}
 
-			DefaultRenderer._animationStyleElement.appendChild(document.createTextNode(animationCollection.cssText));
+			this._animationStyleElement.appendChild(document.createTextNode(animationCollection.cssText));
 
 			sub.style.webkitAnimation = animationCollection.animationStyle;
 			sub.style.animation = animationCollection.animationStyle;
 
-			sub.setAttribute("data-dialogue-id", String(dialogue.id));
+			sub.setAttribute("data-dialogue-id", this.id + "-" + dialogue.id);
 
 			this._preRenderedSubs.set(dialogue.id, sub);
 		}
@@ -1016,13 +1024,14 @@ module libjass.renderers {
 	 * The collection can then be converted to a CSS3 representation.
 	 *
 	 * @constructor
+	 * @param {!libjass.renderers.NullRenderer} renderer The renderer that this collection is associated with
 	 * @param {!libjass.Dialogue} dialogue The Dialogue that this collection is associated with
 	 *
 	 * @private
 	 * @memberof libjass.renderers
 	 */
 	class AnimationCollection {
-		private _id: number;
+		private _id: string;
 		private _start: number;
 		private _end: number;
 
@@ -1030,8 +1039,8 @@ module libjass.renderers {
 		private _animationStyle: string = "";
 		private _numAnimations: number = 0;
 
-		constructor(dialogue: Dialogue) {
-			this._id = dialogue.id;
+		constructor(renderer: NullRenderer, dialogue: Dialogue) {
+			this._id = renderer.id + "-" + dialogue.id;
 			this._start = dialogue.start;
 			this._end = dialogue.end;
 		}
@@ -1129,6 +1138,7 @@ module libjass.renderers {
 	 * As a Dialogue's div is rendered, individual parts are added to span's, and this class is used to maintain the style attribute of those.
 	 *
 	 * @constructor
+	 * @param {!libjass.renderers.NullRenderer} renderer The renderer that this set of styles is associated with
 	 * @param {!libjass.Dialogue} dialogue The Dialogue that this set of styles is associated with
 	 * @param {number} scaleX The horizontal scaling of the subtitles
 	 * @param {number} scaleY The vertical scaling of the subtitles
@@ -1138,7 +1148,7 @@ module libjass.renderers {
 	 * @memberof libjass.renderers
 	 */
 	class SpanStyles {
-		private _id: number;
+		private _id: string;
 		private _defaultStyle: Style;
 
 		private _italic: boolean;
@@ -1167,8 +1177,8 @@ module libjass.renderers {
 
 		private _nextFilterId = 0;
 
-		constructor(dialogue: Dialogue, private _scaleX: number, private _scaleY: number, private _svgDefsElement: SVGDefsElement) {
-			this._id = dialogue.id;
+		constructor(renderer: NullRenderer, dialogue: Dialogue, private _scaleX: number, private _scaleY: number, private _svgDefsElement: SVGDefsElement) {
+			this._id = renderer.id + "-" + dialogue.id;
 			this._defaultStyle = dialogue.style;
 
 			this.reset(null);
