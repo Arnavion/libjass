@@ -14,8 +14,25 @@
 }
 
 @font-face {
+	font-family: "AmbersHand-Plain";
+	src: url("/fonts/LEHN011.TTF");
+}
+
+@font-face {
 	font-family: "Amienne";
 	src: url("/fonts/Amienne.ttf");
+}
+
+@font-face {
+	font-family: "A-OTF Futo Min A101 Pro";
+	src: url("/fonts/A-OTF-FutoMinA101Pro-Bold.otf");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "A-OTF Futo Min A101 Pro Bold";
+	src: url("/fonts/A-OTF-FutoMinA101Pro-Bold.otf");
+	font-weight: bold;
 }
 
 @font-face {
@@ -219,6 +236,11 @@
 }
 
 @font-face {
+	font-family: "EmilysHand-Plain";
+	src: url("/fonts/LEHN084.TTF");
+}
+
+@font-face {
 	font-family: "EngraversGothic BT";
 	src: url("/fonts/Engrvgot.TTF");
 }
@@ -254,6 +276,50 @@
 }
 
 @font-face {
+	font-family: "FarrahsHand-Plain";
+	src: url("/fonts/LEHN095.TTF");
+}
+
+@font-face {
+	font-family: "Fontin Sans";
+	src: url("/fonts/FONTIN_SANS.OTF");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "Fontin Sans";
+	src: url("/fonts/FONTIN_SANS_BI.OTF");
+	font-weight: bold;
+	font-style: italic;
+}
+
+@font-face {
+	font-family: "Fontin Sans Rg";
+	src: url("/fonts/FONTIN_SANS.OTF");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "Fontin Sans Rg";
+	src: url("/fonts/FONTIN_SANS_BI.OTF");
+	font-weight: bold;
+	font-style: italic;
+}
+
+@font-face {
+	font-family: "FontinSans-Bold";
+	src: url("/fonts/FONTIN_SANS.OTF");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "FontinSans-BoldItalic";
+	src: url("/fonts/FONTIN_SANS_BI.OTF");
+	font-weight: bold;
+	font-style: italic;
+}
+
+@font-face {
 	font-family: "Forte";
 	src: url("/fonts/FORTE.TTF");
 }
@@ -271,6 +337,12 @@
 @font-face {
 	font-family: "Franchise-Bold";
 	src: url("/fonts/Franchise-Bold-hinted.ttf");
+}
+
+@font-face {
+	font-family: "FutoMinA101Pro-Bold";
+	src: url("/fonts/A-OTF-FutoMinA101Pro-Bold.otf");
+	font-weight: bold;
 }
 
 @font-face {
@@ -342,6 +414,31 @@
 }
 
 @font-face {
+	font-family: "Impressum Std";
+	src: url("/fonts/ImpressumStd-Roman.otf");
+}
+
+@font-face {
+	font-family: "ImpressumStd-Roman";
+	src: url("/fonts/ImpressumStd-Roman.otf");
+}
+
+@font-face {
+	font-family: "ITC Avant Garde Gothic Std";
+	src: url("/fonts/ITCAvantGardeStd-Md.otf");
+}
+
+@font-face {
+	font-family: "ITC Avant Garde Std Md";
+	src: url("/fonts/ITCAvantGardeStd-Md.otf");
+}
+
+@font-face {
+	font-family: "ITCAvantGardeStd-Md";
+	src: url("/fonts/ITCAvantGardeStd-Md.otf");
+}
+
+@font-face {
 	font-family: "IwaMinPro-Madoka-Lt";
 	src: url("/fonts/IwaMinPro-Lt-Madoka.ttf");
 }
@@ -377,6 +474,21 @@
 }
 
 @font-face {
+	font-family: "Kabel LT Std";
+	src: url("/fonts/KabelLTStd-Book.otf");
+}
+
+@font-face {
+	font-family: "Kabel LT Std Book";
+	src: url("/fonts/KabelLTStd-Book.otf");
+}
+
+@font-face {
+	font-family: "KabelLTStd-Book";
+	src: url("/fonts/KabelLTStd-Book.otf");
+}
+
+@font-face {
 	font-family: "KozGoPro-Heavy-Madoka";
 	src: url("/fonts/KozGoProH-Madoka.ttf");
 	font-weight: bold;
@@ -392,6 +504,21 @@
 	font-family: "KozukaGothicProH-Madoka";
 	src: url("/fonts/KozGoProH-Madoka.ttf");
 	font-weight: bold;
+}
+
+@font-face {
+	font-family: "LEHN011";
+	src: url("/fonts/LEHN011.TTF");
+}
+
+@font-face {
+	font-family: "LEHN084";
+	src: url("/fonts/LEHN084.TTF");
+}
+
+@font-face {
+	font-family: "LEHN095";
+	src: url("/fonts/LEHN095.TTF");
 }
 
 @font-face {
@@ -413,6 +540,11 @@
 	font-family: "LinotypeFinnegan-MediumIt";
 	src: url("/fonts/LT_3italic.ttf"), url("/fonts/LT_italic.ttf");
 	font-style: italic;
+}
+
+@font-face {
+	font-family: "LLRubberGrotesqueOTF";
+	src: url("/fonts/LLRUG.ttf");
 }
 
 @font-face {
@@ -508,6 +640,16 @@
 }
 
 @font-face {
+	font-family: "Old newspaper font";
+	src: url("/fonts/Old_Newspaper_Font.ttf");
+}
+
+@font-face {
+	font-family: "Oldnewspaperfont";
+	src: url("/fonts/Old_Newspaper_Font.ttf");
+}
+
+@font-face {
 	font-family: "Painfresco";
 	src: url("/fonts/Painfresco-Regular.ttf");
 }
@@ -596,6 +738,16 @@
 }
 
 @font-face {
+	font-family: "Spectrum MT Std";
+	src: url("/fonts/SpectrumMTStd.otf");
+}
+
+@font-face {
+	font-family: "SpectrumMTStd";
+	src: url("/fonts/SpectrumMTStd.otf");
+}
+
+@font-face {
 	font-family: "Swis721 Hv BT";
 	src: url("/fonts/SWZ721H.TTF");
 }
@@ -613,6 +765,16 @@
 @font-face {
 	font-family: "Swiss721BT-Medium";
 	src: url("/fonts/SWZ721M.TTF");
+}
+
+@font-face {
+	font-family: "Unisketchlightlimited";
+	src: url("/fonts/Unisketch-light_limited.ttf");
+}
+
+@font-face {
+	font-family: "Unisketch-lightlimitedLight";
+	src: url("/fonts/Unisketch-light_limited.ttf");
 }
 
 @font-face {
