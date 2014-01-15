@@ -143,7 +143,7 @@ module libjass {
 	 * @param {string} template["Spacing"] The letter spacing of the font
 	 * @param {string} template["PrimaryColor"] The primary color
 	 * @param {string} template["OutlineColor"] The outline color
-	 * @param {string} template["Outline"] The outline width
+	 * @param {string} template["Outline"] The outline thickness
 	 * @param {string} template["Alignment"] The alignment number
 	 * @param {string} template["MarginL"] The left margin
 	 * @param {string} template["MarginR"] The right margin
@@ -170,7 +170,7 @@ module libjass {
 		private _primaryColor: parts.Color;
 		private _outlineColor: parts.Color;
 
-		private _outlineWidth: number;
+		private _outlineThickness: number;
 
 		private _alignment: number;
 
@@ -197,7 +197,7 @@ module libjass {
 			this._primaryColor = <parts.Color>parser.parse(template["PrimaryColour"], "colorWithAlpha");
 			this._outlineColor = <parts.Color>parser.parse(template["OutlineColour"], "colorWithAlpha");
 
-			this._outlineWidth = parseFloat(template["Outline"]);
+			this._outlineThickness = parseFloat(template["Outline"]);
 
 			this._alignment = parseInt(template["Alignment"]);
 
@@ -315,12 +315,12 @@ module libjass {
 		}
 
 		/**
-		 * The width of this style's outline.
+		 * The thickness of this style's outline.
 		 *
 		 * @type {number}
 		 */
-		get outlineWidth(): number {
-			return this._outlineWidth;
+		get outlineThickness(): number {
+			return this._outlineThickness;
 		}
 
 		/**

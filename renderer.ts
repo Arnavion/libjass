@@ -515,16 +515,16 @@ module libjass.renderers {
 				}
 
 				else if (part instanceof parts.Border) {
-					currentSpanStyles.outlineWidthX = (<parts.Border>part).value;
-					currentSpanStyles.outlineWidthY = (<parts.Border>part).value;
+					currentSpanStyles.outlineWidth = (<parts.Border>part).value;
+					currentSpanStyles.outlineHeight = (<parts.Border>part).value;
 				}
 
 				else if (part instanceof parts.BorderX) {
-					currentSpanStyles.outlineWidthX = (<parts.BorderX>part).value;
+					currentSpanStyles.outlineWidth = (<parts.BorderX>part).value;
 				}
 
 				else if (part instanceof parts.BorderY) {
-					currentSpanStyles.outlineWidthY = (<parts.BorderY>part).value;
+					currentSpanStyles.outlineHeight = (<parts.BorderY>part).value;
 				}
 
 				else if (part instanceof parts.GaussianBlur) {
@@ -1156,8 +1156,8 @@ module libjass.renderers {
 		private _underline: boolean;
 		private _strikeThrough: boolean;
 
-		private _outlineWidthX: number;
-		private _outlineWidthY: number;
+		private _outlineWidth: number;
+		private _outlineHeight: number;
 
 		private _fontName: string;
 		private _fontSize: number;
@@ -1199,8 +1199,8 @@ module libjass.renderers {
 			this.underline = newStyle.underline;
 			this.strikeThrough = newStyle.strikeThrough;
 
-			this.outlineWidthX = newStyle.outlineWidth;
-			this.outlineWidthY = newStyle.outlineWidth;
+			this.outlineWidth = newStyle.outlineThickness;
+			this.outlineHeight = newStyle.outlineThickness;
 
 			this.fontName = newStyle.fontName;
 			this.fontSize = newStyle.fontSize;
@@ -1270,8 +1270,8 @@ module libjass.renderers {
 
 			var outlineColor = this._outlineColor.withAlpha(this._outlineAlpha);
 
-			var outlineWidthX = (this._scaleX * this._outlineWidthX);
-			var outlineWidthY = (this._scaleY * this._outlineWidthY);
+			var outlineWidth = (this._scaleX * this._outlineWidth);
+			var outlineHeight = (this._scaleY * this._outlineHeight);
 
 			var filterId = "svg-filter-" + this._id + "-" + this._nextFilterId++;
 
@@ -1286,17 +1286,16 @@ module libjass.renderers {
 				'\t</feComponentTransfer>\n';
 
 			var outlineFilter = '';
-			if (outlineWidthX > 0 || outlineWidthY > 0) {
-				/* Lay out outlines in an ellipse with horizontal radius = (this._scaleX * this._outlineWidthX) / this._fontScaleX
-				 * and vertical radius = (this._scaleY * this._outlineWidthY) / this._fontScaleY
-				 * Outlines are laid inside the region of the ellipse, separated by this._fontScaleX pixels horizontally and this._fontScaleY pixels vertically.
+			if (outlineWidth > 0 || outlineHeight > 0) {
+				/* Lay out outlines in an ellipse with horizontal radius = (this._scaleX * this._outlineWidth) and vertical radius = (this._scaleY * this._outlineHeight)
+				 * Outlines are laid inside the region of the ellipse, separated by 1 pixel horizontally and vertically.
 				 *
 				 * The below loop is an unrolled version of the above algorithm that only roams over one quadrant and adds
 				 * four shadows at a time.
 				 */
 
-				var a = outlineWidthX - 1;
-				var b = outlineWidthY - 1;
+				var a = outlineWidth - 1;
+				var b = outlineHeight - 1;
 
 				for (var x = 0; x < a; x++) {
 					for (var y = 0; (x / a) * (x / a) + (y / b) * (y / b) <= 1; y++) {
@@ -1418,17 +1417,17 @@ module libjass.renderers {
 		 *
 		 * @type {?number}
 		 */
-		set outlineWidthX(value: number) {
-			this._outlineWidthX = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineWidth);
+		set outlineWidth(value: number) {
+			this._outlineWidth = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineThickness);
 		}
 
 		/**
-		 * Sets the outline height property. null defaults it to the style's original outline width value.
+		 * Sets the outline height property. null defaults it to the style's original outline height value.
 		 *
 		 * @type {?number}
 		 */
-		set outlineWidthY(value: number) {
-			this._outlineWidthY = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineWidth);
+		set outlineHeight(value: number) {
+			this._outlineHeight = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineThickness);
 		}
 
 		/**
