@@ -1641,20 +1641,20 @@ module libjass.renderers {
 			var bboxHeight = 0;
 
 			this._instructions.forEach((instruction: parts.drawing.Instruction) => {
-				if (instruction instanceof parts.drawing.Move) {
-					var movePart = <parts.drawing.Move>instruction;
+				if (instruction instanceof parts.drawing.MoveInstruction) {
+					var movePart = <parts.drawing.MoveInstruction>instruction;
 					path += " M " + movePart.x + " " + (movePart.y + this._baselineOffset);
 					bboxWidth = Math.max(bboxWidth, movePart.x);
 					bboxHeight = Math.max(bboxHeight, movePart.y + this._baselineOffset);
 				}
-				else if (instruction instanceof parts.drawing.Line) {
-					var linePart = <parts.drawing.Line>instruction;
+				else if (instruction instanceof parts.drawing.LineInstruction) {
+					var linePart = <parts.drawing.LineInstruction>instruction;
 					path += " L " + linePart.x + " " + (linePart.y + this._baselineOffset);
 					bboxWidth = Math.max(bboxWidth, linePart.x);
 					bboxHeight = Math.max(bboxHeight, linePart.y + this._baselineOffset);
 				}
-				else if (instruction instanceof parts.drawing.CubicBezierCurve) {
-					var cubicBezierCurvePart = <parts.drawing.CubicBezierCurve>instruction;
+				else if (instruction instanceof parts.drawing.CubicBezierCurveInstruction) {
+					var cubicBezierCurvePart = <parts.drawing.CubicBezierCurveInstruction>instruction;
 					path += " C " + cubicBezierCurvePart.x1 + " " + (cubicBezierCurvePart.y1 + this._baselineOffset) + ", " + cubicBezierCurvePart.x2 + " " + (cubicBezierCurvePart.y2 + this._baselineOffset) + ", " + cubicBezierCurvePart.x3 + " " + (cubicBezierCurvePart.y3 + this._baselineOffset);
 					bboxWidth = Math.max(bboxWidth, cubicBezierCurvePart.x1, cubicBezierCurvePart.x2, cubicBezierCurvePart.x3);
 					bboxHeight = Math.max(bboxHeight, cubicBezierCurvePart.y1 + this._baselineOffset, cubicBezierCurvePart.y2 + this._baselineOffset, cubicBezierCurvePart.y3 + this._baselineOffset);

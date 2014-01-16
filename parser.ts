@@ -1762,7 +1762,7 @@ module libjass.parser {
 				return null;
 			}
 
-			current.value = new parts.drawing.Move(xPart.value, yPart.value);
+			current.value = new parts.drawing.MoveInstruction(xPart.value, yPart.value);
 
 			return current;
 		}
@@ -1790,7 +1790,7 @@ module libjass.parser {
 				return null;
 			}
 
-			current.value = new parts.drawing.Line(xPart.value, yPart.value);
+			current.value = new parts.drawing.LineInstruction(xPart.value, yPart.value);
 
 			return current;
 		}
@@ -1846,7 +1846,7 @@ module libjass.parser {
 				return null;
 			}
 
-			current.value = new parts.drawing.CubicBezierCurve(x1Part.value, y1Part.value, x2Part.value, y2Part.value, x3Part.value, y3Part.value);
+			current.value = new parts.drawing.CubicBezierCurveInstruction(x1Part.value, y1Part.value, x2Part.value, y2Part.value, x3Part.value, y3Part.value);
 
 			return current;
 		}

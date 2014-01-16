@@ -38,18 +38,38 @@ module libjass {
 		export class Color {
 			constructor(private _red: number, private _green: number, private _blue: number, private _alpha: number = 1) { }
 
+			/**
+			 * The red component of this color as a number between 0 and 255.
+			 *
+			 * @type {number}
+			 */
 			get red(): number {
 				return this._red;
 			}
 
+			/**
+			 * The green component of this color as a number between 0 and 255.
+			 *
+			 * @type {number}
+			 */
 			get green(): number {
 				return this._green;
 			}
 
+			/**
+			 * The blue component of this color as a number between 0 and 255.
+			 *
+			 * @type {number}
+			 */
 			get blue(): number {
 				return this._blue;
 			}
 
+			/**
+			 * The alpha component of this color as a number between 0 and 1, where 0 means transparent and 1 means opaque.
+			 *
+			 * @type {number}
+			 */
 			get alpha(): number {
 				return this._alpha;
 			}
@@ -114,7 +134,7 @@ module libjass {
 		 * @constructor
 		 * @param {string} value The text of this comment
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Comment extends PartBase {
@@ -122,6 +142,11 @@ module libjass {
 				super("Comment", "value");
 			}
 
+			/**
+			 * The value of this comment.
+			 *
+			 * @type {string}
+			 */
 			get value(): string {
 				return this._value;
 			}
@@ -133,7 +158,7 @@ module libjass {
 		 * @constructor
 		 * @param {string} value The content of this block of text
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Text extends PartBase {
@@ -141,6 +166,11 @@ module libjass {
 				super("Text", "value");
 			}
 
+			/**
+			 * The value of this text part.
+			 *
+			 * @type {string}
+			 */
 			get value(): string {
 				return this._value;
 			}
@@ -156,7 +186,7 @@ module libjass {
 		 * @constructor
 		 * @param {?boolean} value {\i1} -> true, {\i0} -> false, {\i} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Italic extends PartBase {
@@ -164,6 +194,11 @@ module libjass {
 				super("Italic", "value");
 			}
 
+			/**
+			 * The value of this italic tag.
+			 *
+			 * @type {?boolean}
+			 */
 			get value(): boolean {
 				return this._value;
 			}
@@ -175,7 +210,7 @@ module libjass {
 		 * @constructor
 		 * @param {*} value {\b1} -> true, {\b0} -> false, {\b###} -> weight of the bold (number), {\b} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Bold extends PartBase {
@@ -183,6 +218,11 @@ module libjass {
 				super("Bold", "value");
 			}
 
+			/**
+			 * The value of this bold tag.
+			 *
+			 * @type {?boolean|?number}
+			 */
 			get value(): Object {
 				return this._value;
 			}
@@ -194,7 +234,7 @@ module libjass {
 		 * @constructor
 		 * @param {?boolean} value {\u1} -> true, {\u0} -> false, {\u} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Underline extends PartBase {
@@ -202,6 +242,11 @@ module libjass {
 				super("Underline", "value");
 			}
 
+			/**
+			 * The value of this underline tag.
+			 *
+			 * @type {?boolean}
+			 */
 			get value(): boolean {
 				return this._value;
 			}
@@ -213,7 +258,7 @@ module libjass {
 		 * @constructor
 		 * @param {?boolean} value {\s1} -> true, {\s0} -> false, {\s} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class StrikeThrough extends PartBase {
@@ -221,6 +266,11 @@ module libjass {
 				super("StrikeThrough", "value");
 			}
 
+			/**
+			 * The value of this strike-through tag.
+			 *
+			 * @type {?boolean}
+			 */
 			get value(): boolean {
 				return this._value;
 			}
@@ -232,7 +282,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\bord###} -> width (number), {\bord} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Border extends PartBase {
@@ -240,6 +290,11 @@ module libjass {
 				super("Border", "value");
 			}
 
+			/**
+			 * The value of this border tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -251,7 +306,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\xbord###} -> width (number), {\xbord} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class BorderX extends PartBase {
@@ -259,6 +314,11 @@ module libjass {
 				super("BorderX", "value");
 			}
 
+			/**
+			 * The value of this horizontal border tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -270,7 +330,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\ybord###} -> height (number), {\ybord} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class BorderY extends PartBase {
@@ -278,6 +338,11 @@ module libjass {
 				super("BorderY", "value");
 			}
 
+			/**
+			 * The value of this vertical border tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -289,7 +354,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\shad###} -> depth (number), {\shad} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Shadow extends PartBase {
@@ -297,6 +362,11 @@ module libjass {
 				super("Shadow", "value");
 			}
 
+			/**
+			 * The value of this shadow tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -308,7 +378,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\xshad###} -> depth (number), {\xshad} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class ShadowX extends PartBase {
@@ -316,6 +386,11 @@ module libjass {
 				super("ShadowX", "value");
 			}
 
+			/**
+			 * The value of this horizontal shadow tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -327,7 +402,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\yshad###} -> depth (number), {\yshad} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class ShadowY extends PartBase {
@@ -335,6 +410,11 @@ module libjass {
 				super("ShadowY", "value");
 			}
 
+			/**
+			 * The value of this vertical shadow tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -346,7 +426,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\be###} -> strength (number), {\be} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Blur extends PartBase {
@@ -354,6 +434,11 @@ module libjass {
 				super("Blur", "value");
 			}
 
+			/**
+			 * The value of this blur tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -365,7 +450,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\blur###} -> strength (number), {\blur} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class GaussianBlur extends PartBase {
@@ -373,6 +458,11 @@ module libjass {
 				super("Blur", "value");
 			}
 
+			/**
+			 * The value of this Gaussian blur tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -384,7 +474,7 @@ module libjass {
 		 * @constructor
 		 * @param {?string} value {\fn###} -> name (string), {\fn} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class FontName extends PartBase {
@@ -392,6 +482,11 @@ module libjass {
 				super("FontName", "value");
 			}
 
+			/**
+			 * The value of this font name tag.
+			 *
+			 * @type {?string}
+			 */
 			get value(): string {
 				return this._value;
 			}
@@ -403,7 +498,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\fs###} -> size (number), {\fs} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class FontSize extends PartBase {
@@ -411,6 +506,11 @@ module libjass {
 				super("FontSize", "value");
 			}
 
+			/**
+			 * The value of this font size tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -422,7 +522,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\fscx###} -> scale (number), {\fscx} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class FontScaleX extends PartBase {
@@ -430,6 +530,11 @@ module libjass {
 				super("FontScaleX", "value");
 			}
 
+			/**
+			 * The value of this horizontal font scaling tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -441,7 +546,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\fscy###} -> scale (number), {\fscy} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class FontScaleY extends PartBase {
@@ -449,18 +554,23 @@ module libjass {
 				super("FontScaleX", "value");
 			}
 
+			/**
+			 * The value of this vertical font scaling tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
 		}
 
 		/**
-		 * A letter spacing tag {\fsp}
+		 * A letter-spacing tag {\fsp}
 		 *
 		 * @constructor
 		 * @param {?number} value {\fsp###} -> spacing (number), {\fsp} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class LetterSpacing extends PartBase {
@@ -468,6 +578,11 @@ module libjass {
 				super("LetterSpacing", "value");
 			}
 
+			/**
+			 * The value of this letter-spacing tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -479,7 +594,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\frx###} -> angle (number), {\frx} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class RotateX extends PartBase {
@@ -487,6 +602,11 @@ module libjass {
 				super("RotateX", "value");
 			}
 
+			/**
+			 * The value of this X-axis rotation tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -498,7 +618,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\fry###} -> angle (number), {\fry} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class RotateY extends PartBase {
@@ -506,6 +626,11 @@ module libjass {
 				super("RotateY", "value");
 			}
 
+			/**
+			 * The value of this Y-axis rotation tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -517,7 +642,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\frz###} -> angle (number), {\frz} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class RotateZ extends PartBase {
@@ -525,6 +650,11 @@ module libjass {
 				super("RotateZ", "value");
 			}
 
+			/**
+			 * The value of this Z-axis rotation tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -536,7 +666,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\fax###} -> angle (number), {\fax} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class SkewX extends PartBase {
@@ -544,6 +674,11 @@ module libjass {
 				super("SkewX", "value");
 			}
 
+			/**
+			 * The value of this X-axis shearing tag.
+			 *
+			 * @type {?number}
+			 */
 			get value() {
 				return this._value;
 			}
@@ -555,7 +690,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\fay###} -> angle (number), {\fay} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class SkewY extends PartBase {
@@ -563,6 +698,11 @@ module libjass {
 				super("SkewY", "value");
 			}
 
+			/**
+			 * The value of this Y-axis shearing tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -574,7 +714,7 @@ module libjass {
 		 * @constructor
 		 * @param {libjass.parts.Color} value {\1c###} -> color (Color), {\1c} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class PrimaryColor extends PartBase {
@@ -582,6 +722,11 @@ module libjass {
 				super("PrimaryColor", "value");
 			}
 
+			/**
+			 * The value of this primary color tag.
+			 *
+			 * @type {libjass.parts.Color}
+			 */
 			get value(): Color {
 				return this._value;
 			}
@@ -593,7 +738,7 @@ module libjass {
 		 * @constructor
 		 * @param {libjass.parts.Color} value {\2c###} -> color (Color), {\2c} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class SecondaryColor extends PartBase {
@@ -601,6 +746,11 @@ module libjass {
 				super("SecondaryColor", "value");
 			}
 
+			/**
+			 * The value of this secondary color tag.
+			 *
+			 * @type {libjass.parts.Color}
+			 */
 			get value(): Color {
 				return this._value;
 			}
@@ -612,7 +762,7 @@ module libjass {
 		 * @constructor
 		 * @param {libjass.parts.Color} value {\3c###} -> color (Color), {\3c} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class OutlineColor extends PartBase {
@@ -620,6 +770,11 @@ module libjass {
 				super("OutlineColor", "value");
 			}
 
+			/**
+			 * The value of this outline color tag.
+			 *
+			 * @type {libjass.parts.Color}
+			 */
 			get value(): Color {
 				return this._value;
 			}
@@ -631,7 +786,7 @@ module libjass {
 		 * @constructor
 		 * @param {libjass.parts.Color} value {\4c###} -> color (Color), {\4c} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class ShadowColor extends PartBase {
@@ -639,6 +794,11 @@ module libjass {
 				super("ShadowColor", "value");
 			}
 
+			/**
+			 * The value of this shadow color tag.
+			 *
+			 * @type {libjass.parts.Color}
+			 */
 			get value(): Color {
 				return this._value;
 			}
@@ -650,7 +810,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\alpha###} -> alpha (number), {\alpha} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Alpha extends PartBase {
@@ -658,6 +818,11 @@ module libjass {
 				super("Alpha", "value");
 			}
 
+			/**
+			 * The value of this alpha tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -669,7 +834,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\1a###} -> alpha (number), {\1a} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class PrimaryAlpha extends PartBase {
@@ -677,6 +842,11 @@ module libjass {
 				super("PrimaryAlpha", "value");
 			}
 
+			/**
+			 * The value of this primary alpha tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -688,7 +858,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\2a###} -> alpha (number), {\2a} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class SecondaryAlpha extends PartBase {
@@ -696,6 +866,11 @@ module libjass {
 				super("SecondaryAlpha", "value");
 			}
 
+			/**
+			 * The value of this secondary alpha tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -707,7 +882,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\3a###} -> alpha (number), {\3a} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class OutlineAlpha extends PartBase {
@@ -715,6 +890,11 @@ module libjass {
 				super("OutlineAlpha", "value");
 			}
 
+			/**
+			 * The value of this outline alpha tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -726,7 +906,7 @@ module libjass {
 		 * @constructor
 		 * @param {?number} value {\4a###} -> alpha (number), {\4a} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class ShadowAlpha extends PartBase {
@@ -734,6 +914,11 @@ module libjass {
 				super("ShadowAlpha", "value");
 			}
 
+			/**
+			 * The value of this shadow alpha tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -745,7 +930,7 @@ module libjass {
 		 * @constructor
 		 * @param {number} value {\an###} -> alignment (number)
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Alignment extends PartBase {
@@ -753,6 +938,11 @@ module libjass {
 				super("Alignment", "value");
 			}
 
+			/**
+			 * The value of this alignment tag.
+			 *
+			 * @type {?number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -764,7 +954,7 @@ module libjass {
 		 * @constructor
 		 * @param {number} duration {\k###} -> duration (number)
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class ColorKaraoke extends PartBase {
@@ -772,6 +962,11 @@ module libjass {
 				super("ColorKaraoke", "duration");
 			}
 
+			/**
+			 * The duration of this color karaoke tag.
+			 *
+			 * @type {number}
+			 */
 			get duration(): number {
 				return this._duration;
 			}
@@ -783,7 +978,7 @@ module libjass {
 		 * @constructor
 		 * @param {number} duration {\kf###} -> duration (number)
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class SweepingColorKaraoke extends PartBase {
@@ -791,6 +986,11 @@ module libjass {
 				super("SweepingColorKaraoke", "duration");
 			}
 
+			/**
+			 * The duration of this sweeping color karaoke tag.
+			 *
+			 * @type {number}
+			 */
 			get duration(): number {
 				return this._duration;
 			}
@@ -802,7 +1002,7 @@ module libjass {
 		 * @constructor
 		 * @param {number} duration {\ko###} -> duration (number)
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class OutlineKaraoke extends PartBase {
@@ -810,6 +1010,11 @@ module libjass {
 				super("OutlineKaraoke", "duration");
 			}
 
+			/**
+			 * The duration of this outline karaoke tag.
+			 *
+			 * @type {number}
+			 */
 			get duration(): number {
 				return this._duration;
 			}
@@ -821,7 +1026,7 @@ module libjass {
 		 * @constructor
 		 * @param {number} value {\q###} -> style (number)
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class WrappingStyle extends PartBase {
@@ -829,6 +1034,11 @@ module libjass {
 				super("WrappingStyle", "value");
 			}
 
+			/**
+			 * The value of this wrapping style tag.
+			 *
+			 * @type {number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -840,7 +1050,7 @@ module libjass {
 		 * @constructor
 		 * @param {?string} value {\r###} -> style name (string), {\r} -> null
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Reset extends PartBase {
@@ -848,6 +1058,11 @@ module libjass {
 				super("Reset", "value");
 			}
 
+			/**
+			 * The value of this style reset tag.
+			 *
+			 * @type {?string}
+			 */
 			get value(): string {
 				return this._value;
 			}
@@ -860,7 +1075,7 @@ module libjass {
 		 * @param {number} x
 		 * @param {number} y
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Position extends PartBase {
@@ -868,10 +1083,20 @@ module libjass {
 				super("Position", "x", "y");
 			}
 
+			/**
+			 * The x value of this position tag.
+			 *
+			 * @type {number}
+			 */
 			get x(): number {
 				return this._x;
 			}
 
+			/**
+			 * The y value of this position tag.
+			 *
+			 * @type {number}
+			 */
 			get y(): number {
 				return this._y;
 			}
@@ -888,7 +1113,7 @@ module libjass {
 		 * @param {number} t1
 		 * @param {number} t2
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Move extends PartBase {
@@ -896,26 +1121,56 @@ module libjass {
 				super("Move", "x1", "y1", "x2", "y2", "t1", "t2");
 			}
 
+			/**
+			 * The starting x value of this move tag.
+			 *
+			 * @type {number}
+			 */
 			get x1(): number {
 				return this._x1;
 			}
 
+			/**
+			 * The starting y value of this move tag.
+			 *
+			 * @type {number}
+			 */
 			get y1(): number {
 				return this._y1;
 			}
 
+			/**
+			 * The ending x value of this move tag.
+			 *
+			 * @type {number}
+			 */
 			get x2(): number {
 				return this._x2;
 			}
 
+			/**
+			 * The ending y value of this move tag.
+			 *
+			 * @type {number}
+			 */
 			get y2(): number {
 				return this._y2;
 			}
 
+			/**
+			 * The start time of this move tag.
+			 *
+			 * @type {number}
+			 */
 			get t1(): number {
 				return this._t1;
 			}
 
+			/**
+			 * The end time value of this move tag.
+			 *
+			 * @type {number}
+			 */
 			get t2(): number {
 				return this._t2;
 			}
@@ -928,7 +1183,7 @@ module libjass {
 		 * @param {number} x
 		 * @param {number} y
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class RotationOrigin extends PartBase {
@@ -936,10 +1191,20 @@ module libjass {
 				super("RotationOrigin", "x", "y");
 			}
 
+			/**
+			 * The x value of this rotation origin tag.
+			 *
+			 * @type {number}
+			 */
 			get x(): number {
 				return this._x;
 			}
 
+			/**
+			 * The y value of this rotation origin tag.
+			 *
+			 * @type {number}
+			 */
 			get y(): number {
 				return this._y;
 			}
@@ -952,7 +1217,7 @@ module libjass {
 		 * @param {number} start
 		 * @param {number} end
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Fade extends PartBase {
@@ -960,10 +1225,20 @@ module libjass {
 				super("Fade", "start", "end");
 			}
 
+			/**
+			 * The start time of this fade tag.
+			 *
+			 * @type {number}
+			 */
 			get start(): number {
 				return this._start;
 			}
 
+			/**
+			 * The end time of this fade tag.
+			 *
+			 * @type {number}
+			 */
 			get end(): number {
 				return this._end;
 			}
@@ -981,7 +1256,7 @@ module libjass {
 		 * @param {number} t3
 		 * @param {number} t4
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class ComplexFade extends PartBase {
@@ -992,30 +1267,65 @@ module libjass {
 				super("ComplexFade", "a1", "a2", "a3", "t1", "t2", "t3", "t4");
 			}
 
+			/**
+			 * The alpha value of this complex fade tag at time t2.
+			 *
+			 * @type {number}
+			 */
 			get a1(): number {
 				return this._a1;
 			}
 
+			/**
+			 * The alpha value of this complex fade tag at time t3.
+			 *
+			 * @type {number}
+			 */
 			get a2(): number {
 				return this._a2;
 			}
 
+			/**
+			 * The alpha value of this complex fade tag at time t4.
+			 *
+			 * @type {number}
+			 */
 			get a3(): number {
 				return this._a3;
 			}
 
+			/**
+			 * The starting time of this complex fade tag.
+			 *
+			 * @type {number}
+			 */
 			get t1(): number {
 				return this._t1;
 			}
 
+			/**
+			 * The first intermediate time of this complex fade tag.
+			 *
+			 * @type {number}
+			 */
 			get t2(): number {
 				return this._t2;
 			}
 
+			/**
+			 * The second intermediate time of this complex fade tag.
+			 *
+			 * @type {number}
+			 */
 			get t3(): number {
 				return this._t3;
 			}
 
+			/**
+			 * The ending time of this complex fade tag.
+			 *
+			 * @type {number}
+			 */
 			get t4(): number {
 				return this._t4;
 			}
@@ -1028,9 +1338,9 @@ module libjass {
 		 * @param {number} start
 		 * @param {number} end
 		 * @param {number} accel
-		 * @param {Array.<libjass.parts.Tag>} tags
+		 * @param {!Array.<!libjass.parts.Tag>} tags
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class Transform extends PartBase {
@@ -1038,18 +1348,38 @@ module libjass {
 				super("Transform", "start", "end", "accel", "tags");
 			}
 
+			/**
+			 * The starting time of this transform tag.
+			 *
+			 * @type {number}
+			 */
 			get start(): number {
 				return this._start;
 			}
 
+			/**
+			 * The ending time of this transform tag.
+			 *
+			 * @type {number}
+			 */
 			get end(): number {
 				return this._end;
 			}
 
+			/**
+			 * The acceleration of this transform tag.
+			 *
+			 * @type {number}
+			 */
 			get accel(): number {
 				return this._accel;
 			}
 
+			/**
+			 * The tags animated by this transform tag.
+			 *
+			 * @type {!Array.<!libjass.parts.Tag>}
+			 */
 			get tags(): Part[] {
 				return this._tags;
 			}
@@ -1065,7 +1395,7 @@ module libjass {
 		 * @param {number} y2
 		 * @param {boolean} inside
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class RectangularClip extends PartBase {
@@ -1073,22 +1403,47 @@ module libjass {
 				super("RectangularClip", "x1", "y1", "x2", "y2", "inside");
 			}
 
+			/**
+			 * The X coordinate of the starting position of this rectangular clip tag.
+			 *
+			 * @type {number}
+			 */
 			get x1(): number {
 				return this._x1;
 			}
 
+			/**
+			 * The Y coordinate of the starting position of this rectangular clip tag.
+			 *
+			 * @type {number}
+			 */
 			get y1(): number {
 				return this._y1;
 			}
 
+			/**
+			 * The X coordinate of the ending position of this rectangular clip tag.
+			 *
+			 * @type {number}
+			 */
 			get x2(): number {
 				return this._x2;
 			}
 
+			/**
+			 * The Y coordinate of the ending position of this rectangular clip tag.
+			 *
+			 * @type {number}
+			 */
 			get y2(): number {
 				return this._y2;
 			}
 
+			/**
+			 * Whether this rectangular clip tag clips the region it encloses or the region it excludes.
+			 *
+			 * @type {boolean}
+			 */
 			get inside(): boolean {
 				return this._inside;
 			}
@@ -1102,7 +1457,7 @@ module libjass {
 		 * @param {string} commands
 		 * @param {boolean} inside
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class VectorClip extends PartBase {
@@ -1110,14 +1465,29 @@ module libjass {
 				super("VectorClip", "scale", "commands", "inside");
 			}
 
+			/**
+			 * The scale of this vector clip tag.
+			 *
+			 * @type {number}
+			 */
 			get scale(): number {
 				return this._scale;
 			}
 
+			/**
+			 * The clip commands of this vector clip tag.
+			 *
+			 * @type {string}
+			 */
 			get commands(): string {
 				return this._commands;
 			}
 
+			/**
+			 * Whether this vector clip tag clips the region it encloses or the region it excludes.
+			 *
+			 * @type {boolean}
+			 */
 			get inside(): boolean {
 				return this._inside;
 			}
@@ -1129,7 +1499,7 @@ module libjass {
 		 * @constructor
 		 * @param {number} scale
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class DrawingMode extends PartBase {
@@ -1137,6 +1507,11 @@ module libjass {
 				super("DrawingMode", "value");
 			}
 
+			/**
+			 * The scale of this drawing mode tag.
+			 *
+			 * @type {number}
+			 */
 			get scale(): number {
 				return this._scale;
 			}
@@ -1148,7 +1523,7 @@ module libjass {
 		 * @constructor
 		 * @param {number} value
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class DrawingBaselineOffset extends PartBase {
@@ -1156,6 +1531,11 @@ module libjass {
 				super("DrawingBaselineOffset", "value");
 			}
 
+			/**
+			 * The value of this drawing mode baseline offset tag.
+			 *
+			 * @type {number}
+			 */
 			get value(): number {
 				return this._value;
 			}
@@ -1165,9 +1545,9 @@ module libjass {
 		 * A pseudo-part representing text interpreted as drawing instructions
 		 *
 		 * @constructor
-		 * @param {string} value
+		 * @param {!Array.<!libjass.parts.drawing.Instruction[]>} value
 		 *
-		 * @extends {libjass.parts.TagBase}
+		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class DrawingInstructions extends PartBase {
@@ -1175,68 +1555,160 @@ module libjass {
 				super("DrawingInstructions", "value");
 			}
 
+			/**
+			 * The instructions contained in this drawing instructions part.
+			 *
+			 * @type {!Array.<!libjass.parts.drawing.Instruction[]>}
+			 */
 			get value(): drawing.Instruction[] {
 				return this._instructions;
 			}
 		}
 
 		export module drawing {
+			/**
+			 * The base interface of the drawing instructions.
+			 */
 			export interface Instruction {
 			}
 
-			export class Move extends PartBase implements Instruction {
+			/**
+			 * An instruction to move to a particular position.
+			 *
+			 * @constructor
+			 * @param {number} x
+			 * @param {number} y
+			 *
+			 * @extends {libjass.parts.PartBase}
+			 * @memberof libjass.parts.drawing
+			 */
+			export class MoveInstruction extends PartBase implements Instruction {
 				constructor(private _x: number, private _y: number) {
-					super("DrawingInstructionMove", "x", "y");
+					super("DrawingMoveInstruction", "x", "y");
 				}
 
+				/**
+				 * The X position of this move instruction.
+				 *
+				 * @type {number}
+				 */
 				get x(): number {
 					return this._x;
 				}
 
+				/**
+				 * The Y position of this move instruction.
+				 *
+				 * @type {number}
+				 */
 				get y(): number {
 					return this._y;
 				}
 			}
 
-			export class Line extends PartBase implements Instruction {
+			/**
+			 * An instruction to draw a line to a particular position.
+			 *
+			 * @constructor
+			 * @param {number} x
+			 * @param {number} y
+			 *
+			 * @extends {libjass.parts.PartBase}
+			 * @memberof libjass.parts.drawing
+			 */
+			export class LineInstruction extends PartBase implements Instruction {
 				constructor(private _x: number, private _y: number) {
-					super("DrawingInstructionLine", "x", "y");
+					super("DrawingLineInstruction", "x", "y");
 				}
 
+				/**
+				 * The X position of this line instruction.
+				 *
+				 * @type {number}
+				 */
 				get x(): number {
 					return this._x;
 				}
 
+				/**
+				 * The Y position of this line instruction.
+				 *
+				 * @type {number}
+				 */
 				get y(): number {
 					return this._y;
 				}
 			}
 
-			export class CubicBezierCurve extends PartBase implements Instruction {
+			/**
+			 * An instruction to draw a cubic bezier curve to a particular position, with two given control points.
+			 *
+			 * @constructor
+			 * @param {number} x1
+			 * @param {number} y1
+			 * @param {number} x2
+			 * @param {number} y2
+			 * @param {number} x3
+			 * @param {number} y3
+			 *
+			 * @extends {libjass.parts.PartBase}
+			 * @memberof libjass.parts.drawing
+			 */
+			export class CubicBezierCurveInstruction extends PartBase implements Instruction {
 				constructor(private _x1: number, private _y1: number, private _x2: number, private _y2: number, private _x3: number, private _y3: number) {
-					super("DrawingInstructionCubicBezierCurve", "x1", "y1", "x2", "y2", "x3", "y3");
+					super("DrawingCubicBezierCurveInstruction", "x1", "y1", "x2", "y2", "x3", "y3");
 				}
 
+				/**
+				 * The X position of the first control point of this cubic bezier curve instruction.
+				 *
+				 * @type {number}
+				 */
 				get x1(): number {
 					return this._x1;
 				}
 
+				/**
+				 * The Y position of the first control point of this cubic bezier curve instruction.
+				 *
+				 * @type {number}
+				 */
 				get y1(): number {
 					return this._y1;
 				}
 
+				/**
+				 * The X position of the second control point of this cubic bezier curve instruction.
+				 *
+				 * @type {number}
+				 */
 				get x2(): number {
 					return this._x2;
 				}
 
+				/**
+				 * The Y position of the second control point of this cubic bezier curve instruction.
+				 *
+				 * @type {number}
+				 */
 				get y2(): number {
 					return this._y2;
 				}
 
+				/**
+				 * The ending X position of this cubic bezier curve instruction.
+				 *
+				 * @type {number}
+				 */
 				get x3(): number {
 					return this._x3;
 				}
 
+				/**
+				 * The ending Y position of this cubic bezier curve instruction.
+				 *
+				 * @type {number}
+				 */
 				get y3(): number {
 					return this._y3;
 				}
