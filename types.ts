@@ -135,15 +135,14 @@ module libjass {
 	 * @param {string} template["Bold"] -1 if the style is bold
 	 * @param {string} template["Underline"] -1 if the style is underlined
 	 * @param {string} template["StrikeOut"] -1 if the style is struck-through
-	 * @param {string} template["OutlineWidth"] The outline width
 	 * @param {string} template["Fontname"] The name of the font
 	 * @param {string} template["Fontsize"] The size of the font
 	 * @param {string} template["ScaleX"] The horizontal scaling of the font
 	 * @param {string} template["ScaleY"] The vertical scaling of the font
 	 * @param {string} template["Spacing"] The letter spacing of the font
-	 * @param {string} template["PrimaryColor"] The primary color
-	 * @param {string} template["OutlineColor"] The outline color
-	 * @param {string} template["BackColor"] The shadow color
+	 * @param {string} template["PrimaryColour"] The primary color
+	 * @param {string} template["OutlineColour"] The outline color
+	 * @param {string} template["BackColour"] The shadow color
 	 * @param {string} template["Outline"] The outline thickness
 	 * @param {string} template["Shadow"] The shadow depth
 	 * @param {string} template["Alignment"] The alignment number
