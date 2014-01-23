@@ -399,16 +399,16 @@ module libjass.renderers {
 			this.video.style.width = width.toFixed(3) + "px";
 			this.video.style.height = height.toFixed(3) + "px";
 
-			var ratio = Math.min(width / this.ass.resolutionX, height / this.ass.resolutionY);
-			var subsWrapperWidth = this.ass.resolutionX * ratio;
-			var subsWrapperHeight = this.ass.resolutionY * ratio;
+			var ratio = Math.min(width / this.ass.properties.resolutionX, height / this.ass.properties.resolutionY);
+			var subsWrapperWidth = this.ass.properties.resolutionX * ratio;
+			var subsWrapperHeight = this.ass.properties.resolutionY * ratio;
 			this._subsWrapper.style.width = subsWrapperWidth.toFixed(3) + "px";
 			this._subsWrapper.style.height = subsWrapperHeight.toFixed(3) + "px";
 			this._subsWrapper.style.left = ((width - subsWrapperWidth) / 2).toFixed(3) + "px";
 			this._subsWrapper.style.top = ((height - subsWrapperHeight) / 2).toFixed(3) + "px";
 
-			this._scaleX = subsWrapperWidth / this.ass.resolutionX;
-			this._scaleY = subsWrapperHeight / this.ass.resolutionY;
+			this._scaleX = subsWrapperWidth / this.ass.properties.resolutionX;
+			this._scaleY = subsWrapperHeight / this.ass.properties.resolutionY;
 
 			// Any dialogues which have been pre-rendered will need to be pre-rendered again.
 			this._preRenderedSubs.clear();

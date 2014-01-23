@@ -104,7 +104,7 @@ addEventListener("DOMContentLoaded", function () {
 		if (subsRequest.readyState === XMLHttpRequest.DONE) {
 			debug("ASS script received.");
 
-			ass = new libjass.ASS(subsRequest.responseText);
+			ass = libjass.ASS.fromString(subsRequest.responseText);
 			if (libjass.debugMode) {
 				window.ass = ass;
 			}

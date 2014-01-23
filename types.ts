@@ -26,84 +26,24 @@ module libjass {
 	}
 
 	/**
-	 * This class represents an ASS script. It contains information about the script, an array of Styles, and an array of Dialogues.
+	 * This class represents an ASS script. It contains the script properties, an array of Styles, and an array of Dialogues.
 	 *
 	 * @constructor
-	 * @param {string} rawASS The raw text of the ASS script.
 	 *
 	 * @memberof libjass
 	 */
 	export class ASS {
-		private _resolutionX: number;
-		private _resolutionY: number;
-
+		private _properties: ScriptProperties = new ScriptProperties();
 		private _styles: StyleMap = Object.create(null);
 		private _dialogues: Dialogue[] = [];
 
-		constructor(rawASS: string) {
-			rawASS = rawASS.replace(/\r$/gm, "");
-
-			var script = parser.parse(rawASS, "script");
-
-			// Get the script info template
-			var infoTemplate: Template = script["Script Info"];
-
-			if (libjass.verboseMode) {
-				console.log("Read script info: " + JSON.stringify(infoTemplate), infoTemplate);
-			}
-
-			// Parse the horizontal script resolution
-			this._resolutionX = parseInt(infoTemplate["PlayResX"]);
-
-			// Parse the vertical script resolution
-			this._resolutionY = parseInt(infoTemplate["PlayResY"]);
-
-			// Get styles from the styles section
-			script["V4+ Styles"].forEach((line: any) => {
-				if (line.type === "Style") {
-					var styleTemplate: Template = line.template;
-
-					if (libjass.verboseMode) {
-						console.log("Read style: " + JSON.stringify(styleTemplate), styleTemplate);
-					}
-
-					// Create the style and add it to the styles map
-					var newStyle = new Style(styleTemplate);
-					this._styles[newStyle.name] = newStyle;
-				}
-			});
-
-			// Get dialogues from the events section
-			script["Events"].forEach((line: any) => {
-				if (line.type === "Dialogue") {
-					var dialogueTemplate: Template = line.template;
-
-					if (libjass.verboseMode) {
-						console.log("Read dialogue: " + JSON.stringify(dialogueTemplate), dialogueTemplate);
-					}
-
-					// Create the dialogue and add it to the dialogues array
-					this._dialogues.push(new Dialogue(dialogueTemplate, this));
-				}
-			});
-		}
-
 		/**
-		 * The horizontal script resolution.
+		 * The properties of this script.
 		 *
-		 * @type {number}
+		 * @type {!libjass.ScriptProperties}
 		 */
-		get resolutionX(): number {
-			return this._resolutionX;
-		}
-
-		/**
-		 * The vertical script resolution.
-		 *
-		 * @type {number}
-		 */
-		get resolutionY(): number {
-			return this._resolutionY;
+		get properties(): ScriptProperties {
+			return this._properties;
 		}
 
 		/**
@@ -122,6 +62,121 @@ module libjass {
 		 */
 		get dialogues(): Dialogue[] {
 			return this._dialogues;
+		}
+
+		constructor() {
+			// Deprecated constructor argument
+			if (arguments.length === 1) {
+				throw new Error("Constructor `new ASS(rawASS)` has been deprecated. Use `ASS.fromString(rawASS)` instead.");
+			}
+		}
+
+		/**
+		 * Creates an ASS object from the raw text of an ASS script.
+		 *
+		 * @param {string} rawASS The raw text of the ASS script.
+		 * @return {!libjass.ASS}
+		 *
+		 * @static
+		 */
+		static fromString(rawASS: string): ASS {
+			rawASS = rawASS.replace(/\r$/gm, "");
+
+			var script = parser.parse(rawASS, "script");
+
+			var result = new ASS();
+
+			// Get the script info template
+			var infoTemplate: Template = script["Script Info"];
+
+			if (libjass.verboseMode) {
+				console.log("Read script info: " + JSON.stringify(infoTemplate), infoTemplate);
+			}
+
+			// Parse the horizontal script resolution
+			result.properties.resolutionX = parseInt(infoTemplate["PlayResX"]);
+
+			// Parse the vertical script resolution
+			result.properties.resolutionY = parseInt(infoTemplate["PlayResY"]);
+
+			// Get styles from the styles section
+			script["V4+ Styles"].forEach((line: any) => {
+				if (line.type === "Style") {
+					var styleTemplate: Template = line.template;
+
+					if (libjass.verboseMode) {
+						console.log("Read style: " + JSON.stringify(styleTemplate), styleTemplate);
+					}
+
+					// Create the style and add it to the styles map
+					var newStyle = new Style(styleTemplate);
+					result.styles[newStyle.name] = newStyle;
+				}
+			});
+
+			// Get dialogues from the events section
+			script["Events"].forEach((line: any) => {
+				if (line.type === "Dialogue") {
+					var dialogueTemplate: Template = line.template;
+
+					if (libjass.verboseMode) {
+						console.log("Read dialogue: " + JSON.stringify(dialogueTemplate), dialogueTemplate);
+					}
+
+					// Create the dialogue and add it to the dialogues array
+					result.dialogues.push(new Dialogue(dialogueTemplate, result));
+				}
+			});
+
+			return result;
+		}
+	}
+
+	/**
+	 * This class represents the properties of an ASS script.
+	 *
+	 * @constructor
+	 *
+	 * @memberof libjass
+	 */
+	export class ScriptProperties {
+		private _resolutionX: number;
+		private _resolutionY: number;
+
+		/**
+		 * The horizontal script resolution.
+		 *
+		 * @type {number}
+		 */
+		get resolutionX(): number {
+			return this._resolutionX;
+		}
+
+		/**
+		 * The horizontal script resolution.
+		 *
+		 * @type {number}
+		 */
+		set resolutionX(value: number) {
+			this._resolutionX = value;
+		}
+
+		/**
+		 * The vertical script resolution.
+		 *
+		 * @type {number}
+		 */
+		get resolutionY(): number {
+			return this._resolutionY;
+		}
+
+		/**
+		 * The vertical script resolution.
+		 *
+		 * @type {number}
+		 */
+		set resolutionY(value: number) {
+			this._resolutionY = value;
 		}
 	}
 
