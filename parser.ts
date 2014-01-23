@@ -110,7 +110,11 @@ module libjass.parser {
 
 			var formatSpecifier: string[] = null;
 
-			while(this._haveMore() && this._peek() !== "[") {
+			while (this._haveMore() && this._peek() !== "[") {
+				if (this.parse_scriptComment(current) !== null) {
+					continue;
+				}
+
 				var propertyNode = this.parse_scriptProperty(current);
 
 				if (propertyNode !== null) {
@@ -148,7 +152,8 @@ module libjass.parser {
 					}
 				}
 
-				else if (this.parse_scriptComment(current) === null && this.read(current, "\n") === null) {
+				// Empty line
+				else if (this.read(current, "\n") === null) {
 					parent.pop();
 					return null;
 				}
