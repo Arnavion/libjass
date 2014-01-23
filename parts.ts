@@ -121,7 +121,7 @@ module libjass {
 			toString(): string {
 				return (
 					this._name + " { " +
-					this._propertyNames.map(name => name + ": " + this[name]).join(", ") +
+					this._propertyNames.map(name => name + ": " + (<any>this)[name]).join(", ") +
 					((this._propertyNames.length > 0) ? " " : "") +
 					"}"
 				);

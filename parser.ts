@@ -2086,7 +2086,7 @@ module libjass.parser {
 		valueParser: (current: ParseNode) => ParseNode,
 		required: boolean
 	) {
-		ParserRun.prototype["parse_tag_" + tagName] = function (parent: ParseNode): ParseNode {
+		(<any>ParserRun.prototype)["parse_tag_" + tagName] = function (parent: ParseNode): ParseNode {
 			var self = <ParserRun>this;
 			var current = new ParseNode(parent);
 
@@ -2150,8 +2150,8 @@ module libjass.parser {
 
 	var rules = new Map<string, (parent: ParseNode) => ParseNode>();
 	Object.keys(ParserRun.prototype).forEach(key => {
-		if (key.indexOf("parse_") === 0 && typeof ParserRun.prototype[key] === "function") {
-			rules.set(key.substr("parse_".length), ParserRun.prototype[key]);
+		if (key.indexOf("parse_") === 0 && typeof (<any>ParserRun.prototype)[key] === "function") {
+			rules.set(key.substr("parse_".length), (<any>ParserRun.prototype)[key]);
 		}
 	});
 
