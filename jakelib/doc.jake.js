@@ -298,11 +298,17 @@ namespace("_doc", function () {
 					break;
 
 				case NodeType.GETTER:
-					allNames[name] = new Getter(name, rootDescription, returnType);
+					if (allNames[name] === undefined) {
+						allNames[name] = new Property(name);
+					}
+					allNames[name].getter = new Getter(rootDescription, returnType);
 					break;
 
 				case NodeType.SETTER:
-					allNames[name] = new Setter(name, rootDescription, parameters);
+					if (allNames[name] === undefined) {
+						allNames[name] = new Property(name);
+					}
+					allNames[name].setter = new Setter(rootDescription, parameters);
 					break;
 			}
 		};
@@ -379,7 +385,7 @@ namespace("_doc", function () {
 				}
 			}
 
-			else if (value instanceof Function || value instanceof Getter || value instanceof Setter) {
+			else if (value instanceof Function || value instanceof Property) {
 				var thisTypeNameParts = null;
 
 				if (value.thisType === null) {
@@ -448,7 +454,7 @@ namespace("_doc", function () {
 		});
 
 		var sorter = (function () {
-			var types = [Function, Getter, Setter, Constructor];
+			var types = [Function, Property, Constructor];
 			var typeSorter = function (value1, value2) {
 				var type1Index = -1;
 				var type2Index = -1;
@@ -578,7 +584,7 @@ namespace("_doc", function () {
 				'	</dd>',
 				'	<dd class="properties">'
 			]).concatMany(constructor.members.filter(function (member) {
-				return (member instanceof Getter) || (member instanceof Setter);
+				return member instanceof Property;
 			}).map(function (property) {
 				return writeProperty(property, 2);
 			})).concat([
@@ -668,25 +674,29 @@ namespace("_doc", function () {
 		};
 
 		var writeProperty = function (property, indent) {
-			if (property instanceof Getter) {
-				return writeGetter(property, indent);
+			var result = [];
+
+			if (property.getter !== null) {
+				result = result.concat(writeGetter(property, indent));
 			}
-			else if (property instanceof Setter) {
-				return writeSetter(property, indent);
+
+			if (property.setter !== null) {
+				result = result.concat(writeSetter(property, indent));
 			}
-			else {
-				throw new Error("Unrecognized property type: [" + property.constructor + "]");
-			}
+
+			return result;
 		}
 
-		var writeGetter = function (getter, indent) {
+		var writeGetter = function (property, indent) {
+			var getter = property.getter;
+
 			return [
-				'<dl class="getter" id="' + sanitize(getter.name.toString()) + '">',
-				'	<dt class="name">' + writePropertyName(getter) + '</dt>',
+				'<dl class="getter" id="' + sanitize(property.name.toString()) + '">',
+				'	<dt class="name">' + writePropertyName(property) + '</dt>',
 				'	<dd class="description">',
 				'		<p>' + sanitize(getter.description) + '</p>',
 				'	</dd>',
-				'	<dd class="usage">' + writeGetterUsage(getter) + '</dd>'
+				'	<dd class="usage">' + writeGetterUsage(property) + '</dd>'
 			].concat([
 				'	<dd class="return type">' + sanitize(getter.type) + '</dd>',
 			]).concat([
@@ -694,14 +704,16 @@ namespace("_doc", function () {
 			]).map(indenter(indent));
 		};
 
-		var writeSetter = function (setter, indent) {
+		var writeSetter = function (property, indent) {
+			var setter = property.setter;
+
 			return [
-				'<dl class="setter" id="' + sanitize(setter.name.toString()) + '">',
-				'	<dt class="name">' + writePropertyName(setter) + '</dt>',
+				'<dl class="setter" id="' + sanitize(property.name.toString()) + '">',
+				'	<dt class="name">' + writePropertyName(property) + '</dt>',
 				'	<dd class="description">',
 				'		<p>' + sanitize(setter.description) + '</p>',
 				'	</dd>',
-				'	<dd class="usage">' + writeSetterUsage(setter) + '</dd>'
+				'	<dd class="usage">' + writeSetterUsage(property) + '</dd>'
 			].concat(writeParameters(setter, 2)).concat([
 				'</dl>'
 			]).map(indenter(indent));
@@ -715,19 +727,19 @@ namespace("_doc", function () {
 			);
 		};
 
-		var writeGetterUsage = function (getter) {
+		var writeGetterUsage = function (property) {
 			return sanitize(
 				'var result = ' +
-				toVariableName(getter.thisType) + '.' + getter.name.toShortString() +
+				toVariableName(property.thisType) + '.' + property.name.toShortString() +
 				';'
 			);
 		};
 
-		var writeSetterUsage = function (setter) {
+		var writeSetterUsage = function (property) {
 			return sanitize(
-				toVariableName(setter.thisType) + '.' + setter.name.toShortString() +
+				toVariableName(property.thisType) + '.' + property.name.toShortString() +
 				' = ' +
-				setter.parameters[0].name +
+				property.setter.parameters[0].name +
 				';'
 			);
 		};
@@ -1005,9 +1017,17 @@ var Constructor = function (name, description, generics, parameters, parentType,
 	this.members = [];
 };
 
-var Getter = function (name, description, type) {
+var Property = function (name) {
 	this.name = name;
 
+	this.getter = null;
+
+	this.setter = null;
+
+	this.thisType = null;
+};
+
+var Getter = function (description, type) {
 	this.description = description;
 
 	this.type = type;
@@ -1015,9 +1035,7 @@ var Getter = function (name, description, type) {
 	this.thisType = null;
 };
 
-var Setter = function (name, description, parameters) {
-	this.name = name;
-
+var Setter = function (description, parameters) {
 	this.description = description;
 
 	this.parameters = parameters;
