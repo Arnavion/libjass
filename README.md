@@ -27,7 +27,7 @@ As a result, libjass is able to render subtitles with very low CPU usage. The do
 1. You need to load libjass.js on the page with your video.
 1. You need to call the libjass API.
 
-Only libjass.js is needed to use libjass on your website. The other files are only used during the build process and you don't need to deploy them to your website.
+Only libjass.js and libjass.css are needed to use libjass on your website. The other files are only used during the build process and you don't need to deploy them to your website.
 
 
 ### Where's the API documentation? What API do I need to call to use libjass?
