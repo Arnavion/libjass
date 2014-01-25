@@ -30,7 +30,7 @@ namespace("_watch", function () {
 
 		var spawnSubProcess = function () {
 			var pathToJake = path.resolve("./node_modules/.bin/jake");
-			var subProcess = childProcess.exec(pathToJake + " _watch:runUntilError --trace");
+			var subProcess = childProcess.exec(pathToJake + " _watch:runUntilError --trace", { stdio: "inherit" });
 			subProcess.stdout.pipe(process.stdout);
 			subProcess.stderr.pipe(process.stderr);
 			subProcess.addListener("exit", function (code, signal) {
