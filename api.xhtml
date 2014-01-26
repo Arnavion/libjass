@@ -70,27 +70,52 @@
 				content: "private ";
 			}
 
+			.static > .name:before {
+				content: "static ";
+			}
+
 			.abstract.private > .name:before {
 				content: "abstract private ";
 			}
+
+			.private.static > .name:before {
+				content: "static private ";
+			}
+
+			body:not(.show-private) .private {
+				display: none;
+			}
 		]]>
 		</style>
+		<script>
+		<![CDATA[
+			addEventListener("load", function () {
+				document.querySelector("#show-private").addEventListener("change", function (event) {
+					document.body.className = (event.target.checked ? "show-private" : "");
+				}, false);
+			}, false);
+		]]>
+		</script>
 	</head>
 	<body>
 		<section class="namespaces">
+			<label><input type="checkbox" id="show-private" />Show private</label>
 			<h2>Namespaces</h2>
-			<span class="namespace"><a href="#Dialogue">Dialogue</a></span>
-			<ul class="namespace-elements">
-				<li><a href="#Dialogue._toTime">_toTime</a></li>
-			</ul>
-
 			<span class="namespace"><a href="#libjass">libjass</a></span>
 			<ul class="namespace-elements">
 				<li><a href="#libjass.ASS">ASS</a></li>
 				<li><a href="#libjass.Dialogue">Dialogue</a></li>
+				<li><a href="#libjass.ScriptProperties">ScriptProperties</a></li>
 				<li><a href="#libjass.Style">Style</a></li>
-				<li><a href="#libjass.SimpleMap">SimpleMap</a></li>
-				<li><a href="#libjass.SimpleSet">SimpleSet</a></li>
+				<li class="private"><a href="#libjass.SimpleMap">SimpleMap</a></li>
+				<li class="private"><a href="#libjass.SimpleSet">SimpleSet</a></li>
+			</ul>
+
+			<span class="namespace"><a href="#libjass.parser">libjass.parser</a></span>
+			<ul class="namespace-elements">
+				<li><a href="#libjass.parser.parse">parse</a></li>
+				<li class="private"><a href="#libjass.parser.ParseNode">ParseNode</a></li>
+				<li class="private"><a href="#libjass.parser.ParserRun">ParserRun</a></li>
 			</ul>
 
 			<span class="namespace"><a href="#libjass.parts">libjass.parts</a></span>
@@ -149,43 +174,25 @@
 				<li><a href="#libjass.parts.WrappingStyle">WrappingStyle</a></li>
 			</ul>
 
+			<span class="namespace"><a href="#libjass.parts.drawing">libjass.parts.drawing</a></span>
+			<ul class="namespace-elements">
+				<li><a href="#libjass.parts.drawing.CubicBezierCurveInstruction">CubicBezierCurveInstruction</a></li>
+				<li><a href="#libjass.parts.drawing.LineInstruction">LineInstruction</a></li>
+				<li><a href="#libjass.parts.drawing.MoveInstruction">MoveInstruction</a></li>
+			</ul>
+
 			<span class="namespace"><a href="#libjass.renderers">libjass.renderers</a></span>
 			<ul class="namespace-elements">
 				<li><a href="#libjass.renderers.DefaultRenderer">DefaultRenderer</a></li>
 				<li><a href="#libjass.renderers.NullRenderer">NullRenderer</a></li>
 				<li><a href="#libjass.renderers.RendererSettings">RendererSettings</a></li>
-				<li><a href="#libjass.renderers.AnimationCollection">AnimationCollection</a></li>
-				<li><a href="#libjass.renderers.SpanStyles">SpanStyles</a></li>
+				<li class="private"><a href="#libjass.renderers.AnimationCollection">AnimationCollection</a></li>
+				<li class="private"><a href="#libjass.renderers.SpanStyles">SpanStyles</a></li>
 			</ul>
 
 		</section>
 		<div class="content">
 
-			<section>
-				<h1 id="Dialogue">Dialogue</h1>
-
-				<section>
-					<h2>Free functions</h2>
-					<dl class="function private" id="Dialogue._toTime">
-						<dt class="name"><a href="#Dialogue._toTime">_toTime</a></dt>
-						<dd class="description">
-							<p>Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM</p>
-						</dd>
-						<dd class="usage">var result = _toTime(string);</dd>
-							<dd class="parameters">
-								<dl>
-									<dt class="parameter name">string</dt>
-									<dd class="parameter type">string</dd>
-									<dd class="parameter description"></dd>
-								</dl>
-							</dd>
-						<dt>Returns</dt>
-						<dd class="return type">number</dd>
-						<dd class="return description"></dd>
-					</dl>
-				</section>
-
-			</section>
 			<section>
 				<h1 id="libjass">libjass</h1>
 
@@ -194,33 +201,26 @@
 					<dl class="constructor" id="libjass.ASS">
 						<dt class="name">class <a href="#libjass.ASS">ASS</a></dt>
 						<dd class="description">
-							<p>This class represents an ASS script. It contains information about the script, an array of Styles, and an array of Dialogues.</p>
+							<p>This class represents an ASS script. It contains the script properties, an array of Styles, and an array of Dialogues.</p>
 						</dd>
-						<dd class="usage">var ass = new ASS(rawASS);</dd>
-							<dd class="parameters">
-								<dl>
-									<dt class="parameter name">rawASS</dt>
-									<dd class="parameter type">string</dd>
-									<dd class="parameter description">The raw text of the ASS script.</dd>
-								</dl>
-							</dd>
+						<dd class="usage">var ass = new ASS();</dd>
 						<dd class="functions">
-							<dl class="function" id="libjass.ASS.scaleTo">
-								<dt class="name"><a href="#libjass.ASS.scaleTo">scaleTo</a></dt>
+							<dl class="function static" id="libjass.ASS.fromString">
+								<dt class="name"><a href="#libjass.ASS.fromString">fromString</a></dt>
 								<dd class="description">
-									<p>This method takes in the actual video height and width and prepares the scaleX and scaleY properties according to the script resolution.</p>
+									<p>Creates an ASS object from the raw text of an ASS script.</p>
 								</dd>
-								<dd class="usage">ass.scaleTo(videoWidth, videoHeight);</dd>
+								<dd class="usage">var result = ASS.fromString(rawASS);</dd>
 									<dd class="parameters">
 										<dl>
-											<dt class="parameter name">videoWidth</dt>
-											<dd class="parameter type">number</dd>
-											<dd class="parameter description">The width of the video, in pixels</dd>
-											<dt class="parameter name">videoHeight</dt>
-											<dd class="parameter type">number</dd>
-											<dd class="parameter description">The height of the video, in pixels</dd>
+											<dt class="parameter name">rawASS</dt>
+											<dd class="parameter type">string</dd>
+											<dd class="parameter description">The raw text of the ASS script.</dd>
 										</dl>
 									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!libjass.ASS</dd>
+								<dd class="return description"></dd>
 							</dl>
 						</dd>
 						<dd class="properties">
@@ -232,37 +232,13 @@
 								<dd class="usage">var result = ass.dialogues;</dd>
 								<dd class="return type">!Array.&lt;!libjass.Dialogue&gt;</dd>
 							</dl>
-							<dl class="getter" id="libjass.ASS.resolutionX">
-								<dt class="name"><a href="#libjass.ASS.resolutionX">resolutionX</a></dt>
+							<dl class="getter" id="libjass.ASS.properties">
+								<dt class="name"><a href="#libjass.ASS.properties">properties</a></dt>
 								<dd class="description">
-									<p>The horizontal script resolution.</p>
+									<p>The properties of this script.</p>
 								</dd>
-								<dd class="usage">var result = ass.resolutionX;</dd>
-								<dd class="return type">number</dd>
-							</dl>
-							<dl class="getter" id="libjass.ASS.resolutionY">
-								<dt class="name"><a href="#libjass.ASS.resolutionY">resolutionY</a></dt>
-								<dd class="description">
-									<p>The vertical script resolution.</p>
-								</dd>
-								<dd class="usage">var result = ass.resolutionY;</dd>
-								<dd class="return type">number</dd>
-							</dl>
-							<dl class="getter" id="libjass.ASS.scaleX">
-								<dt class="name"><a href="#libjass.ASS.scaleX">scaleX</a></dt>
-								<dd class="description">
-									<p>After calling ASS.scaleTo(), this is the multiplicative factor to scale horizontal script resolution to video resolution.</p>
-								</dd>
-								<dd class="usage">var result = ass.scaleX;</dd>
-								<dd class="return type">number</dd>
-							</dl>
-							<dl class="getter" id="libjass.ASS.scaleY">
-								<dt class="name"><a href="#libjass.ASS.scaleY">scaleY</a></dt>
-								<dd class="description">
-									<p>After calling ASS.scaleTo(), this is the multiplicative factor to scale vertical script resolution to video resolution.</p>
-								</dd>
-								<dd class="usage">var result = ass.scaleY;</dd>
-								<dd class="return type">number</dd>
+								<dd class="usage">var result = ass.properties;</dd>
+								<dd class="return type">!libjass.ScriptProperties</dd>
 							</dl>
 							<dl class="getter" id="libjass.ASS.styles">
 								<dt class="name"><a href="#libjass.ASS.styles">styles</a></dt>
@@ -320,6 +296,30 @@
 								<dd class="return type">string</dd>
 								<dd class="return description">A simple representation of this dialogue's properties and tags.</dd>
 							</dl>
+							<dl class="function private" id="libjass.Dialogue._parsePartsString">
+								<dt class="name"><a href="#libjass.Dialogue._parsePartsString">_parsePartsString</a></dt>
+								<dd class="description">
+									<p>Parses this dialogue's parts from the raw parts string.</p>
+								</dd>
+								<dd class="usage">dialogue._parsePartsString();</dd>
+							</dl>
+							<dl class="function private static" id="libjass.Dialogue._toTime">
+								<dt class="name"><a href="#libjass.Dialogue._toTime">_toTime</a></dt>
+								<dd class="description">
+									<p>Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM</p>
+								</dd>
+								<dd class="usage">var result = Dialogue._toTime(string);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">string</dt>
+											<dd class="parameter type">string</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">number</dd>
+								<dd class="return description"></dd>
+							</dl>
 						</dd>
 						<dd class="properties">
 							<dl class="getter" id="libjass.Dialogue.alignment">
@@ -372,6 +372,61 @@
 							</dl>
 						</dd>
 					</dl>
+					<dl class="constructor" id="libjass.ScriptProperties">
+						<dt class="name">class <a href="#libjass.ScriptProperties">ScriptProperties</a></dt>
+						<dd class="description">
+							<p>This class represents the properties of an ASS script.</p>
+						</dd>
+						<dd class="usage">var scriptProperties = new ScriptProperties();</dd>
+						<dd class="functions">
+						</dd>
+						<dd class="properties">
+							<dl class="getter" id="libjass.ScriptProperties.resolutionX">
+								<dt class="name"><a href="#libjass.ScriptProperties.resolutionX">resolutionX</a></dt>
+								<dd class="description">
+									<p>The horizontal script resolution.</p>
+								</dd>
+								<dd class="usage">var result = scriptProperties.resolutionX;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="setter" id="libjass.ScriptProperties.resolutionX">
+								<dt class="name"><a href="#libjass.ScriptProperties.resolutionX">resolutionX</a></dt>
+								<dd class="description">
+									<p>The horizontal script resolution.</p>
+								</dd>
+								<dd class="usage">scriptProperties.resolutionX = value;</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">value</dt>
+											<dd class="parameter type">number</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+							<dl class="getter" id="libjass.ScriptProperties.resolutionY">
+								<dt class="name"><a href="#libjass.ScriptProperties.resolutionY">resolutionY</a></dt>
+								<dd class="description">
+									<p>The vertical script resolution.</p>
+								</dd>
+								<dd class="usage">var result = scriptProperties.resolutionY;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="setter" id="libjass.ScriptProperties.resolutionY">
+								<dt class="name"><a href="#libjass.ScriptProperties.resolutionY">resolutionY</a></dt>
+								<dd class="description">
+									<p>The vertical script resolution.</p>
+								</dd>
+								<dd class="usage">scriptProperties.resolutionY = value;</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">value</dt>
+											<dd class="parameter type">number</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+						</dd>
+					</dl>
 					<dl class="constructor" id="libjass.Style">
 						<dt class="name">class <a href="#libjass.Style">Style</a></dt>
 						<dd class="description">
@@ -400,9 +455,6 @@
 												<dt class="parameter name">"StrikeOut"</dt>
 												<dd class="parameter type">string</dd>
 												<dd class="parameter description">-1 if the style is struck-through</dd>
-												<dt class="parameter name">"OutlineWidth"</dt>
-												<dd class="parameter type">string</dd>
-												<dd class="parameter description">The outline width</dd>
 												<dt class="parameter name">"Fontname"</dt>
 												<dd class="parameter type">string</dd>
 												<dd class="parameter description">The name of the font</dd>
@@ -418,15 +470,21 @@
 												<dt class="parameter name">"Spacing"</dt>
 												<dd class="parameter type">string</dd>
 												<dd class="parameter description">The letter spacing of the font</dd>
-												<dt class="parameter name">"PrimaryColor"</dt>
+												<dt class="parameter name">"PrimaryColour"</dt>
 												<dd class="parameter type">string</dd>
 												<dd class="parameter description">The primary color</dd>
-												<dt class="parameter name">"OutlineColor"</dt>
+												<dt class="parameter name">"OutlineColour"</dt>
 												<dd class="parameter type">string</dd>
 												<dd class="parameter description">The outline color</dd>
+												<dt class="parameter name">"BackColour"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The shadow color</dd>
 												<dt class="parameter name">"Outline"</dt>
 												<dd class="parameter type">string</dd>
-												<dd class="parameter description">The outline width</dd>
+												<dd class="parameter description">The outline thickness</dd>
+												<dt class="parameter name">"Shadow"</dt>
+												<dd class="parameter type">string</dd>
+												<dd class="parameter description">The shadow depth</dd>
 												<dt class="parameter name">"Alignment"</dt>
 												<dd class="parameter type">string</dd>
 												<dd class="parameter description">The alignment number</dd>
@@ -550,12 +608,12 @@
 								<dd class="usage">var result = style.outlineColor;</dd>
 								<dd class="return type">!libjass.parts.Color</dd>
 							</dl>
-							<dl class="getter" id="libjass.Style.outlineWidth">
-								<dt class="name"><a href="#libjass.Style.outlineWidth">outlineWidth</a></dt>
+							<dl class="getter" id="libjass.Style.outlineThickness">
+								<dt class="name"><a href="#libjass.Style.outlineThickness">outlineThickness</a></dt>
 								<dd class="description">
-									<p>The width of this style's outline.</p>
+									<p>The thickness of this style's outline.</p>
 								</dd>
-								<dd class="usage">var result = style.outlineWidth;</dd>
+								<dd class="usage">var result = style.outlineThickness;</dd>
 								<dd class="return type">number</dd>
 							</dl>
 							<dl class="getter" id="libjass.Style.primaryColor">
@@ -565,6 +623,22 @@
 								</dd>
 								<dd class="usage">var result = style.primaryColor;</dd>
 								<dd class="return type">!libjass.parts.Color</dd>
+							</dl>
+							<dl class="getter" id="libjass.Style.shadowColor">
+								<dt class="name"><a href="#libjass.Style.shadowColor">shadowColor</a></dt>
+								<dd class="description">
+									<p>The color of this style's shadow.</p>
+								</dd>
+								<dd class="usage">var result = style.shadowColor;</dd>
+								<dd class="return type">!libjass.parts.Color</dd>
+							</dl>
+							<dl class="getter" id="libjass.Style.shadowDepth">
+								<dt class="name"><a href="#libjass.Style.shadowDepth">shadowDepth</a></dt>
+								<dd class="description">
+									<p>The depth of this style's shadow.</p>
+								</dd>
+								<dd class="usage">var result = style.shadowDepth;</dd>
+								<dd class="return type">number</dd>
 							</dl>
 							<dl class="getter" id="libjass.Style.strikeThrough">
 								<dt class="name"><a href="#libjass.Style.strikeThrough">strikeThrough</a></dt>
@@ -591,6 +665,13 @@
 						</dd>
 						<dd class="usage">var simpleMap = new SimpleMap();</dd>
 						<dd class="functions">
+							<dl class="function" id="libjass.SimpleMap.clear">
+								<dt class="name"><a href="#libjass.SimpleMap.clear">clear</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">simpleMap.clear();</dd>
+							</dl>
 							<dl class="function" id="libjass.SimpleMap.delete">
 								<dt class="name"><a href="#libjass.SimpleMap.delete">delete</a></dt>
 								<dd class="description">
@@ -704,6 +785,13 @@
 								<dd class="return type">libjass.Set.&lt;T&gt;</dd>
 								<dd class="return description">This set</dd>
 							</dl>
+							<dl class="function" id="libjass.SimpleSet.clear">
+								<dt class="name"><a href="#libjass.SimpleSet.clear">clear</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">simpleSet.clear();</dd>
+							</dl>
 							<dl class="function" id="libjass.SimpleSet.forEach">
 								<dt class="name"><a href="#libjass.SimpleSet.forEach">forEach</a></dt>
 								<dd class="description">
@@ -743,12 +831,1454 @@
 
 			</section>
 			<section>
+				<h1 id="libjass.parser">libjass.parser</h1>
+
+				<section>
+					<h2>Free functions</h2>
+					<dl class="function" id="libjass.parser.parse">
+						<dt class="name"><a href="#libjass.parser.parse">parse</a></dt>
+						<dd class="description">
+							<p>Parses a given string with the specified rule.</p>
+						</dd>
+						<dd class="usage">var result = parse(input, rule);</dd>
+							<dd class="parameters">
+								<dl>
+									<dt class="parameter name">input</dt>
+									<dd class="parameter type">string</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">rule</dt>
+									<dd class="parameter type">string</dd>
+									<dd class="parameter description"></dd>
+								</dl>
+							</dd>
+						<dt>Returns</dt>
+						<dd class="return type">*</dd>
+						<dd class="return description"></dd>
+					</dl>
+				</section>
+
+				<section>
+					<h2>Classes</h2>
+					<dl class="constructor private" id="libjass.parser.ParseNode">
+						<dt class="name">class <a href="#libjass.parser.ParseNode">ParseNode</a></dt>
+						<dd class="description">
+							<p>This class represents a single parse node. It has a start and end position, and an optional value object.</p>
+						</dd>
+						<dd class="usage">var parseNode = new ParseNode(parent, value);</dd>
+							<dd class="parameters">
+								<dl>
+									<dt class="parameter name">parent</dt>
+									<dd class="parameter type">!ParseNode</dd>
+									<dd class="parameter description">The parent of this parse node. The parent's end position will be updated to the end position of this node whenever the latter changes.</dd>
+									<dt class="parameter name">value</dt>
+									<dd class="parameter type">?string=null</dd>
+									<dd class="parameter description">A shortcut to assign a string to the value property.</dd>
+								</dl>
+							</dd>
+						<dd class="functions">
+							<dl class="function" id="libjass.parser.ParseNode.pop">
+								<dt class="name"><a href="#libjass.parser.ParseNode.pop">pop</a></dt>
+								<dd class="description">
+									<p>Removes the last child of this node and updates the end position to be end position of the new last child.</p>
+								</dd>
+								<dd class="usage">parseNode.pop();</dd>
+							</dl>
+							<dl class="function private" id="libjass.parser.ParseNode._setEnd">
+								<dt class="name"><a href="#libjass.parser.ParseNode._setEnd">_setEnd</a></dt>
+								<dd class="description">
+									<p>Updates the end property of this node and its parent recursively to the root node.</p>
+								</dd>
+								<dd class="usage">parseNode._setEnd(newEnd);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">newEnd</dt>
+											<dd class="parameter type">number</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+						</dd>
+						<dd class="properties">
+							<dl class="getter" id="libjass.parser.ParseNode.children">
+								<dt class="name"><a href="#libjass.parser.ParseNode.children">children</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parseNode.children;</dd>
+								<dd class="return type">!Array.&lt;!ParseNode&gt;</dd>
+							</dl>
+							<dl class="getter" id="libjass.parser.ParseNode.end">
+								<dt class="name"><a href="#libjass.parser.ParseNode.end">end</a></dt>
+								<dd class="description">
+									<p>The end position of this parse node.</p>
+								</dd>
+								<dd class="usage">var result = parseNode.end;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parser.ParseNode.parent">
+								<dt class="name"><a href="#libjass.parser.ParseNode.parent">parent</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parseNode.parent;</dd>
+								<dd class="return type">!ParseNode</dd>
+							</dl>
+							<dl class="getter" id="libjass.parser.ParseNode.start">
+								<dt class="name"><a href="#libjass.parser.ParseNode.start">start</a></dt>
+								<dd class="description">
+									<p>The start position of this parse node.</p>
+								</dd>
+								<dd class="usage">var result = parseNode.start;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parser.ParseNode.value">
+								<dt class="name"><a href="#libjass.parser.ParseNode.value">value</a></dt>
+								<dd class="description">
+									<p>An optional object associated with this parse node.</p>
+								</dd>
+								<dd class="usage">var result = parseNode.value;</dd>
+								<dd class="return type">*</dd>
+							</dl>
+							<dl class="setter" id="libjass.parser.ParseNode.value">
+								<dt class="name"><a href="#libjass.parser.ParseNode.value">value</a></dt>
+								<dd class="description">
+									<p>An optional object associated with this parse node. If the value is a string, then the end property is updated to be the length of the string.</p>
+								</dd>
+								<dd class="usage">parseNode.value = value;</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">value</dt>
+											<dd class="parameter type">*</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor private" id="libjass.parser.ParserRun">
+						<dt class="name">class <a href="#libjass.parser.ParserRun">ParserRun</a></dt>
+						<dd class="description">
+							<p>This class represents a single run of the parser.</p>
+						</dd>
+						<dd class="usage">var parserRun = new ParserRun(input, rule);</dd>
+							<dd class="parameters">
+								<dl>
+									<dt class="parameter name">input</dt>
+									<dd class="parameter type">string</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">rule</dt>
+									<dd class="parameter type">string</dd>
+									<dd class="parameter description"></dd>
+								</dl>
+							</dd>
+						<dd class="functions">
+							<dl class="function" id="libjass.parser.ParserRun.parse_alpha">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_alpha">parse_alpha</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_alpha(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_color">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_color">parse_color</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_color(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_colorWithAlpha">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_colorWithAlpha">parse_colorWithAlpha</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_colorWithAlpha(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_comment">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_comment">parse_comment</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_comment(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_decimal">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_decimal">parse_decimal</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_decimal(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_dialogueParts">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_dialogueParts">parse_dialogueParts</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_dialogueParts(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_drawingInstructionCubicBezierCurve">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_drawingInstructionCubicBezierCurve">parse_drawingInstructionCubicBezierCurve</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_drawingInstructionCubicBezierCurve(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_drawingInstructionLine">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_drawingInstructionLine">parse_drawingInstructionLine</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_drawingInstructionLine(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_drawingInstructionMove">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_drawingInstructionMove">parse_drawingInstructionMove</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_drawingInstructionMove(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_drawingInstructions">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_drawingInstructions">parse_drawingInstructions</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_drawingInstructions(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_enableDisable">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_enableDisable">parse_enableDisable</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_enableDisable(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_enclosedTags">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_enclosedTags">parse_enclosedTags</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_enclosedTags(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_hardspace">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_hardspace">parse_hardspace</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_hardspace(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_hex">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_hex">parse_hex</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_hex(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_newline">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_newline">parse_newline</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_newline(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_script">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_script">parse_script</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_script(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_scriptComment">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_scriptComment">parse_scriptComment</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_scriptComment(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_scriptProperty">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_scriptProperty">parse_scriptProperty</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_scriptProperty(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_scriptSection">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_scriptSection">parse_scriptSection</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_scriptSection(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_scriptSectionHeader">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_scriptSectionHeader">parse_scriptSectionHeader</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_scriptSectionHeader(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_1a">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_1a">parse_tag_1a</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_1a(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_1c">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_1c">parse_tag_1c</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_1c(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_2a">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_2a">parse_tag_2a</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_2a(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_2c">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_2c">parse_tag_2c</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_2c(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_3a">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_3a">parse_tag_3a</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_3a(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_3c">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_3c">parse_tag_3c</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_3c(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_4a">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_4a">parse_tag_4a</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_4a(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_4c">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_4c">parse_tag_4c</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_4c(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_K">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_K">parse_tag_K</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_K(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_a">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_a">parse_tag_a</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_a(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_alpha">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_alpha">parse_tag_alpha</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_alpha(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_an">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_an">parse_tag_an</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_an(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_b">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_b">parse_tag_b</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_b(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_be">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_be">parse_tag_be</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_be(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_blur">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_blur">parse_tag_blur</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_blur(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_bord">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_bord">parse_tag_bord</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_bord(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_c">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_c">parse_tag_c</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_c(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_clip">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_clip">parse_tag_clip</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_clip(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fad">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fad">parse_tag_fad</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_fad(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fade">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fade">parse_tag_fade</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_fade(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fax">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fax">parse_tag_fax</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_fax(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fay">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fay">parse_tag_fay</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_fay(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fn">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fn">parse_tag_fn</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_fn(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fr">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fr">parse_tag_fr</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_fr(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_frx">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_frx">parse_tag_frx</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_frx(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fry">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fry">parse_tag_fry</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_fry(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_frz">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_frz">parse_tag_frz</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_frz(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fs">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fs">parse_tag_fs</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_fs(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fscx">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fscx">parse_tag_fscx</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_fscx(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fscy">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fscy">parse_tag_fscy</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_fscy(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fsp">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fsp">parse_tag_fsp</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_fsp(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_i">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_i">parse_tag_i</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_i(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_iclip">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_iclip">parse_tag_iclip</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_iclip(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_k">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_k">parse_tag_k</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_k(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_kf">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_kf">parse_tag_kf</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_kf(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_ko">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_ko">parse_tag_ko</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_ko(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_move">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_move">parse_tag_move</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_move(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_org">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_org">parse_tag_org</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_org(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_p">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_p">parse_tag_p</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_p(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_pbo">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_pbo">parse_tag_pbo</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_pbo(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_pos">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_pos">parse_tag_pos</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_pos(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_q">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_q">parse_tag_q</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_q(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_r">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_r">parse_tag_r</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_r(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_s">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_s">parse_tag_s</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_s(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_shad">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_shad">parse_tag_shad</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_shad(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_t">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_t">parse_tag_t</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_t(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_u">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_u">parse_tag_u</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_u(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_xbord">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_xbord">parse_tag_xbord</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_xbord(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_xshad">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_xshad">parse_tag_xshad</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_xshad(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_ybord">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_ybord">parse_tag_ybord</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_ybord(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_yshad">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_yshad">parse_tag_yshad</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_tag_yshad(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_text">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_text">parse_text</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_text(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_unsignedDecimal">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_unsignedDecimal">parse_unsignedDecimal</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.parse_unsignedDecimal(parent);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.read">
+								<dt class="name"><a href="#libjass.parser.ParserRun.read">read</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.read(parent, next);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">parent</dt>
+											<dd class="parameter type">!ParseNode</dd>
+											<dd class="parameter description"></dd>
+											<dt class="parameter name">next</dt>
+											<dd class="parameter type">string</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function private" id="libjass.parser.ParserRun._haveMore">
+								<dt class="name"><a href="#libjass.parser.ParserRun._haveMore">_haveMore</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun._haveMore();</dd>
+								<dt>Returns</dt>
+								<dd class="return type">boolean</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function private" id="libjass.parser.ParserRun._peek">
+								<dt class="name"><a href="#libjass.parser.ParserRun._peek">_peek</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">parserRun._peek(count);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">count</dt>
+											<dd class="parameter type">number=1</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+						</dd>
+						<dd class="properties">
+							<dl class="getter" id="libjass.parser.ParserRun.result">
+								<dt class="name"><a href="#libjass.parser.ParserRun.result">result</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = parserRun.result;</dd>
+								<dd class="return type">!ParseNode</dd>
+							</dl>
+						</dd>
+					</dl>
+				</section>
+
+			</section>
+			<section>
 				<h1 id="libjass.parts">libjass.parts</h1>
 
 				<section>
 					<h2>Classes</h2>
 					<dl class="constructor" id="libjass.parts.Alignment">
-						<dt class="name">class <a href="#libjass.parts.Alignment">Alignment</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Alignment">Alignment</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>An alignment tag {\an} or {\a}</p>
 						</dd>
@@ -763,10 +2293,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Alignment.value">
+								<dt class="name"><a href="#libjass.parts.Alignment.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this alignment tag.</p>
+								</dd>
+								<dd class="usage">var result = alignment.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Alpha">
-						<dt class="name">class <a href="#libjass.parts.Alpha">Alpha</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Alpha">Alpha</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>An alpha tag {\alpha}</p>
 						</dd>
@@ -781,10 +2319,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Alpha.value">
+								<dt class="name"><a href="#libjass.parts.Alpha.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this alpha tag.</p>
+								</dd>
+								<dd class="usage">var result = alpha.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Blur">
-						<dt class="name">class <a href="#libjass.parts.Blur">Blur</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Blur">Blur</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A blur tag {\be}</p>
 						</dd>
@@ -799,10 +2345,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Blur.value">
+								<dt class="name"><a href="#libjass.parts.Blur.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this blur tag.</p>
+								</dd>
+								<dd class="usage">var result = blur.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Bold">
-						<dt class="name">class <a href="#libjass.parts.Bold">Bold</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Bold">Bold</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A bold tag {\b}</p>
 						</dd>
@@ -817,10 +2371,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Bold.value">
+								<dt class="name"><a href="#libjass.parts.Bold.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this bold tag.</p>
+								</dd>
+								<dd class="usage">var result = bold.value;</dd>
+								<dd class="return type">?boolean|?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Border">
-						<dt class="name">class <a href="#libjass.parts.Border">Border</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Border">Border</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A border tag {\bord}</p>
 						</dd>
@@ -835,10 +2397,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Border.value">
+								<dt class="name"><a href="#libjass.parts.Border.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this border tag.</p>
+								</dd>
+								<dd class="usage">var result = border.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.BorderX">
-						<dt class="name">class <a href="#libjass.parts.BorderX">BorderX</a></dt>
+						<dt class="name">class <a href="#libjass.parts.BorderX">BorderX</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A horizontal border tag {\xbord}</p>
 						</dd>
@@ -853,10 +2423,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.BorderX.value">
+								<dt class="name"><a href="#libjass.parts.BorderX.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this horizontal border tag.</p>
+								</dd>
+								<dd class="usage">var result = borderX.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.BorderY">
-						<dt class="name">class <a href="#libjass.parts.BorderY">BorderY</a></dt>
+						<dt class="name">class <a href="#libjass.parts.BorderY">BorderY</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A vertical border tag {\ybord}</p>
 						</dd>
@@ -871,6 +2449,14 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.BorderY.value">
+								<dt class="name"><a href="#libjass.parts.BorderY.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this vertical border tag.</p>
+								</dd>
+								<dd class="usage">var result = borderY.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Color">
@@ -925,10 +2511,42 @@
 							</dl>
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Color.alpha">
+								<dt class="name"><a href="#libjass.parts.Color.alpha">alpha</a></dt>
+								<dd class="description">
+									<p>The alpha component of this color as a number between 0 and 1, where 0 means transparent and 1 means opaque.</p>
+								</dd>
+								<dd class="usage">var result = color.alpha;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.Color.blue">
+								<dt class="name"><a href="#libjass.parts.Color.blue">blue</a></dt>
+								<dd class="description">
+									<p>The blue component of this color as a number between 0 and 255.</p>
+								</dd>
+								<dd class="usage">var result = color.blue;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.Color.green">
+								<dt class="name"><a href="#libjass.parts.Color.green">green</a></dt>
+								<dd class="description">
+									<p>The green component of this color as a number between 0 and 255.</p>
+								</dd>
+								<dd class="usage">var result = color.green;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.Color.red">
+								<dt class="name"><a href="#libjass.parts.Color.red">red</a></dt>
+								<dd class="description">
+									<p>The red component of this color as a number between 0 and 255.</p>
+								</dd>
+								<dd class="usage">var result = color.red;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.ColorKaraoke">
-						<dt class="name">class <a href="#libjass.parts.ColorKaraoke">ColorKaraoke</a></dt>
+						<dt class="name">class <a href="#libjass.parts.ColorKaraoke">ColorKaraoke</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A color karaoke tag {\k}</p>
 						</dd>
@@ -943,10 +2561,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.ColorKaraoke.duration">
+								<dt class="name"><a href="#libjass.parts.ColorKaraoke.duration">duration</a></dt>
+								<dd class="description">
+									<p>The duration of this color karaoke tag.</p>
+								</dd>
+								<dd class="usage">var result = colorKaraoke.duration;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Comment">
-						<dt class="name">class <a href="#libjass.parts.Comment">Comment</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Comment">Comment</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A comment, i.e., any text enclosed in {} that is not understood as an ASS tag.</p>
 						</dd>
@@ -961,10 +2587,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Comment.value">
+								<dt class="name"><a href="#libjass.parts.Comment.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this comment.</p>
+								</dd>
+								<dd class="usage">var result = comment.value;</dd>
+								<dd class="return type">string</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.ComplexFade">
-						<dt class="name">class <a href="#libjass.parts.ComplexFade">ComplexFade</a></dt>
+						<dt class="name">class <a href="#libjass.parts.ComplexFade">ComplexFade</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A complex fade tag {\fade}</p>
 						</dd>
@@ -997,10 +2631,66 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.ComplexFade.a1">
+								<dt class="name"><a href="#libjass.parts.ComplexFade.a1">a1</a></dt>
+								<dd class="description">
+									<p>The alpha value of this complex fade tag at time t2.</p>
+								</dd>
+								<dd class="usage">var result = complexFade.a1;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.ComplexFade.a2">
+								<dt class="name"><a href="#libjass.parts.ComplexFade.a2">a2</a></dt>
+								<dd class="description">
+									<p>The alpha value of this complex fade tag at time t3.</p>
+								</dd>
+								<dd class="usage">var result = complexFade.a2;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.ComplexFade.a3">
+								<dt class="name"><a href="#libjass.parts.ComplexFade.a3">a3</a></dt>
+								<dd class="description">
+									<p>The alpha value of this complex fade tag at time t4.</p>
+								</dd>
+								<dd class="usage">var result = complexFade.a3;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.ComplexFade.t1">
+								<dt class="name"><a href="#libjass.parts.ComplexFade.t1">t1</a></dt>
+								<dd class="description">
+									<p>The starting time of this complex fade tag.</p>
+								</dd>
+								<dd class="usage">var result = complexFade.t1;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.ComplexFade.t2">
+								<dt class="name"><a href="#libjass.parts.ComplexFade.t2">t2</a></dt>
+								<dd class="description">
+									<p>The first intermediate time of this complex fade tag.</p>
+								</dd>
+								<dd class="usage">var result = complexFade.t2;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.ComplexFade.t3">
+								<dt class="name"><a href="#libjass.parts.ComplexFade.t3">t3</a></dt>
+								<dd class="description">
+									<p>The second intermediate time of this complex fade tag.</p>
+								</dd>
+								<dd class="usage">var result = complexFade.t3;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.ComplexFade.t4">
+								<dt class="name"><a href="#libjass.parts.ComplexFade.t4">t4</a></dt>
+								<dd class="description">
+									<p>The ending time of this complex fade tag.</p>
+								</dd>
+								<dd class="usage">var result = complexFade.t4;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.DrawingBaselineOffset">
-						<dt class="name">class <a href="#libjass.parts.DrawingBaselineOffset">DrawingBaselineOffset</a></dt>
+						<dt class="name">class <a href="#libjass.parts.DrawingBaselineOffset">DrawingBaselineOffset</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A drawing mode baseline offset tag {\pbo}</p>
 						</dd>
@@ -1015,10 +2705,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.DrawingBaselineOffset.value">
+								<dt class="name"><a href="#libjass.parts.DrawingBaselineOffset.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this drawing mode baseline offset tag.</p>
+								</dd>
+								<dd class="usage">var result = drawingBaselineOffset.value;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.DrawingInstructions">
-						<dt class="name">class <a href="#libjass.parts.DrawingInstructions">DrawingInstructions</a></dt>
+						<dt class="name">class <a href="#libjass.parts.DrawingInstructions">DrawingInstructions</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A pseudo-part representing text interpreted as drawing instructions</p>
 						</dd>
@@ -1026,17 +2724,25 @@
 							<dd class="parameters">
 								<dl>
 									<dt class="parameter name">value</dt>
-									<dd class="parameter type">string</dd>
+									<dd class="parameter type">!Array.&lt;!libjass.parts.drawing.Instruction[]&gt;</dd>
 									<dd class="parameter description"></dd>
 								</dl>
 							</dd>
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.DrawingInstructions.value">
+								<dt class="name"><a href="#libjass.parts.DrawingInstructions.value">value</a></dt>
+								<dd class="description">
+									<p>The instructions contained in this drawing instructions part.</p>
+								</dd>
+								<dd class="usage">var result = drawingInstructions.value;</dd>
+								<dd class="return type">!Array.&lt;!libjass.parts.drawing.Instruction[]&gt;</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.DrawingMode">
-						<dt class="name">class <a href="#libjass.parts.DrawingMode">DrawingMode</a></dt>
+						<dt class="name">class <a href="#libjass.parts.DrawingMode">DrawingMode</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A drawing mode tag {\p}</p>
 						</dd>
@@ -1051,10 +2757,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.DrawingMode.scale">
+								<dt class="name"><a href="#libjass.parts.DrawingMode.scale">scale</a></dt>
+								<dd class="description">
+									<p>The scale of this drawing mode tag.</p>
+								</dd>
+								<dd class="usage">var result = drawingMode.scale;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Fade">
-						<dt class="name">class <a href="#libjass.parts.Fade">Fade</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Fade">Fade</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A simple fade tag {\fad}</p>
 						</dd>
@@ -1072,10 +2786,26 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Fade.end">
+								<dt class="name"><a href="#libjass.parts.Fade.end">end</a></dt>
+								<dd class="description">
+									<p>The end time of this fade tag.</p>
+								</dd>
+								<dd class="usage">var result = fade.end;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.Fade.start">
+								<dt class="name"><a href="#libjass.parts.Fade.start">start</a></dt>
+								<dd class="description">
+									<p>The start time of this fade tag.</p>
+								</dd>
+								<dd class="usage">var result = fade.start;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.FontName">
-						<dt class="name">class <a href="#libjass.parts.FontName">FontName</a></dt>
+						<dt class="name">class <a href="#libjass.parts.FontName">FontName</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A font name tag {\fn}</p>
 						</dd>
@@ -1090,10 +2820,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.FontName.value">
+								<dt class="name"><a href="#libjass.parts.FontName.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this font name tag.</p>
+								</dd>
+								<dd class="usage">var result = fontName.value;</dd>
+								<dd class="return type">?string</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.FontScaleX">
-						<dt class="name">class <a href="#libjass.parts.FontScaleX">FontScaleX</a></dt>
+						<dt class="name">class <a href="#libjass.parts.FontScaleX">FontScaleX</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A horizontal font scaling tag {\fscx}</p>
 						</dd>
@@ -1108,10 +2846,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.FontScaleX.value">
+								<dt class="name"><a href="#libjass.parts.FontScaleX.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this horizontal font scaling tag.</p>
+								</dd>
+								<dd class="usage">var result = fontScaleX.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.FontScaleY">
-						<dt class="name">class <a href="#libjass.parts.FontScaleY">FontScaleY</a></dt>
+						<dt class="name">class <a href="#libjass.parts.FontScaleY">FontScaleY</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A vertical font scaling tag {\fscy}</p>
 						</dd>
@@ -1126,10 +2872,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.FontScaleY.value">
+								<dt class="name"><a href="#libjass.parts.FontScaleY.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this vertical font scaling tag.</p>
+								</dd>
+								<dd class="usage">var result = fontScaleY.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.FontSize">
-						<dt class="name">class <a href="#libjass.parts.FontSize">FontSize</a></dt>
+						<dt class="name">class <a href="#libjass.parts.FontSize">FontSize</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A font size tag {\fs}</p>
 						</dd>
@@ -1144,10 +2898,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.FontSize.value">
+								<dt class="name"><a href="#libjass.parts.FontSize.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this font size tag.</p>
+								</dd>
+								<dd class="usage">var result = fontSize.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.GaussianBlur">
-						<dt class="name">class <a href="#libjass.parts.GaussianBlur">GaussianBlur</a></dt>
+						<dt class="name">class <a href="#libjass.parts.GaussianBlur">GaussianBlur</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A Gaussian blur tag {\blur}</p>
 						</dd>
@@ -1162,10 +2924,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.GaussianBlur.value">
+								<dt class="name"><a href="#libjass.parts.GaussianBlur.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this Gaussian blur tag.</p>
+								</dd>
+								<dd class="usage">var result = gaussianBlur.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Italic">
-						<dt class="name">class <a href="#libjass.parts.Italic">Italic</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Italic">Italic</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>An italic tag {\i}</p>
 						</dd>
@@ -1180,12 +2950,20 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Italic.value">
+								<dt class="name"><a href="#libjass.parts.Italic.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this italic tag.</p>
+								</dd>
+								<dd class="usage">var result = italic.value;</dd>
+								<dd class="return type">?boolean</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.LetterSpacing">
-						<dt class="name">class <a href="#libjass.parts.LetterSpacing">LetterSpacing</a></dt>
+						<dt class="name">class <a href="#libjass.parts.LetterSpacing">LetterSpacing</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
-							<p>A letter spacing tag {\fsp}</p>
+							<p>A letter-spacing tag {\fsp}</p>
 						</dd>
 						<dd class="usage">var letterSpacing = new LetterSpacing(value);</dd>
 							<dd class="parameters">
@@ -1198,10 +2976,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.LetterSpacing.value">
+								<dt class="name"><a href="#libjass.parts.LetterSpacing.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this letter-spacing tag.</p>
+								</dd>
+								<dd class="usage">var result = letterSpacing.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Move">
-						<dt class="name">class <a href="#libjass.parts.Move">Move</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Move">Move</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A movement tag {\move}</p>
 						</dd>
@@ -1231,10 +3017,58 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Move.t1">
+								<dt class="name"><a href="#libjass.parts.Move.t1">t1</a></dt>
+								<dd class="description">
+									<p>The start time of this move tag.</p>
+								</dd>
+								<dd class="usage">var result = move.t1;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.Move.t2">
+								<dt class="name"><a href="#libjass.parts.Move.t2">t2</a></dt>
+								<dd class="description">
+									<p>The end time value of this move tag.</p>
+								</dd>
+								<dd class="usage">var result = move.t2;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.Move.x1">
+								<dt class="name"><a href="#libjass.parts.Move.x1">x1</a></dt>
+								<dd class="description">
+									<p>The starting x value of this move tag.</p>
+								</dd>
+								<dd class="usage">var result = move.x1;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.Move.x2">
+								<dt class="name"><a href="#libjass.parts.Move.x2">x2</a></dt>
+								<dd class="description">
+									<p>The ending x value of this move tag.</p>
+								</dd>
+								<dd class="usage">var result = move.x2;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.Move.y1">
+								<dt class="name"><a href="#libjass.parts.Move.y1">y1</a></dt>
+								<dd class="description">
+									<p>The starting y value of this move tag.</p>
+								</dd>
+								<dd class="usage">var result = move.y1;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.Move.y2">
+								<dt class="name"><a href="#libjass.parts.Move.y2">y2</a></dt>
+								<dd class="description">
+									<p>The ending y value of this move tag.</p>
+								</dd>
+								<dd class="usage">var result = move.y2;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.OutlineAlpha">
-						<dt class="name">class <a href="#libjass.parts.OutlineAlpha">OutlineAlpha</a></dt>
+						<dt class="name">class <a href="#libjass.parts.OutlineAlpha">OutlineAlpha</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>An outline alpha tag {\3a}</p>
 						</dd>
@@ -1249,10 +3083,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.OutlineAlpha.value">
+								<dt class="name"><a href="#libjass.parts.OutlineAlpha.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this outline alpha tag.</p>
+								</dd>
+								<dd class="usage">var result = outlineAlpha.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.OutlineColor">
-						<dt class="name">class <a href="#libjass.parts.OutlineColor">OutlineColor</a></dt>
+						<dt class="name">class <a href="#libjass.parts.OutlineColor">OutlineColor</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>An outline color tag {\3c}</p>
 						</dd>
@@ -1267,10 +3109,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.OutlineColor.value">
+								<dt class="name"><a href="#libjass.parts.OutlineColor.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this outline color tag.</p>
+								</dd>
+								<dd class="usage">var result = outlineColor.value;</dd>
+								<dd class="return type">libjass.parts.Color</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.OutlineKaraoke">
-						<dt class="name">class <a href="#libjass.parts.OutlineKaraoke">OutlineKaraoke</a></dt>
+						<dt class="name">class <a href="#libjass.parts.OutlineKaraoke">OutlineKaraoke</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>An outline karaoke tag {\ko}</p>
 						</dd>
@@ -1285,6 +3135,14 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.OutlineKaraoke.duration">
+								<dt class="name"><a href="#libjass.parts.OutlineKaraoke.duration">duration</a></dt>
+								<dd class="description">
+									<p>The duration of this outline karaoke tag.</p>
+								</dd>
+								<dd class="usage">var result = outlineKaraoke.duration;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor abstract" id="libjass.parts.PartBase">
@@ -1319,7 +3177,7 @@
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Position">
-						<dt class="name">class <a href="#libjass.parts.Position">Position</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Position">Position</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A position tag {\pos}</p>
 						</dd>
@@ -1337,10 +3195,26 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Position.x">
+								<dt class="name"><a href="#libjass.parts.Position.x">x</a></dt>
+								<dd class="description">
+									<p>The x value of this position tag.</p>
+								</dd>
+								<dd class="usage">var result = position.x;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.Position.y">
+								<dt class="name"><a href="#libjass.parts.Position.y">y</a></dt>
+								<dd class="description">
+									<p>The y value of this position tag.</p>
+								</dd>
+								<dd class="usage">var result = position.y;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.PrimaryAlpha">
-						<dt class="name">class <a href="#libjass.parts.PrimaryAlpha">PrimaryAlpha</a></dt>
+						<dt class="name">class <a href="#libjass.parts.PrimaryAlpha">PrimaryAlpha</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A primary alpha tag {\1a}</p>
 						</dd>
@@ -1355,10 +3229,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.PrimaryAlpha.value">
+								<dt class="name"><a href="#libjass.parts.PrimaryAlpha.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this primary alpha tag.</p>
+								</dd>
+								<dd class="usage">var result = primaryAlpha.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.PrimaryColor">
-						<dt class="name">class <a href="#libjass.parts.PrimaryColor">PrimaryColor</a></dt>
+						<dt class="name">class <a href="#libjass.parts.PrimaryColor">PrimaryColor</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A primary color tag {\c} or {\1c}</p>
 						</dd>
@@ -1373,10 +3255,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.PrimaryColor.value">
+								<dt class="name"><a href="#libjass.parts.PrimaryColor.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this primary color tag.</p>
+								</dd>
+								<dd class="usage">var result = primaryColor.value;</dd>
+								<dd class="return type">libjass.parts.Color</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.RectangularClip">
-						<dt class="name">class <a href="#libjass.parts.RectangularClip">RectangularClip</a></dt>
+						<dt class="name">class <a href="#libjass.parts.RectangularClip">RectangularClip</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A rectangular clip tag {\clip} or {\iclip}</p>
 						</dd>
@@ -1403,10 +3293,50 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.RectangularClip.inside">
+								<dt class="name"><a href="#libjass.parts.RectangularClip.inside">inside</a></dt>
+								<dd class="description">
+									<p>Whether this rectangular clip tag clips the region it encloses or the region it excludes.</p>
+								</dd>
+								<dd class="usage">var result = rectangularClip.inside;</dd>
+								<dd class="return type">boolean</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.RectangularClip.x1">
+								<dt class="name"><a href="#libjass.parts.RectangularClip.x1">x1</a></dt>
+								<dd class="description">
+									<p>The X coordinate of the starting position of this rectangular clip tag.</p>
+								</dd>
+								<dd class="usage">var result = rectangularClip.x1;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.RectangularClip.x2">
+								<dt class="name"><a href="#libjass.parts.RectangularClip.x2">x2</a></dt>
+								<dd class="description">
+									<p>The X coordinate of the ending position of this rectangular clip tag.</p>
+								</dd>
+								<dd class="usage">var result = rectangularClip.x2;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.RectangularClip.y1">
+								<dt class="name"><a href="#libjass.parts.RectangularClip.y1">y1</a></dt>
+								<dd class="description">
+									<p>The Y coordinate of the starting position of this rectangular clip tag.</p>
+								</dd>
+								<dd class="usage">var result = rectangularClip.y1;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.RectangularClip.y2">
+								<dt class="name"><a href="#libjass.parts.RectangularClip.y2">y2</a></dt>
+								<dd class="description">
+									<p>The Y coordinate of the ending position of this rectangular clip tag.</p>
+								</dd>
+								<dd class="usage">var result = rectangularClip.y2;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Reset">
-						<dt class="name">class <a href="#libjass.parts.Reset">Reset</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Reset">Reset</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A style reset tag {\r}</p>
 						</dd>
@@ -1421,10 +3351,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Reset.value">
+								<dt class="name"><a href="#libjass.parts.Reset.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this style reset tag.</p>
+								</dd>
+								<dd class="usage">var result = reset.value;</dd>
+								<dd class="return type">?string</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.RotateX">
-						<dt class="name">class <a href="#libjass.parts.RotateX">RotateX</a></dt>
+						<dt class="name">class <a href="#libjass.parts.RotateX">RotateX</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>An X-axis rotation tag {\frx}</p>
 						</dd>
@@ -1439,10 +3377,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.RotateX.value">
+								<dt class="name"><a href="#libjass.parts.RotateX.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this X-axis rotation tag.</p>
+								</dd>
+								<dd class="usage">var result = rotateX.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.RotateY">
-						<dt class="name">class <a href="#libjass.parts.RotateY">RotateY</a></dt>
+						<dt class="name">class <a href="#libjass.parts.RotateY">RotateY</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A Y-axis rotation tag {\fry}</p>
 						</dd>
@@ -1457,10 +3403,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.RotateY.value">
+								<dt class="name"><a href="#libjass.parts.RotateY.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this Y-axis rotation tag.</p>
+								</dd>
+								<dd class="usage">var result = rotateY.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.RotateZ">
-						<dt class="name">class <a href="#libjass.parts.RotateZ">RotateZ</a></dt>
+						<dt class="name">class <a href="#libjass.parts.RotateZ">RotateZ</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A Z-axis rotation tag {\fr} or {\frz}</p>
 						</dd>
@@ -1475,10 +3429,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.RotateZ.value">
+								<dt class="name"><a href="#libjass.parts.RotateZ.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this Z-axis rotation tag.</p>
+								</dd>
+								<dd class="usage">var result = rotateZ.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.RotationOrigin">
-						<dt class="name">class <a href="#libjass.parts.RotationOrigin">RotationOrigin</a></dt>
+						<dt class="name">class <a href="#libjass.parts.RotationOrigin">RotationOrigin</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A rotation origin tag {\org}</p>
 						</dd>
@@ -1496,10 +3458,26 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.RotationOrigin.x">
+								<dt class="name"><a href="#libjass.parts.RotationOrigin.x">x</a></dt>
+								<dd class="description">
+									<p>The x value of this rotation origin tag.</p>
+								</dd>
+								<dd class="usage">var result = rotationOrigin.x;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.RotationOrigin.y">
+								<dt class="name"><a href="#libjass.parts.RotationOrigin.y">y</a></dt>
+								<dd class="description">
+									<p>The y value of this rotation origin tag.</p>
+								</dd>
+								<dd class="usage">var result = rotationOrigin.y;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.SecondaryAlpha">
-						<dt class="name">class <a href="#libjass.parts.SecondaryAlpha">SecondaryAlpha</a></dt>
+						<dt class="name">class <a href="#libjass.parts.SecondaryAlpha">SecondaryAlpha</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A secondary alpha tag {\2a}</p>
 						</dd>
@@ -1514,10 +3492,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.SecondaryAlpha.value">
+								<dt class="name"><a href="#libjass.parts.SecondaryAlpha.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this secondary alpha tag.</p>
+								</dd>
+								<dd class="usage">var result = secondaryAlpha.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.SecondaryColor">
-						<dt class="name">class <a href="#libjass.parts.SecondaryColor">SecondaryColor</a></dt>
+						<dt class="name">class <a href="#libjass.parts.SecondaryColor">SecondaryColor</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A secondary color tag {\2c}</p>
 						</dd>
@@ -1532,10 +3518,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.SecondaryColor.value">
+								<dt class="name"><a href="#libjass.parts.SecondaryColor.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this secondary color tag.</p>
+								</dd>
+								<dd class="usage">var result = secondaryColor.value;</dd>
+								<dd class="return type">libjass.parts.Color</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Shadow">
-						<dt class="name">class <a href="#libjass.parts.Shadow">Shadow</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Shadow">Shadow</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A shadow tag {\shad}</p>
 						</dd>
@@ -1550,10 +3544,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Shadow.value">
+								<dt class="name"><a href="#libjass.parts.Shadow.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this shadow tag.</p>
+								</dd>
+								<dd class="usage">var result = shadow.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.ShadowAlpha">
-						<dt class="name">class <a href="#libjass.parts.ShadowAlpha">ShadowAlpha</a></dt>
+						<dt class="name">class <a href="#libjass.parts.ShadowAlpha">ShadowAlpha</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A shadow alpha tag {\4a}</p>
 						</dd>
@@ -1568,10 +3570,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.ShadowAlpha.value">
+								<dt class="name"><a href="#libjass.parts.ShadowAlpha.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this shadow alpha tag.</p>
+								</dd>
+								<dd class="usage">var result = shadowAlpha.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.ShadowColor">
-						<dt class="name">class <a href="#libjass.parts.ShadowColor">ShadowColor</a></dt>
+						<dt class="name">class <a href="#libjass.parts.ShadowColor">ShadowColor</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A shadow color tag {\4c}</p>
 						</dd>
@@ -1586,10 +3596,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.ShadowColor.value">
+								<dt class="name"><a href="#libjass.parts.ShadowColor.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this shadow color tag.</p>
+								</dd>
+								<dd class="usage">var result = shadowColor.value;</dd>
+								<dd class="return type">libjass.parts.Color</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.ShadowX">
-						<dt class="name">class <a href="#libjass.parts.ShadowX">ShadowX</a></dt>
+						<dt class="name">class <a href="#libjass.parts.ShadowX">ShadowX</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A horizontal shadow tag {\xshad}</p>
 						</dd>
@@ -1604,10 +3622,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.ShadowX.value">
+								<dt class="name"><a href="#libjass.parts.ShadowX.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this horizontal shadow tag.</p>
+								</dd>
+								<dd class="usage">var result = shadowX.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.ShadowY">
-						<dt class="name">class <a href="#libjass.parts.ShadowY">ShadowY</a></dt>
+						<dt class="name">class <a href="#libjass.parts.ShadowY">ShadowY</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A vertical shadow tag {\yshad}</p>
 						</dd>
@@ -1622,10 +3648,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.ShadowY.value">
+								<dt class="name"><a href="#libjass.parts.ShadowY.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this vertical shadow tag.</p>
+								</dd>
+								<dd class="usage">var result = shadowY.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.SkewX">
-						<dt class="name">class <a href="#libjass.parts.SkewX">SkewX</a></dt>
+						<dt class="name">class <a href="#libjass.parts.SkewX">SkewX</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>An X-axis shearing tag {\fax}</p>
 						</dd>
@@ -1640,10 +3674,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.SkewX.value">
+								<dt class="name"><a href="#libjass.parts.SkewX.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this X-axis shearing tag.</p>
+								</dd>
+								<dd class="usage">var result = skewX.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.SkewY">
-						<dt class="name">class <a href="#libjass.parts.SkewY">SkewY</a></dt>
+						<dt class="name">class <a href="#libjass.parts.SkewY">SkewY</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A Y-axis shearing tag {\fay}</p>
 						</dd>
@@ -1658,10 +3700,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.SkewY.value">
+								<dt class="name"><a href="#libjass.parts.SkewY.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this Y-axis shearing tag.</p>
+								</dd>
+								<dd class="usage">var result = skewY.value;</dd>
+								<dd class="return type">?number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.StrikeThrough">
-						<dt class="name">class <a href="#libjass.parts.StrikeThrough">StrikeThrough</a></dt>
+						<dt class="name">class <a href="#libjass.parts.StrikeThrough">StrikeThrough</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A strike-through tag {\s}</p>
 						</dd>
@@ -1676,10 +3726,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.StrikeThrough.value">
+								<dt class="name"><a href="#libjass.parts.StrikeThrough.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this strike-through tag.</p>
+								</dd>
+								<dd class="usage">var result = strikeThrough.value;</dd>
+								<dd class="return type">?boolean</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.SweepingColorKaraoke">
-						<dt class="name">class <a href="#libjass.parts.SweepingColorKaraoke">SweepingColorKaraoke</a></dt>
+						<dt class="name">class <a href="#libjass.parts.SweepingColorKaraoke">SweepingColorKaraoke</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A sweeping color karaoke tag {\K} or {\kf}</p>
 						</dd>
@@ -1694,10 +3752,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.SweepingColorKaraoke.duration">
+								<dt class="name"><a href="#libjass.parts.SweepingColorKaraoke.duration">duration</a></dt>
+								<dd class="description">
+									<p>The duration of this sweeping color karaoke tag.</p>
+								</dd>
+								<dd class="usage">var result = sweepingColorKaraoke.duration;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Text">
-						<dt class="name">class <a href="#libjass.parts.Text">Text</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Text">Text</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A block of text, i.e., any text not enclosed in {}. Also includes \h and \N.</p>
 						</dd>
@@ -1712,10 +3778,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Text.value">
+								<dt class="name"><a href="#libjass.parts.Text.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this text part.</p>
+								</dd>
+								<dd class="usage">var result = text.value;</dd>
+								<dd class="return type">string</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Transform">
-						<dt class="name">class <a href="#libjass.parts.Transform">Transform</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Transform">Transform</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A transform tag {\t}</p>
 						</dd>
@@ -1732,17 +3806,49 @@
 									<dd class="parameter type">number</dd>
 									<dd class="parameter description"></dd>
 									<dt class="parameter name">tags</dt>
-									<dd class="parameter type">Array.&lt;libjass.parts.Tag&gt;</dd>
+									<dd class="parameter type">!Array.&lt;!libjass.parts.Tag&gt;</dd>
 									<dd class="parameter description"></dd>
 								</dl>
 							</dd>
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Transform.accel">
+								<dt class="name"><a href="#libjass.parts.Transform.accel">accel</a></dt>
+								<dd class="description">
+									<p>The acceleration of this transform tag.</p>
+								</dd>
+								<dd class="usage">var result = transform.accel;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.Transform.end">
+								<dt class="name"><a href="#libjass.parts.Transform.end">end</a></dt>
+								<dd class="description">
+									<p>The ending time of this transform tag.</p>
+								</dd>
+								<dd class="usage">var result = transform.end;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.Transform.start">
+								<dt class="name"><a href="#libjass.parts.Transform.start">start</a></dt>
+								<dd class="description">
+									<p>The starting time of this transform tag.</p>
+								</dd>
+								<dd class="usage">var result = transform.start;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.Transform.tags">
+								<dt class="name"><a href="#libjass.parts.Transform.tags">tags</a></dt>
+								<dd class="description">
+									<p>The tags animated by this transform tag.</p>
+								</dd>
+								<dd class="usage">var result = transform.tags;</dd>
+								<dd class="return type">!Array.&lt;!libjass.parts.Tag&gt;</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.Underline">
-						<dt class="name">class <a href="#libjass.parts.Underline">Underline</a></dt>
+						<dt class="name">class <a href="#libjass.parts.Underline">Underline</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>An underline tag {\u}</p>
 						</dd>
@@ -1757,10 +3863,18 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.Underline.value">
+								<dt class="name"><a href="#libjass.parts.Underline.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this underline tag.</p>
+								</dd>
+								<dd class="usage">var result = underline.value;</dd>
+								<dd class="return type">?boolean</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.VectorClip">
-						<dt class="name">class <a href="#libjass.parts.VectorClip">VectorClip</a></dt>
+						<dt class="name">class <a href="#libjass.parts.VectorClip">VectorClip</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A vector clip tag {\clip} or {\iclip}</p>
 						</dd>
@@ -1781,10 +3895,34 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.VectorClip.commands">
+								<dt class="name"><a href="#libjass.parts.VectorClip.commands">commands</a></dt>
+								<dd class="description">
+									<p>The clip commands of this vector clip tag.</p>
+								</dd>
+								<dd class="usage">var result = vectorClip.commands;</dd>
+								<dd class="return type">string</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.VectorClip.inside">
+								<dt class="name"><a href="#libjass.parts.VectorClip.inside">inside</a></dt>
+								<dd class="description">
+									<p>Whether this vector clip tag clips the region it encloses or the region it excludes.</p>
+								</dd>
+								<dd class="usage">var result = vectorClip.inside;</dd>
+								<dd class="return type">boolean</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.VectorClip.scale">
+								<dt class="name"><a href="#libjass.parts.VectorClip.scale">scale</a></dt>
+								<dd class="description">
+									<p>The scale of this vector clip tag.</p>
+								</dd>
+								<dd class="usage">var result = vectorClip.scale;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.parts.WrappingStyle">
-						<dt class="name">class <a href="#libjass.parts.WrappingStyle">WrappingStyle</a></dt>
+						<dt class="name">class <a href="#libjass.parts.WrappingStyle">WrappingStyle</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
 						<dd class="description">
 							<p>A wrapping style tag {\q}</p>
 						</dd>
@@ -1799,6 +3937,177 @@
 						<dd class="functions">
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.parts.WrappingStyle.value">
+								<dt class="name"><a href="#libjass.parts.WrappingStyle.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this wrapping style tag.</p>
+								</dd>
+								<dd class="usage">var result = wrappingStyle.value;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+						</dd>
+					</dl>
+				</section>
+
+			</section>
+			<section>
+				<h1 id="libjass.parts.drawing">libjass.parts.drawing</h1>
+
+				<section>
+					<h2>Classes</h2>
+					<dl class="constructor" id="libjass.parts.drawing.CubicBezierCurveInstruction">
+						<dt class="name">class <a href="#libjass.parts.drawing.CubicBezierCurveInstruction">CubicBezierCurveInstruction</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
+						<dd class="description">
+							<p>An instruction to draw a cubic bezier curve to a particular position, with two given control points.</p>
+						</dd>
+						<dd class="usage">var cubicBezierCurveInstruction = new CubicBezierCurveInstruction(x1, y1, x2, y2, x3, y3);</dd>
+							<dd class="parameters">
+								<dl>
+									<dt class="parameter name">x1</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">y1</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">x2</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">y2</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">x3</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">y3</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+								</dl>
+							</dd>
+						<dd class="functions">
+						</dd>
+						<dd class="properties">
+							<dl class="getter" id="libjass.parts.drawing.CubicBezierCurveInstruction.x1">
+								<dt class="name"><a href="#libjass.parts.drawing.CubicBezierCurveInstruction.x1">x1</a></dt>
+								<dd class="description">
+									<p>The X position of the first control point of this cubic bezier curve instruction.</p>
+								</dd>
+								<dd class="usage">var result = cubicBezierCurveInstruction.x1;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.drawing.CubicBezierCurveInstruction.x2">
+								<dt class="name"><a href="#libjass.parts.drawing.CubicBezierCurveInstruction.x2">x2</a></dt>
+								<dd class="description">
+									<p>The X position of the second control point of this cubic bezier curve instruction.</p>
+								</dd>
+								<dd class="usage">var result = cubicBezierCurveInstruction.x2;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.drawing.CubicBezierCurveInstruction.x3">
+								<dt class="name"><a href="#libjass.parts.drawing.CubicBezierCurveInstruction.x3">x3</a></dt>
+								<dd class="description">
+									<p>The ending X position of this cubic bezier curve instruction.</p>
+								</dd>
+								<dd class="usage">var result = cubicBezierCurveInstruction.x3;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.drawing.CubicBezierCurveInstruction.y1">
+								<dt class="name"><a href="#libjass.parts.drawing.CubicBezierCurveInstruction.y1">y1</a></dt>
+								<dd class="description">
+									<p>The Y position of the first control point of this cubic bezier curve instruction.</p>
+								</dd>
+								<dd class="usage">var result = cubicBezierCurveInstruction.y1;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.drawing.CubicBezierCurveInstruction.y2">
+								<dt class="name"><a href="#libjass.parts.drawing.CubicBezierCurveInstruction.y2">y2</a></dt>
+								<dd class="description">
+									<p>The Y position of the second control point of this cubic bezier curve instruction.</p>
+								</dd>
+								<dd class="usage">var result = cubicBezierCurveInstruction.y2;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.drawing.CubicBezierCurveInstruction.y3">
+								<dt class="name"><a href="#libjass.parts.drawing.CubicBezierCurveInstruction.y3">y3</a></dt>
+								<dd class="description">
+									<p>The ending Y position of this cubic bezier curve instruction.</p>
+								</dd>
+								<dd class="usage">var result = cubicBezierCurveInstruction.y3;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.parts.drawing.LineInstruction">
+						<dt class="name">class <a href="#libjass.parts.drawing.LineInstruction">LineInstruction</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
+						<dd class="description">
+							<p>An instruction to draw a line to a particular position.</p>
+						</dd>
+						<dd class="usage">var lineInstruction = new LineInstruction(x, y);</dd>
+							<dd class="parameters">
+								<dl>
+									<dt class="parameter name">x</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">y</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+								</dl>
+							</dd>
+						<dd class="functions">
+						</dd>
+						<dd class="properties">
+							<dl class="getter" id="libjass.parts.drawing.LineInstruction.x">
+								<dt class="name"><a href="#libjass.parts.drawing.LineInstruction.x">x</a></dt>
+								<dd class="description">
+									<p>The X position of this line instruction.</p>
+								</dd>
+								<dd class="usage">var result = lineInstruction.x;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.drawing.LineInstruction.y">
+								<dt class="name"><a href="#libjass.parts.drawing.LineInstruction.y">y</a></dt>
+								<dd class="description">
+									<p>The Y position of this line instruction.</p>
+								</dd>
+								<dd class="usage">var result = lineInstruction.y;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.parts.drawing.MoveInstruction">
+						<dt class="name">class <a href="#libjass.parts.drawing.MoveInstruction">MoveInstruction</a> extends <a href="#libjass.parts.PartBase">PartBase</a></dt>
+						<dd class="description">
+							<p>An instruction to move to a particular position.</p>
+						</dd>
+						<dd class="usage">var moveInstruction = new MoveInstruction(x, y);</dd>
+							<dd class="parameters">
+								<dl>
+									<dt class="parameter name">x</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+									<dt class="parameter name">y</dt>
+									<dd class="parameter type">number</dd>
+									<dd class="parameter description"></dd>
+								</dl>
+							</dd>
+						<dd class="functions">
+						</dd>
+						<dd class="properties">
+							<dl class="getter" id="libjass.parts.drawing.MoveInstruction.x">
+								<dt class="name"><a href="#libjass.parts.drawing.MoveInstruction.x">x</a></dt>
+								<dd class="description">
+									<p>The X position of this move instruction.</p>
+								</dd>
+								<dd class="usage">var result = moveInstruction.x;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.parts.drawing.MoveInstruction.y">
+								<dt class="name"><a href="#libjass.parts.drawing.MoveInstruction.y">y</a></dt>
+								<dd class="description">
+									<p>The Y position of this move instruction.</p>
+								</dd>
+								<dd class="usage">var result = moveInstruction.y;</dd>
+								<dd class="return type">number</dd>
+							</dl>
 						</dd>
 					</dl>
 				</section>
@@ -1824,7 +4133,7 @@
 									<dd class="parameter type">!libjass.ASS</dd>
 									<dd class="parameter description"></dd>
 									<dt class="parameter name">settings</dt>
-									<dd class="parameter type">!libjass.RendererSettings</dd>
+									<dd class="parameter type">!libjass.renderers.RendererSettings</dd>
 									<dd class="parameter description"></dd>
 								</dl>
 							</dd>
@@ -1852,6 +4161,20 @@
 									<p>Returns the subtitle div for display. The currentTime is used to shift the animations appropriately, so that at the time the div is inserted into the DOM and the animations begin, they are in sync with the video time.</p>
 								</dd>
 								<dd class="usage">defaultRenderer.draw(dialogue);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">dialogue</dt>
+											<dd class="parameter type">!libjass.Dialogue</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.DefaultRenderer.preRender">
+								<dt class="name"><a href="#libjass.renderers.DefaultRenderer.preRender">preRender</a></dt>
+								<dd class="description">
+									<p>The magic happens here. The subtitle div is rendered and stored. Call draw() to get a clone of the div to display.</p>
+								</dd>
+								<dd class="usage">defaultRenderer.preRender(dialogue);</dd>
 									<dd class="parameters">
 										<dl>
 											<dt class="parameter name">dialogue</dt>
@@ -1913,13 +4236,67 @@
 									<dd class="parameter type">!libjass.ASS</dd>
 									<dd class="parameter description"></dd>
 									<dt class="parameter name">settings</dt>
-									<dd class="parameter type">!libjass.RendererSettings</dd>
+									<dd class="parameter type">!libjass.renderers.RendererSettings</dd>
 									<dd class="parameter description"></dd>
 								</dl>
 							</dd>
 						<dd class="functions">
+							<dl class="function" id="libjass.renderers.NullRenderer.draw">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer.draw">draw</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">nullRenderer.draw();</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.NullRenderer.preRender">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer.preRender">preRender</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">nullRenderer.preRender();</dd>
+							</dl>
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.renderers.NullRenderer.ass">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer.ass">ass</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = nullRenderer.ass;</dd>
+								<dd class="return type">!libjass.ASS</dd>
+							</dl>
+							<dl class="getter" id="libjass.renderers.NullRenderer.currentTime">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer.currentTime">currentTime</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = nullRenderer.currentTime;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.renderers.NullRenderer.id">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer.id">id</a></dt>
+								<dd class="description">
+									<p>The unique ID of this renderer. Auto-generated.</p>
+								</dd>
+								<dd class="usage">var result = nullRenderer.id;</dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.renderers.NullRenderer.settings">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer.settings">settings</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = nullRenderer.settings;</dd>
+								<dd class="return type">!libjass.renderers.RendererSettings</dd>
+							</dl>
+							<dl class="getter" id="libjass.renderers.NullRenderer.video">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer.video">video</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage">var result = nullRenderer.video;</dd>
+								<dd class="return type">!HTMLVideoElement</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.renderers.RendererSettings">
@@ -1929,6 +4306,40 @@
 						</dd>
 						<dd class="usage">var rendererSettings = new RendererSettings();</dd>
 						<dd class="functions">
+							<dl class="function static" id="libjass.renderers.RendererSettings.from">
+								<dt class="name"><a href="#libjass.renderers.RendererSettings.from">from</a></dt>
+								<dd class="description">
+									<p>Converts an arbitrary object into a RendererSettings object.</p>
+								</dd>
+								<dd class="usage">var result = RendererSettings.from(object);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">object</dt>
+											<dd class="parameter type">!*</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!libjass.renderers.RendererSettings</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function static" id="libjass.renderers.RendererSettings.makeFontMapFromStyleElement">
+								<dt class="name"><a href="#libjass.renderers.RendererSettings.makeFontMapFromStyleElement">makeFontMapFromStyleElement</a></dt>
+								<dd class="description">
+									<p>A convenience method to create a font map from a &lt;style&gt; or &lt;link&gt; element that contains @font-face rules.</p>
+								</dd>
+								<dd class="usage">var result = RendererSettings.makeFontMapFromStyleElement(linkStyle);</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">linkStyle</dt>
+											<dd class="parameter type">!LinkStyle</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!Map&lt;string, string[]&gt;</dd>
+								<dd class="return description"></dd>
+							</dl>
 						</dd>
 						<dd class="properties">
 						</dd>
@@ -1936,36 +4347,33 @@
 					<dl class="constructor private" id="libjass.renderers.AnimationCollection">
 						<dt class="name">class <a href="#libjass.renderers.AnimationCollection">AnimationCollection</a></dt>
 						<dd class="description">
-							<p>This class represents a collection of keyframes. Each keyframe contains one or more CSS properties. The collection can then be converted to a CSS3 representation.</p>
+							<p>This class represents a collection of animations. Each animation contains one or more keyframes. The collection can then be converted to a CSS3 representation.</p>
 						</dd>
-						<dd class="usage">var animationCollection = new AnimationCollection(id, start, end);</dd>
+						<dd class="usage">var animationCollection = new AnimationCollection(renderer, dialogue);</dd>
 							<dd class="parameters">
 								<dl>
-									<dt class="parameter name">id</dt>
-									<dd class="parameter type">number</dd>
-									<dd class="parameter description">The ID of the dialogue that this keyframe is associated with</dd>
-									<dt class="parameter name">start</dt>
-									<dd class="parameter type">number</dd>
-									<dd class="parameter description">The start time of the dialogue that this keyframe is associated with</dd>
-									<dt class="parameter name">end</dt>
-									<dd class="parameter type">number</dd>
-									<dd class="parameter description">The end time of the dialogue that this keyframe is associated with</dd>
+									<dt class="parameter name">renderer</dt>
+									<dd class="parameter type">!libjass.renderers.NullRenderer</dd>
+									<dd class="parameter description">The renderer that this collection is associated with</dd>
+									<dt class="parameter name">dialogue</dt>
+									<dd class="parameter type">!libjass.Dialogue</dd>
+									<dd class="parameter description">The Dialogue that this collection is associated with</dd>
 								</dl>
 							</dd>
 						<dd class="functions">
 							<dl class="function" id="libjass.renderers.AnimationCollection.addCustom">
 								<dt class="name"><a href="#libjass.renderers.AnimationCollection.addCustom">addCustom</a></dt>
 								<dd class="description">
-									<p>Add a new custom animation.</p>
+									<p>Add a custom animation to this collection. The given keyframes together make one animation.</p>
 								</dd>
-								<dd class="usage">animationCollection.addCustom(timingFunction, animations);</dd>
+								<dd class="usage">animationCollection.addCustom(timingFunction, keyframes);</dd>
 									<dd class="parameters">
 										<dl>
 											<dt class="parameter name">timingFunction</dt>
 											<dd class="parameter type">string</dd>
-											<dd class="parameter description"></dd>
-											<dt class="parameter name">animations</dt>
-											<dd class="parameter type">Array.&lt;!{time: number, properties: Object.&lt;string, string&gt;}&gt;</dd>
+											<dd class="parameter description">One of the acceptable values for the "animation-timing-function" CSS property</dd>
+											<dt class="parameter name">keyframes</dt>
+											<dd class="parameter type">Array.&lt;!{time: number, properties: !Object.&lt;string, string&gt;}&gt;</dd>
 											<dd class="parameter description"></dd>
 										</dl>
 									</dd>
@@ -1973,7 +4381,7 @@
 							<dl class="function" id="libjass.renderers.AnimationCollection.addFadeIn">
 								<dt class="name"><a href="#libjass.renderers.AnimationCollection.addFadeIn">addFadeIn</a></dt>
 								<dd class="description">
-									<p>Add a fade-in animation.</p>
+									<p>Add a fade-in animation to this collection.</p>
 								</dd>
 								<dd class="usage">animationCollection.addFadeIn(start, duration);</dd>
 									<dd class="parameters">
@@ -1990,7 +4398,7 @@
 							<dl class="function" id="libjass.renderers.AnimationCollection.addFadeOut">
 								<dt class="name"><a href="#libjass.renderers.AnimationCollection.addFadeOut">addFadeOut</a></dt>
 								<dd class="description">
-									<p>Add a fade-out animation.</p>
+									<p>Add a fade-out animation to this collection.</p>
 								</dd>
 								<dd class="usage">animationCollection.addFadeOut(start, duration);</dd>
 									<dd class="parameters">
@@ -2006,6 +4414,22 @@
 							</dl>
 						</dd>
 						<dd class="properties">
+							<dl class="getter" id="libjass.renderers.AnimationCollection.animationStyle">
+								<dt class="name"><a href="#libjass.renderers.AnimationCollection.animationStyle">animationStyle</a></dt>
+								<dd class="description">
+									<p>This string should be set as the "animation" CSS property of the target element.</p>
+								</dd>
+								<dd class="usage">var result = animationCollection.animationStyle;</dd>
+								<dd class="return type">string</dd>
+							</dl>
+							<dl class="getter" id="libjass.renderers.AnimationCollection.cssText">
+								<dt class="name"><a href="#libjass.renderers.AnimationCollection.cssText">cssText</a></dt>
+								<dd class="description">
+									<p>This string contains the animation definitions and should be inserted into a &lt;style&gt; element.</p>
+								</dd>
+								<dd class="usage">var result = animationCollection.cssText;</dd>
+								<dd class="return type">string</dd>
+							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor private" id="libjass.renderers.SpanStyles">
@@ -2013,21 +4437,24 @@
 						<dd class="description">
 							<p>This class represents the style attribute of a span. As a Dialogue's div is rendered, individual parts are added to span's, and this class is used to maintain the style attribute of those.</p>
 						</dd>
-						<dd class="usage">var spanStyles = new SpanStyles(style, transformOrigin, scaleX, scaleY);</dd>
+						<dd class="usage">var spanStyles = new SpanStyles(renderer, dialogue, scaleX, scaleY, svgDefsElement);</dd>
 							<dd class="parameters">
 								<dl>
-									<dt class="parameter name">style</dt>
-									<dd class="parameter type">!libjass.Style</dd>
-									<dd class="parameter description">The default style for the dialogue this object is associated with</dd>
-									<dt class="parameter name">transformOrigin</dt>
-									<dd class="parameter type">string</dd>
-									<dd class="parameter description">The transform origin of the dialogue this object is associated with</dd>
+									<dt class="parameter name">renderer</dt>
+									<dd class="parameter type">!libjass.renderers.NullRenderer</dd>
+									<dd class="parameter description">The renderer that this set of styles is associated with</dd>
+									<dt class="parameter name">dialogue</dt>
+									<dd class="parameter type">!libjass.Dialogue</dd>
+									<dd class="parameter description">The Dialogue that this set of styles is associated with</dd>
 									<dt class="parameter name">scaleX</dt>
 									<dd class="parameter type">number</dd>
-									<dd class="parameter description">The horizontal scaling of the dialogue this object is associated with</dd>
+									<dd class="parameter description">The horizontal scaling of the subtitles</dd>
 									<dt class="parameter name">scaleY</dt>
 									<dd class="parameter type">number</dd>
-									<dd class="parameter description">The vertical scaling of the dialogue this object is associated with</dd>
+									<dd class="parameter description">The vertical scaling of the subtitles</dd>
+									<dt class="parameter name">svgDefsElement</dt>
+									<dd class="parameter type">!SVGDefsElement</dd>
+									<dd class="parameter description">An SVG &lt;defs&gt; element to append filter definitions to</dd>
 								</dl>
 							</dd>
 						<dd class="functions">
@@ -2040,8 +4467,8 @@
 									<dd class="parameters">
 										<dl>
 											<dt class="parameter name">newStyle</dt>
-											<dd class="parameter type">!libjass.Style=</dd>
-											<dd class="parameter description">The new defaults to reset the style to. If unspecified, the new style is the original style this object was created with.</dd>
+											<dd class="parameter type">libjass.Style</dd>
+											<dd class="parameter description">The new defaults to reset the style to. If null, the styles are reset to the default style of the Dialogue.</dd>
 										</dl>
 									</dd>
 							</dl>
@@ -2050,7 +4477,7 @@
 								<dd class="description">
 									<p>Sets the style attribute on the given span element.</p>
 								</dd>
-								<dd class="usage">spanStyles.setStylesOnSpan(span);</dd>
+								<dd class="usage">var result = spanStyles.setStylesOnSpan(span);</dd>
 									<dd class="parameters">
 										<dl>
 											<dt class="parameter name">span</dt>
@@ -2058,6 +4485,9 @@
 											<dd class="parameter description"></dd>
 										</dl>
 									</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!HTMLSpanElement</dd>
+								<dd class="return description">The resulting &lt;span&gt; with the CSS styles applied. This may be a wrapper around the input &lt;span&gt; if the styles were applied using SVG filters.</dd>
 							</dl>
 						</dd>
 						<dd class="properties">
@@ -2078,7 +4508,7 @@
 							<dl class="setter" id="libjass.renderers.SpanStyles.bold">
 								<dt class="name"><a href="#libjass.renderers.SpanStyles.bold">bold</a></dt>
 								<dd class="description">
-									<p>Sets the bold property. null defaults it to the style's original value.</p>
+									<p>Sets the bold property. null defaults it to the default style's value.</p>
 								</dd>
 								<dd class="usage">spanStyles.bold = value;</dd>
 									<dd class="parameters">
@@ -2092,7 +4522,7 @@
 							<dl class="setter" id="libjass.renderers.SpanStyles.fontName">
 								<dt class="name"><a href="#libjass.renderers.SpanStyles.fontName">fontName</a></dt>
 								<dd class="description">
-									<p>Sets the font name property. null defaults it to the style's original value.</p>
+									<p>Sets the font name property. null defaults it to the default style's value.</p>
 								</dd>
 								<dd class="usage">spanStyles.fontName = value;</dd>
 									<dd class="parameters">
@@ -2106,7 +4536,7 @@
 							<dl class="setter" id="libjass.renderers.SpanStyles.fontScaleX">
 								<dt class="name"><a href="#libjass.renderers.SpanStyles.fontScaleX">fontScaleX</a></dt>
 								<dd class="description">
-									<p>Sets the horizontal font scaling property. null defaults it to the style's original value.</p>
+									<p>Sets the horizontal font scaling property. null defaults it to the default style's value.</p>
 								</dd>
 								<dd class="usage">spanStyles.fontScaleX = value;</dd>
 									<dd class="parameters">
@@ -2120,7 +4550,7 @@
 							<dl class="setter" id="libjass.renderers.SpanStyles.fontScaleY">
 								<dt class="name"><a href="#libjass.renderers.SpanStyles.fontScaleY">fontScaleY</a></dt>
 								<dd class="description">
-									<p>Sets the vertical font scaling property. null defaults it to the style's original value.</p>
+									<p>Sets the vertical font scaling property. null defaults it to the default style's value.</p>
 								</dd>
 								<dd class="usage">spanStyles.fontScaleY = value;</dd>
 									<dd class="parameters">
@@ -2134,7 +4564,7 @@
 							<dl class="setter" id="libjass.renderers.SpanStyles.fontSize">
 								<dt class="name"><a href="#libjass.renderers.SpanStyles.fontSize">fontSize</a></dt>
 								<dd class="description">
-									<p>Sets the font size property. null defaults it to the style's original value.</p>
+									<p>Sets the font size property. null defaults it to the default style's value.</p>
 								</dd>
 								<dd class="usage">spanStyles.fontSize = value;</dd>
 									<dd class="parameters">
@@ -2148,7 +4578,7 @@
 							<dl class="setter" id="libjass.renderers.SpanStyles.italic">
 								<dt class="name"><a href="#libjass.renderers.SpanStyles.italic">italic</a></dt>
 								<dd class="description">
-									<p>Sets the italic property. null defaults it to the style's original value.</p>
+									<p>Sets the italic property. null defaults it to the default style's value.</p>
 								</dd>
 								<dd class="usage">spanStyles.italic = value;</dd>
 									<dd class="parameters">
@@ -2162,7 +4592,7 @@
 							<dl class="setter" id="libjass.renderers.SpanStyles.letterSpacing">
 								<dt class="name"><a href="#libjass.renderers.SpanStyles.letterSpacing">letterSpacing</a></dt>
 								<dd class="description">
-									<p>Sets the letter spacing property. null defaults it to the style's original value.</p>
+									<p>Sets the letter spacing property. null defaults it to the default style's value.</p>
 								</dd>
 								<dd class="usage">spanStyles.letterSpacing = value;</dd>
 									<dd class="parameters">
@@ -2190,7 +4620,7 @@
 							<dl class="setter" id="libjass.renderers.SpanStyles.outlineColor">
 								<dt class="name"><a href="#libjass.renderers.SpanStyles.outlineColor">outlineColor</a></dt>
 								<dd class="description">
-									<p>Sets the outline color property. null defaults it to the style's original value.</p>
+									<p>Sets the outline color property. null defaults it to the default style's value.</p>
 								</dd>
 								<dd class="usage">spanStyles.outlineColor = value;</dd>
 									<dd class="parameters">
@@ -2201,12 +4631,12 @@
 										</dl>
 									</dd>
 							</dl>
-							<dl class="setter" id="libjass.renderers.SpanStyles.outlineWidthX">
-								<dt class="name"><a href="#libjass.renderers.SpanStyles.outlineWidthX">outlineWidthX</a></dt>
+							<dl class="setter" id="libjass.renderers.SpanStyles.outlineHeight">
+								<dt class="name"><a href="#libjass.renderers.SpanStyles.outlineHeight">outlineHeight</a></dt>
 								<dd class="description">
-									<p>Sets the outline width property. null defaults it to the style's original outline width value.</p>
+									<p>Sets the outline height property. null defaults it to the style's original outline height value.</p>
 								</dd>
-								<dd class="usage">spanStyles.outlineWidthX = value;</dd>
+								<dd class="usage">spanStyles.outlineHeight = value;</dd>
 									<dd class="parameters">
 										<dl>
 											<dt class="parameter name">value</dt>
@@ -2215,12 +4645,12 @@
 										</dl>
 									</dd>
 							</dl>
-							<dl class="setter" id="libjass.renderers.SpanStyles.outlineWidthY">
-								<dt class="name"><a href="#libjass.renderers.SpanStyles.outlineWidthY">outlineWidthY</a></dt>
+							<dl class="setter" id="libjass.renderers.SpanStyles.outlineWidth">
+								<dt class="name"><a href="#libjass.renderers.SpanStyles.outlineWidth">outlineWidth</a></dt>
 								<dd class="description">
-									<p>Sets the outline height property. null defaults it to the style's original outline width value.</p>
+									<p>Sets the outline width property. null defaults it to the style's original outline width value.</p>
 								</dd>
-								<dd class="usage">spanStyles.outlineWidthY = value;</dd>
+								<dd class="usage">spanStyles.outlineWidth = value;</dd>
 									<dd class="parameters">
 										<dl>
 											<dt class="parameter name">value</dt>
@@ -2246,7 +4676,7 @@
 							<dl class="setter" id="libjass.renderers.SpanStyles.primaryColor">
 								<dt class="name"><a href="#libjass.renderers.SpanStyles.primaryColor">primaryColor</a></dt>
 								<dd class="description">
-									<p>Sets the primary color property. null defaults it to the style's original value.</p>
+									<p>Sets the primary color property. null defaults it to the default style's value.</p>
 								</dd>
 								<dd class="usage">spanStyles.primaryColor = value;</dd>
 									<dd class="parameters">
@@ -2257,10 +4687,66 @@
 										</dl>
 									</dd>
 							</dl>
+							<dl class="setter" id="libjass.renderers.SpanStyles.shadowAlpha">
+								<dt class="name"><a href="#libjass.renderers.SpanStyles.shadowAlpha">shadowAlpha</a></dt>
+								<dd class="description">
+									<p>Sets the shadow alpha property.</p>
+								</dd>
+								<dd class="usage">spanStyles.shadowAlpha = value;</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">value</dt>
+											<dd class="parameter type">?number</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+							<dl class="setter" id="libjass.renderers.SpanStyles.shadowColor">
+								<dt class="name"><a href="#libjass.renderers.SpanStyles.shadowColor">shadowColor</a></dt>
+								<dd class="description">
+									<p>Sets the shadow color property. null defaults it to the default style's value.</p>
+								</dd>
+								<dd class="usage">spanStyles.shadowColor = value;</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">value</dt>
+											<dd class="parameter type">libjass.parts.Color</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+							<dl class="setter" id="libjass.renderers.SpanStyles.shadowDepthX">
+								<dt class="name"><a href="#libjass.renderers.SpanStyles.shadowDepthX">shadowDepthX</a></dt>
+								<dd class="description">
+									<p>Sets the outline width property. null defaults it to the style's original shadow depth X value.</p>
+								</dd>
+								<dd class="usage">spanStyles.shadowDepthX = value;</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">value</dt>
+											<dd class="parameter type">?number</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
+							<dl class="setter" id="libjass.renderers.SpanStyles.shadowDepthY">
+								<dt class="name"><a href="#libjass.renderers.SpanStyles.shadowDepthY">shadowDepthY</a></dt>
+								<dd class="description">
+									<p>Sets the shadow height property. null defaults it to the style's original shadow depth Y value.</p>
+								</dd>
+								<dd class="usage">spanStyles.shadowDepthY = value;</dd>
+									<dd class="parameters">
+										<dl>
+											<dt class="parameter name">value</dt>
+											<dd class="parameter type">?number</dd>
+											<dd class="parameter description"></dd>
+										</dl>
+									</dd>
+							</dl>
 							<dl class="setter" id="libjass.renderers.SpanStyles.strikeThrough">
 								<dt class="name"><a href="#libjass.renderers.SpanStyles.strikeThrough">strikeThrough</a></dt>
 								<dd class="description">
-									<p>Sets the strike-through property. null defaults it to the style's original value.</p>
+									<p>Sets the strike-through property. null defaults it to the default style's value.</p>
 								</dd>
 								<dd class="usage">spanStyles.strikeThrough = value;</dd>
 									<dd class="parameters">
@@ -2274,7 +4760,7 @@
 							<dl class="setter" id="libjass.renderers.SpanStyles.underline">
 								<dt class="name"><a href="#libjass.renderers.SpanStyles.underline">underline</a></dt>
 								<dd class="description">
-									<p>Sets the underline property. null defaults it to the style's original value.</p>
+									<p>Sets the underline property. null defaults it to the default style's value.</p>
 								</dd>
 								<dd class="usage">spanStyles.underline = value;</dd>
 									<dd class="parameters">
