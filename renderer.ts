@@ -448,13 +448,13 @@ module libjass.renderers {
 		onVideoPause(): void {
 			super.onVideoPause();
 
-			DefaultRenderer._addClass(this._subsWrapper, "paused");
+			this._subsWrapper.classList.add("paused");
 		}
 
 		onVideoPlaying(): void {
 			super.onVideoPlaying();
 
-			DefaultRenderer._removeClass(this._subsWrapper, "paused");
+			this._subsWrapper.classList.remove("paused");
 		}
 
 		/**
@@ -846,7 +846,7 @@ module libjass.renderers {
 			}
 
 			if (fullScreenElement === this.video) {
-				DefaultRenderer._addClass(this._videoSubsWrapper, "libjass-full-screen");
+				this._videoSubsWrapper.classList.add("libjass-full-screen");
 
 				this.resizeVideo(screen.width, screen.height);
 
@@ -855,7 +855,7 @@ module libjass.renderers {
 				this._dispatchEvent("fullScreenChange", this._videoIsFullScreen);
 			}
 			else if (fullScreenElement === null && this._videoIsFullScreen) {
-				DefaultRenderer._removeClass(this._videoSubsWrapper, "libjass-full-screen");
+				this._videoSubsWrapper.classList.remove("libjass-full-screen");
 
 				this._videoIsFullScreen = false;
 
@@ -904,21 +904,6 @@ module libjass.renderers {
 			}
 
 			return [transformOriginX, transformOriginY];
-		}
-
-		private static _addClass(element: HTMLElement, className: string): void {
-			var classNames = element.className.split(" ").map(className => className.trim()).filter(className => !!className);
-			if (classNames.indexOf(className) === -1) {
-				element.className += " " + className;
-			}
-		}
-
-		private static _removeClass(element: HTMLElement, className: string): void {
-			var classNames = element.className.split(" ").map(className => className.trim()).filter(className => !!className);
-			var existingIndex = classNames.indexOf(className);
-			if (existingIndex !== -1) {
-				element.className = classNames.slice(0, existingIndex).join(" ") + " " + classNames.slice(existingIndex + 1).join(" ");
-			}
 		}
 	}
 
