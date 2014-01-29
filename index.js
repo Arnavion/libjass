@@ -63,7 +63,7 @@ addEventListener("DOMContentLoaded", function () {
 				}
 
 				else if (id === "video-size-script-radio") {
-					renderer.resizeVideo(ass.resolutionX, ass.resolutionY);
+					renderer.resizeVideo(ass.properties.resolutionX, ass.properties.resolutionY);
 				}
 			};
 
@@ -109,8 +109,8 @@ addEventListener("DOMContentLoaded", function () {
 				window.ass = ass;
 			}
 
-			document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.resolutionX));
-			document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.resolutionY));
+			document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.properties.resolutionX));
+			document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.properties.resolutionY));
 
 			testVideoAndASSLoaded();
 		}
