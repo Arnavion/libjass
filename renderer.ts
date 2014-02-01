@@ -21,17 +21,17 @@
 ///<reference path="libjass.ts" />
 
 interface CSSStyleDeclaration {
-	webkitAnimation: string
-	webkitAnimationDelay: string
-	webkitFilter: string
-	webkitTransform: string
-	webkitTransformOrigin: string
+	webkitAnimation: string;
+	webkitAnimationDelay: string;
+	webkitFilter: string;
+	webkitTransform: string;
+	webkitTransformOrigin: string;
 }
 
 interface Document {
-	fullscreenElement: Element
-	mozFullScreenElement: Element
-	webkitFullscreenElement: Element
+	fullscreenElement: Element;
+	mozFullScreenElement: Element;
+	webkitFullscreenElement: Element;
 }
 
 module libjass.renderers {
@@ -190,13 +190,13 @@ module libjass.renderers {
 
 		/**
 		 */
-		preRender(dialogue: Dialogue): void {
-		}
+		/* tslint:disable:no-empty */
+		preRender(dialogue: Dialogue): void { }
 
 		/**
 		 */
-		draw(dialogue: Dialogue): void {
-		}
+		/* tslint:disable:no-empty */
+		draw(dialogue: Dialogue): void { }
 
 		private _onVideoTimeUpdate(): void {
 			if (this._state === VideoState.Seeking) {

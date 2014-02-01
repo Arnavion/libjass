@@ -510,7 +510,7 @@ module libjass.parser {
 				case "1":
 					var next2 = this._peek(2);
 
-					switch(next2) {
+					switch (next2) {
 						case "10":
 						case "11":
 							next = next2;
@@ -2114,7 +2114,7 @@ module libjass.parser {
 			}
 
 			return current;
-		}
+		};
 	}
 
 	makeTagParserFunction("alpha", parts.Alpha, ParserRun.prototype.parse_alpha, false);
