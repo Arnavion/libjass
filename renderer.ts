@@ -127,7 +127,7 @@ module libjass.renderers {
 		onVideoTimeUpdate(): void {
 			this._currentTime = this._video.currentTime;
 
-			if (libjass.debugMode) {
+			if (libjass.verboseMode) {
 				console.log("NullRenderer.onVideoTimeUpdate: " + this._getVideoStateLogString());
 			}
 
@@ -162,13 +162,13 @@ module libjass.renderers {
 		}
 
 		onVideoSeeking(): void {
-			if (libjass.debugMode) {
+			if (libjass.verboseMode) {
 				console.log("NullRenderer.onVideoSeeking: " + this._getVideoStateLogString());
 			}
 		}
 
 		onVideoPause(): void {
-			if (libjass.debugMode) {
+			if (libjass.verboseMode) {
 				console.log("NullRenderer.onVideoPause: " + this._getVideoStateLogString());
 			}
 
@@ -179,7 +179,7 @@ module libjass.renderers {
 		}
 
 		onVideoPlaying(): void {
-			if (libjass.debugMode) {
+			if (libjass.verboseMode) {
 				console.log("NullRenderer.onVideoPlaying: " + this._getVideoStateLogString());
 			}
 
