@@ -111,12 +111,12 @@ suite("Miscellaneous", function () {
 		new libjass.parts.RotateZ(334.3),
 		new libjass.parts.FontScaleX(0.39),
 		new libjass.parts.FontScaleY(0.47),
-		new libjass.parts.VectorClip(1, new libjass.parts.DrawingInstructions([
+		new libjass.parts.VectorClip(1, [
 			new libjass.parts.drawing.MoveInstruction(129, 338),
 			new libjass.parts.drawing.LineInstruction(121, 381),
 			new libjass.parts.drawing.LineInstruction(110, 372),
 			new libjass.parts.drawing.LineInstruction(110, 331)
-		]), false),
+		], false),
 		new libjass.parts.DrawingInstructions([
 			new libjass.parts.drawing.MoveInstruction(0, 0),
 			new libjass.parts.drawing.LineInstruction(100, 0),

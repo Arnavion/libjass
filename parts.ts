@@ -1454,14 +1454,14 @@ module libjass {
 		 *
 		 * @constructor
 		 * @param {number} scale
-		 * @param {!libjass.parts.DrawingInstructions} instructions
+		 * @param {!Array.<!libjass.parts.drawing.Instruction>} instructions
 		 * @param {boolean} inside
 		 *
 		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class VectorClip extends PartBase {
-			constructor(private _scale: number, private _instructions: DrawingInstructions, private _inside: boolean) {
+			constructor(private _scale: number, private _instructions: drawing.Instruction[], private _inside: boolean) {
 				super("VectorClip", "scale", "instructions", "inside");
 			}
 
@@ -1479,7 +1479,7 @@ module libjass {
 			 *
 			 * @type {string}
 			 */
-			get instructions(): DrawingInstructions {
+			get instructions(): drawing.Instruction[] {
 				return this._instructions;
 			}
 

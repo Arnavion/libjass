@@ -2022,7 +2022,7 @@ module libjass.parser {
 					commandsNode.value += next;
 				}
 
-				current.value = new parts.VectorClip((scaleNode !== null) ? scaleNode.value : 1, new parts.DrawingInstructions(<parts.drawing.Instruction[]>parser.parse(commandsNode.value, "drawingInstructions")), tagName === "clip");
+				current.value = new parts.VectorClip((scaleNode !== null) ? scaleNode.value : 1, <parts.drawing.Instruction[]>parser.parse(commandsNode.value, "drawingInstructions"), tagName === "clip");
 			}
 
 			if (this.read(current, ")") === null) {
