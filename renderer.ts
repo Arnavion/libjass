@@ -772,6 +772,10 @@ module libjass.renderers {
 
 				this.preRender(dialogue);
 				preRenderedSub = this._preRenderedSubs.get(dialogue.id);
+
+				if (libjass.debugMode) {
+					console.log(dialogue.toString());
+				}
 			}
 
 			var result = <HTMLDivElement>preRenderedSub.cloneNode(true);
