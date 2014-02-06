@@ -687,72 +687,7 @@ module libjass.parser {
 		 * @return {!ParseNode}
 		 */
 		parse_tag_clip(parent: ParseNode): ParseNode {
-			var current = new ParseNode(parent);
-
-			if (this.read(current, "clip") === null) {
-				parent.pop();
-				return null;
-			}
-
-			var x1Node: ParseNode = null;
-			var x2Node: ParseNode = null;
-			var y1Node: ParseNode = null;
-			var y2Node: ParseNode = null;
-			var scaleNode: ParseNode = null;
-			var commandsNode: ParseNode = null;
-
-			var firstNode = this.parse_decimal(current);
-
-			if (firstNode !== null) {
-				if (this.read(current, ",") === null) {
-					parent.pop();
-					return null;
-				}
-
-				var secondNode = this.parse_decimal(current);
-
-				if (secondNode !== null) {
-					x1Node = firstNode;
-					y1Node = secondNode;
-				}
-				else {
-					scaleNode = firstNode;
-				}
-			}
-
-			if (x1Node !== null && y1Node !== null) {
-				if (this.read(current, ",") === null) {
-					parent.pop();
-					return null;
-				}
-
-				x2Node = this.parse_decimal(current);
-
-				if (this.read(current, ",") === null) {
-					parent.pop();
-					return null;
-				}
-
-				y2Node = this.parse_decimal(current);
-
-				current.value = new parts.RectangularClip(x1Node.value, y1Node.value, x2Node.value, y2Node.value, true);
-			}
-			else {
-				commandsNode = new ParseNode(current, "");
-
-				for (var next = this._peek(); this._haveMore() && next !== ")" && next !== "}"; next = this._peek()) {
-					commandsNode.value += next;
-				}
-
-				current.value = new parts.VectorClip((scaleNode !== null) ? scaleNode.value : 1, commandsNode.value, true);
-			}
-
-			if (this.read(current, ")") === null) {
-				parent.pop();
-				return null;
-			}
-
-			return current;
+			return this._parse_tag_clip_or_iclip("clip", parent);
 		}
 
 		/**
@@ -1055,72 +990,7 @@ module libjass.parser {
 		 * @return {!ParseNode}
 		 */
 		parse_tag_iclip(parent: ParseNode): ParseNode {
-			var current = new ParseNode(parent);
-
-			if (this.read(current, "iclip") === null) {
-				parent.pop();
-				return null;
-			}
-
-			var x1Node: ParseNode = null;
-			var x2Node: ParseNode = null;
-			var y1Node: ParseNode = null;
-			var y2Node: ParseNode = null;
-			var scaleNode: ParseNode = null;
-			var commandsNode: ParseNode = null;
-
-			var firstNode = this.parse_decimal(current);
-
-			if (firstNode !== null) {
-				if (this.read(current, ",") === null) {
-					parent.pop();
-					return null;
-				}
-
-				var secondNode = this.parse_decimal(current);
-
-				if (secondNode !== null) {
-					x1Node = firstNode;
-					y1Node = secondNode;
-				}
-				else {
-					scaleNode = firstNode;
-				}
-			}
-
-			if (x1Node !== null && y1Node !== null) {
-				if (this.read(current, ",") === null) {
-					parent.pop();
-					return null;
-				}
-
-				x2Node = this.parse_decimal(current);
-
-				if (this.read(current, ",") === null) {
-					parent.pop();
-					return null;
-				}
-
-				y2Node = this.parse_decimal(current);
-
-				current.value = new parts.RectangularClip(x1Node.value, y1Node.value, x2Node.value, y2Node.value, false);
-			}
-			else {
-				commandsNode = new ParseNode(current, "");
-
-				for (var next = this._peek(); this._haveMore() && next !== ")" && next !== "}"; next = this._peek()) {
-					commandsNode.value += next;
-				}
-
-				current.value = new parts.VectorClip((scaleNode !== null) ? scaleNode.value : 1, commandsNode.value, false);
-			}
-
-			if (this.read(current, ")") === null) {
-				parent.pop();
-				return null;
-			}
-
-			return current;
+			return this._parse_tag_clip_or_iclip("iclip", parent);
 		}
 
 		/**
@@ -2082,6 +1952,85 @@ module libjass.parser {
 		 */
 		private _haveMore(): boolean {
 			return this._parseTree.end < this._input.length;
+		}
+
+		/**
+		 * @param {string} tagName One of "clip" and "iclip"
+		 * @param {!ParseNode} parent
+		 * @return {!ParseNode}
+		 */
+		private _parse_tag_clip_or_iclip(tagName: string, parent: ParseNode): ParseNode {
+			var current = new ParseNode(parent);
+
+			if (this.read(current, tagName) === null) {
+				parent.pop();
+				return null;
+			}
+
+			if (this.read(current, "(") === null) {
+				parent.pop();
+				return null;
+			}
+
+			var x1Node: ParseNode = null;
+			var x2Node: ParseNode = null;
+			var y1Node: ParseNode = null;
+			var y2Node: ParseNode = null;
+			var scaleNode: ParseNode = null;
+			var commandsNode: ParseNode = null;
+
+			var firstNode = this.parse_decimal(current);
+
+			if (firstNode !== null) {
+				if (this.read(current, ",") === null) {
+					parent.pop();
+					return null;
+				}
+
+				var secondNode = this.parse_decimal(current);
+
+				if (secondNode !== null) {
+					x1Node = firstNode;
+					y1Node = secondNode;
+				}
+				else {
+					scaleNode = firstNode;
+				}
+			}
+
+			if (x1Node !== null && y1Node !== null) {
+				if (this.read(current, ",") === null) {
+					parent.pop();
+					return null;
+				}
+
+				x2Node = this.parse_decimal(current);
+
+				if (this.read(current, ",") === null) {
+					parent.pop();
+					return null;
+				}
+
+				y2Node = this.parse_decimal(current);
+
+				current.value = new parts.RectangularClip(x1Node.value, y1Node.value, x2Node.value, y2Node.value, tagName === "clip");
+			}
+			else {
+				commandsNode = new ParseNode(current, "");
+
+				for (var next = this._peek(); this._haveMore() && next !== ")" && next !== "}"; next = this._peek()) {
+					commandsNode.value += next;
+				}
+
+				current.value = new parts.VectorClip((scaleNode !== null) ? scaleNode.value : 1, new parts.DrawingInstructions(<parts.drawing.Instruction[]>parser.parse(commandsNode.value, "drawingInstructions")), tagName === "clip");
+			}
+
+			if (this.read(current, ")") === null) {
+				parent.pop();
+				return null;
+			}
+
+			return current;
 		}
 	};
 

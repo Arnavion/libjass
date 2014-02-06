@@ -100,4 +100,28 @@ suite("Miscellaneous", function () {
 		new libjass.parts.PrimaryColor(new libjass.parts.Color(68, 68, 68, 1)),
 		new libjass.parts.Text("u")
 	]);
+
+	parserTest("klk-01", "{\\an5\\bord0\\blur1\\p1\\c&H97B9D6&\\pos(143.39,358.77)\\frz334.3\\fscx39\\fscy47\\iclip(m 129 338 l 121 381 110 372 110 331)}m 0 0 l 100 0 100 100 0 100", "dialogueParts", [
+		new libjass.parts.Alignment(5),
+		new libjass.parts.Border(0),
+		new libjass.parts.GaussianBlur(1),
+		new libjass.parts.DrawingMode(1),
+		new libjass.parts.PrimaryColor(new libjass.parts.Color(214, 185, 151, 1)),
+		new libjass.parts.Position(143.39, 358.77),
+		new libjass.parts.RotateZ(334.3),
+		new libjass.parts.FontScaleX(0.39),
+		new libjass.parts.FontScaleY(0.47),
+		new libjass.parts.VectorClip(1, new libjass.parts.DrawingInstructions([
+			new libjass.parts.drawing.MoveInstruction(129, 338),
+			new libjass.parts.drawing.LineInstruction(121, 381),
+			new libjass.parts.drawing.LineInstruction(110, 372),
+			new libjass.parts.drawing.LineInstruction(110, 331)
+		]), false),
+		new libjass.parts.DrawingInstructions([
+			new libjass.parts.drawing.MoveInstruction(0, 0),
+			new libjass.parts.drawing.LineInstruction(100, 0),
+			new libjass.parts.drawing.LineInstruction(100, 100),
+			new libjass.parts.drawing.LineInstruction(0, 100)
+		])
+	]);
 });

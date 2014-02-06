@@ -75,4 +75,38 @@ suite("Tags", function () {
 	suite("Transform tag - \\t", function () {
 		parserTest("No tags", "{\\t(100,200)}", "enclosedTags", [new libjass.parts.Comment("\\t(100,200)")]);
 	});
+
+	suite("Clip tags - \\clip and \\iclip", function () {
+		parserTest("Rectangular clip", "{\\clip(100,200,300,400)}", "enclosedTags", [new libjass.parts.RectangularClip(100, 200, 300, 400, true)]);
+
+		parserTest("Vector clip", "{\\clip(m 129 338 l 121 381 110 372 110 331)}", "enclosedTags", [new libjass.parts.VectorClip(1, new libjass.parts.DrawingInstructions([
+			new libjass.parts.drawing.MoveInstruction(129, 338),
+			new libjass.parts.drawing.LineInstruction(121, 381),
+			new libjass.parts.drawing.LineInstruction(110, 372),
+			new libjass.parts.drawing.LineInstruction(110, 331)
+		]), true)]);
+
+		parserTest("Vector clip with scale", "{\\clip(1, m 129 338 l 121 381 110 372 110 331)}", "enclosedTags", [new libjass.parts.VectorClip(1, new libjass.parts.DrawingInstructions([
+			new libjass.parts.drawing.MoveInstruction(129, 338),
+			new libjass.parts.drawing.LineInstruction(121, 381),
+			new libjass.parts.drawing.LineInstruction(110, 372),
+			new libjass.parts.drawing.LineInstruction(110, 331)
+		]), true)]);
+
+		parserTest("Inverted rectangular clip", "{\\iclip(100,200,300,400)}", "enclosedTags", [new libjass.parts.RectangularClip(100, 200, 300, 400, false)]);
+
+		parserTest("Inverted vector clip", "{\\iclip(m 129 338 l 121 381 110 372 110 331)}", "enclosedTags", [new libjass.parts.VectorClip(1, new libjass.parts.DrawingInstructions([
+			new libjass.parts.drawing.MoveInstruction(129, 338),
+			new libjass.parts.drawing.LineInstruction(121, 381),
+			new libjass.parts.drawing.LineInstruction(110, 372),
+			new libjass.parts.drawing.LineInstruction(110, 331)
+		]), false)]);
+
+		parserTest("Inverted vector clip with scale", "{\\iclip(1, m 129 338 l 121 381 110 372 110 331)}", "enclosedTags", [new libjass.parts.VectorClip(1, new libjass.parts.DrawingInstructions([
+			new libjass.parts.drawing.MoveInstruction(129, 338),
+			new libjass.parts.drawing.LineInstruction(121, 381),
+			new libjass.parts.drawing.LineInstruction(110, 372),
+			new libjass.parts.drawing.LineInstruction(110, 331)
+		]), false)]);
+	});
 });
