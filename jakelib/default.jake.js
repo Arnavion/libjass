@@ -72,8 +72,6 @@ namespace("_default", function () {
 					firstVarExtendsFound = true;
 					// Remove the check for this.__extends
 					node.definitions[0].value = node.definitions[0].value.right;
-					// console.log(require("util").inspect(node.definitions[0]));
-					// throw 5;
 				}
 				else {
 					nodesToRemove.push({ node: node, parent: this.parent().body });
@@ -115,6 +113,19 @@ namespace("_default", function () {
 
 			root.figure_out_scope();
 		}
+
+		// 4. Rename all function arguments that begin with _ to not have the _.
+		// This converts the TypeScript syntax of declaring private members in the constructor declaration `function Color(private _red: number, ...)` to `function Color(red, ...)`
+		// so that it matches the JSDoc (and looks nicer).
+		root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+			if (
+				node instanceof UglifyJS.AST_SymbolFunarg &&
+				node.thedef.name[0] === "_" &&
+				node.thedef.name !== "_super" // Don't rename _super (used in TypeScript's inheritance shim) to super. super is a reserved word.
+			) {
+				node.thedef.name = node.thedef.name.slice(1);
+			}
+		}));
 
 		// Output
 		var firstLicenseHeaderFound = false; // To detect and preserve the first license header
