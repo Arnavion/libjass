@@ -52,7 +52,7 @@ Yes! Feature requests, suggestions, bug reports and pull requests are welcome! I
 You can also join the IRC channel below and ask any questions.
 
 
-## Links
+### Links
 
 * [GitHub](https://github.com/Arnavion/libjass/)
 * IRC channel - #libjass on irc.rizon.net
@@ -60,21 +60,21 @@ You can also join the IRC channel below and ask any questions.
 * [Aegisub's documentation on ASS](http://docs.aegisub.org/3.0/ASS_Tags/)
 
 
-## Supported features
+### Supported features
 
 * Styles: Italic, Bold, Underline, StrikeOut, FontName, FontSize, ScaleX, ScaleY, Spacing, PrimaryColor, OutlineColor, BackColor, Outline, Shadow, Alignment, MarginL, MarginR, MarginV
 * Tags: \i, \b, \u, \s, \bord, \xbord, \ybord, \shad, \xshad, \yshad, \blur, \fn, \fs, \fscx, \fscy, \fsp, \frx, \fry, \frz, \fr, \fax, \fay, \c, \1c, \3c, \4c, \alpha, \1a, \3a, \4a, \an, \a, \r, \pos, \move, \fad, \fade, \p
 * Custom fonts, using CSS web fonts.
 
 
-## Known bugs
+### Known bugs
 
 * Unsupported tags: \be, \fe, \2c, \2a, \k, \K, \kf, \ko, \q, \org, \t, \clip, \iclip
 * \an4, \an5, \an6 aren't positioned correctly.
 * Font sizes aren't pixel perfect.
 
 
-## Planned improvements
+### Planned improvements
 
 * Document browser compatibility. Currently libjass is tested on IE11 (Windows 7), Firefox Nightly and Google Chrome (Dev channel).
 * Write API documentation. Add more explanatory comments to the code.
@@ -82,7 +82,7 @@ You can also join the IRC channel below and ask any questions.
 * Evaluate (document, benchmark) the benefits and drawbacks of DOM+CSS-based drawing over canvas.
 
 
-# License
+### License
 
 ```
 libjass
