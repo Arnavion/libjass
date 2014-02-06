@@ -455,7 +455,7 @@ module libjass {
 		 */
 		export class GaussianBlur extends PartBase {
 			constructor(private _value: number) {
-				super("Blur", "value");
+				super("GaussianBlur", "value");
 			}
 
 			/**
@@ -1504,7 +1504,7 @@ module libjass {
 		 */
 		export class DrawingMode extends PartBase {
 			constructor(private _scale: number) {
-				super("DrawingMode", "value");
+				super("DrawingMode", "scale");
 			}
 
 			/**

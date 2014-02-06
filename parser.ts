@@ -2058,13 +2058,6 @@ module libjass.parser {
 		}
 
 		/**
-		 * @param {number=1} count
-		 */
-		private _peek(count: number = 1) {
-			return this._input.substr(this._parseTree.end, count);
-		}
-
-		/**
 		 * @param {!ParseNode} parent
 		 * @param {string} next
 		 * @return {!ParseNode}
@@ -2075,6 +2068,13 @@ module libjass.parser {
 			}
 
 			return new ParseNode(parent, next);
+		}
+
+		/**
+		 * @param {number=1} count
+		 */
+		private _peek(count: number = 1): string {
+			return this._input.substr(this._parseTree.end, count);
 		}
 
 		/**
