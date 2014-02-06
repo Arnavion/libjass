@@ -1545,22 +1545,22 @@ module libjass {
 		 * A pseudo-part representing text interpreted as drawing instructions
 		 *
 		 * @constructor
-		 * @param {!Array.<!libjass.parts.drawing.Instruction[]>} value
+		 * @param {!Array.<!libjass.parts.drawing.Instruction>} instructions
 		 *
 		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts
 		 */
 		export class DrawingInstructions extends PartBase {
 			constructor(private _instructions: drawing.Instruction[]) {
-				super("DrawingInstructions", "value");
+				super("DrawingInstructions", "instructions");
 			}
 
 			/**
 			 * The instructions contained in this drawing instructions part.
 			 *
-			 * @type {!Array.<!libjass.parts.drawing.Instruction[]>}
+			 * @type {!Array.<!libjass.parts.drawing.Instruction>}
 			 */
-			get value(): drawing.Instruction[] {
+			get instructions(): drawing.Instruction[] {
 				return this._instructions;
 			}
 		}

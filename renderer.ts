@@ -693,7 +693,7 @@ module libjass.renderers {
 				}
 
 				else if (part instanceof parts.DrawingInstructions) {
-					currentDrawing.instructions = (<parts.DrawingInstructions>part).value;
+					currentDrawing.instructions = (<parts.DrawingInstructions>part).instructions;
 					currentSpan.appendChild(currentDrawing.toSVG());
 					currentDrawing = null;
 					startNewSpan();
