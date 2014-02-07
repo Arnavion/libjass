@@ -73,6 +73,10 @@
 	line-height: 0;
 }
 
+.libjass-filters {
+	display: block;
+}
+
 @-webkit-keyframes fade-in {
 	from {
 		opacity: 0;
