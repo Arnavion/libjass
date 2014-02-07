@@ -239,7 +239,7 @@ module libjass.renderers {
 		private _animationStyleElement: HTMLStyleElement = null;
 		private _svgDefsElement: SVGDefsElement = null;
 
-		private _currentSubs: Map<number, HTMLDivElement> = new Map<number, HTMLDivElement>();
+		private _currentSubs: Map<Dialogue, HTMLDivElement> = new Map<Dialogue, HTMLDivElement>();
 		private _preRenderedSubs: Map<number, HTMLDivElement> = new Map<number, HTMLDivElement>();
 
 		private _scaleX: number;
@@ -399,11 +399,9 @@ module libjass.renderers {
 		onVideoTimeUpdate(): void {
 			super.onVideoTimeUpdate();
 
-			this._currentSubs.forEach((sub: HTMLDivElement, dialogueId: number) => {
-				var dialogue = this.ass.dialogues[dialogueId];
-
+			this._currentSubs.forEach((sub: HTMLDivElement, dialogue: Dialogue) => {
 				if (dialogue.start > this.currentTime || dialogue.end < this.currentTime) {
-					this._currentSubs.delete(dialogueId);
+					this._currentSubs.delete(dialogue);
 					this._removeSub(sub);
 				}
 			});
@@ -719,7 +717,7 @@ module libjass.renderers {
 		 * @param {!libjass.Dialogue} dialogue
 		 */
 		draw(dialogue: Dialogue): void {
-			if (this._currentSubs.has(dialogue.id)) {
+			if (this._currentSubs.has(dialogue)) {
 				return;
 			}
 
@@ -788,7 +786,7 @@ module libjass.renderers {
 
 			this._layerAlignmentWrappers[layer][alignment].appendChild(result);
 
-			this._currentSubs.set(dialogue.id, result);
+			this._currentSubs.set(dialogue, result);
 		}
 
 		private _ready(): void {
