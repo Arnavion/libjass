@@ -121,7 +121,7 @@ module libjass {
 	}
 
 	/**
-	 * Map implementation for browsers that don't support it. Only supports Number and String keys.
+	 * Map implementation for browsers that don't support it. Only supports keys which are of Number or String type, or which have a property called "id".
 	 *
 	 * Keys and values are stored as properties of an object, with property names derived from the key type.
 	 *
@@ -235,6 +235,10 @@ module libjass {
 
 			if (typeof key === "string") {
 				return "'" + key;
+			}
+
+			if ((<any>key).id !== undefined) {
+				return "!" + (<any>key).id;
 			}
 
 			return null;
