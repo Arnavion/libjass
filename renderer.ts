@@ -159,12 +159,10 @@ module libjass.renderers {
 
 		/**
 		 */
-		/* tslint:disable:no-empty */
 		preRender(dialogue: Dialogue): void { }
 
 		/**
 		 */
-		/* tslint:disable:no-empty */
 		draw(dialogue: Dialogue): void { }
 
 		private _onVideoTimeUpdate(): void {
