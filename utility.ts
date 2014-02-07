@@ -176,7 +176,7 @@ module libjass {
 			var property = this._keyToProperty(key);
 
 			if (property === null) {
-				throw new Error("This Map implementation only supports Number and String keys.");
+				throw new Error("This Map implementation only supports Number and String keys, or keys with an id property.");
 			}
 
 			this._keys[property] = key;
