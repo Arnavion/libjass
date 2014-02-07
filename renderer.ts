@@ -388,16 +388,13 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Resize the video element and subtitles to the new dimensions.
+		 * Resize the subtitles to the given new dimensions.
 		 *
 		 * @param {number} width
 		 * @param {number} height
 		 */
 		resizeVideo(width: number, height: number): void {
 			this._removeAllSubs();
-
-			this.video.style.width = width.toFixed(3) + "px";
-			this.video.style.height = height.toFixed(3) + "px";
 
 			var ratio = Math.min(width / this.ass.properties.resolutionX, height / this.ass.properties.resolutionY);
 			var subsWrapperWidth = this.ass.properties.resolutionX * ratio;
@@ -832,7 +829,7 @@ module libjass.renderers {
 			document.addEventListener("mozfullscreenchange", event => this._onFullScreenChange(), false);
 			document.addEventListener("fullscreenchange", event => this._onFullScreenChange(), false);
 
-			this.resizeVideo(parseInt(this.video.style.width), parseInt(this.video.style.height));
+			this.resizeVideo(this.video.offsetWidth, this.video.offsetHeight);
 
 			this._dispatchEvent("ready");
 		}
