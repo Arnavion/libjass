@@ -54,9 +54,6 @@ module libjass.renderers {
 
 		private _settings: RendererSettings;
 
-		private _dialogues: Dialogue[];
-		private _endTimes: number[];
-
 		private _state: VideoState;
 		private _currentTime: number;
 
@@ -66,20 +63,6 @@ module libjass.renderers {
 			this._id = ++NullRenderer._lastRendererId;
 
 			this._settings = RendererSettings.from(settings);
-
-			// Sort the dialogues array by end time and then by their original position in the script (id)
-			this._dialogues = this._ass.dialogues.slice(0);
-			this._dialogues.sort((dialogue1: Dialogue, dialogue2: Dialogue) => {
-				var result = dialogue1.end - dialogue2.end;
-
-				if (result === 0) {
-					result = dialogue1.id - dialogue2.id;
-				}
-
-				return result;
-			});
-
-			this._endTimes = this._dialogues.map((dialogue: Dialogue) => dialogue.end);
 
 			this._video.addEventListener("timeupdate", () => this._onVideoTimeUpdate(), false);
 			this._video.addEventListener("seeking", () => this._onVideoSeeking(), false);
@@ -131,32 +114,18 @@ module libjass.renderers {
 				console.log("NullRenderer.onVideoTimeUpdate: " + this._getVideoStateLogString());
 			}
 
-			var searchStart = 0;
-			var searchEnd = this._endTimes.length;
-			while (searchStart !== searchEnd) {
-				var mid = ((searchStart + searchEnd) / 2) | 0;
-				if (this._endTimes[mid] < this._currentTime) {
-					searchStart = mid + 1;
-				}
-				else {
-					searchEnd = mid;
-				}
-			}
+			for (var i = 0; i < this._ass.dialogues.length; i++) {
+				var dialogue = this._ass.dialogues[i];
 
-			for (var i = searchStart; i < this._endTimes.length; i++) {
-				var dialogue = this._dialogues[i];
-
-				if (dialogue.start <= this._currentTime) {
-					// This dialogue is visible right now. Draw it.
-					this.draw(dialogue);
-				}
-				else if (dialogue.start <= (this._currentTime + this._settings.preRenderTime)) {
-					// This dialogue will be visible soon. Pre-render it.
-					this.preRender(dialogue);
-				}
-				else {
-					// No more dialogues in the time range [currentTime, currentTime + settings.preRenderTime]
-					break;
+				if (dialogue.end > this._currentTime) {
+					if (dialogue.start <= this._currentTime) {
+						// This dialogue is visible right now. Draw it.
+						this.draw(dialogue);
+					}
+					else if (dialogue.start <= (this._currentTime + this._settings.preRenderTime)) {
+						// This dialogue will be visible soon. Pre-render it.
+						this.preRender(dialogue);
+					}
 				}
 			}
 		}
