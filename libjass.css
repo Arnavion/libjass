@@ -73,6 +73,14 @@
 	line-height: 0;
 }
 
+/* Filter wrapper span */
+.libjass-subs div[data-dialogue-id] > span {
+	-webkit-perspective-origin: center;
+	-webkit-perspective: 200px;
+	perspective-origin: center;
+	perspective: 200px;
+}
+
 .libjass-filters {
 	display: block;
 }

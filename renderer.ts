@@ -443,8 +443,6 @@ module libjass.renderers {
 
 			var animationCollection = new AnimationCollection(this, dialogue);
 
-			var divTransformStyle = "";
-
 			var currentSpan: HTMLSpanElement = null;
 			var currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this._svgDefsElement);
 
@@ -527,23 +525,23 @@ module libjass.renderers {
 				}
 
 				else if (part instanceof parts.RotateX) {
-					divTransformStyle += " rotateX(" + (<parts.RotateX>part).value + "deg)";
+					currentSpanStyles.rotationX = (<parts.RotateX>part).value;
 				}
 
 				else if (part instanceof parts.RotateY) {
-					divTransformStyle += " rotateY(" + (<parts.RotateY>part).value + "deg)";
+					currentSpanStyles.rotationY = (<parts.RotateY>part).value;
 				}
 
 				else if (part instanceof parts.RotateZ) {
-					divTransformStyle += " rotateZ(" + (-1 * (<parts.RotateZ>part).value) + "deg)";
+					currentSpanStyles.rotationZ = (<parts.RotateZ>part).value;
 				}
 
 				else if (part instanceof parts.SkewX) {
-					divTransformStyle += " skewX(" + (45 * (<parts.SkewX>part).value) + "deg)";
+					currentSpanStyles.skewX = (<parts.SkewX>part).value;
 				}
 
 				else if (part instanceof parts.SkewY) {
-					divTransformStyle += " skewY(" + (45 * (<parts.SkewY>part).value) + "deg)";
+					currentSpanStyles.skewY = (<parts.SkewY>part).value;
 				}
 
 				else if (part instanceof parts.PrimaryColor) {
@@ -667,31 +665,27 @@ module libjass.renderers {
 				}
 			});
 
-			var transformOriginParts = DefaultRenderer._getTransformOrigin(dialogue);
-
 			dialogue.parts.some(part => {
 				if (part instanceof parts.Position || part instanceof parts.Move) {
+					var transformOriginParts = DefaultRenderer._getTransformOrigin(dialogue);
+
 					var translateX = -transformOriginParts[0];
 					var translateY = -transformOriginParts[1];
 
-					divTransformStyle =
-						"translate(" + translateX + "%, " + translateY + "%) translate(-" + sub.style.marginLeft + ", -" + sub.style.marginTop + ") " +
-						divTransformStyle;
+					var divTransformStyle = "translate(" + translateX + "%, " + translateY + "%) translate(-" + sub.style.marginLeft + ", -" + sub.style.marginTop + ")";
+
+					var transformOriginString = transformOriginParts[0] + "% " + transformOriginParts[1] + "%";
+					sub.style.webkitTransform = divTransformStyle;
+					sub.style.webkitTransformOrigin = transformOriginString;
+
+					sub.style.transform = divTransformStyle;
+					sub.style.transformOrigin = transformOriginString;
 
 					return true;
 				}
 
 				return false;
 			});
-
-			if (divTransformStyle !== "") {
-				var transformOriginString = transformOriginParts[0] + "% " + transformOriginParts[1] + "%";
-				sub.style.webkitTransform = divTransformStyle;
-				sub.style.webkitTransformOrigin = transformOriginString;
-
-				sub.style.transform = divTransformStyle;
-				sub.style.transformOrigin = transformOriginString;
-			}
 
 			if (this._animationStyleElement === null) {
 				this._animationStyleElement = document.createElement("style");
@@ -1143,6 +1137,13 @@ module libjass.renderers {
 
 		private _letterSpacing: number;
 
+		private _rotationX: number;
+		private _rotationY: number;
+		private _rotationZ: number;
+
+		private _skewX: number;
+		private _skewY: number;
+
 		private _primaryColor: parts.Color;
 		private _outlineColor: parts.Color;
 		private _shadowColor: parts.Color;
@@ -1191,6 +1192,13 @@ module libjass.renderers {
 
 			this.letterSpacing = newStyle.letterSpacing;
 
+			this._rotationX = null;
+			this._rotationY = null;
+			this._rotationZ = null;
+
+			this._skewX = null;
+			this._skewY = null;
+
 			this.primaryColor = newStyle.primaryColor;
 			this.outlineColor = newStyle.outlineColor;
 			this.shadowColor = newStyle.shadowColor;
@@ -1236,7 +1244,21 @@ module libjass.renderers {
 				transform += "scaleX(" + this._fontScaleX + ") ";
 			}
 			if (this._fontScaleY !== 1) {
-				transform += "scaleY(" + this._fontScaleY + ")";
+				transform += "scaleY(" + this._fontScaleY + ") ";
+			}
+			if (this._rotationY !== null) {
+				transform += "rotateY(" + this._rotationY + "deg) ";
+			}
+			if (this._rotationX !== null) {
+				transform += "rotateX(" + this._rotationX + "deg) ";
+			}
+			if (this._rotationZ !== null) {
+				transform += "rotateZ(" + (-1 * this._rotationZ) + "deg) ";
+			}
+			if (this._skewX !== null || this._skewY !== null) {
+				var skewX = SpanStyles._valueOrDefault(this._skewX, 0);
+				var skewY = SpanStyles._valueOrDefault(this._skewY, 0);
+				transform += "matrix(1, " + skewY + ", " + skewX + ", 1, 0, 0) ";
 			}
 			if (transform !== "") {
 				span.style.webkitTransform = transform;
@@ -1358,6 +1380,11 @@ module libjass.renderers {
 
 			var shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
 			span.style.textShadow = shadowColor.toString() + " " + (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) + "px " + (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) + "px 0px";
+
+			if (this._rotationZ !== null) {
+				// Perspective needs to be set on a "transformable element"
+				filterWrapperSpan.style.display = "inline-block";
+			}
 
 			return filterWrapperSpan;
 		}
@@ -1486,6 +1513,51 @@ module libjass.renderers {
 		 */
 		set letterSpacing(value: number) {
 			this._letterSpacing = SpanStyles._valueOrDefault(value, this._defaultStyle.letterSpacing);
+		}
+
+		/**
+		 * Sets the X-axis rotation property.
+		 *
+		 * @type {?number}
+		 */
+		set rotationX(value: number) {
+			this._rotationX = value;
+		}
+
+		/**
+		 * Sets the Y-axis rotation property.
+		 *
+		 * @type {?number}
+		 */
+		set rotationY(value: number) {
+			this._rotationY = value;
+		}
+
+		/**
+		 * Sets the Z-axis rotation property.
+		 *
+		 * @type {?number}
+		 */
+		set rotationZ(value: number) {
+			this._rotationZ = value;
+		}
+
+		/**
+		 * Sets the X-axis skew property.
+		 *
+		 * @type {?number}
+		 */
+		set skewX(value: number) {
+			this._skewX = value;
+		}
+
+		/**
+		 * Sets the Y-axis skew property.
+		 *
+		 * @type {?number}
+		 */
+		set skewY(value: number) {
+			this._skewY = value;
 		}
 
 		/**
