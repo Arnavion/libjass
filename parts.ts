@@ -104,7 +104,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {string} value The text of this comment
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Comment {
@@ -126,7 +125,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {string} value The content of this block of text
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Text {
@@ -162,7 +160,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?boolean} value {\i1} -> true, {\i0} -> false, {\i} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Italic {
@@ -184,7 +181,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {*} value {\b1} -> true, {\b0} -> false, {\b###} -> weight of the bold (number), {\b} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Bold {
@@ -206,7 +202,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?boolean} value {\u1} -> true, {\u0} -> false, {\u} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Underline {
@@ -228,7 +223,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?boolean} value {\s1} -> true, {\s0} -> false, {\s} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class StrikeThrough {
@@ -250,7 +244,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\bord###} -> width (number), {\bord} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Border {
@@ -272,7 +265,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\xbord###} -> width (number), {\xbord} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class BorderX {
@@ -294,7 +286,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\ybord###} -> height (number), {\ybord} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class BorderY {
@@ -316,7 +307,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\shad###} -> depth (number), {\shad} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Shadow {
@@ -338,7 +328,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\xshad###} -> depth (number), {\xshad} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class ShadowX {
@@ -360,7 +349,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\yshad###} -> depth (number), {\yshad} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class ShadowY {
@@ -382,7 +370,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\be###} -> strength (number), {\be} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Blur {
@@ -404,7 +391,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\blur###} -> strength (number), {\blur} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class GaussianBlur {
@@ -426,7 +412,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?string} value {\fn###} -> name (string), {\fn} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class FontName {
@@ -448,7 +433,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\fs###} -> size (number), {\fs} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class FontSize {
@@ -470,7 +454,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\fscx###} -> scale (number), {\fscx} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class FontScaleX {
@@ -492,7 +475,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\fscy###} -> scale (number), {\fscy} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class FontScaleY {
@@ -514,7 +496,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\fsp###} -> spacing (number), {\fsp} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class LetterSpacing {
@@ -536,7 +517,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\frx###} -> angle (number), {\frx} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class RotateX {
@@ -558,7 +538,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\fry###} -> angle (number), {\fry} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class RotateY {
@@ -580,7 +559,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\frz###} -> angle (number), {\frz} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class RotateZ {
@@ -602,7 +580,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\fax###} -> angle (number), {\fax} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class SkewX {
@@ -624,7 +601,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\fay###} -> angle (number), {\fay} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class SkewY {
@@ -646,7 +622,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {libjass.parts.Color} value {\1c###} -> color (Color), {\1c} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class PrimaryColor {
@@ -668,7 +643,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {libjass.parts.Color} value {\2c###} -> color (Color), {\2c} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class SecondaryColor {
@@ -690,7 +664,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {libjass.parts.Color} value {\3c###} -> color (Color), {\3c} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class OutlineColor {
@@ -712,7 +685,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {libjass.parts.Color} value {\4c###} -> color (Color), {\4c} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class ShadowColor {
@@ -734,7 +706,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\alpha###} -> alpha (number), {\alpha} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Alpha {
@@ -756,7 +727,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\1a###} -> alpha (number), {\1a} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class PrimaryAlpha {
@@ -778,7 +748,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\2a###} -> alpha (number), {\2a} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class SecondaryAlpha {
@@ -800,7 +769,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\3a###} -> alpha (number), {\3a} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class OutlineAlpha {
@@ -822,7 +790,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?number} value {\4a###} -> alpha (number), {\4a} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class ShadowAlpha {
@@ -844,7 +811,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {number} value {\an###} -> alignment (number)
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Alignment {
@@ -866,7 +832,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {number} duration {\k###} -> duration (number)
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class ColorKaraoke {
@@ -888,7 +853,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {number} duration {\kf###} -> duration (number)
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class SweepingColorKaraoke {
@@ -910,7 +874,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {number} duration {\ko###} -> duration (number)
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class OutlineKaraoke {
@@ -932,7 +895,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {number} value {\q###} -> style (number)
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class WrappingStyle {
@@ -954,7 +916,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {?string} value {\r###} -> style name (string), {\r} -> null
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Reset {
@@ -977,7 +938,6 @@ module libjass.parts {
 	 * @param {number} x
 	 * @param {number} y
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Position {
@@ -1013,7 +973,6 @@ module libjass.parts {
 	 * @param {number} t1
 	 * @param {number} t2
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Move {
@@ -1081,7 +1040,6 @@ module libjass.parts {
 	 * @param {number} x
 	 * @param {number} y
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class RotationOrigin {
@@ -1113,7 +1071,6 @@ module libjass.parts {
 	 * @param {number} start
 	 * @param {number} end
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Fade {
@@ -1150,7 +1107,6 @@ module libjass.parts {
 	 * @param {number} t3
 	 * @param {number} t4
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class ComplexFade {
@@ -1232,7 +1188,6 @@ module libjass.parts {
 	 * @param {number} accel
 	 * @param {!Array.<!libjass.parts.Tag>} tags
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class Transform {
@@ -1285,7 +1240,6 @@ module libjass.parts {
 	 * @param {number} y2
 	 * @param {boolean} inside
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class RectangularClip {
@@ -1345,7 +1299,6 @@ module libjass.parts {
 	 * @param {!Array.<!libjass.parts.drawing.Instruction>} instructions
 	 * @param {boolean} inside
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class VectorClip {
@@ -1385,7 +1338,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {number} scale
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class DrawingMode {
@@ -1407,7 +1359,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {number} value
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class DrawingBaselineOffset {
@@ -1429,7 +1380,6 @@ module libjass.parts {
 	 * @constructor
 	 * @param {!Array.<!libjass.parts.drawing.Instruction>} instructions
 	 *
-	 * @extends {libjass.parts.PartBase}
 	 * @memberof libjass.parts
 	 */
 	export class DrawingInstructions {
@@ -1458,7 +1408,6 @@ module libjass.parts {
 		 * @param {number} x
 		 * @param {number} y
 		 *
-		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts.drawing
 		 */
 		export class MoveInstruction implements Instruction {
@@ -1490,7 +1439,6 @@ module libjass.parts {
 		 * @param {number} x
 		 * @param {number} y
 		 *
-		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts.drawing
 		 */
 		export class LineInstruction implements Instruction {
@@ -1526,7 +1474,6 @@ module libjass.parts {
 		 * @param {number} x3
 		 * @param {number} y3
 		 *
-		 * @extends {libjass.parts.PartBase}
 		 * @memberof libjass.parts.drawing
 		 */
 		export class CubicBezierCurveInstruction implements Instruction {
