@@ -1697,6 +1697,8 @@ module libjass.parser {
 				return null;
 			}
 
+			while (this.read(current, " ") !== null) { }
+
 			var x2Part = this.parse_decimal(current);
 			if (x2Part === null) {
 				parent.pop();
@@ -1710,6 +1712,8 @@ module libjass.parser {
 				parent.pop();
 				return null;
 			}
+
+			while (this.read(current, " ") !== null) { }
 
 			var x3Part = this.parse_decimal(current);
 			if (x3Part === null) {

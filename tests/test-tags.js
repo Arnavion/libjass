@@ -109,4 +109,22 @@ suite("Tags", function () {
 			new libjass.parts.drawing.LineInstruction(110, 331)
 		], false)]);
 	});
+
+	suite("Drawing instructions", function () {
+		parserTest("Normal", "m 984 425 l 985 445 l 985 542 l 973 544 b 983 524 987 496 984 459", "drawingInstructions", [
+			new libjass.parts.drawing.MoveInstruction(984, 425),
+			new libjass.parts.drawing.LineInstruction(985, 445),
+			new libjass.parts.drawing.LineInstruction(985, 542),
+			new libjass.parts.drawing.LineInstruction(973, 544),
+			new libjass.parts.drawing.CubicBezierCurveInstruction(983, 524, 987, 496, 984, 459)
+		]);
+
+		parserTest("Re-use previous instruction", "m 984 425 l 985 445 985 542 973 544 b 983 524 987 496 984 459", "drawingInstructions", [
+			new libjass.parts.drawing.MoveInstruction(984, 425),
+			new libjass.parts.drawing.LineInstruction(985, 445),
+			new libjass.parts.drawing.LineInstruction(985, 542),
+			new libjass.parts.drawing.LineInstruction(973, 544),
+			new libjass.parts.drawing.CubicBezierCurveInstruction(983, 524, 987, 496, 984, 459)
+		]);
+	});
 });
