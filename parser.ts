@@ -34,6 +34,10 @@ module libjass.parser {
 		var run = new ParserRun(input, rule);
 
 		if (run.result === null || run.result.end !== input.length) {
+			if (libjass.debugMode) {
+				console.error("Parse failed. %s %s %o", rule, input, run.result);
+			}
+
 			throw new Error("Parse failed.");
 		}
 

@@ -21,6 +21,8 @@
 var libjass = require("../libjass.js");
 var assert = require("assert");
 
+libjass.debugMode = true;
+
 var parserTest = function (description, input, rule, expected) {
 	var result = test(description, function () {
 		var actual = null;
