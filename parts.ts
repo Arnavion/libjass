@@ -121,7 +121,7 @@ module libjass.parts {
 	}
 
 	/**
-	 * A block of text, i.e., any text not enclosed in {}. Also includes \h and \N.
+	 * A block of text, i.e., any text not enclosed in {}. Also includes \h.
 	 *
 	 * @constructor
 	 * @param {string} value The content of this block of text
@@ -142,8 +142,18 @@ module libjass.parts {
 		}
 
 		toString(): string {
-			return "Text { value: " + this._value.replace(/\u00A0/g, "\\h").replace(/\n/g, "\\N") + " }";
+			return "Text { value: " + this._value.replace(/\u00A0/g, "\\h") + " }";
 		}
+	}
+
+	/**
+	 * A newline character \N.
+	 *
+	 * @constructor
+	 *
+	 * @memberof libjass.parts
+	 */
+	export class NewLine {
 	}
 
 	/**

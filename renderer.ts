@@ -454,14 +454,17 @@ module libjass.renderers {
 			var currentSpan: HTMLSpanElement = null;
 			var currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this._svgDefsElement);
 
-			var startNewSpan = (): void => {
+			var startNewSpan = (addNewLine: boolean): void => {
 				if (currentSpan !== null) {
 					sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan));
+					if (addNewLine) {
+						sub.appendChild(document.createElement("br"));
+					}
 				}
 
 				currentSpan = document.createElement("span");
 			};
-			startNewSpan();
+			startNewSpan(false);
 
 			var currentDrawing: Drawing = null;
 
@@ -679,12 +682,16 @@ module libjass.renderers {
 					currentDrawing.instructions = (<parts.DrawingInstructions>part).instructions;
 					currentSpan.appendChild(currentDrawing.toSVG());
 					currentDrawing = null;
-					startNewSpan();
+					startNewSpan(false);
 				}
 
 				else if (part instanceof parts.Text || (libjass.debugMode && part instanceof parts.Comment)) {
 					currentSpan.appendChild(document.createTextNode((<parts.Text>part).value));
-					startNewSpan();
+					startNewSpan(false);
+				}
+
+				else if (part instanceof parts.NewLine) {
+					startNewSpan(true);
 				}
 			});
 
