@@ -93,11 +93,11 @@ module libjass {
 				console.log("Read script info: " + JSON.stringify(infoTemplate), infoTemplate);
 			}
 
-			// Parse the horizontal script resolution
+			// Parse the script properties
 			result.properties.resolutionX = parseInt(infoTemplate["PlayResX"]);
-
-			// Parse the vertical script resolution
 			result.properties.resolutionY = parseInt(infoTemplate["PlayResY"]);
+			result.properties.wrappingStyle = parseInt(infoTemplate["WrapStyle"]);
+			result.properties.scaleBorderAndShadow = (infoTemplate["ScaledBorderAndShadow"] === "yes");
 
 			// Get styles from the styles section
 			script["V4+ Styles"].forEach((line: any) => {
@@ -132,6 +132,13 @@ module libjass {
 		}
 	}
 
+	export enum WrappingStyle {
+		SmartWrappingWithWiderTopLine = 0,
+		SmartWrappingWithWiderBottomLine = 3,
+		EndOfLineWrapping = 1,
+		NoLineWrapping = 2,
+	}
+
 	/**
 	 * This class represents the properties of an ASS script.
 	 *
@@ -142,6 +149,8 @@ module libjass {
 	export class ScriptProperties {
 		private _resolutionX: number;
 		private _resolutionY: number;
+		private _wrappingStyle: WrappingStyle;
+		private _scaleBorderAndShadow: boolean;
 
 		/**
 		 * The horizontal script resolution.
@@ -178,11 +187,47 @@ module libjass {
 		set resolutionY(value: number) {
 			this._resolutionY = value;
 		}
+
+		/**
+		 * The wrap style.
+		 *
+		 * @type {number}
+		 */
+		get wrappingStyle(): WrappingStyle {
+			return this._wrappingStyle;
+		}
+
+		/**
+		 * The wrap style.
+		 *
+		 * @type {number}
+		 */
+		set wrappingStyle(value: WrappingStyle) {
+			this._wrappingStyle = value;
+		}
+
+		/**
+		 * Whether to scale outline widths and shadow depths from script resolution to video resolution or not. If true, widths and depths are scaled.
+		 *
+		 * @type {boolean}
+		 */
+		get scaleBorderAndShadow(): boolean {
+			return this._scaleBorderAndShadow;
+		}
+
+		/**
+		 * Whether to scale outline widths and shadow depths from script resolution to video resolution or not. If true, widths and depths are scaled.
+		 *
+		 * @type {boolean}
+		 */
+		set scaleBorderAndShadow(value: boolean) {
+			this._scaleBorderAndShadow = value;
+		}
 	}
 
 	export enum BorderStyle {
 		Outline = 1,
-		OpaqueBox = 3
+		OpaqueBox = 3,
 	}
 
 	/**

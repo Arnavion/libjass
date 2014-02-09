@@ -926,14 +926,14 @@ module libjass.parts {
 	 * @memberof libjass.parts
 	 */
 	export class WrappingStyle {
-		constructor(private _value: number) { }
+		constructor(private _value: libjass.WrappingStyle) { }
 
 		/**
 		 * The value of this wrapping style tag.
 		 *
 		 * @type {number}
 		 */
-		get value(): number {
+		get value(): libjass.WrappingStyle {
 			return this._value;
 		}
 	}

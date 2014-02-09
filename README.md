@@ -72,6 +72,7 @@ You can also join the IRC channel below and ask any questions.
 * Unsupported tags: \be, \fe, \2c, \2a, \k, \K, \kf, \ko, \q, \org, \t, \clip, \iclip
 * \an4, \an5, \an6 aren't positioned correctly.
 * Font sizes aren't pixel perfect.
+* All lines are rendered as wrapping style 1 (end-of-line wrapping).
 
 
 ### Planned improvements

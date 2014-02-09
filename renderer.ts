@@ -457,6 +457,8 @@ module libjass.renderers {
 
 			var currentDrawing: Drawing = null;
 
+			var wrappingStyle = this.ass.properties.wrappingStyle;
+
 			dialogue.parts.forEach(part => {
 				if (part instanceof parts.Italic) {
 					currentSpanStyles.italic = (<parts.Italic>part).value;
@@ -587,6 +589,10 @@ module libjass.renderers {
 					// Already handled in Dialogue
 				}
 
+				else if (part instanceof parts.WrappingStyle) {
+					wrappingStyle = (<parts.WrappingStyle>part).value;
+				}
+
 				else if (part instanceof parts.Reset) {
 					var newStyleName = (<parts.Reset>part).value;
 					var newStyle: Style = null;
@@ -695,6 +701,18 @@ module libjass.renderers {
 
 				return false;
 			});
+
+			switch (wrappingStyle) {
+				case WrappingStyle.SmartWrappingWithWiderTopLine:
+				case WrappingStyle.SmartWrappingWithWiderBottomLine:
+					sub.style.whiteSpace = "pre-wrap";
+					break;
+
+				case WrappingStyle.EndOfLineWrapping:
+				case WrappingStyle.NoLineWrapping:
+					sub.style.whiteSpace = "pre";
+					break;
+			}
 
 			if (this._animationStyleElement === null) {
 				this._animationStyleElement = document.createElement("style");
