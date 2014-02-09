@@ -61,13 +61,13 @@ addEventListener("DOMContentLoaded", function () {
 				if (id === "video-size-video-radio") {
 					video.style.width = video.videoWidth + "px";
 					video.style.height = video.videoHeight + "px";
-					renderer.resizeVideo(video.videoWidth, video.videoHeight);
+					renderer.resize(video.videoWidth, video.videoHeight);
 				}
 
 				else if (id === "video-size-script-radio") {
 					video.style.width = ass.properties.resolutionX + "px";
 					video.style.height = ass.properties.resolutionY + "px";
-					renderer.resizeVideo(ass.properties.resolutionX, ass.properties.resolutionY);
+					renderer.resize(ass.properties.resolutionX, ass.properties.resolutionY);
 				}
 			};
 

@@ -360,7 +360,7 @@ module libjass.renderers {
 		 * @param {number} width
 		 * @param {number} height
 		 */
-		resizeVideo(width: number, height: number): void {
+		resize(width: number, height: number): void {
 			this._removeAllSubs();
 
 			var ratio = Math.min(width / this.ass.properties.resolutionX, height / this.ass.properties.resolutionY);
@@ -388,6 +388,14 @@ module libjass.renderers {
 			}
 
 			this.onVideoTimeUpdate();
+		}
+
+		/**
+		 * @deprecated
+		 */
+		resizeVideo(width: number, height: number): void {
+			console.warn("`DefaultRenderer.resizeVideo(width, height)` has been deprecated. Use `DefaultRenderer.resize(width, height)` instead.");
+			this.resize(width, height);
 		}
 
 		onVideoSeeking(): void {
@@ -815,7 +823,7 @@ module libjass.renderers {
 			document.addEventListener("mozfullscreenchange", event => this._onFullScreenChange(), false);
 			document.addEventListener("fullscreenchange", event => this._onFullScreenChange(), false);
 
-			this.resizeVideo(this.video.offsetWidth, this.video.offsetHeight);
+			this.resize(this.video.offsetWidth, this.video.offsetHeight);
 
 			this._dispatchEvent("ready");
 		}
@@ -835,7 +843,7 @@ module libjass.renderers {
 			if (fullScreenElement === this.video) {
 				this._videoSubsWrapper.classList.add("libjass-full-screen");
 
-				this.resizeVideo(screen.width, screen.height);
+				this.resize(screen.width, screen.height);
 
 				this._videoIsFullScreen = true;
 
