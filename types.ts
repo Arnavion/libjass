@@ -522,8 +522,6 @@ module libjass {
 
 			this._layer = Math.max(parseInt(template["Layer"]), 0);
 
-			this._alignment = this._style.alignment;
-
 			this._rawPartsString = template["Text"];
 		}
 
@@ -605,6 +603,8 @@ module libjass {
 		 */
 		private _parsePartsString(): void {
 			this._parts = <parts.Part[]>parser.parse(this._rawPartsString, "dialogueParts");
+
+			this._alignment = this._style.alignment;
 
 			this._parts.forEach((part, index) => {
 				if (part instanceof parts.Alignment) {
