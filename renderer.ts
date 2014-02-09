@@ -548,6 +548,10 @@ module libjass.renderers {
 					currentSpanStyles.primaryColor = (<parts.PrimaryColor>part).value;
 				}
 
+				else if (part instanceof parts.SecondaryColor) {
+					currentSpanStyles.secondaryColor = (<parts.SecondaryColor>part).value;
+				}
+
 				else if (part instanceof parts.OutlineColor) {
 					currentSpanStyles.outlineColor = (<parts.OutlineColor>part).value;
 				}
@@ -558,12 +562,17 @@ module libjass.renderers {
 
 				else if (part instanceof parts.Alpha) {
 					currentSpanStyles.primaryAlpha = (<parts.Alpha>part).value;
+					currentSpanStyles.secondaryAlpha = (<parts.Alpha>part).value;
 					currentSpanStyles.outlineAlpha = (<parts.Alpha>part).value;
 					currentSpanStyles.shadowAlpha = (<parts.Alpha>part).value;
 				}
 
 				else if (part instanceof parts.PrimaryAlpha) {
 					currentSpanStyles.primaryAlpha = (<parts.PrimaryAlpha>part).value;
+				}
+
+				else if (part instanceof parts.SecondaryAlpha) {
+					currentSpanStyles.secondaryAlpha = (<parts.SecondaryAlpha>part).value;
 				}
 
 				else if (part instanceof parts.OutlineAlpha) {
@@ -1145,10 +1154,12 @@ module libjass.renderers {
 		private _skewY: number;
 
 		private _primaryColor: parts.Color;
+		private _secondaryColor: parts.Color;
 		private _outlineColor: parts.Color;
 		private _shadowColor: parts.Color;
 
 		private _primaryAlpha: number;
+		private _secondaryAlpha: number;
 		private _outlineAlpha: number;
 		private _shadowAlpha: number;
 
@@ -1194,16 +1205,18 @@ module libjass.renderers {
 
 			this._rotationX = null;
 			this._rotationY = null;
-			this._rotationZ = null;
+			this._rotationZ = newStyle.rotationZ;
 
 			this._skewX = null;
 			this._skewY = null;
 
 			this.primaryColor = newStyle.primaryColor;
+			this.secondaryColor = newStyle.secondaryColor;
 			this.outlineColor = newStyle.outlineColor;
 			this.shadowColor = newStyle.shadowColor;
 
 			this.primaryAlpha = null;
+			this.secondaryAlpha = null;
 			this.outlineAlpha = null;
 			this.shadowAlpha = null;
 
@@ -1252,7 +1265,7 @@ module libjass.renderers {
 			if (this._rotationX !== null) {
 				transform += "rotateX(" + this._rotationX + "deg) ";
 			}
-			if (this._rotationZ !== null) {
+			if (this._rotationZ !== 0) {
 				transform += "rotateZ(" + (-1 * this._rotationZ) + "deg) ";
 			}
 			if (this._skewX !== null || this._skewY !== null) {
@@ -1539,7 +1552,7 @@ module libjass.renderers {
 		 * @type {?number}
 		 */
 		set rotationZ(value: number) {
-			this._rotationZ = value;
+			this._rotationZ = SpanStyles._valueOrDefault(value, this._defaultStyle.rotationZ);
 		}
 
 		/**
@@ -1570,6 +1583,15 @@ module libjass.renderers {
 		}
 
 		/**
+		 * Sets the secondary color property. null defaults it to the default style's value.
+		 *
+		 * @type {libjass.parts.Color}
+		 */
+		set secondaryColor(value: parts.Color) {
+			this._secondaryColor = SpanStyles._valueOrDefault(value, this._defaultStyle.secondaryColor);
+		}
+
+		/**
 		 * Sets the outline color property. null defaults it to the default style's value.
 		 *
 		 * @type {libjass.parts.Color}
@@ -1594,6 +1616,15 @@ module libjass.renderers {
 		 */
 		set primaryAlpha(value: number) {
 			this._primaryAlpha = value;
+		}
+
+		/**
+		 * Sets the secondary alpha property.
+		 *
+		 * @type {?number}
+		 */
+		set secondaryAlpha(value: number) {
+			this._secondaryAlpha = value;
 		}
 
 		/**

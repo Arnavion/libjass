@@ -180,6 +180,11 @@ module libjass {
 		}
 	}
 
+	export enum BorderStyle {
+		Outline = 1,
+		OpaqueBox = 3
+	}
+
 	/**
 	 * This class represents a single global style declaration in an ASS script. The styles can be obtained via the ASS.styles property.
 	 *
@@ -223,11 +228,15 @@ module libjass {
 
 		private _letterSpacing: number;
 
+		private _rotationZ: number;
+
 		private _primaryColor: parts.Color;
+		private _secondaryColor: parts.Color;
 		private _outlineColor: parts.Color;
 		private _shadowColor: parts.Color;
 
 		private _outlineThickness: number;
+		private _borderStyle: BorderStyle;
 
 		private _shadowDepth: number;
 
@@ -253,11 +262,15 @@ module libjass {
 
 			this._letterSpacing = parseFloat(template["Spacing"]);
 
+			this._rotationZ = parseFloat(template["Angle"]);
+
 			this._primaryColor = <parts.Color>parser.parse(template["PrimaryColour"], "colorWithAlpha");
+			this._secondaryColor = <parts.Color>parser.parse(template["SecondaryColour"], "colorWithAlpha");
 			this._outlineColor = <parts.Color>parser.parse(template["OutlineColour"], "colorWithAlpha");
 			this._shadowColor = <parts.Color>parser.parse(template["BackColour"], "colorWithAlpha");
 
 			this._outlineThickness = parseFloat(template["Outline"]);
+			this._borderStyle = parseInt(template["BorderStyle"]);
 
 			this._shadowDepth = parseFloat(template["Shadow"]);
 
@@ -359,12 +372,30 @@ module libjass {
 		}
 
 		/**
+		 * The default Z-rotation of this style.
+		 *
+		 * @type {number}
+		 */
+		get rotationZ(): number {
+			return this._rotationZ;
+		}
+
+		/**
 		 * The color of this style's font.
 		 *
 		 * @type {!libjass.parts.Color}
 		 */
 		get primaryColor(): parts.Color {
 			return this._primaryColor;
+		}
+
+		/**
+		 * The alternate color of this style's font, used in karaoke.
+		 *
+		 * @type {!libjass.parts.Color}
+		 */
+		get secondaryColor(): parts.Color {
+			return this._secondaryColor;
 		}
 
 		/**
@@ -392,6 +423,15 @@ module libjass {
 		 */
 		get outlineThickness(): number {
 			return this._outlineThickness;
+		}
+
+		/**
+		 * The border style of this style.
+		 *
+		 * @type {number}
+		 */
+		get borderStyle(): BorderStyle {
+			return this._borderStyle;
 		}
 
 		/**
