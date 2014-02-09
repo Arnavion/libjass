@@ -40,7 +40,7 @@ The API documentation is linked in the Links section below. Here's an overview:
 
 * The renderer starts a timer that ticks every 41ms. In each tick, it determines the set of dialogues to be shown at the current video time, renders each of them as a div, and appendChild's the div into the appropriate layer+alignment div.
 
-* The renderer handles resizing the video and subs when the user clicks the browser's native fullscreen-video button. index.js also contains code to change the size of the video based on user input.
+* The renderer handles resizing the subtitles when the user clicks the browser's native fullscreen-video button. index.js also contains code to change the size of the subtitles based on user input.
 
 * Lastly, the renderer contains an implementation of preloading fonts before playing the video. It uses a map of font names to URLs - index.js creates this map from the @font-face rules in fonts.css.
 
