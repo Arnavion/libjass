@@ -442,6 +442,7 @@ module libjass.renderers {
 			sub.style.marginLeft = (this._scaleX * dialogue.style.marginLeft).toFixed(3) + "px";
 			sub.style.marginRight = (this._scaleX * dialogue.style.marginRight).toFixed(3) + "px";
 			sub.style.marginTop = sub.style.marginBottom = (this._scaleY * dialogue.style.marginVertical).toFixed(3) + "px";
+			sub.style.minWidth = (this._subsWrapper.offsetWidth - 2 * (this._scaleX * dialogue.style.marginLeft)).toFixed(3) + "px";
 
 			switch (dialogue.alignment) {
 				case 1: case 4: case 7: sub.style.textAlign = "left"; break;
