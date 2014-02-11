@@ -1425,8 +1425,10 @@ module libjass.renderers {
 				filterWrapperSpan.style.filter = 'url("#' + filterId + '")';
 			}
 
-			var shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
-			span.style.textShadow = shadowColor.toString() + " " + (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) + "px " + (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) + "px 0px";
+			if (this._shadowDepthX !== 0 || this._shadowDepthY !== 0) {
+				var shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
+				span.style.textShadow = shadowColor.toString() + " " + (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) + "px " + (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) + "px 0px";
+			}
 
 			if (this._rotationZ !== null) {
 				// Perspective needs to be set on a "transformable element"
