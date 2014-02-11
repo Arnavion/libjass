@@ -1327,73 +1327,48 @@ module libjass.renderers {
 
 			var filterId = "svg-filter-" + this._id + "-" + this._nextFilterId++;
 
-			var points: number[][] = [];
-
-			var outlineColorFilter =
-				'\t<feComponentTransfer in="SourceAlpha" result="outlineColor">\n' +
-				'\t\t<feFuncR type="linear" slope="0" intercept="' + (outlineColor.red / 255).toFixed(3) + '" />\n' +
-				'\t\t<feFuncG type="linear" slope="0" intercept="' + (outlineColor.green / 255).toFixed(3) + '" />\n' +
-				'\t\t<feFuncB type="linear" slope="0" intercept="' + (outlineColor.blue / 255).toFixed(3) + '" />\n' +
-				'\t\t<feFuncA type="linear" slope="' + outlineColor.alpha.toFixed(3) + '" intercept="0" />\n' +
-				'\t</feComponentTransfer>\n';
-
 			var outlineFilter = '';
 			if (outlineWidth > 0 || outlineHeight > 0) {
-				/* Lay out outlines in an ellipse with horizontal radius = (this._scaleX * this._outlineWidth) and vertical radius = (this._scaleY * this._outlineHeight)
-				 * Outlines are laid inside the region of the ellipse, separated by 1 pixel horizontally and vertically.
-				 *
-				 * The below loop is an unrolled version of the above algorithm that only roams over one quadrant and adds
-				 * four shadows at a time.
-				 */
+				var mergeOutlinesFilter = '';
 
-				var a = outlineWidth - 1;
-				var b = outlineHeight - 1;
+				var radiiPairs: number[][] = [];
 
-				for (var x = 0; x < a; x++) {
-					for (var y = 0; (x / a) * (x / a) + (y / b) * (y / b) <= 1; y++) {
-						if (x === 0 && y === 0) {
-							continue;
+				if (outlineWidth >= outlineHeight) {
+					if (outlineHeight > 0) {
+						for (var y = 0; y <= outlineHeight; y++) {
+							radiiPairs.push([outlineWidth / outlineHeight * Math.sqrt(outlineHeight * outlineHeight - y * y), y]);
 						}
-
-						points.push([x, y]);
-
-						if (x !== 0) {
-							points.push([-x, y]);
+					}
+					else {
+						radiiPairs.push([outlineWidth, 0]);
+					}
+				}
+				else {
+					if (outlineWidth > 0) {
+						for (var x = 0; x <= outlineWidth; x++) {
+							radiiPairs.push([x, outlineHeight / outlineWidth * Math.sqrt(outlineWidth * outlineWidth - x * x)]);
 						}
-
-						if (x !== 0 && y !== 0) {
-							points.push([-x, -y]);
-						}
-
-						if (y !== 0) {
-							points.push([x, -y]);
-						}
+					}
+					else {
+						radiiPairs.push([0, outlineHeight]);
 					}
 				}
 
-				// Add the four corner outlines
-				points.push([a, 0]);
-				points.push([0, b]);
-				points.push([-a, 0]);
-				points.push([0, -b]);
-
-				var mergeOutlinesFilter = '';
-
-				points.forEach((pair: number[], index: number) => {
-					var x = pair[0];
-					var y = pair[1];
-
+				radiiPairs.forEach((radii, index) => {
 					outlineFilter +=
-						'\t<feOffset dx="' + pair[0].toFixed(3) + '" dy="' + pair[1].toFixed(3) + '" in="outlineColor" result="outline' + index + '" />\n';
+						'\t<feMorphology in="SourceAlpha" operator="dilate" radius="' + radii[0].toFixed(3) + ' ' + radii[1].toFixed(3) + '" result="outline' + index + '" />\n';
 
 					mergeOutlinesFilter +=
 						'\t\t<feMergeNode in="outline' + index + '" />\n';
 				});
 
-				outlineFilter +=
+				outlineFilter =
+					'\t<feFlood flood-color="rgb(' + outlineColor.red + ', ' + outlineColor.green + ', ' + outlineColor.blue + ')" result="outlineColor"/>' +
+					outlineFilter +
 					'\t<feMerge>\n' +
 					mergeOutlinesFilter +
-					'\t</feMerge>\n';
+					'\t</feMerge>\n' +
+					'\t<feComposite operator="in" in="outlineColor" />';
 			}
 
 			var blurFilter = '';
@@ -1408,7 +1383,6 @@ module libjass.renderers {
 			if (outlineFilter !== '' || blurFilter !== '') {
 				var filterString =
 					'<filter xmlns="http://www.w3.org/2000/svg" id="' + filterId + '">\n' +
-					outlineColorFilter +
 					outlineFilter +
 					blurFilter +
 					'\t<feMerge>\n' +
