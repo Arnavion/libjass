@@ -456,11 +456,12 @@ module libjass.renderers {
 			var currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this._svgDefsElement);
 
 			var startNewSpan = (addNewLine: boolean): void => {
-				if (currentSpan !== null) {
+				if (currentSpan !== null && currentSpan.textContent !== "") {
 					sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan));
-					if (addNewLine) {
-						sub.appendChild(document.createElement("br"));
-					}
+				}
+
+				if (addNewLine) {
+					sub.appendChild(document.createElement("br"));
 				}
 
 				currentSpan = document.createElement("span");
