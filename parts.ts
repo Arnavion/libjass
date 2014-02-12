@@ -89,7 +89,7 @@ module libjass.parts {
 		 * @return {string} The CSS representation "rgba(...)" of this color.
 		 */
 		toString(): string {
-			return "rgba(" + this._red + ", " + this._green + ", " + this._blue + ", " + this._alpha + ")";
+			return "rgba(" + this._red + ", " + this._green + ", " + this._blue + ", " + this._alpha.toFixed(3) + ")";
 		}
 	}
 
