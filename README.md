@@ -24,7 +24,7 @@ As a result, libjass is able to render subtitles with very low CPU usage. The do
 ### I want to use libjass for my website. What do I need to do?
 
 1. You need to build libjass.js using the instructions in BUILD.md
-1. You need to load libjass.js on the page with your video.
+1. You need to load libjass.js and libjass.css on the page with your video.
 1. You need to call the libjass API.
 
 Only libjass.js and libjass.css are needed to use libjass on your website. The other files are only used during the build process and you don't need to deploy them to your website.
