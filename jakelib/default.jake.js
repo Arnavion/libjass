@@ -49,7 +49,7 @@ namespace("_default", function () {
 
 		root = root.wrap_enclose(['((typeof module !== "undefined") && module.exports) || (this.libjass = {}):libjass', '((typeof global !== "undefined") && global) || this:global']);
 
-		root.figure_out_scope();
+		root.figure_out_scope({ screw_ie8: true });
 
 
 		// Remove some things from the AST
@@ -111,7 +111,7 @@ namespace("_default", function () {
 
 			nodesToRemove = [];
 
-			root.figure_out_scope();
+			root.figure_out_scope({ screw_ie8: true });
 		}
 
 		// 4. Rename all function arguments that begin with _ to not have the _.
@@ -208,7 +208,7 @@ namespace("_default", function () {
 			toplevel: root
 		});
 
-		root.figure_out_scope();
+		root.figure_out_scope({ screw_ie8: true });
 
 
 		// Suppress some warnings
@@ -231,15 +231,16 @@ namespace("_default", function () {
 
 		// Compress
 		var compressor = UglifyJS.Compressor({
-			warnings: true
+			warnings: true,
+			screw_ie8: true
 		});
 		root = root.transform(compressor);
 
 
 		// Mangle
-		root.figure_out_scope();
+		root.figure_out_scope({ screw_ie8: true });
 		root.compute_char_frequency();
-		root.mangle_names();
+		root.mangle_names({ screw_ie8: true });
 
 
 		// Mangle private members
@@ -313,7 +314,8 @@ namespace("_default", function () {
 
 					return false;
 				}
-			}
+			},
+			screw_ie8: true
 		};
 
 		var stream = UglifyJS.OutputStream(output);
