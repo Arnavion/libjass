@@ -108,6 +108,11 @@ module libjass {
 		}
 	}
 
+	/**
+	 * Set to browser's implementation of Set if it has one, else set to libjass.SimpleSet
+	 *
+	 * @type {function(new:Set)}
+	 */
 	export var Set: {
 		new <T>(): Set<T>;
 	} = null;
@@ -245,6 +250,11 @@ module libjass {
 		}
 	}
 
+	/**
+	 * Set to browser's implementation of Map if it has one, else set to libjass.SimpleMap
+	 *
+	 * @type {function(new:Map)}
+	 */
 	export var Map: {
 		new <K, V>(): Map<K, V>;
 	} = null;
