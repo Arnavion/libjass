@@ -56,6 +56,7 @@ module libjass.renderers {
 
 		private _state: RendererState;
 		private _currentTime: number;
+		private _enabled: boolean = true;
 
 		private _timerHandle: number = null;
 
@@ -104,6 +105,48 @@ module libjass.renderers {
 		 */
 		get currentTime(): number {
 			return this._currentTime;
+		}
+
+		get enabled(): boolean {
+			return this._enabled;
+		}
+
+		/**
+		 * Enable the renderer.
+		 */
+		enable(): void {
+			if (this._enabled) {
+				return;
+			}
+
+			this._enabled = true;
+
+			this._onVideoPlaying();
+		}
+
+		/**
+		 * Disable the renderer.
+		 */
+		disable(): void {
+			if (!this._enabled) {
+				return;
+			}
+
+			this._onVideoPause();
+
+			this._enabled = false;
+		}
+
+		/**
+		 * Toggle the renderer.
+		 */
+		toggle(): void {
+			if (this._enabled) {
+				this.disable();
+			}
+			else {
+				this.enable();
+			}
 		}
 
 		/**
@@ -188,6 +231,10 @@ module libjass.renderers {
 		}
 
 		private _onVideoPlaying(): void {
+			if (!this._enabled) {
+				return;
+			}
+
 			if (this._state === RendererState.Playing) {
 				return;
 			}
@@ -213,6 +260,10 @@ module libjass.renderers {
 		}
 
 		private _onVideoPause(): void {
+			if (!this._enabled) {
+				return;
+			}
+
 			if (libjass.verboseMode) {
 				console.log("NullRenderer._onVideoPause: " + this._getStateLogString());
 			}
@@ -236,6 +287,10 @@ module libjass.renderers {
 		}
 
 		private _onVideoSeeking(): void {
+			if (!this._enabled) {
+				return;
+			}
+
 			if (libjass.verboseMode) {
 				console.log("NullRenderer._onVideoSeeking: " + this._getStateLogString());
 			}
@@ -441,6 +496,18 @@ module libjass.renderers {
 		resizeVideo(width: number, height: number): void {
 			console.warn("`DefaultRenderer.resizeVideo(width, height)` has been deprecated. Use `DefaultRenderer.resize(width, height)` instead.");
 			this.resize(width, height);
+		}
+
+		enable(): void {
+			super.enable();
+
+			this._subsWrapper.style.display = "";
+		}
+
+		disable(): void {
+			super.disable();
+
+			this._subsWrapper.style.display = "none";
 		}
 
 		/**

@@ -44,7 +44,17 @@ addEventListener("DOMContentLoaded", function () {
 			renderer.addEventListener("ready", function () {
 				debug("All fonts have been preloaded. Beginning autoplay.");
 				video.play();
+
+				subToggleSpanTextNode.textContent = renderer.enabled ? "off" : "on";
 			});
+
+			var subToggleSpanTextNode = document.createTextNode("");
+			document.querySelector("#enable-disable-subs-span").appendChild(subToggleSpanTextNode);
+
+			document.querySelector("#enable-disable-button").addEventListener("click", function (event) {
+				renderer.toggle();
+				subToggleSpanTextNode.textContent = renderer.enabled ? "off" : "on";
+			}, false);
 
 			var changeVideoSizeSelection = function (id) {
 				if (typeof id === "undefined") {
