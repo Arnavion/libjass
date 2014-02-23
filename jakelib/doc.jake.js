@@ -38,17 +38,14 @@ namespace("_doc", function () {
 	task("parse", [], function () {
 		console.log("[" + this.fullName + "]");
 
-		var compiled = jake.Task["_default:typeScript"].value;
-
 		UglifyJS.base54.reset();
 
-		var root = null;
-		root = UglifyJS.parse(fs.readFileSync("libjass.js", { encoding: "utf8" }), {
+		var root = UglifyJS.parse(fs.readFileSync("libjass.js", { encoding: "utf8" }), {
 			filename: "libjass.js",
-			toplevel: root
+			toplevel: null
 		});
 
-		root.figure_out_scope();
+		root.figure_out_scope({ screw_ie8: true });
 
 		return root;
 	});

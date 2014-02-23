@@ -168,8 +168,8 @@ namespace("_default", function () {
 			}
 		};
 
-		fs.readdirSync('.').filter(function (filename) { return path.extname(filename) === '.ts'; }).forEach(function (filename) {
-			output.source_map.get().setSourceContent(filename, fs.readFileSync(filename, { encoding: 'utf-8'}));
+		fs.readdirSync(".").filter(function (filename) { return path.extname(filename) === ".ts"; }).forEach(function (filename) {
+			output.source_map.get().setSourceContent(filename, fs.readFileSync(filename, { encoding: "utf8"}));
 		});
 
 		var stream = UglifyJS.OutputStream(output);
@@ -322,8 +322,8 @@ namespace("_default", function () {
 			screw_ie8: true
 		};
 
-		fs.readdirSync('.').filter(function (filename) { return path.extname(filename) === '.ts'; }).forEach(function (filename) {
-			output.source_map.get().setSourceContent(filename, fs.readFileSync(filename, { encoding: 'utf-8'}));
+		fs.readdirSync(".").filter(function (filename) { return path.extname(filename) === ".ts"; }).forEach(function (filename) {
+			output.source_map.get().setSourceContent(filename, fs.readFileSync(filename, { encoding: "utf8"}));
 		});
 
 		var stream = UglifyJS.OutputStream(output);
