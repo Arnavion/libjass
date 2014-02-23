@@ -149,10 +149,6 @@ namespace("_doc", function () {
 
 			var lastRead = null;
 
-			if (nameParts[nameParts.length - 1][0] === "_") {
-				isPrivate = true;
-			}
-
 			lines.forEach(function (line) {
 				var readType = function (remainingLine) {
 					if (remainingLine[0] !== "{") {

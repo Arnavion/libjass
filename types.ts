@@ -645,6 +645,8 @@ module libjass {
 
 		/**
 		 * Parses this dialogue's parts from the raw parts string.
+		 *
+		 * @private
 		 */
 		private _parsePartsString(): void {
 			this._parts = <parts.Part[]>parser.parse(this._rawPartsString, "dialogueParts");

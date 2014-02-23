@@ -1955,6 +1955,8 @@ module libjass.parser {
 
 		/**
 		 * @param {number=1} count
+		 *
+		 * @private
 		 */
 		private _peek(count: number = 1): string {
 			return this._input.substr(this._parseTree.end, count);
@@ -1962,6 +1964,8 @@ module libjass.parser {
 
 		/**
 		 * @return {boolean}
+		 *
+		 * @private
 		 */
 		private _haveMore(): boolean {
 			return this._parseTree.end < this._input.length;
@@ -1971,6 +1975,8 @@ module libjass.parser {
 		 * @param {string} tagName One of "clip" and "iclip"
 		 * @param {!ParseNode} parent
 		 * @return {!ParseNode}
+		 *
+		 * @private
 		 */
 		private _parse_tag_clip_or_iclip(tagName: string, parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
@@ -2228,6 +2234,8 @@ module libjass.parser {
 		 * Updates the end property of this node and its parent recursively to the root node.
 		 *
 		 * @param {number} newEnd
+		 *
+		 * @private
 		 */
 		private _setEnd(newEnd: number): void {
 			this._end = newEnd;
