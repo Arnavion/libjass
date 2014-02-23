@@ -47,27 +47,26 @@ module libjass.renderers {
 	 * @memberof libjass.renderers
 	 */
 	export class NullRenderer {
-		private static _highResolutionTimerInterval: number = 41;
+		private static _timerInterval: number = 41;
 		private static _lastRendererId = -1;
 
 		private _id: number;
 
 		private _settings: RendererSettings;
 
-		private _state: VideoState;
+		private _state: RendererState;
 		private _currentTime: number;
 
-		private _timeUpdateIntervalHandle: number = null;
+		private _timerHandle: number = null;
 
 		constructor(private _video: HTMLVideoElement, private _ass: ASS, settings: RendererSettings) {
 			this._id = ++NullRenderer._lastRendererId;
 
 			this._settings = RendererSettings.from(settings);
 
-			this._video.addEventListener("timeupdate", () => this._onVideoTimeUpdate(), false);
-			this._video.addEventListener("seeking", () => this._onVideoSeeking(), false);
-			this._video.addEventListener("pause", () => this._onVideoPause(), false);
 			this._video.addEventListener("playing", () => this._onVideoPlaying(), false);
+			this._video.addEventListener("pause", () => this._onVideoPause(), false);
+			this._video.addEventListener("seeking", () => this._onVideoSeeking(), false);
 		}
 
 		/**
@@ -107,11 +106,44 @@ module libjass.renderers {
 			return this._currentTime;
 		}
 
-		onVideoTimeUpdate(): void {
-			this._currentTime = this._video.currentTime;
+		/**
+		 * Pre-render a dialogue. This is a no-op.
+		 *
+		 * @param {!libjass.Dialogue} dialogue
+		 */
+		preRender(dialogue: Dialogue): void { }
 
+		/**
+		 * Draw a dialogue. This is a no-op.
+		 *
+		 * @param {!libjass.Dialogue} dialogue
+		 */
+		draw(dialogue: Dialogue): void { }
+
+		/**
+		 * Runs when the video starts playing, or is resumed from pause.
+		 */
+		onVideoPlaying(): void {
 			if (libjass.verboseMode) {
-				console.log("NullRenderer.onVideoTimeUpdate: " + this._getVideoStateLogString());
+				console.log("NullRenderer.onVideoPlaying: " + this._getStateLogString());
+			}
+		}
+
+		/**
+		 * Runs when the video is paused.
+		 */
+		onVideoPause(): void {
+			if (libjass.verboseMode) {
+				console.log("NullRenderer.onVideoPause: " + this._getStateLogString());
+			}
+		}
+
+		/**
+		 * Runs when the video's current time changed. This might be a result of either regular playback or seeking.
+		 */
+		onVideoTimeUpdate(): void {
+			if (libjass.verboseMode) {
+				console.log("NullRenderer.onVideoTimeUpdate: " + this._getStateLogString());
 			}
 
 			for (var i = 0; i < this._ass.dialogues.length; i++) {
@@ -130,94 +162,107 @@ module libjass.renderers {
 			}
 		}
 
-		onVideoSeeking(): void {
+		private _timerTick(): void {
 			if (libjass.verboseMode) {
-				console.log("NullRenderer.onVideoSeeking: " + this._getVideoStateLogString());
-			}
-		}
-
-		onVideoPause(): void {
-			if (libjass.verboseMode) {
-				console.log("NullRenderer.onVideoPause: " + this._getVideoStateLogString());
-			}
-
-			if (this._timeUpdateIntervalHandle !== null) {
-				clearInterval(this._timeUpdateIntervalHandle);
-				this._timeUpdateIntervalHandle = null;
-			}
-		}
-
-		onVideoPlaying(): void {
-			if (libjass.verboseMode) {
-				console.log("NullRenderer.onVideoPlaying: " + this._getVideoStateLogString());
-			}
-
-			if (this._timeUpdateIntervalHandle === null) {
-				this._timeUpdateIntervalHandle = setInterval(() => this._onVideoTimeChange(), NullRenderer._highResolutionTimerInterval);
-			}
-		}
-
-		/**
-		 */
-		preRender(dialogue: Dialogue): void { }
-
-		/**
-		 */
-		draw(dialogue: Dialogue): void { }
-
-		private _onVideoTimeUpdate(): void {
-			if (this._state === VideoState.Seeking) {
-				if (this._currentTime !== this._video.currentTime) {
-					this._onVideoPlaying();
-				}
-			}
-		}
-
-		private _onVideoTimeChange(): void {
-			if (this._currentTime !== this._video.currentTime) {
-				if (this._state !== VideoState.Playing) {
-					this._onVideoPlaying();
-				}
-
-				this.onVideoTimeUpdate();
-			}
-		}
-
-		private _onVideoSeeking(): void {
-			if (this._state !== VideoState.Seeking) {
-				this._onVideoPause();
-
-				this._state = VideoState.Seeking;
+				console.log("NullRenderer._timerTick: " + this._getStateLogString());
 			}
 
 			if (this._currentTime !== this._video.currentTime) {
 				this._currentTime = this._video.currentTime;
 
-				this.onVideoSeeking();
+				if (this._state !== RendererState.Playing) {
+					this._state = RendererState.Playing;
+
+					this.onVideoPlaying();
+				}
+
+				this.onVideoTimeUpdate();
+			}
+			else {
+				if (this._state !== RendererState.Paused) {
+					this._state = RendererState.Paused;
+
+					this.onVideoPause();
+				}
 			}
 		}
 
-		private _onVideoPause(): void {
-			this._state = VideoState.Paused;
+		private _onVideoPlaying(): void {
+			if (this._state === RendererState.Playing) {
+				return;
+			}
 
+			if (libjass.verboseMode) {
+				console.log("NullRenderer._onVideoPlaying: " + this._getStateLogString());
+			}
+
+			this._state = RendererState.Playing;
+
+			this.onVideoPlaying();
+
+			if (this._timerHandle === null) {
+				// video might send "playing" event after seeking even when not first paused. In this situation, _timerHandle will not be null. This is fine.
+				this._timerHandle = setInterval(() => this._timerTick(), NullRenderer._timerInterval);
+			}
+
+			if (libjass.verboseMode) {
+				console.log("NullRenderer._onVideoPlaying: Set NullRenderer._timeHandle to " + this._timerHandle);
+			}
+
+			this.onVideoTimeUpdate();
+		}
+
+		private _onVideoPause(): void {
+			if (libjass.verboseMode) {
+				console.log("NullRenderer._onVideoPause: " + this._getStateLogString());
+			}
+
+			this._state = RendererState.Paused;
+
+			this.onVideoPause();
+
+			if (this._timerHandle === null) {
+				if (libjass.debugMode) {
+					console.warn("NullRenderer._onVideoPause: Abnormal state detected. NullRenderer._timeHandle should not have been null");
+				}
+			}
+
+			clearInterval(this._timerHandle);
+			this._timerHandle = null;
+
+			if (libjass.verboseMode) {
+				console.log("NullRenderer._onVideoPause: Cleared NullRenderer._timeHandle");
+			}
+		}
+
+		private _onVideoSeeking(): void {
+			if (libjass.verboseMode) {
+				console.log("NullRenderer._onVideoSeeking: " + this._getStateLogString());
+			}
+
+			if (this._currentTime === this._video.currentTime) {
+				return;
+			}
+
+			if (this._state !== RendererState.Paused) {
+				return;
+			}
+
+			this._currentTime = this._video.currentTime;
+
+			this.onVideoPlaying();
+			this.onVideoTimeUpdate();
 			this.onVideoPause();
 		}
 
-		private _onVideoPlaying(): void {
-			this._state = VideoState.Playing;
-
-			this.onVideoPlaying();
-		}
-
-		private _getVideoStateLogString(): string {
-			return "video.currentTime = " + this._video.currentTime + ", video.paused = " + this._video.paused + ", video.seeking = " + this._video.seeking;
+		private _getStateLogString(): string {
+			return "state = " + RendererState[this._state] + ", video.currentTime = " + this._video.currentTime + ", video.paused = " + this._video.paused + ", video.seeking = " + this._video.seeking;
 		}
 	}
 
-	enum VideoState {
+	enum RendererState {
 		Playing = 0,
 		Paused = 1,
-		Seeking = 2,
 	}
 
 	/**
@@ -396,35 +441,6 @@ module libjass.renderers {
 		resizeVideo(width: number, height: number): void {
 			console.warn("`DefaultRenderer.resizeVideo(width, height)` has been deprecated. Use `DefaultRenderer.resize(width, height)` instead.");
 			this.resize(width, height);
-		}
-
-		onVideoSeeking(): void {
-			super.onVideoSeeking();
-
-			this._removeAllSubs();
-		}
-
-		onVideoTimeUpdate(): void {
-			super.onVideoTimeUpdate();
-
-			this._currentSubs.forEach((sub: HTMLDivElement, dialogue: Dialogue) => {
-				if (dialogue.start > this.currentTime || dialogue.end < this.currentTime) {
-					this._currentSubs.delete(dialogue);
-					this._removeSub(sub);
-				}
-			});
-		}
-
-		onVideoPause(): void {
-			super.onVideoPause();
-
-			this._subsWrapper.classList.add("paused");
-		}
-
-		onVideoPlaying(): void {
-			super.onVideoPlaying();
-
-			this._subsWrapper.classList.remove("paused");
 		}
 
 		/**
@@ -825,6 +841,31 @@ module libjass.renderers {
 			this._layerAlignmentWrappers[layer][alignment].appendChild(result);
 
 			this._currentSubs.set(dialogue, result);
+		}
+
+		onVideoPlaying(): void {
+			super.onVideoPlaying();
+
+			this._removeAllSubs();
+
+			this._subsWrapper.classList.remove("paused");
+		}
+
+		onVideoPause(): void {
+			super.onVideoPause();
+
+			this._subsWrapper.classList.add("paused");
+		}
+
+		onVideoTimeUpdate(): void {
+			super.onVideoTimeUpdate();
+
+			this._currentSubs.forEach((sub: HTMLDivElement, dialogue: Dialogue) => {
+				if (dialogue.start > this.currentTime || dialogue.end < this.currentTime) {
+					this._currentSubs.delete(dialogue);
+					this._removeSub(sub);
+				}
+			});
 		}
 
 		private _ready(): void {
