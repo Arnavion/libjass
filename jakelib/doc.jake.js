@@ -508,7 +508,7 @@ namespace("_doc", function () {
 		});
 
 		var sanitize = function (string) {
-			return string.toString().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+			return string.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 		};
 
 		var indenter = function (indent) {
