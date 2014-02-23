@@ -447,7 +447,20 @@ namespace("_doc", function () {
 		});
 
 		var sorter = (function () {
-			var types = [Function, Property, Constructor];
+			var visibilitySorter = function (value1, value2) {
+				if (value1.isPrivate === value2.isPrivate) {
+					return 0;
+				}
+				if (value1.isPrivate) {
+					return 1;
+				}
+				if (value2.isPrivate) {
+					return -1;
+				}
+				return 0;
+			};
+
+			var types = [Property, Function, Constructor];
 			var typeSorter = function (value1, value2) {
 				var type1Index = -1;
 				var type2Index = -1;
@@ -465,23 +478,11 @@ namespace("_doc", function () {
 				return type1Index - type2Index;
 			};
 
-			var visibilitySorter = function (value1, value2) {
-				if (value1.isPrivate === value2.isPrivate) {
-					return 0;
-				}
-				else if (value1.isPrivate) {
-					return 1;
-				}
-				else {
-					return -1;
-				}
-			};
-
 			var nameSorter = function (value1, value2) {
 				return value1.name.toShortString().localeCompare(value2.name.toShortString());
 			};
 
-			var sorters = [typeSorter, visibilitySorter, nameSorter];
+			var sorters = [visibilitySorter, typeSorter, nameSorter];
 
 			return function (value1, value2) {
 				for (var i = 0; i < sorters.length; i++) {
@@ -549,7 +550,7 @@ namespace("_doc", function () {
 				'		<p>' + sanitize(func.description) + '</p>',
 				'	</dd>',
 				'	<dd class="usage"><fieldset><legend />' + writeFunctionUsage(func) + '</fieldset></dd>'
-			].concat(writeParameters(func, 2)).concat(writeReturns(func, 1)).concat([
+			].concat(writeParameters(func, 1)).concat(writeReturns(func, 1)).concat([
 				'</dl>'
 			]).map(indenter(indent));
 		};
@@ -567,19 +568,15 @@ namespace("_doc", function () {
 				'		<p>' + sanitize(constructor.description) + '</p>',
 				'	</dd>',
 				'	<dd class="usage"><fieldset><legend />' + writeConstructorUsage(constructor) + '</fieldset></dd>'
-			].concat(writeParameters(constructor, 2)).concat([
-				'	<dd class="functions">'
-			]).concatMany(constructor.members.filter(function (member) {
-				return member instanceof Function;
-			}).map(function (member) {
-				return writeFunction(member, 2);
-			})).concat([
-				'	</dd>',
-				'	<dd class="properties">'
-			]).concatMany(constructor.members.filter(function (member) {
-				return member instanceof Property;
-			}).map(function (property) {
-				return writeProperty(property, 2);
+			].concat(writeParameters(constructor, 1)).concat([
+				'	<dd class="members">'
+			]).concatMany(constructor.members.map(function (member) {
+				if (member instanceof Function) {
+					return writeFunction(member, 2);
+				}
+				if (member instanceof Property) {
+					return writeProperty(member, 2);
+				}
 			})).concat([
 				'	</dd>',
 				'</dl>'
@@ -707,7 +704,7 @@ namespace("_doc", function () {
 				'		<p>' + sanitize(setter.description) + '</p>',
 				'	</dd>',
 				'	<dd class="usage"><fieldset><legend />' + writeSetterUsage(property) + '</fieldset></dd>'
-			].concat(writeParameters(setter, 2)).concat([
+			].concat(writeParameters(setter, 1)).concat([
 				'</dl>'
 			]).map(indenter(indent));
 		};
