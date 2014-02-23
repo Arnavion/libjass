@@ -548,7 +548,7 @@ namespace("_doc", function () {
 				'	<dd class="description">',
 				'		<p>' + sanitize(func.description) + '</p>',
 				'	</dd>',
-				'	<dd class="usage">' + writeFunctionUsage(func) + '</dd>'
+				'	<dd class="usage"><fieldset><legend />' + writeFunctionUsage(func) + '</fieldset></dd>'
 			].concat(writeParameters(func, 2)).concat(writeReturns(func, 1)).concat([
 				'</dl>'
 			]).map(indenter(indent));
@@ -566,7 +566,7 @@ namespace("_doc", function () {
 				'	<dd class="description">',
 				'		<p>' + sanitize(constructor.description) + '</p>',
 				'	</dd>',
-				'	<dd class="usage">' + writeConstructorUsage(constructor) + '</dd>'
+				'	<dd class="usage"><fieldset><legend />' + writeConstructorUsage(constructor) + '</fieldset></dd>'
 			].concat(writeParameters(constructor, 2)).concat([
 				'	<dd class="functions">'
 			]).concatMany(constructor.members.filter(function (member) {
@@ -689,7 +689,7 @@ namespace("_doc", function () {
 				'	<dd class="description">',
 				'		<p>' + sanitize(getter.description) + '</p>',
 				'	</dd>',
-				'	<dd class="usage">' + writeGetterUsage(property) + '</dd>'
+				'	<dd class="usage"><fieldset><legend />' + writeGetterUsage(property) + '</fieldset></dd>'
 			].concat([
 				'	<dd class="return type">' + sanitize(getter.type) + '</dd>',
 			]).concat([
@@ -706,7 +706,7 @@ namespace("_doc", function () {
 				'	<dd class="description">',
 				'		<p>' + sanitize(setter.description) + '</p>',
 				'	</dd>',
-				'	<dd class="usage">' + writeSetterUsage(property) + '</dd>'
+				'	<dd class="usage"><fieldset><legend />' + writeSetterUsage(property) + '</fieldset></dd>'
 			].concat(writeParameters(setter, 2)).concat([
 				'</dl>'
 			]).map(indenter(indent));
@@ -831,6 +831,10 @@ namespace("_doc", function () {
 			'			.usage {',
 			'				font-size: large;',
 			'				font-style: italic;',
+			'			}',
+			'',
+			'			.usage legend:before {',
+			'				content: "Usage";',
 			'			}',
 			'',
 			'			.constructor .function, .constructor .getter, .constructor .setter {',
