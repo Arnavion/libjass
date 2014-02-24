@@ -710,7 +710,7 @@ module libjass.renderers {
 					var movePart = <parts.Move>part;
 
 					sub.style.position = "absolute";
-					animationCollection.addCustom("linear", new Keyframe(0, {
+					animationCollection.addCustom("linear", [new Keyframe(0, {
 						left: (this._scaleX * movePart.x1).toFixed(3) + "px",
 						top: (this._scaleY * movePart.y1).toFixed(3) + "px"
 					}), new Keyframe(movePart.t1, {
@@ -722,7 +722,7 @@ module libjass.renderers {
 					}), new Keyframe(dialogue.end - dialogue.start, {
 						left: (this._scaleX * movePart.x2).toFixed(3) + "px",
 						top: (this._scaleY * movePart.y2).toFixed(3) + "px"
-					}));
+					})]);
 				}
 
 				else if (part instanceof parts.Fade) {
@@ -740,7 +740,7 @@ module libjass.renderers {
 				else if (part instanceof parts.ComplexFade) {
 					var complexFadePart = <parts.ComplexFade>part;
 
-					animationCollection.addCustom("linear", new Keyframe(0, {
+					animationCollection.addCustom("linear", [new Keyframe(0, {
 						opacity: String(complexFadePart.a1)
 					}), new Keyframe(complexFadePart.t1, {
 						opacity: String(complexFadePart.a1)
@@ -752,7 +752,7 @@ module libjass.renderers {
 						opacity: String(complexFadePart.a3)
 					}), new Keyframe(dialogue.end, {
 						opacity: String(complexFadePart.a3)
-					}));
+					})]);
 				}
 
 				else if (part instanceof parts.DrawingMode) {
@@ -942,7 +942,7 @@ module libjass.renderers {
 
 			this.resize(this.video.offsetWidth, this.video.offsetHeight);
 
-			this._dispatchEvent("ready");
+			this._dispatchEvent("ready", []);
 		}
 
 		private _onFullScreenChange() {
@@ -964,24 +964,24 @@ module libjass.renderers {
 
 				this._videoIsFullScreen = true;
 
-				this._dispatchEvent("fullScreenChange", this._videoIsFullScreen);
+				this._dispatchEvent("fullScreenChange", [this._videoIsFullScreen]);
 			}
 			else if (fullScreenElement === null && this._videoIsFullScreen) {
 				this._videoSubsWrapper.classList.remove("libjass-full-screen");
 
 				this._videoIsFullScreen = false;
 
-				this._dispatchEvent("fullScreenChange", this._videoIsFullScreen);
+				this._dispatchEvent("fullScreenChange", [this._videoIsFullScreen]);
 			}
 		}
 
 		/**
 		 * @param {string} type
-		 * @param {...*} args
+		 * @param {!Array.<*>} args
 		 *
 		 * @private
 		 */
-		private _dispatchEvent(type: string, ...args: Object[]): void {
+		private _dispatchEvent(type: string, args: Object[]): void {
 			var listeners = this._eventListeners.get(type);
 			if (listeners !== null) {
 				listeners.forEach((listener: Function) => {
@@ -1217,7 +1217,7 @@ module libjass.renderers {
 		 * @param {string} timingFunction One of the acceptable values for the "animation-timing-function" CSS property
 		 * @param {Array.<!{time: number, properties: !Object.<string, string>}>} keyframes
 		 */
-		addCustom(timingFunction: string, ...keyframes: Keyframe[]) {
+		addCustom(timingFunction: string, keyframes: Keyframe[]) {
 			var startTime: number = null;
 			var endTime: number = null;
 
