@@ -2132,7 +2132,7 @@ module libjass.parser {
 	 * This class represents a single parse node. It has a start and end position, and an optional value object.
 	 *
 	 * @constructor
-	 * @param {!ParseNode} parent The parent of this parse node. The parent's end position will be updated to the end position of this node whenever the latter changes.
+	 * @param {ParseNode} parent The parent of this parse node. The parent's end position will be updated to the end position of this node whenever the latter changes.
 	 * @param {?string=null} value A shortcut to assign a string to the value property.
 	 *
 	 * @private
@@ -2179,7 +2179,7 @@ module libjass.parser {
 		}
 
 		/**
-		 * @type {!ParseNode}
+		 * @type {ParseNode}
 		 */
 		get parent(): ParseNode {
 			return this._parent;
