@@ -1032,7 +1032,7 @@ module libjass.renderers {
 		 *
 		 * If you have a <style> or <link> element on the page containing @font-face rules, you can use the RendererSettings.makeFontMapFromStyleElement() convenience method to create a font map.
 		 *
-		 * @type {!Map<string, string[]>}
+		 * @type {!Map.<string, !Array.<string>>}
 		 */
 		fontMap: Map<string, string[]>;
 
@@ -1047,7 +1047,7 @@ module libjass.renderers {
 		 * A convenience method to create a font map from a <style> or <link> element that contains @font-face rules.
 		 *
 		 * @param {!LinkStyle} linkStyle
-		 * @return {!Map<string, string[]>}
+		 * @return {!Map.<string, !Array.<string>>}
 		 *
 		 * @static
 		 */
@@ -1114,6 +1114,7 @@ module libjass.renderers {
 	/**
 	 * This class represents a single keyframe. It has a list of CSS properties (names and values) associated with a point in time. Multiple keyframes make up an animation.
 	 *
+	 * @constructor
 	 * @param {number} time
 	 * @param {!Object.<string, string>} properties
 	 *
@@ -1770,6 +1771,7 @@ module libjass.renderers {
 	/**
 	 * This class represents an ASS drawing - a set of drawing instructions between {\p} tags.
 	 *
+	 * @constructor
 	 * @param {number} drawingScale
 	 * @param {number} scaleX
 	 * @param {number} scaleY

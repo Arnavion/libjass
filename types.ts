@@ -701,7 +701,7 @@ module libjass {
 		/**
 		 * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
 		 *
-		 * @param {string} string
+		 * @param {string} str
 		 * @return {number}
 		 *
 		 * @private
