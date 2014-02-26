@@ -335,6 +335,7 @@ module libjass.renderers {
 	export class DefaultRenderer extends NullRenderer {
 		private _videoSubsWrapper: HTMLDivElement;
 		private _subsWrapper: HTMLDivElement;
+		private _layerWrappers: HTMLDivElement[] = [];
 		private _layerAlignmentWrappers: HTMLDivElement[][] = [];
 		private _animationStyleElement: HTMLStyleElement = null;
 		private _svgDefsElement: SVGDefsElement = null;
@@ -882,25 +883,38 @@ module libjass.renderers {
 			var alignment = (result.style.position === "absolute") ? 0 : dialogue.alignment; // Alignment 0 is for absolutely-positioned subs
 
 			// Create the layer wrapper div and the alignment div inside it if not already created
-			if (this._layerAlignmentWrappers[layer] === undefined) {
-				this._layerAlignmentWrappers[layer] = new Array<HTMLDivElement>(9 + 1); // + 1 because alignments are 1-indexed (1 to 9)
-			}
-			if (this._layerAlignmentWrappers[layer][alignment] === undefined) {
-				var layerAlignmentWrapper = document.createElement("div");
-				layerAlignmentWrapper.className = "layer" + layer + " an" + alignment;
+			if (this._layerWrappers[layer] === undefined) {
+				var layerWrapper = document.createElement("div");
+				layerWrapper.className = "layer layer" + layer;
 
-				// Find the next greater layer,alignment div and insert this div before that one
+				// Find the next greater layer div and insert this div before that one
 				var insertBeforeElement: HTMLDivElement = null;
-				for (var insertBeforeLayer = layer; insertBeforeLayer < this._layerAlignmentWrappers.length && insertBeforeElement === null; insertBeforeLayer++) {
-					if (this._layerAlignmentWrappers[insertBeforeLayer] !== undefined) {
-						for (var insertBeforeAlignment = (insertBeforeLayer === layer) ? (alignment + 1) : 0; insertBeforeAlignment < 10 && insertBeforeElement === null; insertBeforeAlignment++) {
-							if (this._layerAlignmentWrappers[insertBeforeLayer][insertBeforeAlignment] !== undefined) {
-								insertBeforeElement = this._layerAlignmentWrappers[insertBeforeLayer][insertBeforeAlignment];
-							}
-						}
+				for (var insertBeforeLayer = layer + 1; insertBeforeLayer < this._layerWrappers.length && insertBeforeElement === null; insertBeforeLayer++) {
+					if (this._layerWrappers[insertBeforeLayer] !== undefined) {
+						insertBeforeElement = this._layerWrappers[insertBeforeLayer];
 					}
 				}
-				this._subsWrapper.insertBefore(layerAlignmentWrapper, insertBeforeElement);
+
+				this._subsWrapper.insertBefore(layerWrapper, insertBeforeElement);
+
+				this._layerWrappers[layer] = layerWrapper;
+				this._layerAlignmentWrappers[layer] = [];
+			}
+
+			if (this._layerAlignmentWrappers[layer][alignment] === undefined) {
+				var layerAlignmentWrapper = document.createElement("div");
+				layerAlignmentWrapper.className = "an an" + alignment;
+
+				// Find the next greater layer,alignment div and insert this div before that one
+				var layerWrapper = this._layerWrappers[layer];
+				var insertBeforeElement: HTMLDivElement = null;
+				for (var insertBeforeAlignment = alignment + 1; insertBeforeAlignment < this._layerAlignmentWrappers[layer].length && insertBeforeElement === null; insertBeforeAlignment++) {
+					if (this._layerAlignmentWrappers[layer][insertBeforeAlignment] !== undefined) {
+						insertBeforeElement = this._layerAlignmentWrappers[layer][insertBeforeAlignment];
+					}
+				}
+
+				layerWrapper.insertBefore(layerAlignmentWrapper, insertBeforeElement);
 
 				this._layerAlignmentWrappers[layer][alignment] = layerAlignmentWrapper;
 			}

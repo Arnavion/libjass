@@ -36,7 +36,7 @@ The API documentation is linked in the Links section below. Here's an overview:
 
 * The method [ASS.fromString()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromString) takes in the raw ASS string and returns an [ASS](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS) object representing the script properties, the line styles and dialogue lines in it. The example index.js uses XHR to get this data using the URL specified in a track tag.
 
-* index.js initializes a default renderer that libjass ships with, the [DefaultRenderer](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.DefaultRenderer). This renderer uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (.libjass-subs) containing div's corresponding to the 9 alignment directions, 9 for each layer in the ASS script. libjass.css contains styles for these div's to render them at the correct location.
+* index.js initializes a default renderer that libjass ships with, the [DefaultRenderer](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.DefaultRenderer). This renderer uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (.libjass-subs) containing div's corresponding to the layers in the ASS script, and each layer has div's corresponding to the 9 alignment directions. libjass.css contains styles for these div's to render them at the correct location.
 
 * The renderer starts a timer that ticks every 41ms. In each tick, it determines the set of dialogues to be shown at the current video time, renders each of them as a div, and appendChild's the div into the appropriate layer+alignment div.
 
