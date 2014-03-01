@@ -351,3 +351,48 @@ namespace("_default", function () {
 		fs.writeFileSync("libjass.min.js.map", minified.sourceMap);
 	});
 });
+
+// Workaround for https://github.com/mishoo/UglifyJS2/issues/436
+// Derived from lib/sourcemap.js in UglifyJS2 source
+UglifyJS.SourceMap = function SourceMap(options) {
+	options.orig_line_diff = 0;
+	options.dest_line_diff = 0;
+
+	var generator = new UglifyJS.MOZ_SourceMap.SourceMapGenerator({
+		file: options.file,
+		sourceRoot: options.root
+	});
+
+	var orig_map = options.orig && new UglifyJS.MOZ_SourceMap.SourceMapConsumer(options.orig);
+
+	function add(source, gen_line, gen_col, orig_line, orig_col, name) {
+		if (orig_map) {
+			var info = orig_map.originalPositionFor({
+				line: orig_line,
+				column: orig_col
+			});
+
+			if (info.line === null && info.column === null) {
+				return;
+			}
+
+			source = info.source;
+			orig_line = info.line;
+			orig_col = info.column;
+			name = info.name;
+		}
+
+		generator.addMapping({
+			generated : { line: gen_line + options.dest_line_diff, column: gen_col },
+			original  : { line: orig_line + options.orig_line_diff, column: orig_col },
+			source    : source,
+			name      : name
+		});
+	};
+
+	return {
+		add: add,
+		get: function() { return generator },
+		toString: function() { return generator.toString() }
+	};
+};
