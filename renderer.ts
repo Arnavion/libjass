@@ -256,7 +256,7 @@ module libjass.renderers {
 				console.log("NullRenderer._onVideoPlaying: Set NullRenderer._timeHandle to " + this._timerHandle);
 			}
 
-			this.onVideoTimeUpdate();
+			this._timerTick();
 		}
 
 		private _onVideoPause(): void {
@@ -488,7 +488,10 @@ module libjass.renderers {
 				this._svgDefsElement.removeChild(this._svgDefsElement.firstChild);
 			}
 
-			this.onVideoTimeUpdate();
+			// this.currentTime will be undefined if resize() is called before video begins playing for the first time. In this situation, there is no need to force a redraw.
+			if (this.currentTime !== undefined) {
+				this.onVideoTimeUpdate();
+			}
 		}
 
 		/**
