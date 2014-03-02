@@ -124,4 +124,36 @@ suite("Miscellaneous", function () {
 			new libjass.parts.drawing.LineInstruction(0, 100)
 		])
 	]);
+
+	parserTest("chihaya-16", "{\\an7\\pos(0,0)\\bord0\\blur0.5\\p1\\c&HFAFAFA&}m 88 644 l 87 681 l 255 681 l 256 643 m 311 643 l 310 681 l 482 681 l 483 641 m 562 641 l 561 679 l 730 676 l 731 640 m 800 638 l 798 677 l 968 676 l 970 639 m 1031 638 l 1028 675 l 1200 674 l 1200 640 {p0}", "dialogueParts", [
+		new libjass.parts.Alignment(7),
+		new libjass.parts.Position(0, 0),
+		new libjass.parts.Border(0),
+		new libjass.parts.GaussianBlur(0.5),
+		new libjass.parts.DrawingMode(1),
+		new libjass.parts.PrimaryColor(new libjass.parts.Color(250, 250, 250)),
+		new libjass.parts.DrawingInstructions([
+			new libjass.parts.drawing.MoveInstruction(88, 644),
+			new libjass.parts.drawing.LineInstruction(87, 681),
+			new libjass.parts.drawing.LineInstruction(255, 681),
+			new libjass.parts.drawing.LineInstruction(256, 643),
+			new libjass.parts.drawing.MoveInstruction(311, 643),
+			new libjass.parts.drawing.LineInstruction(310, 681),
+			new libjass.parts.drawing.LineInstruction(482, 681),
+			new libjass.parts.drawing.LineInstruction(483, 641),
+			new libjass.parts.drawing.MoveInstruction(562, 641),
+			new libjass.parts.drawing.LineInstruction(561, 679),
+			new libjass.parts.drawing.LineInstruction(730, 676),
+			new libjass.parts.drawing.LineInstruction(731, 640),
+			new libjass.parts.drawing.MoveInstruction(800, 638),
+			new libjass.parts.drawing.LineInstruction(798, 677),
+			new libjass.parts.drawing.LineInstruction(968, 676),
+			new libjass.parts.drawing.LineInstruction(970, 639),
+			new libjass.parts.drawing.MoveInstruction(1031, 638),
+			new libjass.parts.drawing.LineInstruction(1028, 675),
+			new libjass.parts.drawing.LineInstruction(1200, 674),
+			new libjass.parts.drawing.LineInstruction(1200, 640)
+		]),
+		new libjass.parts.Comment("p0")
+	]);
 });

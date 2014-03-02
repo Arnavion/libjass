@@ -1557,6 +1557,9 @@ module libjass.parser {
 
 			while (this._haveMore()) {
 				while (this.read(current, " ") !== null) { }
+				if (!this._haveMore()) {
+					break;
+				}
 
 				var currentType: string = null;
 

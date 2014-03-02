@@ -126,5 +126,26 @@ suite("Tags", function () {
 			new libjass.parts.drawing.LineInstruction(973, 544),
 			new libjass.parts.drawing.CubicBezierCurveInstruction(983, 524, 987, 496, 984, 459)
 		]);
+
+		parserTest("Leading space", " m 984 425", "drawingInstructions", [
+			new libjass.parts.drawing.MoveInstruction(984, 425)
+		]);
+
+		parserTest("Terminal space", "m 984 425 ", "drawingInstructions", [
+			new libjass.parts.drawing.MoveInstruction(984, 425)
+		]);
+
+		parserTest("Space on both ends", " m 984 425 ", "drawingInstructions", [
+			new libjass.parts.drawing.MoveInstruction(984, 425)
+		]);
+
+		parserTest("Empty", "", "drawingInstructions", [
+		]);
+
+		parserTest("One space", " ", "drawingInstructions", [
+		]);
+
+		parserTest("Two spaces", " ", "drawingInstructions", [
+		]);
 	});
 });
