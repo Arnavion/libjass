@@ -773,7 +773,7 @@ module libjass.renderers {
 
 				else if (part instanceof parts.DrawingInstructions) {
 					currentDrawing.instructions = (<parts.DrawingInstructions>part).instructions;
-					currentSpan.appendChild(currentDrawing.toSVG());
+					currentSpan.appendChild(currentDrawing.toSVG(currentSpanStyles.primaryColor));
 					currentDrawing = null;
 					startNewSpan(false);
 				}
@@ -1719,6 +1719,15 @@ module libjass.renderers {
 		}
 
 		/**
+		 * Gets the primary color property.
+		 *
+		 * @type {!libjass.parts.Color}
+		 */
+		get primaryColor() {
+			return this._primaryColor;
+		}
+
+		/**
 		 * Sets the primary color property. null defaults it to the default style's value.
 		 *
 		 * @type {libjass.parts.Color}
@@ -1851,7 +1860,7 @@ module libjass.renderers {
 		 *
 		 * @return {!SVGSVGElement}
 		 */
-		toSVG(): SVGSVGElement {
+		toSVG(color: parts.Color): SVGSVGElement {
 			var path = "";
 			var bboxWidth = 0;
 			var bboxHeight = 0;
@@ -1880,7 +1889,7 @@ module libjass.renderers {
 			var result =
 				'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="' + (bboxWidth * this._scaleX).toFixed(3) + 'px" height="' + (bboxHeight * this._scaleY).toFixed(3) + 'px">\n' +
 				'\t<g transform="scale(' + this._scaleX.toFixed(3) + ' ' + this._scaleY.toFixed(3) + ')">\n' +
-				'\t\t<path d="' + path + '" />\n' +
+				'\t\t<path d="' + path + '" fill="' + color.toString() + '" />\n' +
 				'\t</g>\n' +
 				'</svg>';
 
