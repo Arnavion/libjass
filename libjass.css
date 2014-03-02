@@ -77,6 +77,14 @@
 	perspective: 200px;
 }
 
+.libjass-font-measure {
+	position: absolute;
+	visibility: hidden;
+	border: 0;
+	margin: 0;
+	padding: 0;
+}
+
 .libjass-filters {
 	display: block;
 }

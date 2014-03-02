@@ -337,6 +337,7 @@ module libjass.renderers {
 		private _subsWrapper: HTMLDivElement;
 		private _layerWrappers: HTMLDivElement[] = [];
 		private _layerAlignmentWrappers: HTMLDivElement[][] = [];
+		private _fontSizeElement: HTMLDivElement = null;
 		private _animationStyleElement: HTMLStyleElement = null;
 		private _svgDefsElement: SVGDefsElement = null;
 
@@ -362,6 +363,11 @@ module libjass.renderers {
 			this._subsWrapper = document.createElement("div");
 			this._videoSubsWrapper.appendChild(this._subsWrapper);
 			this._subsWrapper.className = "libjass-subs";
+
+			this._fontSizeElement = document.createElement("div");
+			this._videoSubsWrapper.appendChild(this._fontSizeElement);
+			this._fontSizeElement.className = "libjass-font-measure";
+			this._fontSizeElement.appendChild(document.createTextNode("M"));
 
 			var svgElement = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
 			this._videoSubsWrapper.appendChild(svgElement);
@@ -540,7 +546,7 @@ module libjass.renderers {
 			var animationCollection = new AnimationCollection(this, dialogue);
 
 			var currentSpan: HTMLSpanElement = null;
-			var currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this._svgDefsElement);
+			var currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this._fontSizeElement, this._svgDefsElement);
 
 			var startNewSpan = (addNewLine: boolean): void => {
 				if (currentSpan !== null && currentSpan.textContent !== "") {
@@ -1279,12 +1285,15 @@ module libjass.renderers {
 	 * @param {!libjass.Dialogue} dialogue The Dialogue that this set of styles is associated with
 	 * @param {number} scaleX The horizontal scaling of the subtitles
 	 * @param {number} scaleY The vertical scaling of the subtitles
+	 * @param {!HTMLDivElement} fontSizeElement A <div> element to measure font sizes with
 	 * @param {!SVGDefsElement} svgDefsElement An SVG <defs> element to append filter definitions to
 	 *
 	 * @private
 	 * @memberof libjass.renderers
 	 */
 	class SpanStyles {
+		private static _fontSizeCache: Map<string, Map<number, number>> = new Map<string, Map<number, number>>();
+
 		private _id: string;
 		private _defaultStyle: Style;
 
@@ -1328,7 +1337,7 @@ module libjass.renderers {
 
 		private _nextFilterId = 0;
 
-		constructor(renderer: NullRenderer, dialogue: Dialogue, private _scaleX: number, private _scaleY: number, private _svgDefsElement: SVGDefsElement) {
+		constructor(renderer: NullRenderer, dialogue: Dialogue, private _scaleX: number, private _scaleY: number, private _fontSizeElement: HTMLDivElement, private _svgDefsElement: SVGDefsElement) {
 			this._id = renderer.id + "-" + dialogue.id;
 			this._defaultStyle = dialogue.style;
 
@@ -1401,8 +1410,9 @@ module libjass.renderers {
 			else if (this._bold !== false) {
 				fontStyleOrWeight += (<string>this._bold + " ");
 			}
-			var fontSize = ((72 / 96) * this._scaleY * this._fontSize).toFixed(3);
-			span.style.font = fontStyleOrWeight + fontSize + "px/" + fontSize + "px \"" + this._fontName + "\"";
+			var fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize, this._fontSizeElement)).toFixed(3);
+			var lineHeight = (this._scaleY * this._fontSize).toFixed(3);
+			span.style.font = fontStyleOrWeight + fontSize + "px/" + lineHeight + "px \"" + this._fontName + "\"";
 
 			var textDecoration = "";
 			if (this._underline) {
@@ -1783,6 +1793,22 @@ module libjass.renderers {
 		}
 
 		private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);
+
+		private static _getFontSize(fontFamily: string, lineHeight: number, fontSizeElement: HTMLDivElement): number {
+			var existingFontSizeMap = SpanStyles._fontSizeCache.get(fontFamily);
+			if (existingFontSizeMap === undefined) {
+				SpanStyles._fontSizeCache.set(fontFamily, existingFontSizeMap = new Map<number, number>());
+			}
+
+			var existingFontSize = existingFontSizeMap.get(lineHeight);
+			if (existingFontSize === undefined) {
+				fontSizeElement.style.fontFamily = fontFamily;
+				fontSizeElement.style.fontSize = lineHeight + "px";
+				existingFontSizeMap.set(lineHeight, existingFontSize = lineHeight * lineHeight / fontSizeElement.offsetHeight);
+			}
+
+			return existingFontSize;
+		}
 	}
 
 	/**
