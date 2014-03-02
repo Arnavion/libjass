@@ -41,6 +41,10 @@ addEventListener("DOMContentLoaded", function () {
 				fontMap: libjass.renderers.RendererSettings.makeFontMapFromStyleElement(document.querySelector("#font-map"))
 			});
 
+			if (libjass.debugMode) {
+				window.renderer = renderer;
+			}
+
 			renderer.addEventListener("ready", function () {
 				debug("All fonts have been preloaded. Beginning autoplay.");
 				video.play();
