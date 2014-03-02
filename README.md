@@ -38,7 +38,7 @@ The API documentation is linked in the Links section below. Here's an overview:
 
 * index.js initializes a default renderer that libjass ships with, the [DefaultRenderer](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.DefaultRenderer). This renderer uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (.libjass-subs) containing div's corresponding to the layers in the ASS script, and each layer has div's corresponding to the 9 alignment directions. libjass.css contains styles for these div's to render them at the correct location.
 
-* The renderer starts a timer that ticks every 41ms. In each tick, it determines the set of dialogues to be shown at the current video time, renders each of them as a div, and appendChild's the div into the appropriate layer+alignment div.
+* The renderer uses [window.requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame) as a source of timer ticks. In each tick, it determines the set of dialogues to be shown at the current video time, renders each of them as a div, and appendChild's the div into the appropriate layer+alignment div.
 
 * The renderer handles resizing the subtitles when the user clicks the browser's native fullscreen-video button. index.js also contains code to change the size of the subtitles based on user input.
 
@@ -67,12 +67,14 @@ You can also join the IRC channel below and ask any questions.
 * Custom fonts, using CSS web fonts.
 
 
-### Known bugs
+### Known issues
 
 * Unsupported tags: \be, \fe, \2c, \2a, \k, \K, \kf, \ko, \q, \org, \t, \clip, \iclip
 * \an4, \an5, \an6 aren't positioned correctly.
-* Font sizes aren't pixel perfect.
+* Lines scaled using {\fscx} and {\fscy} have their text clip into itself in some situations, and aren't always positioned correctly.
 * All lines are rendered as wrapping style 1 (end-of-line wrapping).
+* Lines with multiple rotations aren't rotated the same as VSFilter or libass.
+* Subtitles aren't styled in IE11 because [it doesn't support SVG filter effects on HTML](http://caniuse.com/svg-html).
 
 
 ### Planned improvements
