@@ -105,8 +105,8 @@ namespace("_default", function () {
 				break;
 			}
 
-			nodesToRemove.forEach(function (node) {
-				node.parent.splice(node.parent.indexOf(node.node), 1);
+			nodesToRemove.forEach(function (tuple) {
+				tuple.parent.splice(tuple.parent.indexOf(tuple.node), 1);
 			});
 
 			nodesToRemove = [];
