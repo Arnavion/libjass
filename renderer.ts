@@ -1858,9 +1858,10 @@ module libjass.renderers {
 		/**
 		 * Converts this drawing to an <svg> element.
 		 *
+		 * @param {!libjass.parts.Color} fillColor
 		 * @return {!SVGSVGElement}
 		 */
-		toSVG(color: parts.Color): SVGSVGElement {
+		toSVG(fillColor: parts.Color): SVGSVGElement {
 			var path = "";
 			var bboxWidth = 0;
 			var bboxHeight = 0;
@@ -1889,7 +1890,7 @@ module libjass.renderers {
 			var result =
 				'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="' + (bboxWidth * this._scaleX).toFixed(3) + 'px" height="' + (bboxHeight * this._scaleY).toFixed(3) + 'px">\n' +
 				'\t<g transform="scale(' + this._scaleX.toFixed(3) + ' ' + this._scaleY.toFixed(3) + ')">\n' +
-				'\t\t<path d="' + path + '" fill="' + color.toString() + '" />\n' +
+				'\t\t<path d="' + path + '" fill="' + fillColor.toString() + '" />\n' +
 				'\t</g>\n' +
 				'</svg>';
 
