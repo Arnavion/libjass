@@ -47,7 +47,6 @@ module libjass.renderers {
 	 * @memberof libjass.renderers
 	 */
 	export class NullRenderer {
-		private static _timerInterval: number = 41;
 		private static _lastRendererId = -1;
 
 		private _id: number;
@@ -58,7 +57,7 @@ module libjass.renderers {
 		private _currentTime: number;
 		private _enabled: boolean = true;
 
-		private _timerHandle: number = null;
+		private _nextAnimationFrameRequestId: number = null;
 
 		constructor(private _video: HTMLVideoElement, private _ass: ASS, settings: RendererSettings) {
 			this._id = ++NullRenderer._lastRendererId;
@@ -228,6 +227,8 @@ module libjass.renderers {
 					this.onVideoPause();
 				}
 			}
+
+			this._nextAnimationFrameRequestId = requestAnimationFrame(() => this._timerTick());
 		}
 
 		private _onVideoPlaying(): void {
@@ -247,16 +248,13 @@ module libjass.renderers {
 
 			this.onVideoPlaying();
 
-			if (this._timerHandle === null) {
-				// video might send "playing" event after seeking even when not first paused. In this situation, _timerHandle will not be null. This is fine.
-				this._timerHandle = setInterval(() => this._timerTick(), NullRenderer._timerInterval);
-			}
-
 			if (libjass.verboseMode) {
-				console.log("NullRenderer._onVideoPlaying: Set NullRenderer._timeHandle to " + this._timerHandle);
+				console.log("NullRenderer._onVideoPlaying: Set NullRenderer._nextAnimationFrameRequestId to " + this._nextAnimationFrameRequestId);
 			}
 
-			this._timerTick();
+			if (this._nextAnimationFrameRequestId === null) {
+				this._timerTick();
+			}
 		}
 
 		private _onVideoPause(): void {
@@ -272,17 +270,17 @@ module libjass.renderers {
 
 			this.onVideoPause();
 
-			if (this._timerHandle === null) {
+			if (this._nextAnimationFrameRequestId === null) {
 				if (libjass.debugMode) {
-					console.warn("NullRenderer._onVideoPause: Abnormal state detected. NullRenderer._timeHandle should not have been null");
+					console.warn("NullRenderer._onVideoPause: Abnormal state detected. NullRenderer._nextAnimationFrameRequestId should not have been null");
 				}
 			}
 
-			clearInterval(this._timerHandle);
-			this._timerHandle = null;
+			cancelAnimationFrame(this._nextAnimationFrameRequestId);
+			this._nextAnimationFrameRequestId = null;
 
 			if (libjass.verboseMode) {
-				console.log("NullRenderer._onVideoPause: Cleared NullRenderer._timeHandle");
+				console.log("NullRenderer._onVideoPause: Cancelled NullRenderer._nextAnimationFrameRequestId");
 			}
 		}
 
