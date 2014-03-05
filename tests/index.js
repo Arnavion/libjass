@@ -154,12 +154,16 @@ var require = function (name) {
 
 var assert = new function () {
 	this.deepEqual = function (actual, expected) {
+		if (expected === undefined && actual === undefined) {
+			return;
+		}
+
 		if (expected === undefined) {
-			throw new Error("Expected should not be undefined");
+			throw new Error("Expected undefined but got [" + actual + "]");
 		}
 
 		if (actual === undefined) {
-			throw new Error("Actual should not be undefined");
+			throw new Error("Expected [" + expected + "] but got undefined")
 		}
 
 		if (expected === null && actual === null) {
@@ -174,7 +178,7 @@ var assert = new function () {
 			throw new Error("Expected [" + expected + "] but got null")
 		}
 
-		if (expected.constructor !== actual.constructor) {
+		if (expected.constructor !== actual.constructor && actual.constructor !== undefined) {
 			throw new Error("Expected value of type [" + expected.constructor.name + "] but got value of type [" + actual.constructor.name + "].");
 		}
 
