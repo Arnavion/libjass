@@ -760,7 +760,7 @@ module libjass.renderers {
 						opacity: String(complexFadePart.a2)
 					}), new Keyframe(complexFadePart.t4, {
 						opacity: String(complexFadePart.a3)
-					}), new Keyframe(dialogue.end, {
+					}), new Keyframe(dialogue.end - dialogue.start, {
 						opacity: String(complexFadePart.a3)
 					})]);
 				}
