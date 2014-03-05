@@ -718,7 +718,7 @@ module libjass.renderers {
 					var movePart = <parts.Move>part;
 
 					sub.style.position = "absolute";
-					animationCollection.addCustom("linear", [new Keyframe(0, {
+					animationCollection.add("linear", [new Keyframe(0, {
 						left: (this._scaleX * movePart.x1).toFixed(3) + "px",
 						top: (this._scaleY * movePart.y1).toFixed(3) + "px"
 					}), new Keyframe(movePart.t1, {
@@ -736,19 +736,21 @@ module libjass.renderers {
 				else if (part instanceof parts.Fade) {
 					var fadePart = <parts.Fade>part;
 
-					if (fadePart.start !== 0) {
-						animationCollection.addFadeIn(0, fadePart.start);
-					}
-
-					if (fadePart.end !== 0) {
-						animationCollection.addFadeOut(dialogue.end - dialogue.start - fadePart.end, fadePart.end);
-					}
+					animationCollection.add("linear", [new Keyframe(0, {
+						opacity: "0"
+					}), new Keyframe(fadePart.start, {
+						opacity: "1"
+					}), new Keyframe(dialogue.end - dialogue.start - fadePart.end, {
+						opacity: String("1")
+					}), new Keyframe(dialogue.end - dialogue.start, {
+						opacity: "0"
+					})]);
 				}
 
 				else if (part instanceof parts.ComplexFade) {
 					var complexFadePart = <parts.ComplexFade>part;
 
-					animationCollection.addCustom("linear", [new Keyframe(0, {
+					animationCollection.add("linear", [new Keyframe(0, {
 						opacity: String(complexFadePart.a1)
 					}), new Keyframe(complexFadePart.t1, {
 						opacity: String(complexFadePart.a1)
@@ -1205,40 +1207,12 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Add a fade-in animation to this collection.
-		 *
-		 * @param {number} start The time from the dialogue start to start the fade-in
-		 * @param {number} duration The duration of the fade-in
-		 */
-		addFadeIn(start: number, duration: number) {
-			if (this._animationStyle !== "") {
-				this._animationStyle += ",";
-			}
-
-			this._animationStyle += "fade-in " + duration.toFixed(3) + "s linear " + start.toFixed(3) + "s";
-		}
-
-		/**
-		 * Add a fade-out animation to this collection.
-		 *
-		 * @param {number} start The time from the dialogue start to start the fade-out
-		 * @param {number} duration The duration of the fade-out
-		 */
-		addFadeOut(start: number, duration: number) {
-			if (this._animationStyle !== "") {
-				this._animationStyle += ",";
-			}
-
-			this._animationStyle += "fade-out " + duration.toFixed(3) + "s linear " + start.toFixed(3) + "s";
-		}
-
-		/**
-		 * Add a custom animation to this collection. The given keyframes together make one animation.
+		 * Add an animation to this collection. The given keyframes together make one animation.
 		 *
 		 * @param {string} timingFunction One of the acceptable values for the "animation-timing-function" CSS property
 		 * @param {Array.<!{time: number, properties: !Object.<string, string>}>} keyframes
 		 */
-		addCustom(timingFunction: string, keyframes: Keyframe[]) {
+		add(timingFunction: string, keyframes: Keyframe[]) {
 			var startTime: number = null;
 			var endTime: number = null;
 
