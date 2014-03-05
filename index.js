@@ -115,14 +115,14 @@ addEventListener("DOMContentLoaded", function () {
 		testVideoAndASSLoaded();
 	}
 
-	var track = document.querySelector("#video > track[data-format='ass']");
+	var track = document.querySelector("#video > track[data-format='ass'], #video > track[data-format='srt']");
 	var subsRequest = new XMLHttpRequest();
 	subsRequest.open("GET", track.src || track.getAttribute("src"), true);
 	subsRequest.addEventListener("readystatechange", function () {
 		if (subsRequest.readyState === XMLHttpRequest.DONE) {
-			debug("ASS script received.");
+			debug("Script received.");
 
-			ass = libjass.ASS.fromString(subsRequest.responseText);
+			ass = libjass.ASS.fromString(subsRequest.responseText, libjass.Format[track.getAttribute("data-format").toUpperCase()]);
 			if (libjass.debugMode) {
 				window.ass = ass;
 			}

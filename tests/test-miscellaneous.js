@@ -156,4 +156,30 @@ suite("Miscellaneous", function () {
 		]),
 		new libjass.parts.Comment("p0")
 	]);
+
+	parserTest("SRT", "1\n00:00:10,500 --> 00:00:13,000\nElephant's Dream\n\n2\n00:00:15,000 --> 00:00:18,000 X1:52 X2:303 Y1:438 Y2:453\n<font color=\"cyan\">At the left we can see...</font>", "srtScript", [{
+			number: 1,
+			start: "00:00:10.500", end: "00:00:13.000",
+			bounds: { x1: null, y1: null, x2: null, y2: null },
+			text: "Elephant's Dream"
+		}, {
+			number: 2,
+			start: "00:00:15.000", end: "00:00:18.000",
+			bounds: "X1:52 X2:303 Y1:438 Y2:453",
+			text: "<font color=\"cyan\">At the left we can see...</font>"
+		}
+	]);
+
+	parserTest("SRT multiple lines", "1\n00:01:15,940 --> 00:01:17,280\nHave you secured the key?\nWhy can't people forgive each other\n\n2\n00:01:17,280 --> 00:01:17,670\nWhy can't people forgive each other", "srtScript", [{
+			number: 1,
+			start: "00:01:15.940", end: "00:01:17.280",
+			bounds: { x1: null, y1: null, x2: null, y2: null },
+			text: "Have you secured the key?\nWhy can't people forgive each other"
+		}, {
+			number: 2,
+			start: "00:01:17.280", end: "00:01:17.670",
+			bounds: { x1: null, y1: null, x2: null, y2: null },
+			text: "Why can't people forgive each other"
+		}
+	]);
 });

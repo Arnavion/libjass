@@ -74,13 +74,13 @@ module libjass.parser {
 		 * @param {!ParseNode} parent
 		 * @return {ParseNode}
 		 */
-		parse_script(parent: ParseNode): ParseNode {
+		parse_assScript(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
 			current.value = Object.create(null);
 
 			while (this._haveMore()) {
-				var scriptSectionNode = this.parse_scriptSection(current);
+				var scriptSectionNode = this.parse_assScriptSection(current);
 
 				if (scriptSectionNode !== null) {
 					current.value[scriptSectionNode.value.name] = scriptSectionNode.value.contents;
@@ -98,13 +98,13 @@ module libjass.parser {
 		 * @param {!ParseNode} parent
 		 * @return {ParseNode}
 		 */
-		parse_scriptSection(parent: ParseNode): ParseNode {
+		parse_assScriptSection(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
 			current.value = Object.create(null);
 			current.value.contents = null;
 
-			var sectionHeaderNode = this.parse_scriptSectionHeader(current);
+			var sectionHeaderNode = this.parse_assScriptSectionHeader(current);
 			if (sectionHeaderNode === null) {
 				parent.pop();
 				return null;
@@ -115,11 +115,11 @@ module libjass.parser {
 			var formatSpecifier: string[] = null;
 
 			while (this._haveMore() && this._peek() !== "[") {
-				if (this.parse_scriptComment(current) !== null) {
+				if (this.parse_assScriptComment(current) !== null) {
 					continue;
 				}
 
-				var propertyNode = this.parse_scriptProperty(current);
+				var propertyNode = this.parse_assScriptProperty(current);
 
 				if (propertyNode !== null) {
 					var property = propertyNode.value;
@@ -170,7 +170,7 @@ module libjass.parser {
 		 * @param {!ParseNode} parent
 		 * @return {ParseNode}
 		 */
-		parse_scriptSectionHeader(parent: ParseNode): ParseNode {
+		parse_assScriptSectionHeader(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
 			if (this.read(current, "[") === null) {
@@ -203,7 +203,7 @@ module libjass.parser {
 		 * @param {!ParseNode} parent
 		 * @return {ParseNode}
 		 */
-		parse_scriptProperty(parent: ParseNode): ParseNode {
+		parse_assScriptProperty(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
 			current.value = Object.create(null);
@@ -248,7 +248,7 @@ module libjass.parser {
 		 * @param {!ParseNode} parent
 		 * @return {ParseNode}
 		 */
-		parse_scriptComment(parent: ParseNode): ParseNode {
+		parse_assScriptComment(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
 			if (this.read(current, ";") === null) {
@@ -1939,6 +1939,214 @@ module libjass.parser {
 				parseInt(digitNodes[2].value + digitNodes[3].value, 16),
 				1 - parseInt(digitNodes[0].value + digitNodes[1].value, 16) / 255
 			);
+
+			return current;
+		}
+
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {ParseNode}
+		 */
+		parse_srtScript(parent: ParseNode): ParseNode {
+			var current = new ParseNode(parent);
+
+			current.value = [];
+
+			while (this._haveMore()) {
+				var dialogueNode = this.parse_srtDialogue(current);
+				if (dialogueNode === null) {
+					parent.pop();
+					return null;
+				}
+
+				current.value.push(dialogueNode.value);
+
+				if (this.read(current, "\n") === null && this._haveMore()) {
+					parent.pop();
+					return null;
+				}
+
+				while (this.read(current, "\n") !== null) { }
+			}
+
+			return current;
+		}
+
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {ParseNode}
+		 */
+		parse_srtDialogue(parent: ParseNode): ParseNode {
+			var current = new ParseNode(parent);
+
+			current.value = Object.create(null);
+			current.value.bounds = Object.create(null);
+			current.value.bounds.x1 = null;
+			current.value.bounds.y1 = null;
+			current.value.bounds.x2 = null;
+			current.value.bounds.y2 = null;
+
+			var numberNode = this.parse_unsignedDecimal(current);
+			if (numberNode === null) {
+				parent.pop();
+				return null;
+			}
+			current.value.number = parseInt(numberNode.value);
+
+			if (this.read(current, "\n") === null) {
+				parent.pop();
+				return null;
+			}
+
+			var startTimeNode = this.parse_srtTime(current);
+			if (startTimeNode === null) {
+				parent.pop();
+				return null;
+			}
+			current.value.start = startTimeNode.value;
+
+			if (this.read(current, " --> ") === null) {
+				parent.pop();
+				return null;
+			}
+
+			var endTimeNode = this.parse_srtTime(current);
+			if (endTimeNode === null) {
+				parent.pop();
+				return null;
+			}
+			current.value.end = endTimeNode.value;
+
+			if (this.read(current, " ") !== null) {
+				var positionNode = new ParseNode(current, "");
+				// TODO: Parse position properly into current.value.bounds
+				for (var next = this._peek(); next !== "\n" && this._haveMore(); next = this._peek()) {
+					positionNode.value += next;
+				}
+				current.value.bounds = positionNode.value;
+			}
+
+			if (this.read(current, "\n") === null) {
+				parent.pop();
+				return null;
+			}
+
+			var lineNode = new ParseNode(current, "");
+			while (this._peek() !== "\n" && this._haveMore()) {
+				var currentLine = "";
+				for (var next = this._peek(); currentLine[currentLine.length - 1] !== "\n" && this._haveMore(); next = this._peek()) {
+					currentLine += next;
+					lineNode.value += next;
+				}
+			}
+
+			current.value.text = lineNode.value;
+			if (current.value.text[current.value.text.length - 1] === "\n") {
+				current.value.text = current.value.text.substr(0, current.value.text.length - 1);
+			}
+
+			return current;
+		}
+
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {ParseNode}
+		 */
+		parse_srtTime(parent: ParseNode): ParseNode {
+			var current = new ParseNode(parent);
+
+			var hourDigitNodes = new Array<ParseNode>(2);
+
+			for (var i = 0; i < hourDigitNodes.length; i++) {
+				if (!this._haveMore()) {
+					parent.pop();
+					return null;
+				}
+
+				var next = this._peek();
+				if (next >= "0" && next <= "9") {
+					hourDigitNodes[i] = new ParseNode(current, next);
+				}
+				else {
+					parent.pop();
+					return null;
+				}
+			}
+
+			if (this.read(current, ":") === null) {
+				parent.pop();
+				return null;
+			}
+
+			var minuteDigitNodes = new Array<ParseNode>(2);
+
+			for (var i = 0; i < minuteDigitNodes.length; i++) {
+				if (!this._haveMore()) {
+					parent.pop();
+					return null;
+				}
+
+				var next = this._peek();
+				if (next >= "0" && next <= "9") {
+					minuteDigitNodes[i] = new ParseNode(current, next);
+				}
+				else {
+					parent.pop();
+					return null;
+				}
+			}
+
+			if (this.read(current, ":") === null) {
+				parent.pop();
+				return null;
+			}
+
+			var secondDigitNodes = new Array<ParseNode>(2);
+
+			for (var i = 0; i < secondDigitNodes.length; i++) {
+				if (!this._haveMore()) {
+					parent.pop();
+					return null;
+				}
+
+				var next = this._peek();
+				if (next >= "0" && next <= "9") {
+					secondDigitNodes[i] = new ParseNode(current, next);
+				}
+				else {
+					parent.pop();
+					return null;
+				}
+			}
+
+			if (this.read(current, ",") === null) {
+				parent.pop();
+				return null;
+			}
+
+			var millisecondDigitNodes = new Array<ParseNode>(3);
+
+			for (var i = 0; i < millisecondDigitNodes.length; i++) {
+				if (!this._haveMore()) {
+					parent.pop();
+					return null;
+				}
+
+				var next = this._peek();
+				if (next >= "0" && next <= "9") {
+					millisecondDigitNodes[i] = new ParseNode(current, next);
+				}
+				else {
+					parent.pop();
+					return null;
+				}
+			}
+
+			current.value =
+				hourDigitNodes[0].value + hourDigitNodes[1].value + ":" +
+				minuteDigitNodes[0].value + minuteDigitNodes[1].value + ":" +
+				secondDigitNodes[0].value + secondDigitNodes[1].value + "." +
+				millisecondDigitNodes[0].value + millisecondDigitNodes[1].value + millisecondDigitNodes[2].value;
 
 			return current;
 		}

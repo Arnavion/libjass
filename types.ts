@@ -74,15 +74,27 @@ module libjass {
 		/**
 		 * Creates an ASS object from the raw text of an ASS script.
 		 *
-		 * @param {string} rawASS The raw text of the ASS script.
+		 * @param {string} rawASS The raw text of the script.
+		 * @param {number=0} type The type of the script. One of the libjass.Format constants.
 		 * @return {!libjass.ASS}
 		 *
 		 * @static
 		 */
-		static fromString(rawASS: string): ASS {
-			rawASS = rawASS.replace(/\r$/gm, "");
+		static fromString(raw: string, type: Format = Format.ASS): ASS {
+			raw = raw.replace(/\r$/gm, "");
 
-			var script = parser.parse(rawASS, "script");
+			switch (type) {
+				case Format.ASS:
+					return ASS._fromASSString(raw);
+				case Format.SRT:
+					return ASS._fromSRTString(raw);
+				default:
+					throw new Error("Illegal value of type: " + type);
+			}
+		}
+
+		private static _fromASSString(rawASS: string): ASS {
+			var script = parser.parse(rawASS, "assScript");
 
 			var result = new ASS();
 
@@ -130,6 +142,57 @@ module libjass {
 
 			return result;
 		}
+
+		private static _fromSRTString(rawSRT: string): ASS {
+			var script: any[] = parser.parse(rawSRT, "srtScript");
+
+			var result = new ASS();
+
+			// Parse the script properties
+			result.properties.resolutionX = 1280;
+			result.properties.resolutionY = 720;
+			result.properties.wrappingStyle = 1;
+			result.properties.scaleBorderAndShadow = true;
+
+			var newStyle = new Style({
+				"Name": "Default",
+				"Italic": "0", "Bold": "0", "Underline": "0", "StrikeOut": "0",
+				"Fontname": "", "Fontsize": "50",
+				"ScaleX": "100", "ScaleY": "100",
+				"Spacing": "0",
+				"Angle": "0",
+				"PrimaryColour": "&H0000FFFF", "SecondaryColour": "&H00000000", "OutlineColour": "&H00000000", "BackColour": "&H00000000",
+				"Outline": "1", "BorderStyle": "1",
+				"Shadow": "1",
+				"Alignment": "2",
+				"MarginL": "80", "MarginR": "80", "MarginV": "35"
+			});
+			result.styles[newStyle.name] = newStyle;
+
+			script.sort((line1, line2) => line1["number"] - line2["number"]).forEach(line => {
+				result.dialogues.push(new Dialogue({
+					"Style": "Default",
+					"Start": line.start, "End": line.end,
+					"Layer": "0",
+					"Text":
+						(<string>line.text)
+						.replace("<b>", "{\\b1}").replace("</b>", "{\\b0}")
+						.replace("<i>", "{\\i1}").replace("</i>", "{\\i0}")
+						.replace("<u>", "{\\u1}").replace("</u>", "{\\u0}")
+						.replace(
+							/<font color="#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})">/g,
+							(substring: string, red: string, green: string, blue: string) => "{\c&H" + blue + green + red + "&}").replace("<b>", "{\b1}"
+						).replace("</font>", "{\\c}")
+				}, result));
+			});
+
+			return result;
+		}
+	}
+
+	export enum Format {
+		ASS,
+		SRT
 	}
 
 	export enum WrappingStyle {
