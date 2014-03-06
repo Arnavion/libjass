@@ -20,6 +20,7 @@
 
 .libjass-wrapper {
 	position: relative;
+	overflow: hidden;
 }
 
 .libjass-wrapper.libjass-full-screen {
