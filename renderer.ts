@@ -774,6 +774,7 @@ module libjass.renderers {
 				}
 
 				else if (part instanceof parts.DrawingInstructions) {
+					startNewSpan(false);
 					currentDrawing.instructions = (<parts.DrawingInstructions>part).instructions;
 					currentSpan.appendChild(currentDrawing.toSVG(currentSpanStyles.primaryColor));
 					currentDrawing = null;
@@ -1372,6 +1373,8 @@ module libjass.renderers {
 		 * @return {!HTMLSpanElement} The resulting <span> with the CSS styles applied. This may be a wrapper around the input <span> if the styles were applied using SVG filters.
 		 */
 		setStylesOnSpan(span: HTMLSpanElement): HTMLSpanElement {
+			var isTextOnlySpan = span.childNodes[0] instanceof Text;
+
 			var fontStyleOrWeight = "";
 			if (this._italic) {
 				fontStyleOrWeight += "italic ";
@@ -1382,7 +1385,13 @@ module libjass.renderers {
 			else if (this._bold !== false) {
 				fontStyleOrWeight += (<string>this._bold + " ");
 			}
-			var fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize, this._fontSizeElement)).toFixed(3);
+			var fontSize: string;
+			if (isTextOnlySpan) {
+				fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize * this._fontScaleX, this._fontSizeElement)).toFixed(3);
+			}
+			else {
+				fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize, this._fontSizeElement)).toFixed(3);
+			}
 			var lineHeight = (this._scaleY * this._fontSize).toFixed(3);
 			span.style.font = fontStyleOrWeight + fontSize + "px/" + lineHeight + "px \"" + this._fontName + "\"";
 
@@ -1396,11 +1405,18 @@ module libjass.renderers {
 			span.style.textDecoration = textDecoration.trim();
 
 			var transform = "";
-			if (this._fontScaleX !== 1) {
-				transform += "scaleX(" + this._fontScaleX + ") ";
+			if (isTextOnlySpan) {
+				if (this._fontScaleY !== this._fontScaleX) {
+					transform += "scaleY(" + (this._fontScaleY / this._fontScaleX).toFixed(3) + ") ";
+				}
 			}
-			if (this._fontScaleY !== 1) {
-				transform += "scaleY(" + this._fontScaleY + ") ";
+			else {
+				if (this._fontScaleX !== 1) {
+					transform += "scaleX(" + this._fontScaleX + ") ";
+				}
+				if (this._fontScaleY !== 1) {
+					transform += "scaleY(" + this._fontScaleY + ") ";
+				}
 			}
 			if (this._rotationY !== null) {
 				transform += "rotateY(" + this._rotationY + "deg) ";
