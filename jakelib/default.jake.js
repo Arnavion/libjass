@@ -219,7 +219,7 @@ namespace("_default", function () {
 		var originalWarn = UglifyJS.AST_Node.warn;
 		UglifyJS.AST_Node.warn = function (text, properties) {
 			if (
-				(text === "Couldn't figure out mapping for {file}:{line},{col} \u2192 {cline},{ccol} [{name}]" && properties.file === "libjass.js" && properties.line === 1 && properties.col === 0 && properties.cline === 1 && properties.ccol === 1)
+				(text === "{type} {name} is declared but not referenced [{file}:{line},{col}]" && properties.type === "Symbol" && properties.name === "substring" && properties.file === "libjass.js" && properties.line === 5917)
 			) {
 				return;
 			}
