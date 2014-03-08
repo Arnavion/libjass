@@ -24,7 +24,7 @@
 		"test": "jake test"
 	},
 	"dependencies": {
-		"jake": "0.7.7",
+		"jake": "0.7.9",
 		"mocha": "1.17.x",
 		"typescript": "0.9.7",
 		"uglify-js": "2.x"
