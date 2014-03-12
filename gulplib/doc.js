@@ -22,7 +22,12 @@
 
 var assert = require("assert");
 var fs = require("fs");
+var path = require("path");
+
 var UglifyJS = require("uglify-js");
+var Vinyl = require("vinyl");
+
+var Transform = require("./helpers.js").Transform;
 
 Array.prototype.concatMany = function (arr) {
 	var result = this;
@@ -34,27 +39,21 @@ Array.prototype.concatMany = function (arr) {
 	return result;
 };
 
-namespace("_doc", function () {
-	task("parse", [], function () {
-		console.log("[" + this.fullName + "]");
-
+module.exports = function () {
+	return Transform(function (file) {
 		UglifyJS.base54.reset();
 
-		var root = UglifyJS.parse(fs.readFileSync("libjass.js", { encoding: "utf8" }), {
-			filename: "libjass.js",
+
+		// Parse
+		var root = UglifyJS.parse(file.contents.toString(), {
+			filename: path.basename(file.path),
 			toplevel: null
 		});
 
 		root.figure_out_scope({ screw_ie8: true });
 
-		return root;
-	});
 
-	task("readComments", ["_doc:parse"], function () {
-		console.log("[" + this.fullName + "]");
-
-		var root = jake.Task["_doc:parse"].value;
-
+		// Read comments
 		var allNames = Object.create(null);
 
 		var NodeType = {
@@ -72,7 +71,7 @@ namespace("_doc", function () {
 			}
 
 			var lines = comment.split("\n").map(function (line) {
-				return line.replace(/^[ *]*/, "");
+				return line.replace(/^ *\* */, "");
 			}).filter(function (line) {
 				return line.length > 0;
 			});
@@ -143,7 +142,7 @@ namespace("_doc", function () {
 			var parameters = [];
 			var returnType = null;
 
-			var parentType = null;
+			var baseType = null;
 
 			var rootDescription = "";
 
@@ -200,7 +199,7 @@ namespace("_doc", function () {
 
 					case "@extends":
 						var result = readType(remainingLine);
-						parentType = result[0];
+						baseType = result[0];
 						break;
 
 					case "@memberof":
@@ -287,7 +286,7 @@ namespace("_doc", function () {
 					break;
 
 				case NodeType.CONSTRUCTOR:
-					allNames[name] = new Constructor(name, rootDescription, generics, parameters, parentType, isAbstract, isPrivate);
+					allNames[name] = new Constructor(name, rootDescription, generics, parameters, baseType, isAbstract, isPrivate);
 					break;
 
 				case NodeType.GETTER:
@@ -316,14 +315,8 @@ namespace("_doc", function () {
 		});
 		root.walk(treeWalker);
 
-		return allNames;
-	});
 
-	task("link", ["_doc:readComments"], function () {
-		console.log("[" + this.fullName + "]");
-
-		var allNames = jake.Task["_doc:readComments"].value;
-
+		// Link
 		var findType = function (nameParts) {
 			var result = null;
 
@@ -373,8 +366,8 @@ namespace("_doc", function () {
 			var value = keyValuePair[1];
 
 			if (value instanceof Constructor) {
-				if (value.parentType !== null) {
-					value.parentType = findType(value.parentType.split("."));
+				if (value.baseType !== null) {
+					value.baseType = findType(value.baseType.split("."));
 				}
 			}
 
@@ -414,14 +407,8 @@ namespace("_doc", function () {
 			}
 		});
 
-		return allNames;
-	});
 
-	task("makeHtml", ["_doc:link"], function () {
-		console.log("[" + this.fullName + "]");
-
-		var allNames = jake.Task["_doc:link"].value;
-
+		// Make HTML
 		var namespaces = Object.create(null);
 
 		Object.keys(allNames).forEach(function (key) {
@@ -602,7 +589,7 @@ namespace("_doc", function () {
 			return (
 				'class ' +
 				writeCallableName(constructor) +
-				((constructor.parentType !== null) ? (' extends <a href="#' + sanitize(constructor.parentType.name.toString()) + '">' + sanitize(constructor.parentType.name.toShortString()) + '</a>') : '')
+				((constructor.baseType !== null) ? (' extends <a href="#' + sanitize(constructor.baseType.name.toString()) + '">' + sanitize(constructor.baseType.name.toShortString()) + '</a>') : '')
 			);
 		};
 
@@ -781,188 +768,178 @@ namespace("_doc", function () {
 			return result;
 		};
 
-		return [
-			'<?xml version="1.0" encoding="utf-8" ?>',
-			'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">',
-			'	<head>',
-			'		<title>libjass API Documentation</title>',
-			'		<style type="text/css">',
-			'		<![CDATA[',
-			'			html, body, .namespaces, .content {',
-			'				height: 100%;',
-			'				margin: 0;',
-			'			}',
-			'',
-			'			.namespaces, .content {',
-			'				overflow-y: scroll;',
-			'			}',
-			'',
-			'			.namespaces {',
-			'				float: left;',
-			'				background-color: white;',
-			'				padding: 0 20px;',
-			'				margin-right: 20px;',
-			'			}',
-			'',
-			'			.content > section:not(:last-child) {',
-			'				border-bottom: 1px solid black;',
-			'			}',
-			'',
-			'			.function, .constructor, .getter, .setter {',
-			'				margin-left: 30px;',
-			'				padding: 10px;',
-			'			}',
-			'',
-			'			section > .function:nth-child(2n), section > .constructor:nth-child(2n) {',
-			'				background-color: rgb(221, 250, 238);',
-			'			}',
-			'',
-			'			section > .function:nth-child(2n + 1), section > .constructor:nth-child(2n + 1) {',
-			'				background-color: rgb(244, 250, 221);',
-			'			}',
-			'',
-			'			.name {',
-			'				font-size: x-large;',
-			'			}',
-			'',
-			'			.usage {',
-			'				font-size: large;',
-			'				font-style: italic;',
-			'			}',
-			'',
-			'			.usage legend:before {',
-			'				content: "Usage";',
-			'			}',
-			'',
-			'			.constructor .function, .constructor .getter, .constructor .setter {',
-			'				background-color: rgb(250, 241, 221);',
-			'			}',
-			'',
-			'			.parameter.name {',
-			'				font-size: large;',
-			'			}',
-			'',
-			'			.type {',
-			'				font-style: italic;',
-			'			}',
-			'',
-			'			.type:before {',
-			'				content: "Type: ";',
-			'			}',
-			'',
-			'			.abstract > .name:before {',
-			'				content: "abstract ";',
-			'			}',
-			'',
-			'			.private > .name:before {',
-			'				content: "private ";',
-			'			}',
-			'',
-			'			.static > .name:before {',
-			'				content: "static ";',
-			'			}',
-			'',
-			'			.abstract.private > .name:before {',
-			'				content: "abstract private ";',
-			'			}',
-			'',
-			'			.private.static > .name:before {',
-			'				content: "static private ";',
-			'			}',
-			'',
-			'			body:not(.show-private) .private {',
-			'				display: none;',
-			'			}',
-			'		]]>',
-			'		</style>',
-			'		<script>',
-			'		<![CDATA[',
-			'			addEventListener("DOMContentLoaded", function () {',
-			'				document.querySelector("#show-private").addEventListener("change", function (event) {',
-			'					document.body.className = (event.target.checked ? "show-private" : "");',
-			'				}, false);',
-			'',
-			'				if (document.querySelector("[href=\\"" + location.hash + "\\"]").offsetHeight === 0) {',
-			'					document.querySelector("#show-private").click()',
-			'				}',
-			'			}, false);',
-			'		]]>',
-			'		</script>',
-			'	</head>',
-			'	<body>',
-			'		<section class="namespaces">',
-			'			<label><input type="checkbox" id="show-private" />Show private</label>',
-			'			<h2>Namespaces</h2>'
-		].concat(writeOverview(3)).concat([
-			'		</section>',
-			'		<div class="content">',
-			''
-		]).concatMany(namespaceNames.map(function (namespaceName) {
-			var functions = namespaces[namespaceName].filter(function (value) {
-				return value instanceof Function;
-			});
+		this.push(new Vinyl({
+			path: "api.xhtml",
+			contents: Buffer.concat([
+				'<?xml version="1.0" encoding="utf-8" ?>',
+				'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">',
+				'	<head>',
+				'		<title>libjass API Documentation</title>',
+				'		<style type="text/css">',
+				'		<![CDATA[',
+				'			html, body, .namespaces, .content {',
+				'				height: 100%;',
+				'				margin: 0;',
+				'			}',
+				'',
+				'			.namespaces, .content {',
+				'				overflow-y: scroll;',
+				'			}',
+				'',
+				'			.namespaces {',
+				'				float: left;',
+				'				background-color: white;',
+				'				padding: 0 20px;',
+				'				margin-right: 20px;',
+				'			}',
+				'',
+				'			.content > section:not(:last-child) {',
+				'				border-bottom: 1px solid black;',
+				'			}',
+				'',
+				'			.function, .constructor, .getter, .setter {',
+				'				margin-left: 30px;',
+				'				padding: 10px;',
+				'			}',
+				'',
+				'			section > .function:nth-child(2n), section > .constructor:nth-child(2n) {',
+				'				background-color: rgb(221, 250, 238);',
+				'			}',
+				'',
+				'			section > .function:nth-child(2n + 1), section > .constructor:nth-child(2n + 1) {',
+				'				background-color: rgb(244, 250, 221);',
+				'			}',
+				'',
+				'			.name {',
+				'				font-size: x-large;',
+				'			}',
+				'',
+				'			.usage {',
+				'				font-size: large;',
+				'				font-style: italic;',
+				'			}',
+				'',
+				'			.usage legend:before {',
+				'				content: "Usage";',
+				'			}',
+				'',
+				'			.constructor .function, .constructor .getter, .constructor .setter {',
+				'				background-color: rgb(250, 241, 221);',
+				'			}',
+				'',
+				'			.parameter.name {',
+				'				font-size: large;',
+				'			}',
+				'',
+				'			.type {',
+				'				font-style: italic;',
+				'			}',
+				'',
+				'			.type:before {',
+				'				content: "Type: ";',
+				'			}',
+				'',
+				'			.abstract > .name:before {',
+				'				content: "abstract ";',
+				'			}',
+				'',
+				'			.private > .name:before {',
+				'				content: "private ";',
+				'			}',
+				'',
+				'			.static > .name:before {',
+				'				content: "static ";',
+				'			}',
+				'',
+				'			.abstract.private > .name:before {',
+				'				content: "abstract private ";',
+				'			}',
+				'',
+				'			.private.static > .name:before {',
+				'				content: "static private ";',
+				'			}',
+				'',
+				'			body:not(.show-private) .private {',
+				'				display: none;',
+				'			}',
+				'		]]>',
+				'		</style>',
+				'		<script>',
+				'		<![CDATA[',
+				'			addEventListener("DOMContentLoaded", function () {',
+				'				document.querySelector("#show-private").addEventListener("change", function (event) {',
+				'					document.body.className = (event.target.checked ? "show-private" : "");',
+				'				}, false);',
+				'',
+				'				if (document.querySelector("[href=\\"" + location.hash + "\\"]").offsetHeight === 0) {',
+				'					document.querySelector("#show-private").click()',
+				'				}',
+				'			}, false);',
+				'		]]>',
+				'		</script>',
+				'	</head>',
+				'	<body>',
+				'		<section class="namespaces">',
+				'			<label><input type="checkbox" id="show-private" />Show private</label>',
+				'			<h2>Namespaces</h2>'
+			].concat(writeOverview(3)).concat([
+				'		</section>',
+				'		<div class="content">',
+				''
+			]).concatMany(namespaceNames.map(function (namespaceName) {
+				var functions = namespaces[namespaceName].filter(function (value) {
+					return value instanceof Function;
+				});
 
-			var constructors = namespaces[namespaceName].filter(function (value) {
-				return value instanceof Constructor;
-			});
+				var constructors = namespaces[namespaceName].filter(function (value) {
+					return value instanceof Constructor;
+				});
 
-			var result = [
-			'			<section>',
-			'				<h1 id="' + sanitize(namespaceName) + '">' + sanitize(namespaceName) + '</h1>',
-			''
-			];
+				var result = [
+				'			<section>',
+				'				<h1 id="' + sanitize(namespaceName) + '">' + sanitize(namespaceName) + '</h1>',
+				''
+				];
 
-			if (functions.length > 0) {
+				if (functions.length > 0) {
+					result = result.concat([
+				'				<section>',
+				'					<h2>Free functions</h2>'
+					]).concatMany(functions.map(function (value) {
+						return writeFunction(value, 5);
+					})).concat([
+				'				</section>',
+				''
+					]);
+				}
+
+				if (constructors.length > 0) {
+					result = result.concat([
+				'				<section>',
+				'					<h2>Classes</h2>'
+					]).concatMany(constructors.map(function (value) {
+						return writeConstructor(value, 5);
+					})).concat([
+				'				</section>',
+				''
+					]);
+				}
+
 				result = result.concat([
-			'				<section>',
-			'					<h2>Free functions</h2>'
-				]).concatMany(functions.map(function (value) {
-					return writeFunction(value, 5);
-				})).concat([
-			'				</section>',
-			''
+				'			</section>'
 				]);
-			}
 
-			if (constructors.length > 0) {
-				result = result.concat([
-			'				<section>',
-			'					<h2>Classes</h2>'
-				]).concatMany(constructors.map(function (value) {
-					return writeConstructor(value, 5);
-				})).concat([
-			'				</section>',
-			''
-				]);
-			}
-
-			result = result.concat([
-			'			</section>'
-			]);
-
-			return result;
-		})).concat([
-			'		</div>',
-			'	</body>',
-			'</html>'
-		]);
+				return result;
+			})).concat([
+				'		</div>',
+				'	</body>',
+				'</html>'
+			]).map(function (line) {
+				return new Buffer(line + "\n");
+			}))
+		}));
 	});
-
-	task("writeHtml", ["_doc:makeHtml"], function (outputFilename) {
-		console.log("[" + this.fullName + "]");
-
-		var html = jake.Task["_doc:makeHtml"].value;
-
-		var file = fs.createWriteStream(outputFilename);
-		file.on("error", function (error) {
-			throw error;
-		});
-		html.forEach(function (line) {
-			file.write(line + '\n');
-		});
-		file.end();
-	});
-});
+};
 
 var Name = function (parts) {
 	this.type = "Name";
@@ -998,7 +975,7 @@ var Function = function (name, description, generics, parameters, returnType, is
 	this.thisType = null;
 };
 
-var Constructor = function (name, description, generics, parameters, parentType, isAbstract, isPrivate) {
+var Constructor = function (name, description, generics, parameters, baseType, isAbstract, isPrivate) {
 	this.name = name;
 
 	this.description = description;
@@ -1007,7 +984,7 @@ var Constructor = function (name, description, generics, parameters, parentType,
 
 	this.parameters = parameters;
 
-	this.parentType = parentType;
+	this.baseType = baseType;
 
 	this.isAbstract = isAbstract;
 	this.isPrivate = isPrivate;

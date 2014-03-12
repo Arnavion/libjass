@@ -20,13 +20,14 @@
 		"url": "https://github.com/Arnavion/libjass"
 	},
 	"scripts": {
-		"postinstall": "jake clean && jake --trace",
-		"test": "jake test"
+		"postinstall": "gulp clean && gulp --trace",
+		"test": "gulp test"
 	},
 	"dependencies": {
-		"jake": "0.7.9",
+		"gulp": "latest",
 		"mocha": "1.17.x",
 		"typescript": "0.9.7",
-		"uglify-js": "2.x"
+		"uglify-js": "2.x",
+		"vinyl": "latest"
 	}
 }
