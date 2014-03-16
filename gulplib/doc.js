@@ -71,7 +71,11 @@ module.exports = function () {
 			}
 
 			var lines = comment.split("\n").map(function (line) {
-				return line.replace(/^ *\* */, "");
+				var match = line.match(/^ *\* (.*)*/);
+				if (match === null) {
+					return "";
+				}
+				return match[1];
 			}).filter(function (line) {
 				return line.length > 0;
 			});
@@ -594,23 +598,29 @@ module.exports = function () {
 		};
 
 		var writeFunctionUsage = function (func) {
-			return sanitize(
+			return (
+				'<pre><code>' +
+				sanitize(
 				((func.returnType !== null) ? 'var result = ' : '') +
 				((func.thisType !== null) ? ((func.isStatic ? func.thisType.name.toShortString() : toVariableName(func.thisType)) + '.') : '') +
 				func.name.toShortString() + '(' +
 				func.parameters.map(function (parameter) {
 					return parameter.name;
-				}).join(', ') + ');'
+				}).join(', ') + ');') +
+				'</code></pre>'
 			);
 		};
 
 		var writeConstructorUsage = function (constructor) {
-			return sanitize(
+			return (
+				'<pre><code>' +
+				sanitize(
 				'var ' + toVariableName(constructor) + ' = ' +
 				'new ' + constructor.name.toShortString() +  '(' +
 				constructor.parameters.map(function (parameter) {
 					return parameter.name;
-				}).join(', ') + ');'
+				}).join(', ') + ');') +
+				'</code></pre>'
 			);
 		};
 
@@ -705,19 +715,25 @@ module.exports = function () {
 		};
 
 		var writeGetterUsage = function (property) {
-			return sanitize(
+			return (
+				'<pre><code>' +
+				sanitize(
 				'var result = ' +
 				toVariableName(property.thisType) + '.' + property.name.toShortString() +
-				';'
+				';') +
+				'</code></pre>'
 			);
 		};
 
 		var writeSetterUsage = function (property) {
-			return sanitize(
+			return (
+				'<pre><code>' +
+				sanitize(
 				toVariableName(property.thisType) + '.' + property.name.toShortString() +
 				' = ' +
 				property.setter.parameters[0].name +
-				';'
+				';') +
+				'</code></pre>'
 			);
 		};
 
@@ -821,6 +837,10 @@ module.exports = function () {
 				'',
 				'			.usage legend:before {',
 				'				content: "Usage";',
+				'			}',
+				'',
+				'			.usage pre {',
+				'				margin: 0;',
 				'			}',
 				'',
 				'			.constructor .function, .constructor .getter, .constructor .setter {',
