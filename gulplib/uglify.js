@@ -170,15 +170,15 @@ module.exports = {
 				}
 			};
 
-			fs.readdirSync(".").filter(function (filename) { return path.extname(filename) === ".ts"; }).forEach(function (filename) {
-				output.source_map.get().setSourceContent(filename, fs.readFileSync(filename, { encoding: "utf8"}));
-			});
-
 			var stream = UglifyJS.OutputStream(output);
 			root.print(stream);
 
 			codeFile.contents = Buffer.concat([new Buffer(stream.toString()), new Buffer("\n//# sourceMappingURL=libjass.js.map")]);
 			this.push(codeFile);
+
+			output.source_map.get()._sources.toArray().forEach(function (filename) {
+				output.source_map.get().setSourceContent(filename, fs.readFileSync(filename, { encoding: "utf8"}));
+			});
 
 			sourceMapFile.contents = new Buffer(output.source_map.toString());
 			this.push(sourceMapFile);
@@ -319,16 +319,16 @@ module.exports = {
 				screw_ie8: true
 			};
 
-			fs.readdirSync(".").filter(function (filename) { return path.extname(filename) === ".ts"; }).forEach(function (filename) {
-				output.source_map.get().setSourceContent(filename, fs.readFileSync(filename, { encoding: "utf8"}));
-			});
-
 			var stream = UglifyJS.OutputStream(output);
 			root.print(stream);
 
 			codeFile.path = codeFile.path.replace(/\.js$/, ".min.js");
 			codeFile.contents = Buffer.concat([new Buffer(stream.toString()), new Buffer("\n//# sourceMappingURL=libjass.js.map")]);
 			this.push(codeFile);
+
+			output.source_map.get()._sources.toArray().forEach(function (filename) {
+				output.source_map.get().setSourceContent(filename, fs.readFileSync(filename, { encoding: "utf8"}));
+			});
 
 			sourceMapFile.path = sourceMapFile.path.replace(/\.js\.map$/, ".min.js.map");
 			sourceMapFile.contents = new Buffer(output.source_map.toString());
