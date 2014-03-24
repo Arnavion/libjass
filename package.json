@@ -25,9 +25,9 @@
 	},
 	"dependencies": {
 		"gulp": "latest",
-		"mocha": "1.17.x",
+		"mocha": "1.18.x",
 		"typescript": "0.9.7",
-		"uglify-js": "2.x",
+		"uglify-js": "2.x >=2.4.13",
 		"vinyl": "latest"
 	}
 }
