@@ -181,7 +181,7 @@ module libjass {
 						.replace("<u>", "{\\u1}").replace("</u>", "{\\u0}")
 						.replace(
 							/<font color="#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})">/g,
-							(substring: string, red: string, green: string, blue: string) => "{\c&H" + blue + green + red + "&}").replace("<b>", "{\b1}"
+							(substring: string, red: string, green: string, blue: string) => "{\c&H" + blue + green + red + "&}"
 						).replace("</font>", "{\\c}")
 				}, result));
 			});
