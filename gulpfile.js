@@ -88,21 +88,36 @@ gulp.task("test", ["libjass.js"], function (callback) {
 });
 
 gulp.task("watch", function (callback) {
+	var commandLine = path.resolve("./node_modules/.bin/gulp") + " clean libjass.js test";
+
+	var subProcess = null;
+	var rerun = false;
+
 	var spawnSubProcess = function () {
-		var pathToGulp = path.resolve("./node_modules/.bin/gulp");
-		var subProcess = childProcess.exec(pathToGulp + " _watch");
+		subProcess = childProcess.exec(commandLine);
+
 		subProcess.stdout.pipe(process.stdout);
 		subProcess.stderr.pipe(process.stderr);
+
 		subProcess.addListener("exit", function (code, signal) {
-			spawnSubProcess();
+			subProcess = null;
+
+			if (rerun) {
+				spawnSubProcess();
+			}
+
+			rerun = false;
 		});
 	};
 
-	spawnSubProcess();
-});
-
-gulp.task("_watch", function () {
-	return gulp.watch(["./*.ts", "./tests/*.js"], ["clean", "libjass.js", "test"]);
+	gulp.watch(["./*.ts", "./tests/*.js"], { debounceDelay: 1 }, function () {
+		if (subProcess === null) {
+			spawnSubProcess();
+		}
+		else {
+			rerun = true;
+		}
+	});
 });
 
 gulp.task("doc", ["libjass.js"], function () {

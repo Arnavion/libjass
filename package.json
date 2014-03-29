@@ -20,7 +20,7 @@
 		"url": "https://github.com/Arnavion/libjass"
 	},
 	"scripts": {
-		"postinstall": "gulp clean && gulp --trace",
+		"postinstall": "gulp clean default",
 		"test": "gulp test"
 	},
 	"dependencies": {
