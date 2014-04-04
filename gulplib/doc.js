@@ -61,7 +61,7 @@ module.exports = function () {
 				return 0;
 			};
 
-			var types = [TypeScript.AST.Property, TypeScript.AST.Function, TypeScript.AST.Constructor];
+			var types = [TypeScript.AST.Variable, TypeScript.AST.Property, TypeScript.AST.Function, TypeScript.AST.Constructor];
 			var typeSorter = function (value1, value2) {
 				var type1Index = -1;
 				var type2Index = -1;
@@ -176,6 +176,9 @@ module.exports = function () {
 			].concat(writeParameters(constructor, 1)).concat([
 				'	<dd class="members">'
 			]).concatMany(constructor.members.map(function (member) {
+				if (member instanceof TypeScript.AST.Variable) {
+					return writeVariable(member, 2);
+				}
 				if (member instanceof TypeScript.AST.Function) {
 					return writeFunction(member, 2);
 				}
@@ -184,6 +187,21 @@ module.exports = function () {
 				}
 			})).concat([
 				'	</dd>',
+				'</dl>'
+			]).map(indenter(indent));
+		};
+
+		var writeVariable = function (variable, indent) {
+			return [
+				'<dl class="variable" id="' + sanitize(variable.fullName) + '">',
+				'	<dt class="name">' + writePropertyName(variable) + '</dt>',
+				'	<dd class="description">',
+				'		<p>' + sanitize(variable.description) + '</p>',
+				'	</dd>',
+				'	<dd class="usage"><fieldset><legend />' + writeVariableUsage(variable) + '</fieldset></dd>'
+			].concat([
+				'	<dd class="return type">' + sanitize(variable.type) + '</dd>',
+			]).concat([
 				'</dl>'
 			]).map(indenter(indent));
 		};
@@ -208,6 +226,16 @@ module.exports = function () {
 				'class ' +
 				writeCallableName(constructor) +
 				((constructor.baseType !== null) ? (' extends <a href="#' + sanitize(constructor.baseType.fullName) + '">' + sanitize(constructor.baseType.name) + '</a>') : '')
+			);
+		};
+
+		var writeVariableUsage = function (variable) {
+			return (
+				'<pre><code>' +
+				sanitize('var result = ' + toVariableName(variable.parent) + '.' + variable.name + ';' +
+				'\n' +
+				toVariableName(variable.parent) + '.' + variable.name + ' = value;') +
+				'</code></pre>'
 			);
 		};
 
@@ -427,16 +455,16 @@ module.exports = function () {
 				'				border-bottom: 1px solid black;',
 				'			}',
 				'',
-				'			.function, .constructor, .getter, .setter {',
+				'			.variable, .function, .constructor, .getter, .setter {',
 				'				margin-left: 30px;',
 				'				padding: 10px;',
 				'			}',
 				'',
-				'			section > .function:nth-child(2n), section > .constructor:nth-child(2n) {',
+				'			section > .variable:nth-child(2n), section > .function:nth-child(2n), section > .constructor:nth-child(2n) {',
 				'				background-color: rgb(221, 250, 238);',
 				'			}',
 				'',
-				'			section > .function:nth-child(2n + 1), section > .constructor:nth-child(2n + 1) {',
+				'			section > .variable:nth-child(2n + 1), section > .function:nth-child(2n + 1), section > .constructor:nth-child(2n + 1) {',
 				'				background-color: rgb(244, 250, 221);',
 				'			}',
 				'',
@@ -457,7 +485,7 @@ module.exports = function () {
 				'				margin: 0;',
 				'			}',
 				'',
-				'			.constructor .function, .constructor .getter, .constructor .setter {',
+				'			.constructor .variable, .constructor .function, .constructor .getter, .constructor .setter {',
 				'				background-color: rgb(250, 241, 221);',
 				'			}',
 				'',
@@ -521,6 +549,10 @@ module.exports = function () {
 				'		<div class="content">',
 				''
 			]).concatMany(namespaceNames.map(function (namespaceName) {
+				var variables = namespaces[namespaceName].members.filter(function (value) {
+					return value instanceof TypeScript.AST.Variable;
+				});
+
 				var functions = namespaces[namespaceName].members.filter(function (value) {
 					return value instanceof TypeScript.AST.Function;
 				});
@@ -534,6 +566,18 @@ module.exports = function () {
 				'				<h1 id="' + sanitize(namespaceName) + '">' + sanitize(namespaceName) + '</h1>',
 				''
 				];
+
+				if (variables.length > 0) {
+					result = result.concat([
+				'				<section>',
+				'					<h2>Variables</h2>'
+					]).concatMany(variables.map(function (value) {
+						return writeVariable(value, 5);
+					})).concat([
+				'				</section>',
+				''
+					]);
+				}
 
 				if (functions.length > 0) {
 					result = result.concat([

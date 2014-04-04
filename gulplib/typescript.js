@@ -334,6 +334,22 @@ var Setter = function () {
 	return Setter;
 }();
 
+var Variable = function (_super) {
+	__extends(Variable, _super);
+
+	function Variable(name, docNode, description, type) {
+		_super.call(this, name);
+
+		this.docNode = docNode;
+
+		this.description = description;
+
+		this.type = type;
+	};
+
+	return Variable;
+}(Scoped);
+
 var Parameter = function () {
 	function Parameter(name, type, description) {
 		this.name = name;
@@ -362,6 +378,7 @@ var NodeType = function () {
 	NodeType[NodeType["Constructor"] = 1] = "Constructor";
 	NodeType[NodeType["Getter"] = 2] = "Getter";
 	NodeType[NodeType["Setter"] = 3] = "Setter";
+	NodeType[NodeType["Variable"] = 4] = "Variable";
 
 	return NodeType;
 }();
@@ -537,6 +554,38 @@ var Walker = function (_super) {
 		property.setter = new Setter(docNode, doc.rootDescription, doc.parameters);
 	};
 
+	Walker.prototype.visitMemberVariableDeclaration = function (node) {
+		var name = node.variableDeclarator.propertyName.text();
+
+		var docNode = node.variableDeclarator.propertyName;
+		var doc = this._parseJSDoc(docNode, NodeType.Variable);
+		if (doc === null) {
+			return;
+		}
+
+		var variable = this._scope.enter(new Variable(name, docNode, doc.rootDescription, doc.returnType));
+
+		variable.parent.members.push(variable);
+
+		this._scope.leave();
+	};
+
+	Walker.prototype.visitVariableStatement = function (node) {
+		var name = node.variableDeclaration.variableDeclarators.item.propertyName.text();
+
+		var docNode = node.modifiers.item;
+		var doc = this._parseJSDoc(docNode, NodeType.Variable);
+		if (doc === null) {
+			return;
+		}
+
+		var variable = this._scope.enter(new Variable(name, docNode, doc.rootDescription, doc.returnType));
+
+		variable.parent.members.push(variable);
+
+		this._scope.leave();
+	};
+
 	Walker.prototype._getModuleName = function (name) {
 		if (name.kind() === TypeScript.SyntaxKind.QualifiedName) {
 			return this._getModuleName(name.left).concat(name.right.text());
@@ -681,6 +730,7 @@ var Walker = function (_super) {
 				case "@type":
 					switch (nodeType) {
 						case NodeType.Getter:
+						case NodeType.Variable:
 							var result = readType(remainingLine);
 							var type = result[0];
 
@@ -758,6 +808,7 @@ exports.AST = {
 	Property: Property,
 	Getter: Getter,
 	Setter: Setter,
+	Variable: Variable,
 	Parameter: Parameter,
 	ReturnType: ReturnType,
 
