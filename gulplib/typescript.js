@@ -456,10 +456,17 @@ var Walker = function (_super) {
 			return;
 		}
 
+		var extendsClause = node.heritageClauses.toArray().filter(function (heritageClause) {
+			return heritageClause.extendsOrImplementsKeyword.tokenKind === TypeScript.SyntaxKind.ExtendsKeyword;
+		})[0] || null;
+		var baseType = null;
+		if (extendsClause !== null) {
+			baseType = extendsClause.typeNames.item.fullText().trim();
+		}
 		var modifiers = ((node.modifiers.item ? [node.modifiers.item] : node.modifiers.nodeOrTokens) || []).map(function (modifier) { return modifier.tokenKind; });
 		var isPrivate = !modifiers.some(function (modifier) { return modifier === TypeScript.SyntaxKind["ExportKeyword"]; });
 
-		var clazz = this._scope.enter(new Constructor(name, docNode, doc.rootDescription, doc.generics, doc.parameters, doc.baseType, doc.isAbstract, isPrivate));
+		var clazz = this._scope.enter(new Constructor(name, docNode, doc.rootDescription, doc.generics, doc.parameters, baseType, doc.isAbstract, isPrivate));
 
 		clazz.parent.members.push(clazz);
 
@@ -624,8 +631,6 @@ var Walker = function (_super) {
 		var parameters = [];
 		var returnType = null;
 
-		var baseType = null;
-
 		var rootDescription = "";
 
 		var lastRead = null;
@@ -679,8 +684,6 @@ var Walker = function (_super) {
 					break;
 
 				case "@extends":
-					var result = readType(remainingLine);
-					baseType = result[0];
 					break;
 
 				case "@memberof":
@@ -761,7 +764,6 @@ var Walker = function (_super) {
 			rootDescription: rootDescription,
 			generics: generics,
 			parameters: parameters,
-			baseType: baseType,
 			returnType: returnType,
 			isAbstract: isAbstract
 		};
@@ -784,11 +786,33 @@ var walk = function (compiler, resolvedFiles) {
 	var linkVisitor = function (current) {
 		if (current instanceof Constructor) {
 			if (current.baseType !== null && current.baseType.constructor === String) {
-				var endOfNamespaceIndex = current.baseType.lastIndexOf(".");
-				var className = current.baseType.substr(endOfNamespaceIndex + 1);
-				current.baseType = walker.namespaces[current.baseType.substr(0, endOfNamespaceIndex)].members.filter(function (member) {
-					return member.name === className;
-				})[0];
+				var existingBaseType = null;
+				for (var ns = current.parent; existingBaseType === null; ns = ns.parent) {
+					var fullName = ((ns !== null) ? (ns.fullName + ".") : "") + current.baseType;
+
+					var endOfNamespaceIndex = fullName.lastIndexOf(".");
+
+					var existingNamespace = walker.namespaces[fullName.substr(0, endOfNamespaceIndex)];
+
+					if (existingNamespace !== undefined) {
+						var className = fullName.substr(endOfNamespaceIndex + 1);
+
+						existingBaseType = existingNamespace.members.filter(function (member) {
+							return member.name === className;
+						})[0] || null;
+					}
+
+					if (ns === null) {
+						break;
+					}
+				}
+
+				if (existingBaseType === null) {
+					console.warn("Base type [" + current.baseType + "] of type [" + current.fullName + "] not found.");
+				}
+				else {
+					current.baseType = existingBaseType;
+				}
 			}
 		}
 		else if (current instanceof Namespace) {
