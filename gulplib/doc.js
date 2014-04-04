@@ -18,16 +18,14 @@
  * limitations under the License.
  */
 
-// .\node_modules\.bin\jake doc[..\libjass-gh-pages\api.xhtml]
-
-var assert = require("assert");
 var fs = require("fs");
 var path = require("path");
+var vm = require("vm");
 
-var UglifyJS = require("uglify-js");
 var Vinyl = require("vinyl");
 
 var Transform = require("./helpers.js").Transform;
+var TypeScript = require("./typescript.js");
 
 Array.prototype.concatMany = function (arr) {
 	var result = this;
@@ -41,402 +39,14 @@ Array.prototype.concatMany = function (arr) {
 
 module.exports = function () {
 	return Transform(function (file) {
-		UglifyJS.base54.reset();
-
-
 		// Parse
-		var root = UglifyJS.parse(file.contents.toString(), {
-			filename: path.basename(file.path),
-			toplevel: null
-		});
 
-		root.figure_out_scope({ screw_ie8: true });
+		var compiler = new TypeScript.Compiler();
+		var resolvedFiles = compiler.addFiles([file.path]);
 
-
-		// Read comments
-		var allNames = Object.create(null);
-
-		var NodeType = {
-			FUNCTION: 0,
-			CONSTRUCTOR: 1,
-			GETTER: 2,
-			SETTER: 3,
-		};
-
-		var readComment = function (node, comment, treeWalker) {
-			var nodeType = null;
-
-			if (comment.substr(0, 2) !== "*\n") {
-				return;
-			}
-
-			var lines = comment.split("\n").map(function (line) {
-				var match = line.match(/^ *\* (.*)*/);
-				if (match === null) {
-					return "";
-				}
-				return match[1];
-			}).filter(function (line) {
-				return line.length > 0;
-			});
-
-			var nameParts = [];
-
-			if (node instanceof UglifyJS.AST_Defun) {
-				nameParts.unshift(node.name.name);
-				nodeType = NodeType.FUNCTION;
-			}
-			else if (node instanceof UglifyJS.AST_Assign) {
-				if (node.left instanceof UglifyJS.AST_Dot && node.left.expression.name === "this") {
-					return;
-				}
-
-				var walkUp = function (node) {
-					if (node.property !== undefined) {
-						nameParts.unshift(node.property);
-						walkUp(node.expression);
-					}
-					else {
-						nameParts.unshift(node.name);
-					}
-				};
-				walkUp(node.left);
-
-				if (node.right instanceof UglifyJS.AST_Function) {
-					nodeType = NodeType.FUNCTION;
-				}
-			}
-			else if (node instanceof UglifyJS.AST_Var) {
-				// Might be a Constructor if the comment contains @constructor
-				nameParts.unshift(node.definitions[0].name.name);
-			}
-			else if (node instanceof UglifyJS.AST_ObjectKeyVal) {
-				var definePropertyNode = treeWalker.find_parent(UglifyJS.AST_Call);
-				if (
-					(node.key === "get" || node.key === "set") &&
-					definePropertyNode.expression.property === "defineProperty" &&
-					definePropertyNode.expression.expression.name === "Object"
-				) {
-					nameParts.unshift(definePropertyNode.args[1].value);
-
-					var walkUp = function (node) {
-						if (node.property !== undefined) {
-							nameParts.unshift(node.property);
-							walkUp(node.expression);
-						}
-						else {
-							nameParts.unshift(node.name);
-						}
-					};
-					walkUp(definePropertyNode.args[0]);
-
-					nodeType = (node.key === "get") ? NodeType.GETTER : NodeType.SETTER;
-				}
-			}
-
-			if (nameParts.length === 0) {
-				return;
-			}
-
-			var isAbstract = false;
-			var isPrivate = false;
-			var isStatic = false;
-
-			var generics = [];
-			var parameters = [];
-			var returnType = null;
-
-			var baseType = null;
-
-			var rootDescription = "";
-
-			var lastRead = null;
-
-			lines.forEach(function (line) {
-				var readType = function (remainingLine) {
-					if (remainingLine[0] !== "{") {
-						throw new Error("Missing type in line: [" + line + "]");
-					}
-
-					var index = -1;
-					var numberOfUnterminatedBraces = 0;
-					for (var i = 0; i < remainingLine.length; i++) {
-						if (remainingLine[i] === "{") {
-							numberOfUnterminatedBraces++;
-						}
-						else if (remainingLine[i] === "}") {
-							numberOfUnterminatedBraces--;
-
-							if (numberOfUnterminatedBraces === 0) {
-								index = i;
-								break;
-							}
-						}
-					}
-
-					if (index === -1) {
-						throw new Error("Unterminated type specifier.");
-					}
-
-					var type = remainingLine.substr(1, index - 1);
-					remainingLine = remainingLine.substr(index + 1).trimLeft();
-
-					return [type, remainingLine];
-				};
-
-				var firstWordMatch = line.match(/^(\S+)(\s*)/);
-				var firstWord = firstWordMatch[1];
-				var remainingLine = line.substring(firstWordMatch[0].length);
-
-				if (firstWord[0] === "@") {
-					lastRead = null;
-				}
-
-				switch (firstWord) {
-					case "@abstract":
-						isAbstract = true;
-						break;
-
-					case "@constructor":
-						nodeType = NodeType.CONSTRUCTOR;
-						break;
-
-					case "@extends":
-						var result = readType(remainingLine);
-						baseType = result[0];
-						break;
-
-					case "@memberof":
-						nameParts.unshift.apply(nameParts, remainingLine.split("."));
-						break;
-
-					case "@param":
-						var result = readType(remainingLine);
-						var type = result[0];
-						remainingLine = result[1];
-
-						var nameMatch = remainingLine.match(/(\S+)\s*/);
-						var name = nameMatch[1];
-
-						var description = remainingLine.substr(nameMatch[0].length);
-
-						var subParameterMatch = name.match(/^(?:(.+)\.([^\.]+))|(?:(.+)\[("[^\[\]"]+")\])$/);
-						if (subParameterMatch === null) {
-							parameters.push(lastRead = new Parameter(name, type, description));
-						}
-						else {
-							var parentName = subParameterMatch[1] || subParameterMatch[3];
-							var childName = subParameterMatch[2] || subParameterMatch[4];
-							var parentParameter = parameters.filter(function (parameter) { return parameter.name === parentName; })[0];
-							parentParameter.subParameters.push(new Parameter(childName, type, description));
-						}
-						break;
-
-					case "@private":
-						isPrivate = true;
-						break;
-
-					case "@return":
-						var result = readType(remainingLine);
-						var type = result[0];
-						var description = result[1];
-
-						returnType = lastRead = new ReturnType(type, description);
-
-						break;
-
-					case "@static":
-						isStatic = true;
-						break;
-
-					case "@template":
-						generics.push.apply(generics, remainingLine.split(/,/).map(function (word) { return word.trim(); }));
-						break;
-
-					case "@type":
-						switch (nodeType) {
-							case NodeType.GETTER:
-								var result = readType(remainingLine);
-								var type = result[0];
-
-								returnType = lastRead = type;
-								break;
-
-							case NodeType.SETTER:
-								var result = readType(remainingLine);
-								var type = result[0];
-
-								parameters.push(lastRead = new Parameter("value", type, ""));
-								break;
-						}
-						break;
-
-					default:
-						if (lastRead !== null) {
-							lastRead.description += " " + line;
-						}
-						else {
-							rootDescription += ((rootDescription.length > 0) ? " " : "") + line;
-						}
-						break;
-				}
-			});
-
-			var name = new Name(nameParts);
-
-			switch (nodeType) {
-				case NodeType.FUNCTION:
-					allNames[name] = new Function(name, rootDescription, generics, parameters, returnType, isAbstract, isPrivate, isStatic);
-					break;
-
-				case NodeType.CONSTRUCTOR:
-					allNames[name] = new Constructor(name, rootDescription, generics, parameters, baseType, isAbstract, isPrivate);
-					break;
-
-				case NodeType.GETTER:
-					if (allNames[name] === undefined) {
-						allNames[name] = new Property(name);
-					}
-					allNames[name].getter = new Getter(rootDescription, returnType);
-					break;
-
-				case NodeType.SETTER:
-					if (allNames[name] === undefined) {
-						allNames[name] = new Property(name);
-					}
-					allNames[name].setter = new Setter(rootDescription, parameters);
-					break;
-			}
-		};
-
-		var treeWalker = new UglifyJS.TreeWalker(function (node, descend) {
-			node.start.comments_before.forEach(function (comment) {
-				readComment(node, comment.value, treeWalker);
-			});
-			node.end.comments_before.forEach(function (comment) {
-				readComment(node, comment.value, treeWalker);
-			});
-		});
-		root.walk(treeWalker);
-
-
-		// Link
-		var findType = function (nameParts) {
-			var result = null;
-
-			Object.keys(allNames).some(function (key) {
-				if (!(allNames[key] instanceof Constructor)) {
-					return false;
-				}
-
-				try {
-					assert.deepEqual(nameParts, allNames[key].name.parts);
-					result = allNames[key];
-					return true;
-				}
-				catch (ex) {
-					return false;
-				}
-			});
-
-			return result;
-		}
-
-		var findTypeEndingWith = function (nameParts) {
-			var result = null;
-
-			Object.keys(allNames).some(function (key) {
-				if (!(allNames[key] instanceof Constructor)) {
-					return false;
-				}
-
-				try {
-					assert.deepEqual(nameParts, allNames[key].name.parts.slice(-nameParts.length));
-					result = allNames[key];
-					return true;
-				}
-				catch (ex) {
-					return false;
-				}
-			});
-
-			return result;
-		}
-
-		Object.keys(allNames).map(function (key) {
-			return [key, allNames[key]];
-		}).forEach(function (keyValuePair) {
-			var key = keyValuePair[0];
-			var value = keyValuePair[1];
-
-			if (value instanceof Constructor) {
-				if (value.baseType !== null) {
-					value.baseType = findType(value.baseType.split("."));
-				}
-			}
-
-			else if (value instanceof Function || value instanceof Property) {
-				var thisTypeNameParts = null;
-
-				if (value.thisType === null) {
-					thisTypeNameParts = value.name.parts.slice(0, value.name.parts.length - 1);
-					if (thisTypeNameParts[thisTypeNameParts.length - 1] === "prototype") {
-						thisTypeNameParts = thisTypeNameParts.slice(0, thisTypeNameParts.length - 1);
-					}
-
-					var firstCharacter = thisTypeNameParts[thisTypeNameParts.length - 1][0];
-					if (firstCharacter.toLowerCase() === firstCharacter) {
-						thisTypeNameParts = null;
-					}
-				}
-				else {
-					thisTypeNameParts = value.thisType.split(".");
-				}
-
-				if (thisTypeNameParts === null) {
-					return;
-				}
-
-				var thisType = findTypeEndingWith(thisTypeNameParts);
-				if (thisType === null) {
-					var thisTypeName = new Name(thisTypeNameParts);
-					allNames[thisTypeName] = thisType = new Constructor(thisTypeName, "", [], [], null, false, false);
-				}
-
-				value.name = new Name(thisType.name.parts.concat(value.name.toShortString()));
-				value.thisType = thisType;
-				thisType.members.push(value);
-
-				delete allNames[key];
-			}
-		});
-
+		var namespaces = TypeScript.AST.walk(compiler, resolvedFiles);
 
 		// Make HTML
-		var namespaces = Object.create(null);
-
-		Object.keys(allNames).forEach(function (key) {
-			var value = allNames[key];
-
-			var nameParts = allNames[key].name.parts;
-
-			if (nameParts.length === 1) {
-				return;
-			}
-
-			var namespaceName = new Name(nameParts.slice(0, nameParts.length - 1)).toString();
-			var namespace = namespaces[namespaceName];
-			if (namespace === undefined) {
-				namespace = namespaces[namespaceName] = [];
-			}
-
-			namespace.push(value);
-		});
-
-		var namespaceNames = Object.keys(namespaces).sort(function (ns1, ns2) {
-			return ns1.toString().localeCompare(ns2.toString());
-		});
-
 		var sorter = (function () {
 			var visibilitySorter = function (value1, value2) {
 				if (value1.isPrivate === value2.isPrivate) {
@@ -451,7 +61,7 @@ module.exports = function () {
 				return 0;
 			};
 
-			var types = [Property, Function, Constructor];
+			var types = [TypeScript.AST.Property, TypeScript.AST.Function, TypeScript.AST.Constructor];
 			var typeSorter = function (value1, value2) {
 				var type1Index = -1;
 				var type2Index = -1;
@@ -470,7 +80,7 @@ module.exports = function () {
 			};
 
 			var nameSorter = function (value1, value2) {
-				return value1.name.toShortString().localeCompare(value2.name.toShortString());
+				return value1.name.localeCompare(value2.name);
 			};
 
 			var sorters = [visibilitySorter, typeSorter, nameSorter];
@@ -488,18 +98,22 @@ module.exports = function () {
 			};
 		})();
 
-		namespaceNames.forEach(function (namespaceName) {
-			namespaces[namespaceName].sort(sorter);
+		var namespaceNames = Object.keys(namespaces).sort(function (ns1, ns2) {
+			return ns1.localeCompare(ns2);
+		});
 
-			namespaces[namespaceName].filter(function (value) {
-				return value instanceof Constructor;
+		namespaceNames.forEach(function (namespaceName) {
+			namespaces[namespaceName].members.sort(sorter);
+
+			namespaces[namespaceName].members.filter(function (value) {
+				return value instanceof TypeScript.AST.Constructor;
 			}).forEach(function (constructor) {
 				constructor.members.sort(sorter);
 			});
 		});
 
 		var sanitize = function (string) {
-			return string.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+			return string.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 		};
 
 		var indenter = function (indent) {
@@ -515,11 +129,11 @@ module.exports = function () {
 				return [
 					'<span class="namespace"><a href="#' + sanitize(namespaceName) + '">' + sanitize(namespaceName) + '</a></span>',
 					'<ul class="namespace-elements">'
-				].concatMany(namespace.map(function (value) {
+				].concatMany(namespace.members.map(function (value) {
 					return (
 					'	<li' +
 					((value.isPrivate === true) ? ' class="private"' : '') +
-					'><a href="#' + sanitize(value.name.toString()) + '">' + sanitize(value.name.toShortString()) + '</a></li>'
+					'><a href="#' + sanitize(value.fullName) + '">' + sanitize(value.name) + '</a></li>'
 					);
 				})).concat([
 					'</ul>',
@@ -534,7 +148,7 @@ module.exports = function () {
 					(func.isAbstract ? ' abstract' : '') +
 					(func.isPrivate ? ' private' : '') +
 					(func.isStatic ? ' static' : '') +
-					'" id="' + sanitize(func.name.toString()) +
+					'" id="' + sanitize(func.fullName) +
 					'">',
 				'	<dt class="name">' + writeFunctionName(func) + '</dt>',
 				'	<dd class="description">',
@@ -552,7 +166,7 @@ module.exports = function () {
 					(constructor.isAbstract ? ' abstract' : '') +
 					(constructor.isPrivate ? ' private' : '') +
 					'" id="' +
-					sanitize(constructor.name.toString()) +
+					sanitize(constructor.fullName) +
 					'">',
 				'	<dt class="name">' + writeConstructorName(constructor) + '</dt>',
 				'	<dd class="description">',
@@ -562,10 +176,10 @@ module.exports = function () {
 			].concat(writeParameters(constructor, 1)).concat([
 				'	<dd class="members">'
 			]).concatMany(constructor.members.map(function (member) {
-				if (member instanceof Function) {
+				if (member instanceof TypeScript.AST.Function) {
 					return writeFunction(member, 2);
 				}
-				if (member instanceof Property) {
+				if (member instanceof TypeScript.AST.Property) {
 					return writeProperty(member, 2);
 				}
 			})).concat([
@@ -576,9 +190,9 @@ module.exports = function () {
 
 		var writeCallableName = function (callable) {
 			return (
-				'<a href="#' + sanitize(callable.name.toString()) + '">' +
+				'<a href="#' + sanitize(callable.fullName) + '">' +
 				sanitize(
-					callable.name.toShortString() +
+					callable.name +
 					((callable.generics.length > 0) ? ('.<' + callable.generics.join(', ') + '>') : '')
 				) +
 				'</a>'
@@ -593,7 +207,7 @@ module.exports = function () {
 			return (
 				'class ' +
 				writeCallableName(constructor) +
-				((constructor.baseType !== null) ? (' extends <a href="#' + sanitize(constructor.baseType.name.toString()) + '">' + sanitize(constructor.baseType.name.toShortString()) + '</a>') : '')
+				((constructor.baseType !== null) ? (' extends <a href="#' + sanitize(constructor.baseType.fullName) + '">' + sanitize(constructor.baseType.name) + '</a>') : '')
 			);
 		};
 
@@ -602,8 +216,8 @@ module.exports = function () {
 				'<pre><code>' +
 				sanitize(
 				((func.returnType !== null) ? 'var result = ' : '') +
-				((func.thisType !== null) ? ((func.isStatic ? func.thisType.name.toShortString() : toVariableName(func.thisType)) + '.') : '') +
-				func.name.toShortString() + '(' +
+				((func.parent !== null) ? ((func.isStatic ? func.parent.name : toVariableName(func.parent)) + '.') : '') +
+				func.name + '(' +
 				func.parameters.map(function (parameter) {
 					return parameter.name;
 				}).join(', ') + ');') +
@@ -616,7 +230,7 @@ module.exports = function () {
 				'<pre><code>' +
 				sanitize(
 				'var ' + toVariableName(constructor) + ' = ' +
-				'new ' + constructor.name.toShortString() +  '(' +
+				'new ' + constructor.name +  '(' +
 				constructor.parameters.map(function (parameter) {
 					return parameter.name;
 				}).join(', ') + ');') +
@@ -678,7 +292,7 @@ module.exports = function () {
 			var getter = property.getter;
 
 			return [
-				'<dl class="getter" id="' + sanitize(property.name.toString()) + '">',
+				'<dl class="getter" id="' + sanitize(property.fullName) + '">',
 				'	<dt class="name">' + writePropertyName(property) + '</dt>',
 				'	<dd class="description">',
 				'		<p>' + sanitize(getter.description) + '</p>',
@@ -695,7 +309,7 @@ module.exports = function () {
 			var setter = property.setter;
 
 			return [
-				'<dl class="setter" id="' + sanitize(property.name.toString()) + '">',
+				'<dl class="setter" id="' + sanitize(property.fullName) + '">',
 				'	<dt class="name">' + writePropertyName(property) + '</dt>',
 				'	<dd class="description">',
 				'		<p>' + sanitize(setter.description) + '</p>',
@@ -708,8 +322,8 @@ module.exports = function () {
 
 		var writePropertyName = function (property) {
 			return (
-				'<a href="#' + sanitize(property.name.toString()) + '">' +
-				sanitize(property.name.toShortString()) +
+				'<a href="#' + sanitize(property.fullName) + '">' +
+				sanitize(property.name) +
 				'</a>'
 			);
 		};
@@ -719,7 +333,7 @@ module.exports = function () {
 				'<pre><code>' +
 				sanitize(
 				'var result = ' +
-				toVariableName(property.thisType) + '.' + property.name.toShortString() +
+				toVariableName(property.parent) + '.' + property.name +
 				';') +
 				'</code></pre>'
 			);
@@ -729,7 +343,7 @@ module.exports = function () {
 			return (
 				'<pre><code>' +
 				sanitize(
-				toVariableName(property.thisType) + '.' + property.name.toShortString() +
+				toVariableName(property.parent) + '.' + property.name +
 				' = ' +
 				property.setter.parameters[0].name +
 				';') +
@@ -740,7 +354,7 @@ module.exports = function () {
 		var toVariableName = function (constructor) {
 			// TODO: Handle non-letters (are both their toLowerCase() and toUpperCase())
 
-			var name = constructor.name.toShortString();
+			var name = constructor.name;
 			var result = "";
 
 			for (var i = 0; i < name.length; i++) {
@@ -907,12 +521,12 @@ module.exports = function () {
 				'		<div class="content">',
 				''
 			]).concatMany(namespaceNames.map(function (namespaceName) {
-				var functions = namespaces[namespaceName].filter(function (value) {
-					return value instanceof Function;
+				var functions = namespaces[namespaceName].members.filter(function (value) {
+					return value instanceof TypeScript.AST.Function;
 				});
 
-				var constructors = namespaces[namespaceName].filter(function (value) {
-					return value instanceof Constructor;
+				var constructors = namespaces[namespaceName].members.filter(function (value) {
+					return value instanceof TypeScript.AST.Constructor;
 				});
 
 				var result = [
@@ -959,186 +573,4 @@ module.exports = function () {
 			}))
 		}));
 	});
-};
-
-var Name = function (parts) {
-	this.type = "Name";
-
-	this.parts = parts;
-};
-
-Name.prototype.toShortString = function () {
-	return this.parts[this.parts.length - 1];
-};
-
-Name.prototype.toString = function () {
-	return this.parts.join(".");
-};
-
-Name.prototype.inspect = Name.prototype.toString;
-
-var Function = function (name, description, generics, parameters, returnType, isAbstract, isPrivate, isStatic) {
-	this.name = name;
-
-	this.description = description;
-
-	this.generics = generics;
-
-	this.parameters = parameters;
-
-	this.returnType = returnType;
-
-	this.isAbstract = isAbstract;
-	this.isPrivate = isPrivate;
-	this.isStatic = isStatic;
-
-	this.thisType = null;
-};
-
-var Constructor = function (name, description, generics, parameters, baseType, isAbstract, isPrivate) {
-	this.name = name;
-
-	this.description = description;
-
-	this.generics = generics;
-
-	this.parameters = parameters;
-
-	this.baseType = baseType;
-
-	this.isAbstract = isAbstract;
-	this.isPrivate = isPrivate;
-
-	this.members = [];
-};
-
-var Property = function (name) {
-	this.name = name;
-
-	this.getter = null;
-
-	this.setter = null;
-
-	this.thisType = null;
-};
-
-var Getter = function (description, type) {
-	this.description = description;
-
-	this.type = type;
-
-	this.thisType = null;
-};
-
-var Setter = function (description, parameters) {
-	this.description = description;
-
-	this.parameters = parameters;
-
-	this.thisType = null;
-};
-
-var Parameter = function (name, type, description) {
-	this.name = name;
-	this.type = type;
-	this.description = description;
-
-	this.subParameters = [];
-};
-
-var ReturnType = function (type, description) {
-	this.type = type;
-	this.description = description;
-};
-
-var getNodeType = function (node) {
-	var nodeType = "";
-
-	if (node instanceof UglifyJS.AST_Node) { nodeType = "AST_Node"; }
-	if (node instanceof UglifyJS.AST_Statement) { nodeType = "AST_Statement"; }
-	if (node instanceof UglifyJS.AST_Debugger) { nodeType = "AST_Debugger"; }
-	if (node instanceof UglifyJS.AST_Directive) { nodeType = "AST_Directive"; }
-	if (node instanceof UglifyJS.AST_SimpleStatement) { nodeType = "AST_SimpleStatement"; }
-	if (node instanceof UglifyJS.AST_Block) { nodeType = "AST_Block"; }
-	if (node instanceof UglifyJS.AST_BlockStatement) { nodeType = "AST_BlockStatement"; }
-	if (node instanceof UglifyJS.AST_Scope) { nodeType = "AST_Scope"; }
-	if (node instanceof UglifyJS.AST_Toplevel) { nodeType = "AST_Toplevel"; }
-	if (node instanceof UglifyJS.AST_Lambda) { nodeType = "AST_Lambda"; }
-	if (node instanceof UglifyJS.AST_Accessor) { nodeType = "AST_Accessor"; }
-	if (node instanceof UglifyJS.AST_Function) { nodeType = "AST_Function"; }
-	if (node instanceof UglifyJS.AST_Defun) { nodeType = "AST_Defun"; }
-	if (node instanceof UglifyJS.AST_Switch) { nodeType = "AST_Switch"; }
-	if (node instanceof UglifyJS.AST_SwitchBranch) { nodeType = "AST_SwitchBranch"; }
-	if (node instanceof UglifyJS.AST_Default) { nodeType = "AST_Default"; }
-	if (node instanceof UglifyJS.AST_Case) { nodeType = "AST_Case"; }
-	if (node instanceof UglifyJS.AST_Try) { nodeType = "AST_Try"; }
-	if (node instanceof UglifyJS.AST_Catch) { nodeType = "AST_Catch"; }
-	if (node instanceof UglifyJS.AST_Finally) { nodeType = "AST_Finally"; }
-	if (node instanceof UglifyJS.AST_EmptyStatement) { nodeType = "AST_EmptyStatement"; }
-	if (node instanceof UglifyJS.AST_StatementWithBody) { nodeType = "AST_StatementWithBody"; }
-	if (node instanceof UglifyJS.AST_LabeledStatement) { nodeType = "AST_LabeledStatement"; }
-	if (node instanceof UglifyJS.AST_DWLoop) { nodeType = "AST_DWLoop"; }
-	if (node instanceof UglifyJS.AST_Do) { nodeType = "AST_Do"; }
-	if (node instanceof UglifyJS.AST_While) { nodeType = "AST_While"; }
-	if (node instanceof UglifyJS.AST_For) { nodeType = "AST_For"; }
-	if (node instanceof UglifyJS.AST_ForIn) { nodeType = "AST_ForIn"; }
-	if (node instanceof UglifyJS.AST_With) { nodeType = "AST_With"; }
-	if (node instanceof UglifyJS.AST_If) { nodeType = "AST_If"; }
-	if (node instanceof UglifyJS.AST_Jump) { nodeType = "AST_Jump"; }
-	if (node instanceof UglifyJS.AST_Exit) { nodeType = "AST_Exit"; }
-	if (node instanceof UglifyJS.AST_Return) { nodeType = "AST_Return"; }
-	if (node instanceof UglifyJS.AST_Throw) { nodeType = "AST_Throw"; }
-	if (node instanceof UglifyJS.AST_LoopControl) { nodeType = "AST_LoopControl"; }
-	if (node instanceof UglifyJS.AST_Break) { nodeType = "AST_Break"; }
-	if (node instanceof UglifyJS.AST_Continue) { nodeType = "AST_Continue"; }
-	if (node instanceof UglifyJS.AST_Definitions) { nodeType = "AST_Definitions"; }
-	if (node instanceof UglifyJS.AST_Var) { nodeType = "AST_Var"; }
-	if (node instanceof UglifyJS.AST_Const) { nodeType = "AST_Const"; }
-	if (node instanceof UglifyJS.AST_VarDef) { nodeType = "AST_VarDef"; }
-	if (node instanceof UglifyJS.AST_Call) { nodeType = "AST_Call"; }
-	if (node instanceof UglifyJS.AST_New) { nodeType = "AST_New"; }
-	if (node instanceof UglifyJS.AST_Seq) { nodeType = "AST_Seq"; }
-	if (node instanceof UglifyJS.AST_PropAccess) { nodeType = "AST_PropAccess"; }
-	if (node instanceof UglifyJS.AST_Dot) { nodeType = "AST_Dot"; }
-	if (node instanceof UglifyJS.AST_Sub) { nodeType = "AST_Sub"; }
-	if (node instanceof UglifyJS.AST_Unary) { nodeType = "AST_Unary"; }
-	if (node instanceof UglifyJS.AST_UnaryPrefix) { nodeType = "AST_UnaryPrefix"; }
-	if (node instanceof UglifyJS.AST_UnaryPostfix) { nodeType = "AST_UnaryPostfix"; }
-	if (node instanceof UglifyJS.AST_Binary) { nodeType = "AST_Binary"; }
-	if (node instanceof UglifyJS.AST_Assign) { nodeType = "AST_Assign"; }
-	if (node instanceof UglifyJS.AST_Conditional) { nodeType = "AST_Conditional"; }
-	if (node instanceof UglifyJS.AST_Array) { nodeType = "AST_Array"; }
-	if (node instanceof UglifyJS.AST_Object) { nodeType = "AST_Object"; }
-	if (node instanceof UglifyJS.AST_ObjectProperty) { nodeType = "AST_ObjectProperty"; }
-	if (node instanceof UglifyJS.AST_ObjectKeyVal) { nodeType = "AST_ObjectKeyVal"; }
-	if (node instanceof UglifyJS.AST_ObjectSetter) { nodeType = "AST_ObjectSetter"; }
-	if (node instanceof UglifyJS.AST_ObjectGetter) { nodeType = "AST_ObjectGetter"; }
-	if (node instanceof UglifyJS.AST_Symbol) { nodeType = "AST_Symbol"; }
-	if (node instanceof UglifyJS.AST_SymbolAccessor) { nodeType = "AST_SymbolAccessor"; }
-	if (node instanceof UglifyJS.AST_SymbolDeclaration) { nodeType = "AST_SymbolDeclaration"; }
-	if (node instanceof UglifyJS.AST_SymbolVar) { nodeType = "AST_SymbolVar"; }
-	if (node instanceof UglifyJS.AST_SymbolFunarg) { nodeType = "AST_SymbolFunarg"; }
-	if (node instanceof UglifyJS.AST_SymbolConst) { nodeType = "AST_SymbolConst"; }
-	if (node instanceof UglifyJS.AST_SymbolDefun) { nodeType = "AST_SymbolDefun"; }
-	if (node instanceof UglifyJS.AST_SymbolLambda) { nodeType = "AST_SymbolLambda"; }
-	if (node instanceof UglifyJS.AST_SymbolCatch) { nodeType = "AST_SymbolCatch"; }
-	if (node instanceof UglifyJS.AST_Label) { nodeType = "AST_Label"; }
-	if (node instanceof UglifyJS.AST_SymbolRef) { nodeType = "AST_SymbolRef"; }
-	if (node instanceof UglifyJS.AST_LabelRef) { nodeType = "AST_LabelRef"; }
-	if (node instanceof UglifyJS.AST_This) { nodeType = "AST_This"; }
-	if (node instanceof UglifyJS.AST_Constant) { nodeType = "AST_Constant"; }
-	if (node instanceof UglifyJS.AST_String) { nodeType = "AST_String"; }
-	if (node instanceof UglifyJS.AST_Number) { nodeType = "AST_Number"; }
-	if (node instanceof UglifyJS.AST_RegExp) { nodeType = "AST_RegExp"; }
-	if (node instanceof UglifyJS.AST_Atom) { nodeType = "AST_Atom"; }
-	if (node instanceof UglifyJS.AST_Null) { nodeType = "AST_Null"; }
-	if (node instanceof UglifyJS.AST_NaN) { nodeType = "AST_NaN"; }
-	if (node instanceof UglifyJS.AST_Undefined) { nodeType = "AST_Undefined"; }
-	if (node instanceof UglifyJS.AST_Hole) { nodeType = "AST_Hole"; }
-	if (node instanceof UglifyJS.AST_Infinity) { nodeType = "AST_Infinity"; }
-	if (node instanceof UglifyJS.AST_Boolean) { nodeType = "AST_Boolean"; }
-	if (node instanceof UglifyJS.AST_False) { nodeType = "AST_False"; }
-	if (node instanceof UglifyJS.AST_True) { nodeType = "AST_True"; }
-
-	return nodeType;
 };
