@@ -170,7 +170,7 @@ var Compiler = function () {
 
 exports.Compiler = Compiler;
 
-exports.gulp = function (outputCodePath, outputSourceMapPath) {
+exports.gulp = function (outputCodePath, outputSourceMapPath, astModifier) {
 	var files = [];
 
 	return Transform(function (file, encoding) {
@@ -183,7 +183,11 @@ exports.gulp = function (outputCodePath, outputSourceMapPath) {
 
 			var compiler = new Compiler();
 
-			compiler.addFiles(files);
+			var resolvedFiles = compiler.addFiles(files);
+
+			if (astModifier !== undefined) {
+				astModifier(exports.AST.walk(compiler, resolvedFiles));
+			}
 
 			var outputFiles = compiler.compile(outputCodePath, outputSourceMapPath);
 
@@ -250,10 +254,10 @@ var Namespace = function (_super) {
 var Function = function (_super) {
 	__extends(Function, _super);
 
-	function Function(name, docNode, description, generics, parameters, returnType, isAbstract, isPrivate, isStatic) {
+	function Function(name, astNode, description, generics, parameters, returnType, isAbstract, isPrivate, isStatic) {
 		_super.call(this, name);
 
-		this.docNode = docNode;
+		this.astNode = astNode;
 
 		this.description = description;
 
@@ -274,10 +278,10 @@ var Function = function (_super) {
 var Constructor = function (_super) {
 	__extends(Constructor, _super);
 
-	function Constructor(name, docNode, description, generics, parameters, baseType, isAbstract, isPrivate) {
+	function Constructor(name, astNode, description, generics, parameters, baseType, isAbstract, isPrivate) {
 		_super.call(this, name);
 
-		this.docNode = docNode;
+		this.astNode = astNode;
 
 		this.description = description;
 
@@ -311,8 +315,8 @@ var Property = function (_super) {
 }(Scoped);
 
 var Getter = function () {
-	function Getter(docNode, description, type) {
-		this.docNode = docNode;
+	function Getter(astNode, description, type) {
+		this.astNode = astNode;
 
 		this.description = description;
 
@@ -323,8 +327,8 @@ var Getter = function () {
 }();
 
 var Setter = function () {
-	function Setter(docNode, description, parameters) {
-		this.docNode = docNode;
+	function Setter(astNode, description, parameters) {
+		this.astNode = astNode;
 
 		this.description = description;
 
@@ -337,10 +341,10 @@ var Setter = function () {
 var Variable = function (_super) {
 	__extends(Variable, _super);
 
-	function Variable(name, docNode, description, type) {
+	function Variable(name, astNode, description, type) {
 		_super.call(this, name);
 
-		this.docNode = docNode;
+		this.astNode = astNode;
 
 		this.description = description;
 
@@ -466,7 +470,7 @@ var Walker = function (_super) {
 		var modifiers = ((node.modifiers.item ? [node.modifiers.item] : node.modifiers.nodeOrTokens) || []).map(function (modifier) { return modifier.tokenKind; });
 		var isPrivate = !modifiers.some(function (modifier) { return modifier === TypeScript.SyntaxKind["ExportKeyword"]; });
 
-		var clazz = this._scope.enter(new Constructor(name, docNode, doc.rootDescription, doc.generics, doc.parameters, baseType, doc.isAbstract, isPrivate));
+		var clazz = this._scope.enter(new Constructor(name, node, doc.rootDescription, doc.generics, doc.parameters, baseType, doc.isAbstract, isPrivate));
 
 		clazz.parent.members.push(clazz);
 
@@ -488,7 +492,7 @@ var Walker = function (_super) {
 		var isPrivate = modifiers.some(function (modifier) { return modifier === TypeScript.SyntaxKind["PrivateKeyword"]; });
 		var isStatic = modifiers.some(function (modifier) { return modifier === TypeScript.SyntaxKind["StaticKeyword"]; });
 
-		var memberFunction = this._scope.enter(new Function(name, docNode, doc.rootDescription, doc.generics, doc.parameters, doc.returnType, doc.isAbstract, isPrivate, isStatic));
+		var memberFunction = this._scope.enter(new Function(name, node, doc.rootDescription, doc.generics, doc.parameters, doc.returnType, doc.isAbstract, isPrivate, isStatic));
 
 		memberFunction.parent.members.push(memberFunction);
 
@@ -508,7 +512,7 @@ var Walker = function (_super) {
 		var isPrivate = modifiers.some(function (modifier) { return modifier === TypeScript.SyntaxKind["PrivateKeyword"]; });
 		var isStatic = modifiers.some(function (modifier) { return modifier === TypeScript.SyntaxKind["StaticKeyword"]; });
 
-		var freeFunction = this._scope.enter(new Function(name, docNode, doc.rootDescription, doc.generics, doc.parameters, doc.returnType, doc.isAbstract, isPrivate, isStatic));
+		var freeFunction = this._scope.enter(new Function(name, node, doc.rootDescription, doc.generics, doc.parameters, doc.returnType, doc.isAbstract, isPrivate, isStatic));
 
 		freeFunction.parent.members.push(freeFunction);
 
@@ -535,7 +539,7 @@ var Walker = function (_super) {
 			this._scope.leave();
 		}
 
-		property.getter = new Getter(docNode, doc.rootDescription, doc.returnType);
+		property.getter = new Getter(node, doc.rootDescription, doc.returnType);
 	};
 
 	Walker.prototype.visitSetAccessor = function (node) {
@@ -558,7 +562,7 @@ var Walker = function (_super) {
 			this._scope.leave();
 		}
 
-		property.setter = new Setter(docNode, doc.rootDescription, doc.parameters);
+		property.setter = new Setter(node, doc.rootDescription, doc.parameters);
 	};
 
 	Walker.prototype.visitMemberVariableDeclaration = function (node) {
@@ -570,7 +574,7 @@ var Walker = function (_super) {
 			return;
 		}
 
-		var variable = this._scope.enter(new Variable(name, docNode, doc.rootDescription, doc.returnType));
+		var variable = this._scope.enter(new Variable(name, node, doc.rootDescription, doc.returnType));
 
 		variable.parent.members.push(variable);
 
@@ -586,7 +590,7 @@ var Walker = function (_super) {
 			return;
 		}
 
-		var variable = this._scope.enter(new Variable(name, docNode, doc.rootDescription, doc.returnType));
+		var variable = this._scope.enter(new Variable(name, node.variableDeclaration.variableDeclarators.item, doc.rootDescription, doc.returnType));
 
 		variable.parent.members.push(variable);
 
@@ -680,15 +684,6 @@ var Walker = function (_super) {
 					isAbstract = true;
 					break;
 
-				case "@constructor":
-					break;
-
-				case "@extends":
-					break;
-
-				case "@memberof":
-					break;
-
 				case "@param":
 					var result = readType(remainingLine);
 					var type = result[0];
@@ -711,9 +706,6 @@ var Walker = function (_super) {
 					}
 					break;
 
-				case "@private":
-					break;
-
 				case "@return":
 					var result = readType(remainingLine);
 					var type = result[0];
@@ -721,9 +713,6 @@ var Walker = function (_super) {
 
 					returnType = lastRead = new ReturnType(type, description);
 
-					break;
-
-				case "@static":
 					break;
 
 				case "@template":
@@ -837,4 +826,47 @@ exports.AST = {
 	ReturnType: ReturnType,
 
 	walk: walk
+};
+
+Object.keys(TypeScript.SyntaxTreeToAstVisitor.prototype).forEach(function (key) {
+	if (key.substr(0, "visit".length) !== "visit") {
+		return;
+	}
+
+	var originalFunction = TypeScript.SyntaxTreeToAstVisitor.prototype[key];
+	if (originalFunction.length !== 1) {
+		return;
+	}
+
+	TypeScript.SyntaxTreeToAstVisitor.prototype[key] = function (node) {
+		var result = originalFunction.call(this, node);
+
+		if (node && node["gulp-typescript-new-comment"]) {
+			result["gulp-typescript-new-comment"] = node["gulp-typescript-new-comment"];
+		}
+
+		return result;
+	};
+});
+
+var originalEmitComments = TypeScript.Emitter.prototype.emitComments;
+TypeScript.Emitter.prototype.emitComments = function (ast, pre, onlyPinnedOrTripleSlashComments) {
+	if (ast["gulp-typescript-new-comment"]) {
+		var trivia = ast.preComments()[0]._trivia;
+
+		var originalFullText = trivia.fullText();
+
+		var commentEndIndex = originalFullText.lastIndexOf("*/");
+		var fullText = originalFullText.substr(0, commentEndIndex);
+
+		fullText += "*\n";
+		ast["gulp-typescript-new-comment"].forEach(function (line) {
+			fullText += "* " + line + "\n";
+		});
+
+		trivia._fullText = fullText + originalFullText.substr(commentEndIndex);
+		trivia._fullWidth = trivia._fullText.length;
+	}
+
+	return originalEmitComments.apply(this, arguments);
 };

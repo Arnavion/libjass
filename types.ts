@@ -27,10 +27,6 @@ module libjass {
 
 	/**
 	 * This class represents an ASS script. It contains the script properties, an array of Styles, and an array of Dialogues.
-	 *
-	 * @constructor
-	 *
-	 * @memberof libjass
 	 */
 	export class ASS {
 		private _properties: ScriptProperties = new ScriptProperties();
@@ -77,8 +73,6 @@ module libjass {
 		 * @param {string} rawASS The raw text of the script.
 		 * @param {number=0} type The type of the script. One of the libjass.Format constants.
 		 * @return {!libjass.ASS}
-		 *
-		 * @static
 		 */
 		static fromString(raw: string, type: Format = Format.ASS): ASS {
 			raw = raw.replace(/\r$/gm, "");
@@ -204,10 +198,6 @@ module libjass {
 
 	/**
 	 * This class represents the properties of an ASS script.
-	 *
-	 * @constructor
-	 *
-	 * @memberof libjass
 	 */
 	export class ScriptProperties {
 		private _resolutionX: number;
@@ -296,7 +286,6 @@ module libjass {
 	/**
 	 * This class represents a single global style declaration in an ASS script. The styles can be obtained via the ASS.styles property.
 	 *
-	 * @constructor
 	 * @param {!Object} template The template object that contains the style's properties. It is a map of the string values read from the ASS file.
 	 * @param {string} template["Name"] The name of the style
 	 * @param {string} template["Italic"] -1 if the style is italicized
@@ -317,8 +306,6 @@ module libjass {
 	 * @param {string} template["MarginL"] The left margin
 	 * @param {string} template["MarginR"] The right margin
 	 * @param {string} template["MarginV"] The vertical margin
-	 *
-	 * @memberof libjass
 	 */
 	export class Style {
 		private _name: string;
@@ -591,7 +578,6 @@ module libjass {
 	/**
 	 * This class represents a dialogue in an ASS script.
 	 *
-	 * @constructor
 	 * @param {!Object} template The template object that contains the dialogue's properties. It is a map of the string values read from the ASS file.
 	 * @param {string} template["Style"] The name of the default style of this dialogue
 	 * @param {string} template["Start"] The start time
@@ -599,8 +585,6 @@ module libjass {
 	 * @param {string} template["Layer"] The layer number
 	 * @param {string} template["Text"] The text of this dialogue
 	 * @param {ASS} ass The ASS object to which this dialogue belongs
-	 *
-	 * @memberof libjass
 	 */
 	export class Dialogue {
 		private static _lastDialogueId = -1;
@@ -708,8 +692,6 @@ module libjass {
 
 		/**
 		 * Parses this dialogue's parts from the raw parts string.
-		 *
-		 * @private
 		 */
 		private _parsePartsString(): void {
 			this._parts = <parts.Part[]>parser.parse(this._rawPartsString, "dialogueParts");
@@ -766,9 +748,6 @@ module libjass {
 		 *
 		 * @param {string} str
 		 * @return {number}
-		 *
-		 * @private
-		 * @static
 		 */
 		private static _toTime(str: string): number {
 			return str.split(":").reduce<number>((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);

@@ -26,13 +26,10 @@ module libjass.parts {
 	 *
 	 * Instances of this class are immutable.
 	 *
-	 * @constructor
 	 * @param {number} red
 	 * @param {number} green
 	 * @param {number} blue
 	 * @param {number=1} alpha
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Color {
 		constructor(private _red: number, private _green: number, private _blue: number, private _alpha: number = 1) { }
@@ -101,10 +98,7 @@ module libjass.parts {
 	/**
 	 * A comment, i.e., any text enclosed in {} that is not understood as an ASS tag.
 	 *
-	 * @constructor
 	 * @param {string} value The text of this comment
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Comment {
 		constructor(private _value: string) { }
@@ -122,10 +116,7 @@ module libjass.parts {
 	/**
 	 * A block of text, i.e., any text not enclosed in {}. Also includes \h.
 	 *
-	 * @constructor
 	 * @param {string} value The content of this block of text
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Text {
 		constructor(private _value: string) { }
@@ -146,10 +137,6 @@ module libjass.parts {
 
 	/**
 	 * A newline character \N.
-	 *
-	 * @constructor
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class NewLine {
 	}
@@ -157,10 +144,7 @@ module libjass.parts {
 	/**
 	 * An italic tag {\i}
 	 *
-	 * @constructor
 	 * @param {?boolean} value {\i1} -> true, {\i0} -> false, {\i} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Italic {
 		constructor(private _value: boolean) { }
@@ -178,10 +162,7 @@ module libjass.parts {
 	/**
 	 * A bold tag {\b}
 	 *
-	 * @constructor
 	 * @param {*} value {\b1} -> true, {\b0} -> false, {\b###} -> weight of the bold (number), {\b} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Bold {
 		constructor(private _value: Object) { }
@@ -199,10 +180,7 @@ module libjass.parts {
 	/**
 	 * An underline tag {\u}
 	 *
-	 * @constructor
 	 * @param {?boolean} value {\u1} -> true, {\u0} -> false, {\u} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Underline {
 		constructor(private _value: boolean) { }
@@ -220,10 +198,7 @@ module libjass.parts {
 	/**
 	 * A strike-through tag {\s}
 	 *
-	 * @constructor
 	 * @param {?boolean} value {\s1} -> true, {\s0} -> false, {\s} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class StrikeThrough {
 		constructor(private _value: boolean) { }
@@ -241,10 +216,7 @@ module libjass.parts {
 	/**
 	 * A border tag {\bord}
 	 *
-	 * @constructor
 	 * @param {?number} value {\bord###} -> width (number), {\bord} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Border {
 		constructor(private _value: number) { }
@@ -262,10 +234,7 @@ module libjass.parts {
 	/**
 	 * A horizontal border tag {\xbord}
 	 *
-	 * @constructor
 	 * @param {?number} value {\xbord###} -> width (number), {\xbord} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class BorderX {
 		constructor(private _value: number) { }
@@ -283,10 +252,7 @@ module libjass.parts {
 	/**
 	 * A vertical border tag {\ybord}
 	 *
-	 * @constructor
 	 * @param {?number} value {\ybord###} -> height (number), {\ybord} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class BorderY {
 		constructor(private _value: number) { }
@@ -304,10 +270,7 @@ module libjass.parts {
 	/**
 	 * A shadow tag {\shad}
 	 *
-	 * @constructor
 	 * @param {?number} value {\shad###} -> depth (number), {\shad} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Shadow {
 		constructor(private _value: number) { }
@@ -325,10 +288,7 @@ module libjass.parts {
 	/**
 	 * A horizontal shadow tag {\xshad}
 	 *
-	 * @constructor
 	 * @param {?number} value {\xshad###} -> depth (number), {\xshad} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class ShadowX {
 		constructor(private _value: number) { }
@@ -346,10 +306,7 @@ module libjass.parts {
 	/**
 	 * A vertical shadow tag {\yshad}
 	 *
-	 * @constructor
 	 * @param {?number} value {\yshad###} -> depth (number), {\yshad} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class ShadowY {
 		constructor(private _value: number) { }
@@ -367,10 +324,7 @@ module libjass.parts {
 	/**
 	 * A blur tag {\be}
 	 *
-	 * @constructor
 	 * @param {?number} value {\be###} -> strength (number), {\be} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Blur {
 		constructor(private _value: number) { }
@@ -388,10 +342,7 @@ module libjass.parts {
 	/**
 	 * A Gaussian blur tag {\blur}
 	 *
-	 * @constructor
 	 * @param {?number} value {\blur###} -> strength (number), {\blur} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class GaussianBlur {
 		constructor(private _value: number) { }
@@ -409,10 +360,7 @@ module libjass.parts {
 	/**
 	 * A font name tag {\fn}
 	 *
-	 * @constructor
 	 * @param {?string} value {\fn###} -> name (string), {\fn} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class FontName {
 		constructor(private _value: string) { }
@@ -430,10 +378,7 @@ module libjass.parts {
 	/**
 	 * A font size tag {\fs}
 	 *
-	 * @constructor
 	 * @param {?number} value {\fs###} -> size (number), {\fs} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class FontSize {
 		constructor(private _value: number) { }
@@ -451,10 +396,7 @@ module libjass.parts {
 	/**
 	 * A horizontal font scaling tag {\fscx}
 	 *
-	 * @constructor
 	 * @param {?number} value {\fscx###} -> scale (number), {\fscx} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class FontScaleX {
 		constructor(private _value: number) { }
@@ -472,10 +414,7 @@ module libjass.parts {
 	/**
 	 * A vertical font scaling tag {\fscy}
 	 *
-	 * @constructor
 	 * @param {?number} value {\fscy###} -> scale (number), {\fscy} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class FontScaleY {
 		constructor(private _value: number) { }
@@ -493,10 +432,7 @@ module libjass.parts {
 	/**
 	 * A letter-spacing tag {\fsp}
 	 *
-	 * @constructor
 	 * @param {?number} value {\fsp###} -> spacing (number), {\fsp} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class LetterSpacing {
 		constructor(private _value: number) { }
@@ -514,10 +450,7 @@ module libjass.parts {
 	/**
 	 * An X-axis rotation tag {\frx}
 	 *
-	 * @constructor
 	 * @param {?number} value {\frx###} -> angle (number), {\frx} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class RotateX {
 		constructor(private _value: number) { }
@@ -535,10 +468,7 @@ module libjass.parts {
 	/**
 	 * A Y-axis rotation tag {\fry}
 	 *
-	 * @constructor
 	 * @param {?number} value {\fry###} -> angle (number), {\fry} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class RotateY {
 		constructor(private _value: number) { }
@@ -556,10 +486,7 @@ module libjass.parts {
 	/**
 	 * A Z-axis rotation tag {\fr} or {\frz}
 	 *
-	 * @constructor
 	 * @param {?number} value {\frz###} -> angle (number), {\frz} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class RotateZ {
 		constructor(private _value: number) { }
@@ -577,10 +504,7 @@ module libjass.parts {
 	/**
 	 * An X-axis shearing tag {\fax}
 	 *
-	 * @constructor
 	 * @param {?number} value {\fax###} -> angle (number), {\fax} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class SkewX {
 		constructor(private _value: number) { }
@@ -598,10 +522,7 @@ module libjass.parts {
 	/**
 	 * A Y-axis shearing tag {\fay}
 	 *
-	 * @constructor
 	 * @param {?number} value {\fay###} -> angle (number), {\fay} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class SkewY {
 		constructor(private _value: number) { }
@@ -619,10 +540,7 @@ module libjass.parts {
 	/**
 	 * A primary color tag {\c} or {\1c}
 	 *
-	 * @constructor
 	 * @param {libjass.parts.Color} value {\1c###} -> color (Color), {\1c} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class PrimaryColor {
 		constructor(private _value: Color) { }
@@ -640,10 +558,7 @@ module libjass.parts {
 	/**
 	 * A secondary color tag {\2c}
 	 *
-	 * @constructor
 	 * @param {libjass.parts.Color} value {\2c###} -> color (Color), {\2c} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class SecondaryColor {
 		constructor(private _value: Color) { }
@@ -661,10 +576,7 @@ module libjass.parts {
 	/**
 	 * An outline color tag {\3c}
 	 *
-	 * @constructor
 	 * @param {libjass.parts.Color} value {\3c###} -> color (Color), {\3c} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class OutlineColor {
 		constructor(private _value: Color) { }
@@ -682,10 +594,7 @@ module libjass.parts {
 	/**
 	 * A shadow color tag {\4c}
 	 *
-	 * @constructor
 	 * @param {libjass.parts.Color} value {\4c###} -> color (Color), {\4c} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class ShadowColor {
 		constructor(private _value: Color) { }
@@ -703,10 +612,7 @@ module libjass.parts {
 	/**
 	 * An alpha tag {\alpha}
 	 *
-	 * @constructor
 	 * @param {?number} value {\alpha###} -> alpha (number), {\alpha} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Alpha {
 		constructor(private _value: number) { }
@@ -724,10 +630,7 @@ module libjass.parts {
 	/**
 	 * A primary alpha tag {\1a}
 	 *
-	 * @constructor
 	 * @param {?number} value {\1a###} -> alpha (number), {\1a} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class PrimaryAlpha {
 		constructor(private _value: number) { }
@@ -745,10 +648,7 @@ module libjass.parts {
 	/**
 	 * A secondary alpha tag {\2a}
 	 *
-	 * @constructor
 	 * @param {?number} value {\2a###} -> alpha (number), {\2a} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class SecondaryAlpha {
 		constructor(private _value: number) { }
@@ -766,10 +666,7 @@ module libjass.parts {
 	/**
 	 * An outline alpha tag {\3a}
 	 *
-	 * @constructor
 	 * @param {?number} value {\3a###} -> alpha (number), {\3a} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class OutlineAlpha {
 		constructor(private _value: number) { }
@@ -787,10 +684,7 @@ module libjass.parts {
 	/**
 	 * A shadow alpha tag {\4a}
 	 *
-	 * @constructor
 	 * @param {?number} value {\4a###} -> alpha (number), {\4a} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class ShadowAlpha {
 		constructor(private _value: number) { }
@@ -808,10 +702,7 @@ module libjass.parts {
 	/**
 	 * An alignment tag {\an} or {\a}
 	 *
-	 * @constructor
 	 * @param {number} value {\an###} -> alignment (number)
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Alignment {
 		constructor(private _value: number) { }
@@ -829,10 +720,7 @@ module libjass.parts {
 	/**
 	 * A color karaoke tag {\k}
 	 *
-	 * @constructor
 	 * @param {number} duration {\k###} -> duration (number)
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class ColorKaraoke {
 		constructor(private _duration: number) { }
@@ -850,10 +738,7 @@ module libjass.parts {
 	/**
 	 * A sweeping color karaoke tag {\K} or {\kf}
 	 *
-	 * @constructor
 	 * @param {number} duration {\kf###} -> duration (number)
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class SweepingColorKaraoke {
 		constructor(private _duration: number) { }
@@ -871,10 +756,7 @@ module libjass.parts {
 	/**
 	 * An outline karaoke tag {\ko}
 	 *
-	 * @constructor
 	 * @param {number} duration {\ko###} -> duration (number)
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class OutlineKaraoke {
 		constructor(private _duration: number) { }
@@ -892,10 +774,7 @@ module libjass.parts {
 	/**
 	 * A wrapping style tag {\q}
 	 *
-	 * @constructor
 	 * @param {number} value {\q###} -> style (number)
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class WrappingStyle {
 		constructor(private _value: libjass.WrappingStyle) { }
@@ -913,10 +792,7 @@ module libjass.parts {
 	/**
 	 * A style reset tag {\r}
 	 *
-	 * @constructor
 	 * @param {?string} value {\r###} -> style name (string), {\r} -> null
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Reset {
 		constructor(private _value: string) { }
@@ -934,11 +810,8 @@ module libjass.parts {
 	/**
 	 * A position tag {\pos}
 	 *
-	 * @constructor
 	 * @param {number} x
 	 * @param {number} y
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Position {
 		constructor(private _x: number, private _y: number) { }
@@ -965,15 +838,12 @@ module libjass.parts {
 	/**
 	 * A movement tag {\move}
 	 *
-	 * @constructor
 	 * @param {number} x1
 	 * @param {number} y1
 	 * @param {number} x2
 	 * @param {number} y2
 	 * @param {number} t1
 	 * @param {number} t2
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Move {
 		constructor(private _x1: number, private _y1: number, private _x2: number, private _y2: number, private _t1: number, private _t2: number) { }
@@ -1036,11 +906,8 @@ module libjass.parts {
 	/**
 	 * A rotation origin tag {\org}
 	 *
-	 * @constructor
 	 * @param {number} x
 	 * @param {number} y
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class RotationOrigin {
 		constructor(private _x: number, private _y: number) { }
@@ -1067,11 +934,8 @@ module libjass.parts {
 	/**
 	 * A simple fade tag {\fad}
 	 *
-	 * @constructor
 	 * @param {number} start
 	 * @param {number} end
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Fade {
 		constructor(private _start: number, private _end: number) { }
@@ -1098,7 +962,6 @@ module libjass.parts {
 	/**
 	 * A complex fade tag {\fade}
 	 *
-	 * @constructor
 	 * @param {number} a1
 	 * @param {number} a2
 	 * @param {number} a3
@@ -1106,8 +969,6 @@ module libjass.parts {
 	 * @param {number} t2
 	 * @param {number} t3
 	 * @param {number} t4
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class ComplexFade {
 		constructor(
@@ -1182,13 +1043,10 @@ module libjass.parts {
 	/**
 	 * A transform tag {\t}
 	 *
-	 * @constructor
 	 * @param {number} start
 	 * @param {number} end
 	 * @param {number} accel
 	 * @param {!Array.<!libjass.parts.Tag>} tags
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class Transform {
 		constructor(private _start: number, private _end: number, private _accel: number, private _tags: Part[]) { }
@@ -1233,14 +1091,11 @@ module libjass.parts {
 	/**
 	 * A rectangular clip tag {\clip} or {\iclip}
 	 *
-	 * @constructor
 	 * @param {number} x1
 	 * @param {number} y1
 	 * @param {number} x2
 	 * @param {number} y2
 	 * @param {boolean} inside
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class RectangularClip {
 		constructor(private _x1: number, private _y1: number, private _x2: number, private _y2: number, private _inside: boolean) { }
@@ -1294,12 +1149,9 @@ module libjass.parts {
 	/**
 	 * A vector clip tag {\clip} or {\iclip}
 	 *
-	 * @constructor
 	 * @param {number} scale
 	 * @param {!Array.<!libjass.parts.drawing.Instruction>} instructions
 	 * @param {boolean} inside
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class VectorClip {
 		constructor(private _scale: number, private _instructions: drawing.Instruction[], private _inside: boolean) { }
@@ -1335,10 +1187,7 @@ module libjass.parts {
 	/**
 	 * A drawing mode tag {\p}
 	 *
-	 * @constructor
 	 * @param {number} scale
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class DrawingMode {
 		constructor(private _scale: number) { }
@@ -1356,10 +1205,7 @@ module libjass.parts {
 	/**
 	 * A drawing mode baseline offset tag {\pbo}
 	 *
-	 * @constructor
 	 * @param {number} value
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class DrawingBaselineOffset {
 		constructor(private _value: number) { }
@@ -1377,10 +1223,7 @@ module libjass.parts {
 	/**
 	 * A pseudo-part representing text interpreted as drawing instructions
 	 *
-	 * @constructor
 	 * @param {!Array.<!libjass.parts.drawing.Instruction>} instructions
-	 *
-	 * @memberof libjass.parts
 	 */
 	export class DrawingInstructions {
 		constructor(private _instructions: drawing.Instruction[]) { }
@@ -1404,11 +1247,8 @@ module libjass.parts {
 		/**
 		 * An instruction to move to a particular position.
 		 *
-		 * @constructor
 		 * @param {number} x
 		 * @param {number} y
-		 *
-		 * @memberof libjass.parts.drawing
 		 */
 		export class MoveInstruction implements Instruction {
 			constructor(private _x: number, private _y: number) { }
@@ -1435,11 +1275,8 @@ module libjass.parts {
 		/**
 		 * An instruction to draw a line to a particular position.
 		 *
-		 * @constructor
 		 * @param {number} x
 		 * @param {number} y
-		 *
-		 * @memberof libjass.parts.drawing
 		 */
 		export class LineInstruction implements Instruction {
 			constructor(private _x: number, private _y: number) { }
@@ -1466,15 +1303,12 @@ module libjass.parts {
 		/**
 		 * An instruction to draw a cubic bezier curve to a particular position, with two given control points.
 		 *
-		 * @constructor
 		 * @param {number} x1
 		 * @param {number} y1
 		 * @param {number} x2
 		 * @param {number} y2
 		 * @param {number} x3
 		 * @param {number} y3
-		 *
-		 * @memberof libjass.parts.drawing
 		 */
 		export class CubicBezierCurveInstruction implements Instruction {
 			constructor(private _x1: number, private _y1: number, private _x2: number, private _y2: number, private _x3: number, private _y3: number) { }

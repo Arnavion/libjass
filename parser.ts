@@ -27,8 +27,6 @@ module libjass.parser {
 	 * @param {string} input
 	 * @param {string} rule
 	 * @return {*}
-	 *
-	 * @memberof libjass.parser
 	 */
 	export function parse(input: string, rule: string): any {
 		var run = new ParserRun(input, rule);
@@ -47,13 +45,8 @@ module libjass.parser {
 	/**
 	 * This class represents a single run of the parser.
 	 *
-	 * @constructor
-	 *
 	 * @param {string} input
 	 * @param {string} rule
-	 *
-	 * @private
-	 * @memberof libjass.parser
 	 */
 	class ParserRun {
 		private _parseTree: ParseNode = new ParseNode(null);
@@ -2166,8 +2159,6 @@ module libjass.parser {
 
 		/**
 		 * @param {number=1} count
-		 *
-		 * @private
 		 */
 		private _peek(count: number = 1): string {
 			return this._input.substr(this._parseTree.end, count);
@@ -2175,8 +2166,6 @@ module libjass.parser {
 
 		/**
 		 * @return {boolean}
-		 *
-		 * @private
 		 */
 		private _haveMore(): boolean {
 			return this._parseTree.end < this._input.length;
@@ -2186,8 +2175,6 @@ module libjass.parser {
 		 * @param {string} tagName One of "clip" and "iclip"
 		 * @param {!ParseNode} parent
 		 * @return {ParseNode}
-		 *
-		 * @private
 		 */
 		private _parse_tag_clip_or_iclip(tagName: string, parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
@@ -2342,12 +2329,8 @@ module libjass.parser {
 	/**
 	 * This class represents a single parse node. It has a start and end position, and an optional value object.
 	 *
-	 * @constructor
 	 * @param {ParseNode} parent The parent of this parse node. The parent's end position will be updated to the end position of this node whenever the latter changes.
 	 * @param {?string=null} value A shortcut to assign a string to the value property.
-	 *
-	 * @private
-	 * @memberof libjass.parser
 	 */
 	class ParseNode {
 		private _children: ParseNode[] = [];
@@ -2445,8 +2428,6 @@ module libjass.parser {
 		 * Updates the end property of this node and its parent recursively to the root node.
 		 *
 		 * @param {number} newEnd
-		 *
-		 * @private
 		 */
 		private _setEnd(newEnd: number): void {
 			this._end = newEnd;

@@ -28,11 +28,7 @@ module libjass {
 	 *
 	 * Elements are stored as properties of an object, with names derived from their type.
 	 *
-	 * @constructor
 	 * @template T
-	 *
-	 * @private
-	 * @memberof libjass
 	 */
 	class SimpleSet<T> implements Set<T> {
 		private _elements: { [key: string]: T };
@@ -130,11 +126,7 @@ module libjass {
 	 *
 	 * Keys and values are stored as properties of an object, with property names derived from the key type.
 	 *
-	 * @constructor
 	 * @template K, V
-	 *
-	 * @private
-	 * @memberof libjass
 	 */
 	class SimpleMap<K, V> implements Map<K, V> {
 		private _keys: { [key: string]: K };

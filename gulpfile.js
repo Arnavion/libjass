@@ -41,7 +41,41 @@ gulp.task("libjass.js", function (callback) {
 		return callback(null);
 	}
 
-	return gulp.src("./libjass.ts").pipe(TypeScript.gulp("/libjass.js", "/libjass.js.map")).pipe(UglifyJS.fixup()).pipe(gulp.dest("."));
+	return gulp.src("./libjass.ts").pipe(TypeScript.gulp("/libjass.js", "/libjass.js.map", function (namespaces) {
+		var visitor = function (current) {
+			var newText = [];
+
+			if (current instanceof TypeScript.AST.Namespace) {
+				current.members.forEach(visitor);
+			}
+			else if (current instanceof TypeScript.AST.Constructor) {
+				newText.push("@constructor");
+
+				if (current.baseType !== null) {
+					newText.push("@extends {" + current.baseType.fullName + "}");
+				}
+
+				if (current.parent !== null) {
+					newText.push("@memberOf " + current.parent.fullName);
+				}
+
+				current.members.forEach(visitor);
+			}
+
+			if (current.isPrivate) {
+				newText.push("@private");
+			}
+
+			if (current.isStatic) {
+				newText.push("@static");
+			}
+
+			if (newText.length > 0) {
+				current.astNode["gulp-typescript-new-comment"] = newText;
+			}
+		};
+		Object.keys(namespaces).forEach(function (namespaceName) { visitor(namespaces[namespaceName]); });
+	})).pipe(UglifyJS.fixup()).pipe(gulp.dest("."));
 });
 
 gulp.task("libjass.min.js", ["libjass.js"], function (callback) {

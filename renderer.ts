@@ -38,13 +38,9 @@ module libjass.renderers {
 	/**
 	 * A renderer implementation that doesn't output anything.
 	 *
-	 * @constructor
-	 *
 	 * @param {!HTMLVideoElement} video
 	 * @param {!libjass.ASS} ass
 	 * @param {!libjass.renderers.RendererSettings} settings
-	 *
-	 * @memberof libjass.renderers
 	 */
 	export class NullRenderer {
 		private static _lastRendererId = -1;
@@ -321,14 +317,9 @@ module libjass.renderers {
 	/**
 	 * A default renderer implementation.
 	 *
-	 * @constructor
-	 * @extends {libjass.renderers.NullRenderer}
-	 *
 	 * @param {!HTMLVideoElement} video
 	 * @param {!libjass.ASS} ass
 	 * @param {!libjass.renderers.RendererSettings} settings
-	 *
-	 * @memberof libjass.renderers
 	 */
 	export class DefaultRenderer extends NullRenderer {
 		private _videoSubsWrapper: HTMLDivElement;
@@ -1002,8 +993,6 @@ module libjass.renderers {
 		/**
 		 * @param {string} type
 		 * @param {!Array.<*>} args
-		 *
-		 * @private
 		 */
 		private _dispatchEvent(type: string, args: Object[]): void {
 			var listeners = this._eventListeners.get(type);
@@ -1045,10 +1034,6 @@ module libjass.renderers {
 
 	/**
 	 * Settings for the default renderer.
-	 *
-	 * @constructor
-	 *
-	 * @memberof libjass.renderers
 	 */
 	export class RendererSettings {
 		/**
@@ -1072,8 +1057,6 @@ module libjass.renderers {
 		 *
 		 * @param {!LinkStyle} linkStyle
 		 * @return {!Map.<string, !Array.<string>>}
-		 *
-		 * @static
 		 */
 		static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string[]> {
 			var map = new Map<string, string[]>();
@@ -1112,8 +1095,6 @@ module libjass.renderers {
 		 *
 		 * @param {!*} object
 		 * @return {!libjass.renderers.RendererSettings}
-		 *
-		 * @static
 		 */
 		static from(object: any): RendererSettings {
 			return RendererSettings._from(object.fontMap, object.preRenderTime);
@@ -1138,12 +1119,8 @@ module libjass.renderers {
 	/**
 	 * This class represents a single keyframe. It has a list of CSS properties (names and values) associated with a point in time. Multiple keyframes make up an animation.
 	 *
-	 * @constructor
 	 * @param {number} time
 	 * @param {!Object.<string, string>} properties
-	 *
-	 * @private
-	 * @memberof libjass.renderers
 	 */
 	class Keyframe {
 		constructor(private _time: number, private _properties: KeyframePropertiesMap) { }
@@ -1167,12 +1144,8 @@ module libjass.renderers {
 	 * This class represents a collection of animations. Each animation contains one or more keyframes.
 	 * The collection can then be converted to a CSS3 representation.
 	 *
-	 * @constructor
 	 * @param {!libjass.renderers.NullRenderer} renderer The renderer that this collection is associated with
 	 * @param {!libjass.Dialogue} dialogue The Dialogue that this collection is associated with
-	 *
-	 * @private
-	 * @memberof libjass.renderers
 	 */
 	class AnimationCollection {
 		private _id: string;
@@ -1253,16 +1226,12 @@ module libjass.renderers {
 	 * This class represents the style attribute of a span.
 	 * As a Dialogue's div is rendered, individual parts are added to span's, and this class is used to maintain the style attribute of those.
 	 *
-	 * @constructor
 	 * @param {!libjass.renderers.NullRenderer} renderer The renderer that this set of styles is associated with
 	 * @param {!libjass.Dialogue} dialogue The Dialogue that this set of styles is associated with
 	 * @param {number} scaleX The horizontal scaling of the subtitles
 	 * @param {number} scaleY The vertical scaling of the subtitles
 	 * @param {!HTMLDivElement} fontSizeElement A <div> element to measure font sizes with
 	 * @param {!SVGDefsElement} svgDefsElement An SVG <defs> element to append filter definitions to
-	 *
-	 * @private
-	 * @memberof libjass.renderers
 	 */
 	class SpanStyles {
 		private static _fontSizeCache: Map<string, Map<number, number>> = new Map<string, Map<number, number>>();
@@ -1811,13 +1780,9 @@ module libjass.renderers {
 	/**
 	 * This class represents an ASS drawing - a set of drawing instructions between {\p} tags.
 	 *
-	 * @constructor
 	 * @param {number} drawingScale
 	 * @param {number} scaleX
 	 * @param {number} scaleY
-	 *
-	 * @private
-	 * @memberof libjass.renderers
 	 */
 	class Drawing {
 		private _scaleX: number;
