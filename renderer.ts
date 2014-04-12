@@ -1687,7 +1687,7 @@ module libjass.renderers {
 		 *
 		 * @type {!libjass.parts.Color}
 		 */
-		get primaryColor() {
+		get primaryColor(): parts.Color {
 			return this._primaryColor;
 		}
 
