@@ -772,8 +772,13 @@ module libjass.renderers {
 					startNewSpan(false);
 				}
 
-				else if (part instanceof parts.Text || (libjass.debugMode && part instanceof parts.Comment)) {
+				else if (part instanceof parts.Text) {
 					currentSpan.appendChild(document.createTextNode((<parts.Text>part).value));
+					startNewSpan(false);
+				}
+
+				else if (libjass.debugMode && part instanceof parts.Comment) {
+					currentSpan.appendChild(document.createTextNode((<parts.Comment>part).value));
 					startNewSpan(false);
 				}
 
