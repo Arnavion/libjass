@@ -550,7 +550,7 @@ module libjass.renderers {
 			};
 			startNewSpan(false);
 
-			var currentDrawing: Drawing = null;
+			var currentDrawingStyles: DrawingStyles = new DrawingStyles(this._scaleX, this._scaleY);
 
 			var wrappingStyle = this.ass.properties.wrappingStyle;
 
@@ -757,18 +757,18 @@ module libjass.renderers {
 				}
 
 				else if (part instanceof parts.DrawingMode) {
-					currentDrawing = new Drawing((<parts.DrawingMode>part).scale, this._scaleX, this._scaleY);
+					var drawingModePart = <parts.DrawingMode>part;
+					if (drawingModePart.scale !== 0) {
+						currentDrawingStyles.scale = drawingModePart.scale;
+					}
 				}
 
 				else if (part instanceof parts.DrawingBaselineOffset) {
-					currentDrawing.baselineOffset = (<parts.DrawingBaselineOffset>part).value;
+					currentDrawingStyles.baselineOffset = (<parts.DrawingBaselineOffset>part).value;
 				}
 
 				else if (part instanceof parts.DrawingInstructions) {
-					startNewSpan(false);
-					currentDrawing.instructions = (<parts.DrawingInstructions>part).instructions;
-					currentSpan.appendChild(currentDrawing.toSVG(currentSpanStyles.primaryColor));
-					currentDrawing = null;
+					currentSpan.appendChild(currentDrawingStyles.toSVG(<parts.DrawingInstructions>part, currentSpanStyles.primaryColor.withAlpha(currentSpanStyles.primaryAlpha)));
 					startNewSpan(false);
 				}
 
@@ -1794,20 +1794,20 @@ module libjass.renderers {
 	/**
 	 * This class represents an ASS drawing - a set of drawing instructions between {\p} tags.
 	 *
-	 * @param {number} drawingScale
-	 * @param {number} scaleX
-	 * @param {number} scaleY
+	 * @param {number} outputScaleX
+	 * @param {number} outputScaleY
 	 */
-	class Drawing {
-		private _scaleX: number;
-		private _scaleY: number;
+	class DrawingStyles {
+		private _scale: number = 1;
 		private _baselineOffset: number = 0;
-		private _instructions: parts.drawing.Instruction[] = [];
 
-		constructor(drawingScale: number, scaleX: number, scaleY: number) {
-			var scaleFactor = Math.pow(2, drawingScale - 1);
-			this._scaleX = scaleX / scaleFactor;
-			this._scaleY = scaleY / scaleFactor;
+		constructor(private _outputScaleX: number, private _outputScaleY: number) { }
+
+		/**
+		 * @type {number}
+		 */
+		set scale(value: number) {
+			this._scale = value;
 		}
 
 		/**
@@ -1818,24 +1818,22 @@ module libjass.renderers {
 		}
 
 		/**
-		 * @type {!Array.<!libjass.parts.drawing.Instruction>}
-		 */
-		set instructions(value: parts.drawing.Instruction[]) {
-			this._instructions = value;
-		}
-
-		/**
 		 * Converts this drawing to an <svg> element.
 		 *
+		 * @param {!libjass.parts.DrawingInstructions} drawingInstructions
 		 * @param {!libjass.parts.Color} fillColor
 		 * @return {!SVGSVGElement}
 		 */
-		toSVG(fillColor: parts.Color): SVGSVGElement {
+		toSVG(drawingInstructions: parts.DrawingInstructions, fillColor: parts.Color): SVGElement {
+			var scaleFactor = Math.pow(2, this._scale - 1);
+			var scaleX = this._outputScaleX / scaleFactor;
+			var scaleY = this._outputScaleY / scaleFactor;
+
 			var path = "";
 			var bboxWidth = 0;
 			var bboxHeight = 0;
 
-			this._instructions.forEach((instruction: parts.drawing.Instruction) => {
+			drawingInstructions.instructions.forEach(instruction => {
 				if (instruction instanceof parts.drawing.MoveInstruction) {
 					var movePart = <parts.drawing.MoveInstruction>instruction;
 					path += " M " + movePart.x + " " + (movePart.y + this._baselineOffset);
@@ -1857,8 +1855,8 @@ module libjass.renderers {
 			});
 
 			var result =
-				'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="' + (bboxWidth * this._scaleX).toFixed(3) + 'px" height="' + (bboxHeight * this._scaleY).toFixed(3) + 'px">\n' +
-				'\t<g transform="scale(' + this._scaleX.toFixed(3) + ' ' + this._scaleY.toFixed(3) + ')">\n' +
+				'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="' + (bboxWidth * scaleX).toFixed(3) + 'px" height="' + (bboxHeight * scaleY).toFixed(3) + 'px">\n' +
+				'\t<g transform="scale(' + scaleX.toFixed(3) + ' ' + scaleY.toFixed(3) + ')">\n' +
 				'\t\t<path d="' + path + '" fill="' + fillColor.toString() + '" />\n' +
 				'\t</g>\n' +
 				'</svg>';
