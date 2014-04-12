@@ -1728,6 +1728,15 @@ module libjass.renderers {
 		}
 
 		/**
+		 * Gets the primary alpha property.
+		 *
+		 * @type {?number}
+		 */
+		get primaryAlpha(): number {
+			return this._primaryAlpha;
+		}
+
+		/**
 		 * Sets the primary alpha property.
 		 *
 		 * @type {?number}
