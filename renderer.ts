@@ -1447,7 +1447,7 @@ module libjass.renderers {
 				});
 
 				outlineFilter =
-					'\t<feFlood flood-color="' + outlineColor.toString() + '" result="outlineColor"/>' +
+					'\t<feFlood flood-color="' + outlineColor.toString() + '" result="outlineColor" />' +
 					outlineFilter +
 					'\t<feMerge>\n' +
 					mergeOutlinesFilter +
