@@ -1488,7 +1488,7 @@ module libjass.renderers {
 				span.style.textShadow = shadowColor.toString() + " " + (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) + "px " + (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) + "px 0px";
 			}
 
-			if (this._rotationZ !== null) {
+			if (this._rotationZ !== 0) {
 				// Perspective needs to be set on a "transformable element"
 				filterWrapperSpan.style.display = "inline-block";
 			}
