@@ -597,8 +597,12 @@ module libjass.renderers {
 					currentSpanStyles.shadowDepthY = (<parts.ShadowY>part).value;
 				}
 
+				else if (part instanceof parts.Blur) {
+					currentSpanStyles.blur = (<parts.Blur>part).value;
+				}
+
 				else if (part instanceof parts.GaussianBlur) {
-					currentSpanStyles.blur = (<parts.GaussianBlur>part).value;
+					currentSpanStyles.gaussianBlur = (<parts.GaussianBlur>part).value;
 				}
 
 				else if (part instanceof parts.FontName) {
@@ -1266,6 +1270,7 @@ module libjass.renderers {
 		private _shadowAlpha: number;
 
 		private _blur: number;
+		private _gaussianBlur: number;
 
 		private _nextFilterId = 0;
 
@@ -1323,6 +1328,7 @@ module libjass.renderers {
 			this.shadowAlpha = null;
 
 			this.blur = null;
+			this.gaussianBlur = null;
 		}
 
 		/**
@@ -1456,9 +1462,13 @@ module libjass.renderers {
 			}
 
 			var blurFilter = '';
-			if (this._blur > 0) {
-				blurFilter =
-					'\t<feGaussianBlur stdDeviation="' + this._blur + '" />\n';
+			if (this._gaussianBlur > 0) {
+				blurFilter +=
+					'\t<feGaussianBlur stdDeviation="' + this._gaussianBlur + '" />\n';
+			}
+			for (var i = 0; i < this._blur; i++) {
+				blurFilter +=
+					'\t<feConvolveMatrix kernelMatrix="1 2 1 2 4 2 1 2 1" edgeMode="none" />\n';
 			}
 
 			var filterWrapperSpan = document.createElement("span");
@@ -1575,6 +1585,15 @@ module libjass.renderers {
 		 */
 		set blur(value: number) {
 			this._blur = SpanStyles._valueOrDefault(value, 0);
+		}
+
+		/**
+		 * Sets the Gaussian blur property. null defaults it to 0.
+		 *
+		 * @type {?number}
+		 */
+		set gaussianBlur(value: number) {
+			this._gaussianBlur = SpanStyles._valueOrDefault(value, 0);
 		}
 
 		/**
