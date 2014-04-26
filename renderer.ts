@@ -789,14 +789,11 @@ module libjass.renderers {
 
 			dialogue.parts.some(part => {
 				if (part instanceof parts.Position || part instanceof parts.Move) {
-					var transformOriginParts = DefaultRenderer._getTransformOrigin(dialogue);
+					var transformOrigin = DefaultRenderer._transformOrigins[dialogue.alignment];
 
-					var translateX = -transformOriginParts[0];
-					var translateY = -transformOriginParts[1];
+					var divTransformStyle = "translate(" + (-transformOrigin[0]) + "%, " + (-transformOrigin[1]) + "%) translate(-" + sub.style.marginLeft + ", -" + sub.style.marginTop + ")";
+					var transformOriginString = transformOrigin[0] + "% " + transformOrigin[1] + "%";
 
-					var divTransformStyle = "translate(" + translateX + "%, " + translateY + "%) translate(-" + sub.style.marginLeft + ", -" + sub.style.marginTop + ")";
-
-					var transformOriginString = transformOriginParts[0] + "% " + transformOriginParts[1] + "%";
 					sub.style.webkitTransform = divTransformStyle;
 					sub.style.webkitTransformOrigin = transformOriginString;
 
@@ -1017,24 +1014,12 @@ module libjass.renderers {
 			this._currentSubs.clear();
 		}
 
-		private static _getTransformOrigin(dialogue: Dialogue): number[] {
-			var transformOriginX: number;
-			var transformOriginY: number;
-
-			switch (dialogue.alignment) {
-				case 1: transformOriginX =   0; transformOriginY = 100; break;
-				case 2: transformOriginX =  50; transformOriginY = 100; break;
-				case 3: transformOriginX = 100; transformOriginY = 100; break;
-				case 4: transformOriginX =   0; transformOriginY =  50; break;
-				case 5: transformOriginX =  50; transformOriginY =  50; break;
-				case 6: transformOriginX = 100; transformOriginY =  50; break;
-				case 7: transformOriginX =   0; transformOriginY =   0; break;
-				case 8: transformOriginX =  50; transformOriginY =   0; break;
-				case 9: transformOriginX = 100; transformOriginY =   0; break;
-			}
-
-			return [transformOriginX, transformOriginY];
-		}
+		private static _transformOrigins: number[][] = [
+			null,
+			[0, 100], [50, 100], [100, 100],
+			[0, 50], [50, 50], [100, 50],
+			[0, 0], [50, 0], [100, 0]
+		];
 	}
 
 	/**
