@@ -70,7 +70,7 @@ module libjass {
 		/**
 		 * Creates an ASS object from the raw text of an ASS script.
 		 *
-		 * @param {string} rawASS The raw text of the script.
+		 * @param {string} raw The raw text of the script.
 		 * @param {number=0} type The type of the script. One of the libjass.Format constants.
 		 * @return {!libjass.ASS}
 		 */
