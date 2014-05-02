@@ -64,6 +64,18 @@
 	top: 0;
 }
 
+.libjass-subs .an1, .libjass-subs .an4, .libjass-subs .an7 {
+	text-align: left;
+}
+
+.libjass-subs .an2, .libjass-subs .an5, .libjass-subs .an8 {
+	text-align: center;
+}
+
+.libjass-subs .an3, .libjass-subs .an6, .libjass-subs .an9 {
+	text-align: right;
+}
+
 .libjass-subs div {
 	line-height: 0;
 }

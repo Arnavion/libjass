@@ -232,12 +232,6 @@ module libjass.renderers {
 			sub.style.marginTop = sub.style.marginBottom = (this._scaleY * dialogue.style.marginVertical).toFixed(3) + "px";
 			sub.style.minWidth = (this._subsWrapper.offsetWidth - 2 * (this._scaleX * dialogue.style.marginLeft)).toFixed(3) + "px";
 
-			switch (dialogue.alignment) {
-				case 1: case 4: case 7: sub.style.textAlign = "left"; break;
-				case 2: case 5: case 8: sub.style.textAlign = "center"; break;
-				case 3: case 6: case 9: sub.style.textAlign = "right"; break;
-			}
-
 			var animationCollection = new AnimationCollection(this, dialogue);
 
 			var currentSpan: HTMLSpanElement = null;
