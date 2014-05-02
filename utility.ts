@@ -260,4 +260,12 @@ module libjass {
 	else {
 		Map = <any>SimpleMap;
 	}
+
+	export function mixin(derived: any, mixins: any[]) {
+		mixins.forEach((mixin: any) => {
+			Object.getOwnPropertyNames(mixin.prototype).forEach(name => {
+				derived.prototype[name] = mixin.prototype[name];
+			});
+		});
+	}
 }

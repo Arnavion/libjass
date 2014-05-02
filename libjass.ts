@@ -21,5 +21,8 @@
 ///<reference path="utility.ts" />
 ///<reference path="parts.ts" />
 ///<reference path="parser.ts" />
-///<reference path="renderer.ts" />
+///<reference path="renderers-clocks.ts" />
+///<reference path="renderers-null.ts" />
+///<reference path="renderers-web.ts" />
+///<reference path="renderers-default.ts" />
 ///<reference path="types.ts" />

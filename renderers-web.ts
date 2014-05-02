@@ -28,301 +28,16 @@ interface CSSStyleDeclaration {
 	webkitTransformOrigin: string;
 }
 
-interface Document {
-	fullscreenElement: Element;
-	mozFullScreenElement: Element;
-	webkitFullscreenElement: Element;
-}
-
 module libjass.renderers {
 	/**
-	 * A renderer implementation that doesn't output anything.
+	 * A renderer implementation that draws subtitles to the given <div>
 	 *
-	 * @param {!HTMLVideoElement} video
 	 * @param {!libjass.ASS} ass
+	 * @param {!libjass.renderers.Clock} clock
 	 * @param {!libjass.renderers.RendererSettings} settings
+	 * @param {!HTMLDivElement} libjassSubsWrapper Subtitles will be rendered to this <div>
 	 */
-	export class NullRenderer {
-		private static _lastRendererId = -1;
-
-		private _id: number;
-
-		private _settings: RendererSettings;
-
-		private _state: RendererState;
-		private _currentTime: number;
-		private _enabled: boolean = true;
-
-		private _nextAnimationFrameRequestId: number = null;
-
-		constructor(private _video: HTMLVideoElement, private _ass: ASS, settings: RendererSettings) {
-			this._id = ++NullRenderer._lastRendererId;
-
-			this._settings = RendererSettings.from(settings);
-
-			this._video.addEventListener("playing", () => this._onVideoPlaying(), false);
-			this._video.addEventListener("pause", () => this._onVideoPause(), false);
-			this._video.addEventListener("seeking", () => this._onVideoSeeking(), false);
-		}
-
-		/**
-		 * The unique ID of this renderer. Auto-generated.
-		 *
-		 * @type {number}
-		 */
-		get id(): number {
-			return this._id;
-		}
-
-		/**
-		 * @type {!HTMLVideoElement}
-		 */
-		get video(): HTMLVideoElement {
-			return this._video;
-		}
-
-		/**
-		 * @type {!libjass.ASS}
-		 */
-		get ass(): ASS {
-			return this._ass;
-		}
-
-		/**
-		 * @type {!libjass.renderers.RendererSettings}
-		 */
-		get settings(): RendererSettings {
-			return this._settings;
-		}
-
-		/**
-		 * @type {number}
-		 */
-		get currentTime(): number {
-			return this._currentTime;
-		}
-
-		get enabled(): boolean {
-			return this._enabled;
-		}
-
-		/**
-		 * Enable the renderer.
-		 */
-		enable(): void {
-			if (this._enabled) {
-				return;
-			}
-
-			this._enabled = true;
-
-			this._onVideoPlaying();
-		}
-
-		/**
-		 * Disable the renderer.
-		 */
-		disable(): void {
-			if (!this._enabled) {
-				return;
-			}
-
-			this._onVideoPause();
-
-			this._enabled = false;
-		}
-
-		/**
-		 * Toggle the renderer.
-		 */
-		toggle(): void {
-			if (this._enabled) {
-				this.disable();
-			}
-			else {
-				this.enable();
-			}
-		}
-
-		/**
-		 * Pre-render a dialogue. This is a no-op.
-		 *
-		 * @param {!libjass.Dialogue} dialogue
-		 */
-		preRender(dialogue: Dialogue): void { }
-
-		/**
-		 * Draw a dialogue. This is a no-op.
-		 *
-		 * @param {!libjass.Dialogue} dialogue
-		 */
-		draw(dialogue: Dialogue): void { }
-
-		/**
-		 * Runs when the video starts playing, or is resumed from pause.
-		 */
-		onVideoPlaying(): void {
-			if (libjass.verboseMode) {
-				console.log("NullRenderer.onVideoPlaying: " + this._getStateLogString());
-			}
-		}
-
-		/**
-		 * Runs when the video is paused.
-		 */
-		onVideoPause(): void {
-			if (libjass.verboseMode) {
-				console.log("NullRenderer.onVideoPause: " + this._getStateLogString());
-			}
-		}
-
-		/**
-		 * Runs when the video's current time changed. This might be a result of either regular playback or seeking.
-		 */
-		onVideoTimeUpdate(): void {
-			if (libjass.verboseMode) {
-				console.log("NullRenderer.onVideoTimeUpdate: " + this._getStateLogString());
-			}
-
-			for (var i = 0; i < this._ass.dialogues.length; i++) {
-				var dialogue = this._ass.dialogues[i];
-
-				if (dialogue.end > this._currentTime) {
-					if (dialogue.start <= this._currentTime) {
-						// This dialogue is visible right now. Draw it.
-						this.draw(dialogue);
-					}
-					else if (dialogue.start <= (this._currentTime + this._settings.preRenderTime)) {
-						// This dialogue will be visible soon. Pre-render it.
-						this.preRender(dialogue);
-					}
-				}
-			}
-		}
-
-		private _timerTick(): void {
-			if (libjass.verboseMode) {
-				console.log("NullRenderer._timerTick: " + this._getStateLogString());
-			}
-
-			if (this._currentTime !== this._video.currentTime) {
-				this._currentTime = this._video.currentTime;
-
-				if (this._state !== RendererState.Playing) {
-					this._state = RendererState.Playing;
-
-					this.onVideoPlaying();
-				}
-
-				this.onVideoTimeUpdate();
-			}
-			else {
-				if (this._state !== RendererState.Paused) {
-					this._state = RendererState.Paused;
-
-					this.onVideoPause();
-				}
-			}
-
-			this._nextAnimationFrameRequestId = requestAnimationFrame(() => this._timerTick());
-		}
-
-		private _onVideoPlaying(): void {
-			if (!this._enabled) {
-				return;
-			}
-
-			if (this._state === RendererState.Playing) {
-				return;
-			}
-
-			if (libjass.verboseMode) {
-				console.log("NullRenderer._onVideoPlaying: " + this._getStateLogString());
-			}
-
-			this._state = RendererState.Playing;
-
-			this.onVideoPlaying();
-
-			if (libjass.verboseMode) {
-				console.log("NullRenderer._onVideoPlaying: Set NullRenderer._nextAnimationFrameRequestId to " + this._nextAnimationFrameRequestId);
-			}
-
-			if (this._nextAnimationFrameRequestId === null) {
-				this._timerTick();
-			}
-		}
-
-		private _onVideoPause(): void {
-			if (!this._enabled) {
-				return;
-			}
-
-			if (libjass.verboseMode) {
-				console.log("NullRenderer._onVideoPause: " + this._getStateLogString());
-			}
-
-			this._state = RendererState.Paused;
-
-			this.onVideoPause();
-
-			if (this._nextAnimationFrameRequestId === null) {
-				if (libjass.debugMode) {
-					console.warn("NullRenderer._onVideoPause: Abnormal state detected. NullRenderer._nextAnimationFrameRequestId should not have been null");
-				}
-			}
-
-			cancelAnimationFrame(this._nextAnimationFrameRequestId);
-			this._nextAnimationFrameRequestId = null;
-
-			if (libjass.verboseMode) {
-				console.log("NullRenderer._onVideoPause: Cancelled NullRenderer._nextAnimationFrameRequestId");
-			}
-		}
-
-		private _onVideoSeeking(): void {
-			if (!this._enabled) {
-				return;
-			}
-
-			if (libjass.verboseMode) {
-				console.log("NullRenderer._onVideoSeeking: " + this._getStateLogString());
-			}
-
-			if (this._currentTime === this._video.currentTime) {
-				return;
-			}
-
-			if (this._state !== RendererState.Paused) {
-				return;
-			}
-
-			this._currentTime = this._video.currentTime;
-
-			this.onVideoPlaying();
-			this.onVideoTimeUpdate();
-			this.onVideoPause();
-		}
-
-		private _getStateLogString(): string {
-			return "state = " + RendererState[this._state] + ", video.currentTime = " + this._video.currentTime + ", video.paused = " + this._video.paused + ", video.seeking = " + this._video.seeking;
-		}
-	}
-
-	enum RendererState {
-		Playing = 0,
-		Paused = 1,
-	}
-
-	/**
-	 * A default renderer implementation.
-	 *
-	 * @param {!HTMLVideoElement} video
-	 * @param {!libjass.ASS} ass
-	 * @param {!libjass.renderers.RendererSettings} settings
-	 */
-	export class DefaultRenderer extends NullRenderer {
-		private _videoSubsWrapper: HTMLDivElement;
+	export class WebRenderer extends NullRenderer implements EventSource<string> {
 		private _subsWrapper: HTMLDivElement;
 		private _layerWrappers: HTMLDivElement[] = [];
 		private _layerAlignmentWrappers: HTMLDivElement[][] = [];
@@ -336,30 +51,24 @@ module libjass.renderers {
 		private _scaleX: number;
 		private _scaleY: number;
 
-		private _videoIsFullScreen: boolean = false;
+		private _enabled: boolean = true;
 
-		private _eventListeners: Map<string, Function[]> = new Map<string, Function[]>();
+		constructor(ass: ASS, clock: Clock, settings: RendererSettings, private _libjassSubsWrapper: HTMLDivElement) {
+			super(ass, clock, settings);
 
-		constructor(video: HTMLVideoElement, ass: ASS, settings: RendererSettings) {
-			super(video, ass, settings);
-
-			this._videoSubsWrapper = document.createElement("div");
-			video.parentElement.replaceChild(this._videoSubsWrapper, video);
-
-			this._videoSubsWrapper.className = "libjass-wrapper";
-			this._videoSubsWrapper.appendChild(video);
+			this._libjassSubsWrapper.classList.add("libjass-wrapper");
 
 			this._subsWrapper = document.createElement("div");
-			this._videoSubsWrapper.appendChild(this._subsWrapper);
+			this._libjassSubsWrapper.appendChild(this._subsWrapper);
 			this._subsWrapper.className = "libjass-subs";
 
 			this._fontSizeElement = document.createElement("div");
-			this._videoSubsWrapper.appendChild(this._fontSizeElement);
+			this._libjassSubsWrapper.appendChild(this._fontSizeElement);
 			this._fontSizeElement.className = "libjass-font-measure";
 			this._fontSizeElement.appendChild(document.createTextNode("M"));
 
 			var svgElement = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
-			this._videoSubsWrapper.appendChild(svgElement);
+			this._libjassSubsWrapper.appendChild(svgElement);
 			svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 			svgElement.setAttribute("version", "1.1");
 			svgElement.setAttribute("class", "libjass-filters");
@@ -372,8 +81,9 @@ module libjass.renderers {
 			if (this.settings.fontMap === null) {
 				setTimeout(() => this._ready(), 0);
 			}
-			// Preload fonts
 			else {
+				// Preload fonts
+
 				var urlsToPreload: string[] = [];
 				this.settings.fontMap.forEach((src: string[], name: string) => {
 					urlsToPreload.unshift.apply(urlsToPreload, src);
@@ -428,26 +138,17 @@ module libjass.renderers {
 					}, 0);
 				}
 			}
+		}
 
-			this._eventListeners.set("ready", []);
-			this._eventListeners.set("fullScreenChange", []);
+		get libjassSubsWrapper(): HTMLDivElement {
+			return this._libjassSubsWrapper;
 		}
 
 		/**
-		 * Add a listener for the given event.
-		 *
-		 * The "ready" event is fired when fonts have been preloaded if settings.preLoadFonts is true, or in the next tick after the DefaultRenderer object is constructed otherwise.
-		 *
-		 * The "fullScreenChange" event is fired when the browser's fullscreenchange event is fired for the video element.
-		 *
-		 * @param {string} type The type of event to attach the listener for. One of "ready" and "fullScreenChange".
-		 * @param {!Function} listener The listener
+		 * @type {boolean}
 		 */
-		addEventListener(type: string, listener: Function): void {
-			var listeners = this._eventListeners.get(type);
-			if (listeners !== null) {
-				listeners.push(listener);
-			}
+		get enabled(): boolean {
+			return this._enabled;
 		}
 
 		/**
@@ -483,30 +184,35 @@ module libjass.renderers {
 				this._svgDefsElement.removeChild(this._svgDefsElement.firstChild);
 			}
 
-			// this.currentTime will be undefined if resize() is called before video begins playing for the first time. In this situation, there is no need to force a redraw.
-			if (this.currentTime !== undefined) {
-				this.onVideoTimeUpdate();
+			// this.currentTime will be -1 if resize() is called before the clock begins playing for the first time. In this situation, there is no need to force a redraw.
+			if (this.clock.currentTime !== -1) {
+				this._onClockTimeUpdate();
 			}
 		}
 
-		/**
-		 * @deprecated
-		 */
-		resizeVideo(width: number, height: number): void {
-			console.warn("`DefaultRenderer.resizeVideo(width, height)` has been deprecated. Use `DefaultRenderer.resize(width, height)` instead.");
-			this.resize(width, height);
-		}
-
 		enable(): void {
-			super.enable();
+			this.clock.enable();
 
 			this._subsWrapper.style.display = "";
+
+			this._enabled = true;
 		}
 
 		disable(): void {
-			super.disable();
+			this.clock.disable();
 
 			this._subsWrapper.style.display = "none";
+
+			this._enabled = false;
+		}
+
+		toggle(): void {
+			if (this._enabled) {
+				this.disable();
+			}
+			else {
+				this.enable();
+			}
 		}
 
 		/**
@@ -841,7 +547,7 @@ module libjass.renderers {
 
 		/**
 		 * Returns the subtitle div for display. The currentTime is used to shift the animations appropriately, so that at the time the
-		 * div is inserted into the DOM and the animations begin, they are in sync with the video time.
+		 * div is inserted into the DOM and the animations begin, they are in sync with the clock time.
 		 *
 		 * @param {!libjass.Dialogue} dialogue
 		 */
@@ -878,9 +584,9 @@ module libjass.renderers {
 			if (defaultAnimationDelay !== "") {
 				var animationDelay =
 					defaultAnimationDelay
-					.split(",")
-					.map(delay => (parseFloat(delay) + dialogue.start - this.currentTime).toFixed(3) + "s")
-					.join(",");
+						.split(",")
+						.map(delay => (parseFloat(delay) + dialogue.start - this.clock.currentTime).toFixed(3) + "s")
+						.join(",");
 
 				result.style.webkitAnimationDelay = animationDelay;
 				result.style.animationDelay = animationDelay;
@@ -931,82 +637,35 @@ module libjass.renderers {
 			this._currentSubs.set(dialogue, result);
 		}
 
-		onVideoPlaying(): void {
-			super.onVideoPlaying();
+		_onClockPlay(): void {
+			super._onClockPlay();
 
 			this._removeAllSubs();
 
 			this._subsWrapper.classList.remove("paused");
 		}
 
-		onVideoPause(): void {
-			super.onVideoPause();
+		_onClockPause(): void {
+			super._onClockPause();
 
 			this._subsWrapper.classList.add("paused");
 		}
 
-		onVideoTimeUpdate(): void {
-			super.onVideoTimeUpdate();
+		_onClockTimeUpdate(): void {
+			var currentTime = this.clock.currentTime;
+
+			super._onClockTimeUpdate();
 
 			this._currentSubs.forEach((sub: HTMLDivElement, dialogue: Dialogue) => {
-				if (dialogue.start > this.currentTime || dialogue.end < this.currentTime) {
+				if (dialogue.start > currentTime || dialogue.end < currentTime) {
 					this._currentSubs.delete(dialogue);
 					this._removeSub(sub);
 				}
 			});
 		}
 
-		private _ready(): void {
-			document.addEventListener("webkitfullscreenchange", event => this._onFullScreenChange(), false);
-			document.addEventListener("mozfullscreenchange", event => this._onFullScreenChange(), false);
-			document.addEventListener("fullscreenchange", event => this._onFullScreenChange(), false);
-
-			this.resize(this.video.offsetWidth, this.video.offsetHeight);
-
+		_ready(): void {
 			this._dispatchEvent("ready", []);
-		}
-
-		private _onFullScreenChange() {
-			var fullScreenElement = document.fullscreenElement;
-			if (fullScreenElement === undefined) {
-				fullScreenElement = document.mozFullScreenElement;
-			}
-			if (fullScreenElement === undefined) {
-				fullScreenElement = document.msFullscreenElement;
-			}
-			if (fullScreenElement === undefined) {
-				fullScreenElement = document.webkitFullscreenElement;
-			}
-
-			if (fullScreenElement === this.video) {
-				this._videoSubsWrapper.classList.add("libjass-full-screen");
-
-				this.resize(screen.width, screen.height);
-
-				this._videoIsFullScreen = true;
-
-				this._dispatchEvent("fullScreenChange", [this._videoIsFullScreen]);
-			}
-			else if (fullScreenElement === null && this._videoIsFullScreen) {
-				this._videoSubsWrapper.classList.remove("libjass-full-screen");
-
-				this._videoIsFullScreen = false;
-
-				this._dispatchEvent("fullScreenChange", [this._videoIsFullScreen]);
-			}
-		}
-
-		/**
-		 * @param {string} type
-		 * @param {!Array.<*>} args
-		 */
-		private _dispatchEvent(type: string, args: Object[]): void {
-			var listeners = this._eventListeners.get(type);
-			if (listeners !== null) {
-				listeners.forEach((listener: Function) => {
-					listener.apply(this, args);
-				});
-			}
 		}
 
 		private _removeSub(sub: HTMLDivElement): void {
@@ -1024,87 +683,13 @@ module libjass.renderers {
 			[0, 50], [50, 50], [100, 50],
 			[0, 0], [50, 0], [100, 0]
 		];
+
+		// EventSource members
+		_eventListeners: Map<string, Function[]> = new Map<string, Function[]>();
+		addEventListener: (type: string, listener: Function) => void;
+		_dispatchEvent: (type: string, args: Object[]) => void;
 	}
-
-	/**
-	 * Settings for the default renderer.
-	 */
-	export class RendererSettings {
-		/**
-		 * A map of font name to one or more URLs of that font. If provided, the fonts in this map are pre-loaded by the DefaultRenderer before it begins playing the video.
-		 *
-		 * If you have a <style> or <link> element on the page containing @font-face rules, you can use the RendererSettings.makeFontMapFromStyleElement() convenience method to create a font map.
-		 *
-		 * @type {!Map.<string, !Array.<string>>}
-		 */
-		fontMap: Map<string, string[]>;
-
-		/**
-		 * Subtitles will be pre-rendered for this amount of time (seconds)
-		 *
-		 * @type {number}
-		 */
-		preRenderTime: number;
-
-		/**
-		 * A convenience method to create a font map from a <style> or <link> element that contains @font-face rules.
-		 *
-		 * @param {!LinkStyle} linkStyle
-		 * @return {!Map.<string, !Array.<string>>}
-		 */
-		static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string[]> {
-			var map = new Map<string, string[]>();
-
-			var styleSheet = <CSSStyleSheet>linkStyle.sheet;
-			var rules: CSSFontFaceRule[] = Array.prototype.filter.call(styleSheet.cssRules, (rule: CSSRule) => rule.type === CSSRule.FONT_FACE_RULE);
-			rules.forEach((rule: CSSFontFaceRule) => {
-				var src = rule.style.getPropertyValue("src");
-				var urls: string[] = [];
-
-				if (!src) {
-					src = rule.cssText.split("\n")
-						.map((line: string) => line.match(/src: ([^;]+);/))
-						.filter((matches: string[]) => matches !== null)
-						.map((matches: string[]) => matches[1])[0];
-				}
-
-				urls = src.split(/,\s*/).map((url: string) => url.match(/^url\((.+)\)$/)[1]);
-
-				if (urls.length > 0) {
-					var name = RendererSettings._stripQuotes(rule.style.getPropertyValue("font-family"));
-					var existingList = map.get(name);
-					if (existingList === undefined) {
-						existingList = [];
-						map.set(name, existingList);
-					}
-					existingList.unshift.apply(existingList, urls.map(RendererSettings._stripQuotes));
-				}
-			});
-
-			return map;
-		}
-
-		/**
-		 * Converts an arbitrary object into a RendererSettings object.
-		 *
-		 * @param {!*} object
-		 * @return {!libjass.renderers.RendererSettings}
-		 */
-		static from(object: any): RendererSettings {
-			return RendererSettings._from(object.fontMap, object.preRenderTime);
-		}
-
-		private static _from(fontMap: Map<string, string[]> = null, preRenderTime: number = 5): RendererSettings {
-			var result = new RendererSettings();
-			result.fontMap = fontMap;
-			result.preRenderTime = preRenderTime;
-			return result;
-		}
-
-		private static _stripQuotes(str: string): string {
-			return str.match(/^["']?(.*?)["']?$/)[1];
-		}
-	}
+	mixin(WebRenderer, [EventSource]);
 
 	interface KeyframePropertiesMap {
 		[key: string]: string;
