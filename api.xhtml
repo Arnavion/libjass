@@ -24,16 +24,16 @@
 				border-bottom: 1px solid black;
 			}
 
-			.function, .constructor, .getter, .setter {
+			.variable, .function, .constructor, .getter, .setter {
 				margin-left: 30px;
 				padding: 10px;
 			}
 
-			section > .function:nth-child(2n), section > .constructor:nth-child(2n) {
+			section > .variable:nth-child(2n), section > .function:nth-child(2n), section > .constructor:nth-child(2n) {
 				background-color: rgb(221, 250, 238);
 			}
 
-			section > .function:nth-child(2n + 1), section > .constructor:nth-child(2n + 1) {
+			section > .variable:nth-child(2n + 1), section > .function:nth-child(2n + 1), section > .constructor:nth-child(2n + 1) {
 				background-color: rgb(244, 250, 221);
 			}
 
@@ -54,7 +54,7 @@
 				margin: 0;
 			}
 
-			.constructor .function, .constructor .getter, .constructor .setter {
+			.constructor .variable, .constructor .function, .constructor .getter, .constructor .setter {
 				background-color: rgb(250, 241, 221);
 			}
 
@@ -115,6 +115,10 @@
 			<h2>Namespaces</h2>
 			<span class="namespace"><a href="#libjass">libjass</a></span>
 			<ul class="namespace-elements">
+				<li><a href="#libjass.Map">Map</a></li>
+				<li><a href="#libjass.Set">Set</a></li>
+				<li><a href="#libjass.debugMode">debugMode</a></li>
+				<li><a href="#libjass.verboseMode">verboseMode</a></li>
 				<li><a href="#libjass.ASS">ASS</a></li>
 				<li><a href="#libjass.Dialogue">Dialogue</a></li>
 				<li><a href="#libjass.ScriptProperties">ScriptProperties</a></li>
@@ -196,10 +200,14 @@
 			<span class="namespace"><a href="#libjass.renderers">libjass.renderers</a></span>
 			<ul class="namespace-elements">
 				<li><a href="#libjass.renderers.DefaultRenderer">DefaultRenderer</a></li>
+				<li><a href="#libjass.renderers.EventSource">EventSource</a></li>
+				<li><a href="#libjass.renderers.ManualClock">ManualClock</a></li>
 				<li><a href="#libjass.renderers.NullRenderer">NullRenderer</a></li>
 				<li><a href="#libjass.renderers.RendererSettings">RendererSettings</a></li>
+				<li><a href="#libjass.renderers.VideoClock">VideoClock</a></li>
+				<li><a href="#libjass.renderers.WebRenderer">WebRenderer</a></li>
 				<li class="private"><a href="#libjass.renderers.AnimationCollection">AnimationCollection</a></li>
-				<li class="private"><a href="#libjass.renderers.Drawing">Drawing</a></li>
+				<li class="private"><a href="#libjass.renderers.DrawingStyles">DrawingStyles</a></li>
 				<li class="private"><a href="#libjass.renderers.Keyframe">Keyframe</a></li>
 				<li class="private"><a href="#libjass.renderers.SpanStyles">SpanStyles</a></li>
 			</ul>
@@ -209,6 +217,46 @@
 
 			<section>
 				<h1 id="libjass">libjass</h1>
+
+				<section>
+					<h2>Variables</h2>
+					<dl class="variable" id="libjass.Map">
+						<dt class="name"><a href="#libjass.Map">Map</a></dt>
+						<dd class="description">
+							<p>Set to browser's implementation of Map if it has one, else set to libjass.SimpleMap</p>
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.Map;
+libjass.Map = value;</code></pre></fieldset></dd>
+						<dd class="return type">function(new:Map)</dd>
+					</dl>
+					<dl class="variable" id="libjass.Set">
+						<dt class="name"><a href="#libjass.Set">Set</a></dt>
+						<dd class="description">
+							<p>Set to browser's implementation of Set if it has one, else set to libjass.SimpleSet</p>
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.Set;
+libjass.Set = value;</code></pre></fieldset></dd>
+						<dd class="return type">function(new:Set)</dd>
+					</dl>
+					<dl class="variable" id="libjass.debugMode">
+						<dt class="name"><a href="#libjass.debugMode">debugMode</a></dt>
+						<dd class="description">
+							<p>Debug mode. When true, libjass logs some debug messages.</p>
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.debugMode;
+libjass.debugMode = value;</code></pre></fieldset></dd>
+						<dd class="return type">boolean</dd>
+					</dl>
+					<dl class="variable" id="libjass.verboseMode">
+						<dt class="name"><a href="#libjass.verboseMode">verboseMode</a></dt>
+						<dd class="description">
+							<p>Verbose debug mode. When true, libjass logs some more debug messages. This setting is independent of debugMode.</p>
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.verboseMode;
+libjass.verboseMode = value;</code></pre></fieldset></dd>
+						<dd class="return type">boolean</dd>
+					</dl>
+				</section>
 
 				<section>
 					<h2>Classes</h2>
@@ -248,10 +296,10 @@
 								<dd class="description">
 									<p>Creates an ASS object from the raw text of an ASS script.</p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>var result = ASS.fromString(rawASS, type);</code></pre></fieldset></dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = ASS.fromString(raw, type);</code></pre></fieldset></dd>
 								<dd class="parameters">
 									<dl>
-										<dt class="parameter name">rawASS</dt>
+										<dt class="parameter name">raw</dt>
 										<dd class="parameter type">string</dd>
 										<dd class="parameter description">The raw text of the script.</dd>
 										<dt class="parameter name">type</dt>
@@ -913,7 +961,7 @@
 						<dd class="description">
 							<p>Parses a given string with the specified rule.</p>
 						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>var result = parse(input, rule);</code></pre></fieldset></dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = parser.parse(input, rule);</code></pre></fieldset></dd>
 						<dd class="parameters">
 							<dl>
 								<dt class="parameter name">input</dt>
@@ -4129,7 +4177,7 @@
 				<section>
 					<h2>Classes</h2>
 					<dl class="constructor" id="libjass.renderers.DefaultRenderer">
-						<dt class="name">class <a href="#libjass.renderers.DefaultRenderer">DefaultRenderer</a> extends <a href="#libjass.renderers.NullRenderer">NullRenderer</a></dt>
+						<dt class="name">class <a href="#libjass.renderers.DefaultRenderer">DefaultRenderer</a> extends <a href="#libjass.renderers.WebRenderer">WebRenderer</a></dt>
 						<dd class="description">
 							<p>A default renderer implementation.</p>
 						</dd>
@@ -4148,68 +4196,6 @@
 							</dl>
 						</dd>
 						<dd class="members">
-							<dl class="function" id="libjass.renderers.DefaultRenderer.addEventListener">
-								<dt class="name"><a href="#libjass.renderers.DefaultRenderer.addEventListener">addEventListener</a></dt>
-								<dd class="description">
-									<p>Add a listener for the given event. The "ready" event is fired when fonts have been preloaded if settings.preLoadFonts is true, or in the next tick after the DefaultRenderer object is constructed otherwise. The "fullScreenChange" event is fired when the browser's fullscreenchange event is fired for the video element.</p>
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>defaultRenderer.addEventListener(type, listener);</code></pre></fieldset></dd>
-								<dd class="parameters">
-									<dl>
-										<dt class="parameter name">type</dt>
-										<dd class="parameter type">string</dd>
-										<dd class="parameter description">The type of event to attach the listener for. One of "ready" and "fullScreenChange".</dd>
-										<dt class="parameter name">listener</dt>
-										<dd class="parameter type">!Function</dd>
-										<dd class="parameter description">The listener</dd>
-									</dl>
-								</dd>
-							</dl>
-							<dl class="function" id="libjass.renderers.DefaultRenderer.draw">
-								<dt class="name"><a href="#libjass.renderers.DefaultRenderer.draw">draw</a></dt>
-								<dd class="description">
-									<p>Returns the subtitle div for display. The currentTime is used to shift the animations appropriately, so that at the time the div is inserted into the DOM and the animations begin, they are in sync with the video time.</p>
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>defaultRenderer.draw(dialogue);</code></pre></fieldset></dd>
-								<dd class="parameters">
-									<dl>
-										<dt class="parameter name">dialogue</dt>
-										<dd class="parameter type">!libjass.Dialogue</dd>
-										<dd class="parameter description"></dd>
-									</dl>
-								</dd>
-							</dl>
-							<dl class="function" id="libjass.renderers.DefaultRenderer.preRender">
-								<dt class="name"><a href="#libjass.renderers.DefaultRenderer.preRender">preRender</a></dt>
-								<dd class="description">
-									<p>The magic happens here. The subtitle div is rendered and stored. Call draw() to get a clone of the div to display.</p>
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>defaultRenderer.preRender(dialogue);</code></pre></fieldset></dd>
-								<dd class="parameters">
-									<dl>
-										<dt class="parameter name">dialogue</dt>
-										<dd class="parameter type">!libjass.Dialogue</dd>
-										<dd class="parameter description"></dd>
-									</dl>
-								</dd>
-							</dl>
-							<dl class="function" id="libjass.renderers.DefaultRenderer.resize">
-								<dt class="name"><a href="#libjass.renderers.DefaultRenderer.resize">resize</a></dt>
-								<dd class="description">
-									<p>Resize the subtitles to the given new dimensions.</p>
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>defaultRenderer.resize(width, height);</code></pre></fieldset></dd>
-								<dd class="parameters">
-									<dl>
-										<dt class="parameter name">width</dt>
-										<dd class="parameter type">number</dd>
-										<dd class="parameter description"></dd>
-										<dt class="parameter name">height</dt>
-										<dd class="parameter type">number</dd>
-										<dd class="parameter description"></dd>
-									</dl>
-								</dd>
-							</dl>
 							<dl class="function" id="libjass.renderers.DefaultRenderer.resizeVideo">
 								<dt class="name"><a href="#libjass.renderers.DefaultRenderer.resizeVideo">resizeVideo</a></dt>
 								<dd class="description">
@@ -4217,22 +4203,122 @@
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>defaultRenderer.resizeVideo();</code></pre></fieldset></dd>
 							</dl>
-							<dl class="function private" id="libjass.renderers.DefaultRenderer._dispatchEvent">
-								<dt class="name"><a href="#libjass.renderers.DefaultRenderer._dispatchEvent">_dispatchEvent</a></dt>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.renderers.EventSource">
+						<dt class="name">class <a href="#libjass.renderers.EventSource">EventSource.&lt;T&gt;</a></dt>
+						<dd class="description">
+							<p>A mixin class that represents an event source.</p>
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var eventSource = new EventSource();</code></pre></fieldset></dd>
+						<dd class="members">
+							<dl class="function" id="libjass.renderers.EventSource._dispatchEvent">
+								<dt class="name"><a href="#libjass.renderers.EventSource._dispatchEvent">_dispatchEvent</a></dt>
 								<dd class="description">
 									<p></p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>defaultRenderer._dispatchEvent(type, args);</code></pre></fieldset></dd>
+								<dd class="usage"><fieldset><legend /><pre><code>eventSource._dispatchEvent(type, args);</code></pre></fieldset></dd>
 								<dd class="parameters">
 									<dl>
 										<dt class="parameter name">type</dt>
-										<dd class="parameter type">string</dd>
-										<dd class="parameter description"></dd>
+										<dd class="parameter type">!T</dd>
+										<dd class="parameter description">The type of event to dispatch</dd>
 										<dt class="parameter name">args</dt>
 										<dd class="parameter type">!Array.&lt;*&gt;</dd>
+										<dd class="parameter description">Arguments for the listeners of the event</dd>
+									</dl>
+								</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.EventSource.addEventListener">
+								<dt class="name"><a href="#libjass.renderers.EventSource.addEventListener">addEventListener</a></dt>
+								<dd class="description">
+									<p>Add a listener for the given event.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>eventSource.addEventListener(type, listener);</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">type</dt>
+										<dd class="parameter type">!T</dd>
+										<dd class="parameter description">The type of event to attach the listener for</dd>
+										<dt class="parameter name">listener</dt>
+										<dd class="parameter type">!Function</dd>
+										<dd class="parameter description">The listener</dd>
+									</dl>
+								</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.renderers.ManualClock">
+						<dt class="name">class <a href="#libjass.renderers.ManualClock">ManualClock</a></dt>
+						<dd class="description">
+							<p>An implementation of libjass.renderers.Clock that allows user script to manually trigger play, pause and timeUpdate events.</p>
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var manualClock = new ManualClock();</code></pre></fieldset></dd>
+						<dd class="members">
+							<dl class="getter" id="libjass.renderers.ManualClock.currentTime">
+								<dt class="name"><a href="#libjass.renderers.ManualClock.currentTime">currentTime</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = manualClock.currentTime;</code></pre></fieldset></dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.renderers.ManualClock.enabled">
+								<dt class="name"><a href="#libjass.renderers.ManualClock.enabled">enabled</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = manualClock.enabled;</code></pre></fieldset></dd>
+								<dd class="return type">boolean</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.ManualClock.disable">
+								<dt class="name"><a href="#libjass.renderers.ManualClock.disable">disable</a></dt>
+								<dd class="description">
+									<p>Disable the clock. This is a no-op for this type.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>manualClock.disable();</code></pre></fieldset></dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.ManualClock.enable">
+								<dt class="name"><a href="#libjass.renderers.ManualClock.enable">enable</a></dt>
+								<dd class="description">
+									<p>Enable the clock. This is a no-op for this type.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>manualClock.enable();</code></pre></fieldset></dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.ManualClock.pause">
+								<dt class="name"><a href="#libjass.renderers.ManualClock.pause">pause</a></dt>
+								<dd class="description">
+									<p>Trigger a pause event.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>manualClock.pause();</code></pre></fieldset></dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.ManualClock.play">
+								<dt class="name"><a href="#libjass.renderers.ManualClock.play">play</a></dt>
+								<dd class="description">
+									<p>Trigger a play event.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>manualClock.play();</code></pre></fieldset></dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.ManualClock.timeUpdate">
+								<dt class="name"><a href="#libjass.renderers.ManualClock.timeUpdate">timeUpdate</a></dt>
+								<dd class="description">
+									<p>Trigger a timeUpdate event with the given current time.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>manualClock.timeUpdate(currentTime);</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">currentTime</dt>
+										<dd class="parameter type">number</dd>
 										<dd class="parameter description"></dd>
 									</dl>
 								</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.ManualClock.toggle">
+								<dt class="name"><a href="#libjass.renderers.ManualClock.toggle">toggle</a></dt>
+								<dd class="description">
+									<p>Toggle the clock. This is a no-op for this type.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>manualClock.toggle();</code></pre></fieldset></dd>
 							</dl>
 						</dd>
 					</dl>
@@ -4241,14 +4327,14 @@
 						<dd class="description">
 							<p>A renderer implementation that doesn't output anything.</p>
 						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>var nullRenderer = new NullRenderer(video, ass, settings);</code></pre></fieldset></dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var nullRenderer = new NullRenderer(ass, clock, settings);</code></pre></fieldset></dd>
 						<dd class="parameters">
 							<dl>
-								<dt class="parameter name">video</dt>
-								<dd class="parameter type">!HTMLVideoElement</dd>
-								<dd class="parameter description"></dd>
 								<dt class="parameter name">ass</dt>
 								<dd class="parameter type">!libjass.ASS</dd>
+								<dd class="parameter description"></dd>
+								<dt class="parameter name">clock</dt>
+								<dd class="parameter type">!libjass.renderers.Clock</dd>
 								<dd class="parameter description"></dd>
 								<dt class="parameter name">settings</dt>
 								<dd class="parameter type">!libjass.renderers.RendererSettings</dd>
@@ -4264,13 +4350,13 @@
 								<dd class="usage"><fieldset><legend /><pre><code>var result = nullRenderer.ass;</code></pre></fieldset></dd>
 								<dd class="return type">!libjass.ASS</dd>
 							</dl>
-							<dl class="getter" id="libjass.renderers.NullRenderer.currentTime">
-								<dt class="name"><a href="#libjass.renderers.NullRenderer.currentTime">currentTime</a></dt>
+							<dl class="getter" id="libjass.renderers.NullRenderer.clock">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer.clock">clock</a></dt>
 								<dd class="description">
 									<p></p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>var result = nullRenderer.currentTime;</code></pre></fieldset></dd>
-								<dd class="return type">number</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = nullRenderer.clock;</code></pre></fieldset></dd>
+								<dd class="return type">!libjass.renderers.Clock</dd>
 							</dl>
 							<dl class="getter" id="libjass.renderers.NullRenderer.id">
 								<dt class="name"><a href="#libjass.renderers.NullRenderer.id">id</a></dt>
@@ -4288,25 +4374,31 @@
 								<dd class="usage"><fieldset><legend /><pre><code>var result = nullRenderer.settings;</code></pre></fieldset></dd>
 								<dd class="return type">!libjass.renderers.RendererSettings</dd>
 							</dl>
-							<dl class="getter" id="libjass.renderers.NullRenderer.video">
-								<dt class="name"><a href="#libjass.renderers.NullRenderer.video">video</a></dt>
+							<dl class="function" id="libjass.renderers.NullRenderer._onClockPause">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer._onClockPause">_onClockPause</a></dt>
 								<dd class="description">
-									<p></p>
+									<p>Runs when the clock is paused.</p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>var result = nullRenderer.video;</code></pre></fieldset></dd>
-								<dd class="return type">!HTMLVideoElement</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer._onClockPause();</code></pre></fieldset></dd>
 							</dl>
-							<dl class="function" id="libjass.renderers.NullRenderer.disable">
-								<dt class="name"><a href="#libjass.renderers.NullRenderer.disable">disable</a></dt>
+							<dl class="function" id="libjass.renderers.NullRenderer._onClockPlay">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer._onClockPlay">_onClockPlay</a></dt>
 								<dd class="description">
-									<p>Disable the renderer.</p>
+									<p>Runs when the clock starts playing, or is resumed from pause.</p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer.disable();</code></pre></fieldset></dd>
+								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer._onClockPlay();</code></pre></fieldset></dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.NullRenderer._onClockTimeUpdate">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer._onClockTimeUpdate">_onClockTimeUpdate</a></dt>
+								<dd class="description">
+									<p>Runs when the clock's current time changed. This might be a result of either regular playback or seeking.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer._onClockTimeUpdate();</code></pre></fieldset></dd>
 							</dl>
 							<dl class="function" id="libjass.renderers.NullRenderer.draw">
 								<dt class="name"><a href="#libjass.renderers.NullRenderer.draw">draw</a></dt>
 								<dd class="description">
-									<p>Draw a dialogue. This is a no-op.</p>
+									<p>Draw a dialogue. This is a no-op for this type.</p>
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer.draw(dialogue);</code></pre></fieldset></dd>
 								<dd class="parameters">
@@ -4317,38 +4409,10 @@
 									</dl>
 								</dd>
 							</dl>
-							<dl class="function" id="libjass.renderers.NullRenderer.enable">
-								<dt class="name"><a href="#libjass.renderers.NullRenderer.enable">enable</a></dt>
-								<dd class="description">
-									<p>Enable the renderer.</p>
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer.enable();</code></pre></fieldset></dd>
-							</dl>
-							<dl class="function" id="libjass.renderers.NullRenderer.onVideoPause">
-								<dt class="name"><a href="#libjass.renderers.NullRenderer.onVideoPause">onVideoPause</a></dt>
-								<dd class="description">
-									<p>Runs when the video is paused.</p>
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer.onVideoPause();</code></pre></fieldset></dd>
-							</dl>
-							<dl class="function" id="libjass.renderers.NullRenderer.onVideoPlaying">
-								<dt class="name"><a href="#libjass.renderers.NullRenderer.onVideoPlaying">onVideoPlaying</a></dt>
-								<dd class="description">
-									<p>Runs when the video starts playing, or is resumed from pause.</p>
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer.onVideoPlaying();</code></pre></fieldset></dd>
-							</dl>
-							<dl class="function" id="libjass.renderers.NullRenderer.onVideoTimeUpdate">
-								<dt class="name"><a href="#libjass.renderers.NullRenderer.onVideoTimeUpdate">onVideoTimeUpdate</a></dt>
-								<dd class="description">
-									<p>Runs when the video's current time changed. This might be a result of either regular playback or seeking.</p>
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer.onVideoTimeUpdate();</code></pre></fieldset></dd>
-							</dl>
 							<dl class="function" id="libjass.renderers.NullRenderer.preRender">
 								<dt class="name"><a href="#libjass.renderers.NullRenderer.preRender">preRender</a></dt>
 								<dd class="description">
-									<p>Pre-render a dialogue. This is a no-op.</p>
+									<p>Pre-render a dialogue. This is a no-op for this type.</p>
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer.preRender(dialogue);</code></pre></fieldset></dd>
 								<dd class="parameters">
@@ -4359,22 +4423,33 @@
 									</dl>
 								</dd>
 							</dl>
-							<dl class="function" id="libjass.renderers.NullRenderer.toggle">
-								<dt class="name"><a href="#libjass.renderers.NullRenderer.toggle">toggle</a></dt>
-								<dd class="description">
-									<p>Toggle the renderer.</p>
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer.toggle();</code></pre></fieldset></dd>
-							</dl>
 						</dd>
 					</dl>
 					<dl class="constructor" id="libjass.renderers.RendererSettings">
 						<dt class="name">class <a href="#libjass.renderers.RendererSettings">RendererSettings</a></dt>
 						<dd class="description">
-							<p>Settings for the default renderer.</p>
+							<p>Settings for the renderer.</p>
 						</dd>
 						<dd class="usage"><fieldset><legend /><pre><code>var rendererSettings = new RendererSettings();</code></pre></fieldset></dd>
 						<dd class="members">
+							<dl class="variable" id="libjass.renderers.RendererSettings.fontMap">
+								<dt class="name"><a href="#libjass.renderers.RendererSettings.fontMap">fontMap</a></dt>
+								<dd class="description">
+									<p>A map of font name to one or more URLs of that font. If provided, the fonts in this map are pre-loaded by the WebRenderer when it's created. If you have a &lt;style&gt; or &lt;link&gt; element on the page containing @font-face rules, you can use the RendererSettings.makeFontMapFromStyleElement() convenience method to create a font map.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = rendererSettings.fontMap;
+rendererSettings.fontMap = value;</code></pre></fieldset></dd>
+								<dd class="return type">!Map.&lt;string, !Array.&lt;string&gt;&gt;</dd>
+							</dl>
+							<dl class="variable" id="libjass.renderers.RendererSettings.preRenderTime">
+								<dt class="name"><a href="#libjass.renderers.RendererSettings.preRenderTime">preRenderTime</a></dt>
+								<dd class="description">
+									<p>Subtitles will be pre-rendered for this amount of time (seconds)</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = rendererSettings.preRenderTime;
+rendererSettings.preRenderTime = value;</code></pre></fieldset></dd>
+								<dd class="return type">number</dd>
+							</dl>
 							<dl class="function static" id="libjass.renderers.RendererSettings.from">
 								<dt class="name"><a href="#libjass.renderers.RendererSettings.from">from</a></dt>
 								<dd class="description">
@@ -4408,6 +4483,137 @@
 								<dt>Returns</dt>
 								<dd class="return type">!Map.&lt;string, !Array.&lt;string&gt;&gt;</dd>
 								<dd class="return description"></dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.renderers.VideoClock">
+						<dt class="name">class <a href="#libjass.renderers.VideoClock">VideoClock</a></dt>
+						<dd class="description">
+							<p>An implementation of libjass.renderers.Clock that generates play, pause and timeUpdate events according to the state of a &lt;video&gt; element.</p>
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var videoClock = new VideoClock(video);</code></pre></fieldset></dd>
+						<dd class="parameters">
+							<dl>
+								<dt class="parameter name">video</dt>
+								<dd class="parameter type">!HTMLVideoElement</dd>
+								<dd class="parameter description"></dd>
+							</dl>
+						</dd>
+						<dd class="members">
+							<dl class="getter" id="libjass.renderers.VideoClock.currentTime">
+								<dt class="name"><a href="#libjass.renderers.VideoClock.currentTime">currentTime</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = videoClock.currentTime;</code></pre></fieldset></dd>
+								<dd class="return type">number</dd>
+							</dl>
+							<dl class="getter" id="libjass.renderers.VideoClock.enabled">
+								<dt class="name"><a href="#libjass.renderers.VideoClock.enabled">enabled</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = videoClock.enabled;</code></pre></fieldset></dd>
+								<dd class="return type">boolean</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.VideoClock.disable">
+								<dt class="name"><a href="#libjass.renderers.VideoClock.disable">disable</a></dt>
+								<dd class="description">
+									<p>Disable the clock.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>videoClock.disable();</code></pre></fieldset></dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.VideoClock.enable">
+								<dt class="name"><a href="#libjass.renderers.VideoClock.enable">enable</a></dt>
+								<dd class="description">
+									<p>Enable the clock.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>videoClock.enable();</code></pre></fieldset></dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.VideoClock.toggle">
+								<dt class="name"><a href="#libjass.renderers.VideoClock.toggle">toggle</a></dt>
+								<dd class="description">
+									<p>Toggle the clock.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>videoClock.toggle();</code></pre></fieldset></dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.renderers.WebRenderer">
+						<dt class="name">class <a href="#libjass.renderers.WebRenderer">WebRenderer</a> extends <a href="#libjass.renderers.NullRenderer">NullRenderer</a></dt>
+						<dd class="description">
+							<p>A renderer implementation that draws subtitles to the given &lt;div&gt;</p>
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var webRenderer = new WebRenderer(ass, clock, settings, libjassSubsWrapper);</code></pre></fieldset></dd>
+						<dd class="parameters">
+							<dl>
+								<dt class="parameter name">ass</dt>
+								<dd class="parameter type">!libjass.ASS</dd>
+								<dd class="parameter description"></dd>
+								<dt class="parameter name">clock</dt>
+								<dd class="parameter type">!libjass.renderers.Clock</dd>
+								<dd class="parameter description"></dd>
+								<dt class="parameter name">settings</dt>
+								<dd class="parameter type">!libjass.renderers.RendererSettings</dd>
+								<dd class="parameter description"></dd>
+								<dt class="parameter name">libjassSubsWrapper</dt>
+								<dd class="parameter type">!HTMLDivElement</dd>
+								<dd class="parameter description">Subtitles will be rendered to this &lt;div&gt;</dd>
+							</dl>
+						</dd>
+						<dd class="members">
+							<dl class="getter" id="libjass.renderers.WebRenderer.enabled">
+								<dt class="name"><a href="#libjass.renderers.WebRenderer.enabled">enabled</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = webRenderer.enabled;</code></pre></fieldset></dd>
+								<dd class="return type">boolean</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.WebRenderer.draw">
+								<dt class="name"><a href="#libjass.renderers.WebRenderer.draw">draw</a></dt>
+								<dd class="description">
+									<p>Returns the subtitle div for display. The currentTime is used to shift the animations appropriately, so that at the time the div is inserted into the DOM and the animations begin, they are in sync with the clock time.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>webRenderer.draw(dialogue);</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">dialogue</dt>
+										<dd class="parameter type">!libjass.Dialogue</dd>
+										<dd class="parameter description"></dd>
+									</dl>
+								</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.WebRenderer.preRender">
+								<dt class="name"><a href="#libjass.renderers.WebRenderer.preRender">preRender</a></dt>
+								<dd class="description">
+									<p>The magic happens here. The subtitle div is rendered and stored. Call draw() to get a clone of the div to display.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>webRenderer.preRender(dialogue);</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">dialogue</dt>
+										<dd class="parameter type">!libjass.Dialogue</dd>
+										<dd class="parameter description"></dd>
+									</dl>
+								</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.WebRenderer.resize">
+								<dt class="name"><a href="#libjass.renderers.WebRenderer.resize">resize</a></dt>
+								<dd class="description">
+									<p>Resize the subtitles to the given new dimensions.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>webRenderer.resize(width, height);</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">width</dt>
+										<dd class="parameter type">number</dd>
+										<dd class="parameter description"></dd>
+										<dt class="parameter name">height</dt>
+										<dd class="parameter type">number</dd>
+										<dd class="parameter description"></dd>
+									</dl>
+								</dd>
 							</dl>
 						</dd>
 					</dl>
@@ -4463,32 +4669,29 @@
 							</dl>
 						</dd>
 					</dl>
-					<dl class="constructor private" id="libjass.renderers.Drawing">
-						<dt class="name">class <a href="#libjass.renderers.Drawing">Drawing</a></dt>
+					<dl class="constructor private" id="libjass.renderers.DrawingStyles">
+						<dt class="name">class <a href="#libjass.renderers.DrawingStyles">DrawingStyles</a></dt>
 						<dd class="description">
 							<p>This class represents an ASS drawing - a set of drawing instructions between {\p} tags.</p>
 						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>var drawing = new Drawing(drawingScale, scaleX, scaleY);</code></pre></fieldset></dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var drawingStyles = new DrawingStyles(outputScaleX, outputScaleY);</code></pre></fieldset></dd>
 						<dd class="parameters">
 							<dl>
-								<dt class="parameter name">drawingScale</dt>
+								<dt class="parameter name">outputScaleX</dt>
 								<dd class="parameter type">number</dd>
 								<dd class="parameter description"></dd>
-								<dt class="parameter name">scaleX</dt>
-								<dd class="parameter type">number</dd>
-								<dd class="parameter description"></dd>
-								<dt class="parameter name">scaleY</dt>
+								<dt class="parameter name">outputScaleY</dt>
 								<dd class="parameter type">number</dd>
 								<dd class="parameter description"></dd>
 							</dl>
 						</dd>
 						<dd class="members">
-							<dl class="setter" id="libjass.renderers.Drawing.baselineOffset">
-								<dt class="name"><a href="#libjass.renderers.Drawing.baselineOffset">baselineOffset</a></dt>
+							<dl class="setter" id="libjass.renderers.DrawingStyles.baselineOffset">
+								<dt class="name"><a href="#libjass.renderers.DrawingStyles.baselineOffset">baselineOffset</a></dt>
 								<dd class="description">
 									<p></p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>drawing.baselineOffset = value;</code></pre></fieldset></dd>
+								<dd class="usage"><fieldset><legend /><pre><code>drawingStyles.baselineOffset = value;</code></pre></fieldset></dd>
 								<dd class="parameters">
 									<dl>
 										<dt class="parameter name">value</dt>
@@ -4497,28 +4700,31 @@
 									</dl>
 								</dd>
 							</dl>
-							<dl class="setter" id="libjass.renderers.Drawing.instructions">
-								<dt class="name"><a href="#libjass.renderers.Drawing.instructions">instructions</a></dt>
+							<dl class="setter" id="libjass.renderers.DrawingStyles.scale">
+								<dt class="name"><a href="#libjass.renderers.DrawingStyles.scale">scale</a></dt>
 								<dd class="description">
 									<p></p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>drawing.instructions = value;</code></pre></fieldset></dd>
+								<dd class="usage"><fieldset><legend /><pre><code>drawingStyles.scale = value;</code></pre></fieldset></dd>
 								<dd class="parameters">
 									<dl>
 										<dt class="parameter name">value</dt>
-										<dd class="parameter type">!Array.&lt;!libjass.parts.drawing.Instruction&gt;</dd>
+										<dd class="parameter type">number</dd>
 										<dd class="parameter description"></dd>
 									</dl>
 								</dd>
 							</dl>
-							<dl class="function" id="libjass.renderers.Drawing.toSVG">
-								<dt class="name"><a href="#libjass.renderers.Drawing.toSVG">toSVG</a></dt>
+							<dl class="function" id="libjass.renderers.DrawingStyles.toSVG">
+								<dt class="name"><a href="#libjass.renderers.DrawingStyles.toSVG">toSVG</a></dt>
 								<dd class="description">
 									<p>Converts this drawing to an &lt;svg&gt; element.</p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>var result = drawing.toSVG(fillColor);</code></pre></fieldset></dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = drawingStyles.toSVG(drawingInstructions, fillColor);</code></pre></fieldset></dd>
 								<dd class="parameters">
 									<dl>
+										<dt class="parameter name">drawingInstructions</dt>
+										<dd class="parameter type">!libjass.parts.DrawingInstructions</dd>
+										<dd class="parameter description"></dd>
 										<dt class="parameter name">fillColor</dt>
 										<dd class="parameter type">!libjass.parts.Color</dd>
 										<dd class="parameter description"></dd>
@@ -4678,6 +4884,20 @@
 									</dl>
 								</dd>
 							</dl>
+							<dl class="setter" id="libjass.renderers.SpanStyles.gaussianBlur">
+								<dt class="name"><a href="#libjass.renderers.SpanStyles.gaussianBlur">gaussianBlur</a></dt>
+								<dd class="description">
+									<p>Sets the Gaussian blur property. null defaults it to 0.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>spanStyles.gaussianBlur = value;</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">value</dt>
+										<dd class="parameter type">?number</dd>
+										<dd class="parameter description"></dd>
+									</dl>
+								</dd>
+							</dl>
 							<dl class="setter" id="libjass.renderers.SpanStyles.italic">
 								<dt class="name"><a href="#libjass.renderers.SpanStyles.italic">italic</a></dt>
 								<dd class="description">
@@ -4761,6 +4981,14 @@
 										<dd class="parameter description"></dd>
 									</dl>
 								</dd>
+							</dl>
+							<dl class="getter" id="libjass.renderers.SpanStyles.primaryAlpha">
+								<dt class="name"><a href="#libjass.renderers.SpanStyles.primaryAlpha">primaryAlpha</a></dt>
+								<dd class="description">
+									<p>Gets the primary alpha property.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = spanStyles.primaryAlpha;</code></pre></fieldset></dd>
+								<dd class="return type">?number</dd>
 							</dl>
 							<dl class="setter" id="libjass.renderers.SpanStyles.primaryAlpha">
 								<dt class="name"><a href="#libjass.renderers.SpanStyles.primaryAlpha">primaryAlpha</a></dt>
