@@ -45,6 +45,30 @@ The API documentation is linked in the Links section below. Here's an overview:
 * Lastly, the renderer contains an implementation of preloading fonts before playing the video. It uses a map of font names to URLs - index.js creates this map from the @font-face rules in fonts.css.
 
 
+### Can I use libjass in node?
+
+libjass's parser works in node.
+
+```javascript
+> var libjass = require("./libjass.js")
+undefined
+> var parts = libjass.parser.parse("{\\an8}Are {\\i1}you{\\i0} the one who stole the clock?!", "dialogueParts")
+undefined
+> parts.join(" ")
+'Alignment { value: 8 } Text { value: Are  } Italic { value: true } Text { value: you } Italic { value: false } Text { value:  the one who stole the clock?! }'
+> parts.length
+6
+> parts[0].toString()
+'Alignment { value: 8 }'
+> parts[0] instanceof libjass.parts.Alignment
+true
+> parts[0].value
+8
+```
+
+[libjass.parser.parse](http://arnavion.github.io/libjass/api.xhtml#libjass.parser.parse) parses the first parameter using the second parameter as the rule name. The rule names are derived from the methods on the [ParserRun class](http://arnavion.github.io/libjass/api.xhtml#libjass.parser.ParserRun). For example, [dialogueParts](http://arnavion.github.io/libjass/api.xhtml#libjass.parser.ParserRun.parse_dialogueParts) can be used to get an array of [libjass.parts](http://arnavion.github.io/libjass/api.xhtml#libjass.parts) objects that represent the parts of an ASS dialogue line.
+
+
 ### Can I contribute?
 
 Yes! Feature requests, suggestions, bug reports and pull requests are welcome! I'm especially looking for details and edge-cases of the ASS syntax that libjass doesn't support.
