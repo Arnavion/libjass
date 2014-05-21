@@ -78,7 +78,7 @@ gulp.task("libjass.js", function (callback) {
 		return callback(null);
 	}
 
-	return gulp.src("./libjass.ts")
+	return gulp.src("./libjass.ts", { read: false })
 		.pipe(TypeScript.gulp("/libjass.js", "/libjass.js.map", ASTModifer))
 		.pipe(UglifyJS.fixup())
 		.pipe(gulp.dest("."));
@@ -113,7 +113,7 @@ gulp.task("test", ["libjass.js"], function (callback) {
 		reporter: "spec"
 	});
 
-	gulp.src("./tests/test-*.js").pipe(Transform(function (file) {
+	gulp.src("./tests/test-*.js", { read: false }).pipe(Transform(function (file) {
 		mocha.addFile(file.path);
 	}, function () {
 		mocha.run(function (failures) {
