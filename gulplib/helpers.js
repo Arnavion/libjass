@@ -18,6 +18,7 @@
  * limitations under the License.
  */
 
+var childProcess = require("child_process");
 var stream = require("stream");
 var util = require("util");
 
@@ -57,3 +58,31 @@ var Transform = function (transform, flush) {
 util.inherits(Transform, stream.Transform);
 
 exports.Transform = Transform;
+
+exports.SingletonChildProcess = function (filename) {
+	var subProcess = null;
+	var rerun = false;
+
+	var spawnSubProcess = function () {
+		subProcess = childProcess.fork(filename);
+
+		subProcess.addListener("exit", function (code, signal) {
+			subProcess = null;
+
+			if (rerun) {
+				spawnSubProcess();
+			}
+
+			rerun = false;
+		});
+	};
+
+	return function () {
+		if (subProcess === null) {
+			spawnSubProcess();
+		}
+		else {
+			rerun = true;
+		}
+	};
+};

@@ -21,7 +21,7 @@
 	},
 	"scripts": {
 		"postinstall": "gulp clean default",
-		"test": "gulp test"
+		"test": "node ./gulplib/test-runner.js"
 	},
 	"dependencies": {
 		"gulp": "latest",

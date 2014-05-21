@@ -18,18 +18,18 @@
  * limitations under the License.
  */
 
-var childProcess = require("child_process");
 var fs = require("fs");
 var gulp = require("gulp");
 var path = require("path");
 
 var Vinyl = require("vinyl");
 
-var Transform = require("./gulplib/helpers.js").Transform;
+var helpers = require("./gulplib/helpers.js");
+var Transform = helpers.Transform;
+var SingletonChildProcess = helpers.SingletonChildProcess;
 
 Object.defineProperties(global, {
 	Doc: { get: function () { return require("./gulplib/doc.js"); } },
-	Mocha: { get: function () { return require("mocha"); } },
 	TypeScript: { get: function () { return require("./gulplib/typescript.js"); } },
 	UglifyJS: { get: function () { return require("./gulplib/uglify.js"); } },
 });
@@ -107,62 +107,22 @@ gulp.task("clean", function () {
 	});
 });
 
-gulp.task("test", ["libjass.js"], function (callback) {
-	var mocha = new Mocha({
-		ui: "tdd",
-		reporter: "spec"
-	});
-
-	gulp.src("./tests/test-*.js", { read: false }).pipe(Transform(function (file) {
-		mocha.addFile(file.path);
-	}, function () {
-		mocha.run(function (failures) {
-			if (failures > 0) {
-				callback(new Error(failures + " test(s) failed."));
-			}
-			else {
-				callback(null);
-			}
-		});
-	}));
-});
-
 gulp.task("watch", ["clean"], function (callback) {
-	var commandLine = path.resolve("./node_modules/.bin/gulp") + " test";
-	var subProcess = null;
-	var rerun = false;
+	var gulpTestProcess = SingletonChildProcess(path.resolve("./gulplib/test-runner.js"));
 
-	var spawnSubProcess = function () {
-		subProcess = childProcess.exec(commandLine);
+	gulp.src("./libjass.ts", { read: false })
+	.pipe(TypeScript.watch("/libjass.js", "/libjass.js.map", ASTModifer, gulp.watch.bind(gulp, ["./*.ts"], { debounceDelay: 1 })))
+	.pipe(UglifyJS.fixup())
+	.pipe(gulp.dest("."))
+	.pipe(Transform(function (file) {
+		if (path.basename(file.path) === "libjass.js") {
+			gulpTestProcess();
+		}
+	}));
 
-		subProcess.stdout.pipe(process.stdout);
-		subProcess.stderr.pipe(process.stderr);
-
-		subProcess.addListener("exit", function (code, signal) {
-			subProcess = null;
-
-			if (rerun) {
-				spawnSubProcess();
-			}
-
-			rerun = false;
-		});
-	};
-
-	return gulp.src("./libjass.ts", { read: false })
-		.pipe(TypeScript.watch("/libjass.js", "/libjass.js.map", ASTModifer, gulp.watch.bind(gulp, ["./*.ts", "./tests/*.js"], { debounceDelay: 1 })))
-		.pipe(UglifyJS.fixup())
-		.pipe(gulp.dest("."))
-		.pipe(Transform(function (file) {
-			if (file.path.lastIndexOf(".js") === file.path.length - ".js".length) {
-				if (subProcess === null) {
-					spawnSubProcess();
-				}
-				else {
-					rerun = true;
-				}
-			}
-		}));
+	gulp.watch(["./tests/test-*.js"], { debounceDelay: 1 }, function () {
+		gulpTestProcess();
+	});
 });
 
 gulp.task("doc", ["libjass.js"], function () {
