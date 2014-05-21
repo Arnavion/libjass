@@ -53,15 +53,22 @@ innerCompilerSettings = TypeScript.ImmutableCompilationSettings.fromCompilationS
 
 var Compiler = function () {
 	function Compiler() {
-		this._diagnostics = [];
-
 		this._scriptSnapshots = Object.create(null);
+
+		this._innerCompiler = new TypeScript.TypeScriptCompiler(new TypeScript.NullLogger(), innerCompilerSettings);
+
+		this.addFile(path.resolve(typeScriptModulePath, "lib.d.ts"));
 	};
 
-	Compiler.prototype.addFiles = function (files) {
+	Compiler.prototype.addFile = function (file) {
 		var _this = this;
 
-		var resolutionResults = TypeScript.ReferenceResolver.resolve(files, {
+		var filename = file;
+		if (file.constructor !== String) {
+			filename = file.path;
+		}
+
+		var resolutionResults = TypeScript.ReferenceResolver.resolve([filename], {
 			resolveRelativePath: function (file, directory) {
 				return path.resolve(directory, file);
 			},
@@ -70,31 +77,42 @@ var Compiler = function () {
 			getParentDirectory: path.dirname.bind(path)
 		}, true);
 
-		resolutionResults.resolvedFiles.unshift({
-			path: path.resolve(typeScriptModulePath, "lib.d.ts"),
-			referencedFiles: [],
-			importedFiles: []
-		});
+		if (this._writeDiagnostics(resolutionResults.diagnostics)) {
+			throw new Error("File resolution failed for " + JSON.stringify(filename));
+		}
 
-		this._addDiagnostics(resolutionResults.diagnostics);
+		var changed = [];
 
-		this._innerCompiler = new TypeScript.TypeScriptCompiler(new TypeScript.NullLogger(), innerCompilerSettings);
+		if (this._innerCompiler.getDocument(filename) === null) {
+			// This is a new file. Add all the resolutionResults that are new files (including this one).
+			resolutionResults.resolvedFiles.forEach(function (resolvedFile) {
+				if (_this._innerCompiler.getDocument(resolvedFile.path) === null) {
 
-		resolutionResults.resolvedFiles.forEach(function (resolvedFile) {
-			_this._innerCompiler.addFile(resolvedFile.path, _this._getScriptSnapshot(resolvedFile.path), 0, 0, false, resolvedFile.referencedFiles);
-		});
+					_this._innerCompiler.addFile(resolvedFile.path, _this._getScriptSnapshot(resolvedFile.path), 0, 0, false, resolvedFile.referencedFiles);
 
-		return resolutionResults.resolvedFiles;
+					changed.push(resolvedFile.path);
+				}
+			});
+		}
+		else {
+			// This is an existing file that's being updated.
+			this._innerCompiler.updateFile(filename, this._newScriptSnapshot(filename), 0, false, null);
+			changed.push(filename);
+		}
+
+		return changed;
 	};
 
 	Compiler.prototype.compile = function (outputCodePath, outputSourceMapPath) {
 		var iterator = this._innerCompiler.compile(path.resolve.bind(path));
 		var outputFiles = [];
 
+		var error = false;
+
 		while (iterator.moveNext()) {
 			var result = iterator.current();
 
-			this._addDiagnostics(result.diagnostics);
+			error = error || this._writeDiagnostics(result.diagnostics);
 
 			result.outputFiles.forEach(function (outputFile) {
 				var outputPath = null;
@@ -120,19 +138,19 @@ var Compiler = function () {
 			});
 		}
 
-		if (this._diagnostics.some(function (diagnostic) { return diagnostic.info().category === 1; })) {
+		if (error) {
 			throw new Error("There were one or more errors.");
 		}
 
 		return outputFiles;
 	};
 
-	Compiler.prototype.getDocument = function (resolvedFilePath) {
-		return this._innerCompiler.getDocument(resolvedFilePath);
+	Compiler.prototype.getDocument = function (filename) {
+		return this._innerCompiler.getDocument(filename);
 	};
 
-	Compiler.prototype._addDiagnostics = function (newDiagnostics) {
-		newDiagnostics.forEach(function (diagnostic) {
+	Compiler.prototype._writeDiagnostics = function (diagnostics) {
+		diagnostics.forEach(function (diagnostic) {
 			var message = diagnostic.message();
 
 			if (diagnostic.fileName()) {
@@ -142,27 +160,23 @@ var Compiler = function () {
 			console.error(message);
 		});
 
-		this._diagnostics.push.apply(this._diagnostics, newDiagnostics);
+		return diagnostics.some(function (diagnostic) { return diagnostic.info().category === TypeScript.DiagnosticCategory.Error; });
 	};
 
 	Compiler.prototype._getScriptSnapshot = function (filename) {
 		var scriptSnapshot = this._scriptSnapshots[filename];
 
-		if (!scriptSnapshot) {
-			var fileContents;
-
-			try  {
-				fileContents = fs.readFileSync(filename, { encoding: "utf8" });
-			}
-			catch (ex) {
-				this._addDiagnostics([new TypeScript.Diagnostic(null, null, 0, 0, TypeScript.DiagnosticCode.Cannot_read_file_0_1, [filename, ex.message])]);
-				fileContents = "";
-			}
-
-			scriptSnapshot = this._scriptSnapshots[filename] = TypeScript.ScriptSnapshot.fromString(fileContents);
+		if (scriptSnapshot) {
+			return scriptSnapshot;
 		}
 
-		return scriptSnapshot;
+		return this._newScriptSnapshot(filename);
+	};
+
+	Compiler.prototype._newScriptSnapshot = function (filename) {
+		var fileContents = fs.readFileSync(filename, { encoding: "utf8" });
+
+		return this._scriptSnapshots[filename] = TypeScript.ScriptSnapshot.fromString(fileContents);
 	};
 
 	return Compiler;
@@ -170,23 +184,27 @@ var Compiler = function () {
 
 exports.Compiler = Compiler;
 
+function flatten(arrays) {
+	return arrays.reduce(function (previous, current) { return previous.concat(current); }, []);
+}
+
 exports.gulp = function (outputCodePath, outputSourceMapPath, astModifier) {
-	var files = [];
+	var compiler = new Compiler();
+
+	var filenames = [];
+	var allFiles = [];
 
 	return Transform(function (file, encoding) {
-		files.push(file.path);
+		filenames.push(file.path);
+		allFiles.push.apply(allFiles, compiler.addFile(file));
 	}, function () {
 		var _this = this;
 
 		try {
-			console.log("Compiling " + JSON.stringify(files) + "...");
-
-			var compiler = new Compiler();
-
-			var resolvedFiles = compiler.addFiles(files);
+			console.log("Compiling " + JSON.stringify(filenames) + "...");
 
 			if (astModifier !== undefined) {
-				astModifier(exports.AST.walk(compiler, resolvedFiles));
+				astModifier(exports.AST.walk(compiler, allFiles));
 			}
 
 			var outputFiles = compiler.compile(outputCodePath, outputSourceMapPath);
@@ -208,7 +226,52 @@ exports.gulp = function (outputCodePath, outputSourceMapPath, astModifier) {
 	});
 };
 
-var __extends = function(d, b, m) {
+exports.watch = function (outputCodePath, outputSourceMapPath, astModifier, watcher) {
+	var compiler = new Compiler();
+
+	var filenames = [];
+	var allFiles = [];
+
+	return Transform(function (file, encoding) {
+		filenames.push(file.path);
+		allFiles.push.apply(allFiles, compiler.addFile(file));
+	}, function (callback) {
+		var _this = this;
+
+		if (astModifier !== undefined) {
+			astModifier(exports.AST.walk(compiler, allFiles));
+		}
+
+		console.log("Listening for changes...");
+
+		watcher(function (changedFile) {
+			console.log("Compiling " + JSON.stringify(filenames) + "...");
+
+			var changed = changedFile.path;
+
+			var newFiles = compiler.addFile(changed);
+
+			if (astModifier !== undefined) {
+				astModifier(exports.AST.walk(compiler, newFiles));
+			}
+
+			try {
+				var outputFiles = compiler.compile(outputCodePath, outputSourceMapPath);
+
+				console.log("Compile succeeded.");
+
+				outputFiles.forEach(function (file) {
+					_this.push(file);
+				});
+			}
+			catch (ex) {
+				console.error("Compile failed." + ex.stack);
+			}
+		});
+	});
+};
+
+var __extends = function(d, b) {
 	for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
 	function __() {
 		this.constructor = d;
@@ -761,12 +824,12 @@ var Walker = function (_super) {
 	return Walker;
 }(TypeScript.PositionTrackingWalker);
 
-var walk = function (compiler, resolvedFiles) {
+var walk = function (compiler, resolvedFilenames) {
 	var walker = new Walker();
 
 	// Walk
-	resolvedFiles.slice(1).forEach(function (resolvedFile) {
-		var document = compiler.getDocument(resolvedFile.path);
+	resolvedFilenames.forEach(function (resolvedFilename) {
+		var document = compiler.getDocument(resolvedFilename);
 		var sourceUnit = document.syntaxTree().sourceUnit();
 		sourceUnit.accept(walker);
 	});
@@ -863,6 +926,7 @@ TypeScript.Emitter.prototype.emitComments = function (ast, pre, onlyPinnedOrTrip
 		ast["gulp-typescript-new-comment"].forEach(function (line) {
 			fullText += "* " + line + "\n";
 		});
+		ast["gulp-typescript-new-comment"] = undefined;
 
 		trivia._fullText = fullText + originalFullText.substr(commentEndIndex);
 		trivia._fullWidth = trivia._fullText.length;
