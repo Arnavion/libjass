@@ -535,7 +535,9 @@ var Walker = function (_super) {
 
 		var clazz = this._scope.enter(new Constructor(name, node, doc.rootDescription, doc.generics, doc.parameters, baseType, doc.isAbstract, isPrivate));
 
-		clazz.parent.members.push(clazz);
+		if (clazz.parent !== null) {
+			clazz.parent.members.push(clazz);
+		}
 
 		_super.prototype.visitClassDeclaration.call(this, node);
 
@@ -577,7 +579,9 @@ var Walker = function (_super) {
 
 		var freeFunction = this._scope.enter(new Function(name, node, doc.rootDescription, doc.generics, doc.parameters, doc.returnType, doc.isAbstract, isPrivate, isStatic));
 
-		freeFunction.parent.members.push(freeFunction);
+		if (freeFunction.parent !== null) {
+			freeFunction.parent.members.push(freeFunction);
+		}
 
 		this._scope.leave();
 	};
