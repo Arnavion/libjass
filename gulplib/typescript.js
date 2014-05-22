@@ -68,23 +68,13 @@ var Compiler = function () {
 			filename = file.path;
 		}
 
-		var resolutionResults = TypeScript.ReferenceResolver.resolve([filename], {
-			resolveRelativePath: function (file, directory) {
-				return path.resolve(directory, file);
-			},
-			fileExists: fs.existsSync.bind(fs),
-			getScriptSnapshot: this._getScriptSnapshot.bind(this),
-			getParentDirectory: path.dirname.bind(path)
-		}, true);
-
-		if (this._writeDiagnostics(resolutionResults.diagnostics)) {
-			throw new Error("File resolution failed for " + JSON.stringify(filename));
-		}
-
 		var changed = [];
 
 		if (this._innerCompiler.getDocument(filename) === null) {
 			// This is a new file. Add all the resolutionResults that are new files (including this one).
+
+			var resolutionResults = this._resolve(filename);
+
 			resolutionResults.resolvedFiles.forEach(function (resolvedFile) {
 				if (_this._innerCompiler.getDocument(resolvedFile.path) === null) {
 
@@ -96,7 +86,19 @@ var Compiler = function () {
 		}
 		else {
 			// This is an existing file that's being updated.
+
 			this._innerCompiler.updateFile(filename, this._newScriptSnapshot(filename), 0, false, null);
+
+			var resolutionResults = this._resolve(filename);
+
+			resolutionResults.resolvedFiles.forEach(function (resolvedFile) {
+				if (_this._innerCompiler.getDocument(resolvedFile.path) === null) {
+					_this._innerCompiler.addFile(resolvedFile.path, _this._getScriptSnapshot(resolvedFile.path), 0, 0, false, resolvedFile.referencedFiles);
+
+					changed.push(resolvedFile.path);
+				}
+			});
+
 			changed.push(filename);
 		}
 
@@ -147,6 +149,23 @@ var Compiler = function () {
 
 	Compiler.prototype.getDocument = function (filename) {
 		return this._innerCompiler.getDocument(filename);
+	};
+
+	Compiler.prototype._resolve = function (filename) {
+		var resolutionResults = TypeScript.ReferenceResolver.resolve([filename], {
+			resolveRelativePath: function (file, directory) {
+				return path.resolve(directory, file);
+			},
+			fileExists: fs.existsSync.bind(fs),
+			getScriptSnapshot: this._getScriptSnapshot.bind(this),
+			getParentDirectory: path.dirname.bind(path)
+		}, true);
+
+		if (this._writeDiagnostics(resolutionResults.diagnostics)) {
+			throw new Error("File resolution failed for " + JSON.stringify(filename));
+		}
+
+		return resolutionResults;
 	};
 
 	Compiler.prototype._writeDiagnostics = function (diagnostics) {
