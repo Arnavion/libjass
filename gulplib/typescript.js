@@ -68,7 +68,7 @@ var Compiler = function () {
 			filename = file.path;
 		}
 
-		var changed = [];
+		var newFiles = [];
 
 		if (this._innerCompiler.getDocument(filename) === null) {
 			// This is a new file. Add all the resolutionResults that are new files (including this one).
@@ -80,7 +80,7 @@ var Compiler = function () {
 
 					_this._innerCompiler.addFile(resolvedFile.path, _this._getScriptSnapshot(resolvedFile.path), 0, 0, false, resolvedFile.referencedFiles);
 
-					changed.push(resolvedFile.path);
+					newFiles.push(resolvedFile.path);
 				}
 			});
 		}
@@ -95,14 +95,16 @@ var Compiler = function () {
 				if (_this._innerCompiler.getDocument(resolvedFile.path) === null) {
 					_this._innerCompiler.addFile(resolvedFile.path, _this._getScriptSnapshot(resolvedFile.path), 0, 0, false, resolvedFile.referencedFiles);
 
-					changed.push(resolvedFile.path);
+					newFiles.push(resolvedFile.path);
 				}
 			});
-
-			changed.push(filename);
 		}
 
-		return changed;
+		return newFiles;
+	};
+
+	Compiler.prototype.removeFile = function (filename) {
+		this._innerCompiler.removeFile(filename);
 	};
 
 	Compiler.prototype.compile = function (outputCodePath, outputSourceMapPath) {
@@ -245,49 +247,88 @@ exports.gulp = function (outputCodePath, outputSourceMapPath, astModifier) {
 	});
 };
 
-exports.watch = function (outputCodePath, outputSourceMapPath, astModifier, watcher) {
+exports.watch = function (outputCodePath, outputSourceMapPath) {
 	var compiler = new Compiler();
 
 	var filenames = [];
 	var allFiles = [];
 
-	return Transform(function (file, encoding) {
+	return Transform(function (file) {
 		filenames.push(file.path);
 		allFiles.push.apply(allFiles, compiler.addFile(file));
 	}, function (callback) {
 		var _this = this;
 
-		if (astModifier !== undefined) {
-			astModifier(exports.AST.walk(compiler, allFiles));
-		}
+		var outputFiles = compiler.compile(outputCodePath, outputSourceMapPath);
+
+		console.log("Compile succeeded.");
 
 		console.log("Listening for changes...");
 
-		watcher(function (changedFile) {
-			console.log("Compiling " + JSON.stringify(filenames) + "...");
+		allFiles.forEach(function (filename) {
+			watchFile(filename, fileChangedCallback, fileDeletedCallback);
+		});
 
-			var changed = changedFile.path;
-
-			var newFiles = compiler.addFile(changed);
-
-			if (astModifier !== undefined) {
-				astModifier(exports.AST.walk(compiler, newFiles));
-			}
-
+		function fileChangedCallback(filename) {
 			try {
-				var outputFiles = compiler.compile(outputCodePath, outputSourceMapPath);
-
-				console.log("Compile succeeded.");
-
-				outputFiles.forEach(function (file) {
-					_this.push(file);
+				compiler.addFile(filename).forEach(function (changed) {
+					if (changed !== filename) {
+						watchFile(changed, fileChangedCallback, fileDeletedCallback);
+					}
 				});
+
+				compile();
 			}
 			catch (ex) {
 				console.error("Compile failed." + ex.stack);
 			}
-		});
+		}
+
+		function fileDeletedCallback(filename) {
+			try {
+				compiler.removeFile(filename);
+				compile();
+			}
+			catch (ex) {
+				console.error("Compile failed." + ex.stack);
+			}
+		}
+
+		function compile() {
+			console.log("Compiling " + JSON.stringify(filenames) + "...");
+
+			var outputFiles = compiler.compile(outputCodePath, outputSourceMapPath);
+
+			console.log("Compile succeeded.");
+
+			outputFiles.forEach(function (file) {
+				_this.push(file);
+			});
+		}
 	});
+};
+
+var watchFile = function (filename, onChange, onDelete) {
+	var alreadyCalled = false;
+
+	function watchFileCallback(currentFile, previousFile) {
+		if (currentFile.mtime >= previousFile.mtime) {
+			if (alreadyCalled) { return; }
+
+			alreadyCalled = true;
+
+			setTimeout(function () { alreadyCalled = false; }, 100);
+
+			onChange(filename);
+		}
+		else {
+			fs.unwatchFile(filename, watchFileCallback);
+
+			onDelete(filename);
+		}
+	}
+
+	fs.watchFile(filename, { interval: 500 }, watchFileCallback);
 };
 
 var __extends = function(d, b) {

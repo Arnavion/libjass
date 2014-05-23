@@ -19,9 +19,9 @@
  */
 
 var fs = require("fs");
-var gulp = require("gulp");
 var path = require("path");
 
+var gulp = require("gulp");
 var Vinyl = require("vinyl");
 
 var helpers = require("./gulplib/helpers.js");
@@ -111,7 +111,7 @@ gulp.task("watch", ["clean"], function (callback) {
 	var gulpTestProcess = SingletonChildProcess(path.resolve("./gulplib/test-runner.js"));
 
 	gulp.src("./libjass.ts", { read: false })
-	.pipe(TypeScript.watch("/libjass.js", "/libjass.js.map", ASTModifer, gulp.watch.bind(gulp, ["./*.ts"], { debounceDelay: 1 })))
+	.pipe(TypeScript.watch("/libjass.js", "/libjass.js.map"))
 	.pipe(UglifyJS.fixup())
 	.pipe(gulp.dest("."))
 	.pipe(Transform(function (file) {
