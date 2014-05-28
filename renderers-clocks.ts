@@ -93,7 +93,6 @@ module libjass.renderers {
 
 		// EventSource members
 		addEventListener: (type: ClockEvent, listener: Function) => void;
-		_dispatchEvent: (type: ClockEvent, args: Object[]) => void;
 	}
 
 	/**
