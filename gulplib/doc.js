@@ -38,13 +38,17 @@ Array.prototype.concatMany = function (arr) {
 };
 
 module.exports = function () {
-	return Transform(function (file) {
-		// Parse
+	var compiler = new TypeScript.Compiler();
 
-		var compiler = new TypeScript.Compiler();
-		var resolvedFiles = compiler.addFiles([file.path]);
+	var filenames = [];
+	var allFiles = [];
 
-		var namespaces = TypeScript.AST.walk(compiler, resolvedFiles);
+	return Transform(function (file, encoding) {
+		filenames.push(file.path);
+		allFiles.push.apply(allFiles, compiler.addFile(file));
+	}, function () {
+		// Walk
+		var namespaces = TypeScript.AST.walk(compiler, allFiles);
 
 		// Make HTML
 		var sorter = (function () {
