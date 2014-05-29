@@ -48,6 +48,8 @@ var require = function (name) {
 	var Suite = function (name, parent) {
 		this.name = name;
 
+		this.setup = function () { };
+
 		this.children = [];
 
 		this.parent = parent;
@@ -98,12 +100,25 @@ var require = function (name) {
 		}, enumerable: true },
 	});
 
-	Suite.prototype.run = function (logger) {
+	Suite.prototype.run = function (logger, done) {
+		var _this = this;
+
 		logger.beginSuite(this);
 
-		this.children.forEach(function (child) { child.run(logger); });
+		this.setup();
 
-		logger.endSuite(this);
+		var remainingChildren = this.children.slice();
+		var runChild = function () {
+			if (remainingChildren.length > 0) {
+				var nextChild = remainingChildren.shift();
+				nextChild.run(logger, runChild);
+			}
+			else {
+				logger.endSuite(_this);
+				done();
+			}
+		};
+		runChild();
 	};
 
 	var Test = function (description, body, parent) {
@@ -118,21 +133,49 @@ var require = function (name) {
 		this.exception = null;
 	};
 
-	Test.prototype.run = function (logger) {
+	Test.prototype.run = function (logger, done) {
 		if (this.body) {
 			this.passed = false;
 
-			try {
-				this.body();
+			if (this.body.length === 0) {
+				try {
+					this.body();
 
-				this.passed = true;
+					this.passed = true;
+				}
+				catch (testException) {
+					this.exception = testException;
+				}
+
+				logger.writeTest(this);
+
+				done();
 			}
-			catch (testException) {
-				this.exception = testException;
+			else {
+				try {
+					var _this = this;
+					this.body(function (testException) {
+						if (testException !== undefined && testException !== null) {
+							_this.exception = testException;
+						}
+						else {
+							_this.passed = true;
+						}
+
+						logger.writeTest(_this);
+
+						done();
+					});
+				}
+				catch (testException) {
+					this.exception = testException;
+
+					logger.writeTest(this);
+
+					done();
+				}
 			}
 		}
-
-		logger.writeTest(this);
 	};
 
 	var currentSuite = null;
@@ -146,6 +189,10 @@ var require = function (name) {
 
 		return newSuite;
 	};
+
+	setup = function (body) {
+		currentSuite.setup = body;
+	}
 
 	test = function (description, body) {
 		return new Test(description, body, currentSuite);
@@ -284,7 +331,7 @@ var Logger = function (outputDiv) {
 
 	this.writeTest = function (test) {
 		if (test.passed === true) {
-			var message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ] ";
+			var message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ]";
 			console.log(message);
 			append(testDiv, message).className += " passed";
 		}
@@ -345,7 +392,15 @@ var Logger = function (outputDiv) {
 addEventListener("DOMContentLoaded", function () {
 	var logger = new Logger(document.querySelector("#output"));
 
-	rootSuites.forEach(function (suite) { suite.run(logger); });
-
-	logger.writeTotal(rootSuites);
+	var remainingSuites = rootSuites.slice();
+	var runSuite = function () {
+		if (remainingSuites.length > 0) {
+			var nextSuite = remainingSuites.shift();
+			nextSuite.run(logger, runSuite);
+		}
+		else {
+			logger.writeTotal(rootSuites);
+		}
+	};
+	runSuite();
 }, false);
