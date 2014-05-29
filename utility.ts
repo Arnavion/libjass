@@ -131,6 +131,7 @@ module libjass {
 	class SimpleMap<K, V> implements Map<K, V> {
 		private _keys: { [key: string]: K };
 		private _values: { [key: string]: V };
+		private _size: number;
 
 		constructor() {
 			this.clear();
@@ -176,6 +177,10 @@ module libjass {
 				throw new Error("This Map implementation only supports Number and String keys, or keys with an id property.");
 			}
 
+			if (!(property in this._keys)) {
+				this._size++;
+			}
+
 			this._keys[property] = key;
 			this._values[property] = value;
 
@@ -198,6 +203,7 @@ module libjass {
 			if (result) {
 				delete this._keys[property];
 				delete this._values[property];
+				this._size--;
 			}
 
 			return result;
@@ -208,6 +214,7 @@ module libjass {
 		clear(): void {
 			this._keys = Object.create(null);
 			this._values = Object.create(null);
+			this._size = 0;
 		}
 
 		/**
@@ -221,8 +228,11 @@ module libjass {
 			}
 		}
 
+		/**
+		 * @type {number}
+		 */
 		get size(): number {
-			throw new Error("This Map implementation doesn't support size.");
+			return this._size;
 		}
 
 		private _keyToProperty(key: K): string {
