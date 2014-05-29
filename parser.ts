@@ -2438,3 +2438,18 @@ module libjass.parser {
 		}
 	}
 }
+
+module libjass.webworker {
+	export enum WorkerCommands {
+		Parse = 1
+	}
+
+	libjass.webworker._registerWorkerCommand(WorkerCommands.Parse, (parameters: any, response: WorkerResultCallback): void => {
+		try {
+			response(null, libjass.parser.parse(parameters.input, parameters.rule));
+		}
+		catch (ex) {
+			response(ex, null);
+		}
+	});
+}
