@@ -56,6 +56,14 @@ suite("Tags", function () {
 		parserTest("Enclosed tag", "{\\b150}", "enclosedTags", [new libjass.parts.Bold(true), new libjass.parts.Comment("50")]);
 	});
 
+	suite("Italics tag - \\i", function () {
+		parserTest("True", "i1", "tag_i", new libjass.parts.Italic(true));
+
+		parserTest("False", "i0", "tag_i", new libjass.parts.Italic(false));
+
+		parserTest("null", "i", "tag_i", new libjass.parts.Italic(null));
+	});
+
 	suite("Primary color tags - \\c and \\1c", function () {
 		parserTest("Just the tag", "1c&H3F171F&", "tag_1c", new libjass.parts.PrimaryColor(new libjass.parts.Color(31, 23, 63, 1)));
 

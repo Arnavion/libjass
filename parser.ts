@@ -2271,7 +2271,7 @@ module libjass.parser {
 			if (valueNode !== null) {
 				current.value = new tagConstructor(valueNode.value);
 			}
-			else if (required) {
+			else if (!required) {
 				current.value = new tagConstructor(null);
 			}
 			else {
