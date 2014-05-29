@@ -19,6 +19,7 @@
  */
 
 ///<reference path="utility.ts" />
+///<reference path="web-worker.ts" />
 ///<reference path="parts.ts" />
 ///<reference path="parser.ts" />
 ///<reference path="renderers-clocks.ts" />

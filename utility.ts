@@ -22,6 +22,8 @@
 
 "use strict";
 
+declare var global: any; // Defined as a parameter of the anonymous function wrapper
+
 module libjass {
 	/**
 	 * Set implementation for browsers that don't support it. Only supports Number and String elements.
@@ -260,8 +262,6 @@ module libjass {
 	export var Map: {
 		new <K, V>(): Map<K, V>;
 	} = null;
-
-	declare var global: any; // Defined as a parameter of the anonymous function wrapper
 
 	// Use this browser's implementation of Map if it has one
 	if (global.Map !== undefined && typeof global.Map.prototype.forEach === "function") {

@@ -222,7 +222,8 @@ module.exports = {
 				var originalWarn = UglifyJS.AST_Node.warn;
 				UglifyJS.AST_Node.warn = function (text, properties) {
 					if (
-						(text === "{type} {name} is declared but not referenced [{file}:{line},{col}]" && properties.type === "Symbol" && properties.name === "substring")
+						(text === "{type} {name} is declared but not referenced [{file}:{line},{col}]" && properties.type === "Symbol" && properties.name === "substring") ||
+						(text === "{type} {name} is declared but not referenced [{file}:{line},{col}]" && properties.type === "Symbol" && properties.name === "key")
 					) {
 						return;
 					}

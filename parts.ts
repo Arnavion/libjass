@@ -1388,6 +1388,7 @@ module libjass.parts {
 		var value = (<any>libjass.parts)[key];
 		if (value instanceof Function) {
 			addToString(value, key);
+			libjass.webworker._registerClassPrototype(value.prototype);
 		}
 	});
 
@@ -1395,6 +1396,7 @@ module libjass.parts {
 		var value = (<any>libjass.parts.drawing)[key];
 		if (value instanceof Function) {
 			addToString(value, "Drawing" + key);
+			libjass.webworker._registerClassPrototype(value.prototype);
 		}
 	});
 }
