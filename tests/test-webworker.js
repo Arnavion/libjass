@@ -22,8 +22,10 @@ var libjass = require("../libjass.js");
 var assert = require("assert");
 
 suite("Web worker", function () {
+	var workerChannel = null;
+
 	setup(function () {
-		libjass.webworker.setup();
+		workerChannel = libjass.webworker.createWorker();
 	});
 
 	suite("Parse", function () {
@@ -34,16 +36,12 @@ suite("Web worker", function () {
 					input: "{\\an8}Are {\\i1}you{\\i0} the one who stole the clock?!"
 				};
 
-				libjass.webworker.workerChannel.request(libjass.webworker.WorkerCommands.Parse, {
+				workerChannel.request(libjass.webworker.WorkerCommands.Parse, {
 					input: this.customProperties.input,
 					rule: this.customProperties.rule
-				}, function (error, result) {
-					if (error) {
-						return done(error);
-					}
-
+				}).then(function (promise) {
 					try {
-						assert.deepEqual(result, [
+						assert.deepEqual(promise.result, [
 							new libjass.parts.Alignment(8),
 							new libjass.parts.Text("Are "),
 							new libjass.parts.Italic(true),
