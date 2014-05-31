@@ -65,7 +65,7 @@ module.exports = function () {
 				return 0;
 			};
 
-			var types = [TypeScript.AST.Variable, TypeScript.AST.Property, TypeScript.AST.Function, TypeScript.AST.Constructor];
+			var types = [TypeScript.AST.Variable, TypeScript.AST.Property, TypeScript.AST.Function, TypeScript.AST.Interface, TypeScript.AST.Constructor];
 			var typeSorter = function (value1, value2) {
 				var type1Index = -1;
 				var type2Index = -1;
@@ -110,9 +110,9 @@ module.exports = function () {
 			namespaces[namespaceName].members.sort(sorter);
 
 			namespaces[namespaceName].members.filter(function (value) {
-				return value instanceof TypeScript.AST.Constructor;
-			}).forEach(function (constructor) {
-				constructor.members.sort(sorter);
+				return value instanceof TypeScript.AST.Interface || value instanceof TypeScript.AST.Constructor;
+			}).forEach(function (interfaceOrConstructor) {
+				interfaceOrConstructor.members.sort(sorter);
 			});
 		});
 
@@ -160,6 +160,35 @@ module.exports = function () {
 				'	</dd>',
 				'	<dd class="usage"><fieldset><legend />' + writeFunctionUsage(func) + '</fieldset></dd>'
 			].concat(writeParameters(func, 1)).concat(writeReturns(func, 1)).concat([
+				'</dl>'
+			]).map(indenter(indent));
+		};
+
+		var writeInterface = function (interface, indent) {
+			return [
+				'<dl class="interface' +
+					(interface.isPrivate ? ' private' : '') +
+					'" id="' +
+					sanitize(interface.fullName) +
+					'">',
+				'	<dt class="name">' + writeInterfaceName(interface) + '</dt>',
+				'	<dd class="description">',
+				'		<p>' + sanitize(interface.description) + '</p>',
+				'	</dd>'
+			].concat([
+				'	<dd class="members">'
+			]).concatMany(interface.members.map(function (member) {
+				if (member instanceof TypeScript.AST.Variable) {
+					return writeVariable(member, 2);
+				}
+				if (member instanceof TypeScript.AST.Function) {
+					return writeFunction(member, 2);
+				}
+				if (member instanceof TypeScript.AST.Property) {
+					return writeProperty(member, 2);
+				}
+			})).concat([
+				'	</dd>',
 				'</dl>'
 			]).map(indenter(indent));
 		};
@@ -223,6 +252,14 @@ module.exports = function () {
 
 		var writeFunctionName = function (func) {
 			return writeCallableName(func);
+		};
+
+		var writeInterfaceName = function (interface) {
+			return (
+				'interface ' +
+				writeCallableName(interface) +
+				((interface.baseType !== null) ? (' extends <a href="#' + sanitize(interface.baseType.fullName) + '">' + sanitize(interface.baseType.name) + '</a>') : '')
+			);
 		};
 
 		var writeConstructorName = function (constructor) {
@@ -459,16 +496,16 @@ module.exports = function () {
 				'				border-bottom: 1px solid black;',
 				'			}',
 				'',
-				'			.variable, .function, .constructor, .getter, .setter {',
+				'			.variable, .function, .interface, .constructor, .getter, .setter {',
 				'				margin-left: 30px;',
 				'				padding: 10px;',
 				'			}',
 				'',
-				'			section > .variable:nth-child(2n), section > .function:nth-child(2n), section > .constructor:nth-child(2n) {',
+				'			section > .variable:nth-child(2n), section > .function:nth-child(2n), section > .interface:nth-child(2n), section > .constructor:nth-child(2n) {',
 				'				background-color: rgb(221, 250, 238);',
 				'			}',
 				'',
-				'			section > .variable:nth-child(2n + 1), section > .function:nth-child(2n + 1), section > .constructor:nth-child(2n + 1) {',
+				'			section > .variable:nth-child(2n + 1), section > .function:nth-child(2n + 1), section > .interface:nth-child(2n + 1), section > .constructor:nth-child(2n + 1) {',
 				'				background-color: rgb(244, 250, 221);',
 				'			}',
 				'',
@@ -489,6 +526,7 @@ module.exports = function () {
 				'				margin: 0;',
 				'			}',
 				'',
+				'			.interface .variable, .interface .function, .interface .getter, .interface .setter,',
 				'			.constructor .variable, .constructor .function, .constructor .getter, .constructor .setter {',
 				'				background-color: rgb(250, 241, 221);',
 				'			}',
@@ -561,6 +599,10 @@ module.exports = function () {
 					return value instanceof TypeScript.AST.Function;
 				});
 
+				var interfaces = namespaces[namespaceName].members.filter(function (value) {
+					return value instanceof TypeScript.AST.Interface;
+				});
+
 				var constructors = namespaces[namespaceName].members.filter(function (value) {
 					return value instanceof TypeScript.AST.Constructor;
 				});
@@ -589,6 +631,18 @@ module.exports = function () {
 				'					<h2>Free functions</h2>'
 					]).concatMany(functions.map(function (value) {
 						return writeFunction(value, 5);
+					})).concat([
+				'				</section>',
+				''
+					]);
+				}
+
+				if (interfaces.length > 0) {
+					result = result.concat([
+				'				<section>',
+				'					<h2>Interfaces</h2>'
+					]).concatMany(interfaces.map(function (value) {
+						return writeInterface(value, 5);
 					})).concat([
 				'				</section>',
 				''

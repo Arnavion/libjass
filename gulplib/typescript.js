@@ -398,6 +398,28 @@ var Function = function (_super) {
 	return Function;
 }(Scoped);
 
+var Interface = function (_super) {
+	__extends(Interface, _super);
+
+	function Interface(name, astNode, description, generics, baseType, isPrivate) {
+		_super.call(this, name);
+
+		this.astNode = astNode;
+
+		this.description = description;
+
+		this.generics = generics;
+
+		this.baseType = baseType;
+
+		this.isPrivate = isPrivate;
+
+		this.members = [];
+	};
+
+	return Interface;
+}(Scoped);
+
 var Constructor = function (_super) {
 	__extends(Constructor, _super);
 
@@ -506,6 +528,7 @@ var NodeType = function () {
 	NodeType[NodeType["Getter"] = 2] = "Getter";
 	NodeType[NodeType["Setter"] = 3] = "Setter";
 	NodeType[NodeType["Variable"] = 4] = "Variable";
+	NodeType[NodeType["Interface"] = 5] = "Interface";
 
 	return NodeType;
 }();
@@ -572,6 +595,36 @@ var Walker = function (_super) {
 		nameParts.forEach(function () {
 			_this._scope.leave();
 		});
+	};
+
+	Walker.prototype.visitInterfaceDeclaration = function (node) {
+		var name = node.identifier.text();
+
+		var docNode = node.modifiers.item || node.interfaceKeyword;
+		var doc = this._parseJSDoc(docNode, NodeType.Interface);
+		if (doc === null) {
+			return;
+		}
+
+		var extendsClause = node.heritageClauses.toArray().filter(function (heritageClause) {
+			return heritageClause.extendsOrImplementsKeyword.tokenKind === TypeScript.SyntaxKind.ExtendsKeyword;
+		})[0] || null;
+		var baseType = null;
+		if (extendsClause !== null) {
+			baseType = extendsClause.typeNames.item.fullText().trim();
+		}
+		var modifiers = ((node.modifiers.item ? [node.modifiers.item] : node.modifiers.nodeOrTokens) || []).map(function (modifier) { return modifier.tokenKind; });
+		var isPrivate = !modifiers.some(function (modifier) { return modifier === TypeScript.SyntaxKind["ExportKeyword"]; });
+
+		var interface = this._scope.enter(new Interface(name, node, doc.rootDescription, doc.generics, baseType, isPrivate));
+
+		if (interface.parent !== null) {
+			interface.parent.members.push(interface);
+		}
+
+		_super.prototype.visitInterfaceDeclaration.call(this, node);
+
+		this._scope.leave();
 	};
 
 	Walker.prototype.visitClassDeclaration = function (node) {
@@ -798,7 +851,7 @@ var Walker = function (_super) {
 				return [type, remainingLine];
 			};
 
-			var firstWordMatch = line.match(/^(\S+)(\s*)/);
+			var firstWordMatch = line.match(/^\s*(\S+)(\s*)/);
 			var firstWord = firstWordMatch[1];
 			var remainingLine = line.substring(firstWordMatch[0].length);
 
@@ -900,7 +953,7 @@ var walk = function (compiler, resolvedFilenames) {
 
 	// Link base types
 	var linkVisitor = function (current) {
-		if (current instanceof Constructor) {
+		if (current instanceof Interface || current instanceof Constructor) {
 			if (current.baseType !== null && current.baseType.constructor === String) {
 				var existingBaseType = null;
 				for (var ns = current.parent; existingBaseType === null; ns = ns.parent) {
@@ -944,6 +997,7 @@ var walk = function (compiler, resolvedFilenames) {
 exports.AST = {
 	Namespace: Namespace,
 	Function: Function,
+	Interface: Interface,
 	Constructor: Constructor,
 	Property: Property,
 	Getter: Getter,
