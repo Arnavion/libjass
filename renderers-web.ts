@@ -493,7 +493,7 @@ module libjass.renderers {
 
 			dialogue.parts.some(part => {
 				if (part instanceof parts.Position || part instanceof parts.Move) {
-					var transformOrigin = DefaultRenderer._transformOrigins[dialogue.alignment];
+					var transformOrigin = WebRenderer._transformOrigins[dialogue.alignment];
 
 					var divTransformStyle = "translate(" + (-transformOrigin[0]) + "%, " + (-transformOrigin[1]) + "%) translate(-" + sub.style.marginLeft + ", -" + sub.style.marginTop + ")";
 					var transformOriginString = transformOrigin[0] + "% " + transformOrigin[1] + "%";
