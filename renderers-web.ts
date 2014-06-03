@@ -522,6 +522,15 @@ module libjass.renderers {
 					break;
 			}
 
+			if (sub.style.position !== "") {
+				// Explicitly set text alignment on absolutely-positioned subs because they'll go in a .an0 <div> and so won't get alignment CSS text-align.
+				switch (dialogue.alignment) {
+					case 1: case 4: case 7: sub.style.textAlign = "left"; break;
+					case 2: case 5: case 8: sub.style.textAlign = "center"; break;
+					case 3: case 6: case 9: sub.style.textAlign = "right"; break;
+				}
+			}
+
 			if (this._animationStyleElement === null) {
 				this._animationStyleElement = document.createElement("style");
 				this._animationStyleElement.id = "libjass-animation-styles-" + this.id;
