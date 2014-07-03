@@ -1064,7 +1064,7 @@ module libjass.renderers {
 
 			if (outlineFilter !== '' || blurFilter !== '') {
 				var filterString =
-					'<filter xmlns="http://www.w3.org/2000/svg" id="' + filterId + '" width="150%" height="150%">\n' +
+					'<filter xmlns="http://www.w3.org/2000/svg" id="' + filterId + '" x="-50%" width="200%" y="-50%" height="200%">\n' +
 					outlineFilter +
 					blurFilter +
 					'\t<feMerge>\n' +
