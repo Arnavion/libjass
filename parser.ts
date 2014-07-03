@@ -2073,7 +2073,7 @@ module libjass.parser {
 
 			var minuteDigitNodes = new Array<ParseNode>(2);
 
-			for (var i = 0; i < minuteDigitNodes.length; i++) {
+			for (i = 0; i < minuteDigitNodes.length; i++) {
 				if (!this._haveMore()) {
 					parent.pop();
 					return null;
@@ -2096,7 +2096,7 @@ module libjass.parser {
 
 			var secondDigitNodes = new Array<ParseNode>(2);
 
-			for (var i = 0; i < secondDigitNodes.length; i++) {
+			for (i = 0; i < secondDigitNodes.length; i++) {
 				if (!this._haveMore()) {
 					parent.pop();
 					return null;
@@ -2119,7 +2119,7 @@ module libjass.parser {
 
 			var millisecondDigitNodes = new Array<ParseNode>(3);
 
-			for (var i = 0; i < millisecondDigitNodes.length; i++) {
+			for (i = 0; i < millisecondDigitNodes.length; i++) {
 				if (!this._haveMore()) {
 					parent.pop();
 					return null;

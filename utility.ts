@@ -22,7 +22,12 @@
 
 "use strict";
 
-declare var global: any; // Defined as a parameter of the anonymous function wrapper
+interface Global {
+	Set: { new <T>(): Set<T>; prototype: Set<any> }
+	Map: { new <K, V>(): Map<K, V>; prototype: Map<any, any> }
+}
+
+declare var global: Global; // Defined as a parameter of the anonymous function wrapper
 
 module libjass {
 	/**
@@ -111,16 +116,9 @@ module libjass {
 	 *
 	 * @type {function(new:Set)}
 	 */
-	export var Set: {
-		new <T>(): Set<T>;
-	} = null;
-
-	// Use this browser's implementation of Set if it has one
-	if (global.Set !== undefined && typeof global.Set.prototype.forEach === "function") {
-		Set = global.Set;
-	}
-	else {
-		Set = SimpleSet;
+	export var Set = global.Set;
+	if (Set === undefined || typeof Set.prototype.forEach !== "function") {
+		Set = <any>SimpleSet;
 	}
 
 	/**
@@ -259,15 +257,8 @@ module libjass {
 	 *
 	 * @type {function(new:Map)}
 	 */
-	export var Map: {
-		new <K, V>(): Map<K, V>;
-	} = null;
-
-	// Use this browser's implementation of Map if it has one
-	if (global.Map !== undefined && typeof global.Map.prototype.forEach === "function") {
-		Map = global.Map;
-	}
-	else {
+	export var Map = global.Map;
+	if (Map === undefined || typeof Map.prototype.forEach !== "function") {
 		Map = <any>SimpleMap;
 	}
 

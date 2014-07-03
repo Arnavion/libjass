@@ -159,12 +159,10 @@ module libjass.webworker {
 		private _pendingRequests = new Map<number, WorkerPromiseImpl>();
 
 		constructor(private _comm: WorkerCommunication) {
-			this._comm.addEventListener("message", (ev: MessageEvent) => this._onMessage(ev.data), false);
+			this._comm.addEventListener("message", ev => this._onMessage(<string>ev.data), false);
 		}
 
 		request(command: WorkerCommands, parameters: any): WorkerPromise {
-			var requestId: number = null;
-
 			var promise = new WorkerPromiseImpl(this);
 			var requestId = promise.id;
 			this._pendingRequests.set(requestId, promise);
@@ -183,11 +181,11 @@ module libjass.webworker {
 			this._comm.postMessage(WorkerChannelImpl._toJSON({ command: WorkerCommands.Response, requestId: message.requestId, error: message.error, result: message.result }));
 		}
 
-		private _onMessage(message: any): void {
-			message = WorkerChannelImpl._fromJSON(message);
+		private _onMessage(rawMessage: string): void {
+			var message = <{ command: WorkerCommands }>WorkerChannelImpl._fromJSON(rawMessage);
 
 			if (message.command === WorkerCommands.Response) {
-				var responseMessage = <WorkerResponseMessage>message;
+				var responseMessage = <WorkerResponseMessage><any>message;
 
 				var promise = this._pendingRequests.get(responseMessage.requestId);
 				if (promise !== undefined) {
@@ -238,21 +236,19 @@ module libjass.webworker {
 
 	var inWorker = (typeof WorkerGlobalScope !== "undefined" && global instanceof WorkerGlobalScope);
 	if (inWorker) {
-		new WorkerChannelImpl(global);
+		new WorkerChannelImpl(<WorkerGlobalScope><any>global);
 	}
 
 	class WorkerPromiseImpl implements WorkerPromise {
 		private static _lastPromiseId: number = -1;
 
-		private _id: number;
+		private _id: number = ++WorkerPromiseImpl._lastPromiseId;
 		private _resolved: boolean = false;
 		private _result: any = null;
 		private _error: any = null;
 		private _callback: WorkerPromiseCallback = null;
 
-		constructor(private _channel: WorkerChannelImpl) {
-			this._id = ++WorkerPromiseImpl._lastPromiseId;
-		}
+		constructor(private _channel: WorkerChannelImpl) { }
 
 		get resolved(): boolean {
 			return this._resolved;
