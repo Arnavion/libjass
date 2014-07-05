@@ -870,7 +870,7 @@ module libjass.renderers {
 
 		private _nextFilterId = 0;
 
-		constructor(renderer: NullRenderer, dialogue: Dialogue, private _scaleX: number, private _scaleY: number, private _fontSizeElement: HTMLDivElement, private _svgDefsElement: SVGDefsElement) {
+		constructor(renderer: WebRenderer, dialogue: Dialogue, private _scaleX: number, private _scaleY: number, private _fontSizeElement: HTMLDivElement, private _svgDefsElement: SVGDefsElement) {
 			this._id = renderer.id + "-" + dialogue.id;
 			this._defaultStyle = dialogue.style;
 
