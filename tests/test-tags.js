@@ -80,6 +80,20 @@ suite("Tags", function () {
 		parserTest("Just the tag", "alpha00", "tag_alpha", new libjass.parts.Alpha(1));
 	});
 
+	suite("Font size tag - \\fs", function () {
+		parserTest("5", "fs5", "tag_fs", new libjass.parts.FontSize(5));
+
+		parserTest("null", "fs", "tag_fs", new libjass.parts.FontSize(null));
+
+		parserTest("Plus 5", "fs+5", "tag_fsplus", new libjass.parts.FontSizePlus(5));
+
+		parserTest("Plus null", "fs+", "tag_fsplus", null);
+
+		parserTest("Minus 5", "fs-5", "tag_fsminus", new libjass.parts.FontSizeMinus(5));
+
+		parserTest("Minus null", "fs-", "tag_fsminus", null);
+	});
+
 	suite("Transform tag - \\t", function () {
 		parserTest("No tags", "{\\t(100,200)}", "enclosedTags", [new libjass.parts.Comment("\\t(100,200)")]);
 	});

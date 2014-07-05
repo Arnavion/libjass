@@ -394,6 +394,42 @@ module libjass.parts {
 	}
 
 	/**
+	 * A font size increase tag {\fs+}
+	 *
+	 * @param {?number} value {\fs+###} -> difference (number)
+	 */
+	export class FontSizePlus {
+		constructor(private _value: number) { }
+
+		/**
+		 * The value of this font size increase tag.
+		 *
+		 * @type {?number}
+		 */
+		get value(): number {
+			return this._value;
+		}
+	}
+
+	/**
+	 * A font size decrease tag {\fs-}
+	 *
+	 * @param {?number} value {\fs-###} -> difference (number)
+	 */
+	export class FontSizeMinus {
+		constructor(private _value: number) { }
+
+		/**
+		 * The value of this font size decrease tag.
+		 *
+		 * @type {?number}
+		 */
+		get value(): number {
+			return this._value;
+		}
+	}
+
+	/**
 	 * A horizontal font scaling tag {\fscx}
 	 *
 	 * @param {?number} value {\fscx###} -> scale (number), {\fscx} -> null

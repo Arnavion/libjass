@@ -361,6 +361,8 @@ module libjass.parser {
 						this.parse_tag_fry(current) ||
 						this.parse_tag_frz(current) ||
 						this.parse_tag_fsp(current) ||
+						this.parse_tag_fsplus(current) ||
+						this.parse_tag_fsminus(current) ||
 						this.parse_tag_org(current) ||
 						this.parse_tag_pbo(current) ||
 						this.parse_tag_pos(current) ||
@@ -927,6 +929,54 @@ module libjass.parser {
 		 * @param {!ParseNode} parent
 		 * @return {ParseNode}
 		 */
+		parse_tag_fsplus(parent: ParseNode): ParseNode {
+			var current = new ParseNode(parent);
+
+			if (this.read(current, "fs+") === null) {
+				parent.pop();
+				return null;
+			}
+
+			var valueNode = this.parse_decimal(current);
+
+			if (valueNode === null) {
+				parent.pop();
+				return null;
+			}
+
+			current.value = new parts.FontSizePlus(valueNode.value);
+
+			return current;
+		}
+
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {ParseNode}
+		 */
+		parse_tag_fsminus(parent: ParseNode): ParseNode {
+			var current = new ParseNode(parent);
+
+			if (this.read(current, "fs-") === null) {
+				parent.pop();
+				return null;
+			}
+
+			var valueNode = this.parse_decimal(current);
+
+			if (valueNode === null) {
+				parent.pop();
+				return null;
+			}
+
+			current.value = new parts.FontSizeMinus(valueNode.value);
+
+			return current;
+		}
+
+		/**
+		 * @param {!ParseNode} parent
+		 * @return {ParseNode}
+		 */
 		parse_tag_fscx(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -1377,6 +1427,8 @@ module libjass.parser {
 						this.parse_tag_fry(current) ||
 						this.parse_tag_frz(current) ||
 						this.parse_tag_fsp(current) ||
+						this.parse_tag_fsplus(current) ||
+						this.parse_tag_fsminus(current) ||
 
 						this.parse_tag_be(current) ||
 						this.parse_tag_fr(current) ||

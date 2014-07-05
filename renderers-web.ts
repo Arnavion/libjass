@@ -313,6 +313,14 @@ module libjass.renderers {
 					currentSpanStyles.fontSize = (<parts.FontSize>part).value;
 				}
 
+				else if (part instanceof parts.FontSizePlus) {
+					currentSpanStyles.fontSize += (<parts.FontSizePlus>part).value;
+				}
+
+				else if (part instanceof parts.FontSizeMinus) {
+					currentSpanStyles.fontSize -= (<parts.FontSizeMinus>part).value;
+				}
+
 				else if (part instanceof parts.FontScaleX) {
 					currentSpanStyles.fontScaleX = (<parts.FontScaleX>part).value;
 				}
