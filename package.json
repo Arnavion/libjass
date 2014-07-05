@@ -27,7 +27,7 @@
 		"gulp": "latest",
 		"mocha": "1.18.x",
 		"typescript": "1.0.1",
-		"uglify-js": "2.x >=2.4.13",
+		"uglify-js": "2.x >=2.4.14",
 		"vinyl": "latest"
 	}
 }

@@ -50,7 +50,7 @@ module.exports = {
 					toplevel: null
 				});
 
-				root = root.wrap_enclose(['((typeof module !== "undefined") && module.exports) || (this.libjass = {}):libjass', '((typeof global !== "undefined") && global) || this:global']);
+				root = root.wrap_enclose(['(typeof module !== "undefined") ? module.exports : (this.libjass = {}):libjass', '(typeof global !== "undefined") ? global : this:global']);
 
 				root.figure_out_scope({ screw_ie8: true });
 
