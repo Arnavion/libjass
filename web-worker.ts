@@ -208,7 +208,7 @@ module libjass.webworker {
 		}
 
 		private static _toJSON(obj: any): string {
-			return JSON.stringify(obj, (key: string, value: any) => {
+			return JSON.stringify(obj, (/* ujs:unreferenced */ key: string, value: any) => {
 				if (value && value._classTag !== undefined) {
 					value._classTag = value._classTag;
 				}
@@ -218,7 +218,7 @@ module libjass.webworker {
 		}
 
 		private static _fromJSON(str: string): any {
-			return JSON.parse(str, (key: string, value: any) => {
+			return JSON.parse(str, (/* ujs:unreferenced */ key: string, value: any) => {
 				if (value && value._classTag !== undefined) {
 					var hydratedValue = Object.create(classPrototypes.get(value._classTag));
 					Object.keys(value).forEach(key => {

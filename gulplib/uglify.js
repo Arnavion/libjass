@@ -218,19 +218,6 @@ module.exports = {
 				root.figure_out_scope({ screw_ie8: true });
 
 
-				// Suppress some warnings
-				var originalWarn = UglifyJS.AST_Node.warn;
-				UglifyJS.AST_Node.warn = function (text, properties) {
-					if (
-						(text === "{type} {name} is declared but not referenced [{file}:{line},{col}]" && properties.type === "Symbol" && properties.name === "substring") ||
-						(text === "{type} {name} is declared but not referenced [{file}:{line},{col}]" && properties.type === "Symbol" && properties.name === "key")
-					) {
-						return;
-					}
-
-					originalWarn.call(UglifyJS.AST_Node, text, properties);
-				};
-
 				// Warnings
 				root.scope_warnings({
 					func_arguments: false
@@ -347,4 +334,14 @@ module.exports = {
 			}
 		});
 	}
+};
+
+var originalSymbolUnreferenced = UglifyJS.AST_Symbol.prototype.unreferenced;
+
+UglifyJS.AST_Symbol.prototype.unreferenced = function () {
+	if (this.start.comments_before.length > 0 && this.start.comments_before[0].value.trim() === "ujs:unreferenced") {
+		return false;
+	}
+
+	return originalSymbolUnreferenced.call(this);
 };
