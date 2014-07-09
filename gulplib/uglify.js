@@ -137,7 +137,7 @@ module.exports = {
 					source_map: UglifyJS.SourceMap({
 						file: path.basename(sourceMapFile.path),
 						orig: sourceMapFile.contents.toString(),
-						root: ""
+						root: null
 					}),
 					beautify: true,
 					comments: function (node, comment) {
@@ -298,7 +298,7 @@ module.exports = {
 					source_map: UglifyJS.SourceMap({
 						file: path.basename(sourceMapFile.path),
 						orig: sourceMapFile.contents.toString(),
-						root: ""
+						root: null
 					}),
 					comments: {
 						test: function (comment) {
