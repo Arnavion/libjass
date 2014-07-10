@@ -39,6 +39,7 @@ module libjass {
 	 */
 	class SimpleSet<T> implements Set<T> {
 		private _elements: { [key: string]: T };
+		private _size: number;
 
 		constructor() {
 			this.clear();
@@ -55,6 +56,10 @@ module libjass {
 				throw new Error("This Set implementation only supports Number and String values.");
 			}
 
+			if (!(property in this._elements)) {
+				this._size++;
+			}
+
 			this._elements[property] = value;
 
 			return this;
@@ -64,6 +69,7 @@ module libjass {
 		 */
 		clear(): void {
 			this._elements = Object.create(null);
+			this._size = 0;
 		}
 
 		/**
@@ -94,8 +100,11 @@ module libjass {
 			throw new Error("This Set implementation doesn't support delete().");
 		}
 
+		/**
+		 * @type {number}
+		 */
 		get size(): number {
-			throw new Error("This Set implementation doesn't support size.");
+			return this._size;
 		}
 
 		private _toProperty(value: T): string {
