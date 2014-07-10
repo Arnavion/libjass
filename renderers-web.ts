@@ -84,18 +84,18 @@ module libjass.renderers {
 			else {
 				// Preload fonts
 
-				var urlsToPreload: string[] = [];
-				this.settings.fontMap.forEach((src: string[], name: string) => {
-					urlsToPreload.unshift.apply(urlsToPreload, src);
+				var urlsToPreload = new Set<string>();
+				this.settings.fontMap.forEach(srcs => {
+					srcs.forEach(src => urlsToPreload.add(src));
 				});
 
-				var urlsLeftToPreload = urlsToPreload.length;
+				var urlsLeftToPreload = urlsToPreload.size;
 
 				if (libjass.debugMode) {
 					console.log("Preloading fonts...");
 				}
 
-				urlsToPreload.forEach((url: string) => {
+				urlsToPreload.forEach(url => {
 					var xhr = new XMLHttpRequest();
 
 					xhr.open("GET", url, true);
