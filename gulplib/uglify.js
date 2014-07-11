@@ -244,7 +244,9 @@ module.exports = {
 					if (
 						node instanceof UglifyJS.AST_PropAccess &&
 						typeof node.property === "string" &&
-						node.property[0] === "_" && node.property[1] !== "_"
+						node.property[0] === "_" &&
+						node.property[1] !== "_" && // Doesn't start with two leading underscores
+						node.property !== "_classTag" // webworker serializer uses this property by name, so it shouldn't be changed.
 					) {
 						var occurrence = occurrences[node.property];
 						if (occurrence === undefined) {
