@@ -128,9 +128,6 @@ var Compiler = function () {
 
 					case TypeScript.OutputFileType.SourceMap:
 						outputPath = outputSourceMapPath;
-						var sourceMapObject = JSON.parse(outputFile.text);
-						sourceMapObject.sourceRoot = null;
-						outputFile.text = JSON.stringify(sourceMapObject);
 						break;
 
 					default:
