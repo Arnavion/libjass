@@ -148,7 +148,9 @@ module libjass.renderers {
 		fontMap: Map<string, string[]>;
 
 		/**
-		 * Subtitles will be pre-rendered for this amount of time (seconds)
+		 * Subtitles will be pre-rendered for this amount of time (seconds).
+		 *
+		 * Defaults to 5.
 		 *
 		 * @type {number}
 		 */
