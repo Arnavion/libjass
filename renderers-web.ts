@@ -235,7 +235,7 @@ module libjass.renderers {
 			var animationCollection = new AnimationCollection(this, dialogue);
 
 			var currentSpan: HTMLSpanElement = null;
-			var currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this._fontSizeElement, this._svgDefsElement);
+			var currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, this._svgDefsElement);
 
 			var startNewSpan = (addNewLine: boolean): void => {
 				if (currentSpan !== null && currentSpan.textContent !== "") {
@@ -820,6 +820,7 @@ module libjass.renderers {
 	 * @param {!libjass.Dialogue} dialogue The Dialogue that this set of styles is associated with
 	 * @param {number} scaleX The horizontal scaling of the subtitles
 	 * @param {number} scaleY The vertical scaling of the subtitles
+	 * @param {!libjass.renderers.RendererSettings} settings The renderer settings
 	 * @param {!HTMLDivElement} fontSizeElement A <div> element to measure font sizes with
 	 * @param {!SVGDefsElement} svgDefsElement An SVG <defs> element to append filter definitions to
 	 */
@@ -870,7 +871,7 @@ module libjass.renderers {
 
 		private _nextFilterId = 0;
 
-		constructor(renderer: WebRenderer, dialogue: Dialogue, private _scaleX: number, private _scaleY: number, private _fontSizeElement: HTMLDivElement, private _svgDefsElement: SVGDefsElement) {
+		constructor(renderer: WebRenderer, dialogue: Dialogue, private _scaleX: number, private _scaleY: number, private _settings: RendererSettings, private _fontSizeElement: HTMLDivElement, private _svgDefsElement: SVGDefsElement) {
 			this._id = renderer.id + "-" + dialogue.id;
 			this._defaultStyle = dialogue.style;
 
@@ -1008,53 +1009,66 @@ module libjass.renderers {
 
 			var outlineColor = this._outlineColor.withAlpha(this._outlineAlpha);
 
-			var outlineWidth = (this._scaleX * this._outlineWidth);
-			var outlineHeight = (this._scaleY * this._outlineHeight);
+			var outlineWidth = this._scaleX * this._outlineWidth;
+			var outlineHeight = this._scaleY * this._outlineHeight;
 
 			var filterId = "svg-filter-" + this._id + "-" + this._nextFilterId++;
 
 			var outlineFilter = '';
 			if (outlineWidth > 0 || outlineHeight > 0) {
+				/* Construct an elliptical border by merging together many rectangles. The border is creating using dilate morphology filters, but these only support
+				 * generating rectangles.   http://lists.w3.org/Archives/Public/public-fx/2012OctDec/0003.html
+				 */
+
 				var mergeOutlinesFilter = '';
 
-				var radiiPairs: number[][] = [];
+				var outlineNumber = 0;
 
-				if (outlineWidth >= outlineHeight) {
-					if (outlineHeight > 0) {
-						for (var y = 0; y <= outlineHeight; y++) {
-							radiiPairs.push([outlineWidth / outlineHeight * Math.sqrt(outlineHeight * outlineHeight - y * y), y]);
+				var increment = (!this._settings.preciseOutlines && this._gaussianBlur > 0) ? this._gaussianBlur : 1;
+
+				((addOutline: (x: number, y: number) => void) => {
+					if (outlineWidth <= outlineHeight) {
+						if (outlineWidth > 0) {
+							for (var x = 0; x <= outlineWidth; x += increment) {
+								addOutline(x, outlineHeight / outlineWidth * Math.sqrt(outlineWidth * outlineWidth - x * x));
+							}
+							if (x !== outlineWidth + increment) {
+								addOutline(outlineWidth, 0);
+							}
+						}
+						else {
+							addOutline(0, outlineHeight);
 						}
 					}
 					else {
-						radiiPairs.push([outlineWidth, 0]);
-					}
-				}
-				else {
-					if (outlineWidth > 0) {
-						for (var x = 0; x <= outlineWidth; x++) {
-							radiiPairs.push([x, outlineHeight / outlineWidth * Math.sqrt(outlineWidth * outlineWidth - x * x)]);
+						if (outlineHeight > 0) {
+							for (var y = 0; y <= outlineHeight; y += increment) {
+								addOutline(outlineWidth / outlineHeight * Math.sqrt(outlineHeight * outlineHeight - y * y), y);
+							}
+							if (y !== outlineHeight + increment) {
+								addOutline(0, outlineHeight);
+							}
+						}
+						else {
+							addOutline(outlineWidth, 0);
 						}
 					}
-					else {
-						radiiPairs.push([0, outlineHeight]);
-					}
-				}
-
-				radiiPairs.forEach((radii, index) => {
+				})((x: number, y: number): void => {
 					outlineFilter +=
-						'\t<feMorphology in="SourceAlpha" operator="dilate" radius="' + radii[0].toFixed(3) + ' ' + radii[1].toFixed(3) + '" result="outline' + index + '" />\n';
+						'\t<feMorphology in="SourceAlpha" operator="dilate" radius="' + x.toFixed(3) + ' ' + y.toFixed(3) + '" result="outline' + outlineNumber + '" />\n';
 
 					mergeOutlinesFilter +=
-						'\t\t<feMergeNode in="outline' + index + '" />\n';
+						'\t\t<feMergeNode in="outline' + outlineNumber + '" />\n';
+
+					outlineNumber++;
 				});
 
-				outlineFilter =
-					'\t<feFlood flood-color="' + outlineColor.toString() + '" result="outlineColor" />' +
-					outlineFilter +
-					'\t<feMerge>\n' +
+				outlineFilter +=
+					'\t<feMerge result="outline">\n' +
 					mergeOutlinesFilter +
 					'\t</feMerge>\n' +
-					'\t<feComposite operator="in" in="outlineColor" />';
+					'\t<feFlood flood-color="' + outlineColor.toString() + '" />' +
+					'\t<feComposite operator="in" in2="outline" />';
 			}
 
 			var blurFilter = '';

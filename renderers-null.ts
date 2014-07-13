@@ -157,6 +157,15 @@ module libjass.renderers {
 		preRenderTime: number;
 
 		/**
+		 * Subtitle outlines will be rendered in full detail. When false, the value of blur is used to draw less outlines for better performance and (hopefully) similar output.
+		 *
+		 * Defaults to false.
+		 *
+		 * @type {boolean}
+		 */
+		preciseOutlines: boolean;
+
+		/**
 		 * A convenience method to create a font map from a <style> or <link> element that contains @font-face rules.
 		 *
 		 * @param {!LinkStyle} linkStyle
@@ -201,13 +210,14 @@ module libjass.renderers {
 		 * @return {!libjass.renderers.RendererSettings}
 		 */
 		static from(object: any): RendererSettings {
-			return RendererSettings._from(object.fontMap, object.preRenderTime);
+			return RendererSettings._from(object.fontMap, object.preRenderTime, object.preciseOutlines);
 		}
 
-		private static _from(fontMap: Map<string, string[]> = null, preRenderTime: number = 5): RendererSettings {
+		private static _from(fontMap: Map<string, string[]> = null, preRenderTime: number = 5, preciseOutlines: boolean = false): RendererSettings {
 			var result = new RendererSettings();
 			result.fontMap = fontMap;
 			result.preRenderTime = preRenderTime;
+			result.preciseOutlines = preciseOutlines;
 			return result;
 		}
 
