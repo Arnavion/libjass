@@ -118,18 +118,19 @@ module libjass.parser {
 				var propertyNode = this.parse_assScriptProperty(current);
 
 				if (propertyNode !== null) {
-					var property = propertyNode.value;
+					var property: { key: string; value: string } = propertyNode.value;
 
-					if (property.key === "Format") {
-						formatSpecifier = property.value.split(",").map((formatPart: string) => formatPart.trim());
+					if (current.value.contents === null && property.key === "Format") {
+						// The first line of this section is a format specifier. This section will be an array of templates.
+						formatSpecifier = property.value.split(",").map(formatPart => formatPart.trim());
+						current.value.contents = <TypedTemplateArray>[];
+						current.value.contents.formatSpecifier = formatSpecifier;
 					}
 
 					else if (formatSpecifier !== null) {
-						if (current.value.contents === null) {
-							current.value.contents = <any[]>[];
-						}
+						// Each line in this section is a template of a particular type, and the section is an array of these templates.
 
-						var template = Object.create(null);
+						var template: Template = Object.create(null);
 						var value = property.value.split(",");
 
 						if (value.length > formatSpecifier.length) {
@@ -140,10 +141,11 @@ module libjass.parser {
 							template[formatKey] = value[index];
 						});
 
-						current.value.contents.push({ type: property.key, template: template });
+						current.value.contents.push(<TypedTemplate>{ type: property.key, template: template });
 					}
 
 					else {
+						// This section is a single template. Each line is a property of this template.
 						if (current.value.contents === null) {
 							current.value.contents = Object.create(null);
 						}

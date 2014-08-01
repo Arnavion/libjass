@@ -32,6 +32,7 @@ module libjass {
 		private _properties: ScriptProperties = new ScriptProperties();
 		private _styles: StyleMap = Object.create(null);
 		private _dialogues: Dialogue[] = [];
+		private _dialoguesFormatSpecifier: string[];
 
 		/**
 		 * The properties of this script.
@@ -106,7 +107,7 @@ module libjass {
 			result.properties.scaleBorderAndShadow = (infoTemplate["ScaledBorderAndShadow"] === "yes");
 
 			// Get styles from the styles section
-			script["V4+ Styles"].forEach((line: any) => {
+			(<TypedTemplateArray>script["V4+ Styles"]).forEach(line => {
 				if (line.type === "Style") {
 					var styleTemplate: Template = line.template;
 
@@ -121,7 +122,9 @@ module libjass {
 			});
 
 			// Get dialogues from the events section
-			script["Events"].forEach((line: any) => {
+			var events = <TypedTemplateArray>script["Events"];
+			result._dialoguesFormatSpecifier = events.formatSpecifier;
+			events.forEach(line => {
 				if (line.type === "Dialogue") {
 					var dialogueTemplate: Template = line.template;
 
@@ -759,6 +762,21 @@ module libjass {
 	 */
 	export interface Template {
 		[key: string]: string;
+	}
+
+	/**
+	 * A template object with a particular type.
+	 */
+	export interface TypedTemplate {
+		type: string;
+		template: Template;
+	}
+
+	/**
+	 * An array of TypedTemplate objects with the format specifier that was used to parse them.
+	 */
+	export interface TypedTemplateArray extends Array<TypedTemplate> {
+		formatSpecifier: string[];
 	}
 
 	/**
