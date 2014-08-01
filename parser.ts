@@ -94,16 +94,15 @@ module libjass.parser {
 		parse_assScriptSection(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
-			current.value = Object.create(null);
-			current.value.contents = null;
-
 			var sectionHeaderNode = this.parse_assScriptSectionHeader(current);
 			if (sectionHeaderNode === null) {
 				parent.pop();
 				return null;
 			}
 
+			current.value = Object.create(null);
 			current.value.name = sectionHeaderNode.value;
+			current.value.contents = null;
 
 			var formatSpecifier: string[] = null;
 
@@ -199,8 +198,6 @@ module libjass.parser {
 		parse_assScriptProperty(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
-			current.value = Object.create(null);
-
 			var keyNode = new ParseNode(current, "");
 
 			var next: string;
@@ -231,6 +228,7 @@ module libjass.parser {
 				valueNode.value += next;
 			}
 
+			current.value = Object.create(null);
 			current.value.key = keyNode.value;
 			current.value.value = valueNode.value;
 
