@@ -2403,7 +2403,7 @@ module libjass.parser {
 
 		constructor(private _parent: ParseNode, value: string = null) {
 			if (_parent !== null) {
-				_parent._children.push(this);
+				_parent.children.push(this);
 			}
 
 			this._start = ((_parent !== null) ? _parent.end : 0);
@@ -2412,7 +2412,7 @@ module libjass.parser {
 				this.value = value;
 			}
 			else {
-				this._setEnd(this._start);
+				this._end = this._start;
 			}
 		}
 
