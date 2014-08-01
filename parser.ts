@@ -107,6 +107,10 @@ module libjass.parser {
 			var formatSpecifier: string[] = null;
 
 			while (this._haveMore() && this._peek() !== "[") {
+				if (this.read(current, "\n") !== null) {
+					continue;
+				}
+
 				if (this.parse_assScriptComment(current) !== null) {
 					continue;
 				}
@@ -148,10 +152,17 @@ module libjass.parser {
 					}
 				}
 
-				// Empty line
-				else if (this.read(current, "\n") === null) {
-					parent.pop();
-					return null;
+				else {
+					// Not a property line. Ignore.
+
+					if (this._haveMore() && this.read(current, "\n") === null) {
+						var garbageNode = new ParseNode(current, "");
+						for (var next = this._peek(); this._haveMore() && next !== "\n"; next = this._peek()) {
+							garbageNode.value += next;
+						}
+
+						this.read(current, "\n");
+					}
 				}
 			}
 
@@ -187,6 +198,8 @@ module libjass.parser {
 				parent.pop();
 				return null;
 			}
+
+			this.read(current, "\n");
 
 			return current;
 		}
@@ -228,6 +241,8 @@ module libjass.parser {
 				valueNode.value += next;
 			}
 
+			this.read(current, "\n");
+
 			current.value = Object.create(null);
 			current.value.key = keyNode.value;
 			current.value.value = valueNode.value;
@@ -251,6 +266,8 @@ module libjass.parser {
 			for (var next = this._peek(); this._haveMore() && next !== "\n"; next = this._peek()) {
 				valueNode.value += next;
 			}
+
+			this.read(current, "\n");
 
 			current.value = valueNode.value;
 
