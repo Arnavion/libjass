@@ -293,30 +293,20 @@ module libjass.parser {
 				}
 
 				else {
-					var newLineNode = this.parse_newline(current);
+					var whiteSpaceOrTextNode = this.parse_newline(current) || this.parse_hardspace(current) || this.parse_text(current);
 
-					if (newLineNode !== null) {
-						current.value.push(newLineNode.value);
+					if (whiteSpaceOrTextNode === null) {
+						parent.pop();
+						return null;
 					}
 
+					if (whiteSpaceOrTextNode.value instanceof parts.Text && current.value[current.value.length - 1] instanceof parts.Text) {
+						// Merge consecutive text parts into one part
+						var previousTextPart = <parts.Text>current.value[current.value.length - 1];
+						current.value[current.value.length - 1] = new parts.Text(previousTextPart.value + (<parts.Text>whiteSpaceOrTextNode.value).value);
+					}
 					else {
-						var textNode = this.parse_newline(current) || this.parse_hardspace(current) || this.parse_text(current);
-
-						if (textNode !== null) {
-							if (current.value[current.value.length - 1] instanceof parts.Text) {
-								// Merge consecutive text parts into one part
-								var previousTextPart = <parts.Text>current.value[current.value.length - 1];
-								current.value[current.value.length - 1] = new parts.Text(previousTextPart.value + (<parts.Text>textNode.value).value);
-							}
-							else {
-								current.value.push(textNode.value);
-							}
-						}
-
-						else {
-							parent.pop();
-							return null;
-						}
+						current.value.push(whiteSpaceOrTextNode.value);
 					}
 				}
 			}
