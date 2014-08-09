@@ -978,6 +978,7 @@ var walk = function (compiler, resolvedFilenames) {
 
 				if (existingBaseType === null) {
 					console.warn("Base type [" + current.baseType + "] of type [" + current.fullName + "] not found.");
+					current.baseType = { name: current.baseType, fullName: current.baseType };
 				}
 				else {
 					current.baseType = existingBaseType;
