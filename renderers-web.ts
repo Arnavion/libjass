@@ -99,29 +99,26 @@ module libjass.renderers {
 					var xhr = new XMLHttpRequest();
 
 					xhr.open("GET", url, true);
-					xhr.addEventListener("readystatechange", () => {
-						if (xhr.readyState === XMLHttpRequest.DONE) {
+					xhr.addEventListener("load", () => {
+						if (libjass.debugMode) {
+							console.log("Preloaded " + url + ".");
+						}
+
+						--urlsLeftToPreload;
+
+						if (libjass.debugMode) {
+							console.log(urlsLeftToPreload + " fonts left to preload.");
+						}
+
+						if (urlsLeftToPreload === 0) {
 							if (libjass.debugMode) {
-								console.log("Preloaded " + url + ".");
+								console.log("All fonts have been preloaded.");
 							}
 
-							--urlsLeftToPreload;
-
-							if (libjass.debugMode) {
-								console.log(urlsLeftToPreload + " fonts left to preload.");
-							}
-
-							if (urlsLeftToPreload === 0) {
-								if (libjass.debugMode) {
-									console.log("All fonts have been preloaded.");
-								}
-
-								this._ready();
-							}
+							this._ready();
 						}
 					}, false);
 					xhr.send(null);
-					return xhr;
 				});
 
 				if (libjass.debugMode) {

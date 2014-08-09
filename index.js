@@ -118,20 +118,18 @@ addEventListener("DOMContentLoaded", function () {
 	var track = document.querySelector("#video > track[data-format='ass'], #video > track[data-format='srt']");
 	var subsRequest = new XMLHttpRequest();
 	subsRequest.open("GET", track.src || track.getAttribute("src"), true);
-	subsRequest.addEventListener("readystatechange", function () {
-		if (subsRequest.readyState === XMLHttpRequest.DONE) {
-			debug("Script received.");
+	subsRequest.addEventListener("load", function () {
+		debug("Script received.");
 
-			ass = libjass.ASS.fromString(subsRequest.responseText, libjass.Format[track.getAttribute("data-format").toUpperCase()]);
-			if (libjass.debugMode) {
-				window.ass = ass;
-			}
-
-			document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.properties.resolutionX));
-			document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.properties.resolutionY));
-
-			testVideoAndASSLoaded();
+		ass = libjass.ASS.fromString(subsRequest.responseText, libjass.Format[track.getAttribute("data-format").toUpperCase()]);
+		if (libjass.debugMode) {
+			window.ass = ass;
 		}
+
+		document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.properties.resolutionX));
+		document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.properties.resolutionY));
+
+		testVideoAndASSLoaded();
 	}, false);
 	subsRequest.send(null);
 }, false);
