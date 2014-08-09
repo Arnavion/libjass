@@ -36,73 +36,93 @@ addEventListener("DOMContentLoaded", function () {
 	var ass = null;
 
 	var testVideoAndASSLoaded = function () {
-		if (videoMetadataLoaded && ass !== null) {
-			var renderer = new libjass.renderers.DefaultRenderer(video, ass, {
-				fontMap: libjass.renderers.RendererSettings.makeFontMapFromStyleElement(document.querySelector("#font-map"))
-			});
+		if (videoMetadataLoaded === false || ass === null) {
+			return;
+		}
 
-			if (libjass.debugMode) {
-				window.renderer = renderer;
+		// Both video metadata and ASS are loaded
+
+		// Create a DefaultRenderer using the video element, the ASS object, and the font map
+		var renderer = new libjass.renderers.DefaultRenderer(video, ass, {
+			fontMap: libjass.renderers.RendererSettings.makeFontMapFromStyleElement(document.querySelector("#font-map"))
+		});
+
+		if (libjass.debugMode) {
+			// Export the renderer for debugging
+			window.renderer = renderer;
+		}
+
+		// Autoplay the video when the renderer is ready
+		renderer.addEventListener("ready", function () {
+			debug("All fonts have been preloaded. Beginning autoplay.");
+
+			video.play();
+
+			subToggleSpanTextNode.textContent = renderer.enabled ? "off" : "on";
+		});
+
+		var subToggleSpanTextNode = document.createTextNode("");
+		document.querySelector("#enable-disable-subs-span").appendChild(subToggleSpanTextNode);
+
+		document.querySelector("#enable-disable-button").addEventListener("click", function (event) {
+			renderer.toggle();
+			subToggleSpanTextNode.textContent = renderer.enabled ? "off" : "on";
+		}, false);
+
+		// Run when the video/script resolution needs to be changed, either because the user clicked one of the resolution options,
+		// or because they exited full screen and their selection needs to be restored
+		var changeVideoSizeSelection = function (id) {
+			if (typeof id === "undefined") {
+				// Find which option is selected
+
+				[].slice.call(videoSizeSelector.querySelectorAll("input[name='video-size']")).some(function (option) {
+					if (option.checked) {
+						id = option.id;
+						return true;
+					}
+
+					return false;
+				});
 			}
 
-			renderer.addEventListener("ready", function () {
-				debug("All fonts have been preloaded. Beginning autoplay.");
-				video.play();
+			if (id === "video-size-video-radio") {
+				// Resize to video resolution
 
-				subToggleSpanTextNode.textContent = renderer.enabled ? "off" : "on";
-			});
+				video.style.width = video.videoWidth + "px";
+				video.style.height = video.videoHeight + "px";
+				renderer.resize(video.videoWidth, video.videoHeight);
+			}
 
-			var subToggleSpanTextNode = document.createTextNode("");
-			document.querySelector("#enable-disable-subs-span").appendChild(subToggleSpanTextNode);
+			else if (id === "video-size-script-radio") {
+				// Resize to script resolution
 
-			document.querySelector("#enable-disable-button").addEventListener("click", function (event) {
-				renderer.toggle();
-				subToggleSpanTextNode.textContent = renderer.enabled ? "off" : "on";
-			}, false);
-
-			var changeVideoSizeSelection = function (id) {
-				if (typeof id === "undefined") {
-					[].slice.call(videoSizeSelector.querySelectorAll("input[name='video-size']")).some(function (option) {
-						if (option.checked) {
-							id = option.id;
-							return true;
-						}
-
-						return false;
-					});
-				}
-
-				if (id === "video-size-video-radio") {
-					video.style.width = video.videoWidth + "px";
-					video.style.height = video.videoHeight + "px";
-					renderer.resize(video.videoWidth, video.videoHeight);
-				}
-
-				else if (id === "video-size-script-radio") {
-					video.style.width = ass.properties.resolutionX + "px";
-					video.style.height = ass.properties.resolutionY + "px";
-					renderer.resize(ass.properties.resolutionX, ass.properties.resolutionY);
-				}
-			};
-
-			var videoSizeSelector = document.querySelector("#video-size-selector");
-			videoSizeSelector.addEventListener("change", function (event) { changeVideoSizeSelection(event.target.id); }, false);
-
-			renderer.addEventListener("fullScreenChange", function (newState) {
-				if (newState === false) {
-					changeVideoSizeSelection();
-				}
-			});
-
-			changeVideoSizeSelection();
+				video.style.width = ass.properties.resolutionX + "px";
+				video.style.height = ass.properties.resolutionY + "px";
+				renderer.resize(ass.properties.resolutionX, ass.properties.resolutionY);
+			}
 		};
+
+		var videoSizeSelector = document.querySelector("#video-size-selector");
+		videoSizeSelector.addEventListener("change", function (event) { changeVideoSizeSelection(event.target.id); }, false);
+
+		// When video exits full screen, restore the size according to the resolution option that's selected
+		renderer.addEventListener("fullScreenChange", function (newState) {
+			if (newState === false) {
+				changeVideoSizeSelection();
+			}
+		});
+
+		// Set the resolution to whatever's selected by default
+		changeVideoSizeSelection();
 	};
 
 	(function (onVideoMetadataLoaded) {
 		if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
+			// Video metadata isn't available yet. Register an event handler for it.
 			video.addEventListener("loadedmetadata", onVideoMetadataLoaded, false);
 		}
 		else {
+			// Video metadata is already available.
 			onVideoMetadataLoaded();
 		}
 	})(function () {
@@ -110,26 +130,33 @@ addEventListener("DOMContentLoaded", function () {
 
 		videoMetadataLoaded = true;
 
+		// Prepare the "Video resolution" option label
 		document.querySelector("#video-resolution-label-width").appendChild(document.createTextNode(video.videoWidth));
 		document.querySelector("#video-resolution-label-height").appendChild(document.createTextNode(video.videoHeight));
 
+		// Test if everything is loaded
 		testVideoAndASSLoaded();
 	});
 
+	// Find the ASS or SRT track and load it
 	var track = document.querySelector("#video > track[data-format='ass'], #video > track[data-format='srt']");
 	var subsRequest = new XMLHttpRequest();
 	subsRequest.open("GET", track.src || track.getAttribute("src"), true);
 	subsRequest.addEventListener("load", function () {
 		debug("Script received.");
 
+		// Parse the response string into an ASS object
 		ass = libjass.ASS.fromString(subsRequest.responseText, libjass.Format[track.getAttribute("data-format").toUpperCase()]);
 		if (libjass.debugMode) {
+			// Export the ASS object for debugging
 			window.ass = ass;
 		}
 
+		// Prepare the "Script resolution" option label
 		document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.properties.resolutionX));
 		document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.properties.resolutionY));
 
+		// Test if everything is loaded
 		testVideoAndASSLoaded();
 	}, false);
 	subsRequest.send(null);
