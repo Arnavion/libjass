@@ -41,8 +41,9 @@ module libjass.renderers {
 			this._settings = RendererSettings.from(settings);
 
 			this._clock.addEventListener(ClockEvent.Play, () => this._onClockPlay());
+			this._clock.addEventListener(ClockEvent.Tick, () => this._onClockTick());
 			this._clock.addEventListener(ClockEvent.Pause, () => this._onClockPause());
-			this._clock.addEventListener(ClockEvent.TimeUpdate, () => this._onClockTimeUpdate());
+			this._clock.addEventListener(ClockEvent.Stop, () => this._onClockStop());
 		}
 
 		/**
@@ -90,7 +91,49 @@ module libjass.renderers {
 		draw(dialogue: Dialogue): void { }
 
 		/**
-		 * Runs when the clock starts playing, or is resumed from pause.
+		 * Enable the renderer.
+		 *
+		 * @return {boolean} True if the renderer is now enabled, false if it was already enabled.
+		 */
+		enable(): boolean {
+			return this._clock.enable();
+		}
+
+		/**
+		 * Disable the renderer.
+		 *
+		 * @return {boolean} True if the renderer is now disabled, false if it was already disabled.
+		 */
+		disable(): boolean {
+			return this._clock.disable();
+		}
+
+		/**
+		 * Toggle the renderer.
+		 */
+		toggle(): void {
+			this._clock.toggle();
+		}
+
+		/**
+		 * Enable or disable the renderer.
+		 *
+		 * @param {boolean} enabled If true, the renderer is enabled, otherwise it's disabled.
+		 * @return {boolean} True if the renderer is now in the given state, false if it was already in that state.
+		 */
+		setEnabled(enabled: boolean): boolean {
+			return this._clock.setEnabled(enabled);
+		}
+
+		/**
+		 * @type {boolean}
+		 */
+		get enabled(): boolean {
+			return this._clock.enabled;
+		}
+
+		/**
+		 * Runs when the clock is enabled, or starts playing, or is resumed from pause.
 		 */
 		_onClockPlay(): void {
 			if (libjass.verboseMode) {
@@ -99,22 +142,13 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Runs when the clock is paused.
-		 */
-		_onClockPause(): void {
-			if (libjass.verboseMode) {
-				console.log("NullRenderer._onClockPause");
-			}
-		}
-
-		/**
 		 * Runs when the clock's current time changed. This might be a result of either regular playback or seeking.
 		 */
-		_onClockTimeUpdate(): void {
+		_onClockTick(): void {
 			var currentTime = this.clock.currentTime;
 
 			if (libjass.verboseMode) {
-				console.log("NullRenderer._onClockTimeUpdate: currentTime = " + currentTime);
+				console.log("NullRenderer._onClockTick: currentTime = " + currentTime);
 			}
 
 			for (var i = 0; i < this._ass.dialogues.length; i++) {
@@ -130,6 +164,24 @@ module libjass.renderers {
 						this.preRender(dialogue);
 					}
 				}
+			}
+		}
+
+		/**
+		 * Runs when the clock is paused.
+		 */
+		_onClockPause(): void {
+			if (libjass.verboseMode) {
+				console.log("NullRenderer._onClockPause");
+			}
+		}
+
+		/**
+		 * Runs when the clock is disabled.
+		 */
+		_onClockStop(): void {
+			if (libjass.verboseMode) {
+				console.log("NullRenderer._onClockStop");
 			}
 		}
 	}

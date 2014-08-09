@@ -61,8 +61,9 @@ module libjass.renderers {
 
 	export enum ClockEvent {
 		Play,
+		Tick,
 		Pause,
-		TimeUpdate,
+		Stop,
 	}
 
 	export interface Clock extends EventSource<ClockEvent> {
@@ -77,19 +78,36 @@ module libjass.renderers {
 		enabled: boolean;
 
 		/**
-		 * Enable the clock.
+		 * @type {boolean}
 		 */
-		enable(): void;
+		playing: boolean;
+
+		/**
+		 * Enable the clock.
+		 *
+		 * @return {boolean} True if the clock is now enabled, false if it was already enabled.
+		 */
+		enable(): boolean;
 
 		/**
 		 * Disable the clock.
+		 *
+		 * @return {boolean} True if the clock is now disabled, false if it was already disabled.
 		 */
-		disable(): void;
+		disable(): boolean;
 
 		/**
 		 * Toggle the clock.
 		 */
 		toggle(): void;
+
+		/**
+		 * Enable or disable the renderer.
+		 *
+		 * @param {boolean} enabled If true, the clock is enabled, otherwise it's disabled.
+		 * @return {boolean} True if the clock is now in the given state, false if it was already in that state.
+		 */
+		setEnabled(enabled: boolean): boolean;
 
 		// EventSource members
 		addEventListener: (type: ClockEvent, listener: Function) => void;
@@ -100,13 +118,6 @@ module libjass.renderers {
 	 */
 	export class ManualClock implements Clock {
 		private _currentTime: number = -1;
-
-		/**
-		 * Trigger a play event.
-		 */
-		play(): void {
-			this._dispatchEvent(ClockEvent.Play, []);
-		}
 
 		/**
 		 * Trigger a pause event.
@@ -122,8 +133,10 @@ module libjass.renderers {
 		 */
 		timeUpdate(currentTime: number): void {
 			this._currentTime = currentTime;
-			this._dispatchEvent(ClockEvent.TimeUpdate, []);
+			this._dispatchEvent(ClockEvent.Tick, []);
 		}
+
+		// Clock members
 
 		/**
 		 * @type {number}
@@ -140,19 +153,40 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Enable the clock. This is a no-op for this type.
+		 * @type {boolean}
 		 */
-		enable(): void { }
+		get playing(): boolean {
+			return false;
+		}
+
+		/**
+		 * Enable the clock. This is a no-op for this type.
+		 *
+		 * @return {boolean} Always returns false.
+		 */
+		enable(): boolean { return false; }
 
 		/**
 		 * Disable the clock. This is a no-op for this type.
+		 *
+		 * @return {boolean} Always returns false.
 		 */
-		disable(): void { }
+		disable(): boolean { return false; }
 
 		/**
 		 * Toggle the clock. This is a no-op for this type.
 		 */
 		toggle(): void { }
+
+		/**
+		 * Enable or disable the renderer.
+		 *
+		 * @param {boolean} enabled If true, the clock is enabled, otherwise it's disabled.
+		 * @return {boolean} Always returns false.
+		 */
+		setEnabled(enabled: boolean): boolean {
+			return false;
+		}
 
 		// EventSource members
 		_eventListeners: Map<ClockEvent, Function[]> = new Map<ClockEvent, Function[]>();
@@ -161,7 +195,7 @@ module libjass.renderers {
 	}
 	mixin(ManualClock, [EventSource]);
 
-	enum VideoClockState {
+	enum VideoState {
 		Playing = 0,
 		Paused = 1,
 	}
@@ -172,11 +206,11 @@ module libjass.renderers {
 	 * @param {!HTMLVideoElement} video
 	 */
 	export class VideoClock implements Clock {
-		private _currentTime: number;
-
-		private _state: VideoClockState;
+		private _currentTime: number = -1;
 
 		private _enabled: boolean = true;
+
+		private _videoState: VideoState;
 
 		private _nextAnimationFrameRequestId: number = null;
 
@@ -185,6 +219,8 @@ module libjass.renderers {
 			this._video.addEventListener("pause", () => this._onVideoPause(), false);
 			this._video.addEventListener("seeking", () => this._onVideoSeeking(), false);
 		}
+
+		// Clock members
 
 		/**
 		 * @type {number}
@@ -201,29 +237,62 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Enable the clock.
+		 * @type {boolean}
 		 */
-		enable(): void {
+		get playing(): boolean {
+			return this._videoState === VideoState.Playing;
+		}
+
+		/**
+		 * Enable the clock.
+		 *
+		 * @return {boolean} True if the clock is now enabled, false if it was already enabled.
+		 */
+		enable(): boolean {
 			if (this._enabled) {
-				return;
+				return false;
+			}
+
+			if (this._videoState !== VideoState.Paused) {
+				if (libjass.debugMode) {
+					console.warn("VideoClock.enable: Abnormal state detected. VideoClock._videoState should have been VideoState.Paused");
+				}
 			}
 
 			this._enabled = true;
 
-			this._onVideoPlaying();
+			if (this._nextAnimationFrameRequestId === null) {
+				this._nextAnimationFrameRequestId = requestAnimationFrame(() => this._onTimerTick());
+			}
+
+			return true;
 		}
 
 		/**
 		 * Disable the clock.
+		 *
+		 * @return {boolean} True if the clock is now disabled, false if it was already disabled.
 		 */
-		disable(): void {
+		disable(): boolean {
 			if (!this._enabled) {
-				return;
+				return false;
 			}
 
-			this._onVideoPause();
+			if (this._videoState === VideoState.Playing) {
+				this._videoState = VideoState.Paused;
+				this._dispatchEvent(ClockEvent.Pause, []);
+			}
 
 			this._enabled = false;
+
+			this._dispatchEvent(ClockEvent.Stop, []);
+
+			if (this._nextAnimationFrameRequestId !== null) {
+				cancelAnimationFrame(this._nextAnimationFrameRequestId);
+				this._nextAnimationFrameRequestId = null;
+			}
+
+			return true;
 		}
 
 		/**
@@ -238,21 +307,32 @@ module libjass.renderers {
 			}
 		}
 
+		/**
+		 * Enable or disable the renderer.
+		 *
+		 * @param {boolean} enabled If true, the clock is enabled, otherwise it's disabled.
+		 * @return {boolean} True if the clock is now in the given state, false if it was already in that state.
+		 */
+		setEnabled(enabled: boolean): boolean {
+			if (enabled) {
+				return this.enable();
+			}
+			else {
+				return this.disable();
+			}
+		}
+
 		private _onVideoPlaying(): void {
 			if (!this._enabled) {
 				return;
 			}
 
-			if (this._state === VideoClockState.Playing) {
+			if (this._videoState === VideoState.Playing) {
 				return;
 			}
 
-			this._state = VideoClockState.Playing;
-
-			this._dispatchEvent(ClockEvent.Play, []);
-
 			if (this._nextAnimationFrameRequestId === null) {
-				this._timerTick();
+				this._nextAnimationFrameRequestId = requestAnimationFrame(() => this._onTimerTick());
 			}
 		}
 
@@ -261,7 +341,11 @@ module libjass.renderers {
 				return;
 			}
 
-			this._state = VideoClockState.Paused;
+			if (this._videoState === VideoState.Paused) {
+				return;
+			}
+
+			this._videoState = VideoState.Paused;
 
 			this._dispatchEvent(ClockEvent.Pause, []);
 
@@ -269,6 +353,8 @@ module libjass.renderers {
 				if (libjass.debugMode) {
 					console.warn("VideoClock._onVideoPause: Abnormal state detected. VideoClock._nextAnimationFrameRequestId should not have been null");
 				}
+
+				return;
 			}
 
 			cancelAnimationFrame(this._nextAnimationFrameRequestId);
@@ -284,42 +370,45 @@ module libjass.renderers {
 				return;
 			}
 
-			if (this._currentTime === this._video.currentTime) {
-				return;
+			if (this._videoState === VideoState.Playing) {
+				this._videoState = VideoState.Paused;
+				this._dispatchEvent(ClockEvent.Pause, []);
 			}
 
-			if (this._state !== VideoClockState.Paused) {
+			if (this._currentTime === this._video.currentTime) {
 				return;
 			}
 
 			this._currentTime = this._video.currentTime;
 
-			this._dispatchEvent(ClockEvent.Play, []);
-			this._dispatchEvent(ClockEvent.TimeUpdate, []);
-			this._dispatchEvent(ClockEvent.Pause, []);
+			this._dispatchEvent(ClockEvent.Tick, []);
 		}
 
-		private _timerTick(): void {
-			if (this._currentTime !== this._video.currentTime) {
-				this._currentTime = this._video.currentTime;
-
-				if (this._state !== VideoClockState.Playing) {
-					this._state = VideoClockState.Playing;
-
-					this._dispatchEvent(ClockEvent.Play, []);
-				}
-
-				this._dispatchEvent(ClockEvent.TimeUpdate, []);
+		private _onTimerTick(): void {
+			if (!this._enabled) {
+				return;
 			}
-			else {
-				if (this._state !== VideoClockState.Paused) {
-					this._state = VideoClockState.Paused;
 
+			if (this._videoState === VideoState.Playing) {
+				if (this._currentTime !== this._video.currentTime) {
+					this._currentTime = this._video.currentTime;
+					this._dispatchEvent(ClockEvent.Tick, []);
+				}
+				else {
+					this._videoState = VideoState.Paused;
 					this._dispatchEvent(ClockEvent.Pause, []);
 				}
 			}
+			else {
+				if (this._currentTime !== this._video.currentTime) {
+					this._currentTime = this._video.currentTime;
+					this._videoState = VideoState.Playing;
+					this._dispatchEvent(ClockEvent.Play, []);
+					this._dispatchEvent(ClockEvent.Tick, []);
+				}
+			}
 
-			this._nextAnimationFrameRequestId = requestAnimationFrame(() => this._timerTick());
+			this._nextAnimationFrameRequestId = requestAnimationFrame(() => this._onTimerTick());
 		}
 
 		// EventSource members

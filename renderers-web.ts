@@ -51,8 +51,6 @@ module libjass.renderers {
 		private _scaleX: number;
 		private _scaleY: number;
 
-		private _enabled: boolean = true;
-
 		constructor(ass: ASS, clock: Clock, settings: RendererSettings, private _libjassSubsWrapper: HTMLDivElement) {
 			super(ass, clock, settings);
 
@@ -142,13 +140,6 @@ module libjass.renderers {
 		}
 
 		/**
-		 * @type {boolean}
-		 */
-		get enabled(): boolean {
-			return this._enabled;
-		}
-
-		/**
 		 * Resize the subtitles to the given new dimensions.
 		 *
 		 * @param {number} width
@@ -183,32 +174,7 @@ module libjass.renderers {
 
 			// this.currentTime will be -1 if resize() is called before the clock begins playing for the first time. In this situation, there is no need to force a redraw.
 			if (this.clock.currentTime !== -1) {
-				this._onClockTimeUpdate();
-			}
-		}
-
-		enable(): void {
-			this.clock.enable();
-
-			this._subsWrapper.style.display = "";
-
-			this._enabled = true;
-		}
-
-		disable(): void {
-			this.clock.disable();
-
-			this._subsWrapper.style.display = "none";
-
-			this._enabled = false;
-		}
-
-		toggle(): void {
-			if (this._enabled) {
-				this.disable();
-			}
-			else {
-				this.enable();
+				this._onClockTick();
 			}
 		}
 
@@ -650,7 +616,24 @@ module libjass.renderers {
 
 			this._removeAllSubs();
 
+			this._subsWrapper.style.display = "";
+
 			this._subsWrapper.classList.remove("paused");
+		}
+
+		_onClockTick(): void {
+			// Remove dialogues that should be removed before adding new ones via super._onClockTick()
+
+			var currentTime = this.clock.currentTime;
+
+			this._currentSubs.forEach((sub: HTMLDivElement, dialogue: Dialogue) => {
+				if (dialogue.start > currentTime || dialogue.end < currentTime) {
+					this._currentSubs.delete(dialogue);
+					this._removeSub(sub);
+				}
+			});
+
+			super._onClockTick();
 		}
 
 		_onClockPause(): void {
@@ -659,17 +642,10 @@ module libjass.renderers {
 			this._subsWrapper.classList.add("paused");
 		}
 
-		_onClockTimeUpdate(): void {
-			var currentTime = this.clock.currentTime;
+		_onClockStop(): void {
+			super._onClockStop();
 
-			super._onClockTimeUpdate();
-
-			this._currentSubs.forEach((sub: HTMLDivElement, dialogue: Dialogue) => {
-				if (dialogue.start > currentTime || dialogue.end < currentTime) {
-					this._currentSubs.delete(dialogue);
-					this._removeSub(sub);
-				}
-			});
+			this._subsWrapper.style.display = "none";
 		}
 
 		_ready(): void {
