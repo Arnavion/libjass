@@ -78,11 +78,6 @@ module libjass.renderers {
 		enabled: boolean;
 
 		/**
-		 * @type {boolean}
-		 */
-		playing: boolean;
-
-		/**
 		 * Enable the clock.
 		 *
 		 * @return {boolean} True if the clock is now enabled, false if it was already enabled.
@@ -118,22 +113,37 @@ module libjass.renderers {
 	 */
 	export class ManualClock implements Clock {
 		private _currentTime: number = -1;
+		private _enabled: boolean = true;
 
 		/**
-		 * Trigger a pause event.
+		 * Trigger a ClockEvent.Play
+		 */
+		play(): void {
+			this._dispatchEvent(ClockEvent.Play, []);
+		}
+
+		/**
+		 * Trigger a ClockEvent.Tick
+		 *
+		 * @param {number} currentTime
+		 */
+		tick(currentTime: number): void {
+			this._currentTime = currentTime;
+			this._dispatchEvent(ClockEvent.Tick, []);
+		}
+
+		/**
+		 * Trigger a ClockEvent.Pause
 		 */
 		pause(): void {
 			this._dispatchEvent(ClockEvent.Pause, []);
 		}
 
 		/**
-		 * Trigger a timeUpdate event with the given current time.
-		 *
-		 * @param {number} currentTime
+		 * Trigger a ClockEvent.Stop
 		 */
-		timeUpdate(currentTime: number): void {
-			this._currentTime = currentTime;
-			this._dispatchEvent(ClockEvent.Tick, []);
+		stop(): void {
+			this._dispatchEvent(ClockEvent.Stop, []);
 		}
 
 		// Clock members
@@ -149,43 +159,64 @@ module libjass.renderers {
 		 * @type {boolean}
 		 */
 		get enabled(): boolean {
+			return this._enabled;
+		}
+
+		/**
+		 * Enable the clock.
+		 *
+		 * @return {boolean} True if the clock is now enabled, false if it was already enabled.
+		 */
+		enable(): boolean {
+			if (this._enabled) {
+				return false;
+			}
+
+			this._enabled = true;
+
 			return true;
 		}
 
 		/**
-		 * @type {boolean}
+		 * Disable the clock.
+		 *
+		 * @return {boolean} True if the clock is now disabled, false if it was already disabled.
 		 */
-		get playing(): boolean {
-			return false;
+		disable(): boolean {
+			if (!this._enabled) {
+				return false;
+			}
+
+			this._enabled = false;
+
+			return true;
 		}
 
 		/**
-		 * Enable the clock. This is a no-op for this type.
-		 *
-		 * @return {boolean} Always returns false.
+		 * Toggle the clock.
 		 */
-		enable(): boolean { return false; }
+		toggle(): void {
+			if (this._enabled) {
+				this.disable();
+			}
+			else {
+				this.enable();
+			}
+		}
 
 		/**
-		 * Disable the clock. This is a no-op for this type.
-		 *
-		 * @return {boolean} Always returns false.
-		 */
-		disable(): boolean { return false; }
-
-		/**
-		 * Toggle the clock. This is a no-op for this type.
-		 */
-		toggle(): void { }
-
-		/**
-		 * Enable or disable the renderer.
+		 * Enable or disable the clock.
 		 *
 		 * @param {boolean} enabled If true, the clock is enabled, otherwise it's disabled.
-		 * @return {boolean} Always returns false.
+		 * @return {boolean} True if the clock is now in the given state, false if it was already in that state.
 		 */
 		setEnabled(enabled: boolean): boolean {
-			return false;
+			if (enabled) {
+				return this.enable();
+			}
+			else {
+				return this.disable();
+			}
 		}
 
 		// EventSource members
@@ -234,13 +265,6 @@ module libjass.renderers {
 		 */
 		get enabled(): boolean {
 			return this._enabled;
-		}
-
-		/**
-		 * @type {boolean}
-		 */
-		get playing(): boolean {
-			return this._videoState === VideoState.Playing;
 		}
 
 		/**
@@ -303,7 +327,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Enable or disable the renderer.
+		 * Enable or disable the clock.
 		 *
 		 * @param {boolean} enabled If true, the clock is enabled, otherwise it's disabled.
 		 * @return {boolean} True if the clock is now in the given state, false if it was already in that state.
