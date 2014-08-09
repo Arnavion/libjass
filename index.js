@@ -36,7 +36,7 @@ addEventListener("DOMContentLoaded", function () {
 	var ass = null;
 
 	var testVideoAndASSLoaded = function () {
-		if (videoMetadataLoaded && ass) {
+		if (videoMetadataLoaded && ass !== null) {
 			var renderer = new libjass.renderers.DefaultRenderer(video, ass, {
 				fontMap: libjass.renderers.RendererSettings.makeFontMapFromStyleElement(document.querySelector("#font-map"))
 			});
@@ -62,7 +62,7 @@ addEventListener("DOMContentLoaded", function () {
 
 			var changeVideoSizeSelection = function (id) {
 				if (typeof id === "undefined") {
-					[].some.call(videoSizeSelector.querySelectorAll("input[name='video-size']"), function (option) {
+					[].slice.call(videoSizeSelector.querySelectorAll("input[name='video-size']")).some(function (option) {
 						if (option.checked) {
 							id = option.id;
 							return true;
@@ -96,24 +96,25 @@ addEventListener("DOMContentLoaded", function () {
 
 			changeVideoSizeSelection();
 		};
-	}
+	};
 
-	if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
-		video.addEventListener("loadedmetadata", function () {
-			debug("Video metadata loaded.");
-			videoMetadataLoaded = true;
-
-			document.querySelector("#video-resolution-label-width").appendChild(document.createTextNode(video.videoWidth));
-			document.querySelector("#video-resolution-label-height").appendChild(document.createTextNode(video.videoHeight));
-
-			testVideoAndASSLoaded();
-		}, false);
-	}
-	else {
+	(function (onVideoMetadataLoaded) {
+		if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
+			video.addEventListener("loadedmetadata", onVideoMetadataLoaded, false);
+		}
+		else {
+			onVideoMetadataLoaded();
+		}
+	})(function () {
 		debug("Video metadata loaded.");
+
 		videoMetadataLoaded = true;
+
+		document.querySelector("#video-resolution-label-width").appendChild(document.createTextNode(video.videoWidth));
+		document.querySelector("#video-resolution-label-height").appendChild(document.createTextNode(video.videoHeight));
+
 		testVideoAndASSLoaded();
-	}
+	});
 
 	var track = document.querySelector("#video > track[data-format='ass'], #video > track[data-format='srt']");
 	var subsRequest = new XMLHttpRequest();
