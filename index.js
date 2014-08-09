@@ -57,16 +57,10 @@ addEventListener("DOMContentLoaded", function () {
 			debug("All fonts have been preloaded. Beginning autoplay.");
 
 			video.play();
-
-			subToggleSpanTextNode.textContent = renderer.enabled ? "off" : "on";
 		});
 
-		var subToggleSpanTextNode = document.createTextNode("");
-		document.querySelector("#enable-disable-subs-span").appendChild(subToggleSpanTextNode);
-
-		document.querySelector("#enable-disable-button").addEventListener("click", function (event) {
-			renderer.toggle();
-			subToggleSpanTextNode.textContent = renderer.enabled ? "off" : "on";
+		document.querySelector("#enable-disable-subs").addEventListener("change", function (event) {
+			renderer.setEnabled(event.target.checked);
 		}, false);
 
 		// Run when the video/script resolution needs to be changed, either because the user clicked one of the resolution options,

@@ -42,15 +42,16 @@
 			<track src="/video/gc-01.ass" kind="metadata" data-format="ass" />
 		</video>
 		<form class="settings-form">
-			<div>
-				<button type="button" id="enable-disable-button">Turn subs <span id="enable-disable-subs-span" /></button>
-			</div>
 			<fieldset>
 				<legend>Video size</legend>
 				<div id="video-size-selector">
 					<input type="radio" name="video-size" id="video-size-video-radio" checked="checked" /><label for="video-size-video-radio">Video resolution <span id="video-resolution-label-width" />x<span id="video-resolution-label-height" /></label>
 					<input type="radio" name="video-size" id="video-size-script-radio" /><label for="video-size-script-radio">Script resolution <span id="script-resolution-label-width" />x<span id="script-resolution-label-height" /></label>
 				</div>
+			</fieldset>
+			<fieldset>
+				<legend>Subtitles</legend>
+				<input type="checkbox" id="enable-disable-subs" checked="checked" /><label for="enable-disable-subs">Subtitles</label>
 			</fieldset>
 		</form>
 	</body>
