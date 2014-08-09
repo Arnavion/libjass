@@ -145,7 +145,7 @@ module libjass.renderers {
 		 * Runs when the clock's current time changed. This might be a result of either regular playback or seeking.
 		 */
 		_onClockTick(): void {
-			var currentTime = this.clock.currentTime;
+			var currentTime = this._clock.currentTime;
 
 			if (libjass.verboseMode) {
 				console.log("NullRenderer._onClockTick: currentTime = " + currentTime);

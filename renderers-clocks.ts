@@ -102,7 +102,7 @@ module libjass.renderers {
 		toggle(): void;
 
 		/**
-		 * Enable or disable the renderer.
+		 * Enable or disable the clock.
 		 *
 		 * @param {boolean} enabled If true, the clock is enabled, otherwise it's disabled.
 		 * @return {boolean} True if the clock is now in the given state, false if it was already in that state.
@@ -261,9 +261,7 @@ module libjass.renderers {
 
 			this._enabled = true;
 
-			if (this._nextAnimationFrameRequestId === null) {
-				this._nextAnimationFrameRequestId = requestAnimationFrame(() => this._onTimerTick());
-			}
+			this._startTicking();
 
 			return true;
 		}
@@ -287,10 +285,7 @@ module libjass.renderers {
 
 			this._dispatchEvent(ClockEvent.Stop, []);
 
-			if (this._nextAnimationFrameRequestId !== null) {
-				cancelAnimationFrame(this._nextAnimationFrameRequestId);
-				this._nextAnimationFrameRequestId = null;
-			}
+			this._stopTicking();
 
 			return true;
 		}
@@ -331,9 +326,7 @@ module libjass.renderers {
 				return;
 			}
 
-			if (this._nextAnimationFrameRequestId === null) {
-				this._nextAnimationFrameRequestId = requestAnimationFrame(() => this._onTimerTick());
-			}
+			this._startTicking();
 		}
 
 		private _onVideoPause(): void {
@@ -357,12 +350,7 @@ module libjass.renderers {
 				return;
 			}
 
-			cancelAnimationFrame(this._nextAnimationFrameRequestId);
-			this._nextAnimationFrameRequestId = null;
-
-			if (libjass.verboseMode) {
-				console.log("VideoClock._onVideoPause: Cancelled VideoClock._nextAnimationFrameRequestId");
-			}
+			this._stopTicking();
 		}
 
 		private _onVideoSeeking(): void {
@@ -409,6 +397,19 @@ module libjass.renderers {
 			}
 
 			this._nextAnimationFrameRequestId = requestAnimationFrame(() => this._onTimerTick());
+		}
+
+		private _startTicking(): void {
+			if (this._nextAnimationFrameRequestId === null) {
+				this._nextAnimationFrameRequestId = requestAnimationFrame(() => this._onTimerTick());
+			}
+		}
+
+		private _stopTicking(): void {
+			if (this._nextAnimationFrameRequestId !== null) {
+				cancelAnimationFrame(this._nextAnimationFrameRequestId);
+				this._nextAnimationFrameRequestId = null;
+			}
 		}
 
 		// EventSource members
