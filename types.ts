@@ -69,6 +69,32 @@ module libjass {
 		}
 
 		/**
+		 * Add an event to this ASS script.
+		 *
+		 * @param {string} line The line from the script that contains the new event.
+		 */
+		addEvent(line: string): void {
+			var typedTemplateArray = <TypedTemplateArray>[];
+			typedTemplateArray.formatSpecifier = this._dialoguesFormatSpecifier;
+			var typedTemplate = <TypedTemplate>parser.parse(line, "assScriptProperty", new parser.ParseNode(null, { contents: typedTemplateArray }));
+
+			this._addEvent(typedTemplate);
+		}
+
+		private _addEvent(line: TypedTemplate) {
+			if (line.type === "Dialogue") {
+				var dialogueTemplate = line.template;
+
+				if (libjass.verboseMode) {
+					console.log("Read dialogue: " + JSON.stringify(dialogueTemplate), dialogueTemplate);
+				}
+
+				// Create the dialogue and add it to the dialogues array
+				this.dialogues.push(new Dialogue(dialogueTemplate, this));
+			}
+		}
+
+		/**
 		 * Creates an ASS object from the raw text of an ASS script.
 		 *
 		 * @param {string} raw The raw text of the script.
@@ -109,7 +135,7 @@ module libjass {
 			// Get styles from the styles section
 			(<TypedTemplateArray>script["V4+ Styles"]).forEach(line => {
 				if (line.type === "Style") {
-					var styleTemplate: Template = line.template;
+					var styleTemplate = line.template;
 
 					if (libjass.verboseMode) {
 						console.log("Read style: " + JSON.stringify(styleTemplate), styleTemplate);
@@ -124,18 +150,7 @@ module libjass {
 			// Get dialogues from the events section
 			var events = <TypedTemplateArray>script["Events"];
 			result._dialoguesFormatSpecifier = events.formatSpecifier;
-			events.forEach(line => {
-				if (line.type === "Dialogue") {
-					var dialogueTemplate: Template = line.template;
-
-					if (libjass.verboseMode) {
-						console.log("Read dialogue: " + JSON.stringify(dialogueTemplate), dialogueTemplate);
-					}
-
-					// Create the dialogue and add it to the dialogues array
-					result.dialogues.push(new Dialogue(dialogueTemplate, result));
-				}
-			});
+			events.forEach(line => result._addEvent(line));
 
 			return result;
 		}
