@@ -24,16 +24,16 @@
 				border-bottom: 1px solid black;
 			}
 
-			.variable, .function, .constructor, .getter, .setter {
+			.variable, .function, .interface, .constructor, .getter, .setter {
 				margin-left: 30px;
 				padding: 10px;
 			}
 
-			section > .variable:nth-child(2n), section > .function:nth-child(2n), section > .constructor:nth-child(2n) {
+			section > .variable:nth-child(2n), section > .function:nth-child(2n), section > .interface:nth-child(2n), section > .constructor:nth-child(2n) {
 				background-color: rgb(221, 250, 238);
 			}
 
-			section > .variable:nth-child(2n + 1), section > .function:nth-child(2n + 1), section > .constructor:nth-child(2n + 1) {
+			section > .variable:nth-child(2n + 1), section > .function:nth-child(2n + 1), section > .interface:nth-child(2n + 1), section > .constructor:nth-child(2n + 1) {
 				background-color: rgb(244, 250, 221);
 			}
 
@@ -54,6 +54,7 @@
 				margin: 0;
 			}
 
+			.interface .variable, .interface .function, .interface .getter, .interface .setter,
 			.constructor .variable, .constructor .function, .constructor .getter, .constructor .setter {
 				background-color: rgb(250, 241, 221);
 			}
@@ -119,6 +120,9 @@
 				<li><a href="#libjass.Set">Set</a></li>
 				<li><a href="#libjass.debugMode">debugMode</a></li>
 				<li><a href="#libjass.verboseMode">verboseMode</a></li>
+				<li><a href="#libjass.Template">Template</a></li>
+				<li><a href="#libjass.TypedTemplate">TypedTemplate</a></li>
+				<li><a href="#libjass.TypedTemplateArray">TypedTemplateArray</a></li>
 				<li><a href="#libjass.ASS">ASS</a></li>
 				<li><a href="#libjass.Dialogue">Dialogue</a></li>
 				<li><a href="#libjass.ScriptProperties">ScriptProperties</a></li>
@@ -130,12 +134,13 @@
 			<span class="namespace"><a href="#libjass.parser">libjass.parser</a></span>
 			<ul class="namespace-elements">
 				<li><a href="#libjass.parser.parse">parse</a></li>
-				<li class="private"><a href="#libjass.parser.ParseNode">ParseNode</a></li>
+				<li><a href="#libjass.parser.ParseNode">ParseNode</a></li>
 				<li class="private"><a href="#libjass.parser.ParserRun">ParserRun</a></li>
 			</ul>
 
 			<span class="namespace"><a href="#libjass.parts">libjass.parts</a></span>
 			<ul class="namespace-elements">
+				<li><a href="#libjass.parts.Part">Part</a></li>
 				<li><a href="#libjass.parts.Alignment">Alignment</a></li>
 				<li><a href="#libjass.parts.Alpha">Alpha</a></li>
 				<li><a href="#libjass.parts.Blur">Blur</a></li>
@@ -155,6 +160,8 @@
 				<li><a href="#libjass.parts.FontScaleX">FontScaleX</a></li>
 				<li><a href="#libjass.parts.FontScaleY">FontScaleY</a></li>
 				<li><a href="#libjass.parts.FontSize">FontSize</a></li>
+				<li><a href="#libjass.parts.FontSizeMinus">FontSizeMinus</a></li>
+				<li><a href="#libjass.parts.FontSizePlus">FontSizePlus</a></li>
 				<li><a href="#libjass.parts.GaussianBlur">GaussianBlur</a></li>
 				<li><a href="#libjass.parts.Italic">Italic</a></li>
 				<li><a href="#libjass.parts.LetterSpacing">LetterSpacing</a></li>
@@ -192,6 +199,7 @@
 
 			<span class="namespace"><a href="#libjass.parts.drawing">libjass.parts.drawing</a></span>
 			<ul class="namespace-elements">
+				<li><a href="#libjass.parts.drawing.Instruction">Instruction</a></li>
 				<li><a href="#libjass.parts.drawing.CubicBezierCurveInstruction">CubicBezierCurveInstruction</a></li>
 				<li><a href="#libjass.parts.drawing.LineInstruction">LineInstruction</a></li>
 				<li><a href="#libjass.parts.drawing.MoveInstruction">MoveInstruction</a></li>
@@ -210,6 +218,18 @@
 				<li class="private"><a href="#libjass.renderers.DrawingStyles">DrawingStyles</a></li>
 				<li class="private"><a href="#libjass.renderers.Keyframe">Keyframe</a></li>
 				<li class="private"><a href="#libjass.renderers.SpanStyles">SpanStyles</a></li>
+			</ul>
+
+			<span class="namespace"><a href="#libjass.webworker">libjass.webworker</a></span>
+			<ul class="namespace-elements">
+				<li><a href="#libjass.webworker._registerWorkerCommand">_registerWorkerCommand</a></li>
+				<li><a href="#libjass.webworker.createWorker">createWorker</a></li>
+				<li><a href="#libjass.webworker.WorkerChannel">WorkerChannel</a></li>
+				<li><a href="#libjass.webworker.WorkerCommandHandler">WorkerCommandHandler</a></li>
+				<li><a href="#libjass.webworker.WorkerPromise">WorkerPromise</a></li>
+				<li><a href="#libjass.webworker.WorkerPromiseCallback">WorkerPromiseCallback</a></li>
+				<li><a href="#libjass.webworker.WorkerResultCallback">WorkerResultCallback</a></li>
+				<li class="private"><a href="#libjass.webworker.WorkerChannelImpl">WorkerChannelImpl</a></li>
 			</ul>
 
 		</section>
@@ -259,6 +279,34 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 				</section>
 
 				<section>
+					<h2>Interfaces</h2>
+					<dl class="interface" id="libjass.Template">
+						<dt class="name">interface <a href="#libjass.Template">Template</a></dt>
+						<dd class="description">
+							<p>A template object. It is a map of string keys and string values.</p>
+						</dd>
+						<dd class="members">
+						</dd>
+					</dl>
+					<dl class="interface" id="libjass.TypedTemplate">
+						<dt class="name">interface <a href="#libjass.TypedTemplate">TypedTemplate</a></dt>
+						<dd class="description">
+							<p>A template object with a particular type.</p>
+						</dd>
+						<dd class="members">
+						</dd>
+					</dl>
+					<dl class="interface" id="libjass.TypedTemplateArray">
+						<dt class="name">interface <a href="#libjass.TypedTemplateArray">TypedTemplateArray</a> extends <a href="#Array&lt;TypedTemplate&gt;">Array&lt;TypedTemplate&gt;</a></dt>
+						<dd class="description">
+							<p>An array of TypedTemplate objects with the format specifier that was used to parse them.</p>
+						</dd>
+						<dd class="members">
+						</dd>
+					</dl>
+				</section>
+
+				<section>
 					<h2>Classes</h2>
 					<dl class="constructor" id="libjass.ASS">
 						<dt class="name">class <a href="#libjass.ASS">ASS</a></dt>
@@ -290,6 +338,20 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = ass.styles;</code></pre></fieldset></dd>
 								<dd class="return type">!Object.&lt;string, !libjass.Style&gt;</dd>
+							</dl>
+							<dl class="function" id="libjass.ASS.addEvent">
+								<dt class="name"><a href="#libjass.ASS.addEvent">addEvent</a></dt>
+								<dd class="description">
+									<p>Add an event to this ASS script.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>ass.addEvent(line);</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">line</dt>
+										<dd class="parameter type">string</dd>
+										<dd class="parameter description">The line from the script that contains the new event.</dd>
+									</dl>
+								</dd>
 							</dl>
 							<dl class="function static" id="libjass.ASS.fromString">
 								<dt class="name"><a href="#libjass.ASS.fromString">fromString</a></dt>
@@ -790,6 +852,14 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 						</dd>
 						<dd class="usage"><fieldset><legend /><pre><code>var simpleMap = new SimpleMap();</code></pre></fieldset></dd>
 						<dd class="members">
+							<dl class="getter" id="libjass.SimpleMap.size">
+								<dt class="name"><a href="#libjass.SimpleMap.size">size</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = simpleMap.size;</code></pre></fieldset></dd>
+								<dd class="return type">number</dd>
+							</dl>
 							<dl class="function" id="libjass.SimpleMap.clear">
 								<dt class="name"><a href="#libjass.SimpleMap.clear">clear</a></dt>
 								<dd class="description">
@@ -891,6 +961,14 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 						</dd>
 						<dd class="usage"><fieldset><legend /><pre><code>var simpleSet = new SimpleSet();</code></pre></fieldset></dd>
 						<dd class="members">
+							<dl class="getter" id="libjass.SimpleSet.size">
+								<dt class="name"><a href="#libjass.SimpleSet.size">size</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = simpleSet.size;</code></pre></fieldset></dd>
+								<dd class="return type">number</dd>
+							</dl>
 							<dl class="function" id="libjass.SimpleSet.add">
 								<dt class="name"><a href="#libjass.SimpleSet.add">add</a></dt>
 								<dd class="description">
@@ -961,26 +1039,29 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 						<dd class="description">
 							<p>Parses a given string with the specified rule.</p>
 						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>var result = parser.parse(input, rule);</code></pre></fieldset></dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = parser.parse(input, rule, customParseTree);</code></pre></fieldset></dd>
 						<dd class="parameters">
 							<dl>
 								<dt class="parameter name">input</dt>
 								<dd class="parameter type">string</dd>
-								<dd class="parameter description"></dd>
+								<dd class="parameter description">The string to be parsed.</dd>
 								<dt class="parameter name">rule</dt>
 								<dd class="parameter type">string</dd>
-								<dd class="parameter description"></dd>
+								<dd class="parameter description">The rule to parse the string with</dd>
+								<dt class="parameter name">customParseTree</dt>
+								<dd class="parameter type">libjass.parser.ParseNode=null</dd>
+								<dd class="parameter description">If provided, this is used as the root of the parse tree instead of a new object.</dd>
 							</dl>
 						</dd>
 						<dt>Returns</dt>
 						<dd class="return type">*</dd>
-						<dd class="return description"></dd>
+						<dd class="return description">The value returned depends on the rule used.</dd>
 					</dl>
 				</section>
 
 				<section>
 					<h2>Classes</h2>
-					<dl class="constructor private" id="libjass.parser.ParseNode">
+					<dl class="constructor" id="libjass.parser.ParseNode">
 						<dt class="name">class <a href="#libjass.parser.ParseNode">ParseNode</a></dt>
 						<dd class="description">
 							<p>This class represents a single parse node. It has a start and end position, and an optional value object.</p>
@@ -990,10 +1071,10 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 							<dl>
 								<dt class="parameter name">parent</dt>
 								<dd class="parameter type">ParseNode</dd>
-								<dd class="parameter description">The parent of this parse node. The parent's end position will be updated to the end position of this node whenever the latter changes.</dd>
+								<dd class="parameter description">The parent of this parse node.</dd>
 								<dt class="parameter name">value</dt>
-								<dd class="parameter type">?string=null</dd>
-								<dd class="parameter description">A shortcut to assign a string to the value property.</dd>
+								<dd class="parameter type">*=null</dd>
+								<dd class="parameter description">If provided, it is assigned as the value of the node.</dd>
 							</dl>
 						</dd>
 						<dd class="members">
@@ -2000,12 +2081,46 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 								<dd class="return type">ParseNode</dd>
 								<dd class="return description"></dd>
 							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fsminus">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fsminus">parse_tag_fsminus</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = parserRun.parse_tag_fsminus(parent);</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">parent</dt>
+										<dd class="parameter type">!ParseNode</dd>
+										<dd class="parameter description"></dd>
+									</dl>
+								</dd>
+								<dt>Returns</dt>
+								<dd class="return type">ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
 							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fsp">
 								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fsp">parse_tag_fsp</a></dt>
 								<dd class="description">
 									<p></p>
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = parserRun.parse_tag_fsp(parent);</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">parent</dt>
+										<dd class="parameter type">!ParseNode</dd>
+										<dd class="parameter description"></dd>
+									</dl>
+								</dd>
+								<dt>Returns</dt>
+								<dd class="return type">ParseNode</dd>
+								<dd class="return description"></dd>
+							</dl>
+							<dl class="function" id="libjass.parser.ParserRun.parse_tag_fsplus">
+								<dt class="name"><a href="#libjass.parser.ParserRun.parse_tag_fsplus">parse_tag_fsplus</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = parserRun.parse_tag_fsplus(parent);</code></pre></fieldset></dd>
 								<dd class="parameters">
 									<dl>
 										<dt class="parameter name">parent</dt>
@@ -2462,6 +2577,18 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 			</section>
 			<section>
 				<h1 id="libjass.parts">libjass.parts</h1>
+
+				<section>
+					<h2>Interfaces</h2>
+					<dl class="interface" id="libjass.parts.Part">
+						<dt class="name">interface <a href="#libjass.parts.Part">Part</a></dt>
+						<dd class="description">
+							<p>The base interface of the ASS tag classes.</p>
+						</dd>
+						<dd class="members">
+						</dd>
+					</dl>
+				</section>
 
 				<section>
 					<h2>Classes</h2>
@@ -3054,6 +3181,54 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 									<p>The value of this font size tag.</p>
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = fontSize.value;</code></pre></fieldset></dd>
+								<dd class="return type">?number</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.parts.FontSizeMinus">
+						<dt class="name">class <a href="#libjass.parts.FontSizeMinus">FontSizeMinus</a></dt>
+						<dd class="description">
+							<p>A font size decrease tag {\fs-}</p>
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var fontSizeMinus = new FontSizeMinus(value);</code></pre></fieldset></dd>
+						<dd class="parameters">
+							<dl>
+								<dt class="parameter name">value</dt>
+								<dd class="parameter type">?number</dd>
+								<dd class="parameter description">{\fs-###} -&gt; difference (number)</dd>
+							</dl>
+						</dd>
+						<dd class="members">
+							<dl class="getter" id="libjass.parts.FontSizeMinus.value">
+								<dt class="name"><a href="#libjass.parts.FontSizeMinus.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this font size decrease tag.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = fontSizeMinus.value;</code></pre></fieldset></dd>
+								<dd class="return type">?number</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="constructor" id="libjass.parts.FontSizePlus">
+						<dt class="name">class <a href="#libjass.parts.FontSizePlus">FontSizePlus</a></dt>
+						<dd class="description">
+							<p>A font size increase tag {\fs+}</p>
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var fontSizePlus = new FontSizePlus(value);</code></pre></fieldset></dd>
+						<dd class="parameters">
+							<dl>
+								<dt class="parameter name">value</dt>
+								<dd class="parameter type">?number</dd>
+								<dd class="parameter description">{\fs+###} -&gt; difference (number)</dd>
+							</dl>
+						</dd>
+						<dd class="members">
+							<dl class="getter" id="libjass.parts.FontSizePlus.value">
+								<dt class="name"><a href="#libjass.parts.FontSizePlus.value">value</a></dt>
+								<dd class="description">
+									<p>The value of this font size increase tag.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = fontSizePlus.value;</code></pre></fieldset></dd>
 								<dd class="return type">?number</dd>
 							</dl>
 						</dd>
@@ -4018,6 +4193,18 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 				<h1 id="libjass.parts.drawing">libjass.parts.drawing</h1>
 
 				<section>
+					<h2>Interfaces</h2>
+					<dl class="interface" id="libjass.parts.drawing.Instruction">
+						<dt class="name">interface <a href="#libjass.parts.drawing.Instruction">Instruction</a></dt>
+						<dd class="description">
+							<p>The base interface of the drawing instructions.</p>
+						</dd>
+						<dd class="members">
+						</dd>
+					</dl>
+				</section>
+
+				<section>
 					<h2>Classes</h2>
 					<dl class="constructor" id="libjass.parts.drawing.CubicBezierCurveInstruction">
 						<dt class="name">class <a href="#libjass.parts.drawing.CubicBezierCurveInstruction">CubicBezierCurveInstruction</a></dt>
@@ -4274,37 +4461,67 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 							<dl class="function" id="libjass.renderers.ManualClock.disable">
 								<dt class="name"><a href="#libjass.renderers.ManualClock.disable">disable</a></dt>
 								<dd class="description">
-									<p>Disable the clock. This is a no-op for this type.</p>
+									<p>Disable the clock.</p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>manualClock.disable();</code></pre></fieldset></dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = manualClock.disable();</code></pre></fieldset></dd>
+								<dt>Returns</dt>
+								<dd class="return type">boolean</dd>
+								<dd class="return description">True if the clock is now disabled, false if it was already disabled.</dd>
 							</dl>
 							<dl class="function" id="libjass.renderers.ManualClock.enable">
 								<dt class="name"><a href="#libjass.renderers.ManualClock.enable">enable</a></dt>
 								<dd class="description">
-									<p>Enable the clock. This is a no-op for this type.</p>
+									<p>Enable the clock.</p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>manualClock.enable();</code></pre></fieldset></dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = manualClock.enable();</code></pre></fieldset></dd>
+								<dt>Returns</dt>
+								<dd class="return type">boolean</dd>
+								<dd class="return description">True if the clock is now enabled, false if it was already enabled.</dd>
 							</dl>
 							<dl class="function" id="libjass.renderers.ManualClock.pause">
 								<dt class="name"><a href="#libjass.renderers.ManualClock.pause">pause</a></dt>
 								<dd class="description">
-									<p>Trigger a pause event.</p>
+									<p>Trigger a ClockEvent.Pause</p>
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>manualClock.pause();</code></pre></fieldset></dd>
 							</dl>
 							<dl class="function" id="libjass.renderers.ManualClock.play">
 								<dt class="name"><a href="#libjass.renderers.ManualClock.play">play</a></dt>
 								<dd class="description">
-									<p>Trigger a play event.</p>
+									<p>Trigger a ClockEvent.Play</p>
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>manualClock.play();</code></pre></fieldset></dd>
 							</dl>
-							<dl class="function" id="libjass.renderers.ManualClock.timeUpdate">
-								<dt class="name"><a href="#libjass.renderers.ManualClock.timeUpdate">timeUpdate</a></dt>
+							<dl class="function" id="libjass.renderers.ManualClock.setEnabled">
+								<dt class="name"><a href="#libjass.renderers.ManualClock.setEnabled">setEnabled</a></dt>
 								<dd class="description">
-									<p>Trigger a timeUpdate event with the given current time.</p>
+									<p>Enable or disable the clock.</p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>manualClock.timeUpdate(currentTime);</code></pre></fieldset></dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = manualClock.setEnabled(enabled);</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">enabled</dt>
+										<dd class="parameter type">boolean</dd>
+										<dd class="parameter description">If true, the clock is enabled, otherwise it's disabled.</dd>
+									</dl>
+								</dd>
+								<dt>Returns</dt>
+								<dd class="return type">boolean</dd>
+								<dd class="return description">True if the clock is now in the given state, false if it was already in that state.</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.ManualClock.stop">
+								<dt class="name"><a href="#libjass.renderers.ManualClock.stop">stop</a></dt>
+								<dd class="description">
+									<p>Trigger a ClockEvent.Stop</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>manualClock.stop();</code></pre></fieldset></dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.ManualClock.tick">
+								<dt class="name"><a href="#libjass.renderers.ManualClock.tick">tick</a></dt>
+								<dd class="description">
+									<p>Trigger a ClockEvent.Tick</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>manualClock.tick(currentTime);</code></pre></fieldset></dd>
 								<dd class="parameters">
 									<dl>
 										<dt class="parameter name">currentTime</dt>
@@ -4316,7 +4533,7 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 							<dl class="function" id="libjass.renderers.ManualClock.toggle">
 								<dt class="name"><a href="#libjass.renderers.ManualClock.toggle">toggle</a></dt>
 								<dd class="description">
-									<p>Toggle the clock. This is a no-op for this type.</p>
+									<p>Toggle the clock.</p>
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>manualClock.toggle();</code></pre></fieldset></dd>
 							</dl>
@@ -4358,6 +4575,14 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = nullRenderer.clock;</code></pre></fieldset></dd>
 								<dd class="return type">!libjass.renderers.Clock</dd>
 							</dl>
+							<dl class="getter" id="libjass.renderers.NullRenderer.enabled">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer.enabled">enabled</a></dt>
+								<dd class="description">
+									<p></p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = nullRenderer.enabled;</code></pre></fieldset></dd>
+								<dd class="return type">boolean</dd>
+							</dl>
 							<dl class="getter" id="libjass.renderers.NullRenderer.id">
 								<dt class="name"><a href="#libjass.renderers.NullRenderer.id">id</a></dt>
 								<dd class="description">
@@ -4384,16 +4609,33 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 							<dl class="function" id="libjass.renderers.NullRenderer._onClockPlay">
 								<dt class="name"><a href="#libjass.renderers.NullRenderer._onClockPlay">_onClockPlay</a></dt>
 								<dd class="description">
-									<p>Runs when the clock starts playing, or is resumed from pause.</p>
+									<p>Runs when the clock is enabled, or starts playing, or is resumed from pause.</p>
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer._onClockPlay();</code></pre></fieldset></dd>
 							</dl>
-							<dl class="function" id="libjass.renderers.NullRenderer._onClockTimeUpdate">
-								<dt class="name"><a href="#libjass.renderers.NullRenderer._onClockTimeUpdate">_onClockTimeUpdate</a></dt>
+							<dl class="function" id="libjass.renderers.NullRenderer._onClockStop">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer._onClockStop">_onClockStop</a></dt>
+								<dd class="description">
+									<p>Runs when the clock is disabled.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer._onClockStop();</code></pre></fieldset></dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.NullRenderer._onClockTick">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer._onClockTick">_onClockTick</a></dt>
 								<dd class="description">
 									<p>Runs when the clock's current time changed. This might be a result of either regular playback or seeking.</p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer._onClockTimeUpdate();</code></pre></fieldset></dd>
+								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer._onClockTick();</code></pre></fieldset></dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.NullRenderer.disable">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer.disable">disable</a></dt>
+								<dd class="description">
+									<p>Disable the renderer.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = nullRenderer.disable();</code></pre></fieldset></dd>
+								<dt>Returns</dt>
+								<dd class="return type">boolean</dd>
+								<dd class="return description">True if the renderer is now disabled, false if it was already disabled.</dd>
 							</dl>
 							<dl class="function" id="libjass.renderers.NullRenderer.draw">
 								<dt class="name"><a href="#libjass.renderers.NullRenderer.draw">draw</a></dt>
@@ -4409,6 +4651,16 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 									</dl>
 								</dd>
 							</dl>
+							<dl class="function" id="libjass.renderers.NullRenderer.enable">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer.enable">enable</a></dt>
+								<dd class="description">
+									<p>Enable the renderer.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = nullRenderer.enable();</code></pre></fieldset></dd>
+								<dt>Returns</dt>
+								<dd class="return type">boolean</dd>
+								<dd class="return description">True if the renderer is now enabled, false if it was already enabled.</dd>
+							</dl>
 							<dl class="function" id="libjass.renderers.NullRenderer.preRender">
 								<dt class="name"><a href="#libjass.renderers.NullRenderer.preRender">preRender</a></dt>
 								<dd class="description">
@@ -4422,6 +4674,30 @@ libjass.verboseMode = value;</code></pre></fieldset></dd>
 										<dd class="parameter description"></dd>
 									</dl>
 								</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.NullRenderer.setEnabled">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer.setEnabled">setEnabled</a></dt>
+								<dd class="description">
+									<p>Enable or disable the renderer.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = nullRenderer.setEnabled(enabled);</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">enabled</dt>
+										<dd class="parameter type">boolean</dd>
+										<dd class="parameter description">If true, the renderer is enabled, otherwise it's disabled.</dd>
+									</dl>
+								</dd>
+								<dt>Returns</dt>
+								<dd class="return type">boolean</dd>
+								<dd class="return description">True if the renderer is now in the given state, false if it was already in that state.</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.NullRenderer.toggle">
+								<dt class="name"><a href="#libjass.renderers.NullRenderer.toggle">toggle</a></dt>
+								<dd class="description">
+									<p>Toggle the renderer.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>nullRenderer.toggle();</code></pre></fieldset></dd>
 							</dl>
 						</dd>
 					</dl>
@@ -4444,11 +4720,20 @@ rendererSettings.fontMap = value;</code></pre></fieldset></dd>
 							<dl class="variable" id="libjass.renderers.RendererSettings.preRenderTime">
 								<dt class="name"><a href="#libjass.renderers.RendererSettings.preRenderTime">preRenderTime</a></dt>
 								<dd class="description">
-									<p>Subtitles will be pre-rendered for this amount of time (seconds)</p>
+									<p>Subtitles will be pre-rendered for this amount of time (seconds). Defaults to 5.</p>
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = rendererSettings.preRenderTime;
 rendererSettings.preRenderTime = value;</code></pre></fieldset></dd>
 								<dd class="return type">number</dd>
+							</dl>
+							<dl class="variable" id="libjass.renderers.RendererSettings.preciseOutlines">
+								<dt class="name"><a href="#libjass.renderers.RendererSettings.preciseOutlines">preciseOutlines</a></dt>
+								<dd class="description">
+									<p>Subtitle outlines will be rendered in full detail. When false, the value of blur is used to draw less outlines for better performance and (hopefully) similar output. Defaults to false.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = rendererSettings.preciseOutlines;
+rendererSettings.preciseOutlines = value;</code></pre></fieldset></dd>
+								<dd class="return type">boolean</dd>
 							</dl>
 							<dl class="function static" id="libjass.renderers.RendererSettings.from">
 								<dt class="name"><a href="#libjass.renderers.RendererSettings.from">from</a></dt>
@@ -4521,14 +4806,37 @@ rendererSettings.preRenderTime = value;</code></pre></fieldset></dd>
 								<dd class="description">
 									<p>Disable the clock.</p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>videoClock.disable();</code></pre></fieldset></dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = videoClock.disable();</code></pre></fieldset></dd>
+								<dt>Returns</dt>
+								<dd class="return type">boolean</dd>
+								<dd class="return description">True if the clock is now disabled, false if it was already disabled.</dd>
 							</dl>
 							<dl class="function" id="libjass.renderers.VideoClock.enable">
 								<dt class="name"><a href="#libjass.renderers.VideoClock.enable">enable</a></dt>
 								<dd class="description">
 									<p>Enable the clock.</p>
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>videoClock.enable();</code></pre></fieldset></dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = videoClock.enable();</code></pre></fieldset></dd>
+								<dt>Returns</dt>
+								<dd class="return type">boolean</dd>
+								<dd class="return description">True if the clock is now enabled, false if it was already enabled.</dd>
+							</dl>
+							<dl class="function" id="libjass.renderers.VideoClock.setEnabled">
+								<dt class="name"><a href="#libjass.renderers.VideoClock.setEnabled">setEnabled</a></dt>
+								<dd class="description">
+									<p>Enable or disable the clock.</p>
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = videoClock.setEnabled(enabled);</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">enabled</dt>
+										<dd class="parameter type">boolean</dd>
+										<dd class="parameter description">If true, the clock is enabled, otherwise it's disabled.</dd>
+									</dl>
+								</dd>
+								<dt>Returns</dt>
+								<dd class="return type">boolean</dd>
+								<dd class="return description">True if the clock is now in the given state, false if it was already in that state.</dd>
 							</dl>
 							<dl class="function" id="libjass.renderers.VideoClock.toggle">
 								<dt class="name"><a href="#libjass.renderers.VideoClock.toggle">toggle</a></dt>
@@ -4562,14 +4870,6 @@ rendererSettings.preRenderTime = value;</code></pre></fieldset></dd>
 							</dl>
 						</dd>
 						<dd class="members">
-							<dl class="getter" id="libjass.renderers.WebRenderer.enabled">
-								<dt class="name"><a href="#libjass.renderers.WebRenderer.enabled">enabled</a></dt>
-								<dd class="description">
-									<p></p>
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>var result = webRenderer.enabled;</code></pre></fieldset></dd>
-								<dd class="return type">boolean</dd>
-							</dl>
 							<dl class="function" id="libjass.renderers.WebRenderer.draw">
 								<dt class="name"><a href="#libjass.renderers.WebRenderer.draw">draw</a></dt>
 								<dd class="description">
@@ -4776,7 +5076,7 @@ rendererSettings.preRenderTime = value;</code></pre></fieldset></dd>
 						<dd class="description">
 							<p>This class represents the style attribute of a span. As a Dialogue's div is rendered, individual parts are added to span's, and this class is used to maintain the style attribute of those.</p>
 						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>var spanStyles = new SpanStyles(renderer, dialogue, scaleX, scaleY, fontSizeElement, svgDefsElement);</code></pre></fieldset></dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var spanStyles = new SpanStyles(renderer, dialogue, scaleX, scaleY, settings, fontSizeElement, svgDefsElement);</code></pre></fieldset></dd>
 						<dd class="parameters">
 							<dl>
 								<dt class="parameter name">renderer</dt>
@@ -4791,6 +5091,9 @@ rendererSettings.preRenderTime = value;</code></pre></fieldset></dd>
 								<dt class="parameter name">scaleY</dt>
 								<dd class="parameter type">number</dd>
 								<dd class="parameter description">The vertical scaling of the subtitles</dd>
+								<dt class="parameter name">settings</dt>
+								<dd class="parameter type">!libjass.renderers.RendererSettings</dd>
+								<dd class="parameter description">The renderer settings</dd>
 								<dt class="parameter name">fontSizeElement</dt>
 								<dd class="parameter type">!HTMLDivElement</dd>
 								<dd class="parameter description">A &lt;div&gt; element to measure font sizes with</dd>
@@ -5239,6 +5542,105 @@ rendererSettings.preRenderTime = value;</code></pre></fieldset></dd>
 								<dd class="return type">!HTMLSpanElement</dd>
 								<dd class="return description">The resulting &lt;span&gt; with the CSS styles applied. This may be a wrapper around the input &lt;span&gt; if the styles were applied using SVG filters.</dd>
 							</dl>
+						</dd>
+					</dl>
+				</section>
+
+			</section>
+			<section>
+				<h1 id="libjass.webworker">libjass.webworker</h1>
+
+				<section>
+					<h2>Free functions</h2>
+					<dl class="function" id="libjass.webworker._registerWorkerCommand">
+						<dt class="name"><a href="#libjass.webworker._registerWorkerCommand">_registerWorkerCommand</a></dt>
+						<dd class="description">
+							<p>Registers a handler for the given worker command.</p>
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>webworker._registerWorkerCommand(command, handler);</code></pre></fieldset></dd>
+						<dd class="parameters">
+							<dl>
+								<dt class="parameter name">command</dt>
+								<dd class="parameter type">number</dd>
+								<dd class="parameter description">The command that this handler will handle. Valid values are the values of libjass.webworker.WorkerCommands</dd>
+								<dt class="parameter name">handler</dt>
+								<dd class="parameter type">function(*, function(*, *))</dd>
+								<dd class="parameter description">The handler. A function of the form (parameters: *, response: function(error: *, result: *): void): void</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl class="function" id="libjass.webworker.createWorker">
+						<dt class="name"><a href="#libjass.webworker.createWorker">createWorker</a></dt>
+						<dd class="description">
+							<p>Create a new web worker.</p>
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = webworker.createWorker();</code></pre></fieldset></dd>
+						<dt>Returns</dt>
+						<dd class="return type">!libjass.webworker.WorkerChannel</dd>
+						<dd class="return description">A communication channel to the new web worker.</dd>
+					</dl>
+				</section>
+
+				<section>
+					<h2>Interfaces</h2>
+					<dl class="interface" id="libjass.webworker.WorkerChannel">
+						<dt class="name">interface <a href="#libjass.webworker.WorkerChannel">WorkerChannel</a></dt>
+						<dd class="description">
+							<p>Represents a communication channel between the host and the web worker. An instance of this class is created by calling libjass.webworker.setup()</p>
+						</dd>
+						<dd class="members">
+						</dd>
+					</dl>
+					<dl class="interface" id="libjass.webworker.WorkerCommandHandler">
+						<dt class="name">interface <a href="#libjass.webworker.WorkerCommandHandler">WorkerCommandHandler</a></dt>
+						<dd class="description">
+							<p>The signature of a handler registered to handle a particular WorkerCommand.</p>
+						</dd>
+						<dd class="members">
+						</dd>
+					</dl>
+					<dl class="interface" id="libjass.webworker.WorkerPromise">
+						<dt class="name">interface <a href="#libjass.webworker.WorkerPromise">WorkerPromise</a></dt>
+						<dd class="description">
+							<p>A promise returned by libjass.webworker.WorkerChannel.request()</p>
+						</dd>
+						<dd class="members">
+						</dd>
+					</dl>
+					<dl class="interface" id="libjass.webworker.WorkerPromiseCallback">
+						<dt class="name">interface <a href="#libjass.webworker.WorkerPromiseCallback">WorkerPromiseCallback</a></dt>
+						<dd class="description">
+							<p>The signature of a callback called by WorkerPromise when it is resolved.</p>
+						</dd>
+						<dd class="members">
+						</dd>
+					</dl>
+					<dl class="interface" id="libjass.webworker.WorkerResultCallback">
+						<dt class="name">interface <a href="#libjass.webworker.WorkerResultCallback">WorkerResultCallback</a></dt>
+						<dd class="description">
+							<p>The signature of a callback called by a WorkerCommandHandler to report its result back to the caller.</p>
+						</dd>
+						<dd class="members">
+						</dd>
+					</dl>
+				</section>
+
+				<section>
+					<h2>Classes</h2>
+					<dl class="constructor private" id="libjass.webworker.WorkerChannelImpl">
+						<dt class="name">class <a href="#libjass.webworker.WorkerChannelImpl">WorkerChannelImpl</a></dt>
+						<dd class="description">
+							<p>Internal implementation of libjass.webworker.WorkerChannel</p>
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var workerChannelImpl = new WorkerChannelImpl(comm);</code></pre></fieldset></dd>
+						<dd class="parameters">
+							<dl>
+								<dt class="parameter name">comm</dt>
+								<dd class="parameter type">!*</dd>
+								<dd class="parameter description">The other side of the channel. When created by the host, this is the web worker. When created by the web worker, this is its global object.</dd>
+							</dl>
+						</dd>
+						<dd class="members">
 						</dd>
 					</dl>
 				</section>
