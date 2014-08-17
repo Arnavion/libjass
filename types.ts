@@ -188,13 +188,13 @@ module libjass {
 					"Layer": "0",
 					"Text":
 						(<string>line.text)
-						.replace("<b>", "{\\b1}").replace("</b>", "{\\b0}")
-						.replace("<i>", "{\\i1}").replace("</i>", "{\\i0}")
-						.replace("<u>", "{\\u1}").replace("</u>", "{\\u0}")
+						.replace(/<b>/g, "{\\b1}").replace(/<\/b>/g, "{\\b0}")
+						.replace(/<i>/g, "{\\i1}").replace(/<\/i>/g, "{\\i0}")
+						.replace(/<u>/g, "{\\u1}").replace(/<\/u>/g, "{\\u0}")
 						.replace(
 							/<font color="#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})">/g,
 							(/* ujs:unreferenced */ substring: string, red: string, green: string, blue: string) => "{\c&H" + blue + green + red + "&}"
-						).replace("</font>", "{\\c}")
+						).replace(/<\/font>/g, "{\\c}")
 				}, result));
 			});
 
