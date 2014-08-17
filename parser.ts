@@ -24,12 +24,13 @@ module libjass.parser {
 	/**
 	 * Parses a given string with the specified rule.
 	 *
-	 * @param {string} input
-	 * @param {string} rule
-	 * @return {*}
+	 * @param {string} input The string to be parsed.
+	 * @param {string} rule The rule to parse the string with
+	 * @param {libjass.parser.ParseNode=null} customParseTree If provided, this is used as the root of the parse tree instead of a new object.
+	 * @return {*} The value returned depends on the rule used.
 	 */
-	export function parse(input: string, rule: string): any {
-		var run = new ParserRun(input, rule);
+	export function parse(input: string, rule: string, customParseTree: ParseNode = null): any {
+		var run = new ParserRun(input, rule, customParseTree);
 
 		if (run.result === null || run.result.end !== input.length) {
 			if (libjass.debugMode) {
@@ -49,10 +50,17 @@ module libjass.parser {
 	 * @param {string} rule
 	 */
 	class ParserRun {
-		private _parseTree: ParseNode = new ParseNode(null);
+		private _parseTree: ParseNode;
 		private _result: ParseNode;
 
-		constructor(private _input: string, rule: string) {
+		constructor(private _input: string, rule: string, customParseTree: ParseNode) {
+			if (customParseTree === null) {
+				this._parseTree = new ParseNode(null);
+			}
+			else {
+				this._parseTree = customParseTree;
+			}
+
 			this._result = rules.get(rule).call(this, this._parseTree);
 		}
 
@@ -2391,28 +2399,26 @@ module libjass.parser {
 	/**
 	 * This class represents a single parse node. It has a start and end position, and an optional value object.
 	 *
-	 * @param {ParseNode} parent The parent of this parse node. The parent's end position will be updated to the end position of this node whenever the latter changes.
-	 * @param {?string=null} value A shortcut to assign a string to the value property.
+	 * @param {ParseNode} parent The parent of this parse node.
+	 * @param {*=null} value If provided, it is assigned as the value of the node.
 	 */
-	class ParseNode {
+	export class ParseNode {
 		private _children: ParseNode[] = [];
 
 		private _start: number;
 		private _end: number;
 		private _value: any;
 
-		constructor(private _parent: ParseNode, value: string = null) {
+		constructor(private _parent: ParseNode, value: any = null) {
 			if (_parent !== null) {
 				_parent.children.push(this);
 			}
 
 			this._start = ((_parent !== null) ? _parent.end : 0);
+			this._end = this._start;
 
 			if (value !== null) {
 				this.value = value;
-			}
-			else {
-				this._end = this._start;
 			}
 		}
 
