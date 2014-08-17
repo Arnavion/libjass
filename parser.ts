@@ -255,24 +255,26 @@ module libjass.parser {
 
 			current.value = property;
 
-			var scriptSectionContents = parent.value.contents;
-			if (scriptSectionContents !== null) {
-				var formatSpecifier = (<TypedTemplateArray>scriptSectionContents).formatSpecifier;
-				if (formatSpecifier !== undefined) {
-					// This line is a template of a particular type, and its parent section is an array of these templates.
+			if (parent.value !== null) {
+				var scriptSectionContents = parent.value.contents;
+				if (scriptSectionContents !== undefined && scriptSectionContents !== null) {
+					var formatSpecifier = (<TypedTemplateArray>scriptSectionContents).formatSpecifier;
+					if (formatSpecifier !== undefined) {
+						// This line is a template of a particular type, and its parent section is an array of these templates.
 
-					var template = new Map<string, string>();
-					var value = property.value.split(",");
+						var template = new Map<string, string>();
+						var value = property.value.split(",");
 
-					if (value.length > formatSpecifier.length) {
-						value[formatSpecifier.length - 1] = value.slice(formatSpecifier.length - 1).join(",");
+						if (value.length > formatSpecifier.length) {
+							value[formatSpecifier.length - 1] = value.slice(formatSpecifier.length - 1).join(",");
+						}
+
+						formatSpecifier.forEach((formatKey, index) => {
+							template.set(formatKey, value[index]);
+						});
+
+						current.value = <TypedTemplate>{ type: property.key, template: template };
 					}
-
-					formatSpecifier.forEach((formatKey, index) => {
-						template.set(formatKey, value[index]);
-					});
-
-					current.value = <TypedTemplate>{ type: property.key, template: template };
 				}
 			}
 
@@ -2436,9 +2438,7 @@ module libjass.parser {
 			this._start = ((_parent !== null) ? _parent.end : 0);
 			this._end = this._start;
 
-			if (value !== null) {
-				this.value = value;
-			}
+			this.value = value;
 		}
 
 		/**
@@ -2492,7 +2492,7 @@ module libjass.parser {
 		set value(newValue: any) {
 			this._value = newValue;
 
-			if (this._value.constructor === String && this._children.length === 0) {
+			if (this._value !== null && this._value.constructor === String && this._children.length === 0) {
 				this._setEnd(this._start + this._value.length);
 			}
 		}
