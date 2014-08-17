@@ -139,9 +139,16 @@ addEventListener("DOMContentLoaded", function () {
 	subsRequest.addEventListener("load", function () {
 		debug("Script received.");
 
+		if (libjass.debugMode) {
+			console.time("Parsing ASS took");
+		}
+
 		// Parse the response string into an ASS object
 		ass = libjass.ASS.fromString(subsRequest.responseText, libjass.Format[track.getAttribute("data-format").toUpperCase()]);
+
 		if (libjass.debugMode) {
+			console.timeEnd("Parsing ASS took");
+
 			// Export the ASS object for debugging
 			window.ass = ass;
 		}
