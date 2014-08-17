@@ -46,7 +46,7 @@ module libjass.renderers {
 		private _svgDefsElement: SVGDefsElement = null;
 
 		private _currentSubs: Map<Dialogue, HTMLDivElement> = new Map<Dialogue, HTMLDivElement>();
-		private _preRenderedSubs: Map<number, HTMLDivElement> = new Map<number, HTMLDivElement>();
+		private _preRenderedSubs: Map<number, { sub: HTMLDivElement; animationDelays: number[] }> = new Map<number, { sub: HTMLDivElement; animationDelays: number[] }>();
 
 		private _scaleX: number;
 		private _scaleY: number;
@@ -516,7 +516,7 @@ module libjass.renderers {
 
 			sub.setAttribute("data-dialogue-id", this.id + "-" + dialogue.id);
 
-			this._preRenderedSubs.set(dialogue.id, sub);
+			this._preRenderedSubs.set(dialogue.id, { sub: sub, animationDelays: animationCollection.animationDelays });
 		}
 
 		/**
@@ -549,22 +549,11 @@ module libjass.renderers {
 				}
 			}
 
-			var result = <HTMLDivElement>preRenderedSub.cloneNode(true);
+			var result = <HTMLDivElement>preRenderedSub.sub.cloneNode(true);
 
-			var defaultAnimationDelay = result.style.webkitAnimationDelay;
-			if (defaultAnimationDelay === undefined) {
-				defaultAnimationDelay = result.style.animationDelay;
-			}
-			if (defaultAnimationDelay !== "") {
-				var animationDelay =
-					defaultAnimationDelay
-						.split(",")
-						.map(delay => (parseFloat(delay) + dialogue.start - this.clock.currentTime).toFixed(3) + "s")
-						.join(",");
-
-				result.style.webkitAnimationDelay = animationDelay;
-				result.style.animationDelay = animationDelay;
-			}
+			var animationDelay = preRenderedSub.animationDelays.map(delay => (delay + dialogue.start - this.clock.currentTime).toFixed(3) + "s").join(", ");
+			result.style.webkitAnimationDelay = animationDelay;
+			result.style.animationDelay = animationDelay;
 
 			var layer = dialogue.layer;
 			var alignment = (result.style.position === "absolute") ? 0 : dialogue.alignment; // Alignment 0 is for absolutely-positioned subs
@@ -717,6 +706,7 @@ module libjass.renderers {
 
 		private _cssText: string = "";
 		private _animationStyle: string = "";
+		private _animationDelays: number[] = [];
 		private _numAnimations: number = 0;
 
 		constructor(renderer: NullRenderer, dialogue: Dialogue) {
@@ -741,6 +731,13 @@ module libjass.renderers {
 		 */
 		get animationStyle(): string {
 			return this._animationStyle;
+		}
+
+		/**
+		 * This array should be used to set the "animation-delay" CSS property of the target element.
+		 */
+		get animationDelays(): number[] {
+			return this._animationDelays;
 		}
 
 		/**
@@ -781,7 +778,8 @@ module libjass.renderers {
 				this._animationStyle += ",";
 			}
 
-			this._animationStyle += animationName + " " + (endTime - startTime).toFixed(3) + "s " + timingFunction + " " + startTime.toFixed(3) + "s";
+			this._animationStyle += animationName + " " + (endTime - startTime).toFixed(3) + "s " + timingFunction;
+			this._animationDelays.push(startTime);
 		}
 	}
 
