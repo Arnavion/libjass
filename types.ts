@@ -21,16 +21,12 @@
 ///<reference path="libjass.ts" />
 
 module libjass {
-	export interface StyleMap {
-		[name: string]: Style;
-	}
-
 	/**
 	 * This class represents an ASS script. It contains the script properties, an array of Styles, and an array of Dialogues.
 	 */
 	export class ASS {
 		private _properties: ScriptProperties = new ScriptProperties();
-		private _styles: StyleMap = Object.create(null);
+		private _styles: Map<string, Style> = new Map<string, Style>();
 		private _dialogues: Dialogue[] = [];
 		private _dialoguesFormatSpecifier: string[];
 
@@ -46,9 +42,9 @@ module libjass {
 		/**
 		 * The styles in this script.
 		 *
-		 * @type {!Object.<string, !libjass.Style>}
+		 * @type {!Map.<string, !libjass.Style>}
 		 */
-		get styles(): StyleMap {
+		get styles(): Map<string, Style> {
 			return this._styles;
 		}
 
@@ -115,25 +111,25 @@ module libjass {
 		}
 
 		private static _fromASSString(rawASS: string): ASS {
-			var script = parser.parse(rawASS, "assScript");
+			var script = <Map<string, any>>parser.parse(rawASS, "assScript");
 
 			var result = new ASS();
 
 			// Get the script info template
-			var infoTemplate: Template = script["Script Info"];
+			var infoTemplate: Map<string, string> = script.get("Script Info");
 
 			if (libjass.verboseMode) {
 				console.log("Read script info: " + JSON.stringify(infoTemplate), infoTemplate);
 			}
 
 			// Parse the script properties
-			result.properties.resolutionX = parseInt(infoTemplate["PlayResX"]);
-			result.properties.resolutionY = parseInt(infoTemplate["PlayResY"]);
-			result.properties.wrappingStyle = parseInt(infoTemplate["WrapStyle"]);
-			result.properties.scaleBorderAndShadow = (infoTemplate["ScaledBorderAndShadow"] === "yes");
+			result.properties.resolutionX = parseInt(infoTemplate.get("PlayResX"));
+			result.properties.resolutionY = parseInt(infoTemplate.get("PlayResY"));
+			result.properties.wrappingStyle = parseInt(infoTemplate.get("WrapStyle"));
+			result.properties.scaleBorderAndShadow = (infoTemplate.get("ScaledBorderAndShadow") === "yes");
 
 			// Get styles from the styles section
-			(<TypedTemplateArray>script["V4+ Styles"]).forEach(line => {
+			(<TypedTemplateArray>script.get("V4+ Styles")).forEach(line => {
 				if (line.type === "Style") {
 					var styleTemplate = line.template;
 
@@ -143,12 +139,12 @@ module libjass {
 
 					// Create the style and add it to the styles map
 					var newStyle = new Style(styleTemplate);
-					result.styles[newStyle.name] = newStyle;
+					result.styles.set(newStyle.name, newStyle);
 				}
 			});
 
 			// Get dialogues from the events section
-			var events = <TypedTemplateArray>script["Events"];
+			var events = <TypedTemplateArray>script.get("Events");
 			result._dialoguesFormatSpecifier = events.formatSpecifier;
 			events.forEach(line => result._addEvent(line));
 
@@ -166,27 +162,27 @@ module libjass {
 			result.properties.wrappingStyle = 1;
 			result.properties.scaleBorderAndShadow = true;
 
-			var newStyle = new Style({
-				"Name": "Default",
-				"Italic": "0", "Bold": "0", "Underline": "0", "StrikeOut": "0",
-				"Fontname": "", "Fontsize": "50",
-				"ScaleX": "100", "ScaleY": "100",
-				"Spacing": "0",
-				"Angle": "0",
-				"PrimaryColour": "&H0000FFFF", "SecondaryColour": "&H00000000", "OutlineColour": "&H00000000", "BackColour": "&H00000000",
-				"Outline": "1", "BorderStyle": "1",
-				"Shadow": "1",
-				"Alignment": "2",
-				"MarginL": "80", "MarginR": "80", "MarginV": "35"
-			});
-			result.styles[newStyle.name] = newStyle;
+			var newStyle = new Style(new Map<string, string>()
+				.set("Name", "Default")
+				.set("Italic", "0").set("Bold", "0").set("Underline", "0").set("StrikeOut", "0")
+				.set("Fontname", "").set("Fontsize", "50")
+				.set("ScaleX", "100").set("ScaleY", "100")
+				.set("Spacing", "0")
+				.set("Angle", "0")
+				.set("PrimaryColour", "&H0000FFFF").set("SecondaryColour", "&H00000000").set("OutlineColour", "&H00000000").set("BackColour", "&H00000000")
+				.set("Outline", "1").set("BorderStyle", "1")
+				.set("Shadow", "1")
+				.set("Alignment", "2")
+				.set("MarginL", "80").set("MarginR", "80").set("MarginV", "35")
+			);
+			result.styles.set(newStyle.name, newStyle);
 
 			script.sort((line1, line2) => line1["number"] - line2["number"]).forEach(line => {
-				result.dialogues.push(new Dialogue({
-					"Style": "Default",
-					"Start": line.start, "End": line.end,
-					"Layer": "0",
-					"Text":
+				result.dialogues.push(new Dialogue(new Map<string, string>()
+					.set("Style", "Default")
+					.set("Start", line.start).set("End", line.end)
+					.set("Layer", "0")
+					.set("Text",
 						(<string>line.text)
 						.replace(/<b>/g, "{\\b1}").replace(/<\/b>/g, "{\\b0}")
 						.replace(/<i>/g, "{\\i1}").replace(/<\/i>/g, "{\\i0}")
@@ -195,7 +191,7 @@ module libjass {
 							/<font color="#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})">/g,
 							(/* ujs:unreferenced */ substring: string, red: string, green: string, blue: string) => "{\c&H" + blue + green + red + "&}"
 						).replace(/<\/font>/g, "{\\c}")
-				}, result));
+				), result));
 			});
 
 			return result;
@@ -304,7 +300,7 @@ module libjass {
 	/**
 	 * This class represents a single global style declaration in an ASS script. The styles can be obtained via the ASS.styles property.
 	 *
-	 * @param {!Object} template The template object that contains the style's properties. It is a map of the string values read from the ASS file.
+	 * @param {!Map.<string, string>} template The template object that contains the style's properties. It is a map of the string values read from the ASS file.
 	 * @param {string} template["Name"] The name of the style
 	 * @param {string} template["Italic"] -1 if the style is italicized
 	 * @param {string} template["Bold"] -1 if the style is bold
@@ -359,39 +355,39 @@ module libjass {
 		private _marginRight: number;
 		private _marginVertical: number;
 
-		constructor(template: Template) {
-			this._name = template["Name"];
+		constructor(template: Map<string, string>) {
+			this._name = template.get("Name");
 
-			this._italic = template["Italic"] === "-1";
-			this._bold = template["Bold"] === "-1";
-			this._underline = template["Underline"] === "-1";
-			this._strikeThrough = template["StrikeOut"] === "-1";
+			this._italic = template.get("Italic") === "-1";
+			this._bold = template.get("Bold") === "-1";
+			this._underline = template.get("Underline") === "-1";
+			this._strikeThrough = template.get("StrikeOut") === "-1";
 
-			this._fontName = template["Fontname"];
-			this._fontSize = parseFloat(template["Fontsize"]);
+			this._fontName = template.get("Fontname");
+			this._fontSize = parseFloat(template.get("Fontsize"));
 
-			this._fontScaleX = parseFloat(template["ScaleX"]) / 100;
-			this._fontScaleY = parseFloat(template["ScaleY"]) / 100;
+			this._fontScaleX = parseFloat(template.get("ScaleX")) / 100;
+			this._fontScaleY = parseFloat(template.get("ScaleY")) / 100;
 
-			this._letterSpacing = parseFloat(template["Spacing"]);
+			this._letterSpacing = parseFloat(template.get("Spacing"));
 
-			this._rotationZ = parseFloat(template["Angle"]);
+			this._rotationZ = parseFloat(template.get("Angle"));
 
-			this._primaryColor = <parts.Color>parser.parse(template["PrimaryColour"], "colorWithAlpha");
-			this._secondaryColor = <parts.Color>parser.parse(template["SecondaryColour"], "colorWithAlpha");
-			this._outlineColor = <parts.Color>parser.parse(template["OutlineColour"], "colorWithAlpha");
-			this._shadowColor = <parts.Color>parser.parse(template["BackColour"], "colorWithAlpha");
+			this._primaryColor = <parts.Color>parser.parse(template.get("PrimaryColour"), "colorWithAlpha");
+			this._secondaryColor = <parts.Color>parser.parse(template.get("SecondaryColour"), "colorWithAlpha");
+			this._outlineColor = <parts.Color>parser.parse(template.get("OutlineColour"), "colorWithAlpha");
+			this._shadowColor = <parts.Color>parser.parse(template.get("BackColour"), "colorWithAlpha");
 
-			this._outlineThickness = parseFloat(template["Outline"]);
-			this._borderStyle = parseInt(template["BorderStyle"]);
+			this._outlineThickness = parseFloat(template.get("Outline"));
+			this._borderStyle = parseInt(template.get("BorderStyle"));
 
-			this._shadowDepth = parseFloat(template["Shadow"]);
+			this._shadowDepth = parseFloat(template.get("Shadow"));
 
-			this._alignment = parseInt(template["Alignment"]);
+			this._alignment = parseInt(template.get("Alignment"));
 
-			this._marginLeft = parseFloat(template["MarginL"]);
-			this._marginRight = parseFloat(template["MarginR"]);
-			this._marginVertical = parseFloat(template["MarginV"]);
+			this._marginLeft = parseFloat(template.get("MarginL"));
+			this._marginRight = parseFloat(template.get("MarginR"));
+			this._marginVertical = parseFloat(template.get("MarginV"));
 		}
 
 		/**
@@ -596,7 +592,7 @@ module libjass {
 	/**
 	 * This class represents a dialogue in an ASS script.
 	 *
-	 * @param {!Object} template The template object that contains the dialogue's properties. It is a map of the string values read from the ASS file.
+	 * @param {!Map.<string, string>} template The template object that contains the dialogue's properties. It is a map of the string values read from the ASS file.
 	 * @param {string} template["Style"] The name of the default style of this dialogue
 	 * @param {string} template["Start"] The start time
 	 * @param {string} template["End"] The end time
@@ -622,17 +618,17 @@ module libjass {
 
 		private _sub: HTMLDivElement = null;
 
-		constructor(template: Template, ass: ASS) {
+		constructor(template: Map<string, string>, ass: ASS) {
 			this._id = ++Dialogue._lastDialogueId;
 
-			this._style = ass.styles[template["Style"]];
+			this._style = ass.styles.get(template.get("Style"));
 
-			this._start = Dialogue._toTime(template["Start"]);
-			this._end = Dialogue._toTime(template["End"]);
+			this._start = Dialogue._toTime(template.get("Start"));
+			this._end = Dialogue._toTime(template.get("End"));
 
-			this._layer = Math.max(parseInt(template["Layer"]), 0);
+			this._layer = Math.max(parseInt(template.get("Layer")), 0);
 
-			this._rawPartsString = template["Text"];
+			this._rawPartsString = template.get("Text");
 		}
 
 		/**
@@ -773,18 +769,11 @@ module libjass {
 	}
 
 	/**
-	 * A template object. It is a map of string keys and string values.
-	 */
-	export interface Template {
-		[key: string]: string;
-	}
-
-	/**
 	 * A template object with a particular type.
 	 */
 	export interface TypedTemplate {
 		type: string;
-		template: Template;
+		template: Map<string, string>;
 	}
 
 	/**

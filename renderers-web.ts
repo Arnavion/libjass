@@ -367,7 +367,7 @@ module libjass.renderers {
 					var newStyleName = (<parts.Reset>part).value;
 					var newStyle: Style = null;
 					if (newStyleName !== null) {
-						newStyle = this.ass.styles[newStyleName];
+						newStyle = this.ass.styles.get(newStyleName);
 					}
 					currentSpanStyles.reset(newStyle);
 				}
@@ -384,51 +384,51 @@ module libjass.renderers {
 					var movePart = <parts.Move>part;
 
 					sub.style.position = "absolute";
-					animationCollection.add("linear", [new Keyframe(0, {
-						left: (this._scaleX * movePart.x1).toFixed(3) + "px",
-						top: (this._scaleY * movePart.y1).toFixed(3) + "px"
-					}), new Keyframe(movePart.t1, {
-						left: (this._scaleX * movePart.x1).toFixed(3) + "px",
-						top: (this._scaleY * movePart.y1).toFixed(3) + "px"
-					}), new Keyframe(movePart.t2, {
-						left: (this._scaleX * movePart.x2).toFixed(3) + "px",
-						top: (this._scaleY * movePart.y2).toFixed(3) + "px"
-					}), new Keyframe(dialogue.end - dialogue.start, {
-						left: (this._scaleX * movePart.x2).toFixed(3) + "px",
-						top: (this._scaleY * movePart.y2).toFixed(3) + "px"
-					})]);
+					animationCollection.add("linear", [new Keyframe(0, new Map<string, string>()
+						.set("left", (this._scaleX * movePart.x1).toFixed(3) + "px")
+						.set("top", (this._scaleY * movePart.y1).toFixed(3) + "px")
+					), new Keyframe(movePart.t1, new Map<string, string>()
+						.set("left", (this._scaleX * movePart.x1).toFixed(3) + "px")
+						.set("top", (this._scaleY * movePart.y1).toFixed(3) + "px")
+					), new Keyframe(movePart.t2, new Map<string, string>()
+						.set("left", (this._scaleX * movePart.x2).toFixed(3) + "px")
+						.set("top", (this._scaleY * movePart.y2).toFixed(3) + "px")
+					), new Keyframe(dialogue.end - dialogue.start, new Map<string, string>()
+						.set("left", (this._scaleX * movePart.x2).toFixed(3) + "px")
+						.set("top", (this._scaleY * movePart.y2).toFixed(3) + "px")
+					)]);
 				}
 
 				else if (part instanceof parts.Fade) {
 					var fadePart = <parts.Fade>part;
 
-					animationCollection.add("linear", [new Keyframe(0, {
-						opacity: "0"
-					}), new Keyframe(fadePart.start, {
-						opacity: "1"
-					}), new Keyframe(dialogue.end - dialogue.start - fadePart.end, {
-						opacity: String("1")
-					}), new Keyframe(dialogue.end - dialogue.start, {
-						opacity: "0"
-					})]);
+					animationCollection.add("linear", [new Keyframe(0, new Map<string, string>()
+						.set("opacity", "0")
+					), new Keyframe(fadePart.start, new Map<string, string>()
+						.set("opacity", "1")
+					), new Keyframe(dialogue.end - dialogue.start - fadePart.end, new Map<string, string>()
+						.set("opacity", "1")
+					), new Keyframe(dialogue.end - dialogue.start, new Map<string, string>()
+						.set("opacity", "0")
+					)]);
 				}
 
 				else if (part instanceof parts.ComplexFade) {
 					var complexFadePart = <parts.ComplexFade>part;
 
-					animationCollection.add("linear", [new Keyframe(0, {
-						opacity: String(complexFadePart.a1)
-					}), new Keyframe(complexFadePart.t1, {
-						opacity: String(complexFadePart.a1)
-					}), new Keyframe(complexFadePart.t2, {
-						opacity: String(complexFadePart.a2)
-					}), new Keyframe(complexFadePart.t3, {
-						opacity: String(complexFadePart.a2)
-					}), new Keyframe(complexFadePart.t4, {
-						opacity: String(complexFadePart.a3)
-					}), new Keyframe(dialogue.end - dialogue.start, {
-						opacity: String(complexFadePart.a3)
-					})]);
+					animationCollection.add("linear", [new Keyframe(0, new Map<string, string>()
+						.set("opacity", complexFadePart.a1.toFixed(3))
+					), new Keyframe(complexFadePart.t1, new Map<string, string>()
+						.set("opacity", complexFadePart.a1.toFixed(3))
+					), new Keyframe(complexFadePart.t2, new Map<string, string>()
+						.set("opacity", complexFadePart.a2.toFixed(3))
+					), new Keyframe(complexFadePart.t3, new Map<string, string>()
+						.set("opacity", complexFadePart.a2.toFixed(3))
+					), new Keyframe(complexFadePart.t4, new Map<string, string>()
+						.set("opacity", complexFadePart.a3.toFixed(3))
+					), new Keyframe(dialogue.end - dialogue.start, new Map<string, string>()
+						.set("opacity", complexFadePart.a3.toFixed(3))
+					)]);
 				}
 
 				else if (part instanceof parts.DrawingMode) {
@@ -664,10 +664,6 @@ module libjass.renderers {
 	}
 	mixin(WebRenderer, [EventSource]);
 
-	interface KeyframePropertiesMap {
-		[key: string]: string;
-	}
-
 	/**
 	 * This class represents a single keyframe. It has a list of CSS properties (names and values) associated with a point in time. Multiple keyframes make up an animation.
 	 *
@@ -675,7 +671,7 @@ module libjass.renderers {
 	 * @param {!Object.<string, string>} properties
 	 */
 	class Keyframe {
-		constructor(private _time: number, private _properties: KeyframePropertiesMap) { }
+		constructor(private _time: number, private _properties: Map<string, string>) { }
 
 		/**
 		 * @type {number}
@@ -687,7 +683,7 @@ module libjass.renderers {
 		/**
 		 * @type {!Object.<string, string>}
 		 */
-		get properties(): KeyframePropertiesMap {
+		get properties(): Map<string, string> {
 			return this._properties;
 		}
 	}
@@ -761,8 +757,8 @@ module libjass.renderers {
 
 				ruleCssText += "\t" + (100 * keyframe.time / (this._end - this._start)).toFixed(3) + "% {\n";
 
-				Object.keys(keyframe.properties).forEach(propertyName => {
-					ruleCssText += "\t\t" + propertyName + ": " + keyframe.properties[propertyName] + ";\n";
+				keyframe.properties.forEach((value, name) => {
+					ruleCssText += "\t\t" + name + ": " + value + ";\n";
 				});
 
 				ruleCssText += "\t}\n";
