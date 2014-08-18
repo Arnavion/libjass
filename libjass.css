@@ -81,7 +81,7 @@
 }
 
 /* Filter wrapper span */
-.libjass-subs div[data-dialogue-id] > span {
+.libjass-subs div[data-dialogue-id] {
 	-webkit-perspective-origin: center;
 	-webkit-perspective: 200px;
 	perspective-origin: center;

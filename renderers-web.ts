@@ -199,14 +199,35 @@ module libjass.renderers {
 
 			var currentSpan: HTMLSpanElement = null;
 			var currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, this._svgDefsElement);
+			var nextSpanParent: HTMLElement = sub;
+			var rotationX = 0;
+			var rotationY = 0;
+			var rotationZ = 0;
 
 			var startNewSpan = (addNewLine: boolean): void => {
 				if (currentSpan !== null && currentSpan.textContent !== "") {
-					sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan));
+					var newSpan = currentSpanStyles.setStylesOnSpan(currentSpan, rotationX, rotationY, rotationZ);
+
+					if (currentSpanStyles.rotationX !== rotationX || currentSpanStyles.rotationY !== rotationY || currentSpanStyles.rotationZ !== rotationZ) {
+						nextSpanParent.appendChild(newSpan);
+						nextSpanParent = newSpan;
+
+						rotationX = currentSpanStyles.rotationX;
+						rotationY = currentSpanStyles.rotationY;
+						rotationZ = currentSpanStyles.rotationZ;
+					}
+					else {
+						nextSpanParent.appendChild(newSpan.firstElementChild);
+					}
 				}
 
 				if (addNewLine) {
-					sub.appendChild(document.createElement("br"));
+					nextSpanParent = sub;
+					nextSpanParent.appendChild(document.createElement("br"));
+
+					rotationX = 0;
+					rotationY = 0;
+					rotationZ = 0;
 				}
 
 				currentSpan = document.createElement("span");
@@ -874,8 +895,8 @@ module libjass.renderers {
 
 			this.letterSpacing = newStyle.letterSpacing;
 
-			this._rotationX = null;
-			this._rotationY = null;
+			this._rotationX = 0;
+			this._rotationY = 0;
 			this._rotationZ = newStyle.rotationZ;
 
 			this._skewX = null;
@@ -901,7 +922,7 @@ module libjass.renderers {
 		 * @param {!HTMLSpanElement} span
 		 * @return {!HTMLSpanElement} The resulting <span> with the CSS styles applied. This may be a wrapper around the input <span> if the styles were applied using SVG filters.
 		 */
-		setStylesOnSpan(span: HTMLSpanElement): HTMLSpanElement {
+		setStylesOnSpan(span: HTMLSpanElement, previousRotationX: number, previousRotationY: number, previousRotationZ: number): HTMLSpanElement {
 			var isTextOnlySpan = span.childNodes[0] instanceof Text;
 
 			var fontStyleOrWeight = "";
@@ -946,15 +967,6 @@ module libjass.renderers {
 				if (this._fontScaleY !== 1) {
 					transform += "scaleY(" + this._fontScaleY + ") ";
 				}
-			}
-			if (this._rotationY !== null) {
-				transform += "rotateY(" + this._rotationY + "deg) ";
-			}
-			if (this._rotationX !== null) {
-				transform += "rotateX(" + this._rotationX + "deg) ";
-			}
-			if (this._rotationZ !== 0) {
-				transform += "rotateZ(" + (-1 * this._rotationZ) + "deg) ";
 			}
 			if (this._skewX !== null || this._skewY !== null) {
 				var skewX = SpanStyles._valueOrDefault(this._skewX, 0);
@@ -1080,7 +1092,39 @@ module libjass.renderers {
 				filterWrapperSpan.style.display = "inline-block";
 			}
 
-			return filterWrapperSpan;
+			var rotationWrapperSpan = document.createElement("span");
+			rotationWrapperSpan.appendChild(filterWrapperSpan);
+
+			var rotationTransform = "";
+			if (this._rotationX !== previousRotationX || this._rotationY !== previousRotationY || this._rotationZ !== previousRotationZ) {
+				if (previousRotationZ !== 0) {
+					rotationTransform += "rotateZ(" + (previousRotationZ) + "deg) ";
+				}
+				if (previousRotationX !== 0) {
+					rotationTransform += "rotateX(" + (-previousRotationX) + "deg) ";
+				}
+				if (previousRotationY !== 0) {
+					rotationTransform += "rotateY(" + (-previousRotationY) + "deg) ";
+				}
+				if (this._rotationY !== 0) {
+					rotationTransform += "rotateY(" + this._rotationY + "deg) ";
+				}
+				if (this._rotationX !== 0) {
+					rotationTransform += "rotateX(" + this._rotationX + "deg) ";
+				}
+				if (this._rotationZ !== 0) {
+					rotationTransform += "rotateZ(" + (-this._rotationZ) + "deg) ";
+				}
+			}
+			if (rotationTransform !== "") {
+				rotationWrapperSpan.style.webkitTransform = rotationTransform;
+				rotationWrapperSpan.style.webkitTransformOrigin = "50% 50%";
+				rotationWrapperSpan.style.transform = rotationTransform;
+				rotationWrapperSpan.style.transformOrigin = "50% 50%";
+				rotationWrapperSpan.style.display = "inline-block";
+			}
+
+			return rotationWrapperSpan;
 		}
 
 		/**
@@ -1218,13 +1262,21 @@ module libjass.renderers {
 			this._letterSpacing = SpanStyles._valueOrDefault(value, this._defaultStyle.letterSpacing);
 		}
 
+		get rotationX() {
+			return this._rotationX;
+		}
+
 		/**
 		 * Sets the X-axis rotation property.
 		 *
 		 * @type {?number}
 		 */
 		set rotationX(value: number) {
-			this._rotationX = value;
+			this._rotationX = SpanStyles._valueOrDefault(value, 0);
+		}
+
+		get rotationY() {
+			return this._rotationY;
 		}
 
 		/**
@@ -1233,7 +1285,11 @@ module libjass.renderers {
 		 * @type {?number}
 		 */
 		set rotationY(value: number) {
-			this._rotationY = value;
+			this._rotationY = SpanStyles._valueOrDefault(value, 0);
+		}
+
+		get rotationZ() {
+			return this._rotationZ;
 		}
 
 		/**
