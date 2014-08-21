@@ -587,7 +587,7 @@ module libjass {
 		get marginVertical(): number {
 			return this._marginVertical;
 		}
-	};
+	}
 
 	/**
 	 * This class represents a dialogue in an ASS script.

@@ -2340,7 +2340,7 @@ module libjass.parser {
 
 			return current;
 		}
-	};
+	}
 
 	function makeTagParserFunction(
 		tagName: string,
