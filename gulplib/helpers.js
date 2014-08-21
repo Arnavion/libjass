@@ -38,6 +38,10 @@ var Transform = function (transform, flush) {
 				callback();
 			}
 			catch (ex) {
+				if (!(ex instanceof Error)) {
+					ex = new Error(ex.message + "\nStack:\n" + ex.stack);
+				}
+
 				callback(ex);
 			}
 		};
