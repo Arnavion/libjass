@@ -731,6 +731,8 @@ module libjass.renderers {
 
 		/**
 		 * This array should be used to set the "animation-delay" CSS property of the target element.
+		 *
+		 * @type {!Array.<number>}
 		 */
 		get animationDelays(): number[] {
 			return this._animationDelays;
