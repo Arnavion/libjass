@@ -77,7 +77,10 @@ module libjass {
 			this._addEvent(typedTemplate);
 		}
 
-		private _addEvent(line: TypedTemplate) {
+		/**
+		 * @param {string} line
+		 */
+		private _addEvent(line: TypedTemplate): void {
 			if (line.type === "Dialogue") {
 				var dialogueTemplate = line.template;
 
@@ -110,6 +113,10 @@ module libjass {
 			}
 		}
 
+		/**
+		 * @param {string} rawASS
+		 * @return {!libjass.ASS}
+		 */
 		private static _fromASSString(rawASS: string): ASS {
 			var script = <Map<string, any>>parser.parse(rawASS, "assScript");
 
@@ -151,6 +158,10 @@ module libjass {
 			return result;
 		}
 
+		/**
+		 * @param {string} rawSRT
+		 * @return {!libjass.ASS}
+		 */
 		private static _fromSRTString(rawSRT: string): ASS {
 			var script: any[] = parser.parse(rawSRT, "srtScript");
 
@@ -198,11 +209,17 @@ module libjass {
 		}
 	}
 
+	/**
+	 * The format of the string passed to libjass.ASS.fromString()
+	 */
 	export enum Format {
 		ASS,
 		SRT
 	}
 
+	/**
+	 * The wrapping style defined in the script properties.
+	 */
 	export enum WrappingStyle {
 		SmartWrappingWithWiderTopLine = 0,
 		SmartWrappingWithWiderBottomLine = 3,
@@ -292,6 +309,9 @@ module libjass {
 		}
 	}
 
+	/**
+	 * The border style defined in the style properties.
+	 */
 	export enum BorderStyle {
 		Outline = 1,
 		OpaqueBox = 3,

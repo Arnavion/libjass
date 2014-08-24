@@ -46,6 +46,9 @@ module libjass.renderers {
 
 		/**
 		 * @deprecated
+		 *
+		 * @param {number} width
+		 * @param {number} height
 		 */
 		resizeVideo(width: number, height: number): void {
 			console.warn("`DefaultRenderer.resizeVideo(width, height)` has been deprecated. Use `DefaultRenderer.resize(width, height)` instead.");
@@ -62,7 +65,10 @@ module libjass.renderers {
 			super._ready();
 		}
 
-		private _onFullScreenChange(fullScreenElement: Element) {
+		/**
+		 * @param {!Element} fullScreenElement
+		 */
+		private _onFullScreenChange(fullScreenElement: Element): void {
 			if (fullScreenElement === undefined) {
 				fullScreenElement = document.msFullscreenElement;
 			}

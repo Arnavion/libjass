@@ -641,6 +641,9 @@ module libjass.renderers {
 			this._dispatchEvent("ready", []);
 		}
 
+		/**
+		 * @param {!HTMLDivElement} sub
+		 */
 		private _removeSub(sub: HTMLDivElement): void {
 			sub.parentNode.removeChild(sub);
 		}
@@ -744,7 +747,7 @@ module libjass.renderers {
 		 * @param {string} timingFunction One of the acceptable values for the "animation-timing-function" CSS property
 		 * @param {Array.<!{time: number, properties: !Object.<string, string>}>} keyframes
 		 */
-		add(timingFunction: string, keyframes: Keyframe[]) {
+		add(timingFunction: string, keyframes: Keyframe[]): void {
 			var startTime: number = null;
 			var endTime: number = null;
 
@@ -1357,6 +1360,12 @@ module libjass.renderers {
 
 		private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);
 
+		/**
+		 * @param {string} fontFamily
+		 * @param {number} lineHeight
+		 * @param {!HTMLDivElement} fontSizeElement
+		 * @return {number}
+		 */
 		private static _getFontSize(fontFamily: string, lineHeight: number, fontSizeElement: HTMLDivElement): number {
 			var existingFontSizeMap = SpanStyles._fontSizeCache.get(fontFamily);
 			if (existingFontSizeMap === undefined) {

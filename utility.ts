@@ -88,6 +88,7 @@ module libjass {
 
 		/**
 		 * @param {function(T, T, libjass.Set.<T>)} callbackfn A function that is called with each value in the set.
+		 * @param {*} thisArg
 		 */
 		forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void {
 			Object.keys(this._elements).map((property: string) => {
@@ -96,6 +97,12 @@ module libjass {
 			});
 		}
 
+		/**
+		 * Not implemented.
+		 *
+		 * @param {T} value
+		 * @return {boolean}
+		 */
 		delete(value: T): boolean {
 			throw new Error("This Set implementation doesn't support delete().");
 		}
@@ -107,6 +114,12 @@ module libjass {
 			return this._size;
 		}
 
+		/**
+		 * Converts the given value into a property name for the internal map.
+		 *
+		 * @param {T} value
+		 * @return {string}
+		 */
 		private _toProperty(value: T): string {
 			if (typeof value === "number") {
 				return "#" + value;
@@ -228,6 +241,7 @@ module libjass {
 
 		/**
 		 * @param {function(V, K, libjass.Map.<K, V>)} callbackfn A function that is called with each key and value in the map.
+		 * @param {*} thisArg
 		 */
 		forEach(callbackfn: (value: V, index: K, map: Map<K, V>) => void, thisArg?: any): void {
 			var keysArray = Object.keys(this._keys);
@@ -244,6 +258,11 @@ module libjass {
 			return this._size;
 		}
 
+		/**
+		 * Converts the given key into a property name for the internal map.
+		 *
+		 * @param {K} key
+		 */
 		private _keyToProperty(key: K): string {
 			if (typeof key === "number") {
 				return "#" + key;
@@ -271,10 +290,16 @@ module libjass {
 		Map = <any>SimpleMap;
 	}
 
-	export function mixin(derived: any, mixins: any[]) {
+	/**
+	 * Adds properties of the given mixins' prototypes to the given class's prototype.
+	 *
+	 * @param {!*} clazz
+	 * @param {!Array.<*>} mixins
+	 */
+	export function mixin(clazz: any, mixins: any[]): void {
 		mixins.forEach((mixin: any) => {
 			Object.getOwnPropertyNames(mixin.prototype).forEach(name => {
-				derived.prototype[name] = mixin.prototype[name];
+				clazz.prototype[name] = mixin.prototype[name];
 			});
 		});
 	}

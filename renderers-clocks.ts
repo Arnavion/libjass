@@ -59,6 +59,9 @@ module libjass.renderers {
 		}
 	}
 
+	/**
+	 * The type of clock event.
+	 */
 	export enum ClockEvent {
 		Play,
 		Tick,
@@ -66,6 +69,9 @@ module libjass.renderers {
 		Stop,
 	}
 
+	/**
+	 * The clock interface. A clock is used by a renderer as a source of clock events.
+	 */
 	export interface Clock extends EventSource<ClockEvent> {
 		/**
 		 * @type {number}
@@ -226,6 +232,9 @@ module libjass.renderers {
 	}
 	mixin(ManualClock, [EventSource]);
 
+	/**
+	 * The state of the video.
+	 */
 	enum VideoState {
 		Playing = 0,
 		Paused = 1,

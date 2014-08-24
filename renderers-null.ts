@@ -265,6 +265,12 @@ module libjass.renderers {
 			return RendererSettings._from(object.fontMap, object.preRenderTime, object.preciseOutlines);
 		}
 
+		/**
+		 * @param {Map.<string, !Array.<string>>=null} fontMap
+		 * @param {number=5} preRenderTime
+		 * @param {boolean=false} preciseOutlines
+		 * @return {!libjass.renderers.RendererSettings}
+		 */
 		private static _from(fontMap: Map<string, string[]> = null, preRenderTime: number = 5, preciseOutlines: boolean = false): RendererSettings {
 			var result = new RendererSettings();
 			result.fontMap = fontMap;
@@ -273,6 +279,10 @@ module libjass.renderers {
 			return result;
 		}
 
+		/**
+		 * @param {string} str
+		 * @return {string}
+		 */
 		private static _stripQuotes(str: string): string {
 			return str.match(/^["']?(.*?)["']?$/)[1];
 		}
