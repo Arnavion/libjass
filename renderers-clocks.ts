@@ -77,7 +77,7 @@ module libjass.renderers {
 	}
 
 	/**
-	 * The clock interface. A clock is used by a renderer as a source of clock events.
+	 * The clock interface. A clock is used by a renderer as a source of {@link libjass.renderers.ClockEvent}s.
 	 */
 	export interface Clock extends EventSource<ClockEvent> {
 		/**
@@ -127,21 +127,21 @@ module libjass.renderers {
 	}
 
 	/**
-	 * An implementation of libjass.renderers.Clock that allows user script to manually trigger play, pause and timeUpdate events.
+	 * An implementation of {@link libjass.renderers.Clock} that allows user script to manually trigger play, pause and timeUpdate events.
 	 */
 	export class ManualClock implements Clock {
 		private _currentTime: number = -1;
 		private _enabled: boolean = true;
 
 		/**
-		 * Trigger a ClockEvent.Play
+		 * Trigger a {@link libjass.renderers.ClockEvent.Play}
 		 */
 		play(): void {
 			this._dispatchEvent(ClockEvent.Play, []);
 		}
 
 		/**
-		 * Trigger a ClockEvent.Tick
+		 * Trigger a {@link libjass.renderers.ClockEvent.Tick}
 		 *
 		 * @param {number} currentTime
 		 */
@@ -151,14 +151,14 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Trigger a ClockEvent.Pause
+		 * Trigger a {@link libjass.renderers.ClockEvent.Pause}
 		 */
 		pause(): void {
 			this._dispatchEvent(ClockEvent.Pause, []);
 		}
 
 		/**
-		 * Trigger a ClockEvent.Stop
+		 * Trigger a {@link libjass.renderers.ClockEvent.Stop}
 		 */
 		stop(): void {
 			this._dispatchEvent(ClockEvent.Stop, []);

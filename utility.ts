@@ -141,7 +141,7 @@ module libjass {
 	}
 
 	/**
-	 * Set to browser's implementation of Set if it has one, else set to libjass.SimpleSet
+	 * Set to browser's implementation of Set if it has one, else set to {@link libjass.SimpleSet}
 	 *
 	 * @type {function(new:Set)}
 	 */
@@ -289,7 +289,7 @@ module libjass {
 	}
 
 	/**
-	 * Set to browser's implementation of Map if it has one, else set to libjass.SimpleMap
+	 * Set to browser's implementation of Map if it has one, else set to {@link libjass.SimpleMap}
 	 *
 	 * @type {function(new:Map)}
 	 */
@@ -311,4 +311,18 @@ module libjass {
 			});
 		});
 	}
+
+	/**
+	 * Debug mode. When true, libjass logs some debug messages.
+	 *
+	 * @type {boolean}
+	 */
+	export var debugMode: boolean = false;
+
+	/**
+	 * Verbose debug mode. When true, libjass logs some more debug messages. This setting is independent of {@link libjass.debugMode}
+	 *
+	 * @type {boolean}
+	 */
+	export var verboseMode: boolean = false;
 }

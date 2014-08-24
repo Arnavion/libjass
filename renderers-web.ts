@@ -201,7 +201,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * The magic happens here. The subtitle div is rendered and stored. Call draw() to get a clone of the div to display.
+		 * The magic happens here. The subtitle div is rendered and stored. Call {@link libjass.renderers.WebRenderer.draw} to get a clone of the div to display.
 		 *
 		 * @param {!libjass.Dialogue} dialogue
 		 */
@@ -542,7 +542,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Returns the subtitle div for display. The currentTime is used to shift the animations appropriately, so that at the time the
+		 * Returns the subtitle div for display. The {@link libjass.renderers.WebRenderer.currentTime} is used to shift the animations appropriately, so that at the time the
 		 * div is inserted into the DOM and the animations begin, they are in sync with the clock time.
 		 *
 		 * @param {!libjass.Dialogue} dialogue

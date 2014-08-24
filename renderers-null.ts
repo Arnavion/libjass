@@ -193,7 +193,7 @@ module libjass.renderers {
 		/**
 		 * A map of font name to one or more URLs of that font. If provided, the fonts in this map are pre-loaded by the WebRenderer when it's created.
 		 *
-		 * If you have a <style> or <link> element on the page containing @font-face rules, you can use the RendererSettings.makeFontMapFromStyleElement() convenience method to create a font map.
+		 * If you have a <style> or <link> element on the page containing @font-face rules, you can use the {@link libjass.renderers.RendererSettings.makeFontMapFromStyleElement} convenience method to create a font map.
 		 *
 		 * @type {!Map.<string, !Array.<string>>}
 		 */
@@ -256,7 +256,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * Converts an arbitrary object into a RendererSettings object.
+		 * Converts an arbitrary object into a {@link libjass.renderers.RendererSettings} object.
 		 *
 		 * @param {!*} object
 		 * @return {!libjass.renderers.RendererSettings}

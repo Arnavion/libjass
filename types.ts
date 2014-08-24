@@ -22,7 +22,7 @@
 
 module libjass {
 	/**
-	 * This class represents an ASS script. It contains the script properties, an array of Styles, and an array of Dialogues.
+	 * This class represents an ASS script. It contains the {@link libjass.ScriptProperties}, an array of {@link libjass.Style}s, and an array of {@link libjass.Dialogue}s.
 	 */
 	export class ASS {
 		private _properties: ScriptProperties = new ScriptProperties();
@@ -97,7 +97,7 @@ module libjass {
 		 * Creates an ASS object from the raw text of an ASS script.
 		 *
 		 * @param {string} raw The raw text of the script.
-		 * @param {number=0} type The type of the script. One of the libjass.Format constants.
+		 * @param {number=0} type The type of the script. One of the {@link libjass.Format} constants.
 		 * @return {!libjass.ASS}
 		 */
 		static fromString(raw: string, type: Format = Format.ASS): ASS {
@@ -210,7 +210,7 @@ module libjass {
 	}
 
 	/**
-	 * The format of the string passed to libjass.ASS.fromString()
+	 * The format of the string passed to {@link libjass.ASS.fromString}
 	 */
 	export enum Format {
 		ASS,
@@ -218,7 +218,7 @@ module libjass {
 	}
 
 	/**
-	 * The wrapping style defined in the script properties.
+	 * The wrapping style defined in the {@link libjass.ScriptProperties}
 	 */
 	export enum WrappingStyle {
 		SmartWrappingWithWiderTopLine = 0,
@@ -228,7 +228,7 @@ module libjass {
 	}
 
 	/**
-	 * This class represents the properties of an ASS script.
+	 * This class represents the properties of a {@link libjass.ASS} script.
 	 */
 	export class ScriptProperties {
 		private _resolutionX: number;
@@ -273,7 +273,7 @@ module libjass {
 		}
 
 		/**
-		 * The wrap style.
+		 * The wrap style. One of the {@link libjass.WrappingStyle} constants.
 		 *
 		 * @type {number}
 		 */
@@ -282,7 +282,7 @@ module libjass {
 		}
 
 		/**
-		 * The wrap style.
+		 * The wrap style. One of the {@link libjass.WrappingStyle} constants.
 		 *
 		 * @type {number}
 		 */
@@ -310,7 +310,7 @@ module libjass {
 	}
 
 	/**
-	 * The border style defined in the style properties.
+	 * The border style defined in the {@link libjass.Style} properties.
 	 */
 	export enum BorderStyle {
 		Outline = 1,
@@ -318,7 +318,7 @@ module libjass {
 	}
 
 	/**
-	 * This class represents a single global style declaration in an ASS script. The styles can be obtained via the ASS.styles property.
+	 * This class represents a single global style declaration in a {@link libjass.ASS} script. The styles can be obtained via the {@link libjass.ASS.styles} property.
 	 *
 	 * @param {!Map.<string, string>} template The template object that contains the style's properties. It is a map of the string values read from the ASS file.
 	 * @param {string} template["Name"] The name of the style
@@ -610,7 +610,7 @@ module libjass {
 	}
 
 	/**
-	 * This class represents a dialogue in an ASS script.
+	 * This class represents a dialogue in a {@link libjass.ASS} script.
 	 *
 	 * @param {!Map.<string, string>} template The template object that contains the dialogue's properties. It is a map of the string values read from the ASS file.
 	 * @param {string} template["Style"] The name of the default style of this dialogue
@@ -710,9 +710,9 @@ module libjass {
 		}
 
 		/**
-		 * The parts of this dialogue.
+		 * The {@link libjass.parts} of this dialogue.
 		 *
-		 * @type {!Array.<!libjass.parts.Tag>}
+		 * @type {!Array.<!libjass.parts.Part>}
 		 */
 		get parts(): parts.Part[] {
 			if (this._parts === null) {
@@ -723,7 +723,7 @@ module libjass {
 		}
 
 		/**
-		 * @return {string} A simple representation of this dialogue's properties and tags.
+		 * @return {string} A simple representation of this dialogue's properties and parts.
 		 */
 		toString(): string {
 			return "#" + this._id + " [" + this._start.toFixed(3) + "-" + this._end.toFixed(3) + "] " + ((this._parts !== null) ? this._parts.join(", ") : this._rawPartsString);
@@ -809,7 +809,7 @@ module libjass {
 	}
 
 	/**
-	 * An array of TypedTemplate objects with the format specifier that was used to parse them.
+	 * An array of {@link libjass.TypedTemplate} objects with the format specifier that was used to parse them.
 	 */
 	export interface TypedTemplateArray extends Array<TypedTemplate> {
 		/**
@@ -817,18 +817,4 @@ module libjass {
 		 */
 		formatSpecifier: string[];
 	}
-
-	/**
-	 * Debug mode. When true, libjass logs some debug messages.
-	 *
-	 * @type {boolean}
-	 */
-	export var debugMode: boolean = false;
-
-	/**
-	 * Verbose debug mode. When true, libjass logs some more debug messages. This setting is independent of debugMode.
-	 *
-	 * @type {boolean}
-	 */
-	export var verboseMode: boolean = false;
 }

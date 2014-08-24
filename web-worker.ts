@@ -53,7 +53,7 @@ module libjass.webworker {
 	});
 
 	/**
-	 * Represents a communication channel between the host and the web worker. An instance of this class is created by calling libjass.webworker.setup()
+	 * Represents a communication channel between the host and the web worker. An instance of this class is created by calling {@link libjass.webworker.createWorker}
 	 */
 	export interface WorkerChannel {
 		/**
@@ -67,7 +67,7 @@ module libjass.webworker {
 	}
 
 	/**
-	 * Create a new web worker.
+	 * Create a new web worker and returns a {@link libjass.webworker.WorkerChannel} to it.
 	 *
 	 * @return {!libjass.webworker.WorkerChannel} A communication channel to the new web worker.
 	 */
@@ -76,7 +76,7 @@ module libjass.webworker {
 	}
 
 	/**
-	 * A promise returned by libjass.webworker.WorkerChannel.request()
+	 * A promise returned by {@link libjass.webworker.WorkerChannel.request}
 	 */
 	export interface WorkerPromise {
 		/**
@@ -107,7 +107,7 @@ module libjass.webworker {
 	}
 
 	/**
-	 * The signature of a callback called by WorkerPromise when it is resolved.
+	 * The signature of a callback called by {@link libjass.webworker.WorkerPromise} when it is resolved.
 	 */
 	export interface WorkerPromiseCallback {
 		(promise: WorkerPromise): void;
@@ -121,14 +121,14 @@ module libjass.webworker {
 	}
 
 	/**
-	 * The signature of a handler registered to handle a particular WorkerCommand.
+	 * The signature of a handler registered to handle a particular command in {@link libjass.webworker.WorkerCommands}
 	 */
 	export interface WorkerCommandHandler {
 		(parameters: any, response: WorkerResultCallback): void;
 	}
 
 	/**
-	 * The signature of a callback called by a WorkerCommandHandler to report its result back to the caller.
+	 * The signature of a callback called by a {@link libjass.webworker.WorkerCommandHandler} to report its result back to the caller.
 	 */
 	export interface WorkerResultCallback {
 		(error: any, result: any): void;
@@ -137,7 +137,7 @@ module libjass.webworker {
 	/**
 	 * Registers a handler for the given worker command.
 	 *
-	 * @param {number} command The command that this handler will handle. Valid values are the values of libjass.webworker.WorkerCommands
+	 * @param {number} command The command that this handler will handle. One of the {@link libjass.webworker.WorkerCommands} constants.
 	 * @param {function(*, function(*, *))} handler The handler. A function of the form (parameters: *, response: function(error: *, result: *): void): void
 	 */
 	export function _registerWorkerCommand(command: WorkerCommands, handler: WorkerCommandHandler): void {
