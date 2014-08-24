@@ -21,10 +21,29 @@
 ///<reference path="libjass.ts" />
 
 interface CSSStyleDeclaration {
+	/**
+	 * @type {string}
+	 */
 	webkitAnimation: string;
+
+	/**
+	 * @type {string}
+	 */
 	webkitAnimationDelay: string;
+
+	/**
+	 * @type {string}
+	 */
 	webkitFilter: string;
+
+	/**
+	 * @type {string}
+	 */
 	webkitTransform: string;
+
+	/**
+	 * @type {string}
+	 */
 	webkitTransformOrigin: string;
 }
 
@@ -135,6 +154,9 @@ module libjass.renderers {
 			}
 		}
 
+		/**
+		 * @type {!HTMLDivElement}
+		 */
 		get libjassSubsWrapper(): HTMLDivElement {
 			return this._libjassSubsWrapper;
 		}
@@ -661,8 +683,20 @@ module libjass.renderers {
 		];
 
 		// EventSource members
+
+		/**
+		 * @type {!Map.<T, !Array.<Function>>}
+		 */
 		_eventListeners: Map<string, Function[]> = new Map<string, Function[]>();
+
+		/**
+		 * @type {function(number, !Function)}
+		 */
 		addEventListener: (type: string, listener: Function) => void;
+
+		/**
+		 * @type {function(number, Array.<*>)}
+		 */
 		_dispatchEvent: (type: string, args: Object[]) => void;
 	}
 	mixin(WebRenderer, [EventSource]);

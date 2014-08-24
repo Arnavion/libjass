@@ -27,6 +27,11 @@ module libjass.renderers {
 	 * @template T
 	 */
 	export class EventSource<T> {
+		/**
+		 * A map from event type to an array of all the listeners registered for that event type.
+		 *
+		 * @type {!Map.<T, !Array.<Function>>}
+		 */
 		_eventListeners: Map<T, Function[]>;
 
 		/**
@@ -46,6 +51,8 @@ module libjass.renderers {
 		}
 
 		/**
+		 * Calls all listeners registered for the given event type.
+		 *
 		 * @param {!T} type The type of event to dispatch
 		 * @param {!Array.<*>} args Arguments for the listeners of the event
 		 */
@@ -111,7 +118,12 @@ module libjass.renderers {
 		setEnabled(enabled: boolean): boolean;
 
 		// EventSource members
-		addEventListener: (type: ClockEvent, listener: Function) => void;
+
+		/**
+		 * @param {number} type
+		 * @param {!Function} listener
+		 */
+		addEventListener(type: ClockEvent, listener: Function): void;
 	}
 
 	/**
@@ -226,8 +238,20 @@ module libjass.renderers {
 		}
 
 		// EventSource members
+
+		/**
+		 * @type {!Map.<T, !Array.<Function>>}
+		 */
 		_eventListeners: Map<ClockEvent, Function[]> = new Map<ClockEvent, Function[]>();
+
+		/**
+		 * @type {function(number, !Function)}
+		 */
 		addEventListener: (type: ClockEvent, listener: Function) => void;
+
+		/**
+		 * @type {function(number, Array.<*>)}
+		 */
 		_dispatchEvent: (type: ClockEvent, args: Object[]) => void;
 	}
 	mixin(ManualClock, [EventSource]);
@@ -446,8 +470,20 @@ module libjass.renderers {
 		}
 
 		// EventSource members
+
+		/**
+		 * @type {!Map.<T, !Array.<Function>>}
+		 */
 		_eventListeners: Map<ClockEvent, Function[]> = new Map<ClockEvent, Function[]>();
+
+		/**
+		 * @type {function(number, !Function)}
+		 */
 		addEventListener: (type: ClockEvent, listener: Function) => void;
+
+		/**
+		 * @type {function(number, Array.<*>)}
+		 */
 		_dispatchEvent: (type: ClockEvent, args: Object[]) => void;
 	}
 	mixin(VideoClock, [EventSource]);

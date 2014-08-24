@@ -23,7 +23,14 @@
 "use strict";
 
 interface Global {
+	/**
+	 * @type {function(new: Set.<T>)}
+	 */
 	Set: { new <T>(): Set<T>; prototype: Set<any> }
+
+	/**
+	 * @type {function(new: Map.<T>)}
+	 */
 	Map: { new <K, V>(): Map<K, V>; prototype: Map<any, any> }
 }
 
@@ -262,6 +269,7 @@ module libjass {
 		 * Converts the given key into a property name for the internal map.
 		 *
 		 * @param {K} key
+		 * @return {string}
 		 */
 		private _keyToProperty(key: K): string {
 			if (typeof key === "number") {

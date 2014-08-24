@@ -2248,6 +2248,7 @@ module libjass.parser {
 
 		/**
 		 * @param {number=1} count
+		 * @return {string}
 		 */
 		private _peek(count: number = 1): string {
 			// Fastpath for count === 1. http://jsperf.com/substr-vs-indexer

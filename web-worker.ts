@@ -21,6 +21,9 @@
 ///<reference path="libjass.ts" />
 
 interface Document {
+	/**
+	 * @type {!HTMLScriptElement}
+	 */
 	currentScript: HTMLScriptElement;
 }
 

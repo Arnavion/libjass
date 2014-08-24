@@ -130,6 +130,9 @@ module libjass.parts {
 			return this._value;
 		}
 
+		/**
+		 * @return {string}
+		 */
 		toString(): string {
 			return "Text { value: " + this._value.replace(/\u00A0/g, "\\h") + " }";
 		}

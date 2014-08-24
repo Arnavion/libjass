@@ -678,6 +678,11 @@ module libjass {
 			return this._end;
 		}
 
+		/**
+		 * The default style of this dialogue.
+		 *
+		 * @type {!libjass.Style}
+		 */
 		get style(): Style {
 			return this._style;
 		}
@@ -792,7 +797,14 @@ module libjass {
 	 * A template object with a particular type.
 	 */
 	export interface TypedTemplate {
+		/**
+		 * @type {string}
+		 */
 		type: string;
+
+		/**
+		 * @type {!Map.<string, string>}
+		 */
 		template: Map<string, string>;
 	}
 
@@ -800,6 +812,9 @@ module libjass {
 	 * An array of TypedTemplate objects with the format specifier that was used to parse them.
 	 */
 	export interface TypedTemplateArray extends Array<TypedTemplate> {
+		/**
+		 * @type {!Array.<string>}
+		 */
 		formatSpecifier: string[];
 	}
 
