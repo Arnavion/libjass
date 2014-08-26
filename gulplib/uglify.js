@@ -300,15 +300,19 @@ module.exports = {
 						file: path.basename(sourceMapFile.path),
 						orig: sourceMapFile.contents.toString()
 					}),
-					comments: {
-						test: function (comment) {
-							if (!firstLicenseHeaderFound && comment.indexOf("Copyright") !== -1) {
-								firstLicenseHeaderFound = true;
-								return true;
-							}
+					comments: function (node, comment) {
+						if (!firstLicenseHeaderFound && comment.value.indexOf("Copyright") !== -1) {
+							firstLicenseHeaderFound = true;
 
-							return false;
+							// Align the license header correctly.
+							var lines = comment.value.split("\n");
+							lines = [lines[0]].concat(lines.slice(1).map(function (line) { return line.replace(/^ +/g, " "); }));
+							comment.value = lines.join('\n');
+
+							return true;
 						}
+
+						return false;
 					},
 					screw_ie8: true
 				};
