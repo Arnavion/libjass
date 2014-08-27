@@ -37,7 +37,7 @@ Array.prototype.concatMany = function (arr) {
 	return result;
 };
 
-module.exports = function () {
+module.exports = function (outputFilePath) {
 	var compiler = new TypeScript.Compiler();
 
 	var filenames = [];
@@ -468,7 +468,7 @@ module.exports = function () {
 		};
 
 		this.push(new Vinyl({
-			path: "api.xhtml",
+			path: outputFilePath,
 			contents: Buffer.concat([
 				'<?xml version="1.0" encoding="utf-8" ?>',
 				'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">',

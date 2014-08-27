@@ -126,5 +126,5 @@ gulp.task("watch", ["clean"], function (callback) {
 });
 
 gulp.task("doc", ["libjass.js"], function () {
-	return gulp.src("./libjass.ts").pipe(Doc("/api.xhtml")).pipe(gulp.dest("../libjass-gh-pages/"));
+	return gulp.src("./libjass.ts").pipe(Doc("./api.xhtml")).pipe(gulp.dest("../libjass-gh-pages/"));
 });
