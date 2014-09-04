@@ -589,11 +589,11 @@ module.exports = function (outputFilePath) {
 				'		</script>',
 				'	</head>',
 				'	<body>',
-				'		<section class="namespaces">',
+				'		<nav class="namespaces">',
 				'			<label><input type="checkbox" id="show-private" />Show private</label>',
 				'			<h2>Namespaces</h2>'
 			].concat(writeOverview(3)).concat([
-				'		</section>',
+				'		</nav>',
 				'		<div class="content">',
 				''
 			]).concatMany(namespaceNames.map(function (namespaceName) {
