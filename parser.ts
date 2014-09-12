@@ -2542,11 +2542,20 @@ module libjass.webworker {
 	}
 
 	libjass.webworker._registerWorkerCommand(WorkerCommands.Parse, (parameters: any, response: WorkerResultCallback): void => {
+		var result: any;
+
 		try {
-			response(null, libjass.parser.parse(parameters.input, parameters.rule));
+			result = libjass.parser.parse(parameters.input, parameters.rule);
 		}
 		catch (ex) {
 			response(ex, null);
+			return;
+		}
+
+		try {
+			response(null, result);
+		}
+		catch (ex) {
 		}
 	});
 }
