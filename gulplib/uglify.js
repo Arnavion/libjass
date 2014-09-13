@@ -347,5 +347,9 @@ UglifyJS.AST_Symbol.prototype.unreferenced = function () {
 		return false;
 	}
 
+	if (this instanceof UglifyJS.AST_SymbolCatch) {
+		return false;
+	}
+
 	return originalSymbolUnreferenced.call(this);
 };
