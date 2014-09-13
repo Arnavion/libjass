@@ -25,7 +25,9 @@ suite("Web worker", function () {
 	var workerChannel = null;
 
 	setup(function () {
-		workerChannel = libjass.webworker.createWorker();
+		if (libjass.webworker.supported) {
+			workerChannel = libjass.webworker.createWorker("../libjass.js");
+		}
 	});
 
 	suite("Parse", function () {

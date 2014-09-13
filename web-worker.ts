@@ -69,10 +69,12 @@ module libjass.webworker {
 	/**
 	 * Create a new web worker and returns a {@link libjass.webworker.WorkerChannel} to it.
 	 *
+	 * @param {string=} The path to libjass.js to be loaded in the web worker. If the browser supports document.currentScript, the parameter is optional and, if not provided,
+	 * the path will be determined from the src attribute of the <script> element that contains the currently running copy of libjass.js
 	 * @return {!libjass.webworker.WorkerChannel} A communication channel to the new web worker.
 	 */
-	export function createWorker(): WorkerChannel {
-		return new WorkerChannelImpl(new Worker(_scriptNode.src));
+	export function createWorker(scriptPath: string = _scriptNode.src): WorkerChannel {
+		return new WorkerChannelImpl(new Worker(scriptPath));
 	}
 
 	/**
