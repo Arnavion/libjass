@@ -61,58 +61,20 @@ module libjass.webworker {
 		 *
 		 * @param {number} command
 		 * @param {*} parameters
-		 * @return {!libjass.webworker.WorkerPromise} A promise that will get resolved when the other side computes the result
+		 * @return {!Promise.<*>} A promise that will get resolved when the other side computes the result
 		 */
-		request(command: WorkerCommands, parameters: any): WorkerPromise;
+		request(command: WorkerCommands, parameters: any): Promise<any>;
 	}
 
 	/**
 	 * Create a new web worker and returns a {@link libjass.webworker.WorkerChannel} to it.
 	 *
-	 * @param {string=} The path to libjass.js to be loaded in the web worker. If the browser supports document.currentScript, the parameter is optional and, if not provided,
+	 * @param {string=} scriptPath The path to libjass.js to be loaded in the web worker. If the browser supports document.currentScript, the parameter is optional and, if not provided,
 	 * the path will be determined from the src attribute of the <script> element that contains the currently running copy of libjass.js
 	 * @return {!libjass.webworker.WorkerChannel} A communication channel to the new web worker.
 	 */
 	export function createWorker(scriptPath: string = _scriptNode.src): WorkerChannel {
 		return new WorkerChannelImpl(new Worker(scriptPath));
-	}
-
-	/**
-	 * A promise returned by {@link libjass.webworker.WorkerChannel.request}
-	 */
-	export interface WorkerPromise {
-		/**
-		 * True if the promise is resolved.
-		 *
-		 * @type {boolean}
-		 */
-		resolved: boolean;
-
-		/**
-		 * The value of the promise.
-		 *
-		 * @type {*}
-		 */
-		result: any;
-
-		/**
-		 * Registers a callback to run when this promise is resolved. If the promise is already resolved, the callback is called immediately.
-		 *
-		 * @param {function(*) } callback A function of the form (promise: *): void
-		 */
-		then(callback: WorkerPromiseCallback): void;
-
-		/**
-		 * Cancels the promise.
-		 */
-		cancel(): void;
-	}
-
-	/**
-	 * The signature of a callback called by {@link libjass.webworker.WorkerPromise} when it is resolved.
-	 */
-	export interface WorkerPromiseCallback {
-		(promise: WorkerPromise): void;
 	}
 
 	/**
@@ -242,12 +204,51 @@ module libjass.webworker {
 	}
 
 	/**
+	 * A deferred promise.
+	 */
+	class DeferredPromise<T> {
+		private _promise: Promise<T>;
+		private _resolve: (value: T) => void;
+		private _reject: (reason: any) => void;
+
+		constructor() {
+			this._promise = new Promise<T>((resolve, reject) => {
+				this._resolve = resolve;
+				this._reject = reject;
+			});
+		}
+
+		/**
+		 * @type {!Promise.<T>}
+		 */
+		get promise(): Promise<T> {
+			return this._promise;
+		}
+
+		/**
+		 * @param {T} value
+		 */
+		resolve(value: T): void {
+			this._resolve(value);
+		}
+
+		/**
+		 * @param {*} reason
+		 */
+		reject(reason: any): void {
+			this._reject(reason);
+		}
+	}
+
+	/**
 	 * Internal implementation of libjass.webworker.WorkerChannel
 	 *
 	 * @param {!*} comm The other side of the channel. When created by the host, this is the web worker. When created by the web worker, this is its global object.
 	 */
 	class WorkerChannelImpl implements WorkerChannel {
-		private _pendingRequests = new Map<number, WorkerPromiseImpl>();
+		private static _lastRequestId: number = -1;
+
+		private _pendingRequests = new Map<number, DeferredPromise<any>>();
 
 		constructor(private _comm: WorkerCommunication) {
 			this._comm.addEventListener("message", ev => this._onMessage(<string>ev.data), false);
@@ -256,17 +257,17 @@ module libjass.webworker {
 		/**
 		 * @param {number} command
 		 * @param {*} parameters
-		 * @return {!libjass.webworker.WorkerPromise}
+		 * @return {!Promise.<*>}
 		 */
-		request(command: WorkerCommands, parameters: any): WorkerPromise {
-			var promise = new WorkerPromiseImpl(this);
-			var requestId = promise.id;
-			this._pendingRequests.set(requestId, promise);
+		request(command: WorkerCommands, parameters: any): Promise<any> {
+			var deferred = new DeferredPromise<any>();
+			var requestId = ++WorkerChannelImpl._lastRequestId;
+			this._pendingRequests.set(requestId, deferred);
 
 			var requestMessage: WorkerRequestMessage = { requestId: requestId, command: command, parameters: parameters };
 			this._comm.postMessage(WorkerChannelImpl._toJSON(requestMessage));
 
-			return promise;
+			return deferred.promise;
 		}
 
 		/**
@@ -292,10 +293,15 @@ module libjass.webworker {
 			if (message.command === WorkerCommands.Response) {
 				var responseMessage = <WorkerResponseMessage><any>message;
 
-				var promise = this._pendingRequests.get(responseMessage.requestId);
-				if (promise !== undefined) {
+				var deferred = this._pendingRequests.get(responseMessage.requestId);
+				if (deferred !== undefined) {
 					this._pendingRequests.delete(responseMessage.requestId);
-					promise.resolve(responseMessage.error, responseMessage.result);
+					if (responseMessage.error === null) {
+						deferred.resolve(responseMessage.result);
+					}
+					else {
+						deferred.reject(responseMessage.error);
+					}
 				}
 
 				return;
@@ -350,83 +356,5 @@ module libjass.webworker {
 	var inWorker = (typeof WorkerGlobalScope !== "undefined" && global instanceof WorkerGlobalScope);
 	if (inWorker) {
 		new WorkerChannelImpl(<WorkerGlobalScope><any>global);
-	}
-
-	/**
-	 * The actual implementation of libjass.webworker.WorkerPromise
-	 *
-	 * @param {!WorkerChannelImpl} channel
-	 */
-	class WorkerPromiseImpl implements WorkerPromise {
-		private static _lastPromiseId: number = -1;
-
-		private _id: number = ++WorkerPromiseImpl._lastPromiseId;
-		private _resolved: boolean = false;
-		private _result: any = null;
-		private _error: any = null;
-		private _callback: WorkerPromiseCallback = null;
-
-		constructor(private _channel: WorkerChannelImpl) { }
-
-		/**
-		 * @type {boolean}
-		 */
-		get resolved(): boolean {
-			return this._resolved;
-		}
-
-		/**
-		 * @type {*}
-		 */
-		get result(): any {
-			if (!this._resolved) {
-				throw new Error("Unresolved promise.");
-			}
-
-			if (this._error !== null) {
-				throw this._error;
-			}
-
-			return this._result;
-		}
-
-		/**
-		 * @param {function(*) } callback A function of the form (promise: *): void
-		 */
-		then(callback: WorkerPromiseCallback): void {
-			this._callback = callback;
-			if (this._resolved) {
-				setTimeout(() => this._callback(this), 0);
-			}
-		}
-
-		cancel(): void {
-			if (this._resolved) {
-				return;
-			}
-
-			this._channel.cancelRequest(this._id);
-		}
-
-		/**
-		 * @type {number}
-		 */
-		get id(): number {
-			return this._id;
-		}
-
-		/**
-		 * @param {*} error
-		 * @param {*} result
-		 */
-		resolve(error: any, result: any): void {
-			this._resolved = true;
-			this._error = error;
-			this._result = result;
-
-			if (this._callback !== null) {
-				this._callback(this);
-			}
-		}
 	}
 }

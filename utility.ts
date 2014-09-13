@@ -22,6 +22,36 @@
 
 "use strict";
 
+interface Promise<T> {
+	/**
+	 * @param {function(T):U} fulfilledHandler
+	 * @param {?function(*):U} rejectedHandler
+	 * @return {!Promise.<U>}
+	 */
+	then<U>(fulfilledHandler: (value: T) => U, rejectedHandler?: (reason: any) => U): Promise<U>;
+
+	/**
+	 * @param {function(T):!Promise.<U>} fulfilledHandler
+	 * @param {?function(*):!Promise.<U>} rejectedHandler
+	 * @return {!Promise.<U>}
+	 */
+	then<U>(fulfilledHandler: (value: T) => Promise<U>, rejectedHandler?: (reason: any) => Promise<U>): Promise<U>;
+
+	/**
+	 * @param {function(T):U} fulfilledHandler
+	 * @param {?function(*):!Promise.<U>} rejectedHandler
+	 * @return {!Promise.<U>}
+	 */
+	then<U>(fulfilledHandler: (value: T) => U, rejectedHandler?: (reason: any) => Promise<U>): Promise<U>;
+
+	/**
+	 * @param {function(T):!Promise.<U>} fulfilledHandler
+	 * @param {?function(*):U} rejectedHandler
+	 * @return {!Promise.<U>}
+	 */
+	then<U>(fulfilledHandler: (value: T) => Promise<U>, rejectedHandler?: (reason: any) => U): Promise<U>;
+}
+
 interface Global {
 	/**
 	 * @type {function(new: Set.<T>)}
@@ -32,6 +62,11 @@ interface Global {
 	 * @type {function(new: Map.<T>)}
 	 */
 	Map: { new <K, V>(): Map<K, V>; prototype: Map<any, any> }
+
+	/**
+	 * @type {function(new: Promise.<T>}}
+	 */
+	Promise: { new <T>(resolver: (fulfill: (value: T) => void, reject: (reason: any) => void) => void): Promise<T> }
 }
 
 declare var global: Global; // Defined as a parameter of the anonymous function wrapper
@@ -296,6 +331,213 @@ module libjass {
 	export var Map = global.Map;
 	if (Map === undefined || typeof Map.prototype.forEach !== "function") {
 		Map = <any>SimpleMap;
+	}
+
+	/**
+	 * Promise implementation for browsers that don't support it.
+	 *
+	 * @param {function(function(T), function(*))} resolver
+	 *
+	 * @template T
+	 */
+	class SimplePromise<T> implements Promise<T> {
+		private _state: SimplePromiseState = SimplePromiseState.PENDING;
+
+		private _onFulfills: { (value: T): void }[] = [];
+		private _onRejects: { (reason: any): void }[] = [];
+
+		private _alreadyFulfilledValue: T = null;
+		private _alreadyRejectedReason: any = null;
+
+		constructor(private _resolver: (resolve: (value: T) => void, reject: (reason: any) => void) => void) {
+			try {
+				this._resolver(value => {
+					if (this._state !== SimplePromiseState.PENDING) {
+						return;
+					}
+
+					this._state = SimplePromiseState.FULFILLED;
+
+					this._alreadyFulfilledValue = value;
+
+					setTimeout(() => this._emitFulfill(), 0);
+				}, reason => {
+					if (this._state !== SimplePromiseState.PENDING) {
+						return;
+					}
+
+					this._state = SimplePromiseState.REJECTED;
+
+					this._alreadyRejectedReason = reason;
+
+					setTimeout(() => this._emitReject(), 0);
+				});
+			}
+			catch (ex) {
+				this._state = SimplePromiseState.REJECTED;
+
+				if (this._state !== SimplePromiseState.PENDING) {
+					return;
+				}
+
+				this._alreadyRejectedReason = ex;
+
+				setTimeout(() => this._emitReject(), 0);
+			}
+		}
+
+		/**
+		 * @param {function(T):U} fulfilledHandler
+		 * @param {function(*):U} rejectedHandler
+		 * @return {!Promise.<U>}
+		 *
+		 * @template U
+		 */
+		then<U>(fulfilledHandler: (value: T) => U, rejectedHandler: (reason: any) => U): Promise<U> {
+			fulfilledHandler = (typeof fulfilledHandler === "function") ? fulfilledHandler : null;
+			rejectedHandler = (typeof fulfilledHandler === "function") ? rejectedHandler : null;
+
+			if (fulfilledHandler === null && rejectedHandler === null) {
+				return <any>this;
+			}
+
+			if (!fulfilledHandler) {
+				fulfilledHandler = <any>((value: T) => value);
+			}
+
+			if (!rejectedHandler) {
+				rejectedHandler = <any>((reason: any) => { throw reason; });
+			}
+
+			return new SimplePromise<U>((resolve, reject) => {
+				this._onFulfills.push(value => {
+					try {
+						var fulfilledHandlerResult = fulfilledHandler(value);
+					}
+					catch (ex) {
+						reject(ex);
+						return;
+					}
+
+					if (SimplePromise._isPromise(fulfilledHandlerResult)) {
+						var onFulfillResultPromise = <Promise<U>><any>(fulfilledHandlerResult);
+						onFulfillResultPromise.then(resolve, reject);
+					}
+					else {
+						resolve(fulfilledHandlerResult);
+					}
+				});
+
+				this._onRejects.push(reason => {
+					try {
+						var rejectedHandlerResult = rejectedHandler(reason);
+					}
+					catch (ex) {
+						reject(ex);
+						return;
+					}
+
+					if (SimplePromise._isPromise(rejectedHandlerResult)) {
+						var onRejectResultPromise = <Promise<U>><any>(rejectedHandlerResult);
+						onRejectResultPromise.then(resolve, reject);
+					}
+					else {
+						resolve(rejectedHandlerResult);
+					}
+				});
+
+				if (this._state === SimplePromiseState.FULFILLED) {
+					setTimeout(() => this._emitFulfill(), 0);
+				}
+				else if (this._state === SimplePromiseState.REJECTED) {
+					setTimeout(() => this._emitReject(), 0);
+				}
+			});
+		}
+
+		/**
+		 * @return {boolean}
+		 */
+		isFulfilled(): boolean {
+			return (this._state !== SimplePromiseState.FULFILLED);
+		}
+
+		/**
+		 * @return {boolean}
+		 */
+		isRejected(): boolean {
+			return (this._state !== SimplePromiseState.REJECTED);
+		}
+
+		/**
+		 * @return {boolean}
+		 */
+		isPending(): boolean {
+			return (this._state !== SimplePromiseState.PENDING);
+		}
+
+		/**
+		 * @return {T}
+		 */
+		value(): T {
+			if (this._state !== SimplePromiseState.FULFILLED) {
+				throw new Error("This promise is not in FULFILLED state.");
+			}
+
+			return this._alreadyFulfilledValue;
+		}
+
+		/**
+		 * @return {*}
+		 */
+		reason(): any {
+			if (this._state !== SimplePromiseState.REJECTED) {
+				throw new Error("This promise is not in FULFILLED state.");
+			}
+
+			return this._alreadyRejectedReason;
+		}
+
+		/**
+		 * @param {!*} obj
+		 * @return {boolean}
+		 */
+		private static _isPromise(obj: any): boolean {
+			return obj && (typeof obj.then === "function");
+		}
+
+		private _emitFulfill(): void {
+			while (this._onFulfills.length > 0) {
+				var onFulfill = this._onFulfills.shift();
+				onFulfill(this._alreadyFulfilledValue);
+			}
+		}
+
+		private _emitReject(): void {
+			while (this._onRejects.length > 0) {
+				var onReject = this._onRejects.shift();
+				onReject(this._alreadyRejectedReason);
+			}
+		}
+	}
+
+	/**
+	 * The state of the {@link libjass.SimplePromise}
+	 */
+	enum SimplePromiseState {
+		PENDING = 0,
+		FULFILLED = 1,
+		REJECTED = 2,
+	}
+
+	/**
+	 * Set to browser's implementation of Promise if it has one, else set to {@link libjass.SimplePromise}
+	 *
+	 * @type {function(new:Promise)}
+	 */
+	export var Promise = global.Promise;
+	if (Promise === undefined) {
+		Promise = <any>SimplePromise;
 	}
 
 	/**

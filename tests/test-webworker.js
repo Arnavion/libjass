@@ -41,9 +41,9 @@ suite("Web worker", function () {
 				workerChannel.request(libjass.webworker.WorkerCommands.Parse, {
 					input: this.customProperties.input,
 					rule: this.customProperties.rule
-				}).then(function (promise) {
+				}).then(function (value) {
 					try {
-						assert.deepEqual(promise.result, [
+						assert.deepEqual(value, [
 							new libjass.parts.Alignment(8),
 							new libjass.parts.Text("Are "),
 							new libjass.parts.Italic(true),
@@ -57,6 +57,8 @@ suite("Web worker", function () {
 					catch (ex) {
 						done(ex);
 					}
+				}, function (reason) {
+					done(reason);
 				});
 			});
 		}
@@ -74,14 +76,10 @@ suite("Web worker", function () {
 				workerChannel.request(libjass.webworker.WorkerCommands.Parse, {
 					input: this.customProperties.input,
 					rule: this.customProperties.rule
-				}).then(function (promise) {
-					try {
-						promise.result;
-						done(new Error("Expected parse to fail."));
-					}
-					catch (ex) {
-						done();
-					}
+				}).then(function (value) {
+					done(new Error("Expected parse to fail."));
+				}, function (reason) {
+					done();
 				});
 			});
 		}
