@@ -63,5 +63,30 @@ suite("Web worker", function () {
 		else {
 			test("Parse: Web workers not supported in this environment.");
 		}
+
+		if (libjass.webworker.supported) {
+			test("Parse failure", function (done) {
+				this.customProperties = {
+					rule: "tag_a",
+					input: "a4"
+				};
+
+				workerChannel.request(libjass.webworker.WorkerCommands.Parse, {
+					input: this.customProperties.input,
+					rule: this.customProperties.rule
+				}).then(function (promise) {
+					try {
+						promise.result;
+						done(new Error("Expected parse to fail."));
+					}
+					catch (ex) {
+						done();
+					}
+				});
+			});
+		}
+		else {
+			test("Parse failure: Web workers not supported in this environment.");
+		}
 	});
 });
