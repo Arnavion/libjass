@@ -274,7 +274,13 @@ module libjass.webworker {
 		 * @param {number} requestId
 		 */
 		cancelRequest(requestId: number): void {
+			var deferred = this._pendingRequests.get(requestId);
+			if (deferred === undefined) {
+				return;
+			}
+
 			this._pendingRequests.delete(requestId);
+			deferred.reject(new Error("Cancelled."));
 		}
 
 		/**
