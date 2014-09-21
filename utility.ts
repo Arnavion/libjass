@@ -343,8 +343,7 @@ module libjass {
 	class SimplePromise<T> implements Promise<T> {
 		private _state: SimplePromiseState = SimplePromiseState.PENDING;
 
-		private _onFulfills: { (value: T): void }[] = [];
-		private _onRejects: { (reason: any): void }[] = [];
+		private _thens: { emitFulfill: (value: T) => void; emitReject: (reason: any) => void }[] = [];
 
 		private _alreadyFulfilledValue: T = null;
 		private _alreadyRejectedReason: any = null;
@@ -410,39 +409,39 @@ module libjass {
 			}
 
 			return new SimplePromise<U>((resolve, reject) => {
-				this._onFulfills.push(value => {
-					try {
-						var fulfilledHandlerResult = fulfilledHandler(value);
-					}
-					catch (ex) {
-						reject(ex);
-						return;
-					}
+				this._thens.push({
+					emitFulfill: value => {
+						try {
+							var fulfilledHandlerResult = fulfilledHandler(value);
+						}
+						catch (ex) {
+							reject(ex);
+							return;
+						}
 
-					if (SimplePromise._isPromise(fulfilledHandlerResult)) {
-						var onFulfillResultPromise = <Promise<U>><any>(fulfilledHandlerResult);
-						onFulfillResultPromise.then(resolve, reject);
-					}
-					else {
-						resolve(fulfilledHandlerResult);
-					}
-				});
+						if (SimplePromise._isPromise(fulfilledHandlerResult)) {
+							var onFulfillResultPromise = <Promise<U>><any>(fulfilledHandlerResult);
+							onFulfillResultPromise.then(resolve, reject);
+						}
+						else {
+							resolve(fulfilledHandlerResult);
+						}
+					}, emitReject: reason => {
+						try {
+							var rejectedHandlerResult = rejectedHandler(reason);
+						}
+						catch (ex) {
+							reject(ex);
+							return;
+						}
 
-				this._onRejects.push(reason => {
-					try {
-						var rejectedHandlerResult = rejectedHandler(reason);
-					}
-					catch (ex) {
-						reject(ex);
-						return;
-					}
-
-					if (SimplePromise._isPromise(rejectedHandlerResult)) {
-						var onRejectResultPromise = <Promise<U>><any>(rejectedHandlerResult);
-						onRejectResultPromise.then(resolve, reject);
-					}
-					else {
-						resolve(rejectedHandlerResult);
+						if (SimplePromise._isPromise(rejectedHandlerResult)) {
+							var onRejectResultPromise = <Promise<U>><any>(rejectedHandlerResult);
+							onRejectResultPromise.then(resolve, reject);
+						}
+						else {
+							resolve(rejectedHandlerResult);
+						}
 					}
 				});
 
@@ -507,16 +506,16 @@ module libjass {
 		}
 
 		private _emitFulfill(): void {
-			while (this._onFulfills.length > 0) {
-				var onFulfill = this._onFulfills.shift();
-				onFulfill(this._alreadyFulfilledValue);
+			while (this._thens.length > 0) {
+				var nextThen = this._thens.shift();
+				nextThen.emitFulfill(this._alreadyFulfilledValue);
 			}
 		}
 
 		private _emitReject(): void {
-			while (this._onRejects.length > 0) {
-				var onReject = this._onRejects.shift();
-				onReject(this._alreadyRejectedReason);
+			while (this._thens.length > 0) {
+				var nextThen = this._thens.shift();
+				nextThen.emitReject(this._alreadyRejectedReason);
 			}
 		}
 	}
