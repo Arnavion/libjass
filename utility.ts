@@ -76,8 +76,6 @@ module libjass {
 	 * Set implementation for browsers that don't support it. Only supports Number and String elements.
 	 *
 	 * Elements are stored as properties of an object, with names derived from their type.
-	 *
-	 * @template T
 	 */
 	class SimpleSet<T> implements Set<T> {
 		private _elements: { [key: string]: T };
@@ -189,8 +187,6 @@ module libjass {
 	 * Map implementation for browsers that don't support it. Only supports keys which are of Number or String type, or which have a property called "id".
 	 *
 	 * Keys and values are stored as properties of an object, with property names derived from the key type.
-	 *
-	 * @template K, V
 	 */
 	class SimpleMap<K, V> implements Map<K, V> {
 		private _keys: { [key: string]: K };
@@ -337,8 +333,6 @@ module libjass {
 	 * Promise implementation for browsers that don't support it.
 	 *
 	 * @param {function(function(T), function(*))} resolver
-	 *
-	 * @template T
 	 */
 	class SimplePromise<T> implements Promise<T> {
 		private _state: SimplePromiseState = SimplePromiseState.PENDING;
@@ -389,8 +383,6 @@ module libjass {
 		 * @param {function(T):U} fulfilledHandler
 		 * @param {function(*):U} rejectedHandler
 		 * @return {!Promise.<U>}
-		 *
-		 * @template U
 		 */
 		then<U>(fulfilledHandler: (value: T) => U, rejectedHandler: (reason: any) => U): Promise<U> {
 			fulfilledHandler = (typeof fulfilledHandler === "function") ? fulfilledHandler : null;

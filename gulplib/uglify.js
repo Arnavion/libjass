@@ -156,13 +156,10 @@ module.exports = {
 							return false;
 						}
 
-						/* Align multi-line comments correctly.
-						 * TypeScript shifts them one space left, and UJS shifts them four spaces left,
-						 * so shift each line except the first five spaces right.
-						 */
+						// UJS shifts multi-line comments four spaces left, so shift each line except the first one four spaces right.
 						if (comment.type === "comment2") {
 							var lines = comment.value.split("\n");
-							lines = [lines[0]].concat(lines.slice(1).map(function (line) { return '     ' + line; }));
+							lines = [lines[0]].concat(lines.slice(1).map(function (line) { return '    ' + line; }));
 							comment.value = lines.join('\n');
 						}
 

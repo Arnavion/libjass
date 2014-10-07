@@ -23,8 +23,6 @@
 module libjass.renderers {
 	/**
 	 * A mixin class that represents an event source.
-	 *
-	 * @template T
 	 */
 	export class EventSource<T> {
 		/**

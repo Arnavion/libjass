@@ -38,35 +38,59 @@ gulp.task("default", ["libjass.js", "libjass.min.js"]);
 
 function ASTModifer(namespaces) {
 	var visitor = function (current) {
-		var newText = [];
+		var newComments = [];
 
 		if (current instanceof TypeScript.AST.Namespace) {
 			current.members.forEach(visitor);
 		}
 		else if (current instanceof TypeScript.AST.Constructor) {
-			newText.push("@constructor");
+			newComments.push("@constructor");
 
 			if (current.baseType !== null) {
-				newText.push("@extends {" + current.baseType.fullName + "}");
+				newComments.push(
+					"@extends {" +
+					current.baseType.type.fullName +
+					(current.baseType.generics.length > 0 ? ("." + current.baseType.generics.join(", ")) : "") +
+					"}"
+				);
 			}
 
 			if (current.parent !== null) {
-				newText.push("@memberOf " + current.parent.fullName);
+				newComments.push("@memberOf " + current.parent.fullName);
 			}
 
 			current.members.forEach(visitor);
 		}
+		else if (current instanceof TypeScript.AST.Interface) {
+			if (current.baseTypes.length > 0) {
+				current.baseTypes.forEach(function (baseType) {
+					newComments.push(
+						"@extends {" +
+						baseType.type.fullName +
+						(baseType.generics.length > 0 ? ("." + baseType.generics.join(", ")) : "") +
+						"}"
+					);
+				});
+			}
+		}
+		else if (current instanceof TypeScript.AST.Enum) {
+			newComments.push("@enum");
+		}
+
+		if ((current.generics !== undefined) && (current.generics.length > 0)) {
+			newComments.push("@template " + current.generics.join(", "));
+		}
 
 		if (current.isPrivate) {
-			newText.push("@private");
+			newComments.push("@private");
 		}
 
 		if (current.isStatic) {
-			newText.push("@static");
+			newComments.push("@static");
 		}
 
-		if (newText.length > 0) {
-			current.astNode["gulp-typescript-new-comment"] = newText;
+		if (newComments.length > 0) {
+			current.astNode["gulp-typescript-new-comment"] = newComments;
 		}
 	};
 
