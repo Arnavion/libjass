@@ -348,7 +348,7 @@ TypeScript.AST.Property.prototype.toHtml = function () {
 	].concat(writeParameters([new TypeScript.AST.Parameter("value", "", this.setter.type)]).map(indenter(1)))).concat([
 		'</dl>'
 	]);
-}
+};
 
 module.exports = function (outputFilePath) {
 	var compiler = new TypeScript.Compiler();

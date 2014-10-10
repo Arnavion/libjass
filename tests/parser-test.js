@@ -32,7 +32,6 @@ var parserTest = function (description, input, rule, expected) {
 		}
 		catch (parseException) {
 			if (expected === null) {
-				passed = true;
 				return;
 			}
 			else {

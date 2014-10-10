@@ -30,12 +30,13 @@ var typeScriptModulePath = path.resolve("./node_modules/typescript/bin");
 var typeScriptJsPath = path.join(typeScriptModulePath, "tsc.js");
 
 var ts = {};
-vm.runInNewContext(
-	fs.readFileSync(typeScriptJsPath, { encoding: "utf8" }).replace(
-		"writeCommentRange(comment, writer);",
-		"ts.gulpTypeScriptWriteCommentRange(comment, writer, writeCommentRange);").replace(
-		"ts.executeCommandLine(sys.args);",
-		"module.exports = ts;"), {
+vm.runInNewContext(fs.readFileSync(typeScriptJsPath, { encoding: "utf8" }).replace(
+	"writeCommentRange(comment, writer);",
+	"ts.gulpTypeScriptWriteCommentRange(comment, writer, writeCommentRange);"
+).replace(
+	"ts.executeCommandLine(sys.args);",
+	"module.exports = ts;"
+), {
 	module: Object.defineProperty(Object.create(null), "exports", {
 		get: function () { return ts; },
 		set: function (value) { ts = value; },
@@ -46,7 +47,7 @@ vm.runInNewContext(
 	__dirname: typeScriptModulePath
 });
 
-var __extends = function(d, b) {
+var __extends = function (d, b) {
 	for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
 	function __() {
 		this.constructor = d;
@@ -347,7 +348,7 @@ var Scoped = function () {
 
 	Object.defineProperty(Scoped.prototype, "fullName", {
 		get: function () {
-			if (this.parent == null) {
+			if (this.parent === null) {
 				return this.name;
 			}
 

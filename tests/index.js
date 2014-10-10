@@ -192,7 +192,7 @@ var require = function (name) {
 
 	setup = function (body) {
 		currentSuite.setup = body;
-	}
+	};
 
 	test = function (description, body) {
 		return new Test(description, body, currentSuite);
@@ -210,7 +210,7 @@ var assert = new function () {
 		}
 
 		if (actual === undefined) {
-			throw new Error("Expected [" + expected + "] but got undefined")
+			throw new Error("Expected [" + expected + "] but got undefined");
 		}
 
 		if (expected === null && actual === null) {
@@ -222,7 +222,7 @@ var assert = new function () {
 		}
 
 		if (actual === null) {
-			throw new Error("Expected [" + expected + "] but got null")
+			throw new Error("Expected [" + expected + "] but got null");
 		}
 
 		if (expected.constructor !== actual.constructor && actual.constructor !== undefined) {
@@ -306,7 +306,7 @@ var Logger = function (outputDiv) {
 		console.log(message);
 
 		if (numFailed > 0) {
-			var message = numFailed + " of " + numTotal + " tests failed";
+			message = numFailed + " of " + numTotal + " tests failed";
 
 			console.warn(message);
 
@@ -318,7 +318,7 @@ var Logger = function (outputDiv) {
 		}
 
 		if (numTotal > numPassed + numFailed) {
-			var message = (numTotal - (numPassed + numFailed)) + " of " + numTotal + " tests skipped";
+			message = (numTotal - (numPassed + numFailed)) + " of " + numTotal + " tests skipped";
 
 			console.log(message);
 
@@ -330,18 +330,20 @@ var Logger = function (outputDiv) {
 	};
 
 	this.writeTest = function (test) {
+		var message;
+
 		if (test.passed === true) {
-			var message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ]";
+			message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ]";
 			console.log(message);
 			append(testDiv, message).className += " passed";
 		}
 		else if (test.passed === false) {
-			var message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ] " + " : " + ((test.exception !== null) ? test.exception.message : "<No exception>");
+			message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ] " + " : " + ((test.exception !== null) ? test.exception.message : "<No exception>");
 			console.warn(message);
 			append(testDiv, message).className += " failed";
 		}
 		else {
-			var message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ] " + " : Skipped";
+			message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ] " + " : Skipped";
 			console.log(message);
 			append(testDiv, message).className += " skipped";
 		}
@@ -364,13 +366,13 @@ var Logger = function (outputDiv) {
 		append(totalDiv, message).className = "passed";
 
 		if (numFailed > 0) {
-			var message = numFailed + " of " + numTotal + " tests failed.";
+			message = numFailed + " of " + numTotal + " tests failed.";
 			console.warn(message);
 			append(totalDiv, message).className = "failed";
 		}
 
 		if (numTotal > numPassed + numFailed) {
-			var message = (numTotal - (numPassed + numFailed)) + " of " + numTotal + " tests skipped.";
+			message = (numTotal - (numPassed + numFailed)) + " of " + numTotal + " tests skipped.";
 			console.warn(message);
 			append(totalDiv, message).className = "skipped";
 		}
