@@ -188,7 +188,7 @@ module libjass {
 			);
 			result.styles.set(newStyle.name, newStyle);
 
-			script.sort((line1, line2) => line1["number"] - line2["number"]).forEach(line => {
+			script.sort((line1, line2) => line1.number - line2.number).forEach(line => {
 				result.dialogues.push(new Dialogue(new Map<string, string>()
 					.set("Style", "Default")
 					.set("Start", line.start).set("End", line.end)
