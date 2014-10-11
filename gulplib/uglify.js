@@ -130,6 +130,14 @@ module.exports = {
 					}
 				}));
 
+				// 5. Fixup anonymous functions to print a space after "function"
+				root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+					if (node instanceof UglifyJS.AST_Lambda && !node.name) {
+						node.name = Object.create(UglifyJS.AST_Node.prototype);
+						node.name.print = function () { };
+					}
+				}));
+
 				// Output
 				var firstLicenseHeaderFound = false; // To detect and preserve the first license header
 
