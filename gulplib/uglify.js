@@ -138,9 +138,28 @@ module.exports = {
 					}
 				}));
 
-				// Output
-				var firstLicenseHeaderFound = false; // To detect and preserve the first license header
+				// 6. Find the first license header
+				var licenseHeader = null;
+				root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+					if (licenseHeader !== null) {
+						return;
+					}
 
+					if (node.start) {
+						(node.start.comments_before || []).some(function (comment) {
+							if (comment.value.indexOf("Copyright") !== -1) {
+								licenseHeader = comment;
+								node.start.comments_before = [];
+								return true;
+							}
+							return false;
+						});
+					}
+				}));
+				root.start.comments_before = [licenseHeader];
+				root.start.nlb = true;
+
+				// Output
 				var output = {
 					source_map: UglifyJS.SourceMap({
 						file: path.basename(sourceMapFile.path),
@@ -148,15 +167,9 @@ module.exports = {
 					}),
 					beautify: true,
 					comments: function (node, comment) {
-						// If this is a license header
-						if (comment.value.indexOf("Copyright") !== -1) {
-							if (!firstLicenseHeaderFound) {
-								firstLicenseHeaderFound = true;
-							}
-							else {
-								// This isn't the first license header. Strip it.
-								return false;
-							}
+						// If this is the first license header, keep it.
+						if (comment === licenseHeader) {
+							return true;
 						}
 
 						// If this is a TypeScript reference comment, strip it.
@@ -164,8 +177,8 @@ module.exports = {
 							return false;
 						}
 
-						// UJS shifts multi-line comments four spaces left, so shift each line except the first one four spaces right.
-						if (comment.type === "comment2") {
+						// UJS shifts multi-line comments four spaces left, so shift each line except the first one four spaces right. But don't do this for the license header.
+						if (comment.type === "comment2" && comment !== licenseHeader) {
 							var lines = comment.value.split("\n");
 							lines = [lines[0]].concat(lines.slice(1).map(function (line) { return '    ' + line; }));
 							comment.value = lines.join('\n');
