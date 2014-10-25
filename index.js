@@ -134,31 +134,57 @@ addEventListener("DOMContentLoaded", function () {
 
 	// Find the ASS or SRT track and load it
 	var track = document.querySelector("#video > track[data-format='ass'], #video > track[data-format='srt']");
-	var subsRequest = new XMLHttpRequest();
-	subsRequest.open("GET", track.src || track.getAttribute("src"), true);
-	subsRequest.addEventListener("load", function () {
-		debug("Script received.");
+	switch (track.getAttribute("data-format")) {
+		case "ass":
+			libjass.ASS.fromUrl(track.src || track.getAttribute("src")).then(function (result) {
+				debug("Script received.");
 
-		if (libjass.debugMode) {
-			console.time("Parsing ASS took");
-		}
+				ass = result;
 
-		// Parse the response string into an ASS object
-		ass = libjass.ASS.fromString(subsRequest.responseText, libjass.Format[track.getAttribute("data-format").toUpperCase()]);
+				if (libjass.debugMode) {
+					// Export the ASS object for debugging
+					window.ass = ass;
+				}
 
-		if (libjass.debugMode) {
-			console.timeEnd("Parsing ASS took");
+				// Prepare the "Script resolution" option label
+				document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.properties.resolutionX));
+				document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.properties.resolutionY));
 
-			// Export the ASS object for debugging
-			window.ass = ass;
-		}
+				// Test if everything is loaded
+				testVideoAndASSLoaded();
+			});
+			break;
 
-		// Prepare the "Script resolution" option label
-		document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.properties.resolutionX));
-		document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.properties.resolutionY));
+		case "srt":
+			var subsRequest = new XMLHttpRequest();
+			subsRequest.open("GET", track.src || track.getAttribute("src"), true);
+			subsRequest.addEventListener("load", function () {
+				debug("Script received.");
 
-		// Test if everything is loaded
-		testVideoAndASSLoaded();
-	}, false);
-	subsRequest.send(null);
+				if (libjass.debugMode) {
+					console.time("Parsing ASS took");
+				}
+
+				// Parse the response string into an ASS object
+				libjass.ASS.fromString(subsRequest.responseText, libjass.Format[track.getAttribute("data-format").toUpperCase()]).then(function (result) {
+					ass = result;
+
+					if (libjass.debugMode) {
+						console.timeEnd("Parsing ASS took");
+
+						// Export the ASS object for debugging
+						window.ass = ass;
+					}
+
+					// Prepare the "Script resolution" option label
+					document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.properties.resolutionX));
+					document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.properties.resolutionY));
+
+					// Test if everything is loaded
+					testVideoAndASSLoaded();
+				});
+			}, false);
+			subsRequest.send(null);
+			break;
+	}
 }, false);

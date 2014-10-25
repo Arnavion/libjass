@@ -22,15 +22,303 @@
 
 module libjass.parser {
 	/**
+	 * An interface for a stream.
+	 */
+	export interface Stream {
+		/**
+		 * @return {!Promise.<string>} A promise that will be resolved with the next line, or null if the stream is exhausted.
+		 */
+		nextLine(): Promise<string>;
+	}
+
+	/**
+	 * A {@link libjass.parser.Stream} that reads from a string in memory.
+	 *
+	 * @param {string} str The string
+	 */
+	export class StringStream implements Stream {
+		private _readTill: number = 0;
+
+		constructor(private _str: string) { }
+
+		/**
+		 * @return {!Promise.<string>} A promise that will be resolved with the next line, or null if the string has been completely read.
+		 */
+		nextLine(): Promise<string> {
+			var result: Promise<string> = null;
+
+			if (this._readTill < this._str.length) {
+				var nextNewLinePos = this._str.indexOf("\n", this._readTill);
+				if (nextNewLinePos !== -1) {
+					result = Promise.resolve(this._str.substring(this._readTill, nextNewLinePos));
+					this._readTill = nextNewLinePos + 1;
+				}
+				else {
+					result = Promise.resolve(this._str.substr(this._readTill));
+					this._readTill = this._str.length;
+				}
+			}
+			else {
+				result = Promise.resolve<string>(null);
+			}
+
+			return result;
+		}
+	}
+
+	/**
+	 * A {@link libjass.parser.Stream} that reads from an XMLHttpRequest object.
+	 *
+	 * @param {!XMLHttpRequest} xhr The XMLHttpRequest object
+	 */
+	export class XhrStream implements Stream {
+		private _readTill: number = 0;
+		private _pendingDeferred: DeferredPromise<string> = null;
+
+		constructor(private _xhr: XMLHttpRequest) {
+			var readSoFarPos = 0;
+			_xhr.addEventListener("progress", event=> this._onXhrProgress(event), false);
+			_xhr.addEventListener("loadend", event=> this._onXhrLoadEnd(event), false);
+		}
+
+		/**
+		 * @return {!Promise.<string>} A promise that will be resolved with the next line, or null if the stream is exhausted.
+		 */
+		nextLine(): Promise<string> {
+			if (this._pendingDeferred !== null) {
+				throw new Error("Streaming parser only supports one pending unfulfilled read at a time.");
+			}
+
+			var deferred = this._pendingDeferred = new DeferredPromise<string>();
+
+			this._reportNewLine();
+
+			return deferred.promise;
+		}
+
+		/**
+		 * @param {!ProgressEvent} event
+		 */
+		private _onXhrProgress(event: ProgressEvent): void {
+			if (this._pendingDeferred === null) {
+				return;
+			}
+
+			this._reportNewLine();
+		}
+
+		/**
+		 * @param {!ProgressEvent} event
+		 */
+		private _onXhrLoadEnd(event: ProgressEvent): void {
+			if (this._pendingDeferred === null) {
+				return;
+			}
+
+			this._reportNewLine();
+		}
+
+		/**
+		 */
+		private _reportNewLine(): void {
+			var response = this._xhr.responseText;
+
+			var nextNewLinePos = response.indexOf("\n", this._readTill);
+			if (nextNewLinePos !== -1) {
+				this._pendingDeferred.resolve(response.substring(this._readTill, nextNewLinePos));
+				this._readTill = nextNewLinePos + 1;
+				this._pendingDeferred = null;
+			}
+
+			else if (this._xhr.readyState === XMLHttpRequest.DONE) {
+				// No more data. This is the last line.
+				if (this._readTill < response.length) {
+					this._pendingDeferred.resolve(response.substr(this._readTill));
+					this._readTill = response.length;
+				}
+				else {
+					this._pendingDeferred.resolve(null);
+				}
+
+				this._pendingDeferred = null;
+			}
+		}
+	}
+
+	/**
+	 * A parser that parses an {@link libjass.ASS} object from a {@link libjass.parser.Stream}.
+	 *
+	 * @param {!libjass.parser.Stream} stream The {@link libjass.parser.Stream} to parse
+	 */
+	export class StreamParser {
+		private _ass: ASS = new ASS();
+		private _minimalDeferred: DeferredPromise<ASS> = new DeferredPromise<ASS>();
+		private _deferred: DeferredPromise<ASS> = new DeferredPromise<ASS>();
+
+		private _currentSectionName: string = null;
+
+		constructor(private _stream: Stream) {
+			this._stream.nextLine().then(line => this._onNextLine(line));
+		}
+
+		/**
+		 * @type {!Promise.<!libjass.ASS>} A promise that will be resolved when the script properties of the ASS script have been parsed from the stream. Styles and events have not necessarily been
+		 * parsed at the point this promise becomes resolved.
+		 */
+		get minimalASS(): Promise<ASS> {
+			return this._minimalDeferred.promise;
+		}
+
+		/**
+		 * @type {!Promise.<!libjass.ASS>} A promise that will be resolved when the entire stream has been parsed.
+		 */
+		get ass(): Promise<ASS> {
+			return this._deferred.promise;
+		}
+
+		/**
+		 * @param {string} line
+		 */
+		private _onNextLine(line: string): void {
+			if (line === null) {
+				this._minimalDeferred.resolve(this._ass);
+				this._deferred.resolve(this._ass);
+				return;
+			}
+
+			if (line[line.length - 1] === "\r") {
+				line = line.substr(0, line.length - 1);
+			}
+
+			if (line === "" || line[0] === ";") {
+				// Ignore empty lines and comments
+			}
+
+			else if (line[0] === "[" && line[line.length - 1] === "]") {
+				// Start of new section
+
+				if (this._currentSectionName === "Script Info") {
+					// Exiting script info section
+					this._minimalDeferred.resolve(this._ass);
+				}
+
+				this._currentSectionName = line.substring(1, line.length - 1);
+			}
+
+			else {
+				switch (this._currentSectionName) {
+					case "Script Info":
+						var property = parseLineIntoProperty(line);
+						switch (property.name) {
+							case "PlayResX":
+								this._ass.properties.resolutionX = parseInt(property.value);
+								break;
+							case "PlayResY":
+								this._ass.properties.resolutionY = parseInt(property.value);
+								break;
+							case "WrapStyle":
+								this._ass.properties.wrappingStyle = parseInt(property.value);
+								break;
+							case "ScaledBorderAndShadow":
+								this._ass.properties.scaleBorderAndShadow = (property.value === "yes");
+								break;
+						}
+						break;
+
+					case "V4+ Styles":
+						if (this._ass.stylesFormatSpecifier === null) {
+							var property = parseLineIntoProperty(line);
+							if (property !== null && property.name === "Format") {
+								this._ass.stylesFormatSpecifier = property.value.split(",").map(str => str.trim());
+							}
+							else {
+								// Ignore any non-format lines
+							}
+						}
+						else {
+							this._ass.addStyle(line);
+						}
+						break;
+
+					case "Events":
+						if (this._ass.dialoguesFormatSpecifier === null) {
+							var property = parseLineIntoProperty(line);
+							if (property !== null && property.name === "Format") {
+								this._ass.dialoguesFormatSpecifier = property.value.split(",").map(str => str.trim());
+							}
+							else {
+								// Ignore any non-format lines
+							}
+						}
+						else {
+							this._ass.addEvent(line);
+						}
+						break;
+
+					default:
+						// Ignore other sections
+						break;
+				}
+			}
+
+			this._stream.nextLine().then(line => this._onNextLine(line));
+		}
+	}
+
+	/**
+	 * Parses a line into a {@link libjass.Property}.
+	 *
+	 * @param {string} line
+	 * @return {!libjass.Property}
+	 */
+	export function parseLineIntoProperty(line: string): Property {
+		var colonPos = line.indexOf(":");
+		if (colonPos === -1) {
+			return null;
+		}
+
+		var name = line.substr(0, colonPos);
+		var value = line.substr(colonPos + 1).replace(/^\s+/, "");
+
+		return { name: name, value: value };
+	}
+
+	/**
+	 * Parses a line into a {@link libjass.TypedTemplate} according to the given format specifier.
+	 *
+	 * @param {string} line
+	 * @param {!Array.<string>} formatSpecifier
+	 * @return {!libjass.TypedTemplate}
+	 */
+	export function parseLineIntoTypedTemplate(line: string, formatSpecifier: string[]): TypedTemplate {
+		var property = parseLineIntoProperty(line);
+		if (property === null) {
+			return null;
+		}
+
+		var value = property.value.split(",");
+
+		if (value.length > formatSpecifier.length) {
+			value[formatSpecifier.length - 1] = value.slice(formatSpecifier.length - 1).join(",");
+		}
+
+		var template = new Map<string, string>();
+		formatSpecifier.forEach((formatKey, index) => {
+			template.set(formatKey, value[index]);
+		});
+
+		return { type: property.name, template: template };
+	}
+
+	/**
 	 * Parses a given string with the specified rule.
 	 *
 	 * @param {string} input The string to be parsed.
 	 * @param {string} rule The rule to parse the string with
-	 * @param {libjass.parser.ParseNode=null} customParseTree If provided, this is used as the root of the parse tree instead of a new object.
 	 * @return {*} The value returned depends on the rule used.
 	 */
-	export function parse(input: string, rule: string, customParseTree: ParseNode = null): any {
-		var run = new ParserRun(input, rule, customParseTree);
+	export function parse(input: string, rule: string): any {
+		var run = new ParserRun(input, rule);
 
 		if (run.result === null || run.result.end !== input.length) {
 			if (libjass.debugMode) {
@@ -48,19 +336,13 @@ module libjass.parser {
 	 *
 	 * @param {string} input
 	 * @param {string} rule
-	 * @param {libjass.parser.ParseNode=null} customParseTree
 	 */
 	class ParserRun {
 		private _parseTree: ParseNode;
 		private _result: ParseNode;
 
-		constructor(private _input: string, rule: string, customParseTree: ParseNode) {
-			if (customParseTree === null) {
-				this._parseTree = new ParseNode(null);
-			}
-			else {
-				this._parseTree = customParseTree;
-			}
+		constructor(private _input: string, rule: string) {
+			this._parseTree = new ParseNode(null);
 
 			this._result = rules.get(rule).call(this, this._parseTree);
 		}
@@ -70,240 +352,6 @@ module libjass.parser {
 		 */
 		get result(): ParseNode {
 			return this._result;
-		}
-
-		/**
-		 * @param {!libjass.parser.ParseNode} parent
-		 * @return {libjass.parser.ParseNode}
-		 */
-		parse_assScript(parent: ParseNode): ParseNode {
-			var current = new ParseNode(parent);
-
-			var sections = new Map<string, any>();
-			current.value = sections;
-
-			while (this._haveMore()) {
-				var scriptSectionNode = this.parse_assScriptSection(current);
-
-				if (scriptSectionNode !== null) {
-					sections.set(scriptSectionNode.value.name, scriptSectionNode.value.contents);
-				}
-				else if (this.read(current, "\n") === null) {
-					parent.pop();
-					return null;
-				}
-			}
-
-			return current;
-		}
-
-		/**
-		 * @param {!libjass.parser.ParseNode} parent
-		 * @return {libjass.parser.ParseNode}
-		 */
-		parse_assScriptSection(parent: ParseNode): ParseNode {
-			var current = new ParseNode(parent);
-
-			var sectionHeaderNode = this.parse_assScriptSectionHeader(current);
-			if (sectionHeaderNode === null) {
-				parent.pop();
-				return null;
-			}
-
-			current.value = Object.create(null);
-			current.value.name = sectionHeaderNode.value;
-			current.value.contents = null;
-
-			var sectionTemplate: Map<string, string> = null;
-
-			var sectionTemplateArray: TypedTemplateArray = null;
-
-			while (this._haveMore() && this._peek() !== "[") {
-				if (this.read(current, "\n") !== null) {
-					continue;
-				}
-
-				if (this.parse_assScriptComment(current) !== null) {
-					continue;
-				}
-
-				var propertyNode = this.parse_assScriptProperty(current);
-
-				if (propertyNode !== null) {
-					if (sectionTemplateArray === null) {
-						var property: { key: string; value: string } = propertyNode.value;
-
-						if (sectionTemplateArray === null && property.key === "Format") {
-							// The first line of this section is a format specifier. This section will be an array of templates.
-							sectionTemplateArray = <TypedTemplateArray>[];
-							sectionTemplateArray.formatSpecifier = property.value.split(",").map(formatPart => formatPart.trim());
-
-							current.value.contents = sectionTemplateArray;
-						}
-
-						else {
-							// This section is a single template. Each line is a property of this template.
-							if (sectionTemplate === null) {
-								sectionTemplate = new Map<string, string>();
-								current.value.contents = sectionTemplate;
-							}
-
-							sectionTemplate.set(property.key, property.value);
-						}
-					}
-
-					else {
-						// Each line in this section is a template of a particular type, and the section is an array of these templates.
-
-						sectionTemplateArray.push(<TypedTemplate>propertyNode.value);
-					}
-				}
-
-				else {
-					// Not a property line. Ignore.
-
-					if (this._haveMore() && this.read(current, "\n") === null) {
-						var garbageNode = new ParseNode(current, "");
-						for (var next = this._peek(); this._haveMore() && next !== "\n"; next = this._peek()) {
-							garbageNode.value += next;
-						}
-
-						this.read(current, "\n");
-					}
-				}
-			}
-
-			return current;
-		}
-
-		/**
-		 * @param {!libjass.parser.ParseNode} parent
-		 * @return {libjass.parser.ParseNode}
-		 */
-		parse_assScriptSectionHeader(parent: ParseNode): ParseNode {
-			var current = new ParseNode(parent);
-
-			if (this.read(current, "[") === null) {
-				parent.pop();
-				return null;
-			}
-
-			var nameNode = new ParseNode(current, "");
-
-			for (var next = this._peek(); this._haveMore() && next !== "]" && next !== "\n"; next = this._peek()) {
-				nameNode.value += next;
-			}
-
-			if (nameNode.value.length === 0) {
-				parent.pop();
-				return null;
-			}
-
-			current.value = nameNode.value;
-
-			if (this.read(current, "]") === null) {
-				parent.pop();
-				return null;
-			}
-
-			this.read(current, "\n");
-
-			return current;
-		}
-
-		/**
-		 * @param {!libjass.parser.ParseNode} parent
-		 * @return {libjass.parser.ParseNode}
-		 */
-		parse_assScriptProperty(parent: ParseNode): ParseNode {
-			var current = new ParseNode(parent);
-
-			var keyNode = new ParseNode(current, "");
-
-			var next: string;
-
-			for (next = this._peek(); this._haveMore() && next !== ":" && next !== "\n"; next = this._peek()) {
-				keyNode.value += next;
-			}
-
-			if (keyNode.value.length === 0) {
-				parent.pop();
-				return null;
-			}
-
-			if (this.read(current, ":") === null) {
-				parent.pop();
-				return null;
-			}
-
-			var spacesNode = new ParseNode(current, "");
-
-			for (next = this._peek(); next === " "; next = this._peek()) {
-				spacesNode.value += next;
-			}
-
-			var valueNode = new ParseNode(current, "");
-
-			for (next = this._peek(); this._haveMore() && next !== "\n"; next = this._peek()) {
-				valueNode.value += next;
-			}
-
-			this.read(current, "\n");
-
-			var property: { key: string; value: string } = Object.create(null);
-			property.key = keyNode.value;
-			property.value = valueNode.value;
-
-			current.value = property;
-
-			if (parent.value !== null) {
-				var scriptSectionContents = parent.value.contents;
-				if (scriptSectionContents !== undefined && scriptSectionContents !== null) {
-					var formatSpecifier = (<TypedTemplateArray>scriptSectionContents).formatSpecifier;
-					if (formatSpecifier !== undefined) {
-						// This line is a template of a particular type, and its parent section is an array of these templates.
-
-						var template = new Map<string, string>();
-						var value = property.value.split(",");
-
-						if (value.length > formatSpecifier.length) {
-							value[formatSpecifier.length - 1] = value.slice(formatSpecifier.length - 1).join(",");
-						}
-
-						formatSpecifier.forEach((formatKey, index) => {
-							template.set(formatKey, value[index]);
-						});
-
-						current.value = <TypedTemplate>{ type: property.key, template: template };
-					}
-				}
-			}
-
-			return current;
-		}
-
-		/**
-		 * @param {!libjass.parser.ParseNode} parent
-		 * @return {libjass.parser.ParseNode}
-		 */
-		parse_assScriptComment(parent: ParseNode): ParseNode {
-			var current = new ParseNode(parent);
-
-			if (this.read(current, ";") === null) {
-				parent.pop();
-				return null;
-			}
-
-			var valueNode = new ParseNode(current, "");
-			for (var next = this._peek(); this._haveMore() && next !== "\n"; next = this._peek()) {
-				valueNode.value += next;
-			}
-
-			this.read(current, "\n");
-
-			current.value = valueNode.value;
-
-			return current;
 		}
 
 		/**

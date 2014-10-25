@@ -28,7 +28,9 @@ module libjass {
 		private _properties: ScriptProperties = new ScriptProperties();
 		private _styles: Map<string, Style> = new Map<string, Style>();
 		private _dialogues: Dialogue[] = [];
-		private _dialoguesFormatSpecifier: string[];
+
+		private _stylesFormatSpecifier: string[] = null;
+		private _dialoguesFormatSpecifier: string[] = null;
 
 		/**
 		 * The properties of this script.
@@ -57,6 +59,42 @@ module libjass {
 			return this._dialogues;
 		}
 
+		/**
+		 * The format specifier for the styles section.
+		 *
+		 * @type {!Array.<string>}
+		 */
+		get stylesFormatSpecifier(): string[] {
+			return this._stylesFormatSpecifier;
+		}
+
+		/**
+		 * The format specifier for the styles section.
+		 *
+		 * @type {!Array.<string>}
+		 */
+		get dialoguesFormatSpecifier(): string[] {
+			return this._dialoguesFormatSpecifier;
+		}
+
+		/**
+		 * The format specifier for the events section.
+		 *
+		 * @type {!Array.<string>}
+		 */
+		set stylesFormatSpecifier(value: string[]) {
+			this._stylesFormatSpecifier = value;
+		}
+
+		/**
+		 * The format specifier for the events section.
+		 *
+		 * @type {!Array.<string>}
+		 */
+		set dialoguesFormatSpecifier(value: string[]) {
+			this._dialoguesFormatSpecifier = value;
+		}
+
 		constructor() {
 			// Deprecated constructor argument
 			if (arguments.length === 1) {
@@ -65,32 +103,50 @@ module libjass {
 		}
 
 		/**
+		 * Add a style to this ASS script.
+		 *
+		 * @param {string} line The line from the script that contains the new style.
+		 */
+		addStyle(line: string): void {
+			var styleLine = parser.parseLineIntoTypedTemplate(line, this._stylesFormatSpecifier);
+			if (styleLine === null || styleLine.type !== "Style") {
+				return;
+			}
+
+			var styleTemplate = styleLine.template;
+
+			if (libjass.verboseMode) {
+				var repr = "";
+				styleTemplate.forEach((value, key) => repr += key + " = " + value + ", ");
+				console.log("Read style: " + repr);
+			}
+
+			// Create the dialogue and add it to the dialogues array
+			var style = new Style(styleTemplate);
+			this._styles.set(style.name, style);
+		}
+
+		/**
 		 * Add an event to this ASS script.
 		 *
 		 * @param {string} line The line from the script that contains the new event.
 		 */
 		addEvent(line: string): void {
-			var typedTemplateArray = <TypedTemplateArray>[];
-			typedTemplateArray.formatSpecifier = this._dialoguesFormatSpecifier;
-			var typedTemplate = <TypedTemplate>parser.parse(line, "assScriptProperty", new parser.ParseNode(null, { contents: typedTemplateArray }));
-
-			this._addEvent(typedTemplate);
-		}
-
-		/**
-		 * @param {string} line
-		 */
-		private _addEvent(line: TypedTemplate): void {
-			if (line.type === "Dialogue") {
-				var dialogueTemplate = line.template;
-
-				if (libjass.verboseMode) {
-					console.log("Read dialogue: " + JSON.stringify(dialogueTemplate), dialogueTemplate);
-				}
-
-				// Create the dialogue and add it to the dialogues array
-				this.dialogues.push(new Dialogue(dialogueTemplate, this));
+			var dialogueLine = parser.parseLineIntoTypedTemplate(line, this._dialoguesFormatSpecifier);
+			if (dialogueLine === null || dialogueLine.type !== "Dialogue") {
+				return;
 			}
+
+			var dialogueTemplate = dialogueLine.template;
+
+			if (libjass.verboseMode) {
+				var repr = "";
+				dialogueTemplate.forEach((value, key) => repr += key + " = " + value + ", ");
+				console.log("Read dialogue: " + repr);
+			}
+
+			// Create the dialogue and add it to the dialogues array
+			this.dialogues.push(new Dialogue(dialogueTemplate, this));
 		}
 
 		/**
@@ -98,63 +154,40 @@ module libjass {
 		 *
 		 * @param {string} raw The raw text of the script.
 		 * @param {number=0} type The type of the script. One of the {@link libjass.Format} constants.
-		 * @return {!libjass.ASS}
+		 * @return {!Promise.<!libjass.ASS>}
 		 */
-		static fromString(raw: string, type: Format = Format.ASS): ASS {
-			raw = raw.replace(/\r$/gm, "");
-
+		static fromString(raw: string, type: Format = Format.ASS): Promise<ASS> {
 			switch (type) {
 				case Format.ASS:
-					return ASS._fromASSString(raw);
+					return ASS.fromStream(new parser.StringStream(raw));
 				case Format.SRT:
-					return ASS._fromSRTString(raw);
+					return Promise.resolve(ASS._fromSRTString(raw));
 				default:
 					throw new Error("Illegal value of type: " + type);
 			}
 		}
 
 		/**
-		 * @param {string} rawASS
-		 * @return {!libjass.ASS}
+		 * Creates an ASS object from the given {@link libjass.parser.Stream}.
+		 *
+		 * @param {!libjass.parser.Stream} stream The stream to parse the script from
+		 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 		 */
-		private static _fromASSString(rawASS: string): ASS {
-			var script = <Map<string, any>>parser.parse(rawASS, "assScript");
+		static fromStream(stream: parser.Stream): Promise<ASS> {
+			return new parser.StreamParser(stream).ass;
+		}
 
-			var result = new ASS();
-
-			// Get the script info template
-			var infoTemplate: Map<string, string> = script.get("Script Info");
-
-			if (libjass.verboseMode) {
-				console.log("Read script info: " + JSON.stringify(infoTemplate), infoTemplate);
-			}
-
-			// Parse the script properties
-			result.properties.resolutionX = parseInt(infoTemplate.get("PlayResX"));
-			result.properties.resolutionY = parseInt(infoTemplate.get("PlayResY"));
-			result.properties.wrappingStyle = parseInt(infoTemplate.get("WrapStyle"));
-			result.properties.scaleBorderAndShadow = (infoTemplate.get("ScaledBorderAndShadow") === "yes");
-
-			// Get styles from the styles section
-			(<TypedTemplateArray>script.get("V4+ Styles")).forEach(line => {
-				if (line.type === "Style") {
-					var styleTemplate = line.template;
-
-					if (libjass.verboseMode) {
-						console.log("Read style: " + JSON.stringify(styleTemplate), styleTemplate);
-					}
-
-					// Create the style and add it to the styles map
-					var newStyle = new Style(styleTemplate);
-					result.styles.set(newStyle.name, newStyle);
-				}
-			});
-
-			// Get dialogues from the events section
-			var events = <TypedTemplateArray>script.get("Events");
-			result._dialoguesFormatSpecifier = events.formatSpecifier;
-			events.forEach(line => result._addEvent(line));
-
+		/**
+		 * Creates an ASS object from the given URL.
+		 *
+		 * @param {string} url The URL of the script.
+		 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
+		 */
+		static fromUrl(url: string): Promise<ASS> {
+			var xhr = new XMLHttpRequest();
+			var result = ASS.fromStream(new parser.XhrStream(xhr));
+			xhr.open("GET", url, true);
+			xhr.send();
 			return result;
 		}
 
@@ -794,6 +827,21 @@ module libjass {
 	}
 
 	/**
+	 * A property.
+	 */
+	export interface Property {
+		/**
+		 * @type {string}
+		 */
+		name: string;
+
+		/**
+		 * @type {string}
+		 */
+		value: string;
+	}
+
+	/**
 	 * A template object with a particular type.
 	 */
 	export interface TypedTemplate {
@@ -806,15 +854,5 @@ module libjass {
 		 * @type {!Map.<string, string>}
 		 */
 		template: Map<string, string>;
-	}
-
-	/**
-	 * An array of {@link libjass.TypedTemplate} objects with the format specifier that was used to parse them.
-	 */
-	export interface TypedTemplateArray extends Array<TypedTemplate> {
-		/**
-		 * @type {!Array.<string>}
-		 */
-		formatSpecifier: string[];
 	}
 }
