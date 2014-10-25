@@ -548,6 +548,43 @@ module libjass {
 	}
 
 	/**
+	 * A deferred promise.
+	 */
+	export class DeferredPromise<T> {
+		private _promise: Promise<T>;
+		private _resolve: (value: T) => void;
+		private _reject: (reason: any) => void;
+
+		constructor() {
+			this._promise = new Promise<T>((resolve, reject) => {
+				this._resolve = resolve;
+				this._reject = reject;
+			});
+		}
+
+		/**
+		 * @type {!Promise.<T>}
+		 */
+		get promise(): Promise<T> {
+			return this._promise;
+		}
+
+		/**
+		 * @param {T} value
+		 */
+		resolve(value: T): void {
+			this._resolve(value);
+		}
+
+		/**
+		 * @param {*} reason
+		 */
+		reject(reason: any): void {
+			this._reject(reason);
+		}
+	}
+
+	/**
 	 * Adds properties of the given mixins' prototypes to the given class's prototype.
 	 *
 	 * @param {!*} clazz
