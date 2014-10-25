@@ -56,17 +56,25 @@ interface Global {
 	/**
 	 * @type {function(new: Set.<T>)}
 	 */
-	Set: { new <T>(): Set<T>; prototype: Set<any> }
+	Set: {
+		new <T>(): Set<T>; prototype: Set<any>
+	};
 
 	/**
 	 * @type {function(new: Map.<T>)}
 	 */
-	Map: { new <K, V>(): Map<K, V>; prototype: Map<any, any> }
+	Map: {
+		new <K, V>(): Map<K, V>; prototype: Map<any, any>
+	};
 
 	/**
 	 * @type {function(new: Promise.<T>}}
 	 */
-	Promise: { new <T>(resolver: (fulfill: (value: T) => void, reject: (reason: any) => void) => void): Promise<T> }
+	Promise: {
+		new <T>(resolver: (fulfill: (value: T) => void, reject: (reason: any) => void) => void): Promise<T>;
+
+		resolve<T>(value: T): Promise<T>;
+	};
 }
 
 declare var global: Global; // Defined as a parameter of the anonymous function wrapper
@@ -487,6 +495,14 @@ module libjass {
 			}
 
 			return this._alreadyRejectedReason;
+		}
+
+		/**
+		 * @param {T} value
+		 * @return {!Promise.<T>}
+		 */
+		static resolve<T>(value: T): Promise<T> {
+			return new SimplePromise<T>(resolve => resolve(value));
 		}
 
 		/**
