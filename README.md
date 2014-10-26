@@ -107,7 +107,7 @@ You can also join the IRC channel below and ask any questions.
 
 * Document browser compatibility. Currently libjass is tested on IE11 (Windows 7), Firefox Nightly and Google Chrome (Dev channel).
 * Write API documentation. Add more explanatory comments to the code.
-* Write more parser tests. Also figure out a way to test layout.
+* Write more parser tests. Also figure out a way to test layout. See [#21](https://github.com/Arnavion/libjass/issues/21)
 * Evaluate (document, benchmark) the benefits and drawbacks of DOM+CSS-based drawing over canvas.
 
 
