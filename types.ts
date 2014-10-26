@@ -157,35 +157,45 @@ module libjass {
 		 * @return {!Promise.<!libjass.ASS>}
 		 */
 		static fromString(raw: string, type: Format = Format.ASS): Promise<ASS> {
-			switch (type) {
-				case Format.ASS:
-					return ASS.fromStream(new parser.StringStream(raw));
-				case Format.SRT:
-					return Promise.resolve(ASS._fromSRTString(raw));
-				default:
-					throw new Error("Illegal value of type: " + type);
+			if ((<{ [index: string]: any }><any>Format)[Format[type]] !== type) {
+				throw new Error("Illegal value of type: " + type);
 			}
+
+			return ASS.fromStream(new parser.StringStream(raw), type);
 		}
 
 		/**
 		 * Creates an ASS object from the given {@link libjass.parser.Stream}.
 		 *
 		 * @param {!libjass.parser.Stream} stream The stream to parse the script from
+		 * @param {number=0} type The type of the script. One of the {@link libjass.Format} constants.
 		 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 		 */
-		static fromStream(stream: parser.Stream): Promise<ASS> {
-			return new parser.StreamParser(stream).ass;
+		static fromStream(stream: parser.Stream, type: Format = Format.ASS): Promise<ASS> {
+			switch (type) {
+				case Format.ASS:
+					return new parser.StreamParser(stream).ass;
+				case Format.SRT:
+					return new parser.SrtStreamParser(stream).ass;
+				default:
+					throw new Error("Illegal value of type: " + type);
+			}
 		}
 
 		/**
 		 * Creates an ASS object from the given URL.
 		 *
 		 * @param {string} url The URL of the script.
+		 * @param {number=0} type The type of the script. One of the {@link libjass.Format} constants.
 		 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 		 */
-		static fromUrl(url: string): Promise<ASS> {
+		static fromUrl(url: string, type: Format = Format.ASS): Promise<ASS> {
+			if ((<{ [index: string]: any }><any>Format)[Format[type]] !== type) {
+				throw new Error("Illegal value of type: " + type);
+			}
+
 			var xhr = new XMLHttpRequest();
-			var result = ASS.fromStream(new parser.XhrStream(xhr));
+			var result = ASS.fromStream(new parser.XhrStream(xhr), type);
 			xhr.open("GET", url, true);
 			xhr.send();
 			return result;

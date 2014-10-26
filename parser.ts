@@ -266,6 +266,125 @@ module libjass.parser {
 	}
 
 	/**
+	 * A parser that parses an {@link libjass.ASS} object from a {@link libjass.parser.Stream} of an SRT script.
+	 *
+	 * @param {!libjass.parser.Stream} stream The {@link libjass.parser.Stream} to parse
+	 */
+	export class SrtStreamParser {
+		private _ass: ASS = new ASS();
+		private _deferred: DeferredPromise<ASS> = new DeferredPromise<ASS>();
+
+		private _currentDialogueNumber: string = null;
+		private _currentDialogueStart: string = null;
+		private _currentDialogueEnd: string = null;
+		private _currentDialogueText: string = null;
+
+		constructor(private _stream: Stream) {
+			this._stream.nextLine().then(line => this._onNextLine(line));
+
+			this._ass.properties.resolutionX = 1280;
+			this._ass.properties.resolutionY = 720;
+			this._ass.properties.wrappingStyle = 1;
+			this._ass.properties.scaleBorderAndShadow = true;
+
+			var newStyle = new Style(new Map<string, string>()
+				.set("Name", "Default")
+				.set("Italic", "0").set("Bold", "0").set("Underline", "0").set("StrikeOut", "0")
+				.set("Fontname", "").set("Fontsize", "50")
+				.set("ScaleX", "100").set("ScaleY", "100")
+				.set("Spacing", "0")
+				.set("Angle", "0")
+				.set("PrimaryColour", "&H0000FFFF").set("SecondaryColour", "&H00000000").set("OutlineColour", "&H00000000").set("BackColour", "&H00000000")
+				.set("Outline", "1").set("BorderStyle", "1")
+				.set("Shadow", "1")
+				.set("Alignment", "2")
+				.set("MarginL", "80").set("MarginR", "80").set("MarginV", "35")
+			);
+			this._ass.styles.set(newStyle.name, newStyle);
+		}
+
+		/**
+		 * @type {!Promise.<!libjass.ASS>} A promise that will be resolved when the entire stream has been parsed.
+		 */
+		get ass(): Promise<ASS> {
+			return this._deferred.promise;
+		}
+
+		/**
+		 * @param {string} line
+		 */
+		private _onNextLine(line: string): void {
+			if (line === null) {
+				if (this._currentDialogueNumber !== null && this._currentDialogueStart !== null && this._currentDialogueEnd !== null && this._currentDialogueText !== null) {
+					this._ass.dialogues.push(new Dialogue(new Map<string, string>()
+						.set("Style", "Default")
+						.set("Start", this._currentDialogueStart).set("End", this._currentDialogueEnd)
+						.set("Layer", "0")
+						.set("Text", this._currentDialogueText), this._ass)
+					);
+				}
+
+				this._deferred.resolve(this._ass);
+				return;
+			}
+
+			if (line[line.length - 1] === "\r") {
+				line = line.substr(0, line.length - 1);
+			}
+
+			if (line === "") {
+				if (this._currentDialogueNumber !== null && this._currentDialogueStart !== null && this._currentDialogueEnd !== null && this._currentDialogueText !== null) {
+					this._ass.dialogues.push(new Dialogue(new Map<string, string>()
+						.set("Style", "Default")
+						.set("Start", this._currentDialogueStart)
+						.set("End", this._currentDialogueEnd)
+						.set("Layer", "0")
+						.set("Text", this._currentDialogueText), this._ass)
+					);
+				}
+
+				this._currentDialogueNumber = this._currentDialogueStart = this._currentDialogueEnd = this._currentDialogueText = null;
+			}
+			else {
+				if (this._currentDialogueNumber === null) {
+					if (/^\d+$/.test(line)) {
+						this._currentDialogueNumber = line;
+					}
+				}
+				else if (this._currentDialogueStart === null && this._currentDialogueEnd === null) {
+					var match = /^(\d\d:\d\d:\d\d,\d\d\d) --> (\d\d:\d\d:\d\d,\d\d\d)/.exec(line);
+					if (match !== null) {
+						this._currentDialogueStart = match[1].replace(",", ".");
+						this._currentDialogueEnd = match[2].replace(",", ".");
+					}
+				}
+				else {
+					line = line
+						.replace(/<b>/g, "{\\b1}").replace(/\{b\}/g, "{\\b1}")
+						.replace(/<\/b>/g, "{\\b0}").replace(/\{\/b\}/g, "{\\b0}")
+						.replace(/<i>/g, "{\\i1}").replace(/\{i\}/g, "{\\i1}")
+						.replace(/<\/i>/g, "{\\i0}").replace(/\{\/i\}/g, "{\\i0}")
+						.replace(/<u>/g, "{\\u1}").replace(/\{u\}/g, "{\\u1}")
+						.replace(/<\/u>/g, "{\\u0}").replace(/\{\/u\}/g, "{\\u0}")
+						.replace(
+							/<font color="#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})">/g,
+							(/* ujs:unreferenced */ substring: string, red: string, green: string, blue: string) => "{\c&H" + blue + green + red + "&}"
+						).replace(/<\/font>/g, "{\\c}");
+
+					if (this._currentDialogueText !== null) {
+						this._currentDialogueText += "\\N" + line;
+					}
+					else {
+						this._currentDialogueText = line;
+					}
+				}
+			}
+
+			this._stream.nextLine().then(line => this._onNextLine(line));
+		}
+	}
+
+	/**
 	 * Parses a line into a {@link libjass.Property}.
 	 *
 	 * @param {string} line
@@ -2069,214 +2188,6 @@ module libjass.parser {
 				parseInt(digitNodes[2].value + digitNodes[3].value, 16),
 				1 - parseInt(digitNodes[0].value + digitNodes[1].value, 16) / 255
 			);
-
-			return current;
-		}
-
-		/**
-		 * @param {!libjass.parser.ParseNode} parent
-		 * @return {libjass.parser.ParseNode}
-		 */
-		parse_srtScript(parent: ParseNode): ParseNode {
-			var current = new ParseNode(parent);
-
-			current.value = [];
-
-			while (this._haveMore()) {
-				var dialogueNode = this.parse_srtDialogue(current);
-				if (dialogueNode === null) {
-					parent.pop();
-					return null;
-				}
-
-				current.value.push(dialogueNode.value);
-
-				if (this.read(current, "\n") === null && this._haveMore()) {
-					parent.pop();
-					return null;
-				}
-
-				while (this.read(current, "\n") !== null) { }
-			}
-
-			return current;
-		}
-
-		/**
-		 * @param {!libjass.parser.ParseNode} parent
-		 * @return {libjass.parser.ParseNode}
-		 */
-		parse_srtDialogue(parent: ParseNode): ParseNode {
-			var current = new ParseNode(parent);
-
-			current.value = Object.create(null);
-			current.value.bounds = Object.create(null);
-			current.value.bounds.x1 = null;
-			current.value.bounds.y1 = null;
-			current.value.bounds.x2 = null;
-			current.value.bounds.y2 = null;
-
-			var numberNode = this.parse_unsignedDecimal(current);
-			if (numberNode === null) {
-				parent.pop();
-				return null;
-			}
-			current.value.number = parseInt(numberNode.value);
-
-			if (this.read(current, "\n") === null) {
-				parent.pop();
-				return null;
-			}
-
-			var startTimeNode = this.parse_srtTime(current);
-			if (startTimeNode === null) {
-				parent.pop();
-				return null;
-			}
-			current.value.start = startTimeNode.value;
-
-			if (this.read(current, " --> ") === null) {
-				parent.pop();
-				return null;
-			}
-
-			var endTimeNode = this.parse_srtTime(current);
-			if (endTimeNode === null) {
-				parent.pop();
-				return null;
-			}
-			current.value.end = endTimeNode.value;
-
-			if (this.read(current, " ") !== null) {
-				var positionNode = new ParseNode(current, "");
-				// TODO: Parse position properly into current.value.bounds
-				for (var next = this._peek(); next !== "\n" && this._haveMore(); next = this._peek()) {
-					positionNode.value += next;
-				}
-				current.value.bounds = positionNode.value;
-			}
-
-			if (this.read(current, "\n") === null) {
-				parent.pop();
-				return null;
-			}
-
-			var lineNode = new ParseNode(current, "");
-			while (this._peek() !== "\n" && this._haveMore()) {
-				var currentLine = "";
-				for (var next = this._peek(); currentLine[currentLine.length - 1] !== "\n" && this._haveMore(); next = this._peek()) {
-					currentLine += next;
-					lineNode.value += next;
-				}
-			}
-
-			current.value.text = lineNode.value;
-			if (current.value.text[current.value.text.length - 1] === "\n") {
-				current.value.text = current.value.text.substr(0, current.value.text.length - 1);
-			}
-
-			return current;
-		}
-
-		/**
-		 * @param {!libjass.parser.ParseNode} parent
-		 * @return {libjass.parser.ParseNode}
-		 */
-		parse_srtTime(parent: ParseNode): ParseNode {
-			var current = new ParseNode(parent);
-
-			var hourDigitNodes = new Array<ParseNode>(2);
-
-			for (var i = 0; i < hourDigitNodes.length; i++) {
-				if (!this._haveMore()) {
-					parent.pop();
-					return null;
-				}
-
-				var next = this._peek();
-				if (next >= "0" && next <= "9") {
-					hourDigitNodes[i] = new ParseNode(current, next);
-				}
-				else {
-					parent.pop();
-					return null;
-				}
-			}
-
-			if (this.read(current, ":") === null) {
-				parent.pop();
-				return null;
-			}
-
-			var minuteDigitNodes = new Array<ParseNode>(2);
-
-			for (i = 0; i < minuteDigitNodes.length; i++) {
-				if (!this._haveMore()) {
-					parent.pop();
-					return null;
-				}
-
-				var next = this._peek();
-				if (next >= "0" && next <= "9") {
-					minuteDigitNodes[i] = new ParseNode(current, next);
-				}
-				else {
-					parent.pop();
-					return null;
-				}
-			}
-
-			if (this.read(current, ":") === null) {
-				parent.pop();
-				return null;
-			}
-
-			var secondDigitNodes = new Array<ParseNode>(2);
-
-			for (i = 0; i < secondDigitNodes.length; i++) {
-				if (!this._haveMore()) {
-					parent.pop();
-					return null;
-				}
-
-				var next = this._peek();
-				if (next >= "0" && next <= "9") {
-					secondDigitNodes[i] = new ParseNode(current, next);
-				}
-				else {
-					parent.pop();
-					return null;
-				}
-			}
-
-			if (this.read(current, ",") === null) {
-				parent.pop();
-				return null;
-			}
-
-			var millisecondDigitNodes = new Array<ParseNode>(3);
-
-			for (i = 0; i < millisecondDigitNodes.length; i++) {
-				if (!this._haveMore()) {
-					parent.pop();
-					return null;
-				}
-
-				var next = this._peek();
-				if (next >= "0" && next <= "9") {
-					millisecondDigitNodes[i] = new ParseNode(current, next);
-				}
-				else {
-					parent.pop();
-					return null;
-				}
-			}
-
-			current.value =
-				hourDigitNodes[0].value + hourDigitNodes[1].value + ":" +
-				minuteDigitNodes[0].value + minuteDigitNodes[1].value + ":" +
-				secondDigitNodes[0].value + secondDigitNodes[1].value + "." +
-				millisecondDigitNodes[0].value + millisecondDigitNodes[1].value + millisecondDigitNodes[2].value;
 
 			return current;
 		}
