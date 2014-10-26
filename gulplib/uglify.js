@@ -50,7 +50,21 @@ module.exports = {
 					toplevel: null
 				});
 
-				root = root.wrap_enclose(['(typeof module !== "undefined") ? module.exports : (this.libjass = {}):libjass', '(typeof global !== "undefined") ? global : this:global']);
+				root = UglifyJS.parse(
+					'(function (define) {\n' +
+					'	var global = this;\n' +
+					'	define(["exports"], function (libjass) {\n' +
+					'"$ORIG";\n' +
+					'	});\n' +
+					'})((typeof define !== "undefined") ? define : function (/* ujs:unreferenced */ names, body) {\n' +
+					'	body((typeof module !== "undefined") ? module.exports : (this.libjass = Object.create(null)));\n' +
+					'});'
+				).transform(new UglifyJS.TreeTransformer(function (node) {
+					if (node instanceof UglifyJS.AST_Directive && node.value === "$ORIG") {
+						return UglifyJS.MAP.splice(root.body);
+					}
+				}));
+
 
 				root.figure_out_scope({ screw_ie8: true });
 
@@ -177,10 +191,10 @@ module.exports = {
 							return false;
 						}
 
-						// UJS shifts multi-line comments four spaces left, so shift each line except the first one four spaces right. But don't do this for the license header.
+						// UJS shifts multi-line comments eight spaces left, so shift each line except the first one eight spaces right. But don't do this for the license header.
 						if (comment.type === "comment2" && comment !== licenseHeader) {
 							var lines = comment.value.split("\n");
-							lines = [lines[0]].concat(lines.slice(1).map(function (line) { return '    ' + line; }));
+							lines = [lines[0]].concat(lines.slice(1).map(function (line) { return '        ' + line; }));
 							comment.value = lines.join('\n');
 						}
 
