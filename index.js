@@ -134,21 +134,12 @@ addEventListener("DOMContentLoaded", function () {
 
 	// Find the ASS or SRT track and load it
 	var track = document.querySelector("#video > track[data-format='ass'], #video > track[data-format='srt']");
-	var subsRequest = new XMLHttpRequest();
-	subsRequest.open("GET", track.src || track.getAttribute("src"), true);
-	subsRequest.addEventListener("load", function () {
+	libjass.ASS.fromUrl(track.src || track.getAttribute("src"), libjass.Format[track.getAttribute("data-format").toUpperCase()]).then(function (result) {
 		debug("Script received.");
 
-		if (libjass.debugMode) {
-			console.time("Parsing ASS took");
-		}
-
-		// Parse the response string into an ASS object
-		ass = libjass.ASS.fromString(subsRequest.responseText, libjass.Format[track.getAttribute("data-format").toUpperCase()]);
+		ass = result;
 
 		if (libjass.debugMode) {
-			console.timeEnd("Parsing ASS took");
-
 			// Export the ASS object for debugging
 			window.ass = ass;
 		}
@@ -159,6 +150,5 @@ addEventListener("DOMContentLoaded", function () {
 
 		// Test if everything is loaded
 		testVideoAndASSLoaded();
-	}, false);
-	subsRequest.send(null);
+	});
 }, false);

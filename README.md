@@ -34,7 +34,7 @@ Only libjass.js and libjass.css are needed to use libjass on your website. The o
 
 The API documentation is linked in the Links section below. Here's an overview:
 
-* The method [ASS.fromString()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromString) takes in the raw ASS string and returns an [ASS](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS) object representing the script properties, the line styles and dialogue lines in it. The example index.js uses XHR to get this data using the URL specified in a track tag.
+* The method [ASS.fromUrl()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromUrl) takes in a URL to an ASS script and returns a promise that resolves to an [ASS](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS) object. This ASS object represents the script properties, the line styles and dialogue lines in it. The example index.js uses gets the URL from the src attribute of a track tag. Alternatively, you can use [ASS.fromString()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromString) to convert a string of the script contents into an ASS object.
 
 * index.js initializes a default renderer that libjass ships with, the [DefaultRenderer](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.DefaultRenderer). This renderer uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (.libjass-subs) containing div's corresponding to the layers in the ASS script, and each layer has div's corresponding to the 9 alignment directions. libjass.css contains styles for these div's to render them at the correct location.
 
@@ -67,6 +67,8 @@ true
 ```
 
 [libjass.parser.parse](http://arnavion.github.io/libjass/api.xhtml#libjass.parser.parse) parses the first parameter using the second parameter as the rule name. The rule names are derived from the methods on the [ParserRun class](http://arnavion.github.io/libjass/api.xhtml#libjass.parser.ParserRun). For example, [dialogueParts](http://arnavion.github.io/libjass/api.xhtml#libjass.parser.ParserRun.parse_dialogueParts) can be used to get an array of [libjass.parts](http://arnavion.github.io/libjass/api.xhtml#libjass.parts) objects that represent the parts of an ASS dialogue line.
+
+Entire scripts can be parsed via [ASS.fromString()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromString)
 
 
 ### Can I contribute?
