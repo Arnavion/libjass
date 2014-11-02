@@ -345,45 +345,18 @@ module libjass {
 	class SimplePromise<T> implements Promise<T> {
 		private _state: SimplePromiseState = SimplePromiseState.PENDING;
 
-		private _thens: { emitFulfill: (value: T) => void; emitReject: (reason: any) => void }[] = [];
+		private _thens: { propagateFulfilling: (value: T) => void; propagateRejection: (reason: any) => void }[] = [];
+		private _pendingPropagateTimeout: number = null;
 
 		private _alreadyFulfilledValue: T = null;
 		private _alreadyRejectedReason: any = null;
 
 		constructor(private _resolver: (resolve: (value: T) => void, reject: (reason: any) => void) => void) {
 			try {
-				this._resolver(value => {
-					if (this._state !== SimplePromiseState.PENDING) {
-						return;
-					}
-
-					this._state = SimplePromiseState.FULFILLED;
-
-					this._alreadyFulfilledValue = value;
-
-					setTimeout(() => this._emitFulfill(), 0);
-				}, reason => {
-					if (this._state !== SimplePromiseState.PENDING) {
-						return;
-					}
-
-					this._state = SimplePromiseState.REJECTED;
-
-					this._alreadyRejectedReason = reason;
-
-					setTimeout(() => this._emitReject(), 0);
-				});
+				_resolver(value => this._resolve(value), reason => this._reject(reason));
 			}
 			catch (ex) {
-				this._state = SimplePromiseState.REJECTED;
-
-				if (this._state !== SimplePromiseState.PENDING) {
-					return;
-				}
-
-				this._alreadyRejectedReason = ex;
-
-				setTimeout(() => this._emitReject(), 0);
+				this._reject(ex);
 			}
 		}
 
@@ -394,64 +367,45 @@ module libjass {
 		 */
 		then<U>(fulfilledHandler: (value: T) => U, rejectedHandler: (reason: any) => U): Promise<U> {
 			fulfilledHandler = (typeof fulfilledHandler === "function") ? fulfilledHandler : null;
-			rejectedHandler = (typeof fulfilledHandler === "function") ? rejectedHandler : null;
+			rejectedHandler = (typeof rejectedHandler === "function") ? rejectedHandler : null;
 
 			if (fulfilledHandler === null && rejectedHandler === null) {
 				return <any>this;
 			}
 
-			if (!fulfilledHandler) {
-				fulfilledHandler = <any>((value: T) => value);
+			if (fulfilledHandler === null) {
+				fulfilledHandler = value => <U><any>value;
 			}
 
-			if (!rejectedHandler) {
-				rejectedHandler = <any>((reason: any) => { throw reason; });
+			if (rejectedHandler === null) {
+				rejectedHandler = (reason): U => { throw reason; };
 			}
 
-			return new SimplePromise<U>((resolve, reject) => {
+			var result = new SimplePromise<U>((resolve, reject) => {
 				this._thens.push({
-					emitFulfill: value => {
+					propagateFulfilling: value => {
 						try {
-							var fulfilledHandlerResult = fulfilledHandler(value);
+							resolve(fulfilledHandler(value));
 						}
 						catch (ex) {
 							reject(ex);
-							return;
 						}
-
-						if (SimplePromise._isPromise(fulfilledHandlerResult)) {
-							var onFulfillResultPromise = <Promise<U>><any>(fulfilledHandlerResult);
-							onFulfillResultPromise.then(resolve, reject);
-						}
-						else {
-							resolve(fulfilledHandlerResult);
-						}
-					}, emitReject: reason => {
+					}, propagateRejection: reason => {
 						try {
-							var rejectedHandlerResult = rejectedHandler(reason);
+							resolve(rejectedHandler(reason));
 						}
 						catch (ex) {
 							reject(ex);
-							return;
-						}
-
-						if (SimplePromise._isPromise(rejectedHandlerResult)) {
-							var onRejectResultPromise = <Promise<U>><any>(rejectedHandlerResult);
-							onRejectResultPromise.then(resolve, reject);
-						}
-						else {
-							resolve(rejectedHandlerResult);
 						}
 					}
 				});
-
-				if (this._state === SimplePromiseState.FULFILLED) {
-					setTimeout(() => this._emitFulfill(), 0);
-				}
-				else if (this._state === SimplePromiseState.REJECTED) {
-					setTimeout(() => this._emitReject(), 0);
-				}
 			});
+
+			if ((this._state === SimplePromiseState.FULFILLED || this._state === SimplePromiseState.REJECTED) && this._pendingPropagateTimeout === null) {
+				this._pendingPropagateTimeout = setTimeout(() => this._propagateResolution(), 0);
+			}
+
+			return result;
 		}
 
 		/**
@@ -506,24 +460,120 @@ module libjass {
 		}
 
 		/**
-		 * @param {!*} obj
-		 * @return {boolean}
+		 * @param {T} value
 		 */
-		private static _isPromise(obj: any): boolean {
-			return obj && (typeof obj.then === "function");
-		}
+		private _resolve(value: T): void {
+			try {
+				if (<any>value === this) {
+					throw new TypeError("2.3.1");
+				}
 
-		private _emitFulfill(): void {
-			while (this._thens.length > 0) {
-				var nextThen = this._thens.shift();
-				nextThen.emitFulfill(this._alreadyFulfilledValue);
+				var thenMethod = SimplePromise._getThenMethod<T>(value);
+				if (thenMethod === null) {
+					this._fulfill(value);
+					return;
+				}
+
+				var alreadyCalled = false;
+
+				thenMethod.call(
+					<Promise<T>><any>value,
+					(value: T) => {
+						if (alreadyCalled) {
+							return;
+						}
+						alreadyCalled = true;
+
+						this._resolve(value);
+					},
+					(reason: any) => {
+						if (alreadyCalled) {
+							return;
+						}
+						alreadyCalled = true;
+
+						this._reject(reason);
+					});
+			}
+			catch (ex) {
+				if (alreadyCalled) {
+					return;
+				}
+
+				this._reject(ex);
 			}
 		}
 
-		private _emitReject(): void {
-			while (this._thens.length > 0) {
-				var nextThen = this._thens.shift();
-				nextThen.emitReject(this._alreadyRejectedReason);
+		/**
+		 * @param {T} value
+		 */
+		private _fulfill(value: T): void {
+			if (this._state !== SimplePromiseState.PENDING) {
+				return;
+			}
+
+			this._state = SimplePromiseState.FULFILLED;
+			this._alreadyFulfilledValue = value;
+
+			if (this._pendingPropagateTimeout === null) {
+				this._pendingPropagateTimeout = setTimeout(() => this._propagateResolution(), 0);
+			}
+		}
+
+		/**
+		 * @param {*} reason
+		 */
+		private _reject(reason: any): void {
+			if (this._state !== SimplePromiseState.PENDING) {
+				return;
+			}
+
+			this._state = SimplePromiseState.REJECTED;
+			this._alreadyRejectedReason = reason;
+
+			if (this._pendingPropagateTimeout === null) {
+				this._pendingPropagateTimeout = setTimeout(() => this._propagateResolution(), 0);
+			}
+		}
+
+		/**
+		 * @param {!*} obj
+		 * @return {?function(function(T):T, function(*):T):!Promise.<T>}
+		 */
+		private static _getThenMethod<T>(obj: any): (fulfilledHandler: (value: T) => T, rejectedHandler: (reason: any) => T) => Promise<T> {
+			if (typeof obj !== "object" && typeof obj !== "function") {
+				return null;
+			}
+
+			if (obj === null || obj === undefined) {
+				return null;
+			}
+
+			var then: any = obj.then;
+			if (typeof then !== "function") {
+				return null;
+			}
+
+			return then;
+		}
+
+		/**
+		 * Propagates the result of the current promise to all its children.
+		 */
+		private _propagateResolution(): void {
+			this._pendingPropagateTimeout = null;
+
+			if (this._state === SimplePromiseState.FULFILLED) {
+				while (this._thens.length > 0) {
+					var nextThen = this._thens.shift();
+					nextThen.propagateFulfilling(this._alreadyFulfilledValue);
+				}
+			}
+			else if (this._state === SimplePromiseState.REJECTED) {
+				while (this._thens.length > 0) {
+					var nextThen = this._thens.shift();
+					nextThen.propagateRejection(this._alreadyRejectedReason);
+				}
 			}
 		}
 	}
