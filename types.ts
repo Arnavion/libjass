@@ -200,56 +200,6 @@ module libjass {
 			xhr.send();
 			return result;
 		}
-
-		/**
-		 * @param {string} rawSRT
-		 * @return {!libjass.ASS}
-		 */
-		private static _fromSRTString(rawSRT: string): ASS {
-			var script: any[] = parser.parse(rawSRT, "srtScript");
-
-			var result = new ASS();
-
-			// Parse the script properties
-			result.properties.resolutionX = 1280;
-			result.properties.resolutionY = 720;
-			result.properties.wrappingStyle = 1;
-			result.properties.scaleBorderAndShadow = true;
-
-			var newStyle = new Style(new Map<string, string>()
-				.set("Name", "Default")
-				.set("Italic", "0").set("Bold", "0").set("Underline", "0").set("StrikeOut", "0")
-				.set("Fontname", "").set("Fontsize", "50")
-				.set("ScaleX", "100").set("ScaleY", "100")
-				.set("Spacing", "0")
-				.set("Angle", "0")
-				.set("PrimaryColour", "&H0000FFFF").set("SecondaryColour", "&H00000000").set("OutlineColour", "&H00000000").set("BackColour", "&H00000000")
-				.set("Outline", "1").set("BorderStyle", "1")
-				.set("Shadow", "1")
-				.set("Alignment", "2")
-				.set("MarginL", "80").set("MarginR", "80").set("MarginV", "35")
-			);
-			result.styles.set(newStyle.name, newStyle);
-
-			script.sort((line1, line2) => line1.number - line2.number).forEach(line => {
-				result.dialogues.push(new Dialogue(new Map<string, string>()
-					.set("Style", "Default")
-					.set("Start", line.start).set("End", line.end)
-					.set("Layer", "0")
-					.set("Text",
-						(<string>line.text)
-						.replace(/<b>/g, "{\\b1}").replace(/<\/b>/g, "{\\b0}")
-						.replace(/<i>/g, "{\\i1}").replace(/<\/i>/g, "{\\i0}")
-						.replace(/<u>/g, "{\\u1}").replace(/<\/u>/g, "{\\u0}")
-						.replace(
-							/<font color="#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})">/g,
-							(/* ujs:unreferenced */ substring: string, red: string, green: string, blue: string) => "{\c&H" + blue + green + red + "&}"
-						).replace(/<\/font>/g, "{\\c}")
-				), result));
-			});
-
-			return result;
-		}
 	}
 
 	/**
