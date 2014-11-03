@@ -54,21 +54,21 @@ interface Promise<T> {
 
 interface Global {
 	/**
-	 * @type {function(new: Set.<T>)}
+	 * @type {function(new:Set.<T>)}
 	 */
 	Set: {
 		new <T>(): Set<T>; prototype: Set<any>
 	};
 
 	/**
-	 * @type {function(new: Map.<T>)}
+	 * @type {function(new:Map.<K, V>)}
 	 */
 	Map: {
 		new <K, V>(): Map<K, V>; prototype: Map<any, any>
 	};
 
 	/**
-	 * @type {function(new: Promise.<T>}}
+	 * @type {function(new:Promise.<T>, function(T), function(*)), resolve: function(T):!Promise.<T>}}
 	 */
 	Promise: {
 		new <T>(resolver: (fulfill: (value: T) => void, reject: (reason: any) => void) => void): Promise<T>;
@@ -361,8 +361,8 @@ module libjass {
 		}
 
 		/**
-		 * @param {function(T):U} fulfilledHandler
-		 * @param {function(*):U} rejectedHandler
+		 * @param {function(T):(U|Promise.<U>)} fulfilledHandler
+		 * @param {?function(*):(U|Promise.<U>)} rejectedHandler
 		 * @return {!Promise.<U>}
 		 */
 		then<U>(fulfilledHandler: (value: T) => U, rejectedHandler: (reason: any) => U): Promise<U> {
