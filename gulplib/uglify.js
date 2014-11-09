@@ -186,13 +186,18 @@ module.exports = {
 							return true;
 						}
 
+						// If this is a license header, remove it.
+						if (comment.value.indexOf("Copyright") !== -1) {
+							return false;
+						}
+
 						// If this is a TypeScript reference comment, strip it.
 						if (comment.value.substr(0, "/<reference path=".length) === "/<reference path=") {
 							return false;
 						}
 
-						// UJS shifts multi-line comments eight spaces left, so shift each line except the first one eight spaces right. But don't do this for the license header.
-						if (comment.type === "comment2" && comment !== licenseHeader) {
+						// UJS shifts multi-line comments eight spaces left, so shift each line except the first one eight spaces right.
+						if (comment.type === "comment2") {
 							var lines = comment.value.split("\n");
 							lines = [lines[0]].concat(lines.slice(1).map(function (line) { return '        ' + line; }));
 							comment.value = lines.join('\n');
