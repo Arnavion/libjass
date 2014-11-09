@@ -32,15 +32,44 @@ addEventListener("DOMContentLoaded", function () {
 
 	var video = document.querySelector("#video");
 
-	var videoMetadataLoaded = false;
-	var ass = null;
+	var videoMetadataLoadedPromise = new libjass.Promise(function (resolve, reject) {
+		if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
+			// Video metadata isn't available yet. Register an event handler for it.
+			video.addEventListener("loadedmetadata", function () { resolve(); }, false);
+		}
+		else {
+			// Video metadata is already available.
+			resolve();
+		}
+	}).then(function () {
+		debug("Video metadata loaded.");
 
-	var testVideoAndASSLoaded = function () {
-		if (videoMetadataLoaded === false || ass === null) {
-			return;
+		// Prepare the "Video resolution" option label
+		document.querySelector("#video-resolution-label-width").appendChild(document.createTextNode(video.videoWidth));
+		document.querySelector("#video-resolution-label-height").appendChild(document.createTextNode(video.videoHeight));
+	});
+
+	var assLoadedPromise = new libjass.Promise(function (resolve, reject) {
+		// Find the ASS or SRT track and load it
+		var track = document.querySelector("#video > track[data-format='ass'], #video > track[data-format='srt']");
+		resolve(libjass.ASS.fromUrl(track.src || track.getAttribute("src"), libjass.Format[track.getAttribute("data-format").toUpperCase()]));
+	}).then(function (ass) {
+		debug("Script received.");
+
+		if (libjass.debugMode) {
+			// Export the ASS object for debugging
+			window.ass = ass;
 		}
 
-		// Both video metadata and ASS are loaded
+		// Prepare the "Script resolution" option label
+		document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.properties.resolutionX));
+		document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.properties.resolutionY));
+
+		return ass;
+	});
+
+	libjass.Promise.all([videoMetadataLoadedPromise, assLoadedPromise]).then(function (results) {
+		var ass = results[1];
 
 		// Create a DefaultRenderer using the video element, the ASS object, and the font map
 		var renderer = new libjass.renderers.DefaultRenderer(video, ass, {
@@ -108,47 +137,5 @@ addEventListener("DOMContentLoaded", function () {
 
 		// Set the resolution to whatever's selected by default
 		changeVideoSizeSelection();
-	};
-
-	(function (onVideoMetadataLoaded) {
-		if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
-			// Video metadata isn't available yet. Register an event handler for it.
-			video.addEventListener("loadedmetadata", onVideoMetadataLoaded, false);
-		}
-		else {
-			// Video metadata is already available.
-			onVideoMetadataLoaded();
-		}
-	})(function () {
-		debug("Video metadata loaded.");
-
-		videoMetadataLoaded = true;
-
-		// Prepare the "Video resolution" option label
-		document.querySelector("#video-resolution-label-width").appendChild(document.createTextNode(video.videoWidth));
-		document.querySelector("#video-resolution-label-height").appendChild(document.createTextNode(video.videoHeight));
-
-		// Test if everything is loaded
-		testVideoAndASSLoaded();
-	});
-
-	// Find the ASS or SRT track and load it
-	var track = document.querySelector("#video > track[data-format='ass'], #video > track[data-format='srt']");
-	libjass.ASS.fromUrl(track.src || track.getAttribute("src"), libjass.Format[track.getAttribute("data-format").toUpperCase()]).then(function (result) {
-		debug("Script received.");
-
-		ass = result;
-
-		if (libjass.debugMode) {
-			// Export the ASS object for debugging
-			window.ass = ass;
-		}
-
-		// Prepare the "Script resolution" option label
-		document.querySelector("#script-resolution-label-width").appendChild(document.createTextNode(ass.properties.resolutionX));
-		document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.properties.resolutionY));
-
-		// Test if everything is loaded
-		testVideoAndASSLoaded();
 	});
 }, false);

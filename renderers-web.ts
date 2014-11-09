@@ -95,63 +95,42 @@ module libjass.renderers {
 			this._svgDefsElement = <SVGDefsElement>document.createElementNS("http://www.w3.org/2000/svg", "defs");
 			svgElement.appendChild(this._svgDefsElement);
 
-			if (this.settings.fontMap === null) {
-				setTimeout(() => this._ready(), 0);
-			}
-			else {
-				// Preload fonts
+			// Preload fonts
 
-				var urlsToPreload = new Set<string>();
+			var urlsToPreload = new Set<string>();
+			if (this.settings.fontMap !== null) {
 				this.settings.fontMap.forEach(srcs => {
 					srcs.forEach(src => urlsToPreload.add(src));
 				});
+			}
 
-				var urlsLeftToPreload = urlsToPreload.size;
+			if (libjass.debugMode) {
+				console.log("Preloading " + urlsToPreload.size + " fonts...");
+			}
 
-				if (libjass.debugMode) {
-					console.log("Preloading fonts...");
-				}
-
-				urlsToPreload.forEach(url => {
+			var xhrPromises: Promise<void>[] = [];
+			urlsToPreload.forEach(url => {
+				xhrPromises.push(new Promise<void>((resolve, reject) => {
 					var xhr = new XMLHttpRequest();
-
-					xhr.open("GET", url, true);
 					xhr.addEventListener("load", () => {
 						if (libjass.debugMode) {
 							console.log("Preloaded " + url + ".");
 						}
 
-						--urlsLeftToPreload;
+						resolve(null);
+					});
+					xhr.open("GET", url, true);
+					xhr.send();
+				}));
+			});
 
-						if (libjass.debugMode) {
-							console.log(urlsLeftToPreload + " fonts left to preload.");
-						}
-
-						if (urlsLeftToPreload === 0) {
-							if (libjass.debugMode) {
-								console.log("All fonts have been preloaded.");
-							}
-
-							this._ready();
-						}
-					}, false);
-					xhr.send(null);
-				});
-
+			Promise.all(xhrPromises).then(() => {
 				if (libjass.debugMode) {
-					console.log(urlsLeftToPreload + " fonts left to preload.");
+					console.log("All fonts have been preloaded.");
 				}
 
-				if (urlsLeftToPreload === 0) {
-					setTimeout(() => {
-						if (libjass.debugMode) {
-							console.log("All fonts have been preloaded.");
-						}
-
-						this._ready();
-					}, 0);
-				}
-			}
+				this._ready();
+			});
 		}
 
 		/**
