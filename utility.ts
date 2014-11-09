@@ -490,6 +490,8 @@ module libjass {
 		 * @param {T} value
 		 */
 		private _resolve(value: T): void {
+			var alreadyCalled = false;
+
 			try {
 				if (<any>value === this) {
 					throw new TypeError("2.3.1");
@@ -500,8 +502,6 @@ module libjass {
 					this._fulfill(value);
 					return;
 				}
-
-				var alreadyCalled = false;
 
 				thenMethod.call(
 					<Promise<T>><any>value,
