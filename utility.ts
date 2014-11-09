@@ -68,12 +68,14 @@ interface Global {
 	};
 
 	/**
-	 * @type {function(new:Promise.<T>, function(T), function(*)), resolve: function(T):!Promise.<T>}}
+	 * @type {function(new:Promise.<T>, function(T), function(*)), resolve: function(T):!Promise.<T>, all: function(!Array.<!Promise.<T>>):!Promise.<!Array.<T>>}}
 	 */
 	Promise: {
 		new <T>(resolver: (fulfill: (value: T) => void, reject: (reason: any) => void) => void): Promise<T>;
 
 		resolve<T>(value: T): Promise<T>;
+
+		all<T>(promises: Promise<T>[]): Promise<T[]>;
 	};
 }
 
@@ -457,6 +459,31 @@ module libjass {
 		 */
 		static resolve<T>(value: T): Promise<T> {
 			return new SimplePromise<T>(resolve => resolve(value));
+		}
+
+		/**
+		 * @param {!Array.<!Promise.<T>>} promises
+		 * @return {!Promise.<!Array.<T>>}
+		 */
+		static all<T>(promises: Promise<T>[]): Promise<T[]> {
+			return new Promise<T[]>((resolve, reject) => {
+				var result: T[] = [];
+
+				var numUnresolved = promises.length;
+				if (numUnresolved === 0) {
+					resolve(result);
+					return;
+				}
+
+				promises.forEach((promise, index) => promise.then(value => {
+					result[index] = value;
+					numUnresolved--;
+
+					if (numUnresolved === 0) {
+						resolve(result);
+					}
+				}), reject);
+			});
 		}
 
 		/**
