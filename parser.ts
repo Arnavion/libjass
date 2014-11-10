@@ -76,7 +76,6 @@ module libjass.parser {
 		private _pendingDeferred: DeferredPromise<string> = null;
 
 		constructor(private _xhr: XMLHttpRequest) {
-			var readSoFarPos = 0;
 			_xhr.addEventListener("progress", event=> this._onXhrProgress(event), false);
 			_xhr.addEventListener("loadend", event=> this._onXhrLoadEnd(event), false);
 		}
