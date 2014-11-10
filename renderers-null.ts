@@ -44,6 +44,7 @@ module libjass.renderers {
 			this._clock.addEventListener(ClockEvent.Tick, () => this._onClockTick());
 			this._clock.addEventListener(ClockEvent.Pause, () => this._onClockPause());
 			this._clock.addEventListener(ClockEvent.Stop, () => this._onClockStop());
+			this._clock.addEventListener(ClockEvent.RateChange, () => this._onClockRateChange());
 		}
 
 		/**
@@ -182,6 +183,15 @@ module libjass.renderers {
 		_onClockStop(): void {
 			if (libjass.verboseMode) {
 				console.log("NullRenderer._onClockStop");
+			}
+		}
+
+		/**
+		 * Runs when the clock changes its rate.
+		 */
+		_onClockRateChange(): void {
+			if (libjass.verboseMode) {
+				console.log("NullRenderer._onClockRateChange");
 			}
 		}
 	}

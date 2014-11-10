@@ -552,7 +552,7 @@ module libjass.renderers {
 
 			var result = <HTMLDivElement>preRenderedSub.sub.cloneNode(true);
 
-			var animationDelay = preRenderedSub.animationDelays.map(delay => (delay + dialogue.start - this.clock.currentTime).toFixed(3) + "s").join(", ");
+			var animationDelay = preRenderedSub.animationDelays.map(delay => ((delay + dialogue.start - this.clock.currentTime) / this.clock.rate).toFixed(3) + "s").join(", ");
 			result.style.webkitAnimationDelay = animationDelay;
 			result.style.animationDelay = animationDelay;
 
@@ -638,6 +638,23 @@ module libjass.renderers {
 			this._subsWrapper.style.display = "none";
 		}
 
+		_onClockRateChange(): void {
+			super._onClockRateChange();
+
+			// Any dialogues which have been pre-rendered will need to be pre-rendered again.
+			this._preRenderedSubs.clear();
+
+			if (this._animationStyleElement !== null) {
+				while (this._animationStyleElement.firstChild !== null) {
+					this._animationStyleElement.removeChild(this._animationStyleElement.firstChild);
+				}
+			}
+
+			while (this._svgDefsElement.firstChild !== null) {
+				this._svgDefsElement.removeChild(this._svgDefsElement.firstChild);
+			}
+		}
+
 		_ready(): void {
 			this._dispatchEvent("ready", []);
 		}
@@ -715,6 +732,7 @@ module libjass.renderers {
 		private _id: string;
 		private _start: number;
 		private _end: number;
+		private _rate: number;
 
 		private _cssText: string = "";
 		private _animationStyle: string = "";
@@ -725,6 +743,7 @@ module libjass.renderers {
 			this._id = renderer.id + "-" + dialogue.id;
 			this._start = dialogue.start;
 			this._end = dialogue.end;
+			this._rate = renderer.clock.rate;
 		}
 
 		/**
@@ -792,7 +811,7 @@ module libjass.renderers {
 				this._animationStyle += ",";
 			}
 
-			this._animationStyle += animationName + " " + (endTime - startTime).toFixed(3) + "s " + timingFunction;
+			this._animationStyle += animationName + " " + ((endTime - startTime) / this._rate).toFixed(3) + "s " + timingFunction;
 			this._animationDelays.push(startTime);
 		}
 	}

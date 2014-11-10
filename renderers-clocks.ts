@@ -72,6 +72,7 @@ module libjass.renderers {
 		Tick,
 		Pause,
 		Stop,
+		RateChange,
 	}
 
 	/**
@@ -87,6 +88,13 @@ module libjass.renderers {
 		 * @type {boolean}
 		 */
 		enabled: boolean;
+
+		/**
+		 * Gets the rate of the clock - how fast the clock ticks compared to real time.
+		 *
+		 * @type {number}
+		 */
+		rate: number;
 
 		/**
 		 * Enable the clock.
@@ -130,6 +138,7 @@ module libjass.renderers {
 	export class ManualClock implements Clock {
 		private _currentTime: number = -1;
 		private _enabled: boolean = true;
+		private _rate: number = 1;
 
 		/**
 		 * Trigger a {@link libjass.renderers.ClockEvent.Play}
@@ -176,6 +185,15 @@ module libjass.renderers {
 		 */
 		get enabled(): boolean {
 			return this._enabled;
+		}
+
+		/**
+		 * Gets the rate of the clock - how fast the clock ticks compared to real time.
+		 *
+		 * @type {number}
+		 */
+		get rate(): number {
+			return this._rate;
 		}
 
 		/**
@@ -235,6 +253,17 @@ module libjass.renderers {
 			}
 		}
 
+		/**
+		 * Sets the rate of the clock - how fast the clock ticks compared to real time.
+		 *
+		 * @param {number} rate The new rate of the clock.
+		 */
+		setRate(rate: number): void {
+			this._rate = rate;
+
+			this._dispatchEvent(ClockEvent.RateChange, []);
+		}
+
 		// EventSource members
 
 		/**
@@ -280,6 +309,7 @@ module libjass.renderers {
 			this._video.addEventListener("playing", () => this._onVideoPlaying(), false);
 			this._video.addEventListener("pause", () => this._onVideoPause(), false);
 			this._video.addEventListener("seeking", () => this._onVideoSeeking(), false);
+			this._video.addEventListener("ratechange", () => this._onVideoRateChange(), false);
 		}
 
 		// Clock members
@@ -296,6 +326,15 @@ module libjass.renderers {
 		 */
 		get enabled(): boolean {
 			return this._enabled;
+		}
+
+		/**
+		 * Gets the rate of the clock - how fast the clock ticks compared to real time.
+		 *
+		 * @type {number}
+		 */
+		get rate(): number {
+			return this._video.playbackRate;
 		}
 
 		/**
@@ -452,6 +491,10 @@ module libjass.renderers {
 			}
 
 			this._nextAnimationFrameRequestId = requestAnimationFrame(() => this._onTimerTick());
+		}
+
+		private _onVideoRateChange(): void {
+			this._dispatchEvent(ClockEvent.RateChange, []);
 		}
 
 		private _startTicking(): void {
