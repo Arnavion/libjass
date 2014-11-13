@@ -85,6 +85,10 @@ function ASTModifer(namespaces) {
 			newComments.push("@private");
 		}
 
+		if (current.isProtected) {
+			newComments.push("@protected");
+		}
+
 		if (current.isStatic) {
 			newComments.push("@static");
 		}

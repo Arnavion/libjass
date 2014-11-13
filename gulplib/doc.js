@@ -39,15 +39,26 @@ Array.prototype.concatMany = function (arr) {
 
 var sorter = (function () {
 	var visibilitySorter = function (value1, value2) {
-		if (value1.isPrivate === value2.isPrivate) {
+		if (value1.isPrivate === value2.isPrivate && value1.isProtected === value2.isProtected) {
 			return 0;
 		}
+
 		if (value1.isPrivate) {
 			return 1;
 		}
+
 		if (value2.isPrivate) {
 			return -1;
 		}
+
+		if (value1.isProtected) {
+			return 1;
+		}
+
+		if (value2.isProtected) {
+			return -1;
+		}
+
 		return 0;
 	};
 
@@ -215,6 +226,7 @@ TypeScript.AST.Function.prototype.toHtml = function () {
 		'<dl id="' + toId(this) + '" class="function' +
 			(this.isAbstract ? ' abstract' : '') +
 			(this.isPrivate ? ' private' : '') +
+			(this.isProtected ? ' protected' : '') +
 			(this.isStatic ? ' static' : '') +
 			'">',
 		'	<dt class="name">' + toLink(this) + '</dt>',
@@ -473,6 +485,10 @@ module.exports = function (outputFilePath) {
 				'				content: "private ";',
 				'			}',
 				'',
+				'			.protected > .name:before {',
+				'				content: "protected ";',
+				'			}',
+				'',
 				'			.static > .name:before {',
 				'				content: "static ";',
 				'			}',
@@ -485,7 +501,15 @@ module.exports = function (outputFilePath) {
 				'				content: "static private ";',
 				'			}',
 				'',
-				'			body:not(.show-private) .private {',
+				'			.abstract.protected > .name:before {',
+				'				content: "abstract protected ";',
+				'			}',
+				'',
+				'			.protected.static > .name:before {',
+				'				content: "static protected ";',
+				'			}',
+				'',
+				'			body:not(.show-private) .private, body:not(.show-private) .protected {',
 				'				display: none;',
 				'			}',
 				'		]]>',

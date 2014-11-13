@@ -384,7 +384,7 @@ var Namespace = function (_super) {
 var Function = function (_super) {
 	__extends(Function, _super);
 
-	function Function(name, astNode, description, generics, parameters, returnType, isAbstract, isPrivate, isStatic) {
+	function Function(name, astNode, description, generics, parameters, returnType, isAbstract, isPrivate, isProtected, isStatic) {
 		_super.call(this, name);
 
 		this.astNode = astNode;
@@ -399,6 +399,7 @@ var Function = function (_super) {
 
 		this.isAbstract = isAbstract;
 		this.isPrivate = isPrivate;
+		this.isProtected = isProtected;
 		this.isStatic = isStatic;
 	}
 
@@ -714,11 +715,12 @@ var Walker = function () {
 		}
 
 		var isPrivate = (node.flags & ts.NodeFlags.Private) === ts.NodeFlags.Private;
+		var isProtected = (node.flags & ts.NodeFlags.Protected) === ts.NodeFlags.Protected;
 		var isStatic = (node.flags & ts.NodeFlags.Static) === ts.NodeFlags.Static;
 
 		var generics = this._getGenerics(node);
 
-		var method = this._scope.enter(new Function(node.name.text, node, jsDoc.rootDescription, generics, parameters, jsDoc.returnType, jsDoc.isAbstract, isPrivate, isStatic));
+		var method = this._scope.enter(new Function(node.name.text, node, jsDoc.rootDescription, generics, parameters, jsDoc.returnType, jsDoc.isAbstract, isPrivate, isProtected, isStatic));
 
 		method.parent.members.push(method);
 
@@ -807,6 +809,7 @@ var Walker = function () {
 		var jsDoc = this._parseJSDoc(node);
 
 		var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
+		var isProtected = (node.flags & ts.NodeFlags.Protected) === ts.NodeFlags.Protected;
 		var isStatic = (node.flags & ts.NodeFlags.Static) === ts.NodeFlags.Static;
 
 		var generics = this._getGenerics(node);
@@ -820,7 +823,7 @@ var Walker = function () {
 			jsDoc.returnType = new ReturnType("", "*");
 		}
 
-		var freeFunction = this._scope.enter(new Function(node.name.text, node, jsDoc.rootDescription, generics, parameters, jsDoc.returnType, jsDoc.isAbstract, isPrivate, isStatic));
+		var freeFunction = this._scope.enter(new Function(node.name.text, node, jsDoc.rootDescription, generics, parameters, jsDoc.returnType, jsDoc.isAbstract, isPrivate, isProtected, isStatic));
 
 		freeFunction.parent.members.push(freeFunction);
 
