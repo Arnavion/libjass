@@ -31,8 +31,8 @@ var typeScriptJsPath = path.join(typeScriptModulePath, "tsc.js");
 
 var ts = {};
 vm.runInNewContext(fs.readFileSync(typeScriptJsPath, { encoding: "utf8" }).replace(
-	"writeCommentRange(comment, writer);",
-	"ts.gulpTypeScriptWriteCommentRange(comment, writer, writeCommentRange);"
+	"writeCommentRange(currentSourceFile, writer, comment, newLine);",
+	"ts.gulpTypeScriptWriteCommentRange(currentSourceFile, writer, comment, newLine, writeCommentRange);"
 ).replace(
 	"ts.executeCommandLine(sys.args);",
 	"module.exports = ts;"
@@ -974,7 +974,7 @@ var Walker = function () {
 	};
 
 	Walker.prototype._parseJSDoc = function (node) {
-		var comments = oldGetLeadingCommentsOfNode(node, this._currentSourceFile);
+		var comments = oldGetLeadingCommentRangesOfNode(node, this._currentSourceFile);
 
 		if (comments === undefined) {
 			comments = [];
@@ -1279,9 +1279,9 @@ exports.AST = {
 	walk: walk
 };
 
-var oldGetLeadingCommentsOfNode = ts.getLeadingCommentsOfNode.bind(ts);
-ts.getLeadingCommentsOfNode = function (node, sourceFileOfNode) {
-	var result = oldGetLeadingCommentsOfNode(node, sourceFileOfNode);
+var oldGetLeadingCommentRangesOfNode = ts.getLeadingCommentRangesOfNode.bind(ts);
+ts.getLeadingCommentRangesOfNode = function (node, sourceFileOfNode) {
+	var result = oldGetLeadingCommentRangesOfNode(node, sourceFileOfNode);
 
 	if (result !== undefined) {
 		var newComments = node["gulp-typescript-new-comment"];
@@ -1293,7 +1293,7 @@ ts.getLeadingCommentsOfNode = function (node, sourceFileOfNode) {
 	return result;
 };
 
-ts.gulpTypeScriptWriteCommentRange = function (comment, writer, writeCommentRange) {
+ts.gulpTypeScriptWriteCommentRange = function (currentSourceFile, writer, comment, newLine, writeCommentRange) {
 	var newComments = comment["gulp-typescript-new-comment"];
 
 	var oldWriterRawWrite = writer.rawWrite.bind(writer);
@@ -1327,7 +1327,7 @@ ts.gulpTypeScriptWriteCommentRange = function (comment, writer, writeCommentRang
 		};
 	}
 
-	writeCommentRange(comment, writer);
+	writeCommentRange(currentSourceFile, writer, comment, newLine);
 
 	writer.rawWrite = oldWriterRawWrite;
 	writer.write = oldWriterWrite;
