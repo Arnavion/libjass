@@ -2092,42 +2092,30 @@ module libjass.parser {
 		parse_color(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
-			if (this.read(current, "&") === null) {
-				parent.pop();
-				return null;
+			while (this.read(current, "&") !== null ||
+				   this.read(current, "H") !== null) {}
+
+			var str = "";
+			var next:ParseNode;
+			while ((next = this.parse_hex(current)) !== null) {
+				str += next.value;
 			}
 
-			this.read(current, "H");
+			var num = parseInt(str, 16);
 
-			var digitNodes = new Array<ParseNode>(6);
-
-			for (var i = 0; i < digitNodes.length; i++) {
-				var digitNode = this.parse_hex(current);
-				if (digitNode === null) {
-					parent.pop();
-					return null;
-				}
-				digitNodes[i] = digitNode;
-			}
-
-			// Optional extra 00 at the end
-			if (this.read(current, "0") !== null) {
-				if (this.read(current, "0") === null) {
-					parent.pop();
-					return null;
-				}
-			}
-
-			if (this.read(current, "&") === null) {
-				parent.pop();
+			if (isNaN(num)) {
+			    parent.pop();
 				return null;
 			}
 
 			current.value = new parts.Color(
-				parseInt(digitNodes[4].value + digitNodes[5].value, 16),
-				parseInt(digitNodes[2].value + digitNodes[3].value, 16),
-				parseInt(digitNodes[0].value + digitNodes[1].value, 16)
+					(num	   & 0xFF),
+					(num >>  8 & 0xFF),
+					(num >> 16 & 0xFF)
 			);
+
+			while (this.read(current, "&") !== null ||
+				   this.read(current, "H") !== null) {}
 
 			return current;
 		}
@@ -2139,21 +2127,26 @@ module libjass.parser {
 		parse_alpha(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
-			if (this.read(current, "&") !== null) {
-				this.read(current, "H");
+			while (this.read(current, "&") !== null ||
+				   this.read(current, "H") !== null) {}
+
+			var str = "";
+			var next:ParseNode;
+			while ((next = this.parse_hex(current)) !== null) {
+				str += next.value;
 			}
 
-			var firstDigitNode = this.parse_hex(current);
-			if (firstDigitNode === null) {
-				parent.pop();
+			var num = parseInt(str, 16);
+
+			if (isNaN(num)) {
+			    parent.pop();
 				return null;
 			}
 
-			var secondDigitNode = this.parse_hex(current);
+			current.value = 1 - num / 255;
 
-			this.read(current, "&");
-
-			current.value = 1 - parseInt(firstDigitNode.value + ((secondDigitNode !== null) ? secondDigitNode : firstDigitNode).value, 16) / 255;
+			while (this.read(current, "&") !== null ||
+				   this.read(current, "H") !== null) {}
 
 			return current;
 		}
@@ -2164,28 +2157,30 @@ module libjass.parser {
 		 */
 		parse_colorWithAlpha(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
+			var base = 10;
 
-			if (this.read(current, "&H") === null) {
-				parent.pop();
+			if (this.read(current, "&H") !== null || this.read(current, "&h") !== null) {
+				base = 16;
+			}
+
+			var str = "";
+			var next:ParseNode;
+			while ((next = this.parse_hex(current)) !== null) {
+				str += next.value;
+			}
+
+			var num = parseInt(str, base);
+
+			if (isNaN(num)) {
+			    parent.pop();
 				return null;
 			}
 
-			var digitNodes = new Array<ParseNode>(8);
-
-			for (var i = 0; i < digitNodes.length; i++) {
-				var digitNode = this.parse_hex(current);
-				if (digitNode === null) {
-					parent.pop();
-					return null;
-				}
-				digitNodes[i] = digitNode;
-			}
-
 			current.value = new parts.Color(
-				parseInt(digitNodes[6].value + digitNodes[7].value, 16),
-				parseInt(digitNodes[4].value + digitNodes[5].value, 16),
-				parseInt(digitNodes[2].value + digitNodes[3].value, 16),
-				1 - parseInt(digitNodes[0].value + digitNodes[1].value, 16) / 255
+					(num	   & 0xFF),
+					(num >>  8 & 0xFF),
+					(num >> 16 & 0xFF),
+				1 - (num >> 24 & 0xFF) / 255
 			);
 
 			return current;
