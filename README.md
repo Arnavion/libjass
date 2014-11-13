@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/Arnavion/libjass.png?branch=master)](https://travis-ci.org/Arnavion/libjass)
 
-libjass is a JavaScript library written in TypeScript to render ASS subs on HTML5 video in the browser.
+libjass is a JavaScript library written in TypeScript to render ASS subs on HTML5 video in the browser. [Check out the demo.](http://arnavion.github.io/libjass/demo/index.xhtml)
 
 
 ### What's special about libjass?
@@ -18,7 +18,9 @@ As a result, libjass is able to render subtitles with very low CPU usage. The do
 
 * The .ts files are the source of libjass. They are TypeScript files and must be compiled into JavaScript for the browser using the TypeScript compiler.
 
-* The rest of the files - index.xhtml, index.js, index.css and fonts.css - are a sample implementation of how to use libjass on a web page. They demonstrate the API to call, how to place &lt;div&gt; elements to render the subs, etc.
+* gulpfile.js is the build script. The build command will use this script to build libjass.js
+
+* libjass.css is a CSS file that you'll need to deploy to your website.
 
 
 ### I want to use libjass for my website. What do I need to do?
@@ -34,15 +36,17 @@ Only libjass.js and libjass.css are needed to use libjass on your website. The o
 
 The API documentation is linked in the Links section below. Here's an overview:
 
-* The method [ASS.fromUrl()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromUrl) takes in a URL to an ASS script and returns a promise that resolves to an [ASS](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS) object. This ASS object represents the script properties, the line styles and dialogue lines in it. The example index.js uses gets the URL from the src attribute of a track tag. Alternatively, you can use [ASS.fromString()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromString) to convert a string of the script contents into an ASS object.
+* The method [ASS.fromUrl()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromUrl) takes in a URL to an ASS script and returns a promise that resolves to an [ASS](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS) object. This ASS object represents the script properties, the line styles and dialogue lines in it. Alternatively, you can use [ASS.fromString()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromString) to convert a string of the script contents into an ASS object.
 
-* index.js initializes a default renderer that libjass ships with, the [DefaultRenderer](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.DefaultRenderer). This renderer uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (.libjass-subs) containing div's corresponding to the layers in the ASS script, and each layer has div's corresponding to the 9 alignment directions. libjass.css contains styles for these div's to render them at the correct location.
+* Next, you initialize a renderer to render the subtitles. libjass ships with an easy-to-use renderer, the [DefaultRenderer](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.DefaultRenderer). It uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (.libjass-subs) containing div's corresponding to the layers in the ASS script, and each layer has div's corresponding to the 9 alignment directions. libjass.css contains styles for these div's to render them at the correct location.
 
 * The renderer uses [window.requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame) as a source of timer ticks. In each tick, it determines the set of dialogues to be shown at the current video time, renders each of them as a div, and appendChild's the div into the appropriate layer+alignment div.
 
 * The renderer handles resizing the subtitles when the user clicks the browser's native fullscreen-video button. index.js also contains code to change the size of the subtitles based on user input.
 
-* Lastly, the renderer contains an implementation of preloading fonts before playing the video. It uses a map of font names to URLs - index.js creates this map from the @font-face rules in fonts.css.
+* Lastly, the renderer contains an implementation of preloading fonts before playing the video. It uses a map of font names to URLs - this map can be conveniently created from a CSS file containing @font-face rules using [RendererSettings.makeFontMapFromStyleElement()](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.RendererSettings.makeFontMapFromStyleElement)
+
+* For an example of using libjass, check out [the demo.](http://arnavion.github.io/libjass/demo/index.xhtml)
 
 
 ### Can I use libjass in node?
