@@ -66,7 +66,7 @@ module libjass.renderers {
 			this.resize(width, height);
 		}
 
-		_ready(): void {
+		protected _ready(): void {
 			document.addEventListener("mozfullscreenchange", event => this._onFullScreenChange(document.mozFullScreenElement), false);
 			document.addEventListener("webkitfullscreenchange", event => this._onFullScreenChange(document.webkitFullscreenElement), false);
 			document.addEventListener("fullscreenchange", event => this._onFullScreenChange(document.fullscreenElement), false);

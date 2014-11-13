@@ -136,7 +136,7 @@ module libjass.renderers {
 		/**
 		 * Runs when the clock is enabled, or starts playing, or is resumed from pause.
 		 */
-		_onClockPlay(): void {
+		protected _onClockPlay(): void {
 			if (libjass.verboseMode) {
 				console.log("NullRenderer._onClockPlay");
 			}
@@ -145,7 +145,7 @@ module libjass.renderers {
 		/**
 		 * Runs when the clock's current time changed. This might be a result of either regular playback or seeking.
 		 */
-		_onClockTick(): void {
+		protected _onClockTick(): void {
 			var currentTime = this._clock.currentTime;
 
 			if (libjass.verboseMode) {
@@ -171,7 +171,7 @@ module libjass.renderers {
 		/**
 		 * Runs when the clock is paused.
 		 */
-		_onClockPause(): void {
+		protected _onClockPause(): void {
 			if (libjass.verboseMode) {
 				console.log("NullRenderer._onClockPause");
 			}
@@ -180,7 +180,7 @@ module libjass.renderers {
 		/**
 		 * Runs when the clock is disabled.
 		 */
-		_onClockStop(): void {
+		protected _onClockStop(): void {
 			if (libjass.verboseMode) {
 				console.log("NullRenderer._onClockStop");
 			}
@@ -189,7 +189,7 @@ module libjass.renderers {
 		/**
 		 * Runs when the clock changes its rate.
 		 */
-		_onClockRateChange(): void {
+		protected _onClockRateChange(): void {
 			if (libjass.verboseMode) {
 				console.log("NullRenderer._onClockRateChange");
 			}

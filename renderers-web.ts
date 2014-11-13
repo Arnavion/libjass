@@ -601,7 +601,7 @@ module libjass.renderers {
 			this._currentSubs.set(dialogue, result);
 		}
 
-		_onClockPlay(): void {
+		protected _onClockPlay(): void {
 			super._onClockPlay();
 
 			this._removeAllSubs();
@@ -611,7 +611,7 @@ module libjass.renderers {
 			this._subsWrapper.classList.remove("paused");
 		}
 
-		_onClockTick(): void {
+		protected _onClockTick(): void {
 			// Remove dialogues that should be removed before adding new ones via super._onClockTick()
 
 			var currentTime = this.clock.currentTime;
@@ -626,19 +626,19 @@ module libjass.renderers {
 			super._onClockTick();
 		}
 
-		_onClockPause(): void {
+		protected _onClockPause(): void {
 			super._onClockPause();
 
 			this._subsWrapper.classList.add("paused");
 		}
 
-		_onClockStop(): void {
+		protected _onClockStop(): void {
 			super._onClockStop();
 
 			this._subsWrapper.style.display = "none";
 		}
 
-		_onClockRateChange(): void {
+		protected _onClockRateChange(): void {
 			super._onClockRateChange();
 
 			// Any dialogues which have been pre-rendered will need to be pre-rendered again.
@@ -655,7 +655,7 @@ module libjass.renderers {
 			}
 		}
 
-		_ready(): void {
+		protected _ready(): void {
 			this._dispatchEvent("ready", []);
 		}
 
