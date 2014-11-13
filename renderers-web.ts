@@ -53,8 +53,8 @@ module libjass.renderers {
 	 *
 	 * @param {!libjass.ASS} ass
 	 * @param {!libjass.renderers.Clock} clock
-	 * @param {!libjass.renderers.RendererSettings} settings
 	 * @param {!HTMLDivElement} libjassSubsWrapper Subtitles will be rendered to this <div>
+	 * @param {!libjass.renderers.RendererSettings} settings
 	 */
 	export class WebRenderer extends NullRenderer implements EventSource<string> {
 		private _subsWrapper: HTMLDivElement;
@@ -70,8 +70,17 @@ module libjass.renderers {
 		private _scaleX: number;
 		private _scaleY: number;
 
-		constructor(ass: ASS, clock: Clock, settings: RendererSettings, private _libjassSubsWrapper: HTMLDivElement) {
-			super(ass, clock, settings);
+		constructor(ass: ASS, clock: Clock, private _libjassSubsWrapper: HTMLDivElement, settings?: RendererSettings) {
+			super(ass, clock, (() => {
+				if (!(_libjassSubsWrapper instanceof HTMLDivElement)) {
+					var temp = settings;
+					settings = <any>_libjassSubsWrapper;
+					_libjassSubsWrapper = <any>settings;
+					console.warn("WebRenderer's constructor now takes libjassSubsWrapper as the third parameter and settings as the fourth parameter. Please update the caller.");
+				}
+
+				return settings;
+			})());
 
 			this._libjassSubsWrapper.classList.add("libjass-wrapper");
 

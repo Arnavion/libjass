@@ -43,13 +43,13 @@ module libjass.renderers {
 	 *
 	 * @param {!HTMLVideoElement} video
 	 * @param {!libjass.ASS} ass
-	 * @param {!libjass.renderers.RendererSettings} settings
+	 * @param {libjass.renderers.RendererSettings} settings
 	 */
 	export class DefaultRenderer extends WebRenderer {
 		private _videoIsFullScreen: boolean = false;
 
-		constructor(private _video: HTMLVideoElement, ass: ASS, settings: RendererSettings) {
-			super(ass, new VideoClock(_video), settings, document.createElement("div"));
+		constructor(private _video: HTMLVideoElement, ass: ASS, settings?: RendererSettings) {
+			super(ass, new VideoClock(_video), document.createElement("div"), settings);
 
 			this._video.parentElement.replaceChild(this.libjassSubsWrapper, this._video);
 			this.libjassSubsWrapper.insertBefore(this._video, this.libjassSubsWrapper.firstElementChild);

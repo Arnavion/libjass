@@ -26,7 +26,7 @@ module libjass.renderers {
 	 *
 	 * @param {!libjass.ASS} ass
 	 * @param {!libjass.renderers.Clock} clock
-	 * @param {!libjass.renderers.RendererSettings} settings
+	 * @param {libjass.renderers.RendererSettings} settings
 	 */
 	export class NullRenderer {
 		private static _lastRendererId = -1;
@@ -35,7 +35,7 @@ module libjass.renderers {
 
 		private _settings: RendererSettings;
 
-		constructor(private _ass: ASS, private _clock: Clock, settings: RendererSettings) {
+		constructor(private _ass: ASS, private _clock: Clock, settings?: RendererSettings) {
 			this._id = ++NullRenderer._lastRendererId;
 
 			this._settings = RendererSettings.from(settings);
@@ -268,10 +268,14 @@ module libjass.renderers {
 		/**
 		 * Converts an arbitrary object into a {@link libjass.renderers.RendererSettings} object.
 		 *
-		 * @param {!*} object
+		 * @param {*} object
 		 * @return {!libjass.renderers.RendererSettings}
 		 */
-		static from(object: any): RendererSettings {
+		static from(object?: any): RendererSettings {
+			if (object === undefined || object === null) {
+				object = {};
+			}
+
 			return RendererSettings._from(object.fontMap, object.preRenderTime, object.preciseOutlines);
 		}
 
