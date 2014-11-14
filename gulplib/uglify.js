@@ -56,7 +56,7 @@ module.exports = {
 					'	define(["exports"], function (libjass) {\n' +
 					'"$ORIG";\n' +
 					'	});\n' +
-					'})((typeof define !== "undefined") ? define : function (/* ujs:unreferenced */ names, body) {\n' +
+					'})((typeof define !== "undefined" && define.amd) ? define : function (/* ujs:unreferenced */ names, body) {\n' +
 					'	body((typeof module !== "undefined") ? module.exports : (this.libjass = Object.create(null)));\n' +
 					'});'
 				).transform(new UglifyJS.TreeTransformer(function (node) {
