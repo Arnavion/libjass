@@ -1994,6 +1994,103 @@ module libjass.parser {
 		 * @param {!libjass.parser.ParseNode} parent
 		 * @return {libjass.parser.ParseNode}
 		 */
+		parse_decimalInt32(parent: ParseNode): ParseNode {
+			var current = new ParseNode(parent);
+
+			var isNegative = this.read(current, "-") !== null;
+
+			var numberNode = new ParseNode(current, "");
+			for (var next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
+				numberNode.value += next;
+			}
+
+			if (numberNode.value.length === 0) {
+				parent.pop();
+				return null;
+			}
+
+			var value = parseInt(numberNode.value);
+			if (value >= 0xFFFFFFFF) {
+				value = 0xFFFFFFFF;
+			}
+			else if (isNegative) {
+				value = -value;
+			}
+
+			current.value = value;
+
+			return current;
+		}
+
+		/**
+		 * @param {!libjass.parser.ParseNode} parent
+		 * @return {libjass.parser.ParseNode}
+		 */
+		parse_hexInt32(parent: ParseNode): ParseNode {
+			var current = new ParseNode(parent);
+
+			var isNegative = this.read(current, "-") !== null;
+
+			var numberNode = new ParseNode(current, "");
+			for (
+				var next = this._peek();
+				this._haveMore() && (
+					(next >= "0" && next <= "9") ||
+					(next >= "a" && next <= "f") ||
+					(next >= "A" && next <= "F")
+				);
+				next = this._peek()) {
+
+				numberNode.value += next;
+			}
+
+			if (numberNode.value.length === 0) {
+				parent.pop();
+				return null;
+			}
+
+			var value = parseInt(numberNode.value, 16);
+			if (value >= 0xFFFFFFFF) {
+				value = 0xFFFFFFFF;
+			}
+			else if (isNegative) {
+				value = -value;
+			}
+
+			current.value = value;
+
+			return current;
+		}
+
+		/**
+		 * @param {!libjass.parser.ParseNode} parent
+		 * @return {libjass.parser.ParseNode}
+		 */
+		parse_decimalOrHexInt32(parent: ParseNode): ParseNode {
+			var current = new ParseNode(parent);
+
+			var valueNode: ParseNode = null;
+			if (this.read(current, "&H") !== null || this.read(current, "&h") !== null) {
+				valueNode = this.parse_hexInt32(current);
+			}
+			else {
+				valueNode = this.parse_decimalInt32(current);
+			}
+
+			if (valueNode === null) {
+				parent.pop();
+				return null;
+			}
+
+			current.value = valueNode.value;
+
+			return current;
+		}
+
+		/**
+		 * @param {!libjass.parser.ParseNode} parent
+		 * @return {libjass.parser.ParseNode}
+		 */
 		parse_decimal(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
@@ -2075,59 +2172,26 @@ module libjass.parser {
 		 * @param {!libjass.parser.ParseNode} parent
 		 * @return {libjass.parser.ParseNode}
 		 */
-		parse_hex(parent: ParseNode): ParseNode {
-			var next = this._peek();
-
-			if ((next >= "0" && next <= "9") || (next >= "a" && next <= "f") || (next >= "A" && next <= "F")) {
-				return new ParseNode(parent, next);
-			}
-
-			return null;
-		}
-
-		/**
-		 * @param {!libjass.parser.ParseNode} parent
-		 * @return {libjass.parser.ParseNode}
-		 */
 		parse_color(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
-			if (this.read(current, "&") === null) {
+			while (this.read(current, "&") !== null || this.read(current, "H") !== null) { }
+
+			var valueNode = this.parse_hexInt32(current);
+			if (valueNode === null) {
 				parent.pop();
 				return null;
 			}
 
-			this.read(current, "H");
-
-			var digitNodes = new Array<ParseNode>(6);
-
-			for (var i = 0; i < digitNodes.length; i++) {
-				var digitNode = this.parse_hex(current);
-				if (digitNode === null) {
-					parent.pop();
-					return null;
-				}
-				digitNodes[i] = digitNode;
-			}
-
-			// Optional extra 00 at the end
-			if (this.read(current, "0") !== null) {
-				if (this.read(current, "0") === null) {
-					parent.pop();
-					return null;
-				}
-			}
-
-			if (this.read(current, "&") === null) {
-				parent.pop();
-				return null;
-			}
+			var value = valueNode.value;
 
 			current.value = new parts.Color(
-				parseInt(digitNodes[4].value + digitNodes[5].value, 16),
-				parseInt(digitNodes[2].value + digitNodes[3].value, 16),
-				parseInt(digitNodes[0].value + digitNodes[1].value, 16)
+				value & 0xFF,
+				(value >> 8) & 0xFF,
+				(value >> 16) & 0xFF
 			);
+
+			while (this.read(current, "&") !== null || this.read(current, "H") !== null) { }
 
 			return current;
 		}
@@ -2139,21 +2203,19 @@ module libjass.parser {
 		parse_alpha(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
-			if (this.read(current, "&") !== null) {
-				this.read(current, "H");
-			}
+			while (this.read(current, "&") !== null || this.read(current, "H") !== null) { }
 
-			var firstDigitNode = this.parse_hex(current);
-			if (firstDigitNode === null) {
+			var valueNode = this.parse_hexInt32(current);
+			if (valueNode === null) {
 				parent.pop();
 				return null;
 			}
 
-			var secondDigitNode = this.parse_hex(current);
+			var value = valueNode.value;
 
-			this.read(current, "&");
+			current.value = 1 - (value & 0xFF) / 0xFF;
 
-			current.value = 1 - parseInt(firstDigitNode.value + ((secondDigitNode !== null) ? secondDigitNode : firstDigitNode).value, 16) / 255;
+			while (this.read(current, "&") !== null || this.read(current, "H") !== null) { }
 
 			return current;
 		}
@@ -2165,27 +2227,19 @@ module libjass.parser {
 		parse_colorWithAlpha(parent: ParseNode): ParseNode {
 			var current = new ParseNode(parent);
 
-			if (this.read(current, "&H") === null) {
+			var valueNode = this.parse_decimalOrHexInt32(current);
+			if (valueNode === null) {
 				parent.pop();
 				return null;
 			}
 
-			var digitNodes = new Array<ParseNode>(8);
-
-			for (var i = 0; i < digitNodes.length; i++) {
-				var digitNode = this.parse_hex(current);
-				if (digitNode === null) {
-					parent.pop();
-					return null;
-				}
-				digitNodes[i] = digitNode;
-			}
+			var value = valueNode.value;
 
 			current.value = new parts.Color(
-				parseInt(digitNodes[6].value + digitNodes[7].value, 16),
-				parseInt(digitNodes[4].value + digitNodes[5].value, 16),
-				parseInt(digitNodes[2].value + digitNodes[3].value, 16),
-				1 - parseInt(digitNodes[0].value + digitNodes[1].value, 16) / 255
+				value & 0xFF,
+				(value >> 8) & 0xFF,
+				(value >> 16) & 0xFF,
+				1 - ((value >> 24) & 0xFF) / 0xFF
 			);
 
 			return current;
