@@ -111,6 +111,10 @@ module.exports = {
 								if (this.parent(1).definitions.length === 1) {
 									nodesToRemove.push({ node: this.parent(1), parent: this.parent(2).body });
 								}
+
+								if (["BorderStyle", "ClockEvent", "WorkerCommands", "WrappingStyle"].indexOf(node.name) === -1) {
+									console.warn("Unused variable %s at %s:%s:%s", node.name, node.start.file, node.start.line, node.start.col);
+								}
 							}
 							else if (node instanceof UglifyJS.AST_SymbolDefun) {
 								nodesToRemove.push({ node: this.parent(), parent: this.parent(1).body });
