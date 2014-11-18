@@ -75,7 +75,7 @@ module libjass.renderers {
 				if (!(_libjassSubsWrapper instanceof HTMLDivElement)) {
 					var temp = settings;
 					settings = <any>_libjassSubsWrapper;
-					_libjassSubsWrapper = <any>settings;
+					_libjassSubsWrapper = <any>temp;
 					console.warn("WebRenderer's constructor now takes libjassSubsWrapper as the third parameter and settings as the fourth parameter. Please update the caller.");
 				}
 
