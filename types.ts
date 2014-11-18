@@ -370,6 +370,9 @@ module libjass {
 
 		constructor(template: Map<string, string>) {
 			this._name = template.get("Name");
+			if (this._name === undefined || this._name === null || this._name.constructor !== String) {
+				throw new Error("Style doesn't have a name.");
+			}
 
 			this._italic = template.get("Italic") === "-1";
 			this._bold = template.get("Bold") === "-1";
@@ -377,30 +380,30 @@ module libjass {
 			this._strikeThrough = template.get("StrikeOut") === "-1";
 
 			this._fontName = template.get("Fontname");
-			this._fontSize = parseFloat(template.get("Fontsize"));
+			this._fontSize = _valueOrDefault(template, "Fontsize", parseFloat, value => !isNaN(value), "50");
 
-			this._fontScaleX = parseFloat(template.get("ScaleX")) / 100;
-			this._fontScaleY = parseFloat(template.get("ScaleY")) / 100;
+			this._fontScaleX = _valueOrDefault(template, "ScaleX", parseFloat, value => !isNaN(value), "100") / 100;
+			this._fontScaleY = _valueOrDefault(template, "ScaleY", parseFloat, value => !isNaN(value), "100") / 100;
 
-			this._letterSpacing = parseFloat(template.get("Spacing"));
+			this._letterSpacing = _valueOrDefault(template, "Spacing", parseFloat, value => !isNaN(value), "0");
 
-			this._rotationZ = parseFloat(template.get("Angle"));
+			this._rotationZ = _valueOrDefault(template, "Angle", parseFloat, value => !isNaN(value), "0");
 
-			this._primaryColor = <parts.Color>parser.parse(template.get("PrimaryColour"), "colorWithAlpha");
-			this._secondaryColor = <parts.Color>parser.parse(template.get("SecondaryColour"), "colorWithAlpha");
-			this._outlineColor = <parts.Color>parser.parse(template.get("OutlineColour"), "colorWithAlpha");
-			this._shadowColor = <parts.Color>parser.parse(template.get("BackColour"), "colorWithAlpha");
+			this._primaryColor = _valueOrDefault(template, "PrimaryColour", str => <parts.Color>parser.parse(str, "colorWithAlpha"), null, "&H0000FFFF");
+			this._secondaryColor = _valueOrDefault(template, "SecondaryColour", str => <parts.Color>parser.parse(str, "colorWithAlpha"), null, "&H00000000");
+			this._outlineColor = _valueOrDefault(template, "OutlineColour", str => <parts.Color>parser.parse(str, "colorWithAlpha"), null, "&H00000000");
+			this._shadowColor = _valueOrDefault(template, "BackColour", str => <parts.Color>parser.parse(str, "colorWithAlpha"), null, "&H00000000");
 
-			this._outlineThickness = parseFloat(template.get("Outline"));
-			this._borderStyle = parseInt(template.get("BorderStyle"));
+			this._outlineThickness = _valueOrDefault(template, "Outline", parseFloat, value => !isNaN(value), "1");
+			this._borderStyle = _valueOrDefault(template, "BorderStyle", parseInt, value => !isNaN(value), "1");
 
-			this._shadowDepth = parseFloat(template.get("Shadow"));
+			this._shadowDepth = _valueOrDefault(template, "Shadow", parseFloat, value => !isNaN(value), "1");
 
-			this._alignment = parseInt(template.get("Alignment"));
+			this._alignment = _valueOrDefault(template, "Alignment", parseInt, value => !isNaN(value), "2");
 
-			this._marginLeft = parseFloat(template.get("MarginL"));
-			this._marginRight = parseFloat(template.get("MarginR"));
-			this._marginVertical = parseFloat(template.get("MarginV"));
+			this._marginLeft = _valueOrDefault(template, "MarginL", parseFloat, value => !isNaN(value), "80");
+			this._marginRight = _valueOrDefault(template, "MarginR", parseFloat, value => !isNaN(value), "80");
+			this._marginVertical = _valueOrDefault(template, "MarginV", parseFloat, value => !isNaN(value), "35");
 		}
 
 		/**
@@ -634,14 +637,21 @@ module libjass {
 		constructor(template: Map<string, string>, ass: ASS) {
 			this._id = ++Dialogue._lastDialogueId;
 
-			this._style = ass.styles.get(template.get("Style"));
+			var style = template.get("Style");
+			this._style = ass.styles.get(style);
+			if (this._style === undefined) {
+				throw new Error("Unrecognized style " + style);
+			}
 
 			this._start = Dialogue._toTime(template.get("Start"));
 			this._end = Dialogue._toTime(template.get("End"));
 
-			this._layer = Math.max(parseInt(template.get("Layer")), 0);
+			this._layer = Math.max(_valueOrDefault(template, "Layer", parseInt, value => !isNaN(value), "0"), 0);
 
 			this._rawPartsString = template.get("Text");
+			if (this._rawPartsString === undefined || this._rawPartsString === null || this._rawPartsString.constructor !== String) {
+				throw new Error("Dialogue doesn't have any text.");
+			}
 		}
 
 		/**
@@ -814,5 +824,33 @@ module libjass {
 		 * @type {!Map.<string, string>}
 		 */
 		template: Map<string, string>;
+	}
+
+	/**
+	 * @param {!Map.<string, string>} template
+	 * @param {string} key
+	 * @param {function(string):T} converter
+	 * @param {?function(T):boolean} validator
+	 * @param {T} defaultValue
+	 * @return {T}
+	 */
+	function _valueOrDefault<T>(template: Map<string, string>, key: string, converter: (str: string) => T, validator: (value: T) => boolean, defaultValue: string): T {
+		var value = template.get(key);
+		if (value === undefined) {
+			return converter(defaultValue);
+		}
+
+		try {
+			var numValue = converter(value);
+
+			if (validator !== null && !validator(numValue)) {
+				throw new Error("Validation failed.");
+			}
+
+			return numValue;
+		}
+		catch (ex) {
+			throw new Error("Property " + key + " has invalid value " + value + " - " + ex.stack);
+		}
 	}
 }

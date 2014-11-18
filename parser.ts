@@ -286,19 +286,7 @@ module libjass.parser {
 			this._ass.properties.wrappingStyle = 1;
 			this._ass.properties.scaleBorderAndShadow = true;
 
-			var newStyle = new Style(new Map<string, string>()
-				.set("Name", "Default")
-				.set("Italic", "0").set("Bold", "0").set("Underline", "0").set("StrikeOut", "0")
-				.set("Fontname", "").set("Fontsize", "50")
-				.set("ScaleX", "100").set("ScaleY", "100")
-				.set("Spacing", "0")
-				.set("Angle", "0")
-				.set("PrimaryColour", "&H0000FFFF").set("SecondaryColour", "&H00000000").set("OutlineColour", "&H00000000").set("BackColour", "&H00000000")
-				.set("Outline", "1").set("BorderStyle", "1")
-				.set("Shadow", "1")
-				.set("Alignment", "2")
-				.set("MarginL", "80").set("MarginR", "80").set("MarginV", "35")
-			);
+			var newStyle = new Style(new Map<string, string>().set("Name", "Default"));
 			this._ass.styles.set(newStyle.name, newStyle);
 		}
 
@@ -317,8 +305,8 @@ module libjass.parser {
 				if (this._currentDialogueNumber !== null && this._currentDialogueStart !== null && this._currentDialogueEnd !== null && this._currentDialogueText !== null) {
 					this._ass.dialogues.push(new Dialogue(new Map<string, string>()
 						.set("Style", "Default")
-						.set("Start", this._currentDialogueStart).set("End", this._currentDialogueEnd)
-						.set("Layer", "0")
+						.set("Start", this._currentDialogueStart)
+						.set("End", this._currentDialogueEnd)
 						.set("Text", this._currentDialogueText), this._ass)
 					);
 				}
@@ -337,7 +325,6 @@ module libjass.parser {
 						.set("Style", "Default")
 						.set("Start", this._currentDialogueStart)
 						.set("End", this._currentDialogueEnd)
-						.set("Layer", "0")
 						.set("Text", this._currentDialogueText), this._ass)
 					);
 				}
