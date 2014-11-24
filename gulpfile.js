@@ -153,6 +153,10 @@ gulp.task("watch", ["clean"], function (callback) {
 	});
 });
 
+gulp.task("demo", ["libjass.js"], function () {
+	return gulp.src(["./libjass.js", "./libjass.js.map", "./libjass.css"]).pipe(gulp.dest("../libjass-gh-pages/demo/"));
+});
+
 gulp.task("doc", ["libjass.js"], function () {
 	return gulp.src("./libjass.ts").pipe(Doc("./api.xhtml")).pipe(gulp.dest("../libjass-gh-pages/"));
 });
