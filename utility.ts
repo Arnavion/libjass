@@ -54,17 +54,17 @@ interface Promise<T> {
 
 interface Global {
 	/**
-	 * @type {function(new:Set.<T>)}
+	 * @type {function(new:Set.<T>, !Array.<T>=)}
 	 */
 	Set: {
-		new <T>(): Set<T>; prototype: Set<any>
+		new <T>(iterable?: T[]): Set<T>; prototype: Set<any>
 	};
 
 	/**
-	 * @type {function(new:Map.<K, V>)}
+	 * @type {function(new:Map.<K, V>, !Array.<!Array.<*>>=)}
 	 */
 	Map: {
-		new <K, V>(): Map<K, V>; prototype: Map<any, any>
+		new <K, V>(iterable?: [K, V][]): Map<K, V>; prototype: Map<any, any>
 	};
 
 	/**
@@ -86,13 +86,19 @@ module libjass {
 	 * Set implementation for browsers that don't support it. Only supports Number and String elements.
 	 *
 	 * Elements are stored as properties of an object, with names derived from their type.
+	 *
+	 * @param {!Array.<T>=} iterable Only an array of values is supported.
 	 */
 	class SimpleSet<T> implements Set<T> {
 		private _elements: { [key: string]: T };
 		private _size: number;
 
-		constructor() {
+		constructor(iterable?: T[]) {
 			this.clear();
+
+			if (Array.isArray(iterable)) {
+				iterable.forEach(value => this.add(value));
+			}
 		}
 
 		/**
@@ -186,10 +192,10 @@ module libjass {
 	/**
 	 * Set to browser's implementation of Set if it has one, else set to {@link libjass.SimpleSet}
 	 *
-	 * @type {function(new:Set)}
+	 * @type {function(new:Set, !Array.<T>=)}
 	 */
 	export var Set = global.Set;
-	if (Set === undefined || typeof Set.prototype.forEach !== "function") {
+	if (Set === undefined || typeof Set.prototype.forEach !== "function" || new Set([1, 2]).size !== 2) {
 		Set = <any>SimpleSet;
 	}
 
@@ -197,14 +203,20 @@ module libjass {
 	 * Map implementation for browsers that don't support it. Only supports keys which are of Number or String type, or which have a property called "id".
 	 *
 	 * Keys and values are stored as properties of an object, with property names derived from the key type.
+	 *
+	 * @param {!Array.<!Array.<*>>=} iterable Only an array of elements (where each element is a 2-tuple of key and value) is supported.
 	 */
 	class SimpleMap<K, V> implements Map<K, V> {
 		private _keys: { [key: string]: K };
 		private _values: { [key: string]: V };
 		private _size: number;
 
-		constructor() {
+		constructor(iterable?: [K, V][]) {
 			this.clear();
+
+			if (Array.isArray(iterable)) {
+				iterable.forEach(element => this.set(element[0], element[1]));
+			}
 		}
 
 		/**
@@ -332,10 +344,10 @@ module libjass {
 	/**
 	 * Set to browser's implementation of Map if it has one, else set to {@link libjass.SimpleMap}
 	 *
-	 * @type {function(new:Map)}
+	 * @type {function(new:Map, !Array.<!Array.<*>>=)}
 	 */
 	export var Map = global.Map;
-	if (Map === undefined || typeof Map.prototype.forEach !== "function") {
+	if (Map === undefined || typeof Map.prototype.forEach !== "function" || new Map([[1, "foo"], [2, "bar"]]).size !== 2) {
 		Map = <any>SimpleMap;
 	}
 

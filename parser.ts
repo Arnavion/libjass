@@ -286,7 +286,7 @@ module libjass.parser {
 			this._ass.properties.wrappingStyle = 1;
 			this._ass.properties.scaleBorderAndShadow = true;
 
-			var newStyle = new Style(new Map<string, string>().set("Name", "Default"));
+			var newStyle = new Style(new Map([["Name", "Default"]]));
 			this._ass.styles.set(newStyle.name, newStyle);
 		}
 
@@ -303,12 +303,12 @@ module libjass.parser {
 		private _onNextLine(line: string): void {
 			if (line === null) {
 				if (this._currentDialogueNumber !== null && this._currentDialogueStart !== null && this._currentDialogueEnd !== null && this._currentDialogueText !== null) {
-					this._ass.dialogues.push(new Dialogue(new Map<string, string>()
-						.set("Style", "Default")
-						.set("Start", this._currentDialogueStart)
-						.set("End", this._currentDialogueEnd)
-						.set("Text", this._currentDialogueText), this._ass)
-					);
+					this._ass.dialogues.push(new Dialogue(new Map([
+						["Style", "Default"],
+						["Start", this._currentDialogueStart],
+						["End", this._currentDialogueEnd],
+						["Text", this._currentDialogueText],
+					]), this._ass));
 				}
 
 				this._deferred.resolve(this._ass);
@@ -321,12 +321,12 @@ module libjass.parser {
 
 			if (line === "") {
 				if (this._currentDialogueNumber !== null && this._currentDialogueStart !== null && this._currentDialogueEnd !== null && this._currentDialogueText !== null) {
-					this._ass.dialogues.push(new Dialogue(new Map<string, string>()
-						.set("Style", "Default")
-						.set("Start", this._currentDialogueStart)
-						.set("End", this._currentDialogueEnd)
-						.set("Text", this._currentDialogueText), this._ass)
-					);
+					this._ass.dialogues.push(new Dialogue(new Map([
+						["Style", "Default"],
+						["Start", this._currentDialogueStart],
+						["End", this._currentDialogueEnd],
+						["Text", this._currentDialogueText],
+					]), this._ass));
 				}
 
 				this._currentDialogueNumber = this._currentDialogueStart = this._currentDialogueEnd = this._currentDialogueText = null;

@@ -394,51 +394,51 @@ module libjass.renderers {
 					var movePart = <parts.Move>part;
 
 					sub.style.position = "absolute";
-					animationCollection.add("linear", [new Keyframe(0, new Map<string, string>()
-						.set("left", (this._scaleX * movePart.x1).toFixed(3) + "px")
-						.set("top", (this._scaleY * movePart.y1).toFixed(3) + "px")
-					), new Keyframe(movePart.t1, new Map<string, string>()
-						.set("left", (this._scaleX * movePart.x1).toFixed(3) + "px")
-						.set("top", (this._scaleY * movePart.y1).toFixed(3) + "px")
-					), new Keyframe(movePart.t2, new Map<string, string>()
-						.set("left", (this._scaleX * movePart.x2).toFixed(3) + "px")
-						.set("top", (this._scaleY * movePart.y2).toFixed(3) + "px")
-					), new Keyframe(dialogue.end - dialogue.start, new Map<string, string>()
-						.set("left", (this._scaleX * movePart.x2).toFixed(3) + "px")
-						.set("top", (this._scaleY * movePart.y2).toFixed(3) + "px")
-					)]);
+					animationCollection.add("linear", [new Keyframe(0, new Map([
+						["left", (this._scaleX * movePart.x1).toFixed(3) + "px"],
+						["top", (this._scaleY * movePart.y1).toFixed(3) + "px"],
+					])), new Keyframe(movePart.t1, new Map([
+						["left", (this._scaleX * movePart.x1).toFixed(3) + "px"],
+						["top", (this._scaleY * movePart.y1).toFixed(3) + "px"],
+					])), new Keyframe(movePart.t2, new Map([
+						["left", (this._scaleX * movePart.x2).toFixed(3) + "px"],
+						["top", (this._scaleY * movePart.y2).toFixed(3) + "px"],
+					])), new Keyframe(dialogue.end - dialogue.start, new Map([
+						["left", (this._scaleX * movePart.x2).toFixed(3) + "px"],
+						["top", (this._scaleY * movePart.y2).toFixed(3) + "px"],
+					]))]);
 				}
 
 				else if (part instanceof parts.Fade) {
 					var fadePart = <parts.Fade>part;
 
-					animationCollection.add("linear", [new Keyframe(0, new Map<string, string>()
-						.set("opacity", "0")
-					), new Keyframe(fadePart.start, new Map<string, string>()
-						.set("opacity", "1")
-					), new Keyframe(dialogue.end - dialogue.start - fadePart.end, new Map<string, string>()
-						.set("opacity", "1")
-					), new Keyframe(dialogue.end - dialogue.start, new Map<string, string>()
-						.set("opacity", "0")
-					)]);
+					animationCollection.add("linear", [new Keyframe(0, new Map([
+						["opacity", "0"],
+					])), new Keyframe(fadePart.start, new Map([
+						["opacity", "1"],
+					])), new Keyframe(dialogue.end - dialogue.start - fadePart.end, new Map([
+						["opacity", "1"],
+					])), new Keyframe(dialogue.end - dialogue.start, new Map([
+						["opacity", "0"],
+					]))]);
 				}
 
 				else if (part instanceof parts.ComplexFade) {
 					var complexFadePart = <parts.ComplexFade>part;
 
-					animationCollection.add("linear", [new Keyframe(0, new Map<string, string>()
-						.set("opacity", complexFadePart.a1.toFixed(3))
-					), new Keyframe(complexFadePart.t1, new Map<string, string>()
-						.set("opacity", complexFadePart.a1.toFixed(3))
-					), new Keyframe(complexFadePart.t2, new Map<string, string>()
-						.set("opacity", complexFadePart.a2.toFixed(3))
-					), new Keyframe(complexFadePart.t3, new Map<string, string>()
-						.set("opacity", complexFadePart.a2.toFixed(3))
-					), new Keyframe(complexFadePart.t4, new Map<string, string>()
-						.set("opacity", complexFadePart.a3.toFixed(3))
-					), new Keyframe(dialogue.end - dialogue.start, new Map<string, string>()
-						.set("opacity", complexFadePart.a3.toFixed(3))
-					)]);
+					animationCollection.add("linear", [new Keyframe(0, new Map([
+						["opacity", complexFadePart.a1.toFixed(3)],
+					])), new Keyframe(complexFadePart.t1, new Map([
+						["opacity", complexFadePart.a1.toFixed(3)],
+					])), new Keyframe(complexFadePart.t2, new Map([
+						["opacity", complexFadePart.a2.toFixed(3)],
+					])), new Keyframe(complexFadePart.t3, new Map([
+						["opacity", complexFadePart.a2.toFixed(3)],
+					])), new Keyframe(complexFadePart.t4, new Map([
+						["opacity", complexFadePart.a3.toFixed(3)],
+					])), new Keyframe(dialogue.end - dialogue.start, new Map([
+						["opacity", complexFadePart.a3.toFixed(3)],
+					]))]);
 				}
 
 				else if (part instanceof parts.DrawingMode) {
