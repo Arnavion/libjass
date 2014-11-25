@@ -1025,73 +1025,106 @@ module libjass.renderers {
 			var outlineWidth = this._scaleX * this._outlineWidth;
 			var outlineHeight = this._scaleY * this._outlineHeight;
 
-			var filterId = "svg-filter-" + this._id + "-" + this._nextFilterId++;
-
 			var outlineFilter = '';
-			if (outlineWidth > 0 || outlineHeight > 0) {
-				/* Construct an elliptical border by merging together many rectangles. The border is creating using dilate morphology filters, but these only support
-				 * generating rectangles.   http://lists.w3.org/Archives/Public/public-fx/2012OctDec/0003.html
-				 */
+			var blurFilter = '';
 
-				var mergeOutlinesFilter = '';
+			if (this._settings.enableSvg) {
+				var filterId = "svg-filter-" + this._id + "-" + this._nextFilterId++;
 
-				var outlineNumber = 0;
+				if (outlineWidth > 0 || outlineHeight > 0) {
+					/* Construct an elliptical border by merging together many rectangles. The border is creating using dilate morphology filters, but these only support
+					 * generating rectangles.   http://lists.w3.org/Archives/Public/public-fx/2012OctDec/0003.html
+					 */
 
-				var increment = (!this._settings.preciseOutlines && this._gaussianBlur > 0) ? this._gaussianBlur : 1;
+					var mergeOutlinesFilter = '';
 
-				((addOutline: (x: number, y: number) => void) => {
-					if (outlineWidth <= outlineHeight) {
-						if (outlineWidth > 0) {
-							for (var x = 0; x <= outlineWidth; x += increment) {
-								addOutline(x, outlineHeight / outlineWidth * Math.sqrt(outlineWidth * outlineWidth - x * x));
+					var outlineNumber = 0;
+
+					var increment = (!this._settings.preciseOutlines && this._gaussianBlur > 0) ? this._gaussianBlur : 1;
+
+					((addOutline: (x: number, y: number) => void) => {
+						if (outlineWidth <= outlineHeight) {
+							if (outlineWidth > 0) {
+								for (var x = 0; x <= outlineWidth; x += increment) {
+									addOutline(x, outlineHeight / outlineWidth * Math.sqrt(outlineWidth * outlineWidth - x * x));
+								}
+								if (x !== outlineWidth + increment) {
+									addOutline(outlineWidth, 0);
+								}
 							}
-							if (x !== outlineWidth + increment) {
-								addOutline(outlineWidth, 0);
-							}
-						}
-						else {
-							addOutline(0, outlineHeight);
-						}
-					}
-					else {
-						if (outlineHeight > 0) {
-							for (var y = 0; y <= outlineHeight; y += increment) {
-								addOutline(outlineWidth / outlineHeight * Math.sqrt(outlineHeight * outlineHeight - y * y), y);
-							}
-							if (y !== outlineHeight + increment) {
+							else {
 								addOutline(0, outlineHeight);
 							}
 						}
 						else {
-							addOutline(outlineWidth, 0);
+							if (outlineHeight > 0) {
+								for (var y = 0; y <= outlineHeight; y += increment) {
+									addOutline(outlineWidth / outlineHeight * Math.sqrt(outlineHeight * outlineHeight - y * y), y);
+								}
+								if (y !== outlineHeight + increment) {
+									addOutline(0, outlineHeight);
+								}
+							}
+							else {
+								addOutline(outlineWidth, 0);
+							}
 						}
-					}
-				})((x: number, y: number): void => {
+					})((x: number, y: number): void => {
+						outlineFilter +=
+							'\t<feMorphology in="SourceAlpha" operator="dilate" radius="' + x.toFixed(3) + ' ' + y.toFixed(3) + '" result="outline' + outlineNumber + '" />\n';
+
+						mergeOutlinesFilter +=
+							'\t\t<feMergeNode in="outline' + outlineNumber + '" />\n';
+
+						outlineNumber++;
+					});
+
 					outlineFilter +=
-						'\t<feMorphology in="SourceAlpha" operator="dilate" radius="' + x.toFixed(3) + ' ' + y.toFixed(3) + '" result="outline' + outlineNumber + '" />\n';
+						'\t<feMerge result="outline">\n' +
+						mergeOutlinesFilter +
+						'\t</feMerge>\n' +
+						'\t<feFlood flood-color="' + outlineColor.toString() + '" />' +
+						'\t<feComposite operator="in" in2="outline" />';
+				}
 
-					mergeOutlinesFilter +=
-						'\t\t<feMergeNode in="outline' + outlineNumber + '" />\n';
-
-					outlineNumber++;
-				});
-
-				outlineFilter +=
-					'\t<feMerge result="outline">\n' +
-					mergeOutlinesFilter +
-					'\t</feMerge>\n' +
-					'\t<feFlood flood-color="' + outlineColor.toString() + '" />' +
-					'\t<feComposite operator="in" in2="outline" />';
+				if (this._gaussianBlur > 0) {
+					blurFilter +=
+						'\t<feGaussianBlur stdDeviation="' + this._gaussianBlur + '" />\n';
+				}
+				for (var i = 0; i < this._blur; i++) {
+					blurFilter +=
+						'\t<feConvolveMatrix kernelMatrix="1 2 1 2 4 2 1 2 1" edgeMode="none" />\n';
+				}
 			}
+			else {
+				if (outlineWidth > 0 || outlineHeight > 0) {
+					var outlineCssString = "";
 
-			var blurFilter = '';
-			if (this._gaussianBlur > 0) {
-				blurFilter +=
-					'\t<feGaussianBlur stdDeviation="' + this._gaussianBlur + '" />\n';
-			}
-			for (var i = 0; i < this._blur; i++) {
-				blurFilter +=
-					'\t<feConvolveMatrix kernelMatrix="1 2 1 2 4 2 1 2 1" edgeMode="none" />\n';
+					((addOutline: (x: number, y: number) => void) => {
+						for (var x = 0; x <= outlineWidth; x++) {
+							var maxY = (outlineWidth === 0) ? outlineHeight : outlineHeight * Math.sqrt(1 - ((x * x) / (outlineWidth * outlineWidth)));
+							for (var y = 0; y <= maxY; y++) {
+								addOutline(x, y);
+
+								if (x !== 0) {
+									addOutline(-x, y);
+								}
+
+								if (y !== 0) {
+									addOutline(x, -y);
+								}
+
+								if (x !== 0 && y !== 0) {
+									addOutline(-x, -y);
+								}
+							}
+						}
+					})((x: number, y: number): void => {
+						outlineCssString += ", " + outlineColor.toString() + " " + x + "px " + y + "px " + this._gaussianBlur.toFixed(3) + "px";
+					});
+
+					span.style.textShadow = outlineCssString.substr(", ".length);
+				}
 			}
 
 			var filterWrapperSpan = document.createElement("span");
@@ -1118,7 +1151,13 @@ module libjass.renderers {
 
 			if (this._shadowDepthX !== 0 || this._shadowDepthY !== 0) {
 				var shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
-				span.style.textShadow = shadowColor.toString() + " " + (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) + "px " + (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) + "px 0px";
+				var shadowCssString = shadowColor.toString() + " " + (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) + "px " + (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) + "px 0px";
+				if (span.style.textShadow === "") {
+					span.style.textShadow = shadowCssString;
+				}
+				else {
+					span.style.textShadow += ", " + shadowCssString;
+				}
 			}
 
 			if (this._rotationZ !== 0) {

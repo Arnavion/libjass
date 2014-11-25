@@ -228,6 +228,17 @@ module libjass.renderers {
 		preciseOutlines: boolean;
 
 		/**
+		 * Outlines and blur are implemented using SVG filters by default. When false, they will be rendered using alternative means.
+		 *
+		 * IE 11 and below do not support SVG filters on HTML elements so this should be set to false there.
+		 *
+		 * Defaults to true.
+		 *
+		 * @type {boolean}
+		 */
+		enableSvg: boolean;
+
+		/**
 		 * A convenience method to create a font map from a <style> or <link> element that contains @font-face rules.
 		 *
 		 * @param {!LinkStyle} linkStyle
@@ -276,20 +287,22 @@ module libjass.renderers {
 				object = {};
 			}
 
-			return RendererSettings._from(object.fontMap, object.preRenderTime, object.preciseOutlines);
+			return RendererSettings._from(object.fontMap, object.preRenderTime, object.preciseOutlines, object.enableSvg);
 		}
 
 		/**
 		 * @param {Map.<string, !Array.<string>>=null} fontMap
 		 * @param {number=5} preRenderTime
 		 * @param {boolean=false} preciseOutlines
+		 * @param {boolean=true} enableSvg
 		 * @return {!libjass.renderers.RendererSettings}
 		 */
-		private static _from(fontMap: Map<string, string[]> = null, preRenderTime: number = 5, preciseOutlines: boolean = false): RendererSettings {
+		private static _from(fontMap: Map<string, string[]> = null, preRenderTime: number = 5, preciseOutlines: boolean = false, enableSvg: boolean = true): RendererSettings {
 			var result = new RendererSettings();
 			result.fontMap = fontMap;
 			result.preRenderTime = preRenderTime;
 			result.preciseOutlines = preciseOutlines;
+			result.enableSvg = enableSvg;
 			return result;
 		}
 
