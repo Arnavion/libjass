@@ -969,7 +969,7 @@ module libjass.renderers {
 			}
 			var fontSize: string;
 			if (isTextOnlySpan) {
-				fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize * this._fontScaleX, this._fontSizeElement)).toFixed(3);
+				fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize * this._fontScaleY, this._fontSizeElement)).toFixed(3);
 			}
 			else {
 				fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize, this._fontSizeElement)).toFixed(3);
