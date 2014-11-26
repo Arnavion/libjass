@@ -1160,7 +1160,7 @@ module libjass.renderers {
 				}
 			}
 
-			if (this._rotationZ !== 0) {
+			if (this._rotationX !== 0 || this._rotationY !== 0) {
 				// Perspective needs to be set on a "transformable element"
 				filterWrapperSpan.style.display = "inline-block";
 			}

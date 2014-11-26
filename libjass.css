@@ -83,9 +83,9 @@
 /* Filter wrapper span */
 .libjass-subs div[data-dialogue-id] > span {
 	-webkit-perspective-origin: center;
-	-webkit-perspective: 200px;
+	-webkit-perspective: 400px;
 	perspective-origin: center;
-	perspective: 200px;
+	perspective: 400px;
 }
 
 .libjass-font-measure {
