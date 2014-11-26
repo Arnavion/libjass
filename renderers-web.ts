@@ -1175,6 +1175,9 @@ module libjass.renderers {
 			return filterWrapperSpan;
 		}
 
+		/**
+		 * @return {!HTMLBRElement}
+		 */
 		makeNewLine(): HTMLBRElement {
 			var result = document.createElement("br");
 			result.style.lineHeight = (this._scaleY * this._fontSize).toFixed(3) + "px";
