@@ -210,16 +210,23 @@ module libjass.renderers {
 			var currentSpan: HTMLSpanElement = null;
 			var currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, this._svgDefsElement);
 
+			var previousAddNewLine = false; // If two or more \N's are encountered in sequence, then all but the first will be created using currentSpanStyles.makeNewLine() instead
 			var startNewSpan = (addNewLine: boolean): void => {
 				if (currentSpan !== null && currentSpan.textContent !== "") {
 					sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan));
 				}
 
 				if (addNewLine) {
-					sub.appendChild(document.createElement("br"));
+					if (previousAddNewLine) {
+						sub.appendChild(currentSpanStyles.makeNewLine());
+					}
+					else {
+						sub.appendChild(document.createElement("br"));
+					}
 				}
 
 				currentSpan = document.createElement("span");
+				previousAddNewLine = addNewLine;
 			};
 			startNewSpan(false);
 
@@ -1166,6 +1173,12 @@ module libjass.renderers {
 			}
 
 			return filterWrapperSpan;
+		}
+
+		makeNewLine(): HTMLBRElement {
+			var result = document.createElement("br");
+			result.style.lineHeight = (this._scaleY * this._fontSize).toFixed(3) + "px";
+			return result;
 		}
 
 		/**
