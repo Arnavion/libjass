@@ -1079,10 +1079,10 @@ var Walker = function () {
 
 				default:
 					if (lastRead !== null) {
-						lastRead.description += " " + line;
+						lastRead.description += "\n" + line;
 					}
 					else {
-						rootDescription += ((rootDescription.length > 0) ? " " : "") + line;
+						rootDescription += ((rootDescription.length > 0) ? "\n" : "") + line;
 					}
 					break;
 			}

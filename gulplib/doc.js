@@ -196,9 +196,33 @@ var toLink = function (item) {
 };
 
 var writeDescription = function (text) {
-	return sanitize(text).replace(/\{@link ([^} ]+)\}/g, function (substring, linkTarget) {
+	var result = sanitize(text).replace(/\{@link ([^} ]+)\}/g, function (substring, linkTarget) {
 		return '<a href="#' + linkTarget + '">' + linkTarget + '</a>';
 	});
+
+	var inCodeBlock = false;
+	result = result.split("\n").map(function (line) {
+		if (line.substr(0, "    ".length) === "    ") {
+			line = line.substr("    ".length);
+
+			if (!inCodeBlock) {
+				inCodeBlock = true;
+				line = '<pre class="code"><code>' + line;
+			}
+		}
+		else if (line.length > 0 && inCodeBlock) {
+			inCodeBlock = false;
+			line = '</code></pre>' + line;
+		}
+
+		return line;
+	}).join("\n");
+
+	if (inCodeBlock) {
+		result += '</code></pre>';
+	}
+
+	return result;
 };
 
 var writeParameters = function (parameters) {
@@ -511,6 +535,10 @@ module.exports = function (outputFilePath) {
 				'',
 				'			body:not(.show-private) .private, body:not(.show-private) .protected {',
 				'				display: none;',
+				'			}',
+				'',
+				'			.description .code {',
+				'				margin-left: 30px;',
 				'			}',
 				'		]]>',
 				'		</style>',
