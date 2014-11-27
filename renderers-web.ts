@@ -714,125 +714,6 @@ module libjass.renderers {
 	mixin(WebRenderer, [EventSource]);
 
 	/**
-	 * This class represents a single keyframe. It has a list of CSS properties (names and values) associated with a point in time. Multiple keyframes make up an animation.
-	 *
-	 * @param {number} time
-	 * @param {!Object.<string, string>} properties
-	 */
-	class Keyframe {
-		constructor(private _time: number, private _properties: Map<string, string>) { }
-
-		/**
-		 * @type {number}
-		 */
-		get time(): number {
-			return this._time;
-		}
-
-		/**
-		 * @type {!Object.<string, string>}
-		 */
-		get properties(): Map<string, string> {
-			return this._properties;
-		}
-	}
-
-	/**
-	 * This class represents a collection of animations. Each animation contains one or more keyframes.
-	 * The collection can then be converted to a CSS3 representation.
-	 *
-	 * @param {!libjass.renderers.NullRenderer} renderer The renderer that this collection is associated with
-	 * @param {!libjass.Dialogue} dialogue The Dialogue that this collection is associated with
-	 */
-	class AnimationCollection {
-		private _id: string;
-		private _start: number;
-		private _end: number;
-		private _rate: number;
-
-		private _cssText: string = "";
-		private _animationStyle: string = "";
-		private _animationDelays: number[] = [];
-		private _numAnimations: number = 0;
-
-		constructor(renderer: NullRenderer, dialogue: Dialogue) {
-			this._id = renderer.id + "-" + dialogue.id;
-			this._start = dialogue.start;
-			this._end = dialogue.end;
-			this._rate = renderer.clock.rate;
-		}
-
-		/**
-		 * This string contains the animation definitions and should be inserted into a <style> element.
-		 *
-		 * @type {string}
-		 */
-		get cssText(): string {
-			return this._cssText;
-		}
-
-		/**
-		 * This string should be set as the "animation" CSS property of the target element.
-		 *
-		 * @type {string}
-		 */
-		get animationStyle(): string {
-			return this._animationStyle;
-		}
-
-		/**
-		 * This array should be used to set the "animation-delay" CSS property of the target element.
-		 *
-		 * @type {!Array.<number>}
-		 */
-		get animationDelays(): number[] {
-			return this._animationDelays;
-		}
-
-		/**
-		 * Add an animation to this collection. The given keyframes together make one animation.
-		 *
-		 * @param {string} timingFunction One of the acceptable values for the "animation-timing-function" CSS property
-		 * @param {Array.<!{time: number, properties: !Object.<string, string>}>} keyframes
-		 */
-		add(timingFunction: string, keyframes: Keyframe[]): void {
-			var startTime: number = null;
-			var endTime: number = null;
-
-			var ruleCssText = "";
-
-			keyframes.forEach(keyframe => {
-				if (startTime === null) {
-					startTime = keyframe.time;
-				}
-
-				endTime = keyframe.time;
-
-				ruleCssText += "\t" + (100 * keyframe.time / (this._end - this._start)).toFixed(3) + "% {\n";
-
-				keyframe.properties.forEach((value, name) => {
-					ruleCssText += "\t\t" + name + ": " + value + ";\n";
-				});
-
-				ruleCssText += "\t}\n";
-			});
-
-			var animationName = "dialogue-" + this._id + "-" + this._numAnimations++;
-
-			this._cssText +=
-				"@-webkit-keyframes " + animationName + " {\n" + ruleCssText + "}\n\n" +
-				"@keyframes " + animationName + " {\n" + ruleCssText + "}\n\n";
-
-			if (this._animationStyle !== "") {
-				this._animationStyle += ",";
-			}
-
-			this._animationStyle += animationName + " " + ((endTime - startTime) / this._rate).toFixed(3) + "s " + timingFunction;
-			this._animationDelays.push(startTime);
-		}
-	}
-
-	/**
 	 * This class represents the style attribute of a span.
 	 * As a Dialogue's div is rendered, individual parts are added to span's, and this class is used to maintain the style attribute of those.
 	 *
@@ -1476,6 +1357,125 @@ module libjass.renderers {
 			}
 
 			return existingFontSize;
+		}
+	}
+
+	/**
+	 * This class represents a collection of animations. Each animation contains one or more keyframes.
+	 * The collection can then be converted to a CSS3 representation.
+	 *
+	 * @param {!libjass.renderers.NullRenderer} renderer The renderer that this collection is associated with
+	 * @param {!libjass.Dialogue} dialogue The Dialogue that this collection is associated with
+	 */
+	class AnimationCollection {
+		private _id: string;
+		private _start: number;
+		private _end: number;
+		private _rate: number;
+
+		private _cssText: string = "";
+		private _animationStyle: string = "";
+		private _animationDelays: number[] = [];
+		private _numAnimations: number = 0;
+
+		constructor(renderer: NullRenderer, dialogue: Dialogue) {
+			this._id = renderer.id + "-" + dialogue.id;
+			this._start = dialogue.start;
+			this._end = dialogue.end;
+			this._rate = renderer.clock.rate;
+		}
+
+		/**
+		 * This string contains the animation definitions and should be inserted into a <style> element.
+		 *
+		 * @type {string}
+		 */
+		get cssText(): string {
+			return this._cssText;
+		}
+
+		/**
+		 * This string should be set as the "animation" CSS property of the target element.
+		 *
+		 * @type {string}
+		 */
+		get animationStyle(): string {
+			return this._animationStyle;
+		}
+
+		/**
+		 * This array should be used to set the "animation-delay" CSS property of the target element.
+		 *
+		 * @type {!Array.<number>}
+		 */
+		get animationDelays(): number[] {
+			return this._animationDelays;
+		}
+
+		/**
+		 * Add an animation to this collection. The given keyframes together make one animation.
+		 *
+		 * @param {string} timingFunction One of the acceptable values for the "animation-timing-function" CSS property
+		 * @param {Array.<!{time: number, properties: !Object.<string, string>}>} keyframes
+		 */
+		add(timingFunction: string, keyframes: Keyframe[]): void {
+			var startTime: number = null;
+			var endTime: number = null;
+
+			var ruleCssText = "";
+
+			keyframes.forEach(keyframe => {
+				if (startTime === null) {
+					startTime = keyframe.time;
+				}
+
+				endTime = keyframe.time;
+
+				ruleCssText += "\t" + (100 * keyframe.time / (this._end - this._start)).toFixed(3) + "% {\n";
+
+				keyframe.properties.forEach((value, name) => {
+					ruleCssText += "\t\t" + name + ": " + value + ";\n";
+				});
+
+				ruleCssText += "\t}\n";
+			});
+
+			var animationName = "dialogue-" + this._id + "-" + this._numAnimations++;
+
+			this._cssText +=
+				"@-webkit-keyframes " + animationName + " {\n" + ruleCssText + "}\n\n" +
+				"@keyframes " + animationName + " {\n" + ruleCssText + "}\n\n";
+
+			if (this._animationStyle !== "") {
+				this._animationStyle += ",";
+			}
+
+			this._animationStyle += animationName + " " + ((endTime - startTime) / this._rate).toFixed(3) + "s " + timingFunction;
+			this._animationDelays.push(startTime);
+		}
+	}
+
+	/**
+	 * This class represents a single keyframe. It has a list of CSS properties (names and values) associated with a point in time. Multiple keyframes make up an animation.
+	 *
+	 * @param {number} time
+	 * @param {!Object.<string, string>} properties
+	 */
+	class Keyframe {
+		constructor(private _time: number, private _properties: Map<string, string>) { }
+
+		/**
+		 * @type {number}
+		 */
+		get time(): number {
+			return this._time;
+		}
+
+		/**
+		 * @type {!Object.<string, string>}
+		 */
+		get properties(): Map<string, string> {
+			return this._properties;
 		}
 	}
 
