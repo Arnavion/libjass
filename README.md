@@ -42,7 +42,7 @@ The API documentation is linked in the Links section below. Here's an overview:
 
 * The renderer uses [window.requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame) as a source of timer ticks. In each tick, it determines the set of dialogues to be shown at the current video time, renders each of them as a div, and appendChild's the div into the appropriate layer+alignment div.
 
-* The renderer handles resizing the subtitles when the user clicks the browser's native fullscreen-video button. index.js also contains code to change the size of the subtitles based on user input.
+* The renderer can be told to dynamically change the size of the subtitles based on user input by calling [WebRenderer.resize()](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.WebRenderer.resize) DefaultRenderer also handles resizing the subtitles automatically when the user clicks the browser's native fullscreen-video button.
 
 * Lastly, the renderer contains an implementation of preloading fonts before playing the video. It uses a map of font names to URLs - this map can be conveniently created from a CSS file containing @font-face rules using [RendererSettings.makeFontMapFromStyleElement()](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.RendererSettings.makeFontMapFromStyleElement)
 
