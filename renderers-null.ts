@@ -203,7 +203,13 @@ module libjass.renderers {
 		/**
 		 * A map of font name to one or more URLs of that font. If provided, the fonts in this map are pre-loaded by the WebRenderer when it's created.
 		 *
-		 * If you have a <style> or <link> element on the page containing @font-face rules, you can use the {@link libjass.renderers.RendererSettings.makeFontMapFromStyleElement} convenience method to create a font map.
+		 * If you have a <style> or <link> element on the page containing @font-face rules, you can use the {@link libjass.renderers.RendererSettings.makeFontMapFromStyleElement}
+		 * convenience method to create a font map. The CSS should have one @font-face rule for each font name, mapping to a font file URL. For example:
+		 *
+		 *     @font-face {
+		 *         font-family: "Helvetica";
+		 *         src: url("/fonts/helvetica.ttf");
+		 *     }
 		 *
 		 * @type {!Map.<string, !Array.<string>>}
 		 */
