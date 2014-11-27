@@ -1,3 +1,20 @@
+### v0.9.0 - 2014/11/27
+- BREAKING CHANGE - ASS.fromString() now returns a Promise of an ASS object, not an ASS object directly. The synchronous ASS parser used by ASS.fromString() is no more.
+- BACKWARD-COMPATIBLE CHANGE - WebRenderer constructor parameters order has changed from (ass, clock, settings, libjassSubsWrapper) to (ass, clock, libjassSubsWrapper, settings). The constructor will detect the old order and reorder accordingly.
+- Added ASS.fromStream and ASS.fromXhr that read a stream and an XMLHttpRequest object's response respectively and return (a Promise of) an ASS object. Both of these parse the script asynchronously.
+- Added RendererSettings.enableSvg that can be used to toggle the use of SVG filter effects for outlines and blur.
+- libjass.js now has an AMD wrapper so that it can be used with RequireJS, etc.
+- Settings parameter is now optional for WebRenderer and DefaultRenderer.
+- Added support for clock rates apart from 1 to clocks and renderers.
+- Added a parameter to libjass.createWorker to specify the path to libjass.js that will run in the worker.
+- Fixed Style and Dialogue constructors not setting defaults for missing properties.
+- Fixed color and alpha parser to support more formats.
+- Fixed SRT parser to replace all HTML tags it finds, instead of just the first one.
+- Fixed font size calculation to use the vertical scale instead of horizontal.
+- Fixed line-height on newlines.
+- Fixed missing perspective on X and Y rotations.
+
+
 ### v0.8.0 - 2014/08/16
 - Added web worker support. libjass.parse can now be offloaded to a web worker.
 - Implemented \fs+ and \fs-
