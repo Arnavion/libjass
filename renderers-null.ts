@@ -231,7 +231,7 @@ module libjass.renderers {
 		/**
 		 * Outlines and blur are implemented using SVG filters by default. When false, they will be rendered using alternative means.
 		 *
-		 * IE 11 and below do not support SVG filters on HTML elements so this should be set to false there.
+		 * IE 11 and below do not support SVG filters on HTML elements so this should be set to false there. See http://caniuse.com/svg-html for details.
 		 *
 		 * Defaults to true.
 		 *

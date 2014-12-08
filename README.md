@@ -93,26 +93,23 @@ You can also join the IRC channel below and ask any questions.
 ### Supported features
 
 * Styles: Italic, Bold, Underline, StrikeOut, FontName, FontSize, ScaleX, ScaleY, Spacing, PrimaryColor, OutlineColor, BackColor, Outline, Shadow, Alignment, MarginL, MarginR, MarginV
-* Tags: \i, \b, \u, \s, \bord, \xbord, \ybord, \shad, \xshad, \yshad, \blur, \fn, \fs, \fscx, \fscy, \fsp, \frx, \fry, \frz, \fr, \fax, \fay, \c, \1c, \3c, \4c, \alpha, \1a, \3a, \4a, \an, \a, \r, \pos, \move, \fad, \fade, \p
+* Tags: \i, \b, \u, \s, \bord, \xbord, \ybord, \shad, \xshad, \yshad, \be, \blur, \fn, \fs, \fscx, \fscy, \fsp, \frx, \fry, \frz, \fr, \fax, \fay, \c, \1c, \3c, \4c, \alpha, \1a, \3a, \4a, \an, \a, \r, \pos, \move, \fad, \fade, \p
 * Custom fonts, using CSS web fonts.
 
 
 ### Known issues
 
-* Unsupported tags: \be, \fe, \2c, \2a, \k, \K, \kf, \ko, \q, \org, \t, \clip, \iclip
+* Unsupported tags: \fe, \2c, \2a, \k, \K, \kf, \ko, \q, \org, \t, \clip, \iclip
 * \an4, \an5, \an6 aren't positioned correctly.
-* Lines scaled using {\fscx} and {\fscy} have their text clip into itself in some situations, and aren't always positioned correctly.
-* All lines are rendered as wrapping style 1 (end-of-line wrapping).
-* Lines with multiple rotations aren't rotated the same as VSFilter or libass.
-* Subtitles aren't styled in IE11 because [it doesn't support SVG filter effects on HTML](http://caniuse.com/svg-html).
+* All lines are rendered as [wrapping style 1 (end-of-line wrapping)](http://docs.aegisub.org/3.0/ASS_Tags/#wrapstyle)
+* Lines with multiple rotations aren't rotated the same as VSFilter or libass. See [#14](https://github.com/Arnavion/libjass/issues/14)
 
 
 ### Planned improvements
 
-* Document browser compatibility. Currently libjass is tested on IE11 (Windows 7), Firefox Nightly and Google Chrome (Dev channel).
-* Write API documentation. Add more explanatory comments to the code.
-* Write more parser tests. Also figure out a way to test layout. See [#21](https://github.com/Arnavion/libjass/issues/21)
+* Figure out a way to test layout. See [#21](https://github.com/Arnavion/libjass/issues/21)
 * Evaluate (document, benchmark) the benefits and drawbacks of DOM+CSS-based drawing over canvas.
+* Add more explanatory comments to the code.
 
 
 ### License
