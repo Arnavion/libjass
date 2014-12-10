@@ -24,32 +24,32 @@
 
 interface Promise<T> {
 	/**
-	 * @param {function(T):U} fulfilledHandler
+	 * @param {?function(T):U} fulfilledHandler
 	 * @param {?function(*):U} rejectedHandler
 	 * @return {!Promise.<U>}
 	 */
-	then<U>(fulfilledHandler: (value: T) => U, rejectedHandler?: (reason: any) => U): Promise<U>;
+	then<U>(fulfilledHandler?: (value: T) => U, rejectedHandler?: (reason: any) => U): Promise<U>;
 
 	/**
-	 * @param {function(T):!Promise.<U>} fulfilledHandler
+	 * @param {?function(T):!Promise.<U>} fulfilledHandler
 	 * @param {?function(*):!Promise.<U>} rejectedHandler
 	 * @return {!Promise.<U>}
 	 */
-	then<U>(fulfilledHandler: (value: T) => Promise<U>, rejectedHandler?: (reason: any) => Promise<U>): Promise<U>;
+	then<U>(fulfilledHandler?: (value: T) => Promise<U>, rejectedHandler?: (reason: any) => Promise<U>): Promise<U>;
 
 	/**
-	 * @param {function(T):U} fulfilledHandler
+	 * @param {?function(T):U} fulfilledHandler
 	 * @param {?function(*):!Promise.<U>} rejectedHandler
 	 * @return {!Promise.<U>}
 	 */
-	then<U>(fulfilledHandler: (value: T) => U, rejectedHandler?: (reason: any) => Promise<U>): Promise<U>;
+	then<U>(fulfilledHandler?: (value: T) => U, rejectedHandler?: (reason: any) => Promise<U>): Promise<U>;
 
 	/**
-	 * @param {function(T):!Promise.<U>} fulfilledHandler
+	 * @param {?function(T):!Promise.<U>} fulfilledHandler
 	 * @param {?function(*):U} rejectedHandler
 	 * @return {!Promise.<U>}
 	 */
-	then<U>(fulfilledHandler: (value: T) => Promise<U>, rejectedHandler?: (reason: any) => U): Promise<U>;
+	then<U>(fulfilledHandler?: (value: T) => Promise<U>, rejectedHandler?: (reason: any) => U): Promise<U>;
 }
 
 interface Global {
@@ -375,11 +375,11 @@ module libjass {
 		}
 
 		/**
-		 * @param {function(T):(U|Promise.<U>)} fulfilledHandler
+		 * @param {?function(T):(U|Promise.<U>)} fulfilledHandler
 		 * @param {?function(*):(U|Promise.<U>)} rejectedHandler
 		 * @return {!Promise.<U>}
 		 */
-		then<U>(fulfilledHandler: (value: T) => U, rejectedHandler: (reason: any) => U): Promise<U> {
+		then<U>(fulfilledHandler?: (value: T) => U, rejectedHandler?: (reason: any) => U): Promise<U> {
 			fulfilledHandler = (typeof fulfilledHandler === "function") ? fulfilledHandler : null;
 			rejectedHandler = (typeof rejectedHandler === "function") ? rejectedHandler : null;
 
