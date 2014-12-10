@@ -26,7 +26,7 @@ module libjass.parser {
 	 */
 	export interface Stream {
 		/**
-		 * @return {!Promise.<string>} A promise that will be resolved with the next line, or null if the stream is exhausted.
+		 * @return {!Promise.<?string>} A promise that will be resolved with the next line, or null if the stream is exhausted.
 		 */
 		nextLine(): Promise<string>;
 	}
@@ -42,7 +42,7 @@ module libjass.parser {
 		constructor(private _str: string) { }
 
 		/**
-		 * @return {!Promise.<string>} A promise that will be resolved with the next line, or null if the string has been completely read.
+		 * @return {!Promise.<?string>} A promise that will be resolved with the next line, or null if the string has been completely read.
 		 */
 		nextLine(): Promise<string> {
 			var result: Promise<string> = null;
@@ -81,7 +81,7 @@ module libjass.parser {
 		}
 
 		/**
-		 * @return {!Promise.<string>} A promise that will be resolved with the next line, or null if the stream is exhausted.
+		 * @return {!Promise.<?string>} A promise that will be resolved with the next line, or null if the stream is exhausted.
 		 */
 		nextLine(): Promise<string> {
 			if (this._pendingDeferred !== null) {
