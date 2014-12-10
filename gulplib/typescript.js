@@ -1223,7 +1223,7 @@ var Walker = function () {
 				var className = fullName.substr(endOfNamespaceIndex + 1);
 
 				result = existingNamespace.members.filter(function (member) {
-					return member.name === className;
+					return (member instanceof Constructor || member instanceof Interface) && member.name === className;
 				})[0] || null;
 			}
 
