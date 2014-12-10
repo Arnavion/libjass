@@ -709,7 +709,7 @@ var Walker = function () {
 			return "Could not find @param annotation for " + parameterName + " on method " + node.name.text;
 		});
 
-		if (jsDoc.returnType === null && node.type.kind !== ts.SyntaxKind.VoidKeyword) {
+		if (jsDoc.returnType === null && (node.type === undefined || node.type.kind !== ts.SyntaxKind.VoidKeyword)) {
 			this._notifyIncorrectJsDoc("Missing @return annotation for method " + node.name.text);
 			jsDoc.returnType = new ReturnType("", "*");
 		}
