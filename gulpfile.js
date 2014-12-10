@@ -50,7 +50,7 @@ function ASTModifer(namespaces) {
 				newComments.push(
 					"@extends {" +
 					current.baseType.type.fullName +
-					(current.baseType.generics.length > 0 ? ("." + current.baseType.generics.join(", ")) : "") +
+					(current.baseType.generics.length > 0 ? (".<" + current.baseType.generics.join(", ") + ">") : "") +
 					"}"
 				);
 			}
