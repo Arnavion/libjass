@@ -61,18 +61,6 @@ function ASTModifer(namespaces) {
 
 			current.members.forEach(visitor);
 		}
-		else if (current instanceof TypeScript.AST.Interface) {
-			if (current.baseTypes.length > 0) {
-				current.baseTypes.forEach(function (baseType) {
-					newComments.push(
-						"@extends {" +
-						baseType.type.fullName +
-						(baseType.generics.length > 0 ? ("." + baseType.generics.join(", ")) : "") +
-						"}"
-					);
-				});
-			}
-		}
 		else if (current instanceof TypeScript.AST.Enum) {
 			newComments.push("@enum");
 		}
