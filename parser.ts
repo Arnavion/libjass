@@ -208,19 +208,21 @@ module libjass.parser {
 				switch (this._currentSectionName) {
 					case "Script Info":
 						var property = parseLineIntoProperty(line);
-						switch (property.name) {
-							case "PlayResX":
-								this._ass.properties.resolutionX = parseInt(property.value);
-								break;
-							case "PlayResY":
-								this._ass.properties.resolutionY = parseInt(property.value);
-								break;
-							case "WrapStyle":
-								this._ass.properties.wrappingStyle = parseInt(property.value);
-								break;
-							case "ScaledBorderAndShadow":
-								this._ass.properties.scaleBorderAndShadow = (property.value === "yes");
-								break;
+						if (property !== null) {
+							switch (property.name) {
+								case "PlayResX":
+									this._ass.properties.resolutionX = parseInt(property.value);
+									break;
+								case "PlayResY":
+									this._ass.properties.resolutionY = parseInt(property.value);
+									break;
+								case "WrapStyle":
+									this._ass.properties.wrappingStyle = parseInt(property.value);
+									break;
+								case "ScaledBorderAndShadow":
+									this._ass.properties.scaleBorderAndShadow = (property.value === "yes");
+									break;
+							}
 						}
 						break;
 
