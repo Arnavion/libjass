@@ -76,8 +76,8 @@ module libjass.parser {
 		private _pendingDeferred: DeferredPromise<string> = null;
 
 		constructor(private _xhr: XMLHttpRequest) {
-			_xhr.addEventListener("progress", event=> this._onXhrProgress(event), false);
-			_xhr.addEventListener("loadend", event=> this._onXhrLoadEnd(event), false);
+			_xhr.addEventListener("progress", event => this._onXhrProgress(event), false);
+			_xhr.addEventListener("loadend", event => this._onXhrLoadEnd(event), false);
 		}
 
 		/**
@@ -85,14 +85,14 @@ module libjass.parser {
 		 */
 		nextLine(): Promise<string> {
 			if (this._pendingDeferred !== null) {
-				throw new Error("Streaming parser only supports one pending unfulfilled read at a time.");
+				throw new Error("XhrStream only supports one pending unfulfilled read at a time.");
 			}
 
-			var deferred = this._pendingDeferred = new DeferredPromise<string>();
+			this._pendingDeferred = new DeferredPromise<string>();
 
-			this._reportNewLine();
+			this._tryResolveNextLine();
 
-			return deferred.promise;
+			return this._pendingDeferred.promise;
 		}
 
 		/**
@@ -103,7 +103,7 @@ module libjass.parser {
 				return;
 			}
 
-			this._reportNewLine();
+			this._tryResolveNextLine();
 		}
 
 		/**
@@ -114,12 +114,12 @@ module libjass.parser {
 				return;
 			}
 
-			this._reportNewLine();
+			this._tryResolveNextLine();
 		}
 
 		/**
 		 */
-		private _reportNewLine(): void {
+		private _tryResolveNextLine(): void {
 			var response = this._xhr.responseText;
 
 			var nextNewLinePos = response.indexOf("\n", this._readTill);
