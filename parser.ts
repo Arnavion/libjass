@@ -88,11 +88,11 @@ module libjass.parser {
 				throw new Error("XhrStream only supports one pending unfulfilled read at a time.");
 			}
 
-			this._pendingDeferred = new DeferredPromise<string>();
+			var deferred = this._pendingDeferred = new DeferredPromise<string>();
 
 			this._tryResolveNextLine();
 
-			return this._pendingDeferred.promise;
+			return deferred.promise;
 		}
 
 		/**
