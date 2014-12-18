@@ -304,6 +304,7 @@ module libjass.renderers {
 		private _videoState: VideoState;
 
 		private _nextAnimationFrameRequestId: number = null;
+		private _possiblePauseAnimationFrameTimeStamp: number = null;
 
 		constructor(private _video: HTMLVideoElement) {
 			this._video.addEventListener("playing", () => this._onVideoPlaying(), false);
@@ -466,7 +467,10 @@ module libjass.renderers {
 			this._dispatchEvent(ClockEvent.Tick, []);
 		}
 
-		private _onTimerTick(): void {
+		/**
+		 * @param {number} timeStamp
+		 */
+		private _onTimerTick(timeStamp: number): void {
 			if (!this._enabled) {
 				return;
 			}
@@ -474,23 +478,31 @@ module libjass.renderers {
 			if (this._videoState === VideoState.Playing) {
 				if (this._currentTime !== this._video.currentTime) {
 					this._currentTime = this._video.currentTime;
+					this._possiblePauseAnimationFrameTimeStamp = null;
 					this._dispatchEvent(ClockEvent.Tick, []);
 				}
 				else {
-					this._videoState = VideoState.Paused;
-					this._dispatchEvent(ClockEvent.Pause, []);
+					if (this._possiblePauseAnimationFrameTimeStamp === null) {
+						this._possiblePauseAnimationFrameTimeStamp = timeStamp;
+					}
+					else if (timeStamp - this._possiblePauseAnimationFrameTimeStamp > 100) {
+						this._possiblePauseAnimationFrameTimeStamp = null;
+						this._videoState = VideoState.Paused;
+						this._dispatchEvent(ClockEvent.Pause, []);
+					}
 				}
 			}
 			else {
 				if (this._currentTime !== this._video.currentTime) {
 					this._currentTime = this._video.currentTime;
+					this._possiblePauseAnimationFrameTimeStamp = null;
 					this._videoState = VideoState.Playing;
 					this._dispatchEvent(ClockEvent.Play, []);
 					this._dispatchEvent(ClockEvent.Tick, []);
 				}
 			}
 
-			this._nextAnimationFrameRequestId = requestAnimationFrame(() => this._onTimerTick());
+			this._nextAnimationFrameRequestId = requestAnimationFrame(timeStamp => this._onTimerTick(timeStamp));
 		}
 
 		private _onVideoRateChange(): void {
@@ -499,7 +511,7 @@ module libjass.renderers {
 
 		private _startTicking(): void {
 			if (this._nextAnimationFrameRequestId === null) {
-				this._nextAnimationFrameRequestId = requestAnimationFrame(() => this._onTimerTick());
+				this._nextAnimationFrameRequestId = requestAnimationFrame(timeStamp => this._onTimerTick(timeStamp));
 			}
 		}
 
