@@ -434,7 +434,7 @@ var Interface = function (_super) {
 var Constructor = function (_super) {
 	__extends(Constructor, _super);
 
-	function Constructor(name, astNode, description, generics, parameters, baseType, isAbstract, isPrivate) {
+	function Constructor(name, astNode, description, generics, parameters, baseType, interfaces, isAbstract, isPrivate) {
 		_super.call(this, name);
 
 		this.astNode = astNode;
@@ -446,6 +446,7 @@ var Constructor = function (_super) {
 		this.parameters = parameters;
 
 		this.baseType = baseType;
+		this.interfaces = interfaces;
 
 		this.isAbstract = isAbstract;
 		this.isPrivate = isPrivate;
@@ -840,16 +841,26 @@ var Walker = function () {
 	Walker.prototype._visitClassDeclaration = function (node) {
 		var jsDoc = this._parseJSDoc(node);
 
+		var _this = this;
+
 		var baseType = null;
+		var interfaces = [];
+
 		if (node.baseType !== undefined) {
 			baseType = new UnresolvedType(node.baseType.typeName.text, this._getGenerics(node.baseType));
+		}
+
+		if (node.implementedTypes !== undefined) {
+			interfaces = node.implementedTypes.map(function (interface) {
+				return new UnresolvedType(interface.typeName.text, _this._getGenerics(interface));
+			});
 		}
 
 		var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
 
 		var generics = this._getGenerics(node);
 
-		var clazz = this._scope.enter(new Constructor(node.name.text, node, jsDoc.rootDescription, generics, jsDoc.parameters, baseType, jsDoc.isAbstract, isPrivate));
+		var clazz = this._scope.enter(new Constructor(node.name.text, node, jsDoc.rootDescription, generics, jsDoc.parameters, baseType, interfaces, jsDoc.isAbstract, isPrivate));
 
 		clazz.parent.members.push(clazz);
 
@@ -1186,6 +1197,14 @@ var Walker = function () {
 					if (current.baseType instanceof UnresolvedType) {
 						current.baseType = _this._resolveTypeReference(current.baseType, current, _this.namespaces);
 					}
+
+					current.interfaces = current.interfaces.map(function (interface) {
+						if (interface instanceof UnresolvedType) {
+							interface = _this._resolveTypeReference(interface, current, _this.namespaces);
+						}
+
+						return interface;
+					});
 				}
 
 				else if (current instanceof Interface) {

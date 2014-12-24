@@ -300,7 +300,7 @@ TypeScript.AST.Constructor.prototype.toHtml = function () {
 			(this.isAbstract ? ' abstract' : '') +
 			(this.isPrivate ? ' private' : '') +
 			'">',
-		'	<dt class="name">class ' + toLink(this) + ((this.baseType !== null) ? (' extends ' + toLink(this.baseType)) : '') + '</dt>',
+		'	<dt class="name">class ' + toLink(this) + ((this.baseType !== null) ? (' extends ' + toLink(this.baseType)) : '') + ((this.interfaces.length > 0) ? (' implements ' + this.interfaces.map(function (interface) { return toLink(interface); }).join(', ')) : '') + '</dt>',
 		'	<dd class="description">',
 		'		<p>' + writeDescription(this.description) + '</p>',
 		'	</dd>',

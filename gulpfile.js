@@ -55,6 +55,17 @@ function ASTModifer(namespaces) {
 				);
 			}
 
+			if (current.interfaces.length > 0) {
+				current.interfaces.forEach(function (interface) {
+					newComments.push(
+						"@implements {" +
+						interface.type.fullName +
+						(interface.generics.length > 0 ? (".<" + interface.generics.join(", ") + ">") : "") +
+						"}"
+					);
+				});
+			}
+
 			if (current.parent !== null) {
 				newComments.push("@memberOf " + current.parent.fullName);
 			}
