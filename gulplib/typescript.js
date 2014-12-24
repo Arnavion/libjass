@@ -77,11 +77,12 @@ var CompilerHost = function () {
 			text = fs.readFileSync(filename, { encoding: "utf8" });
 		}
 		catch (ex) {
-			onError(ex.message);
-			text = "";
+			if (onError) {
+				onError(ex.message);
+			}
 		}
 
-		return ts.createSourceFile(filename, text, ts.ScriptTarget.ES5);
+		return (text !== undefined) ? ts.createSourceFile(filename, text, ts.ScriptTarget.ES5) : undefined;
 	};
 
 	CompilerHost.prototype.getDefaultLibFilename = function () { return path.join(typeScriptModulePath, "lib.dom.d.ts"); };
@@ -99,7 +100,7 @@ var CompilerHost = function () {
 				break;
 
 			default:
-				return;
+				throw new Error("Unexpected output " + filename);
 		}
 
 		this._outputStream.push(new Vinyl({
@@ -138,7 +139,10 @@ var WatchCompilerHost = function (_super) {
 		}
 
 		var result = _super.prototype.getSourceFile.call(this, filename, languageVersion, onError);
-		this._sourceFiles[filename] = result;
+		if (result !== undefined) {
+			this._sourceFiles[filename] = result;
+		}
+
 		return result;
 	};
 
@@ -166,6 +170,7 @@ var Compiler = function () {
 		this._host = host;
 
 		this._program = null;
+		this._checker = null;
 	}
 
 	Compiler.prototype.addFile = function (file) {
@@ -185,19 +190,19 @@ var Compiler = function () {
 		if (error) {
 			throw new Error("There were one or more errors.");
 		}
+
+		this._checker = this._program.getTypeChecker(true);
+
+		var errors = this._checker.getDiagnostics();
+		if (this._reportErrors(errors)) {
+			throw new Error("There were one or more errors.");
+		}
 	};
 
 	Compiler.prototype.writeFiles = function (outputCodePath, outputSourceMapPath, outputStream) {
-		var checker = this._program.getTypeChecker(true);
-
-		var semanticErrors = checker.getDiagnostics();
-		if (this._reportErrors(semanticErrors)) {
-			throw new Error("There were one or more errors.");
-		}
-
 		this._host.setOutputs(outputCodePath, outputSourceMapPath, outputStream);
 
-		var emitErrors = checker.emitFiles().errors;
+		var emitErrors = this._checker.emitFiles().errors;
 		if (this._reportErrors(emitErrors)) {
 			throw new Error("There were one or more errors.");
 		}
@@ -374,6 +379,7 @@ var Namespace = function (_super) {
 		this.members = [];
 	}
 
+	// Overridden for globalNS to return just member.name
 	Namespace.prototype.getMemberFullName = function (member) {
 		return this.fullName + "." + member.name;
 	};
@@ -573,15 +579,13 @@ var UnresolvedType = function () {
 }();
 
 var WalkerScope = function () {
-	function WalkerScope(globalNS) {
+	function WalkerScope() {
 		this._scopes = [];
-
-		this._globalNS = globalNS;
 	}
 
 	Object.defineProperty(WalkerScope.prototype, "current", {
 		get: function () {
-			return (this._scopes.length > 0) ? this._scopes[this._scopes.length - 1] : this._globalNS;
+			return (this._scopes.length > 0) ? this._scopes[this._scopes.length - 1] : null;
 		},
 		enumerable: true,
 		configurable: true
@@ -609,15 +613,21 @@ var Walker = function () {
 			return member.name;
 		};
 
-		this._scope = new WalkerScope(this._globalNS);
+		this._scope = new WalkerScope();
 
 		this.namespaces = Object.create(null);
-		this.namespaces["Global"] = this._globalNS;
+		this.namespaces[this._globalNS.fullName] = this._globalNS;
 
 		this._currentSourceFile = null;
 	}
 
 	Walker.prototype.walk = function (node) {
+		this._scope.enter(this._globalNS);
+		this._walk(node);
+		this._scope.leave();
+	};
+
+	Walker.prototype._walk = function (node) {
 		switch (node.kind) {
 			case ts.SyntaxKind.Property:
 				this._visitProperty(node);
@@ -846,7 +856,7 @@ var Walker = function () {
 
 		clazz.parent.members.push(clazz);
 
-		node.members.forEach(this.walk.bind(this));
+		node.members.forEach(this._walk.bind(this));
 
 		if (!Array.isArray(clazz.parameters)) {
 			if (Object.keys(clazz.parameters).length > 0) {
@@ -903,7 +913,7 @@ var Walker = function () {
 			interfaceType.parent.members.push(interfaceType);
 		}
 
-		node.members.forEach(this.walk.bind(this));
+		node.members.forEach(this._walk.bind(this));
 
 		this._scope.leave();
 	};
@@ -927,7 +937,7 @@ var Walker = function () {
 			enumType.parent.members.push(enumType);
 		}
 
-		node.members.forEach(this.walk.bind(this));
+		node.members.forEach(this._walk.bind(this));
 
 		this._scope.leave();
 	};
@@ -960,11 +970,11 @@ var Walker = function () {
 
 		switch (node.body.kind) {
 			case ts.SyntaxKind.ModuleBlock:
-				node.body.statements.forEach(this.walk.bind(this));
+				node.body.statements.forEach(this._walk.bind(this));
 				break;
 
 			case ts.SyntaxKind.ModuleDeclaration:
-				this.walk(node.body);
+				this._walk(node.body);
 				break;
 		}
 
@@ -973,7 +983,7 @@ var Walker = function () {
 
 	Walker.prototype._visitSourceFile = function (node) {
 		this._currentSourceFile = node;
-		node.statements.forEach(this.walk.bind(this));
+		node.statements.forEach(this._walk.bind(this));
 	};
 
 	Walker.prototype._parseJSDoc = function (node) {
@@ -1211,30 +1221,16 @@ var Walker = function () {
 	Walker.prototype._resolveTypeReference = function (unresolvedType, current, namespaces) {
 		var result = null;
 
-		var ns = current.parent;
-		while (result === null) {
-			var fullName = ns.fullName + "." + unresolvedType.name;
-
+		for (var ns = current.parent; result === null && ns !== null; ns = ns.parent) {
+			var fullName = ns.getMemberFullName(unresolvedType);
 			var endOfNamespaceIndex = fullName.lastIndexOf(".");
-
-			var existingNamespace = namespaces[fullName.substr(0, endOfNamespaceIndex)];
-
+			var existingNamespace = (endOfNamespaceIndex === -1) ? this._globalNS : namespaces[fullName.substr(0, endOfNamespaceIndex)];
 			if (existingNamespace !== undefined) {
 				var className = fullName.substr(endOfNamespaceIndex + 1);
 
 				result = existingNamespace.members.filter(function (member) {
 					return (member instanceof Constructor || member instanceof Interface) && member.name === className;
 				})[0] || null;
-			}
-
-			if (ns === null) {
-				ns = this._globalNS;
-			}
-			else if (ns === this._globalNS) {
-				break;
-			}
-			else {
-				ns = ns.parent;
 			}
 		}
 
