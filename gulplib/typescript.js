@@ -27,16 +27,13 @@ var Vinyl = require("vinyl");
 var Transform = require("./helpers.js").Transform;
 
 var typeScriptModulePath = path.resolve("./node_modules/typescript/bin");
-var typeScriptJsPath = path.join(typeScriptModulePath, "tsc.js");
+var typeScriptJsPath = path.join(typeScriptModulePath, "typescriptServices.js");
 
 var ts = {};
 vm.runInNewContext(fs.readFileSync(typeScriptJsPath, { encoding: "utf8" }).replace(
-	"writeCommentRange(currentSourceFile, writer, comment, newLine);",
-	"ts.gulpTypeScriptWriteCommentRange(currentSourceFile, writer, comment, newLine, writeCommentRange);"
-).replace(
-	"ts.executeCommandLine(sys.args);",
-	"module.exports = ts;"
-), {
+	"function writeCommentRange(",
+	"ts.writeCommentRange = function ("
+).replace(/writeCommentRange(?=[();])/g, "ts.writeCommentRange") + "module.exports = ts;", {
 	module: Object.defineProperty(Object.create(null), "exports", {
 		get: function () { return ts; },
 		set: function (value) { ts = value; },
@@ -1278,56 +1275,99 @@ exports.AST = {
 	walk: walk
 };
 
+var FakeSourceFile = (function () {
+	function FakeSourceFile(originalSourceFile) {
+		this._text = originalSourceFile.text;
+		this._originalLength = this._text.length;
+		this._originalLastLine = originalSourceFile.getLineAndCharacterFromPosition(this._text.length);
+
+		this._lastLine = this._originalLastLine.line;
+
+		this._lineStarts = [[this._text.length, this._lastLine]];
+	}
+
+	FakeSourceFile.prototype.addComment = function (originalComment, newComments) {
+		var pos = this._text.length;
+
+		this._text += "/**\n";
+		this._lineStarts.push([this._text.length, ++this._lastLine]);
+
+		var originalCommentLines = this._text.substring(originalComment.pos, originalComment.end).split("\n");
+		originalCommentLines.shift();
+		originalCommentLines = originalCommentLines.map(function (originalCommentLine) {
+			return originalCommentLine.replace(/^\s+/, " ");
+		});
+
+		if (originalCommentLines.length > 1) {
+			originalCommentLines.splice(originalCommentLines.length - 1, 0, " *");
+		}
+
+		newComments.forEach(function (newComment) {
+			originalCommentLines.splice(originalCommentLines.length - 1, 0, " * " + newComment);
+		}, this);
+
+		originalCommentLines.forEach(function (newCommentLine) {
+			this._text += newCommentLine + "\n";
+			this._lineStarts.push([this._text.length, ++this._lastLine]);
+		}, this);
+
+		this._text += "\n";
+		this._lineStarts.push([this._text.length, ++this._lastLine]);
+
+		var end = this._text.length;
+
+		return { pos: pos, end: end, hasTrailingNewLine: true, sourceFile: this };
+	};
+
+	Object.defineProperty(FakeSourceFile.prototype, "text", {
+		get: function () { return this._text; },
+		enumerable: true,
+		configurable: true
+	});
+
+	FakeSourceFile.prototype.getLineAndCharacterFromPosition = function (position) {
+		for (var i = 0; i < this._lineStarts.length; i++) {
+			if (i === this._lineStarts.length - 1 || position >= this._lineStarts[i][0] && position < this._lineStarts[i + 1][0]) {
+				return { line: this._lineStarts[i][1], character: position - this._lineStarts[i][0] + 1 };
+			}
+		}
+	};
+
+	FakeSourceFile.prototype.getPositionFromLineAndCharacter = function (line, character) {
+		return this._lineStarts[line - this._originalLastLine.line][0] + character - 1;
+	};
+
+	return FakeSourceFile;
+})();
+
+var fakeSourceFiles = Object.create(null);
+
 var oldGetLeadingCommentRangesOfNode = ts.getLeadingCommentRangesOfNode.bind(ts);
 ts.getLeadingCommentRangesOfNode = function (node, sourceFileOfNode) {
-	var result = oldGetLeadingCommentRangesOfNode(node, sourceFileOfNode);
+	sourceFileOfNode = sourceFileOfNode || ts.getSourceFileOfNode(node);
 
-	if (result !== undefined) {
-		var newComments = node["gulp-typescript-new-comment"];
-		if (newComments !== undefined) {
-			result[result.length - 1]["gulp-typescript-new-comment"] = newComments;
+	if (node["gulp-typescript-new-comment"] !== undefined) {
+		var originalComments = oldGetLeadingCommentRangesOfNode(node, sourceFileOfNode);
+		if (originalComments !== undefined) {
+			var fakeSourceFile = fakeSourceFiles[sourceFileOfNode.filename];
+			if (fakeSourceFile === undefined) {
+				fakeSourceFile = fakeSourceFiles[sourceFileOfNode.filename] = new FakeSourceFile(sourceFileOfNode);
+			}
+
+			originalComments[originalComments.length - 1] = fakeSourceFile.addComment(originalComments[originalComments.length - 1], node["gulp-typescript-new-comment"]);
+
+			return originalComments;
 		}
 	}
 
-	return result;
+	return oldGetLeadingCommentRangesOfNode(node, sourceFileOfNode);
 };
 
-ts.gulpTypeScriptWriteCommentRange = function (currentSourceFile, writer, comment, newLine, writeCommentRange) {
-	var newComments = comment["gulp-typescript-new-comment"];
-
-	var oldWriterRawWrite = writer.rawWrite.bind(writer);
-	var oldWriterWrite = writer.write.bind(writer);
-
-	if (newComments !== undefined) {
-		newComments.unshift("");
-
-		var indents = [];
-
-		writer.rawWrite = function (str) {
-			indents.push(str);
-
-			oldWriterRawWrite(str);
-		};
-
-		writer.write = function (str) {
-			if (str === "*/") {
-				newComments.forEach(function (newComment) {
-					oldWriterWrite("*" + ((newComment.length > 0) ? (" " + newComment) : ""));
-					writer.writeLine();
-					indents.forEach(function (indent) {
-						oldWriterRawWrite(indent);
-					});
-				});
-			}
-
-			indents.length = 0;
-
-			oldWriterWrite(str);
-		};
+var oldWriteCommentRange = ts.writeCommentRange.bind(ts);
+ts.writeCommentRange = function (currentSourceFile, writer, comment, newLine) {
+	if (comment.sourceFile) {
+		currentSourceFile = comment.sourceFile;
 	}
 
-	writeCommentRange(currentSourceFile, writer, comment, newLine);
-
-	writer.rawWrite = oldWriterRawWrite;
-	writer.write = oldWriterWrite;
+	return oldWriteCommentRange(currentSourceFile, writer, comment, newLine);
 };
