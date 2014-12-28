@@ -68,14 +68,14 @@ interface Global {
 	};
 
 	/**
-	 * @type {function(new:Promise.<T>, function(T), function(*)), resolve: function(T):!Promise.<T>, all: function(!Array.<!Promise.<T>>):!Promise.<!Array.<T>>}}
+	 * @type {function(new:Promise.<T>, function(T), function(*)), resolve: function(T|!Promise.<T>):!Promise.<T>, all: function(!Array.<T|!Promise.<T>>):!Promise.<!Array.<T>>}}
 	 */
 	Promise: {
-		new <T>(resolver: (fulfill: (value: T) => void, reject: (reason: any) => void) => void): Promise<T>;
+		new <T>(resolver: (resolve: (value: T) => void, reject: (reason: any) => void) => void): Promise<T>;
 
 		resolve<T>(value: T): Promise<T>;
 
-		all<T>(promises: Promise<T>[]): Promise<T[]>;
+		all<T>(promises: T[]): Promise<T[]>;
 	};
 }
 
@@ -395,7 +395,7 @@ module libjass {
 				rejectedHandler = (reason): U => { throw reason; };
 			}
 
-			var result = new SimplePromise<U>((resolve, reject) => {
+			var result = new Promise<U>((resolve, reject) => {
 				this._thens.push({
 					propagateFulfilling: value => {
 						try {
@@ -466,28 +466,32 @@ module libjass {
 		}
 
 		/**
-		 * @param {T} value
+		 * @param {T|!Promise.<T>} value
 		 * @return {!Promise.<T>}
 		 */
 		static resolve<T>(value: T): Promise<T> {
-			return new SimplePromise<T>(resolve => resolve(value));
+			if (value instanceof SimplePromise) {
+				return <Promise<T>><any>value;
+			}
+
+			return new Promise<T>(resolve => resolve(value));
 		}
 
 		/**
-		 * @param {!Array.<!Promise.<T>>} promises
+		 * @param {!Array.<T|!Promise.<T>>} values
 		 * @return {!Promise.<!Array.<T>>}
 		 */
-		static all<T>(promises: Promise<T>[]): Promise<T[]> {
+		static all<T>(values: T[]): Promise<T[]> {
 			return new Promise<T[]>((resolve, reject) => {
 				var result: T[] = [];
 
-				var numUnresolved = promises.length;
+				var numUnresolved = values.length;
 				if (numUnresolved === 0) {
 					resolve(result);
 					return;
 				}
 
-				promises.forEach((promise, index) => promise.then(value => {
+				values.forEach((value, index) => Promise.resolve(value).then(value => {
 					result[index] = value;
 					numUnresolved--;
 
@@ -499,7 +503,7 @@ module libjass {
 		}
 
 		/**
-		 * @param {T} value
+		 * @param {T|!Promise.<T>} value
 		 */
 		private _resolve(value: T): void {
 			var alreadyCalled = false;
@@ -577,7 +581,7 @@ module libjass {
 
 		/**
 		 * @param {!*} obj
-		 * @return {?function(function(T):T, function(*):T):!Promise.<T>}
+		 * @return {?function(function(T):(T|!Promise.<T>), function(*):(T|!Promise.<T>)):!Promise.<T>}
 		 */
 		private static _getThenMethod<T>(obj: any): (fulfilledHandler: (value: T) => T, rejectedHandler: (reason: any) => T) => Promise<T> {
 			if (typeof obj !== "object" && typeof obj !== "function") {
