@@ -311,10 +311,10 @@ var Logger = function (outputDiv) {
 			console.warn(message);
 
 			currentSuiteElement.querySelector("legend").appendChild(document.createTextNode(" - " + message));
-			currentSuiteElement.className += " failed";
+			currentSuiteElement.classList.add("failed");
 		}
 		else {
-			currentSuiteElement.className += " passed";
+			currentSuiteElement.classList.add("passed");
 		}
 
 		if (numTotal > numPassed + numFailed) {
@@ -335,17 +335,17 @@ var Logger = function (outputDiv) {
 		if (test.passed === true) {
 			message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ]";
 			console.log(message);
-			append(testDiv, message).className += " passed";
+			append(testDiv, message).classList.add("passed");
 		}
 		else if (test.passed === false) {
 			message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ] " + " : " + ((test.exception !== null) ? test.exception.message : "<No exception>");
 			console.warn(message);
-			append(testDiv, message).className += " failed";
+			append(testDiv, message).classList.add("failed");
 		}
 		else {
 			message = "Test " + test.number + " - \"" + test.description + "\" - " + test.customProperties.rule + " [ " + test.customProperties.input + " ] " + " : Skipped";
 			console.log(message);
-			append(testDiv, message).className += " skipped";
+			append(testDiv, message).classList.add("skipped");
 		}
 	};
 
