@@ -355,7 +355,7 @@ module libjass {
 		private _state: SimplePromiseState = SimplePromiseState.PENDING;
 
 		private _thens: { propagateFulfilling: (value: T) => void; propagateRejection: (reason: any) => void }[] = [];
-		private _pendingPropagateTimeout: number = null;
+		private _propagateIsPending: boolean = false;
 
 		private _alreadyFulfilledValue: T = null;
 		private _alreadyRejectedReason: any = null;
@@ -410,9 +410,7 @@ module libjass {
 				});
 			});
 
-			if ((this._state === SimplePromiseState.FULFILLED || this._state === SimplePromiseState.REJECTED) && this._pendingPropagateTimeout === null) {
-				this._pendingPropagateTimeout = setTimeout(() => this._propagateResolution(), 0);
-			}
+			this._propagateResolution();
 
 			return result;
 		}
@@ -553,9 +551,7 @@ module libjass {
 			this._state = SimplePromiseState.FULFILLED;
 			this._alreadyFulfilledValue = value;
 
-			if (this._pendingPropagateTimeout === null) {
-				this._pendingPropagateTimeout = setTimeout(() => this._propagateResolution(), 0);
-			}
+			this._propagateResolution();
 		}
 
 		/**
@@ -569,9 +565,7 @@ module libjass {
 			this._state = SimplePromiseState.REJECTED;
 			this._alreadyRejectedReason = reason;
 
-			if (this._pendingPropagateTimeout === null) {
-				this._pendingPropagateTimeout = setTimeout(() => this._propagateResolution(), 0);
-			}
+			this._propagateResolution();
 		}
 
 		/**
@@ -599,21 +593,36 @@ module libjass {
 		 * Propagates the result of the current promise to all its children.
 		 */
 		private _propagateResolution(): void {
-			this._pendingPropagateTimeout = null;
+			if (this._state === SimplePromiseState.PENDING) {
+				return;
+			}
 
-			if (this._state === SimplePromiseState.FULFILLED) {
-				while (this._thens.length > 0) {
-					var nextThen = this._thens.shift();
-					nextThen.propagateFulfilling(this._alreadyFulfilledValue);
-				}
+			if (this._propagateIsPending) {
+				return;
 			}
-			else if (this._state === SimplePromiseState.REJECTED) {
-				while (this._thens.length > 0) {
-					var nextThen = this._thens.shift();
-					nextThen.propagateRejection(this._alreadyRejectedReason);
+			this._propagateIsPending = true;
+
+			SimplePromise._nextTick(() => {
+				this._propagateIsPending = false;
+
+				if (this._state === SimplePromiseState.FULFILLED) {
+					while (this._thens.length > 0) {
+						var nextThen = this._thens.shift();
+						nextThen.propagateFulfilling(this._alreadyFulfilledValue);
+					}
 				}
-			}
+				else if (this._state === SimplePromiseState.REJECTED) {
+					while (this._thens.length > 0) {
+						var nextThen = this._thens.shift();
+						nextThen.propagateRejection(this._alreadyRejectedReason);
+					}
+				}
+			});
 		}
+
+		private static _nextTick: (callback: () => void) => void = (function () {
+			return (callback: () => void) => setTimeout(callback, 0);
+		})();
 	}
 
 	/**
