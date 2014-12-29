@@ -199,79 +199,83 @@ var require = function (name) {
 	};
 })();
 
-var assert = new function () {
-	this.deepEqual = function (actual, expected) {
-		if (expected === undefined && actual === undefined) {
-			return;
-		}
+function assert(value, message) {
+	if (!value) {
+		throw new Error(message);
+	}
+}
 
-		if (expected === undefined) {
-			throw new Error("Expected undefined but got [" + actual + "]");
-		}
+assert.deepEqual = function (actual, expected) {
+	if (expected === undefined && actual === undefined) {
+		return;
+	}
 
-		if (actual === undefined) {
-			throw new Error("Expected [" + expected + "] but got undefined");
-		}
+	if (expected === undefined) {
+		throw new Error("Expected undefined but got [" + actual + "]");
+	}
 
-		if (expected === null && actual === null) {
-			return;
-		}
+	if (actual === undefined) {
+		throw new Error("Expected [" + expected + "] but got undefined");
+	}
 
-		if (expected === null) {
-			throw new Error("Expected null but got [" + actual + "]");
-		}
+	if (expected === null && actual === null) {
+		return;
+	}
 
-		if (actual === null) {
-			throw new Error("Expected [" + expected + "] but got null");
-		}
+	if (expected === null) {
+		throw new Error("Expected null but got [" + actual + "]");
+	}
 
-		if (expected.constructor !== actual.constructor && actual.constructor !== undefined) {
-			throw new Error("Expected value of type [" + expected.constructor.name + "] but got value of type [" + actual.constructor.name + "].");
-		}
+	if (actual === null) {
+		throw new Error("Expected [" + expected + "] but got null");
+	}
 
-		switch(typeof expected) {
-			case "boolean":
-			case "number":
-			case "string":
-				if (expected !== actual) {
-					throw new Error("Expected [" + expected + "] but got [" + actual + "]");
-				}
-				break;
+	if (expected.constructor !== actual.constructor && actual.constructor !== undefined) {
+		throw new Error("Expected value of type [" + expected.constructor.name + "] but got value of type [" + actual.constructor.name + "].");
+	}
 
-			case "object":
-				if (Array.isArray(expected)) {
-					if (!Array.isArray(actual)) {
-						throw new Error("Expected an array but got [" + actual + "]");
-					}
+	switch(typeof expected) {
+		case "boolean":
+		case "number":
+		case "string":
+			if (expected !== actual) {
+				throw new Error("Expected [" + expected + "] but got [" + actual + "]");
+			}
+			break;
 
-					if (expected.length !== actual.length) {
-						throw new Error("Expected an array of length " + expected.length + " but got array of length " + actual.length);
-					}
-
-					var i;
-					for (i = 0; i < expected.length; i++) {
-						assert.deepEqual(actual[i], expected[i]);
-					}
+		case "object":
+			if (Array.isArray(expected)) {
+				if (!Array.isArray(actual)) {
+					throw new Error("Expected an array but got [" + actual + "]");
 				}
 
-				else {
-					var expectedProperties = Object.keys(expected);
-					var actualProperties = Object.keys(actual);
-					expectedProperties.sort();
-					actualProperties.sort();
-
-					assert.deepEqual(actualProperties, expectedProperties);
-
-					expectedProperties.forEach(function (property) {
-						assert.deepEqual(actual[property], expected[property]);
-					});
+				if (expected.length !== actual.length) {
+					throw new Error("Expected an array of length " + expected.length + " but got array of length " + actual.length);
 				}
-				break;
 
-			default:
-				throw new Error("Unrecognized type: " + typeof expected);
-		}
-	};
+				var i;
+				for (i = 0; i < expected.length; i++) {
+					assert.deepEqual(actual[i], expected[i]);
+				}
+			}
+
+			else {
+				var expectedProperties = Object.keys(expected);
+				var actualProperties = Object.keys(actual);
+				expectedProperties.sort();
+				actualProperties.sort();
+
+				assert.deepEqual(actualProperties, expectedProperties);
+
+				expectedProperties.forEach(function (property) {
+					assert.deepEqual(actual[property], expected[property]);
+				});
+			}
+			break;
+
+		default:
+			throw new Error("Unrecognized type: " + typeof expected);
+	}
 };
 
 var Logger = function (outputDiv) {
