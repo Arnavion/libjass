@@ -52,34 +52,29 @@ interface Promise<T> {
 	then<U>(fulfilledHandler?: (value: T) => Promise<U>, rejectedHandler?: (reason: any) => U): Promise<U>;
 }
 
-interface Global {
-	/**
-	 * @type {function(new:Set.<T>, !Array.<T>=)}
-	 */
-	Set: {
-		new <T>(iterable?: T[]): Set<T>; prototype: Set<any>
+// Defined as a parameter of the anonymous function wrapper
+declare var global: {
+	Set?: {
+		new <T>(iterable?: T[]): Set<T>;
+
+		prototype: Set<any>;
 	};
 
-	/**
-	 * @type {function(new:Map.<K, V>, !Array.<!Array.<*>>=)}
-	 */
-	Map: {
-		new <K, V>(iterable?: [K, V][]): Map<K, V>; prototype: Map<any, any>
+	Map?: {
+		new <K, V>(iterable?: [K, V][]): Map<K, V>;
+
+		prototype: Map<any, any>;
 	};
 
-	/**
-	 * @type {function(new:Promise.<T>, function(T), function(*)), resolve: function(T|!Promise.<T>):!Promise.<T>, all: function(!Array.<T|!Promise.<T>>):!Promise.<!Array.<T>>}}
-	 */
-	Promise: {
+	Promise?: {
 		new <T>(resolver: (resolve: (value: T) => void, reject: (reason: any) => void) => void): Promise<T>;
 
 		resolve<T>(value: T): Promise<T>;
-
 		all<T>(promises: T[]): Promise<T[]>;
-	};
-}
 
-declare var global: Global; // Defined as a parameter of the anonymous function wrapper
+		prototype: Promise<any>;
+	};
+};
 
 module libjass {
 	/**
