@@ -74,6 +74,20 @@ declare var global: {
 
 		prototype: Promise<any>;
 	};
+
+	MutationObserver?: {
+		prototype: MutationObserver;
+		new (callback: (arr: MutationRecord[], observer: MutationObserver) => any): MutationObserver;
+	};
+
+	WebkitMutationObserver?: {
+		prototype: MutationObserver;
+		new (callback: (arr: MutationRecord[], observer: MutationObserver) => any): MutationObserver;
+	};
+
+	process?: {
+		nextTick: (callback: () => void) => void;
+	};
 };
 
 module libjass {
@@ -620,8 +634,48 @@ module libjass {
 			});
 		}
 
+		// Based on https://github.com/petkaantonov/bluebird/blob/1b1467b95442c12378d0ea280ede61d640ab5510/src/schedule.js
 		private static _nextTick: (callback: () => void) => void = (function () {
-			return (callback: () => void) => setTimeout(callback, 0);
+			var MutationObserver = global.MutationObserver || global.WebkitMutationObserver;
+			if (global.process !== undefined && typeof global.process.nextTick === "function") {
+				return (callback: () => void) => {
+					global.process.nextTick(callback);
+				};
+			}
+			else if (MutationObserver !== undefined) {
+				var pending: Array<() => void> = [];
+				var currentlyPending = false;
+
+				var div = document.createElement("div");
+
+				var observer = new MutationObserver(() => {
+					var processing = pending;
+					pending = [];
+
+					processing.forEach(callback => callback());
+
+					currentlyPending = false;
+
+					if (pending.length > 0) {
+						div.classList.toggle("foo");
+						currentlyPending = true;
+					}
+				});
+
+				observer.observe(div, { attributes: true });
+
+				return (callback: () => void) => {
+					pending.push(callback);
+
+					if (!currentlyPending) {
+						div.classList.toggle("foo");
+						currentlyPending = true;
+					}
+				};
+			}
+			else {
+				return (callback: () => void) => setTimeout(callback, 0);
+			}
 		})();
 	}
 
