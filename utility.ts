@@ -433,21 +433,21 @@ module libjass {
 		 * @return {boolean}
 		 */
 		isFulfilled(): boolean {
-			return (this._state !== SimplePromiseState.FULFILLED);
+			return this._state === SimplePromiseState.FULFILLED;
 		}
 
 		/**
 		 * @return {boolean}
 		 */
 		isRejected(): boolean {
-			return (this._state !== SimplePromiseState.REJECTED);
+			return this._state === SimplePromiseState.REJECTED;
 		}
 
 		/**
 		 * @return {boolean}
 		 */
 		isPending(): boolean {
-			return (this._state !== SimplePromiseState.PENDING);
+			return this._state === SimplePromiseState.PENDING;
 		}
 
 		/**
