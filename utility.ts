@@ -22,6 +22,18 @@
 
 "use strict";
 
+interface SetConstructor {
+	new <T>(iterable?: T[]): Set<T>;
+
+	prototype: Set<any>;
+}
+
+interface MapConstructor {
+	new <K, V>(iterable?: [K, V][]): Map<K, V>;
+
+	prototype: Map<any, any>;
+}
+
 interface Promise<T> {
 	/**
 	 * @param {?function(T):U} fulfilledHandler
@@ -52,28 +64,20 @@ interface Promise<T> {
 	then<U>(fulfilledHandler?: (value: T) => Promise<U>, rejectedHandler?: (reason: any) => U): Promise<U>;
 }
 
+interface PromiseConstructor {
+	new <T>(resolver: (resolve: (value: T) => void, reject: (reason: any) => void) => void): Promise<T>;
+
+	resolve<T>(value: T): Promise<T>;
+	all<T>(promises: T[]): Promise<T[]>;
+
+	prototype: Promise<any>;
+}
+
 // Defined as a parameter of the anonymous function wrapper
 declare var global: {
-	Set?: {
-		new <T>(iterable?: T[]): Set<T>;
-
-		prototype: Set<any>;
-	};
-
-	Map?: {
-		new <K, V>(iterable?: [K, V][]): Map<K, V>;
-
-		prototype: Map<any, any>;
-	};
-
-	Promise?: {
-		new <T>(resolver: (resolve: (value: T) => void, reject: (reason: any) => void) => void): Promise<T>;
-
-		resolve<T>(value: T): Promise<T>;
-		all<T>(promises: T[]): Promise<T[]>;
-
-		prototype: Promise<any>;
-	};
+	Set?: SetConstructor;
+	Map?: MapConstructor;
+	Promise?: PromiseConstructor;
 
 	MutationObserver?: {
 		prototype: MutationObserver;
