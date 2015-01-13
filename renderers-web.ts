@@ -1416,7 +1416,7 @@ module libjass.renderers {
 		 * Add an animation to this collection. The given keyframes together make one animation.
 		 *
 		 * @param {string} timingFunction One of the acceptable values for the "animation-timing-function" CSS property
-		 * @param {Array.<!{time: number, properties: !Object.<string, string>}>} keyframes
+		 * @param {!Array.<!libjass.renderers.Keyframe>} keyframes
 		 */
 		add(timingFunction: string, keyframes: Keyframe[]): void {
 			var startTime: number = null;
@@ -1459,7 +1459,7 @@ module libjass.renderers {
 	 * This class represents a single keyframe. It has a list of CSS properties (names and values) associated with a point in time. Multiple keyframes make up an animation.
 	 *
 	 * @param {number} time
-	 * @param {!Object.<string, string>} properties
+	 * @param {!Map.<string, string>} properties
 	 */
 	class Keyframe {
 		constructor(private _time: number, private _properties: Map<string, string>) { }
@@ -1472,7 +1472,7 @@ module libjass.renderers {
 		}
 
 		/**
-		 * @type {!Object.<string, string>}
+		 * @type {!Map.<string, string>}
 		 */
 		get properties(): Map<string, string> {
 			return this._properties;
