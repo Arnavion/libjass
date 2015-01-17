@@ -169,11 +169,11 @@ module libjass {
 		 */
 		private _toProperty(value: T): string {
 			if (typeof value === "number") {
-				return "#" + value;
+				return `#${ value }`;
 			}
 
 			if (typeof value === "string") {
-				return "'" + value;
+				return `'${ value }`;
 			}
 
 			return null;
@@ -338,15 +338,15 @@ module libjass {
 		 */
 		private _keyToProperty(key: K): string {
 			if (typeof key === "number") {
-				return "#" + key;
+				return `#${ key }`;
 			}
 
 			if (typeof key === "string") {
-				return "'" + key;
+				return `'${ key }`;
 			}
 
 			if ((<any>key).id !== undefined) {
-				return "!" + (<any>key).id;
+				return `!${ (<any>key).id }`;
 			}
 
 			return null;

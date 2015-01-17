@@ -114,7 +114,7 @@ module libjass.renderers {
 			}
 
 			if (libjass.debugMode) {
-				console.log("Preloading " + urlsToPreload.size + " fonts...");
+				console.log(`Preloading ${ urlsToPreload.size } fonts...`);
 			}
 
 			var xhrPromises: Promise<void>[] = [];
@@ -123,7 +123,7 @@ module libjass.renderers {
 					var xhr = new XMLHttpRequest();
 					xhr.addEventListener("load", () => {
 						if (libjass.debugMode) {
-							console.log("Preloaded " + url + ".");
+							console.log(`Preloaded ${ url }.`);
 						}
 
 						resolve(null);
@@ -161,10 +161,10 @@ module libjass.renderers {
 			var ratio = Math.min(width / this.ass.properties.resolutionX, height / this.ass.properties.resolutionY);
 			var subsWrapperWidth = this.ass.properties.resolutionX * ratio;
 			var subsWrapperHeight = this.ass.properties.resolutionY * ratio;
-			this._subsWrapper.style.width = subsWrapperWidth.toFixed(3) + "px";
-			this._subsWrapper.style.height = subsWrapperHeight.toFixed(3) + "px";
-			this._subsWrapper.style.left = ((width - subsWrapperWidth) / 2).toFixed(3) + "px";
-			this._subsWrapper.style.top = ((height - subsWrapperHeight) / 2).toFixed(3) + "px";
+			this._subsWrapper.style.width = `${ subsWrapperWidth.toFixed(3) }px`;
+			this._subsWrapper.style.height = `${ subsWrapperHeight.toFixed(3) }px`;
+			this._subsWrapper.style.left = `${ ((width - subsWrapperWidth) / 2).toFixed(3) }px`;
+			this._subsWrapper.style.top = `${ ((height - subsWrapperHeight) / 2).toFixed(3) }px`;
 
 			this._scaleX = subsWrapperWidth / this.ass.properties.resolutionX;
 			this._scaleY = subsWrapperHeight / this.ass.properties.resolutionY;
@@ -200,10 +200,10 @@ module libjass.renderers {
 
 			var sub = document.createElement("div");
 
-			sub.style.marginLeft = (this._scaleX * dialogue.style.marginLeft).toFixed(3) + "px";
-			sub.style.marginRight = (this._scaleX * dialogue.style.marginRight).toFixed(3) + "px";
-			sub.style.marginTop = sub.style.marginBottom = (this._scaleY * dialogue.style.marginVertical).toFixed(3) + "px";
-			sub.style.minWidth = (this._subsWrapper.offsetWidth - this._scaleX * (dialogue.style.marginLeft + dialogue.style.marginRight)).toFixed(3) + "px";
+			sub.style.marginLeft = `${ (this._scaleX * dialogue.style.marginLeft).toFixed(3) }px`;
+			sub.style.marginRight = `${ (this._scaleX * dialogue.style.marginRight).toFixed(3) }px`;
+			sub.style.marginTop = sub.style.marginBottom = `${ (this._scaleY * dialogue.style.marginVertical).toFixed(3) }px`;
+			sub.style.minWidth = `${ (this._subsWrapper.offsetWidth - this._scaleX * (dialogue.style.marginLeft + dialogue.style.marginRight)).toFixed(3) }px`;
 
 			var animationCollection = new AnimationCollection(this, dialogue);
 
@@ -393,8 +393,8 @@ module libjass.renderers {
 					var positionPart = <parts.Position>part;
 
 					sub.style.position = "absolute";
-					sub.style.left = (this._scaleX * positionPart.x).toFixed(3) + "px";
-					sub.style.top = (this._scaleY * positionPart.y).toFixed(3) + "px";
+					sub.style.left = `${ (this._scaleX * positionPart.x).toFixed(3) }px`;
+					sub.style.top = `${ (this._scaleY * positionPart.y).toFixed(3) }px`;
 				}
 
 				else if (part instanceof parts.Move) {
@@ -402,17 +402,17 @@ module libjass.renderers {
 
 					sub.style.position = "absolute";
 					animationCollection.add("linear", [new Keyframe(0, new Map([
-						["left", (this._scaleX * movePart.x1).toFixed(3) + "px"],
-						["top", (this._scaleY * movePart.y1).toFixed(3) + "px"],
+						["left", `${ (this._scaleX * movePart.x1).toFixed(3) }px`],
+						["top", `${ (this._scaleY * movePart.y1).toFixed(3) }px`],
 					])), new Keyframe(movePart.t1, new Map([
-						["left", (this._scaleX * movePart.x1).toFixed(3) + "px"],
-						["top", (this._scaleY * movePart.y1).toFixed(3) + "px"],
+						["left", `${ (this._scaleX * movePart.x1).toFixed(3) }px`],
+						["top", `${ (this._scaleY * movePart.y1).toFixed(3) }px`],
 					])), new Keyframe(movePart.t2, new Map([
-						["left", (this._scaleX * movePart.x2).toFixed(3) + "px"],
-						["top", (this._scaleY * movePart.y2).toFixed(3) + "px"],
+						["left", `${ (this._scaleX * movePart.x2).toFixed(3) }px`],
+						["top", `${ (this._scaleY * movePart.y2).toFixed(3) }px`],
 					])), new Keyframe(dialogue.end - dialogue.start, new Map([
-						["left", (this._scaleX * movePart.x2).toFixed(3) + "px"],
-						["top", (this._scaleY * movePart.y2).toFixed(3) + "px"],
+						["left", `${ (this._scaleX * movePart.x2).toFixed(3) }px`],
+						["top", `${ (this._scaleY * movePart.y2).toFixed(3) }px`],
 					]))]);
 				}
 
@@ -483,8 +483,8 @@ module libjass.renderers {
 				if (part instanceof parts.Position || part instanceof parts.Move) {
 					var transformOrigin = WebRenderer._transformOrigins[dialogue.alignment];
 
-					var divTransformStyle = "translate(" + (-transformOrigin[0]) + "%, " + (-transformOrigin[1]) + "%) translate(-" + sub.style.marginLeft + ", -" + sub.style.marginTop + ")";
-					var transformOriginString = transformOrigin[0] + "% " + transformOrigin[1] + "%";
+					var divTransformStyle = `translate(${ -transformOrigin[0] }%, ${ -transformOrigin[1] }%) translate(-${ sub.style.marginLeft }, -${ sub.style.marginTop })`;
+					var transformOriginString = `${ transformOrigin[0] }% ${ transformOrigin[1] }%`;
 
 					sub.style.webkitTransform = divTransformStyle;
 					sub.style.webkitTransformOrigin = transformOriginString;
@@ -521,7 +521,7 @@ module libjass.renderers {
 
 			if (this._animationStyleElement === null) {
 				this._animationStyleElement = document.createElement("style");
-				this._animationStyleElement.id = "libjass-animation-styles-" + this.id;
+				this._animationStyleElement.id = `libjass-animation-styles-${ this.id }`;
 				this._animationStyleElement.type = "text/css";
 				document.querySelector("head").appendChild(this._animationStyleElement);
 			}
@@ -531,7 +531,7 @@ module libjass.renderers {
 			sub.style.webkitAnimation = animationCollection.animationStyle;
 			sub.style.animation = animationCollection.animationStyle;
 
-			sub.setAttribute("data-dialogue-id", this.id + "-" + dialogue.id);
+			sub.setAttribute("data-dialogue-id", `${ this.id }-${ dialogue.id }`);
 
 			this._preRenderedSubs.set(dialogue.id, { sub: sub, animationDelays: animationCollection.animationDelays });
 		}
@@ -568,7 +568,7 @@ module libjass.renderers {
 
 			var result = <HTMLDivElement>preRenderedSub.sub.cloneNode(true);
 
-			var animationDelay = preRenderedSub.animationDelays.map(delay => ((delay + dialogue.start - this.clock.currentTime) / this.clock.rate).toFixed(3) + "s").join(", ");
+			var animationDelay = preRenderedSub.animationDelays.map(delay => `${ ((delay + dialogue.start - this.clock.currentTime) / this.clock.rate).toFixed(3) }s`).join(", ");
 			result.style.webkitAnimationDelay = animationDelay;
 			result.style.animationDelay = animationDelay;
 
@@ -578,7 +578,7 @@ module libjass.renderers {
 			// Create the layer wrapper div and the alignment div inside it if not already created
 			if (this._layerWrappers[layer] === undefined) {
 				var layerWrapper = document.createElement("div");
-				layerWrapper.className = "layer layer" + layer;
+				layerWrapper.className = `layer layer${ layer }`;
 
 				// Find the next greater layer div and insert this div before that one
 				var insertBeforeElement: HTMLDivElement = null;
@@ -596,7 +596,7 @@ module libjass.renderers {
 
 			if (this._layerAlignmentWrappers[layer][alignment] === undefined) {
 				var layerAlignmentWrapper = document.createElement("div");
-				layerAlignmentWrapper.className = "an an" + alignment;
+				layerAlignmentWrapper.className = `an an${ alignment }`;
 
 				// Find the next greater layer,alignment div and insert this div before that one
 				var layerWrapper = this._layerWrappers[layer];
@@ -773,7 +773,7 @@ module libjass.renderers {
 		private _nextFilterId = 0;
 
 		constructor(renderer: WebRenderer, dialogue: Dialogue, private _scaleX: number, private _scaleY: number, private _settings: RendererSettings, private _fontSizeElement: HTMLDivElement, private _svgDefsElement: SVGDefsElement) {
-			this._id = renderer.id + "-" + dialogue.id;
+			this._id = `${ renderer.id }-${ dialogue.id }`;
 			this._defaultStyle = dialogue.style;
 
 			this.reset(null);
@@ -846,7 +846,7 @@ module libjass.renderers {
 				fontStyleOrWeight += "bold ";
 			}
 			else if (this._bold !== false) {
-				fontStyleOrWeight += (<string>this._bold + " ");
+				fontStyleOrWeight += this._bold + " ";
 			}
 			var fontSize: string;
 			if (isTextOnlySpan) {
@@ -856,7 +856,7 @@ module libjass.renderers {
 				fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize, this._fontSizeElement)).toFixed(3);
 			}
 			var lineHeight = (this._scaleY * this._fontSize).toFixed(3);
-			span.style.font = fontStyleOrWeight + fontSize + "px/" + lineHeight + "px \"" + this._fontName + "\"";
+			span.style.font = `${ fontStyleOrWeight }${ fontSize }px/${ lineHeight }px "${ this._fontName }"`;
 
 			var textDecoration = "";
 			if (this._underline) {
@@ -870,30 +870,30 @@ module libjass.renderers {
 			var transform = "";
 			if (isTextOnlySpan) {
 				if (this._fontScaleY !== this._fontScaleX) {
-					transform += "scaleY(" + (this._fontScaleY / this._fontScaleX).toFixed(3) + ") ";
+					transform += `scaleY(${ (this._fontScaleY / this._fontScaleX).toFixed(3) }) `;
 				}
 			}
 			else {
 				if (this._fontScaleX !== 1) {
-					transform += "scaleX(" + this._fontScaleX + ") ";
+					transform += `scaleX(${ this._fontScaleX }) `;
 				}
 				if (this._fontScaleY !== 1) {
-					transform += "scaleY(" + this._fontScaleY + ") ";
+					transform += `scaleY(${ this._fontScaleY }) `;
 				}
 			}
 			if (this._rotationY !== null) {
-				transform += "rotateY(" + this._rotationY + "deg) ";
+				transform += `rotateY(${ this._rotationY }deg) `;
 			}
 			if (this._rotationX !== null) {
-				transform += "rotateX(" + this._rotationX + "deg) ";
+				transform += `rotateX(${ this._rotationX }deg) `;
 			}
 			if (this._rotationZ !== 0) {
-				transform += "rotateZ(" + (-1 * this._rotationZ) + "deg) ";
+				transform += `rotateZ(${ -1 * this._rotationZ }deg) `;
 			}
 			if (this._skewX !== null || this._skewY !== null) {
 				var skewX = SpanStyles._valueOrDefault(this._skewX, 0);
 				var skewY = SpanStyles._valueOrDefault(this._skewY, 0);
-				transform += "matrix(1, " + skewY + ", " + skewX + ", 1, 0, 0) ";
+				transform += `matrix(1, ${ skewY }, ${ skewX }, 1, 0, 0) `;
 			}
 			if (transform !== "") {
 				span.style.webkitTransform = transform;
@@ -903,7 +903,7 @@ module libjass.renderers {
 				span.style.display = "inline-block";
 			}
 
-			span.style.letterSpacing = (this._scaleX * this._letterSpacing).toFixed(3) + "px";
+			span.style.letterSpacing = `${ (this._scaleX * this._letterSpacing).toFixed(3) }px`;
 
 			var primaryColor = this._primaryColor.withAlpha(this._primaryAlpha);
 			span.style.color = primaryColor.toString();
@@ -917,7 +917,7 @@ module libjass.renderers {
 			var blurFilter = '';
 
 			if (this._settings.enableSvg) {
-				var filterId = "svg-filter-" + this._id + "-" + this._nextFilterId++;
+				var filterId = `svg-filter-${ this._id }-${ this._nextFilterId++ }`;
 
 				if (outlineWidth > 0 || outlineHeight > 0) {
 					/* Construct an elliptical border by merging together many rectangles. The border is creating using dilate morphology filters, but these only support
@@ -959,29 +959,34 @@ module libjass.renderers {
 						}
 					})((x: number, y: number): void => {
 						outlineFilter +=
-							'\t<feMorphology in="SourceAlpha" operator="dilate" radius="' + x.toFixed(3) + ' ' + y.toFixed(3) + '" result="outline' + outlineNumber + '" />\n';
+`	<feMorphology in="SourceAlpha" operator="dilate" radius="${ x.toFixed(3) } ${ y.toFixed(3) }" result="outline${ outlineNumber }" />
+`;
 
 						mergeOutlinesFilter +=
-							'\t\t<feMergeNode in="outline' + outlineNumber + '" />\n';
+`		<feMergeNode in="outline${ outlineNumber }" />
+`;
 
 						outlineNumber++;
 					});
 
 					outlineFilter +=
-						'\t<feMerge result="outline">\n' +
-						mergeOutlinesFilter +
-						'\t</feMerge>\n' +
-						'\t<feFlood flood-color="' + outlineColor.toString() + '" />' +
-						'\t<feComposite operator="in" in2="outline" />';
+`	<feMerge result="outline">
+${ mergeOutlinesFilter }
+	</feMerge>
+	<feFlood flood-color="${ outlineColor.toString() }" />
+	<feComposite operator="in" in2="outline" />
+`;
 				}
 
 				if (this._gaussianBlur > 0) {
 					blurFilter +=
-						'\t<feGaussianBlur stdDeviation="' + this._gaussianBlur + '" />\n';
+`	<feGaussianBlur stdDeviation="${ this._gaussianBlur }" />
+`;
 				}
 				for (var i = 0; i < this._blur; i++) {
 					blurFilter +=
-						'\t<feConvolveMatrix kernelMatrix="1 2 1 2 4 2 1 2 1" edgeMode="none" />\n';
+`	<feConvolveMatrix kernelMatrix="1 2 1 2 4 2 1 2 1" edgeMode="none" />
+`;
 				}
 			}
 			else {
@@ -1008,7 +1013,7 @@ module libjass.renderers {
 							}
 						}
 					})((x: number, y: number): void => {
-						outlineCssString += ", " + outlineColor.toString() + " " + x + "px " + y + "px " + this._gaussianBlur.toFixed(3) + "px";
+						outlineCssString += `, ${ outlineColor.toString() } ${ x }px ${ y }px ${ this._gaussianBlur.toFixed(3) }px`;
 					});
 
 					span.style.textShadow = outlineCssString.substr(", ".length);
@@ -1020,26 +1025,27 @@ module libjass.renderers {
 
 			if (outlineFilter !== '' || blurFilter !== '') {
 				var filterString =
-					'<filter xmlns="http://www.w3.org/2000/svg" id="' + filterId + '" x="-50%" width="200%" y="-50%" height="200%">\n' +
-					outlineFilter +
-					blurFilter +
-					'\t<feMerge>\n' +
-					'\t\t<feMergeNode />\n' +
-					'\t\t<feMergeNode in="SourceGraphic" />\n' +
-					'\t</feMerge>\n' +
-					'</filter>\n';
+`<filter xmlns="http://www.w3.org/2000/svg" id="${ filterId }" x="-50%" width="200%" y="-50%" height="200%">
+${ outlineFilter }
+${ blurFilter }
+	<feMerge>
+		<feMergeNode />
+		<feMergeNode in="SourceGraphic" />
+	</feMerge>
+</filter>
+`;
 
 				var filterElement = domParser.parseFromString(filterString, "image/svg+xml").childNodes[0];
 
 				this._svgDefsElement.appendChild(filterElement);
 
-				filterWrapperSpan.style.webkitFilter = 'url("#' + filterId + '")';
-				filterWrapperSpan.style.filter = 'url("#' + filterId + '")';
+				filterWrapperSpan.style.webkitFilter = `url("#${ filterId }")`;
+				filterWrapperSpan.style.filter = `url("#${ filterId }")`;
 			}
 
 			if (this._shadowDepthX !== 0 || this._shadowDepthY !== 0) {
 				var shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
-				var shadowCssString = shadowColor.toString() + " " + (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) + "px " + (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) + "px 0px";
+				var shadowCssString = `${ shadowColor.toString() } ${ (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) }px ${ (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) }px 0px`;
 				if (span.style.textShadow === "") {
 					span.style.textShadow = shadowCssString;
 				}
@@ -1061,7 +1067,7 @@ module libjass.renderers {
 		 */
 		makeNewLine(): HTMLBRElement {
 			var result = document.createElement("br");
-			result.style.lineHeight = (this._scaleY * this._fontSize).toFixed(3) + "px";
+			result.style.lineHeight = `${ (this._scaleY * this._fontSize).toFixed(3) }px`;
 			return result;
 		}
 
@@ -1352,7 +1358,7 @@ module libjass.renderers {
 			var existingFontSize = existingFontSizeMap.get(lineHeight);
 			if (existingFontSize === undefined) {
 				fontSizeElement.style.fontFamily = fontFamily;
-				fontSizeElement.style.fontSize = lineHeight + "px";
+				fontSizeElement.style.fontSize = `${ lineHeight }px`;
 				existingFontSizeMap.set(lineHeight, existingFontSize = lineHeight * lineHeight / fontSizeElement.offsetHeight);
 			}
 
@@ -1379,7 +1385,7 @@ module libjass.renderers {
 		private _numAnimations: number = 0;
 
 		constructor(renderer: NullRenderer, dialogue: Dialogue) {
-			this._id = renderer.id + "-" + dialogue.id;
+			this._id = `${ renderer.id }-${ dialogue.id }`;
 			this._start = dialogue.start;
 			this._end = dialogue.end;
 			this._rate = renderer.clock.rate;
@@ -1431,26 +1437,39 @@ module libjass.renderers {
 
 				endTime = keyframe.time;
 
-				ruleCssText += "\t" + (100 * keyframe.time / (this._end - this._start)).toFixed(3) + "% {\n";
+				ruleCssText +=
+`	${ (100 * keyframe.time / (this._end - this._start)).toFixed(3) }% {
+`;
 
 				keyframe.properties.forEach((value, name) => {
-					ruleCssText += "\t\t" + name + ": " + value + ";\n";
+					ruleCssText +=
+`		${ name }: ${ value };
+`;
 				});
 
-				ruleCssText += "\t}\n";
+				ruleCssText +=
+`	}
+`;
 			});
 
-			var animationName = "dialogue-" + this._id + "-" + this._numAnimations++;
+			var animationName = `dialogue-${ this._id }-${ this._numAnimations++ }`;
 
 			this._cssText +=
-				"@-webkit-keyframes " + animationName + " {\n" + ruleCssText + "}\n\n" +
-				"@keyframes " + animationName + " {\n" + ruleCssText + "}\n\n";
+`@-webkit-keyframes ${ animationName } {
+${ ruleCssText }
+}
+
+@keyframes ${ animationName } {
+${ ruleCssText }
+}
+
+`;
 
 			if (this._animationStyle !== "") {
 				this._animationStyle += ",";
 			}
 
-			this._animationStyle += animationName + " " + ((endTime - startTime) / this._rate).toFixed(3) + "s " + timingFunction;
+			this._animationStyle += `${ animationName } ${ ((endTime - startTime) / this._rate).toFixed(3) }s ${ timingFunction }`;
 			this._animationDelays.push(startTime);
 		}
 	}
@@ -1524,30 +1543,30 @@ module libjass.renderers {
 			drawingInstructions.instructions.forEach(instruction => {
 				if (instruction instanceof parts.drawing.MoveInstruction) {
 					var movePart = <parts.drawing.MoveInstruction>instruction;
-					path += " M " + movePart.x + " " + (movePart.y + this._baselineOffset);
+					path += ` M ${ movePart.x } ${ movePart.y + this._baselineOffset }`;
 					bboxWidth = Math.max(bboxWidth, movePart.x);
 					bboxHeight = Math.max(bboxHeight, movePart.y + this._baselineOffset);
 				}
 				else if (instruction instanceof parts.drawing.LineInstruction) {
 					var linePart = <parts.drawing.LineInstruction>instruction;
-					path += " L " + linePart.x + " " + (linePart.y + this._baselineOffset);
+					path += ` L ${ linePart.x } ${ linePart.y + this._baselineOffset }`;
 					bboxWidth = Math.max(bboxWidth, linePart.x);
 					bboxHeight = Math.max(bboxHeight, linePart.y + this._baselineOffset);
 				}
 				else if (instruction instanceof parts.drawing.CubicBezierCurveInstruction) {
 					var cubicBezierCurvePart = <parts.drawing.CubicBezierCurveInstruction>instruction;
-					path += " C " + cubicBezierCurvePart.x1 + " " + (cubicBezierCurvePart.y1 + this._baselineOffset) + ", " + cubicBezierCurvePart.x2 + " " + (cubicBezierCurvePart.y2 + this._baselineOffset) + ", " + cubicBezierCurvePart.x3 + " " + (cubicBezierCurvePart.y3 + this._baselineOffset);
+					path += ` C ${ cubicBezierCurvePart.x1 } ${ cubicBezierCurvePart.y1 + this._baselineOffset }, ${ cubicBezierCurvePart.x2 } ${ cubicBezierCurvePart.y2 + this._baselineOffset }, ${ cubicBezierCurvePart.x3 } ${ cubicBezierCurvePart.y3 + this._baselineOffset }`;
 					bboxWidth = Math.max(bboxWidth, cubicBezierCurvePart.x1, cubicBezierCurvePart.x2, cubicBezierCurvePart.x3);
 					bboxHeight = Math.max(bboxHeight, cubicBezierCurvePart.y1 + this._baselineOffset, cubicBezierCurvePart.y2 + this._baselineOffset, cubicBezierCurvePart.y3 + this._baselineOffset);
 				}
 			});
 
 			var result =
-				'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="' + (bboxWidth * scaleX).toFixed(3) + 'px" height="' + (bboxHeight * scaleY).toFixed(3) + 'px">\n' +
-				'\t<g transform="scale(' + scaleX.toFixed(3) + ' ' + scaleY.toFixed(3) + ')">\n' +
-				'\t\t<path d="' + path + '" fill="' + fillColor.toString() + '" />\n' +
-				'\t</g>\n' +
-				'</svg>';
+`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="${ (bboxWidth * scaleX).toFixed(3) }px" height="${ (bboxHeight * scaleY).toFixed(3) }px">
+	<g transform="scale(${ scaleX.toFixed(3) } ${ scaleY.toFixed(3) })">
+		<path d="${ path }" fill="${ fillColor.toString() }" />
+	</g>
+</svg>`;
 
 			return <SVGSVGElement>domParser.parseFromString(result, "image/svg+xml").childNodes[0];
 		}

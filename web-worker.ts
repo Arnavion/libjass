@@ -280,7 +280,7 @@ module libjass.webworker {
 
 			var commandCallback = workerCommands.get(requestMessage.command);
 			if (commandCallback === undefined) {
-				this._respond({ requestId: requestMessage.requestId, error: new Error("Unrecognized command: " + requestMessage.command), result: null });
+				this._respond({ requestId: requestMessage.requestId, error: new Error(`Unrecognized command: ${ requestMessage.command }`), result: null });
 				return;
 			}
 

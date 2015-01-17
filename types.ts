@@ -117,8 +117,8 @@ module libjass {
 
 			if (libjass.verboseMode) {
 				var repr = "";
-				styleTemplate.forEach((value, key) => repr += key + " = " + value + ", ");
-				console.log("Read style: " + repr);
+				styleTemplate.forEach((value, key) => repr += `${ key } = ${ value }, `);
+				console.log(`Read style: ${ repr }`);
 			}
 
 			// Create the dialogue and add it to the dialogues array
@@ -141,8 +141,8 @@ module libjass {
 
 			if (libjass.verboseMode) {
 				var repr = "";
-				dialogueTemplate.forEach((value, key) => repr += key + " = " + value + ", ");
-				console.log("Read dialogue: " + repr);
+				dialogueTemplate.forEach((value, key) => repr += `${ key } = ${ value }, `);
+				console.log(`Read dialogue: ${ repr }`);
 			}
 
 			// Create the dialogue and add it to the dialogues array
@@ -158,7 +158,7 @@ module libjass {
 		 */
 		static fromString(raw: string, type: Format = Format.ASS): Promise<ASS> {
 			if ((<{ [index: string]: any }><any>Format)[Format[type]] !== type) {
-				throw new Error("Illegal value of type: " + type);
+				throw new Error(`Illegal value of type: ${ type }`);
 			}
 
 			return ASS.fromStream(new parser.StringStream(raw), type);
@@ -178,7 +178,7 @@ module libjass {
 				case Format.SRT:
 					return new parser.SrtStreamParser(stream).ass;
 				default:
-					throw new Error("Illegal value of type: " + type);
+					throw new Error(`Illegal value of type: ${ type }`);
 			}
 		}
 
@@ -191,7 +191,7 @@ module libjass {
 		 */
 		static fromUrl(url: string, type: Format = Format.ASS): Promise<ASS> {
 			if ((<{ [index: string]: any }><any>Format)[Format[type]] !== type) {
-				throw new Error("Illegal value of type: " + type);
+				throw new Error(`Illegal value of type: ${ type }`);
 			}
 
 			var xhr = new XMLHttpRequest();
@@ -640,7 +640,7 @@ module libjass {
 			var style = template.get("Style");
 			this._style = ass.styles.get(style);
 			if (this._style === undefined) {
-				throw new Error("Unrecognized style " + style);
+				throw new Error(`Unrecognized style ${ style }`);
 			}
 
 			this._start = Dialogue._toTime(template.get("Start"));
@@ -729,7 +729,7 @@ module libjass {
 		 * @return {string} A simple representation of this dialogue's properties and parts.
 		 */
 		toString(): string {
-			return "#" + this._id + " [" + this._start.toFixed(3) + "-" + this._end.toFixed(3) + "] " + ((this._parts !== null) ? this._parts.join(", ") : this._rawPartsString);
+			return `#${ this._id } [${ this._start.toFixed(3) }-${ this._end.toFixed(3) }] ${ (this._parts !== null) ? this._parts.join(", ") : this._rawPartsString }`;
 		}
 
 		/**
@@ -774,12 +774,12 @@ module libjass {
 				var possiblyIncorrectParses = this._parts.filter(part => part instanceof parts.Comment && (<parts.Comment>part).value.indexOf("\\") !== -1);
 				if (possiblyIncorrectParses.length > 0) {
 					console.warn(
-						"Possible incorrect parse:\n" +
-						this._rawPartsString + "\n" +
-						"was parsed as\n" +
-						this.toString() + "\n" +
-						"The possibly incorrect parses are:\n" +
-						possiblyIncorrectParses.join("\n")
+`Possible incorrect parse:
+${ this._rawPartsString }
+was parsed as
+${ this.toString() }
+The possibly incorrect parses are:
+${ possiblyIncorrectParses.join("\n") }`
 					);
 				}
 			}
@@ -850,7 +850,7 @@ module libjass {
 			return numValue;
 		}
 		catch (ex) {
-			throw new Error("Property " + key + " has invalid value " + value + " - " + ex.stack);
+			throw new Error(`Property ${ key } has invalid value ${ value } - ${ ex.stack }`);
 		}
 	}
 }

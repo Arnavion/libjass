@@ -149,7 +149,7 @@ module libjass.renderers {
 			var currentTime = this._clock.currentTime;
 
 			if (libjass.verboseMode) {
-				console.log("NullRenderer._onClockTick: currentTime = " + currentTime);
+				console.log(`NullRenderer._onClockTick: currentTime = ${ currentTime }`);
 			}
 
 			for (var i = 0; i < this._ass.dialogues.length; i++) {

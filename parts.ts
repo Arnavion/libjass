@@ -86,7 +86,7 @@ module libjass.parts {
 		 * @return {string} The CSS representation "rgba(...)" of this color.
 		 */
 		toString(): string {
-			return "rgba(" + this._red + ", " + this._green + ", " + this._blue + ", " + this._alpha.toFixed(3) + ")";
+			return `rgba(${ this._red }, ${ this._green }, ${ this._blue }, ${ this._alpha.toFixed(3) })`;
 		}
 	}
 
@@ -134,7 +134,7 @@ module libjass.parts {
 		 * @return {string}
 		 */
 		toString(): string {
-			return "Text { value: " + this._value.replace(/\u00A0/g, "\\h") + " }";
+			return `Text { value: ${ this._value.replace(/\u00A0/g, "\\h") } }`;
 		}
 	}
 
@@ -1415,7 +1415,7 @@ module libjass.parts {
 			ctor.prototype.toString = function () {
 				return (
 					ctorName + " { " +
-					propertyNames.map(name => name + ": " + (<any>this)[name]).join(", ") +
+					propertyNames.map(name => `${ name }: ${ (<any>this)[name] }`).join(", ") +
 					((propertyNames.length > 0) ? " " : "") +
 					"}"
 				);
@@ -1434,7 +1434,7 @@ module libjass.parts {
 	Object.keys(libjass.parts.drawing).forEach(key => {
 		var value = (<any>libjass.parts.drawing)[key];
 		if (value instanceof Function) {
-			addToString(value, "Drawing" + key);
+			addToString(value, `Drawing${ key }`);
 			libjass.webworker._registerClassPrototype(value.prototype);
 		}
 	});

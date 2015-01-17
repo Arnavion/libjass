@@ -356,7 +356,7 @@ module libjass.parser {
 						.replace(/<\/u>/g, "{\\u0}").replace(/\{\/u\}/g, "{\\u0}")
 						.replace(
 							/<font color="#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})">/g,
-							(/* ujs:unreferenced */ substring: string, red: string, green: string, blue: string) => "{\c&H" + blue + green + red + "&}"
+							(/* ujs:unreferenced */ substring: string, red: string, green: string, blue: string) => `{\c&H${ blue }${ green }${ red }&}`
 						).replace(/<\/font>/g, "{\\c}");
 
 					if (this._currentDialogueText !== null) {
@@ -2359,7 +2359,7 @@ module libjass.parser {
 		valueParser: (current: ParseNode) => ParseNode,
 		required: boolean
 	): void {
-		(<any>ParserRun.prototype)["parse_tag_" + tagName] = function (parent: ParseNode): ParseNode {
+		(<any>ParserRun.prototype)[`parse_tag_${ tagName }`] = function (parent: ParseNode): ParseNode {
 			var self = <ParserRun>this;
 			var current = new ParseNode(parent);
 
