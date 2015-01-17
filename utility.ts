@@ -24,53 +24,10 @@
 
 interface SetConstructor {
 	new <T>(iterable?: T[]): Set<T>;
-
-	prototype: Set<any>;
 }
 
 interface MapConstructor {
 	new <K, V>(iterable?: [K, V][]): Map<K, V>;
-
-	prototype: Map<any, any>;
-}
-
-interface Promise<T> {
-	/**
-	 * @param {?function(T):U} fulfilledHandler
-	 * @param {?function(*):U} rejectedHandler
-	 * @return {!Promise.<U>}
-	 */
-	then<U>(fulfilledHandler?: (value: T) => U, rejectedHandler?: (reason: any) => U): Promise<U>;
-
-	/**
-	 * @param {?function(T):!Promise.<U>} fulfilledHandler
-	 * @param {?function(*):!Promise.<U>} rejectedHandler
-	 * @return {!Promise.<U>}
-	 */
-	then<U>(fulfilledHandler?: (value: T) => Promise<U>, rejectedHandler?: (reason: any) => Promise<U>): Promise<U>;
-
-	/**
-	 * @param {?function(T):U} fulfilledHandler
-	 * @param {?function(*):!Promise.<U>} rejectedHandler
-	 * @return {!Promise.<U>}
-	 */
-	then<U>(fulfilledHandler?: (value: T) => U, rejectedHandler?: (reason: any) => Promise<U>): Promise<U>;
-
-	/**
-	 * @param {?function(T):!Promise.<U>} fulfilledHandler
-	 * @param {?function(*):U} rejectedHandler
-	 * @return {!Promise.<U>}
-	 */
-	then<U>(fulfilledHandler?: (value: T) => Promise<U>, rejectedHandler?: (reason: any) => U): Promise<U>;
-}
-
-interface PromiseConstructor {
-	new <T>(resolver: (resolve: (value: T) => void, reject: (reason: any) => void) => void): Promise<T>;
-
-	resolve<T>(value: T): Promise<T>;
-	all<T>(promises: T[]): Promise<T[]>;
-
-	prototype: Promise<any>;
 }
 
 // Defined as a parameter of the anonymous function wrapper
@@ -106,11 +63,11 @@ module libjass {
 		private _elements: { [key: string]: T };
 		private _size: number;
 
-		constructor(iterable?: T[]) {
+		constructor(iterable?: Iterable<T>) {
 			this.clear();
 
 			if (Array.isArray(iterable)) {
-				iterable.forEach(value => this.add(value));
+				(<T[]>iterable).forEach(value => this.add(value));
 			}
 		}
 
@@ -177,6 +134,27 @@ module libjass {
 		}
 
 		/**
+		 * @return {!Iterator.<!Array.<T>>}
+		 */
+		entries(): Iterator<[T, T]> {
+			throw new Error("This Set implementation doesn't support entries().");
+		}
+
+		/**
+		 * @return {!Iterator.<T>}
+		 */
+		keys(): Iterator<T> {
+			throw new Error("This Set implementation doesn't support keys().");
+		}
+
+		/**
+		 * @return {!Iterator.<T>}
+		 */
+		values(): Iterator<T> {
+			throw new Error("This Set implementation doesn't support values().");
+		}
+
+		/**
 		 * @type {number}
 		 */
 		get size(): number {
@@ -224,11 +202,11 @@ module libjass {
 		private _values: { [key: string]: V };
 		private _size: number;
 
-		constructor(iterable?: [K, V][]) {
+		constructor(iterable?: Iterable<[K, V]>) {
 			this.clear();
 
 			if (Array.isArray(iterable)) {
-				iterable.forEach(element => this.set(element[0], element[1]));
+				(<[K, V][]>iterable).forEach(element => this.set(element[0], element[1]));
 			}
 		}
 
@@ -325,6 +303,27 @@ module libjass {
 		}
 
 		/**
+		 * @return {!Iterator.<!Array.<*>>}
+		 */
+		entries(): Iterator<[K, V]> {
+			throw new Error("This Map implementation doesn't support entries().");
+		}
+
+		/**
+		 * @return {!Iterator.<K>}
+		 */
+		keys(): Iterator<K> {
+			throw new Error("This Map implementation doesn't support keys().");
+		}
+
+		/**
+		 * @return {!Iterator.<V>}
+		 */
+		values(): Iterator<V> {
+			throw new Error("This Map implementation doesn't support values().");
+		}
+
+		/**
 		 * @type {number}
 		 */
 		get size(): number {
@@ -378,7 +377,7 @@ module libjass {
 		private _alreadyFulfilledValue: T = null;
 		private _alreadyRejectedReason: any = null;
 
-		constructor(private _resolver: (resolve: (value: T) => void, reject: (reason: any) => void) => void) {
+		constructor(private _resolver: (resolve: (value: T | Promise<T>) => void, reject: (reason: any) => void) => void) {
 			try {
 				_resolver(value => this._resolve(value), reason => this._reject(reason));
 			}
@@ -392,7 +391,7 @@ module libjass {
 		 * @param {?function(*):(U|Promise.<U>)} rejectedHandler
 		 * @return {!Promise.<U>}
 		 */
-		then<U>(fulfilledHandler?: (value: T) => U, rejectedHandler?: (reason: any) => U): Promise<U> {
+		then<U>(fulfilledHandler?: (value: T) => U | Promise<U>, rejectedHandler?: (reason: any) => U | Promise<U>): Promise<U> {
 			fulfilledHandler = (typeof fulfilledHandler === "function") ? fulfilledHandler : null;
 			rejectedHandler = (typeof rejectedHandler === "function") ? rejectedHandler : null;
 
@@ -431,6 +430,14 @@ module libjass {
 			this._propagateResolution();
 
 			return result;
+		}
+
+		/**
+		 * @param {function(*):(T|Promise.<T>)} rejectedHandler
+		 * @return {!Promise.<T>}
+		 */
+		catch(rejectedHandler?: (reason: any) => T | Promise<T>): Promise<T> {
+			return this.then(null, rejectedHandler);
 		}
 
 		/**
@@ -480,9 +487,9 @@ module libjass {
 		 * @param {T|!Promise.<T>} value
 		 * @return {!Promise.<T>}
 		 */
-		static resolve<T>(value: T): Promise<T> {
+		static resolve<T>(value: T | Promise<T>): Promise<T> {
 			if (value instanceof SimplePromise) {
-				return <Promise<T>><any>value;
+				return value;
 			}
 
 			return new Promise<T>(resolve => resolve(value));
@@ -492,7 +499,7 @@ module libjass {
 		 * @param {!Array.<T|!Promise.<T>>} values
 		 * @return {!Promise.<!Array.<T>>}
 		 */
-		static all<T>(values: T[]): Promise<T[]> {
+		static all<T>(values: (T | Promise<T>)[]): Promise<T[]> {
 			return new Promise<T[]>((resolve, reject) => {
 				var result: T[] = [];
 
@@ -516,22 +523,22 @@ module libjass {
 		/**
 		 * @param {T|!Promise.<T>} value
 		 */
-		private _resolve(value: T): void {
+		private _resolve(value: T | Promise<T>): void {
 			var alreadyCalled = false;
 
 			try {
-				if (<any>value === this) {
+				if (value === this) {
 					throw new TypeError("2.3.1");
 				}
 
 				var thenMethod = SimplePromise._getThenMethod<T>(value);
 				if (thenMethod === null) {
-					this._fulfill(value);
+					this._fulfill(<T>value);
 					return;
 				}
 
 				thenMethod.call(
-					<Promise<T>><any>value,
+					<Promise<T>>value,
 					(value: T) => {
 						if (alreadyCalled) {
 							return;
@@ -590,7 +597,7 @@ module libjass {
 		 * @param {!*} obj
 		 * @return {?function(function(T):(T|!Promise.<T>), function(*):(T|!Promise.<T>)):!Promise.<T>}
 		 */
-		private static _getThenMethod<T>(obj: any): (fulfilledHandler: (value: T) => T, rejectedHandler: (reason: any) => T) => Promise<T> {
+		private static _getThenMethod<T>(obj: any): (fulfilledHandler: (value: T) => T | Promise<T>, rejectedHandler: (reason: any) => T | Promise<T>) => Promise<T> {
 			if (typeof obj !== "object" && typeof obj !== "function") {
 				return null;
 			}
@@ -647,7 +654,7 @@ module libjass {
 				};
 			}
 			else if (MutationObserver !== undefined) {
-				var pending: Array<() => void> = [];
+				var pending: (() => void)[] = [];
 				var currentlyPending = false;
 
 				var div = document.createElement("div");

@@ -33,7 +33,7 @@ var ts = {};
 vm.runInNewContext(fs.readFileSync(typeScriptJsPath, { encoding: "utf8" }).replace(
 	"function writeCommentRange(",
 	"ts.writeCommentRange = function ("
-).replace(/writeCommentRange(?=[();])/g, "ts.writeCommentRange") + "module.exports = ts;", {
+).replace(/writeCommentRange(?=[();])/g, "ts.writeCommentRange"), {
 	module: Object.defineProperty(Object.create(null), "exports", {
 		get: function () { return ts; },
 		set: function (value) { ts = value; },
@@ -82,7 +82,7 @@ var CompilerHost = function () {
 		return (text !== undefined) ? ts.createSourceFile(filename, text, ts.ScriptTarget.ES5) : undefined;
 	};
 
-	CompilerHost.prototype.getDefaultLibFilename = function () { return path.join(typeScriptModulePath, "lib.dom.d.ts"); };
+	CompilerHost.prototype.getDefaultLibFilename = function () { return path.join(typeScriptModulePath, "lib.es6.d.ts"); };
 
 	CompilerHost.prototype.writeFile = function (filename, data, writeByteOrderMark, onError) {
 		var outputPath = null;
@@ -199,7 +199,7 @@ var Compiler = function () {
 	Compiler.prototype.writeFiles = function (outputCodePath, outputSourceMapPath, outputStream) {
 		this._host.setOutputs(outputCodePath, outputSourceMapPath, outputStream);
 
-		var emitErrors = this._checker.emitFiles().errors;
+		var emitErrors = this._checker.emitFiles().diagnostics;
 		if (this._reportErrors(emitErrors)) {
 			throw new Error("There were one or more errors.");
 		}
@@ -680,9 +680,11 @@ var Walker = function () {
 				break;
 
 			case ts.SyntaxKind.CallSignature:
+			case ts.SyntaxKind.ConstructSignature:
 			case ts.SyntaxKind.IndexSignature:
 			case ts.SyntaxKind.ExpressionStatement:
 			case ts.SyntaxKind.IfStatement:
+			case ts.SyntaxKind.TypeAliasDeclaration:
 				break;
 
 			default:
@@ -846,13 +848,24 @@ var Walker = function () {
 		var baseType = null;
 		var interfaces = [];
 
-		if (node.baseType !== undefined) {
-			baseType = new UnresolvedType(node.baseType.typeName.text, this._getGenerics(node.baseType));
-		}
-
-		if (node.implementedTypes !== undefined) {
-			interfaces = node.implementedTypes.map(function (interface) {
-				return new UnresolvedType(interface.typeName.text, _this._getGenerics(interface));
+		if (node.heritageClauses !== undefined) {
+			node.heritageClauses.forEach(function (heritageClause) {
+				heritageClause.types.forEach(function (type) {
+					type = new UnresolvedType(type.typeName.text, _this._getGenerics(type));
+					switch (heritageClause.token) {
+						case ts.SyntaxKind.ExtendsKeyword:
+							if (baseType !== null) {
+								throw new Error("Multiple base types on type " + node.name.text);
+							}
+							baseType = type;
+							break;
+						case ts.SyntaxKind.ImplementsKeyword:
+							interfaces.push(type);
+							break;
+						default:
+							throw new Error("Unrecognized token on heritage clause of type " + node.name.text, heritageClause);
+					}
+				});
 			});
 		}
 
@@ -885,8 +898,12 @@ var Walker = function () {
 		var interfaceType;
 
 		var baseTypes = [];
-		if (node.baseTypes !== undefined) {
-			baseTypes = node.baseTypes.map(function (baseType) { return new UnresolvedType(baseType.typeName.text, _this._getGenerics(baseType)); });
+		if (node.heritageClauses !== undefined) {
+			node.heritageClauses.forEach(function (heritageClause) {
+				heritageClause.types.forEach(function (baseType) {
+					baseTypes.push(new UnresolvedType(baseType.typeName.text, _this._getGenerics(baseType)));
+				});
+			});
 		}
 
 		var existingInterfaceType = this._scope.current.members.filter(function (member) {
@@ -1177,7 +1194,7 @@ var Walker = function () {
 
 	Walker.prototype._notifyIncorrectJsDoc = function (message) {
 		var filename = path.basename(this._currentSourceFile.filename);
-		if (filename === "lib.core.d.ts" || filename === "lib.dom.d.ts") {
+		if (filename === "lib.es6.d.ts") {
 			return;
 		}
 
