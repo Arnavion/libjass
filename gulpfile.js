@@ -116,8 +116,6 @@ gulp.task("libjass.min.js", ["libjass.js"], function (callback) {
 		return callback(null);
 	}
 
-	var input = Object.create(null);
-
 	return gulp.src(["./libjass.js", "./libjass.js.map"]).pipe(UglifyJS.minify()).pipe(gulp.dest("."));
 });
 
