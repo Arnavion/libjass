@@ -386,32 +386,44 @@ TypeScript.AST.Property.prototype.toHtml = function () {
 	]);
 };
 
-module.exports = function (outputFilePath) {
+module.exports = function (outputFilePath, root, rootNamespaceName) {
 	var compiler = new TypeScript.Compiler();
 
-	return Transform(function (file, encoding) {
-		compiler.addFile(file);
-	}, function () {
+	return Transform(function (file) {
 		// Compile
-		compiler.compile();
+		compiler.compile(file);
 
 		// Walk
-		var namespaces = TypeScript.AST.walk(compiler);
+		var namespaces = TypeScript.AST.walk(compiler, root, rootNamespaceName);
 
 		// Make HTML
 
 		var namespaceNames = Object.keys(namespaces).filter(function (namespaceName) {
-			return namespaceName.substr(0, "libjass".length) === "libjass";
+			return namespaceName.substr(0, rootNamespaceName.length) === rootNamespaceName;
 		}).sort(function (ns1, ns2) {
 			return ns1.localeCompare(ns2);
 		});
 
 		namespaceNames.forEach(function (namespaceName) {
-			namespaces[namespaceName].members.sort(sorter);
+			var namespace = namespaces[namespaceName];
 
-			namespaces[namespaceName].members.filter(function (value) {
+			var members = [];
+			Object.keys(namespace.members).forEach(function (memberName) {
+				members.push(namespace.members[memberName]);
+			});
+			namespace.members = members;
+
+			namespace.members.sort(sorter);
+
+			namespace.members.filter(function (value) {
 				return value instanceof TypeScript.AST.Interface || value instanceof TypeScript.AST.Constructor;
 			}).forEach(function (interfaceOrConstructor) {
+				var members = [];
+				Object.keys(interfaceOrConstructor.members).forEach(function (memberName) {
+					members.push(interfaceOrConstructor.members[memberName]);
+				});
+				interfaceOrConstructor.members = members;
+
 				interfaceOrConstructor.members.sort(sorter);
 			});
 		});
@@ -422,7 +434,7 @@ module.exports = function (outputFilePath) {
 				'<?xml version="1.0" encoding="utf-8" ?>',
 				'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">',
 				'	<head>',
-				'		<title>libjass API Documentation</title>',
+				'		<title>' + rootNamespaceName + ' API Documentation</title>',
 				'		<style type="text/css">',
 				'		<![CDATA[',
 				'			html, body, .namespaces, .content {',

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-var libjass = require("../libjass.js");
+var libjass = require("../lib/libjass.js");
 var parserTest = require("./parser-test.js");
 
 suite("Primitives", function () {

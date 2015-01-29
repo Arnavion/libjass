@@ -50,22 +50,6 @@ module.exports = {
 					toplevel: null
 				});
 
-				root = UglifyJS.parse(
-					'(function (define) {\n' +
-					'	var global = this;\n' +
-					'	define(["exports"], function (libjass) {\n' +
-					'"$ORIG";\n' +
-					'	});\n' +
-					'})((typeof define !== "undefined" && define.amd) ? define : function (/* ujs:unreferenced */ names, body) {\n' +
-					'	body((typeof module !== "undefined") ? module.exports : (this.libjass = Object.create(null)));\n' +
-					'});'
-				).transform(new UglifyJS.TreeTransformer(function (node) {
-					if (node instanceof UglifyJS.AST_Directive && node.value === "$ORIG") {
-						return UglifyJS.MAP.splice(root.body);
-					}
-				}));
-
-
 				root.figure_out_scope({ screw_ie8: true });
 
 
@@ -74,31 +58,115 @@ module.exports = {
 
 				nodesToRemove = [];
 
-				// 1. All the top-level "var libjass;"
+				// 1. Rename all function arguments that begin with _ to not have the _.
+				// This converts the TypeScript syntax of declaring private members in the constructor declaration `function Color(private _red: number, ...)` to `function Color(red, ...)`
+				// so that it matches the JSDoc (and looks nicer).
 				root.walk(new UglifyJS.TreeWalker(function (node, descend) {
-					if (node instanceof UglifyJS.AST_Var && node.definitions[0].name.name === "libjass") {
-						nodesToRemove.push({ node: node, parent: this.parent().body });
+					if (
+						node instanceof UglifyJS.AST_SymbolFunarg &&
+						node.thedef.name[0] === "_" &&
+						node.thedef.name[1] === "__" &&
+						node.thedef.name !== "_super" // Don't rename _super (used in TypeScript's inheritance shim) to super. super is a reserved word.
+					) {
+						node.thedef.name = node.thedef.name.slice(1);
 					}
 				}));
 
-				// 2. All but the first top-level "var __extends = ..."
-				var firstVarExtendsFound = false;
+				// 2. Fixup anonymous functions to print a space after "function"
 				root.walk(new UglifyJS.TreeWalker(function (node, descend) {
-					if (node instanceof UglifyJS.AST_Var && node.definitions[0].name.name === "__extends") {
-						if (firstVarExtendsFound === false) {
-							firstVarExtendsFound = true;
-							// Remove the check for this.__extends
-							node.definitions[0].value = node.definitions[0].value.right;
-						}
-						else {
-							nodesToRemove.push({ node: node, parent: this.parent().body });
-						}
+					if (node instanceof UglifyJS.AST_Lambda && !node.name) {
+						node.name = Object.create(UglifyJS.AST_Node.prototype);
+						node.name.print = function () { };
 					}
 				}));
+
+				// 3. Find the first license header
+				var licenseHeader = null;
+				root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+					if (licenseHeader !== null) {
+						return;
+					}
+
+					if (node.start) {
+						(node.start.comments_before || []).some(function (comment, i) {
+							if (comment.value.indexOf("Copyright") !== -1) {
+								licenseHeader = comment;
+								licenseHeader.value = licenseHeader.value.split("\n").map(function (line) { return line.replace(/^\t/, ""); }).join("\n");
+								node.start.comments_before.splice(i, 1);
+								return true;
+							}
+							return false;
+						});
+					}
+				}));
+				root.start.comments_before = [licenseHeader];
+				root.start.nlb = true;
+
+
+				// 4. Remove comments on __webpack_require__
+				root.body[0].body.args[1].body[0].value.expression.walk(new UglifyJS.TreeWalker(function (node, descend) {
+					if (node.start && node.start.comments_before && node.start.comments_before.length > 0) {
+						node.start.comments_before = [];
+					}
+				}));
+
+
+				// 5. Replace tabs in comments with 8 spaces
+				root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+					if (node.start && node.start.comments_before) {
+						node.start.comments_before.forEach(function (comment) {
+							comment.value = comment.value.split("\n").map(function (line) { return line.replace(/^\t/, "        "); }).join("\n");
+						});
+					}
+				}));
+
+
+				// 6. Fixup var injection for global
+				root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+					if (
+						node.start && node.start.comments_before &&
+						node.start.comments_before.length > 0 &&
+						node.start.comments_before[0].value === " WEBPACK VAR INJECTION " &&
+						this.parent() instanceof UglifyJS.AST_Function) {
+
+						this.parent().body.splice.apply(this.parent().body, [this.parent().body.indexOf(node), 1].concat(node.body.expression.expression.body));
+					}
+				}));
+
+				root.body[0].body.expression.body = UglifyJS.parse(
+					'var global = this;\n' +
+					'\n' +
+					'if (typeof exports === "object" && typeof module === "object") {\n' +
+					'	module.exports = factory(global);\n' +
+					'}\n' +
+					'else if (typeof define === "function" && define.amd) {\n' +
+					'	define(function () { return factory(global); });\n' +
+					'}\n' +
+					'else if (typeof exports === "object") {\n' +
+					'	exports["libjass"] = factory(global);\n' +
+					'}\n' +
+					'else {\n' +
+					'	root["libjass"] = factory(global);\n' +
+					'}'
+				).body;
+
+				root.body[0].body.args[1].argnames = UglifyJS.parse('(function (global) { })').body[0].body.argnames;
+
+
+				// 7. Anonymize webpackUniversalModuleDefinition
+				root.body[0].body.expression.name.name = "";
+
+
+				// 8. Add "use strict"
+				root.body[0].body.args[1].body.unshift(UglifyJS.parse('"use strict";').body[0]);
+
+
+				root.figure_out_scope({ screw_ie8: true });
+
 
 				// Repeat because removing some declarations may make others unreferenced
 				for (;;) {
-					// 3. Unreferenced variable and function declarations, and unreferenced terminal function arguments
+					// 9. Unreferenced variable and function declarations, and unreferenced terminal function arguments
 					root.walk(new UglifyJS.TreeWalker(function (node, descend) {
 						if (node instanceof UglifyJS.AST_SymbolDeclaration && node.unreferenced()) {
 							if (node instanceof UglifyJS.AST_SymbolFunarg) {
@@ -112,7 +180,7 @@ module.exports = {
 									nodesToRemove.push({ node: this.parent(1), parent: this.parent(2).body });
 								}
 
-								if (["BorderStyle", "ClockEvent", "WorkerCommands", "WrappingStyle"].indexOf(node.name) === -1) {
+								if (["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle", "clocks", "types"].indexOf(node.name) === -1) {
 									console.warn("Unused variable %s at %s:%s:%s", node.name, node.start.file, node.start.line, node.start.col);
 								}
 							}
@@ -135,47 +203,6 @@ module.exports = {
 					root.figure_out_scope({ screw_ie8: true });
 				}
 
-				// 4. Rename all function arguments that begin with _ to not have the _.
-				// This converts the TypeScript syntax of declaring private members in the constructor declaration `function Color(private _red: number, ...)` to `function Color(red, ...)`
-				// so that it matches the JSDoc (and looks nicer).
-				root.walk(new UglifyJS.TreeWalker(function (node, descend) {
-					if (
-						node instanceof UglifyJS.AST_SymbolFunarg &&
-						node.thedef.name[0] === "_" &&
-						node.thedef.name !== "_super" // Don't rename _super (used in TypeScript's inheritance shim) to super. super is a reserved word.
-					) {
-						node.thedef.name = node.thedef.name.slice(1);
-					}
-				}));
-
-				// 5. Fixup anonymous functions to print a space after "function"
-				root.walk(new UglifyJS.TreeWalker(function (node, descend) {
-					if (node instanceof UglifyJS.AST_Lambda && !node.name) {
-						node.name = Object.create(UglifyJS.AST_Node.prototype);
-						node.name.print = function () { };
-					}
-				}));
-
-				// 6. Find the first license header
-				var licenseHeader = null;
-				root.walk(new UglifyJS.TreeWalker(function (node, descend) {
-					if (licenseHeader !== null) {
-						return;
-					}
-
-					if (node.start) {
-						(node.start.comments_before || []).some(function (comment) {
-							if (comment.value.indexOf("Copyright") !== -1) {
-								licenseHeader = comment;
-								node.start.comments_before = [];
-								return true;
-							}
-							return false;
-						});
-					}
-				}));
-				root.start.comments_before = [licenseHeader];
-				root.start.nlb = true;
 
 				// Output
 				var output = {
@@ -200,11 +227,9 @@ module.exports = {
 							return false;
 						}
 
-						// UJS shifts multi-line comments eight spaces left, so shift each line except the first one eight spaces right.
-						if (comment.type === "comment2") {
-							var lines = comment.value.split("\n");
-							lines = [lines[0]].concat(lines.slice(1).map(function (line) { return '        ' + line; }));
-							comment.value = lines.join('\n');
+						// If this is an empty webpack comment, strip it.
+						if (comment.type === "comment2" && comment.value === "*") {
+							return false;
 						}
 
 						return true;
@@ -217,8 +242,10 @@ module.exports = {
 				codeFile.contents = Buffer.concat([new Buffer(stream.toString()), new Buffer("\n//# sourceMappingURL="), new Buffer(sourceMapFile.relative)]);
 				this.push(codeFile);
 
-				output.source_map.get()._sources.toArray().forEach(function (filename) {
-					output.source_map.get().setSourceContent(filename, fs.readFileSync(filename, { encoding: "utf8"}));
+				var inputSourceMapObject = JSON.parse(sourceMapFile.contents.toString());
+				var outputSourceMapObject = output.source_map.get();
+				outputSourceMapObject._sources.toArray().forEach(function (filename, i) {
+					outputSourceMapObject.setSourceContent(filename, inputSourceMapObject.sourcesContent[i]);
 				});
 
 				sourceMapFile.contents = new Buffer(output.source_map.toString());
@@ -367,8 +394,10 @@ module.exports = {
 				codeFile.contents = Buffer.concat([new Buffer(stream.toString()), new Buffer("\n//# sourceMappingURL="), new Buffer(sourceMapFile.relative)]);
 				this.push(codeFile);
 
-				output.source_map.get()._sources.toArray().forEach(function (filename) {
-					output.source_map.get().setSourceContent(filename, fs.readFileSync(filename, { encoding: "utf8"}));
+				var inputSourceMapObject = JSON.parse(sourceMapFile.contents.toString());
+				var outputSourceMapObject = output.source_map.get();
+				outputSourceMapObject._sources.toArray().forEach(function (filename, i) {
+					outputSourceMapObject.setSourceContent(filename, inputSourceMapObject.sourcesContent[i]);
 				});
 
 				sourceMapFile.contents = new Buffer(output.source_map.toString());
@@ -388,7 +417,7 @@ UglifyJS.AST_Symbol.prototype.unreferenced = function () {
 		return false;
 	}
 
-	if (this instanceof UglifyJS.AST_SymbolCatch) {
+	if (this.name === "module" || this.name === "exports") {
 		return false;
 	}
 

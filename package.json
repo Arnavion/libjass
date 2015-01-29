@@ -25,9 +25,12 @@
 	},
 	"dependencies": {
 		"gulp": "latest",
+		"memory-fs": "latest",
 		"mocha": "2.1.x",
+		"source-map-loader": "https://github.com/Arnavion/source-map-loader/archive/75faa177461df3a611840b82a5e5ab79312985a0.tar.gz",
 		"typescript": "1.4.1",
-		"uglify-js": "2.x >=2.4.14",
-		"vinyl": "latest"
+		"uglify-js": "2.x >=2.4.16",
+		"vinyl": "latest",
+		"webpack": "latest"
 	}
 }

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-var libjass = require("../libjass.js");
+var libjass = require("../lib/libjass.js");
 var assert = require("assert");
 
 suite("Web worker", function () {
@@ -26,7 +26,7 @@ suite("Web worker", function () {
 
 	setup(function () {
 		if (libjass.webworker.supported) {
-			workerChannel = libjass.webworker.createWorker("../libjass.js");
+			workerChannel = libjass.webworker.createWorker("../lib/libjass.js");
 		}
 	});
 

@@ -31,6 +31,7 @@ var SingletonChildProcess = helpers.SingletonChildProcess;
 Object.defineProperties(global, {
 	Doc: { get: function () { return require("./gulplib/doc.js"); } },
 	TypeScript: { get: function () { return require("./gulplib/typescript.js"); } },
+	WebPack: { get: function () { return require("./gulplib/webpack.js"); } },
 	UglifyJS: { get: function () { return require("./gulplib/uglify.js"); } },
 });
 
@@ -41,7 +42,9 @@ function ASTModifer(namespaces) {
 		var newComments = [];
 
 		if (current instanceof TypeScript.AST.Namespace) {
-			current.members.forEach(visitor);
+			Object.keys(current.members).forEach(function (memberName) {
+				visitor(current.members[memberName]);
+			});
 		}
 		else if (current instanceof TypeScript.AST.Constructor) {
 			newComments.push("@constructor");
@@ -70,7 +73,9 @@ function ASTModifer(namespaces) {
 				newComments.push("@memberOf " + current.parent.fullName);
 			}
 
-			current.members.forEach(visitor);
+			Object.keys(current.members).forEach(function (memberName) {
+				visitor(current.members[memberName]);
+			});
 		}
 		else if (current instanceof TypeScript.AST.Enum) {
 			newComments.push("@enum");
@@ -100,27 +105,30 @@ function ASTModifer(namespaces) {
 	Object.keys(namespaces).forEach(function (namespaceName) { visitor(namespaces[namespaceName]); });
 }
 
-gulp.task("libjass.js", function (callback) {
-	if (fs.existsSync("./libjass.js")) {
-		return callback(null);
+gulp.task("libjass.js", function () {
+	if (fs.existsSync("./lib/libjass.js")) {
+		return;
 	}
 
-	return gulp.src("./libjass.ts", { read: false })
-		.pipe(TypeScript.gulp("/libjass.js", "/libjass.js.map", ASTModifer))
+	return gulp.src("./src/tsconfig.json")
+		.pipe(TypeScript.gulp(ASTModifer, "./src/index.ts", "libjass"))
+		.pipe(WebPack("./src/index.js", "libjass", "./node_modules"))
 		.pipe(UglifyJS.fixup())
-		.pipe(gulp.dest("."));
+		.pipe(gulp.dest("./lib"));
 });
 
-gulp.task("libjass.min.js", ["libjass.js"], function (callback) {
-	if (fs.existsSync("./libjass.min.js")) {
-		return callback(null);
+gulp.task("libjass.min.js", ["libjass.js"], function () {
+	if (fs.existsSync("./lib/libjass.min.js")) {
+		return;
 	}
 
-	return gulp.src(["./libjass.js", "./libjass.js.map"]).pipe(UglifyJS.minify()).pipe(gulp.dest("."));
+	return gulp.src(["./lib/libjass.js", "./lib/libjass.js.map"])
+		.pipe(UglifyJS.minify())
+		.pipe(gulp.dest("./lib"));
 });
 
 gulp.task("clean", function () {
-	["libjass.js", "libjass.js.map", "libjass.min.js", "libjass.min.js.map"].forEach(function (file) {
+	["./lib/libjass.js", "./lib/libjass.js.map", "./lib/libjass.min.js", "./lib/libjass.min.js.map"].forEach(function (file) {
 		try {
 			fs.unlinkSync(file);
 		}
@@ -135,10 +143,12 @@ gulp.task("clean", function () {
 gulp.task("watch", ["clean"], function (callback) {
 	var gulpTestProcess = SingletonChildProcess(path.resolve("./gulplib/test-runner.js"));
 
-	gulp.src("./libjass.ts", { read: false })
-	.pipe(TypeScript.watch("/libjass.js", "/libjass.js.map"))
+	gulp.src("./src/tsconfig.json")
+	.pipe(TypeScript.watch())
+	.pipe(gulp.dest("./lib"))
+	.pipe(WebPack("./lib/index.js", "libjass"))
 	.pipe(UglifyJS.fixup())
-	.pipe(gulp.dest("."))
+	.pipe(gulp.dest("./lib"))
 	.pipe(Transform(function (file) {
 		if (path.basename(file.path) === "libjass.js") {
 			gulpTestProcess();
@@ -151,9 +161,11 @@ gulp.task("watch", ["clean"], function (callback) {
 });
 
 gulp.task("demo", ["libjass.js"], function () {
-	return gulp.src(["./libjass.js", "./libjass.js.map", "./libjass.css"]).pipe(gulp.dest("../libjass-gh-pages/demo/"));
+	return gulp.src(["./lib/libjass.js", "./lib/libjass.js.map", "./lib/libjass.css"]).pipe(gulp.dest("../libjass-gh-pages/demo/"));
 });
 
 gulp.task("doc", ["libjass.js"], function () {
-	return gulp.src("./libjass.ts").pipe(Doc("./api.xhtml")).pipe(gulp.dest("../libjass-gh-pages/"));
+	return gulp.src("./src/tsconfig.json")
+		.pipe(Doc("./api.xhtml", "./src/index.ts", "libjass"))
+		.pipe(gulp.dest("../libjass-gh-pages/"));
 });

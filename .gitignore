@@ -1,7 +1,8 @@
+lib/libjass.js
+lib/libjass.js.map
+lib/libjass.min.js
+lib/libjass.min.js.map
+
 node_modules/
 
-libjass.js
-libjass.min.js
-*.map
-
-*.log
+npm-debug.log

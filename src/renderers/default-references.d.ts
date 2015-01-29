@@ -18,12 +18,19 @@
  * limitations under the License.
  */
 
-///<reference path="utility.ts" />
-///<reference path="web-worker.ts" />
-///<reference path="parts.ts" />
-///<reference path="parser.ts" />
-///<reference path="renderers-clocks.ts" />
-///<reference path="renderers-null.ts" />
-///<reference path="renderers-web.ts" />
-///<reference path="renderers-default.ts" />
-///<reference path="types.ts" />
+interface Document {
+	/**
+	 * @type {Element}
+	 */
+	fullscreenElement: Element;
+
+	/**
+	 * @type {Element}
+	 */
+	mozFullScreenElement: Element;
+
+	/**
+	 * @type {Element}
+	 */
+	webkitFullscreenElement: Element;
+}

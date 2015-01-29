@@ -30,7 +30,7 @@ var setup = null;
 var test = null;
 
 var require = function (name) {
-	if (name === "../libjass.js") {
+	if (name === "../lib/libjass.js") {
 		return libjass;
 	}
 	else if (name === "assert") {

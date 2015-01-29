@@ -58,12 +58,15 @@ var CompilerHost = function () {
 		this._outputCodePath = null;
 		this._outputSourceMapPath = null;
 		this._outputStream = null;
+		this._outputPathsRelativeTo = null;
 	}
 
-	CompilerHost.prototype.setOutputs = function (codePath, sourceMapPath, stream) {
-		this._outputCodePath = codePath;
-		this._outputSourceMapPath = sourceMapPath;
-		this._outputStream = stream;
+	CompilerHost.prototype.setOutputStream = function (outputStream) {
+		this._outputStream = outputStream;
+	};
+
+	CompilerHost.prototype.setOutputPathsRelativeTo = function (path) {
+		this._outputPathsRelativeTo = path;
 	};
 
 	// ts.CompilerHost members
@@ -85,24 +88,9 @@ var CompilerHost = function () {
 	CompilerHost.prototype.getDefaultLibFilename = function () { return path.join(typeScriptModulePath, "lib.es6.d.ts"); };
 
 	CompilerHost.prototype.writeFile = function (filename, data, writeByteOrderMark, onError) {
-		var outputPath = null;
-
-		switch (filename) {
-			case "output.js":
-				outputPath = this._outputCodePath;
-				break;
-
-			case "output.js.map":
-				outputPath = this._outputSourceMapPath;
-				break;
-
-			default:
-				throw new Error("Unexpected output " + filename);
-		}
-
 		this._outputStream.push(new Vinyl({
-			base: "/",
-			path: outputPath,
+			base: this._outputPathsRelativeTo,
+			path: filename,
 			contents: new Buffer(data)
 		}));
 	};
@@ -154,33 +142,25 @@ var Compiler = function () {
 
 		var _this = this;
 
-		this._options = {
-			module: ts.ModuleKind.None,
-			out: "output.js",
-			noImplicitAny: true,
-			sourceMap: true,
-			target: ts.ScriptTarget.ES5,
-		};
-
-		this._filenames = [];
-
 		this._host = host;
 
+		this._projectRoot = null;
 		this._program = null;
 		this._checker = null;
 	}
 
-	Compiler.prototype.addFile = function (file) {
-		var filename = file;
-		if (file.constructor !== String) {
-			filename = file.path;
+	Compiler.prototype.compile = function (projectConfigFile) {
+		this._projectRoot = path.dirname(projectConfigFile.path);
+		var projectConfig = parseConfigFile(JSON.parse(projectConfigFile.contents.toString()), this._projectRoot);
+
+		if (projectConfig.errors.length > 0) {
+			this._reportErrors(projectConfig.errors);
+			throw new Error("There were on or more errors while parsing the project file.");
 		}
 
-		this._filenames.push(filename);
-	};
+		this._host.setOutputPathsRelativeTo(this._projectRoot);
 
-	Compiler.prototype.compile = function () {
-		this._program = ts.createProgram(this._filenames, this._options, this._host);
+		this._program = ts.createProgram(projectConfig.filenames, projectConfig.options, this._host);
 
 		var errors = this._program.getDiagnostics();
 		var error = this._reportErrors(errors);
@@ -196,8 +176,8 @@ var Compiler = function () {
 		}
 	};
 
-	Compiler.prototype.writeFiles = function (outputCodePath, outputSourceMapPath, outputStream) {
-		this._host.setOutputs(outputCodePath, outputSourceMapPath, outputStream);
+	Compiler.prototype.writeFiles = function (outputStream) {
+		this._host.setOutputStream(outputStream);
 
 		var emitErrors = this._checker.emitFiles().diagnostics;
 		if (this._reportErrors(emitErrors)) {
@@ -205,9 +185,11 @@ var Compiler = function () {
 		}
 	};
 
-	Compiler.prototype.getSourceFiles = function () {
-		return this._program.getSourceFiles();
-	};
+	Object.defineProperties(Compiler.prototype, {
+		projectRoot: { get: function () { return this._projectRoot; } },
+		typeChecker: { get: function () { return this._checker; } },
+		sourceFiles: { get: function () { return this._program.getSourceFiles(); } },
+	});
 
 	Compiler.prototype._reportErrors = function (errors) {
 		errors.forEach(function (error) {
@@ -229,25 +211,20 @@ var Compiler = function () {
 
 exports.Compiler = Compiler;
 
-exports.gulp = function (outputCodePath, outputSourceMapPath, astModifier) {
+exports.gulp = function (astModifier, root, rootNamespaceName) {
 	var compiler = new Compiler();
 
-	var filenames = [];
-
 	return Transform(function (file, encoding) {
-		filenames.push(file.path);
-		compiler.addFile(file);
-	}, function () {
 		try {
-			console.log("Compiling " + JSON.stringify(filenames) + "...");
+			console.log("Compiling " + file.path + "...");
 
-			compiler.compile();
+			compiler.compile(file);
 
 			if (astModifier !== undefined) {
-				astModifier(exports.AST.walk(compiler));
+				astModifier(exports.AST.walk(compiler, root, rootNamespaceName));
 			}
 
-			compiler.writeFiles(outputCodePath, outputSourceMapPath, this);
+			compiler.writeFiles(this);
 
 			console.log("Compile succeeded.");
 		}
@@ -274,7 +251,7 @@ exports.watch = function (outputCodePath, outputSourceMapPath) {
 
 		var compiler = compile();
 
-		compiler.getSourceFiles().forEach(function (sourceFile) {
+		compiler.sourceFiles.forEach(function (sourceFile) {
 			watchFile(sourceFile.filename, fileChangedCallback, fileChangedCallback);
 		});
 
@@ -341,6 +318,37 @@ var watchFile = function (filename, onChange, onDelete) {
 	fs.watchFile(filename, { interval: 500 }, watchFileCallback);
 };
 
+var parseConfigFile = function (json, basePath) {
+	var options = json.compilerOptions;
+	options.module = ts.ModuleKind[options.module];
+	options.target = ts.ScriptTarget[options.target];
+
+	var filenames = [];
+
+	function walk(directory) {
+		fs.readdirSync(directory).forEach(function (entry) {
+			var entryPath = path.join(directory, entry);
+			var stat = fs.lstatSync(entryPath);
+			if (stat.isFile()) {
+				if (path.extname(entry) === ".ts") {
+					filenames.push(entryPath);
+				}
+			}
+			else if (stat.isDirectory()) {
+				walk(entryPath);
+			}
+		});
+	}
+
+	walk(basePath);
+
+	return {
+		options: options,
+		filenames: filenames,
+		errors: [],
+	};
+};
+
 var Scoped = function () {
 	function Scoped(name) {
 		this.name = name;
@@ -367,13 +375,33 @@ var Scoped = function () {
 	return Scoped;
 }();
 
+var Module = (function (_super) {
+	function Module(name) {
+		_super.call(this, name);
+
+		this.members = Object.create(null);
+	}
+
+	return Module;
+})(Scoped);
+
+var Reference = (function () {
+	function Reference(module, name, isPrivate) {
+		this.module = module;
+		this.name = name;
+		this.isPrivate = isPrivate;
+	}
+
+	return Reference;
+})();
+
 var Namespace = function (_super) {
 	__extends(Namespace, _super);
 
 	function Namespace(name) {
 		_super.call(this, name);
 
-		this.members = [];
+		this.members = Object.create(null);
 	}
 
 	// Overridden for globalNS to return just member.name
@@ -425,7 +453,7 @@ var Interface = function (_super) {
 
 		this.isPrivate = isPrivate;
 
-		this.members = [];
+		this.members = Object.create(null);
 	}
 
 	return Interface;
@@ -451,7 +479,7 @@ var Constructor = function (_super) {
 		this.isAbstract = isAbstract;
 		this.isPrivate = isPrivate;
 
-		this.members = [];
+		this.members = Object.create(null);
 	}
 
 	return Constructor;
@@ -605,7 +633,7 @@ var WalkerScope = function () {
 }();
 
 var Walker = function () {
-	function Walker() {
+	function Walker(checker) {
 		this._globalNS = new Namespace("Global");
 		this._globalNS.getMemberFullName = function (member) {
 			return member.name;
@@ -616,37 +644,29 @@ var Walker = function () {
 		this.namespaces = Object.create(null);
 		this.namespaces[this._globalNS.fullName] = this._globalNS;
 
+		this.modules = Object.create(null);
+
 		this._currentSourceFile = null;
+		this._currentModule = null;
+
+		this._checker = checker;
 	}
 
-	Walker.prototype.walk = function (node) {
-		this._scope.enter(this._globalNS);
-		this._walk(node);
+	Walker.prototype.walk = function (sourceFile, module) {
+		if (!(module in this.modules)) {
+			this.modules[module] = new Module(module);
+		}
+
+		this._currentModule = this._scope.enter(this.modules[module]);
+		this._currentSourceFile = sourceFile;
+
+		sourceFile.statements.forEach(this._walk.bind(this));
+
 		this._scope.leave();
 	};
 
 	Walker.prototype._walk = function (node) {
 		switch (node.kind) {
-			case ts.SyntaxKind.Property:
-				this._visitProperty(node);
-				break;
-
-			case ts.SyntaxKind.Method:
-				this._visitMethod(node);
-				break;
-
-			case ts.SyntaxKind.Constructor:
-				this._visitConstructor(node);
-				break;
-
-			case ts.SyntaxKind.GetAccessor:
-				this._visitGetAccessor(node);
-				break;
-
-			case ts.SyntaxKind.SetAccessor:
-				this._visitSetAccessor(node);
-				break;
-
 			case ts.SyntaxKind.VariableStatement:
 				this._visitVariableStatement(node);
 				break;
@@ -667,24 +687,67 @@ var Walker = function () {
 				this._visitEnumDeclaration(node);
 				break;
 
-			case ts.SyntaxKind.EnumMember:
-				this._visitEnumMember(node);
+			case ts.SyntaxKind.ImportDeclaration:
+				this._visitImportDeclaration(node);
 				break;
 
-			case ts.SyntaxKind.ModuleDeclaration:
-				this._visitModuleDeclaration(node);
+			case ts.SyntaxKind.ExportAssignment:
+				this._visitExportAssignment(node);
 				break;
 
-			case ts.SyntaxKind.SourceFile:
-				this._visitSourceFile(node);
+			case ts.SyntaxKind.ExpressionStatement:
+			case ts.SyntaxKind.IfStatement:
 				break;
 
+			default:
+				console.error(node.kind, ts.SyntaxKind[node.kind], node);
+				throw new Error("Unrecognized node.");
+		}
+	};
+
+	Walker.prototype._walkClassMember = function (node) {
+		switch (node.kind) {
+			case ts.SyntaxKind.Property:
+				this._visitProperty(node);
+				break;
+
+			case ts.SyntaxKind.Method:
+				this._visitMethod(node);
+				break;
+
+			case ts.SyntaxKind.GetAccessor:
+				this._visitGetAccessor(node);
+				break;
+
+			case ts.SyntaxKind.SetAccessor:
+				this._visitSetAccessor(node);
+				break;
+
+			case ts.SyntaxKind.TypeParameter:
+			case ts.SyntaxKind.Parameter:
+			case ts.SyntaxKind.Constructor:
+				break;
+
+			default:
+				console.error(node.kind, ts.SyntaxKind[node.kind], node);
+				throw new Error("Unrecognized node.");
+		}
+	};
+
+	Walker.prototype._walkInterfaceMember = function (node) {
+		switch (node.kind) {
+			case ts.SyntaxKind.Property:
+				this._visitProperty(node);
+				break;
+
+			case ts.SyntaxKind.Method:
+				this._visitMethod(node);
+				break;
+
+			case ts.SyntaxKind.TypeParameter:
 			case ts.SyntaxKind.CallSignature:
 			case ts.SyntaxKind.ConstructSignature:
 			case ts.SyntaxKind.IndexSignature:
-			case ts.SyntaxKind.ExpressionStatement:
-			case ts.SyntaxKind.IfStatement:
-			case ts.SyntaxKind.TypeAliasDeclaration:
 				break;
 
 			default:
@@ -707,7 +770,7 @@ var Walker = function () {
 
 		var variable = this._scope.enter(new Variable(node.name.text, node, jsDoc.rootDescription, jsDoc.typeAnnotation));
 
-		variable.parent.members.push(variable);
+		variable.parent.members[variable.name] = variable;
 
 		this._scope.leave();
 	};
@@ -728,25 +791,13 @@ var Walker = function () {
 		var isProtected = (node.flags & ts.NodeFlags.Protected) === ts.NodeFlags.Protected;
 		var isStatic = (node.flags & ts.NodeFlags.Static) === ts.NodeFlags.Static;
 
-		var generics = this._getGenerics(node);
+		var generics = this._getGenericsOfSignatureDeclaration(node);
 
 		var method = this._scope.enter(new Function(node.name.text, node, jsDoc.rootDescription, generics, parameters, jsDoc.returnType, jsDoc.isAbstract, isPrivate, isProtected, isStatic));
 
-		method.parent.members.push(method);
+		method.parent.members[method.name] = method;
 
 		this._scope.leave();
-	};
-
-	Walker.prototype._visitConstructor = function (node) {
-		var clazz = this._scope.current;
-
-		if (Array.isArray(clazz.parameters)) {
-			return;
-		}
-
-		clazz.parameters = this._connectParameters(node.parameters, clazz.parameters, function (parameterName) {
-			return "Could not find @param annotation for " + parameterName + " on constructor in class " + clazz.fullName;
-		});
 	};
 
 	Walker.prototype._visitGetAccessor = function (node) {
@@ -756,11 +807,11 @@ var Walker = function () {
 
 		var name = node.name.text;
 
-		var property = clazz.members.filter(function (member) { return member.name === name; })[0];
+		var property = clazz.members[name];
 		if (property === undefined) {
 			this._scope.enter(property = new Property(name));
 
-			clazz.members.push(property);
+			clazz.members[property.name] = property;
 
 			this._scope.leave();
 		}
@@ -779,11 +830,11 @@ var Walker = function () {
 
 		var name = node.name.text;
 
-		var property = clazz.members.filter(function (member) { return member.name === name; })[0];
+		var property = clazz.members[name];
 		if (property === undefined) {
 			this._scope.enter(property = new Property(name));
 
-			clazz.members.push(property);
+			clazz.members[property.name] = property;
 
 			this._scope.leave();
 		}
@@ -796,21 +847,23 @@ var Walker = function () {
 	};
 
 	Walker.prototype._visitVariableStatement = function (node) {
-		var jsDoc = this._parseJSDoc(node);
-
 		if (node.declarations.length > 1) {
 			return;
 		}
 
-		if ((node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export) {
+		var declaration = node.declarations[0];
+		if ((declaration.flags & ts.NodeFlags.Ambient) === ts.NodeFlags.Ambient) {
 			return;
 		}
 
-		var declaration = node.declarations[0];
+		var jsDoc = this._parseJSDoc(node);
+		if (jsDoc.typeAnnotation === null) {
+			return;
+		}
 
 		var variable = this._scope.enter(new Variable(declaration.name.text, node, jsDoc.rootDescription, jsDoc.typeAnnotation));
 
-		variable.parent.members.push(variable);
+		variable.parent.members[variable.name] = variable;
 
 		this._scope.leave();
 	};
@@ -822,7 +875,7 @@ var Walker = function () {
 		var isProtected = (node.flags & ts.NodeFlags.Protected) === ts.NodeFlags.Protected;
 		var isStatic = (node.flags & ts.NodeFlags.Static) === ts.NodeFlags.Static;
 
-		var generics = this._getGenerics(node);
+		var generics = this._getGenericsOfSignatureDeclaration(node);
 
 		var parameters = this._connectParameters(node.parameters, jsDoc.parameters, function (parameterName) {
 			return "Could not find @param annotation for " + parameterName + " on function " + node.name.text;
@@ -835,7 +888,7 @@ var Walker = function () {
 
 		var freeFunction = this._scope.enter(new Function(node.name.text, node, jsDoc.rootDescription, generics, parameters, jsDoc.returnType, jsDoc.isAbstract, isPrivate, isProtected, isStatic));
 
-		freeFunction.parent.members.push(freeFunction);
+		this._currentModule.members[freeFunction.name] = freeFunction;
 
 		this._scope.leave();
 	};
@@ -845,47 +898,51 @@ var Walker = function () {
 
 		var _this = this;
 
-		var baseType = null;
-		var interfaces = [];
-
-		if (node.heritageClauses !== undefined) {
-			node.heritageClauses.forEach(function (heritageClause) {
-				heritageClause.types.forEach(function (type) {
-					type = new UnresolvedType(type.typeName.text, _this._getGenerics(type));
-					switch (heritageClause.token) {
-						case ts.SyntaxKind.ExtendsKeyword:
-							if (baseType !== null) {
-								throw new Error("Multiple base types on type " + node.name.text);
-							}
-							baseType = type;
-							break;
-						case ts.SyntaxKind.ImplementsKeyword:
-							interfaces.push(type);
-							break;
-						default:
-							throw new Error("Unrecognized token on heritage clause of type " + node.name.text, heritageClause);
-					}
-				});
-			});
+		var baseType = ts.getClassBaseTypeNode(node) || null;
+		if (baseType !== null) {
+			baseType = new UnresolvedType(baseType.typeName.text, this._getGenericsOfTypeReferenceNode(baseType));
 		}
+
+		var interfaces = (ts.getClassImplementedTypeNodes(node) || []).map(function (type) {
+			return new UnresolvedType(type.typeName.text, _this._getGenericsOfTypeReferenceNode(type));
+		});
 
 		var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
 
-		var generics = this._getGenerics(node);
+		var type = this._checker.getTypeAtLocation(node);
 
-		var clazz = this._scope.enter(new Constructor(node.name.text, node, jsDoc.rootDescription, generics, jsDoc.parameters, baseType, interfaces, jsDoc.isAbstract, isPrivate));
+		var generics = this._getGenericsOfInterfaceType(type);
 
-		clazz.parent.members.push(clazz);
+		var parameters = [];
 
-		node.members.forEach(this._walk.bind(this));
+		if (type.symbol.members.__constructor !== undefined) {
+			parameters = this._connectParameters(type.symbol.members.__constructor.declarations[0].parameters, jsDoc.parameters, function (parameterName) {
+				return "Could not find @param annotation for " + parameterName + " on constructor in class " + node.name.text;
+			});
+		}
+		else if (Object.keys(jsDoc.parameters).length > 0) {
+			this._notifyIncorrectJsDoc("There are @param annotations on this class but it has no constructors.");
+		}
 
-		if (!Array.isArray(clazz.parameters)) {
-			if (Object.keys(clazz.parameters).length > 0) {
-				this._notifyIncorrectJsDoc("There are @param annotations on this class but it has no constructors.");
+		var clazz = this._scope.enter(new Constructor(node.name.text, node, jsDoc.rootDescription, generics, parameters, baseType, interfaces, jsDoc.isAbstract, isPrivate));
+
+		this._currentModule.members[clazz.name] = clazz;
+
+		ts.forEachValue(type.symbol.exports, function (symbol) {
+			if (symbol.name === "prototype") {
+				return;
 			}
 
-			clazz.parameters = [];
-		}
+			symbol.declarations.forEach(function (declaration) {
+				_this._walkClassMember(declaration);
+			});
+		});
+
+		ts.forEachValue(type.symbol.members, function (symbol) {
+			symbol.declarations.forEach(function (declaration) {
+				_this._walkClassMember(declaration);
+			});
+		});
 
 		this._scope.leave();
 	};
@@ -895,50 +952,29 @@ var Walker = function () {
 
 		var _this = this;
 
-		var interfaceType;
+		var baseTypes = (ts.getInterfaceBaseTypeNodes(node) || []).map(function (type) {
+			return new UnresolvedType(type.typeName.text, _this._getGenericsOfTypeReferenceNode(type));
+		});
 
-		var baseTypes = [];
-		if (node.heritageClauses !== undefined) {
-			node.heritageClauses.forEach(function (heritageClause) {
-				heritageClause.types.forEach(function (baseType) {
-					baseTypes.push(new UnresolvedType(baseType.typeName.text, _this._getGenerics(baseType)));
-				});
-			});
-		}
-
-		var existingInterfaceType = this._scope.current.members.filter(function (member) {
-			return member instanceof Interface && member.name === node.name.text;
-		})[0];
-
+		var existingInterfaceType = this._scope.current.members[node.name.text];
 		if (existingInterfaceType !== undefined) {
-			interfaceType = this._scope.enter(existingInterfaceType);
-
-			interfaceType.baseTypes = baseTypes.reduce(function (baseTypes, newBaseType) {
-				if (!baseTypes.some(function (baseType) {
-					try {
-						assert.deepEqual(baseType, newBaseType);
-						return true;
-					}
-					catch (ex) {
-						return false;
-					}
-				})) {
-					baseTypes.push(newBaseType);
-				}
-
-				return baseTypes;
-			}, interfaceType.baseTypes);
-		}
-		else {
-			var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
-
-			var generics = this._getGenerics(node);
-
-			interfaceType = this._scope.enter(new Interface(node.name.text, node, jsDoc.rootDescription, generics, baseTypes, isPrivate));
-			interfaceType.parent.members.push(interfaceType);
+			return;
 		}
 
-		node.members.forEach(this._walk.bind(this));
+		var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
+
+		var type = this._checker.getTypeAtLocation(node);
+
+		var generics = this._getGenericsOfInterfaceType(type);
+
+		var interfaceType = this._scope.enter(new Interface(node.name.text, node, jsDoc.rootDescription, generics, baseTypes, isPrivate));
+		this._currentModule.members[interfaceType.name] = interfaceType;
+
+		ts.forEachValue(type.symbol.members, function (symbol) {
+			symbol.declarations.forEach(function (declaration) {
+				_this._walkInterfaceMember(declaration);
+			});
+		});
 
 		this._scope.leave();
 	};
@@ -946,23 +982,23 @@ var Walker = function () {
 	Walker.prototype._visitEnumDeclaration = function (node) {
 		var jsDoc = this._parseJSDoc(node);
 
-		var enumType;
+		var _this = this;
 
-		var existingEnumType = this._scope.current.members.filter(function (member) {
-			return member instanceof Enum && member.name === node.name.text;
-		})[0];
-
+		var existingEnumType = this._currentModule.members[node.name.text];
 		if (existingEnumType !== undefined) {
-			enumType = this._scope.enter(existingEnumType);
-		}
-		else {
-			var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
-
-			enumType = this._scope.enter(new Enum(node.name.text, node, jsDoc.rootDescription, isPrivate));
-			enumType.parent.members.push(enumType);
+			return;
 		}
 
-		node.members.forEach(this._walk.bind(this));
+		var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
+
+		var enumType = this._scope.enter(new Enum(node.name.text, node, jsDoc.rootDescription, isPrivate));
+		this._currentModule.members[enumType.name] = enumType;
+
+		var type = this._checker.getTypeAtLocation(node);
+
+		ts.forEachValue(type.symbol.exports, function (symbol) {
+			_this._visitEnumMember(symbol.declarations[0]);
+		});
 
 		this._scope.leave();
 	};
@@ -979,36 +1015,37 @@ var Walker = function () {
 		this._scope.leave();
 	};
 
-	Walker.prototype._visitModuleDeclaration = function (node) {
-		var _this = this;
+	Walker.prototype._visitImportDeclaration = function (node) {
+		var importReference = null;
 
-		var namespace = _this._scope.enter(new Namespace(node.name.text));
+		var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
 
-		var existingNamespace = _this.namespaces[namespace.fullName];
-		if (existingNamespace !== undefined) {
-			_this._scope.leave();
-			_this._scope.enter(existingNamespace);
+		if (node.moduleReference.expression) {
+			var importPath = this._resolve(node.moduleReference.expression.text);
+			importReference = new Reference(importPath, "default", isPrivate);
 		}
 		else {
-			_this.namespaces[namespace.fullName] = namespace;
+			var moduleImportReference = this._currentModule.members[node.moduleReference.left.text];
+			importReference = new Reference(moduleImportReference.module, node.name.text, isPrivate);
 		}
 
-		switch (node.body.kind) {
-			case ts.SyntaxKind.ModuleBlock:
-				node.body.statements.forEach(this._walk.bind(this));
-				break;
-
-			case ts.SyntaxKind.ModuleDeclaration:
-				this._walk(node.body);
-				break;
-		}
-
-		_this._scope.leave();
+		this._currentModule.members[node.name.text] = importReference;
 	};
 
-	Walker.prototype._visitSourceFile = function (node) {
-		this._currentSourceFile = node;
-		node.statements.forEach(this._walk.bind(this));
+	Walker.prototype._visitExportAssignment = function (node) {
+		var exportedMember = this._currentModule.members[node.exportName.text];
+		this._currentModule.members.default = exportedMember;
+		exportedMember.isPrivate = false;
+	};
+
+	Walker.prototype._resolve = function (relativeModuleName) {
+		var result = ts.normalizeSlashes(path.join(this._currentModule.name, "../" + relativeModuleName));
+
+		if (result[0] !== ".") {
+			result = "./" + result;
+		}
+
+		return result;
 	};
 
 	Walker.prototype._parseJSDoc = function (node) {
@@ -1163,16 +1200,39 @@ var Walker = function () {
 		return [type, remainingLine];
 	};
 
-	Walker.prototype._getGenerics = function (node) {
-		if (node.typeParameters !== undefined) {
-			return node.typeParameters.map(function (typeParameter) { return typeParameter.name.text; });
+	Walker.prototype._getGenericsOfSignatureDeclaration = function (signatureDeclaration) {
+		if (signatureDeclaration.typeParameters === undefined) {
+			return [];
 		}
 
-		if (node.typeArguments !== undefined) {
-			return node.typeArguments.filter(function (typeArgument) { return typeArgument.typeName !== undefined; }).map(function (typeArgument) { return typeArgument.typeName.text; });
+		return signatureDeclaration.typeParameters.map(function (typeParameter) {
+			return typeParameter.name.text;
+		});
+	};
+
+	Walker.prototype._getGenericsOfTypeReferenceNode = function (typeReferenceNode) {
+		if (typeReferenceNode.typeArguments === undefined) {
+			return [];
 		}
 
-		return [];
+		var type = this._checker.getTypeAtLocation(typeReferenceNode);
+		return type.typeArguments.map(function (typeArgument) {
+			if (typeArgument.intrinsicName !== undefined) {
+				return typeArgument.intrinsicName;
+			}
+
+			return typeArgument.symbol.name;
+		});
+	};
+
+	Walker.prototype._getGenericsOfInterfaceType = function (interfaceType) {
+		if (interfaceType.typeParameters === undefined) {
+			return [];
+		}
+
+		return interfaceType.typeParameters.map(function (typeParameter) {
+			return typeParameter.symbol.name;
+		});
 	};
 
 	Walker.prototype._connectParameters = function (astParameters, jsDocParameters, onMissingMessageCallback) {
@@ -1205,38 +1265,41 @@ var Walker = function () {
 		);
 	};
 
-	Walker.prototype.link = function () {
+	Walker.prototype.link = function (rootNamespaceName) {
 		var _this = this;
 
-		Object.keys(_this.namespaces).forEach(function (namespaceName) {
-			_this.namespaces[namespaceName].members.forEach(function (current) {
-				if (current instanceof Constructor) {
-					if (current.baseType instanceof UnresolvedType) {
-						current.baseType = _this._resolveTypeReference(current.baseType, current, _this.namespaces);
+		Object.keys(this.modules).forEach(function (moduleName) {
+			var module = _this.modules[moduleName]; 
+			Object.keys(module.members).forEach(function (memberName) {
+				var member = module.members[memberName];
+
+				if (member instanceof Constructor) {
+					if (member.baseType instanceof UnresolvedType) {
+						member.baseType = _this._resolveTypeReference(member.baseType, member, module);
 					}
 
-					current.interfaces = current.interfaces.map(function (interface) {
+					member.interfaces = member.interfaces.map(function (interface) {
 						if (interface instanceof UnresolvedType) {
-							interface = _this._resolveTypeReference(interface, current, _this.namespaces);
+							interface = _this._resolveTypeReference(interface, member, module);
 						}
 
 						return interface;
 					});
 				}
 
-				else if (current instanceof Interface) {
-					current.baseTypes = current.baseTypes.map(function (baseType) {
+				else if (member instanceof Interface) {
+					member.baseTypes = member.baseTypes.map(function (baseType) {
 						if (baseType instanceof UnresolvedType) {
-							baseType = _this._resolveTypeReference(baseType, current, _this.namespaces);
+							baseType = _this._resolveTypeReference(baseType, member, module);
 						}
 
 						return baseType;
 					});
 				}
 
-				else if (current instanceof Enum) {
+				else if (member instanceof Enum) {
 					var value = 0;
-					current.members.forEach(function (member) {
+					member.members.forEach(function (member) {
 						if (member.value === null) {
 							member.value = value;
 						}
@@ -1249,26 +1312,59 @@ var Walker = function () {
 				}
 			});
 		});
+
+		_this.namespaces[rootNamespaceName] = this._scope.enter(new Namespace(rootNamespaceName));
+		this._moduleToNamespace(this.modules["./index"], rootNamespaceName);
+		this._scope.leave();
 	};
 
-	Walker.prototype._resolveTypeReference = function (unresolvedType, current, namespaces) {
-		var result = null;
+	Walker.prototype._moduleToNamespace = function (module, rootNamespaceName) {
+		var _this = this;
 
-		for (var ns = current.parent; result === null && ns !== null; ns = ns.parent) {
-			var fullName = ns.getMemberFullName(unresolvedType);
-			var endOfNamespaceIndex = fullName.lastIndexOf(".");
-			var existingNamespace = (endOfNamespaceIndex === -1) ? this._globalNS : namespaces[fullName.substr(0, endOfNamespaceIndex)];
-			if (existingNamespace !== undefined) {
-				var className = fullName.substr(endOfNamespaceIndex + 1);
+		Object.keys(module.members).forEach(function (memberName) {
+			var member = module.members[memberName];
 
-				result = existingNamespace.members.filter(function (member) {
-					return (member instanceof Constructor || member instanceof Interface) && member.name === className;
-				})[0] || null;
+			if (member instanceof Reference) {
+				if (member.isPrivate) {
+					return;
+				}
+
+				if (member.name === "default" && _this.modules[member.module].members.default === undefined) {
+					var newNamespace = _this._scope.enter(new Namespace(memberName));
+
+					var existingNamespace = _this.namespaces[newNamespace.fullName];
+					if (existingNamespace !== undefined) {
+						_this._scope.leave();
+						_this._scope.enter(existingNamespace);
+					}
+					else {
+						_this.namespaces[newNamespace.fullName] = newNamespace;
+					}
+
+					_this._moduleToNamespace(_this.modules[member.module], rootNamespaceName);
+
+					_this._scope.leave();
+				}
+				else {
+					var actualMember = _this.modules[member.module].members[member.name];
+
+					_this._scope.enter(actualMember);
+					_this._scope.leave();
+					_this._scope.current.members[actualMember.name] = actualMember;
+				}
 			}
-		}
+			else {
+				_this._scope.enter(member);
+				_this._scope.leave();
+				_this._scope.current.members[member.name] = member;
+			}
+		});
+	};
 
-		if (result === null) {
-			throw new Error("Base type [" + unresolvedType.name + "] of type [" + current.fullName + "] not found.");
+	Walker.prototype._resolveTypeReference = function (unresolvedType, member, module) {
+		var result = module.members[unresolvedType.name];
+		if (result instanceof Reference) {
+			result = this.modules[result.module].members[result.name];
 		}
 
 		return new TypeReference(result, unresolvedType.generics);
@@ -1277,17 +1373,35 @@ var Walker = function () {
 	return Walker;
 }();
 
-var walk = function (compiler, resolvedFilenames) {
-	var sourceFiles = compiler.getSourceFiles();
-	var walker = new Walker();
+var walk = function (compiler, root, rootNamespaceName) {
+	var sourceFiles = compiler.sourceFiles;
+	var rootFilename = ts.normalizeSlashes(path.resolve(root));
+	var rootSourceFile = sourceFiles.filter(function (sourceFile) {
+		return sourceFile.filename === rootFilename;
+	})[0];
+
+	var walker = new Walker(compiler.typeChecker);
 
 	// Walk
 	sourceFiles.forEach(function (sourceFile) {
-		walker.walk(sourceFile);
+		if (
+			path.basename(sourceFile.filename) === "lib.es6.d.ts" ||
+			sourceFile.filename.substr(-"-references.d.ts".length) === "-references.d.ts"
+		) {
+			return;
+		}
+
+		var moduleName = ts.normalizeSlashes(path.relative(compiler.projectRoot, sourceFile.filename));
+		moduleName = moduleName.substr(0, moduleName.length - ".ts".length);
+		if (moduleName[0] !== ".") {
+			moduleName = "./" + moduleName;
+		}
+
+		walker.walk(sourceFile, moduleName);
 	});
 
 	// Link base types and set enum member values if unspecified.
-	walker.link();
+	walker.link(rootNamespaceName);
 
 	// Return types
 	return walker.namespaces;

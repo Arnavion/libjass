@@ -16,11 +16,11 @@ As a result, libjass is able to render subtitles with very low CPU usage. The do
 
 ### What are all these files?
 
-* The .ts files are the source of libjass. They are TypeScript files and must be compiled into JavaScript for the browser using the TypeScript compiler.
+* The src directory contains the source of libjass. They are TypeScript files and get compiled into JavaScript for the browser using the TypeScript compiler.
 
 * gulpfile.js is the build script. The build command will use this script to build libjass.js
 
-* libjass.css is a CSS file that you'll need to deploy to your website.
+* Once built, the lib directory will contain the compiled libjass.js. Also in the directory is libjass.css. You will need to deploy libjass.js and libjass.cs to your website.
 
 
 ### I want to use libjass for my website. What do I need to do?
