@@ -18,8 +18,6 @@
  * limitations under the License.
  */
 
-///<reference path="./set-references.d.ts" />
-
 /**
  * Set implementation for browsers that don't support it. Only supports Number and String elements.
  *
@@ -27,11 +25,11 @@
  *
  * @param {!Array.<T>=} iterable Only an array of values is supported.
  */
-class SimpleSet<T> implements Set<T> {
+class SimpleSet<T> {
 	private _elements: { [key: string]: T };
 	private _size: number;
 
-	constructor(iterable?: Iterable<T>) {
+	constructor(iterable?: T[]) {
 		this.clear();
 
 		if (Array.isArray(iterable)) {
@@ -92,37 +90,6 @@ class SimpleSet<T> implements Set<T> {
 	}
 
 	/**
-	 * Not implemented.
-	 *
-	 * @param {T} value
-	 * @return {boolean}
-	 */
-	delete(value: T): boolean {
-		throw new Error("This Set implementation doesn't support delete().");
-	}
-
-	/**
-	 * @return {!Iterator.<!Array.<T>>}
-	 */
-	entries(): Iterator<[T, T]> {
-		throw new Error("This Set implementation doesn't support entries().");
-	}
-
-	/**
-	 * @return {!Iterator.<T>}
-	 */
-	keys(): Iterator<T> {
-		throw new Error("This Set implementation doesn't support keys().");
-	}
-
-	/**
-	 * @return {!Iterator.<T>}
-	 */
-	values(): Iterator<T> {
-		throw new Error("This Set implementation doesn't support values().");
-	}
-
-	/**
 	 * @type {number}
 	 */
 	get size(): number {
@@ -148,14 +115,49 @@ class SimpleSet<T> implements Set<T> {
 	}
 }
 
+declare var global: {
+	Set?: typeof SimpleSet;
+};
+
+export interface Set<T> {
+	/**
+	 * @param {T} value
+	 * @return {libjass.Set.<T>} This set
+	 */
+    add(value: T): Set<T>;
+
+	/**
+	 */
+    clear(): void;
+
+	/**
+	 * @param {T} value
+	 * @return {boolean}
+	 */
+    has(value: T): boolean;
+
+	/**
+	 * @param {function(T, T, libjass.Set.<T>)} callbackfn A function that is called with each value in the set.
+	 * @param {*} thisArg
+	 */
+    forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void;
+
+	/**
+	 * @type {number}
+	 */
+    size: number;
+}
+
 /**
  * Set to browser's implementation of Set if it has one, else set to {@link libjass.SimpleSet}
  *
  * @type {function(new:Set, !Array.<T>=)}
  */
-var Set = global.Set;
+export var Set: {
+	new <T>(iterable?: T[]): Set<T>;
+    prototype: Set<any>;
+} = global.Set;
+
 if (Set === undefined || typeof Set.prototype.forEach !== "function" || new Set([1, 2]).size !== 2) {
 	Set = <any>SimpleSet;
 }
-
-export = Set;

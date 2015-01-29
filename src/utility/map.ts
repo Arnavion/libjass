@@ -18,8 +18,6 @@
  * limitations under the License.
  */
 
-///<reference path="./map-references.d.ts" />
-
 /**
  * Map implementation for browsers that don't support it. Only supports keys which are of Number or String type, or which have a property called "id".
  *
@@ -27,12 +25,12 @@
  *
  * @param {!Array.<!Array.<*>>=} iterable Only an array of elements (where each element is a 2-tuple of key and value) is supported.
  */
-class SimpleMap<K, V> implements Map<K, V> {
+class SimpleMap<K, V> {
 	private _keys: { [key: string]: K };
 	private _values: { [key: string]: V };
 	private _size: number;
 
-	constructor(iterable?: Iterable<[K, V]>) {
+	constructor(iterable?: [K, V][]) {
 		this.clear();
 
 		if (Array.isArray(iterable)) {
@@ -133,27 +131,6 @@ class SimpleMap<K, V> implements Map<K, V> {
 	}
 
 	/**
-	 * @return {!Iterator.<!Array.<*>>}
-	 */
-	entries(): Iterator<[K, V]> {
-		throw new Error("This Map implementation doesn't support entries().");
-	}
-
-	/**
-	 * @return {!Iterator.<K>}
-	 */
-	keys(): Iterator<K> {
-		throw new Error("This Map implementation doesn't support keys().");
-	}
-
-	/**
-	 * @return {!Iterator.<V>}
-	 */
-	values(): Iterator<V> {
-		throw new Error("This Map implementation doesn't support values().");
-	}
-
-	/**
 	 * @type {number}
 	 */
 	get size(): number {
@@ -183,14 +160,62 @@ class SimpleMap<K, V> implements Map<K, V> {
 	}
 }
 
+declare var global: {
+	Map?: typeof SimpleMap;
+};
+
+export interface Map<K, V> {
+	/**
+	 * @param {K} key
+	 * @return {V}
+	 */
+	get(key: K): V;
+
+	/**
+	 * @param {K} key
+	 * @return {boolean}
+	 */
+	has(key: K): boolean;
+
+	/**
+	 * @param {K} key
+	 * @param {V} value
+	 * @return {libjass.Map.<K, V>} This map
+	 */
+	set(key: K, value?: V): Map<K, V>;
+
+	/**
+	 * @param {K} key
+	 * @return {boolean} true if the key was present before being deleted, false otherwise
+	 */
+	delete(key: K): boolean;
+
+	/**
+	 */
+	clear(): void;
+
+	/**
+	 * @param {function(V, K, libjass.Map.<K, V>)} callbackfn A function that is called with each key and value in the map.
+	 * @param {*} thisArg
+	 */
+	forEach(callbackfn: (value: V, index: K, map: Map<K, V>) => void, thisArg?: any): void;
+
+	/**
+	 * @type {number}
+	 */
+	size: number;
+}
+
 /**
  * Set to browser's implementation of Map if it has one, else set to {@link libjass.SimpleMap}
  *
  * @type {function(new:Map, !Array.<!Array.<*>>=)}
  */
-var Map = global.Map;
+export var Map: {
+	new <K, V>(iterable?: [K, V][]): Map<K, V>;
+	prototype: Map<any, any>;
+} = global.Map;
+
 if (Map === undefined || typeof Map.prototype.forEach !== "function" || new Map([[1, "foo"], [2, "bar"]]).size !== 2) {
 	Map = <any>SimpleMap;
 }
-
-export = Map;

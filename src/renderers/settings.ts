@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import Map = require("../utility/map");
+import map = require("../utility/map");
 
 /**
  * Settings for the renderer.
@@ -32,7 +32,7 @@ class RendererSettings {
 	 *
 	 * @type {!Map.<string, !Array.<string>>}
 	 */
-	fontMap: Map<string, string[]>;
+	fontMap: map.Map<string, string[]>;
 
 	/**
 	 * Subtitles will be pre-rendered for this amount of time (seconds).
@@ -76,8 +76,8 @@ class RendererSettings {
 	 * @param {!LinkStyle} linkStyle
 	 * @return {!Map.<string, !Array.<string>>}
 	 */
-	static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string[]> {
-		var map = new Map<string, string[]>();
+	static makeFontMapFromStyleElement(linkStyle: LinkStyle): map.Map<string, string[]> {
+		var fontMap = new map.Map<string, string[]>();
 
 		var styleSheet = <CSSStyleSheet>linkStyle.sheet;
 		var rules: CSSFontFaceRule[] = Array.prototype.filter.call(styleSheet.cssRules, (rule: CSSRule) => rule.type === CSSRule.FONT_FACE_RULE);
@@ -96,16 +96,16 @@ class RendererSettings {
 
 			if (urls.length > 0) {
 				var name = RendererSettings._stripQuotes(rule.style.getPropertyValue("font-family"));
-				var existingList = map.get(name);
+				var existingList = fontMap.get(name);
 				if (existingList === undefined) {
 					existingList = [];
-					map.set(name, existingList);
+					fontMap.set(name, existingList);
 				}
 				existingList.unshift.apply(existingList, urls.map(RendererSettings._stripQuotes));
 			}
 		});
 
-		return map;
+		return fontMap;
 	}
 
 	/**
@@ -129,7 +129,7 @@ class RendererSettings {
 	 * @param {boolean=true} enableSvg
 	 * @return {!libjass.renderers.RendererSettings}
 	 */
-	private static _from(fontMap: Map<string, string[]> = null, preRenderTime: number = 5, preciseOutlines: boolean = false, enableSvg: boolean = true): RendererSettings {
+	private static _from(fontMap: map.Map<string, string[]> = null, preRenderTime: number = 5, preciseOutlines: boolean = false, enableSvg: boolean = true): RendererSettings {
 		var result = new RendererSettings();
 		result.fontMap = fontMap;
 		result.preRenderTime = preRenderTime;

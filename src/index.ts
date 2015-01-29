@@ -20,11 +20,10 @@
 
 export import settings = require("./settings");
 
-export import Set = require("./utility/set");
-export import Map = require("./utility/map");
+import set = require("./utility/set");
+import map = require("./utility/map");
 
 import promise = require("./utility/promise");
-export import Promise = promise.Promise;
 export import DeferredPromise = promise.DeferredPromise;
 
 export import webworker = require("./web-worker");
@@ -56,5 +55,17 @@ Object.defineProperties(exports, {
 	verboseMode: {
 		get: () => settings.verboseMode,
 		set: (value: boolean) => settings.verboseMode = value,
+	},
+	Set: {
+		get: () => set.Set,
+		set: (value: typeof set.Set) => set.Set = value,
+	},
+	Map: {
+		get: () => map.Map,
+		set: (value: typeof map.Map) => map.Map = value,
+	},
+	Promise: {
+		get: () => promise.Promise,
+		set: (value: typeof promise.Promise) => promise.Promise = value,
 	},
 });

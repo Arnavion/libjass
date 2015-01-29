@@ -36,11 +36,9 @@ import types = require("../types/misc");
 import WrappingStyle = types.WrappingStyle;
 
 import mixin = require("../utility/mixin");
-import Map = require("../utility/map");
-import Set = require("../utility/set");
-
+import map = require("../utility/map");
+import set = require("../utility/set");
 import promise = require("../utility/promise");
-import Promise = promise.Promise;
 
 ///<reference path="./web-references.d.ts" />
 
@@ -60,8 +58,8 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 	private _animationStyleElement: HTMLStyleElement = null;
 	private _svgDefsElement: SVGDefsElement = null;
 
-	private _currentSubs: Map<Dialogue, HTMLDivElement> = new Map<Dialogue, HTMLDivElement>();
-	private _preRenderedSubs: Map<number, { sub: HTMLDivElement; animationDelays: number[] }> = new Map<number, { sub: HTMLDivElement; animationDelays: number[] }>();
+	private _currentSubs: map.Map<Dialogue, HTMLDivElement> = new map.Map<Dialogue, HTMLDivElement>();
+	private _preRenderedSubs: map.Map<number, { sub: HTMLDivElement; animationDelays: number[] }> = new map.Map<number, { sub: HTMLDivElement; animationDelays: number[] }>();
 
 	private _scaleX: number;
 	private _scaleY: number;
@@ -102,7 +100,7 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		// Preload fonts
 
-		var urlsToPreload = new Set<string>();
+		var urlsToPreload = new set.Set<string>();
 		if (this.settings.fontMap !== null) {
 			this.settings.fontMap.forEach(srcs => {
 				srcs.forEach(src => urlsToPreload.add(src));
@@ -113,9 +111,9 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			console.log(`Preloading ${ urlsToPreload.size } fonts...`);
 		}
 
-		var xhrPromises: Promise<void>[] = [];
+		var xhrPromises: promise.Promise<void>[] = [];
 		urlsToPreload.forEach(url => {
-			xhrPromises.push(new Promise<void>((resolve, reject) => {
+			xhrPromises.push(new promise.Promise<void>((resolve, reject) => {
 				var xhr = new XMLHttpRequest();
 				xhr.addEventListener("load", () => {
 					if (globalSettings.debugMode) {
@@ -129,7 +127,7 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			}));
 		});
 
-		Promise.all(xhrPromises).then(() => {
+		promise.Promise.all(xhrPromises).then(() => {
 			if (globalSettings.debugMode) {
 				console.log("All fonts have been preloaded.");
 			}
@@ -397,16 +395,16 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 				var movePart = <parts.Move>part;
 
 				sub.style.position = "absolute";
-				animationCollection.add("linear", [new Keyframe(0, new Map([
+				animationCollection.add("linear", [new Keyframe(0, new map.Map([
 					["left", `${ (this._scaleX * movePart.x1).toFixed(3) }px`],
 					["top", `${ (this._scaleY * movePart.y1).toFixed(3) }px`],
-				])), new Keyframe(movePart.t1, new Map([
+				])), new Keyframe(movePart.t1, new map.Map([
 					["left", `${ (this._scaleX * movePart.x1).toFixed(3) }px`],
 					["top", `${ (this._scaleY * movePart.y1).toFixed(3) }px`],
-				])), new Keyframe(movePart.t2, new Map([
+				])), new Keyframe(movePart.t2, new map.Map([
 					["left", `${ (this._scaleX * movePart.x2).toFixed(3) }px`],
 					["top", `${ (this._scaleY * movePart.y2).toFixed(3) }px`],
-				])), new Keyframe(dialogue.end - dialogue.start, new Map([
+				])), new Keyframe(dialogue.end - dialogue.start, new map.Map([
 					["left", `${ (this._scaleX * movePart.x2).toFixed(3) }px`],
 					["top", `${ (this._scaleY * movePart.y2).toFixed(3) }px`],
 				]))]);
@@ -415,13 +413,13 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			else if (part instanceof parts.Fade) {
 				var fadePart = <parts.Fade>part;
 
-				animationCollection.add("linear", [new Keyframe(0, new Map([
+				animationCollection.add("linear", [new Keyframe(0, new map.Map([
 					["opacity", "0"],
-				])), new Keyframe(fadePart.start, new Map([
+				])), new Keyframe(fadePart.start, new map.Map([
 					["opacity", "1"],
-				])), new Keyframe(dialogue.end - dialogue.start - fadePart.end, new Map([
+				])), new Keyframe(dialogue.end - dialogue.start - fadePart.end, new map.Map([
 					["opacity", "1"],
-				])), new Keyframe(dialogue.end - dialogue.start, new Map([
+				])), new Keyframe(dialogue.end - dialogue.start, new map.Map([
 					["opacity", "0"],
 				]))]);
 			}
@@ -429,17 +427,17 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			else if (part instanceof parts.ComplexFade) {
 				var complexFadePart = <parts.ComplexFade>part;
 
-				animationCollection.add("linear", [new Keyframe(0, new Map([
+				animationCollection.add("linear", [new Keyframe(0, new map.Map([
 					["opacity", complexFadePart.a1.toFixed(3)],
-				])), new Keyframe(complexFadePart.t1, new Map([
+				])), new Keyframe(complexFadePart.t1, new map.Map([
 					["opacity", complexFadePart.a1.toFixed(3)],
-				])), new Keyframe(complexFadePart.t2, new Map([
+				])), new Keyframe(complexFadePart.t2, new map.Map([
 					["opacity", complexFadePart.a2.toFixed(3)],
-				])), new Keyframe(complexFadePart.t3, new Map([
+				])), new Keyframe(complexFadePart.t3, new map.Map([
 					["opacity", complexFadePart.a2.toFixed(3)],
-				])), new Keyframe(complexFadePart.t4, new Map([
+				])), new Keyframe(complexFadePart.t4, new map.Map([
 					["opacity", complexFadePart.a3.toFixed(3)],
-				])), new Keyframe(dialogue.end - dialogue.start, new Map([
+				])), new Keyframe(dialogue.end - dialogue.start, new map.Map([
 					["opacity", complexFadePart.a3.toFixed(3)],
 				]))]);
 			}
@@ -695,7 +693,7 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 	/**
 	 * @type {!Map.<T, !Array.<Function>>}
 	 */
-	_eventListeners: Map<string, Function[]> = new Map<string, Function[]>();
+	_eventListeners: map.Map<string, Function[]> = new map.Map<string, Function[]>();
 
 	/**
 	 * @type {function(number, !Function)}
@@ -722,7 +720,7 @@ mixin(WebRenderer, [EventSource]);
  * @param {!SVGDefsElement} svgDefsElement An SVG <defs> element to append filter definitions to
  */
 class SpanStyles {
-	private static _fontSizeCache: Map<string, Map<number, number>> = new Map<string, Map<number, number>>();
+	private static _fontSizeCache: map.Map<string, map.Map<number, number>> = new map.Map<string, map.Map<number, number>>();
 
 	private _id: string;
 	private _defaultStyle: Style;
@@ -1348,7 +1346,7 @@ ${ blurFilter }
 	private static _getFontSize(fontFamily: string, lineHeight: number, fontSizeElement: HTMLDivElement): number {
 		var existingFontSizeMap = SpanStyles._fontSizeCache.get(fontFamily);
 		if (existingFontSizeMap === undefined) {
-			SpanStyles._fontSizeCache.set(fontFamily, existingFontSizeMap = new Map<number, number>());
+			SpanStyles._fontSizeCache.set(fontFamily, existingFontSizeMap = new map.Map<number, number>());
 		}
 
 		var existingFontSize = existingFontSizeMap.get(lineHeight);
@@ -1477,7 +1475,7 @@ ${ ruleCssText }
  * @param {!Map.<string, string>} properties
  */
 class Keyframe {
-	constructor(private _time: number, private _properties: Map<string, string>) { }
+	constructor(private _time: number, private _properties: map.Map<string, string>) { }
 
 	/**
 	 * @type {number}
@@ -1489,7 +1487,7 @@ class Keyframe {
 	/**
 	 * @type {!Map.<string, string>}
 	 */
-	get properties(): Map<string, string> {
+	get properties(): map.Map<string, string> {
 		return this._properties;
 	}
 }

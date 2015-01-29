@@ -30,6 +30,8 @@ import parts = require("../parts/index");
 
 import globalSettings = require("../settings");
 
+import map = require("../utility/map");
+
 /**
  * This class represents a dialogue in a {@link libjass.ASS} script.
  *
@@ -59,7 +61,7 @@ class Dialogue {
 
 	private _sub: HTMLDivElement = null;
 
-	constructor(template: Map<string, string>, ass: ASS) {
+	constructor(template: map.Map<string, string>, ass: ASS) {
 		this._id = ++Dialogue._lastDialogueId;
 
 		var style = template.get("Style");

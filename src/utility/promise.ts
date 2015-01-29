@@ -23,7 +23,7 @@
  *
  * @param {function(function(T), function(*))} resolver
  */
-class SimplePromise<T> implements Promise<T> {
+class SimplePromise<T> {
 	private _state: SimplePromiseState = SimplePromiseState.PENDING;
 
 	private _thens: { propagateFulfilling: (value: T) => void; propagateRejection: (reason: any) => void }[] = [];
@@ -354,12 +354,42 @@ enum SimplePromiseState {
 	REJECTED = 2,
 }
 
+declare var global: {
+	Promise?: typeof SimplePromise;
+	MutationObserver?: typeof MutationObserver;
+	WebkitMutationObserver?: typeof MutationObserver;
+	process?: {
+		nextTick(callback: () => void): void;
+	}
+};
+
+export interface Promise<T> {
+	/**
+	 * @param {?function(T):(U|Promise.<U>)} fulfilledHandler
+	 * @param {?function(*):(U|Promise.<U>)} rejectedHandler
+	 * @return {!Promise.<U>}
+	 */
+	then<U>(fulfilledHandler?: (value: T) => U | Promise<U>, rejectedHandler?: (reason: any) => U | Promise<U>): Promise<U>;
+
+	/**
+	 * @param {function(*):(T|Promise.<T>)} rejectedHandler
+	 * @return {!Promise.<T>}
+	 */
+	catch(rejectedHandler?: (reason: any) => T | Promise<T>): Promise<T>
+}
+
 /**
  * Set to browser's implementation of Promise if it has one, else set to {@link libjass.SimplePromise}
  *
  * @type {function(new:Promise)}
  */
-export var Promise = global.Promise;
+export var Promise: {
+	new <T>(init: (resolve: (value?: T | Promise<T>) => void, reject: (reason?: any) => void) => void): Promise<T>;
+	prototype: Promise<any>;
+	resolve<T>(value: T | Promise<T>): Promise<T>;
+	all<T>(values: (T | Promise<T>)[]): Promise<T[]>;
+} = global.Promise;
+
 if (Promise === undefined) {
 	Promise = <any>SimplePromise;
 }

@@ -29,10 +29,9 @@ import types = require("./types/misc");
 import Property = types.Property;
 import TypedTemplate = types.TypedTemplate;
 
-import Map = require("./utility/map");
+import map = require("./utility/map");
 
 import promise = require("./utility/promise");
-import Promise = promise.Promise;
 import DeferredPromise = promise.DeferredPromise;
 
 /**
@@ -42,7 +41,7 @@ export interface Stream {
 	/**
 	 * @return {!Promise.<?string>} A promise that will be resolved with the next line, or null if the stream is exhausted.
 	 */
-	nextLine(): Promise<string>;
+	nextLine(): promise.Promise<string>;
 }
 
 /**
@@ -58,22 +57,22 @@ export class StringStream implements Stream {
 	/**
 	 * @return {!Promise.<?string>} A promise that will be resolved with the next line, or null if the string has been completely read.
 	 */
-	nextLine(): Promise<string> {
-		var result: Promise<string> = null;
+	nextLine(): promise.Promise<string> {
+		var result: promise.Promise<string> = null;
 
 		if (this._readTill < this._str.length) {
 			var nextNewLinePos = this._str.indexOf("\n", this._readTill);
 			if (nextNewLinePos !== -1) {
-				result = Promise.resolve(this._str.substring(this._readTill, nextNewLinePos));
+				result = promise.Promise.resolve(this._str.substring(this._readTill, nextNewLinePos));
 				this._readTill = nextNewLinePos + 1;
 			}
 			else {
-				result = Promise.resolve(this._str.substr(this._readTill));
+				result = promise.Promise.resolve(this._str.substr(this._readTill));
 				this._readTill = this._str.length;
 			}
 		}
 		else {
-			result = Promise.resolve<string>(null);
+			result = promise.Promise.resolve<string>(null);
 		}
 
 		return result;
@@ -97,7 +96,7 @@ export class XhrStream implements Stream {
 	/**
 	 * @return {!Promise.<?string>} A promise that will be resolved with the next line, or null if the stream is exhausted.
 	 */
-	nextLine(): Promise<string> {
+	nextLine(): promise.Promise<string> {
 		if (this._pendingDeferred !== null) {
 			throw new Error("XhrStream only supports one pending unfulfilled read at a time.");
 		}
@@ -178,14 +177,14 @@ export class StreamParser {
 	 * @type {!Promise.<!libjass.ASS>} A promise that will be resolved when the script properties of the ASS script have been parsed from the stream. Styles and events have not necessarily been
 	 * parsed at the point this promise becomes resolved.
 	 */
-	get minimalASS(): Promise<ASS> {
+	get minimalASS(): promise.Promise<ASS> {
 		return this._minimalDeferred.promise;
 	}
 
 	/**
 	 * @type {!Promise.<!libjass.ASS>} A promise that will be resolved when the entire stream has been parsed.
 	 */
-	get ass(): Promise<ASS> {
+	get ass(): promise.Promise<ASS> {
 		return this._deferred.promise;
 	}
 
@@ -302,14 +301,14 @@ export class SrtStreamParser {
 		this._ass.properties.wrappingStyle = 1;
 		this._ass.properties.scaleBorderAndShadow = true;
 
-		var newStyle = new Style(new Map([["Name", "Default"]]));
+		var newStyle = new Style(new map.Map([["Name", "Default"]]));
 		this._ass.styles.set(newStyle.name, newStyle);
 	}
 
 	/**
 	 * @type {!Promise.<!libjass.ASS>} A promise that will be resolved when the entire stream has been parsed.
 	 */
-	get ass(): Promise<ASS> {
+	get ass(): promise.Promise<ASS> {
 		return this._deferred.promise;
 	}
 
@@ -319,7 +318,7 @@ export class SrtStreamParser {
 	private _onNextLine(line: string): void {
 		if (line === null) {
 			if (this._currentDialogueNumber !== null && this._currentDialogueStart !== null && this._currentDialogueEnd !== null && this._currentDialogueText !== null) {
-				this._ass.dialogues.push(new Dialogue(new Map([
+				this._ass.dialogues.push(new Dialogue(new map.Map([
 					["Style", "Default"],
 					["Start", this._currentDialogueStart],
 					["End", this._currentDialogueEnd],
@@ -337,7 +336,7 @@ export class SrtStreamParser {
 
 		if (line === "") {
 			if (this._currentDialogueNumber !== null && this._currentDialogueStart !== null && this._currentDialogueEnd !== null && this._currentDialogueText !== null) {
-				this._ass.dialogues.push(new Dialogue(new Map([
+				this._ass.dialogues.push(new Dialogue(new map.Map([
 					["Style", "Default"],
 					["Start", this._currentDialogueStart],
 					["End", this._currentDialogueEnd],
@@ -423,7 +422,7 @@ export function parseLineIntoTypedTemplate(line: string, formatSpecifier: string
 		value[formatSpecifier.length - 1] = value.slice(formatSpecifier.length - 1).join(",");
 	}
 
-	var template = new Map<string, string>();
+	var template = new map.Map<string, string>();
 	formatSpecifier.forEach((formatKey, index) => {
 		template.set(formatKey, value[index]);
 	});
@@ -2435,7 +2434,7 @@ makeTagParserFunction("3c", parts.OutlineColor, ParserRun.prototype.parse_color,
 makeTagParserFunction("4a", parts.ShadowAlpha, ParserRun.prototype.parse_alpha, false);
 makeTagParserFunction("4c", parts.ShadowColor, ParserRun.prototype.parse_color, false);
 
-var rules = new Map<string, (parent: ParseNode) => ParseNode>();
+var rules = new map.Map<string, (parent: ParseNode) => ParseNode>();
 Object.keys(ParserRun.prototype).forEach(key => {
 	if (key.indexOf("parse_") === 0 && typeof (<any>ParserRun.prototype)[key] === "function") {
 		rules.set(key.substr("parse_".length), (<any>ParserRun.prototype)[key]);

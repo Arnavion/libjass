@@ -75,6 +75,12 @@ var CompilerHost = function () {
 		var text;
 		try {
 			text = fs.readFileSync(filename, { encoding: "utf8" });
+
+			if (path.basename(filename) === "lib.dom.d.ts") {
+				var startOfES6Extensions = text.indexOf("/// IE11 ECMAScript Extensions");
+				var endOfES6Extensions = text.indexOf("/// ECMAScript Internationalization API", startOfES6Extensions);
+				text = text.substring(0, startOfES6Extensions) + text.substring(endOfES6Extensions);
+			}
 		}
 		catch (ex) {
 			if (onError) {
@@ -85,7 +91,7 @@ var CompilerHost = function () {
 		return (text !== undefined) ? ts.createSourceFile(filename, text, ts.ScriptTarget.ES5) : undefined;
 	};
 
-	CompilerHost.prototype.getDefaultLibFilename = function () { return path.join(typeScriptModulePath, "lib.es6.d.ts"); };
+	CompilerHost.prototype.getDefaultLibFilename = function () { return path.join(typeScriptModulePath, "lib.dom.d.ts"); };
 
 	CompilerHost.prototype.writeFile = function (filename, data, writeByteOrderMark, onError) {
 		this._outputStream.push(new Vinyl({
@@ -1254,7 +1260,7 @@ var Walker = function () {
 
 	Walker.prototype._notifyIncorrectJsDoc = function (message) {
 		var filename = path.basename(this._currentSourceFile.filename);
-		if (filename === "lib.es6.d.ts") {
+		if (filename === "lib.core.d.ts" || filename === "lib.dom.d.ts") {
 			return;
 		}
 
@@ -1385,7 +1391,8 @@ var walk = function (compiler, root, rootNamespaceName) {
 	// Walk
 	sourceFiles.forEach(function (sourceFile) {
 		if (
-			path.basename(sourceFile.filename) === "lib.es6.d.ts" ||
+			path.basename(sourceFile.filename) === "lib.core.d.ts" ||
+			path.basename(sourceFile.filename) === "lib.dom.d.ts" ||
 			sourceFile.filename.substr(-"-references.d.ts".length) === "-references.d.ts"
 		) {
 			return;

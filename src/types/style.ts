@@ -26,6 +26,8 @@ import parser = require("../parser");
 
 import parts = require("../parts/index");
 
+import map = require("../utility/map");
+
 /**
  * This class represents a single global style declaration in a {@link libjass.ASS} script. The styles can be obtained via the {@link libjass.ASS.styles} property.
  *
@@ -84,7 +86,7 @@ class Style {
 	private _marginRight: number;
 	private _marginVertical: number;
 
-	constructor(template: Map<string, string>) {
+	constructor(template: map.Map<string, string>) {
 		this._name = template.get("Name");
 		if (this._name === undefined || this._name === null || this._name.constructor !== String) {
 			throw new Error("Style doesn't have a name.");

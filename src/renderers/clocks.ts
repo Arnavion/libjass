@@ -21,7 +21,7 @@
 import globalSettings = require("../settings");
 
 import mixin = require("../utility/mixin");
-import Map = require("../utility/map");
+import map = require("../utility/map");
 
 /**
  * A mixin class that represents an event source.
@@ -32,7 +32,7 @@ export class EventSource<T> {
 	 *
 	 * @type {!Map.<T, !Array.<Function>>}
 	 */
-	_eventListeners: Map<T, Function[]>;
+	_eventListeners: map.Map<T, Function[]>;
 
 	/**
 	 * Add a listener for the given event.
@@ -271,7 +271,7 @@ export class ManualClock implements Clock {
 	/**
 	 * @type {!Map.<T, !Array.<Function>>}
 	 */
-	_eventListeners: Map<ClockEvent, Function[]> = new Map<ClockEvent, Function[]>();
+	_eventListeners: map.Map<ClockEvent, Function[]> = new map.Map<ClockEvent, Function[]>();
 
 	/**
 	 * @type {function(number, !Function)}
@@ -529,7 +529,7 @@ export class VideoClock implements Clock {
 	/**
 	 * @type {!Map.<T, !Array.<Function>>}
 	 */
-	_eventListeners: Map<ClockEvent, Function[]> = new Map<ClockEvent, Function[]>();
+	_eventListeners: map.Map<ClockEvent, Function[]> = new map.Map<ClockEvent, Function[]>();
 
 	/**
 	 * @type {function(number, !Function)}
