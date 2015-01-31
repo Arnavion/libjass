@@ -49,6 +49,15 @@ The API documentation is linked in the Links section below. Here's an overview:
 * For an example of using libjass, check out [the demo.](http://arnavion.github.io/libjass/demo/index.xhtml)
 
 
+### What does libjass need?
+
+* libjass uses some ES5 features like getters and setters (via Object.defineProperty), and assumptions like the behavior of parseInt with leading zeros. It cannot be used with an ES3 environment.
+
+* libjass will use ES6 Set, Map and Promise if they're available on the global object. If they're not present, it will use its own minimal internal implementations. If you have implementations of these that you would like libjass to use but don't want to register them on the global object, you can provide them to libjass specifically by setting the libjass.Set, libjass.Map and libjass.Promise properties.
+
+* WebRenderer and DefaultRenderer try to use [SVG filter effects for HTML](http://caniuse.com/svg-html) by default. This feature is not available on all browsers, so you can tell them to fall back to more widely available CSS methods with the [RendererSettings.enableSvg](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.RendererSettings.enableSvg) property.
+
+
 ### Can I use libjass in node?
 
 libjass's parser works in node.
@@ -81,15 +90,7 @@ See the tests, particularly the ones in test-miscellaneous.js, for examples.
 
 Yes! Feature requests, suggestions, bug reports and pull requests are welcome! I'm especially looking for details and edge-cases of the ASS syntax that libjass doesn't support.
 
-You can also join the IRC channel below and ask any questions.
-
-
-### Links
-
-* [GitHub](https://github.com/Arnavion/libjass/)
-* IRC channel - #libjass on irc.rizon.net
-* [API documentation](http://arnavion.github.io/libjass/api.xhtml)
-* [Aegisub's documentation on ASS](http://docs.aegisub.org/3.0/ASS_Tags/)
+You can also join the IRC channel in the links section below and ask any questions.
 
 
 ### Supported features
@@ -107,11 +108,12 @@ You can also join the IRC channel below and ask any questions.
 * Lines with multiple rotations aren't rotated the same as VSFilter or libass. See [#14](https://github.com/Arnavion/libjass/issues/14)
 
 
-### Planned improvements
+### Links
 
-* Figure out a way to test layout. See [#21](https://github.com/Arnavion/libjass/issues/21)
-* Evaluate (document, benchmark) the benefits and drawbacks of DOM+CSS-based drawing over canvas.
-* Add more explanatory comments to the code.
+* [GitHub](https://github.com/Arnavion/libjass/)
+* IRC channel - #libjass on irc.rizon.net
+* [API documentation](http://arnavion.github.io/libjass/api.xhtml)
+* [Aegisub's documentation on ASS](http://docs.aegisub.org/3.0/ASS_Tags/)
 
 
 ### License
