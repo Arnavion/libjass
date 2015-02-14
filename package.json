@@ -1,6 +1,6 @@
 {
 	"name": "libjass",
-	"version": "0.9.0",
+	"version": "0.10.0",
 	"description": "A library to render ASS subtitles on HTML5 video in the browser.",
 	"keywords": ["browser", "html5", "subtitles"],
 	"homepage": "https://github.com/Arnavion/libjass",
