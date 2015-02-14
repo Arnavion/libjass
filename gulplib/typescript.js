@@ -227,7 +227,8 @@ exports.gulp = function (astModifier, root, rootNamespaceName) {
 			compiler.compile(file);
 
 			if (astModifier !== undefined) {
-				astModifier(exports.AST.walk(compiler, root, rootNamespaceName));
+				var walkResult = exports.AST.walk(compiler, root, rootNamespaceName);
+				astModifier(walkResult.namespaces);
 			}
 
 			compiler.writeFiles(this);
@@ -384,6 +385,8 @@ var Scoped = function () {
 var Module = (function (_super) {
 	function Module(name) {
 		_super.call(this, name);
+
+		this.fullName = name;
 
 		this.members = Object.create(null);
 	}
@@ -1411,10 +1414,11 @@ var walk = function (compiler, root, rootNamespaceName) {
 	walker.link(rootNamespaceName);
 
 	// Return types
-	return walker.namespaces;
+	return { namespaces: walker.namespaces, modules: walker.modules };
 };
 
 exports.AST = {
+	Module: Module,
 	Namespace: Namespace,
 	Function: Function,
 	Interface: Interface,

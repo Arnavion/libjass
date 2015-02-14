@@ -157,6 +157,10 @@ var toVariableName = function (item) {
 };
 
 var toUsageName = function (item) {
+	if (item.parent instanceof TypeScript.AST.Module) {
+		return item.name;
+	}
+
 	if (item instanceof TypeScript.AST.Constructor || item instanceof TypeScript.AST.Interface || item instanceof TypeScript.AST.Enum) {
 		if (item.isPrivate) {
 			return item.name;
@@ -394,7 +398,9 @@ module.exports = function (outputFilePath, root, rootNamespaceName) {
 		compiler.compile(file);
 
 		// Walk
-		var namespaces = TypeScript.AST.walk(compiler, root, rootNamespaceName);
+		var walkResult = TypeScript.AST.walk(compiler, root, rootNamespaceName);
+		var namespaces = walkResult.namespaces;
+		var modules = walkResult.modules;
 
 		// Make HTML
 
@@ -428,6 +434,41 @@ module.exports = function (outputFilePath, root, rootNamespaceName) {
 			});
 		});
 
+		var moduleNames = Object.keys(modules).sort(function (ns1, ns2) {
+			return ns1.localeCompare(ns2);
+		});
+
+		moduleNames.forEach(function (moduleName) {
+			var module = modules[moduleName];
+
+			var members = [];
+			Object.keys(module.members).forEach(function (memberName) {
+				var member = module.members[memberName];
+				if (member.parent === module) {
+					members.push(member);
+				}
+			});
+			module.members = members;
+
+			module.members.sort(sorter);
+
+			module.members.filter(function (value) {
+				return value instanceof TypeScript.AST.Interface || value instanceof TypeScript.AST.Constructor;
+			}).forEach(function (interfaceOrConstructor) {
+				var members = [];
+				Object.keys(interfaceOrConstructor.members).forEach(function (memberName) {
+					members.push(interfaceOrConstructor.members[memberName]);
+				});
+				interfaceOrConstructor.members = members;
+
+				interfaceOrConstructor.members.sort(sorter);
+			});
+		});
+
+		moduleNames = moduleNames.filter(function (moduleName) {
+			return modules[moduleName].members.length > 0;
+		});
+
 		this.push(new Vinyl({
 			path: outputFilePath,
 			contents: Buffer.concat([
@@ -437,16 +478,16 @@ module.exports = function (outputFilePath, root, rootNamespaceName) {
 				'		<title>' + rootNamespaceName + ' API Documentation</title>',
 				'		<style type="text/css">',
 				'		<![CDATA[',
-				'			html, body, .namespaces, .content {',
+				'			html, body, .navigation, .content {',
 				'				height: 100%;',
 				'				margin: 0;',
 				'			}',
 				'',
-				'			.namespaces, .content {',
+				'			.navigation, .content {',
 				'				overflow-y: scroll;',
 				'			}',
 				'',
-				'			.namespaces {',
+				'			.navigation {',
 				'				float: left;',
 				'				background-color: white;',
 				'				padding: 0 20px;',
@@ -577,10 +618,11 @@ module.exports = function (outputFilePath, root, rootNamespaceName) {
 				'		</script>',
 				'	</head>',
 				'	<body>',
-				'		<nav class="namespaces">',
+				'		<nav class="navigation">',
 				'			<label><input type="checkbox" id="show-private" />Show private</label>',
+				'',
 				'			<h2>Namespaces</h2>'
-			].concat([].concatMany(namespaceNames.map(function (namespaceName) {
+			].concatMany(namespaceNames.map(function (namespaceName) {
 				var namespace = namespaces[namespaceName];
 
 				return [
@@ -596,8 +638,27 @@ module.exports = function (outputFilePath, root, rootNamespaceName) {
 				'			</ul>',
 				''
 				]);
-			}))).concat([
+			})).concat([
+				'			<h2>Modules</h2>'
+			]).concatMany(moduleNames.map(function (moduleName) {
+				var module = modules[moduleName];
+
+				return [
+				'			<span class="module"><a href="#' + sanitize(moduleName) + '">' + sanitize(moduleName) + '</a></span>',
+				'			<ul class="module-elements">'
+				].concatMany(module.members.map(function (value) {
+					return (
+				'				<li' +
+						((value.isPrivate === true) ? ' class="private"' : '') +
+						'><a href="#' + sanitize(value.fullName) + '">' + sanitize(value.name) + '</a></li>'
+					);
+				})).concat([
+				'			</ul>',
+				''
+				]);
+			})).concat([
 				'		</nav>',
+				'',
 				'		<div class="content">',
 				''
 			]).concatMany(namespaceNames.map(function (namespaceName) {
@@ -623,7 +684,99 @@ module.exports = function (outputFilePath, root, rootNamespaceName) {
 
 				var result = [
 				'			<section>',
-				'				<h1 id="' + sanitize(namespaceName) + '">' + sanitize(namespaceName) + '</h1>',
+				'				<h1 id="' + sanitize(namespaceName) + '">Namespace ' + sanitize(namespaceName) + '</h1>',
+				''
+				];
+
+				if (variables.length > 0) {
+					result = result.concat([
+				'				<section>',
+				'					<h2>Variables</h2>'
+					]).concatMany(variables.map(function (value) {
+						return value.toHtml().map(indenter(5));
+					})).concat([
+				'				</section>',
+				''
+					]);
+				}
+
+				if (functions.length > 0) {
+					result = result.concat([
+				'				<section>',
+				'					<h2>Free functions</h2>'
+					]).concatMany(functions.map(function (value) {
+						return value.toHtml().map(indenter(5));
+					})).concat([
+				'				</section>',
+				''
+					]);
+				}
+
+				if (interfaces.length > 0) {
+					result = result.concat([
+				'				<section>',
+				'					<h2>Interfaces</h2>'
+					]).concatMany(interfaces.map(function (value) {
+						return value.toHtml().map(indenter(5));
+					})).concat([
+				'				</section>',
+				''
+					]);
+				}
+
+				if (constructors.length > 0) {
+					result = result.concat([
+				'				<section>',
+				'					<h2>Classes</h2>'
+					]).concatMany(constructors.map(function (value) {
+						return value.toHtml().map(indenter(5));
+					})).concat([
+				'				</section>',
+				''
+					]);
+				}
+
+				if (enums.length > 0) {
+					result = result.concat([
+				'				<section>',
+				'					<h2>Enums</h2>'
+					]).concatMany(enums.map(function (value) {
+						return value.toHtml().map(indenter(5));
+					})).concat([
+				'				</section>',
+				''
+					]);
+				}
+
+				result = result.concat([
+				'			</section>'
+				]);
+
+				return result;
+			})).concatMany(moduleNames.map(function (moduleName) {
+				var variables = modules[moduleName].members.filter(function (value) {
+					return value instanceof TypeScript.AST.Variable;
+				});
+
+				var functions = modules[moduleName].members.filter(function (value) {
+					return value instanceof TypeScript.AST.Function;
+				});
+
+				var interfaces = modules[moduleName].members.filter(function (value) {
+					return value instanceof TypeScript.AST.Interface;
+				});
+
+				var constructors = modules[moduleName].members.filter(function (value) {
+					return value instanceof TypeScript.AST.Constructor;
+				});
+
+				var enums = modules[moduleName].members.filter(function (value) {
+					return value instanceof TypeScript.AST.Enum;
+				});
+
+				var result = [
+				'			<section>',
+				'				<h1 id="' + sanitize(moduleName) + '">Module ' + sanitize(moduleName) + '</h1>',
 				''
 				];
 
