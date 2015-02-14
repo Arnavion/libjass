@@ -1043,6 +1043,7 @@ var Walker = function () {
 
 	Walker.prototype._visitExportAssignment = function (node) {
 		var exportedMember = this._currentModule.members[node.exportName.text];
+		delete this._currentModule.members[node.exportName.text];
 		this._currentModule.members.default = exportedMember;
 		exportedMember.isPrivate = false;
 	};
