@@ -386,7 +386,7 @@ export class SrtStreamParser {
 }
 
 /**
- * Parses a line into a {@link libjass.Property}.
+ * Parses a line into a {@link ./types/misc.Property}.
  *
  * @param {string} line
  * @return {!libjass.Property}
@@ -404,7 +404,7 @@ export function parseLineIntoProperty(line: string): Property {
 }
 
 /**
- * Parses a line into a {@link libjass.TypedTemplate} according to the given format specifier.
+ * Parses a line into a {@link ./types/misc.TypedTemplate} according to the given format specifier.
  *
  * @param {string} line
  * @param {!Array.<string>} formatSpecifier

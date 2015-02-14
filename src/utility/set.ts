@@ -149,7 +149,7 @@ export interface Set<T> {
 }
 
 /**
- * Set to browser's implementation of Set if it has one, else set to {@link libjass.SimpleSet}
+ * Set to browser's implementation of Set if it has one, else set to {@link ./utility/set.SimpleSet}
  *
  * @type {function(new:Set, !Array.<T>=)}
  */

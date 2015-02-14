@@ -346,7 +346,7 @@ class SimplePromise<T> {
 }
 
 /**
- * The state of the {@link libjass.SimplePromise}
+ * The state of the {@link ./utility/promise.SimplePromise}
  */
 enum SimplePromiseState {
 	PENDING = 0,
@@ -379,7 +379,7 @@ export interface Promise<T> {
 }
 
 /**
- * Set to browser's implementation of Promise if it has one, else set to {@link libjass.SimplePromise}
+ * Set to browser's implementation of Promise if it has one, else set to {@link ./utility/promise.SimplePromise}
  *
  * @type {function(new:Promise)}
  */

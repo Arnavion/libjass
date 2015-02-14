@@ -207,7 +207,7 @@ export interface Map<K, V> {
 }
 
 /**
- * Set to browser's implementation of Map if it has one, else set to {@link libjass.SimpleMap}
+ * Set to browser's implementation of Map if it has one, else set to {@link ./utility/map.SimpleMap}
  *
  * @type {function(new:Map, !Array.<!Array.<*>>=)}
  */
