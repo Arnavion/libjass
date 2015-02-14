@@ -158,6 +158,13 @@ export var Set: {
     prototype: Set<any>;
 } = global.Set;
 
-if (Set === undefined || typeof Set.prototype.forEach !== "function" || new Set([1, 2]).size !== 2) {
+if (Set === undefined || typeof Set.prototype.forEach !== "function" || (() => {
+	try {
+		return new Set([1, 2]).size !== 2;
+	}
+	catch (ex) {
+		return true;
+	}
+})()) {
 	Set = <any>SimpleSet;
 }

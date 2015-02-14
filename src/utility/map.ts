@@ -216,6 +216,13 @@ export var Map: {
 	prototype: Map<any, any>;
 } = global.Map;
 
-if (Map === undefined || typeof Map.prototype.forEach !== "function" || new Map([[1, "foo"], [2, "bar"]]).size !== 2) {
+if (Map === undefined || typeof Map.prototype.forEach !== "function" || (() => {
+	try {
+		return new Map([[1, "foo"], [2, "bar"]]).size !== 2;
+	}
+	catch (ex) {
+		return true;
+	}
+})()) {
 	Map = <any>SimpleMap;
 }
