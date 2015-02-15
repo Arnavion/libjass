@@ -83,7 +83,7 @@ true
 
 Entire scripts can be parsed via [ASS.fromString()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromString)
 
-See the tests, particularly the ones in test-miscellaneous.js, for examples.
+See the tests, particularly the ones in tests/specs/miscellaneous.js, for examples.
 
 
 ### Can I contribute?

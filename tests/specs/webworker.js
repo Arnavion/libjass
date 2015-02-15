@@ -18,8 +18,9 @@
  * limitations under the License.
  */
 
-var libjass = require("../lib/libjass.js");
 var assert = require("assert");
+
+var libjass = require("../../lib/libjass.js");
 
 suite("Web worker", function () {
 	var workerChannel = null;
@@ -33,14 +34,9 @@ suite("Web worker", function () {
 	suite("Parse", function () {
 		if (libjass.webworker.supported) {
 			test("Parse", function (done) {
-				this.customProperties = {
-					rule: "dialogueParts",
-					input: "{\\an8}Are {\\i1}you{\\i0} the one who stole the clock?!"
-				};
-
 				workerChannel.request(libjass.webworker.WorkerCommands.Parse, {
-					input: this.customProperties.input,
-					rule: this.customProperties.rule
+					input: "{\\an8}Are {\\i1}you{\\i0} the one who stole the clock?!",
+					rule: "dialogueParts"
 				}).then(function (value) {
 					try {
 						assert.deepEqual(value, [
@@ -68,14 +64,9 @@ suite("Web worker", function () {
 
 		if (libjass.webworker.supported) {
 			test("Parse failure", function (done) {
-				this.customProperties = {
-					rule: "tag_a",
-					input: "a4"
-				};
-
 				workerChannel.request(libjass.webworker.WorkerCommands.Parse, {
-					input: this.customProperties.input,
-					rule: this.customProperties.rule
+					input: "a4",
+					rule: "tag_a"
 				}).then(function (value) {
 					done(new Error("Expected parse to fail."));
 				}, function (reason) {

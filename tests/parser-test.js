@@ -21,10 +21,8 @@
 var libjass = require("../lib/libjass.js");
 var assert = require("assert");
 
-libjass.debugMode = true;
-
-var parserTest = function (description, input, rule, expected) {
-	var result = test(description, function () {
+function parserTest(input, rule, expected) {
+	return function () {
 		var actual = null;
 
 		try {
@@ -34,37 +32,21 @@ var parserTest = function (description, input, rule, expected) {
 			if (expected === null) {
 				return;
 			}
-			else {
-				throw new Error("Expected parse to succeed but it threw an exception: " + parseException.stack);
-			}
+
+			throw new Error("Expected parse to succeed but it threw an exception: " + parseException.stack);
 		}
 
 		if (expected === null) {
 			throw new Error("Expected parse to fail.");
 		}
-		else if (actual === null) {
+
+		if (actual === null) {
 			throw new Error("Parse failed without throwing an exception.");
 		}
 
 		assert.deepEqual(actual, expected);
-	});
-
-	result.customProperties = Object.create(null);
-	result.customProperties.input = input;
-	result.customProperties.rule = rule;
-
-	return result;
-};
-
-parserTest.skip = function (description, input, rule, expected) {
-	var result = test(description); // Could use test.skip but Mocha's implementation has a bug - it doesn't return the Test object
-
-	result.customProperties = Object.create(null);
-	result.customProperties.input = input;
-	result.customProperties.rule = rule;
-
-	return result;
-};
+	};
+}
 
 if (typeof module !== "undefined") {
 	module.exports = parserTest;

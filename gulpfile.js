@@ -110,6 +110,38 @@ gulp.task("libjass.js", function () {
 		return;
 	}
 
+	if (!fs.existsSync("./tests/mocha.js")) {
+		// Copy over mocha.js to tests/
+
+		var mochaJs = fs.readFileSync("./node_modules/mocha/mocha.js", { encoding: "utf8" });
+
+		// Workaround for https://github.com/mochajs/mocha/pull/1551 and https://github.com/mochajs/mocha/pull/1552
+		mochaJs = mochaJs.replace(
+			'var el = fragment(\'<li class="suite"><h1><a href="%s">%s</a></h1></li>\', url, escape(suite.title));',
+			'var el = fragment(\'<li class="suite"><h1><a href="%e">%e</a></h1></li>\', url, suite.title);'
+		).replace(
+			'var el = fragment(\'<li class="test pass %e"><h2>%e<span class="duration">%ems</span> <a href="%s" class="replay">‣</a></h2></li>\', test.speed, test.title, test.duration, url);',
+			'var el = fragment(\'<li class="test pass %e"><h2>%e<span class="duration">%ems</span> <a href="%e" class="replay">‣</a></h2></li>\', test.speed, test.title, test.duration, url);'
+		).replace(
+			'document.body.appendChild(fragment(\'<div id="mocha-error">%s</div>\', msg));',
+			'document.body.appendChild(fragment(\'<div id="mocha-error">%e</div>\', msg));'
+		).replace(
+			'  for (var i = 0; i < els.length; ++i) {\n' +
+			'    els[i].className = els[i].className.replace(\'suite hidden\', \'suite\');',
+			'  while (els.length > 0) {\n' +
+			'    els[0].className = els[0].className.replace(\'suite hidden\', \'suite\');'
+		);
+
+		fs.writeFileSync("./tests/mocha.js", mochaJs, { encoding: "utf8" });
+	}
+
+	if (!fs.existsSync("./tests/mocha.css")) {
+		// Copy over mocha.css to tests/
+
+		var mochaCss = fs.readFileSync("./node_modules/mocha/mocha.css", { encoding: "utf8" });
+		fs.writeFileSync("./tests/mocha.css", mochaCss, { encoding: "utf8" });
+	}
+
 	return gulp.src("./src/tsconfig.json")
 		.pipe(TypeScript.gulp(ASTModifer, "./src/index.ts", "libjass"))
 		.pipe(WebPack("./src/index.js", "libjass", "./node_modules"))

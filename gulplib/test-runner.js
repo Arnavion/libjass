@@ -30,9 +30,7 @@ var mocha = new Mocha({
 	reporter: "spec"
 });
 
-fs.readdirSync("./tests/")
-.filter(function (filename) { return filename.match(/^test-.*\.js$/) !== null; })
-.forEach(function (filename) { mocha.addFile(path.resolve("./tests", filename)); });
+fs.readdirSync("./tests/specs/").forEach(function (filename) { mocha.addFile(path.resolve("./tests/specs/", filename)); });
 
 mocha.run(function (failures) {
 	if (failures > 0) {

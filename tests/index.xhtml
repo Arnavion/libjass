@@ -21,41 +21,20 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
 		<title>Parser tests</title>
-		<style type="text/css">
-		<![CDATA[
-			.suite:not(:last-child) {
-				margin-bottom: 1em;
-			}
-
-			.test {
-				text-overflow: ellipsis;
-				white-space: pre-wrap;
-				padding: 0.2em 0;
-			}
-
-			.test:not(:last-child) {
-				border-bottom: 1px solid black;
-			}
-
-			.test.passed, .suite.passed >legend, .total > .passed {
-				color: green;
-			}
-
-			.test.failed, .suite.failed >legend, .total > .failed {
-				color: red;
-			}
-		]]>
-		</style>
+		<link rel="stylesheet" href="mocha.css" />
 		<script src="../lib/libjass.js" />
+		<script src="mocha.js" />
 		<script src="index.js" />
 		<script src="parser-test.js" />
 
-		<script src="test-primitives.js" />
-		<script src="test-tags.js" />
-		<script src="test-miscellaneous.js" />
-		<script src="test-webworker.js" />
+		<script src="specs/miscellaneous.js" />
+		<script src="specs/primitives.js" />
+		<script src="specs/tags.js" />
+		<script src="specs/webworker.js" />
 	</head>
 	<body>
-		<div id="output" />
+		<div id="mocha" />
+
+		<script>mocha.run();</script>
 	</body>
 </html>
