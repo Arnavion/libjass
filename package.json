@@ -24,14 +24,14 @@
 		"test": "mocha --ui tdd --reporter spec tests/specs/"
 	},
 	"dependencies": {
-		"gulp": "latest",
+		"gulp": "3.x",
 		"memory-fs": "latest",
-		"mocha": "2.1.x",
-		"npm": "latest",
+		"mocha": "2.x",
+		"npm": "2.x",
 		"source-map-loader": "https://github.com/Arnavion/source-map-loader/archive/75faa177461df3a611840b82a5e5ab79312985a0.tar.gz",
 		"typescript": "1.4.1",
 		"uglify-js": "2.x >=2.4.16",
 		"vinyl": "latest",
-		"webpack": "latest"
+		"webpack": "1.x"
 	}
 }
