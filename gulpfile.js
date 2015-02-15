@@ -147,8 +147,8 @@ gulp.task("libjass.js", function () {
 	}
 
 	return gulp.src("./src/tsconfig.json")
-		.pipe(TypeScript.gulp(ASTModifer, "./src/index.ts", "libjass"))
-		.pipe(WebPack("./src/index.js", "libjass", "./node_modules"))
+		.pipe(TypeScript.gulp(ASTModifer, "./src/libjass.ts", "libjass"))
+		.pipe(WebPack("./src/libjass.js", "libjass", "./node_modules"))
 		.pipe(UglifyJS.fixup())
 		.pipe(gulp.dest("./lib"));
 });
@@ -204,6 +204,6 @@ gulp.task("doc", ["libjass.js"], function () {
 	var Doc = require("./gulplib/doc.js");
 
 	return gulp.src("./src/tsconfig.json")
-		.pipe(Doc("./api.xhtml", "./src/index.ts", "libjass"))
+		.pipe(Doc("./api.xhtml", "./src/libjass.ts", "libjass"))
 		.pipe(gulp.dest("../libjass-gh-pages/"));
 });
