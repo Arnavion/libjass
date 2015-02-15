@@ -22,18 +22,22 @@ var fs = require("fs");
 var path = require("path");
 
 var gulp = require("gulp");
-var Vinyl = require("vinyl");
 
 var helpers = require("./gulplib/helpers.js");
 var Transform = helpers.Transform;
 var SingletonChildProcess = helpers.SingletonChildProcess;
 
-Object.defineProperties(global, {
-	Doc: { get: function () { return require("./gulplib/doc.js"); } },
-	TypeScript: { get: function () { return require("./gulplib/typescript.js"); } },
-	WebPack: { get: function () { return require("./gulplib/webpack.js"); } },
-	UglifyJS: { get: function () { return require("./gulplib/uglify.js"); } },
-});
+(function () {
+	var _TypeScript = null;
+	var _UglifyJS = null;
+	var _WebPack = null;
+
+	Object.defineProperties(global, {
+		TypeScript: { get: function () { return _TypeScript || (_TypeScript = require("./gulplib/typescript.js")); } },
+		UglifyJS: { get: function () { return _UglifyJS || (_UglifyJS = require("./gulplib/uglify.js")); } },
+		WebPack: { get: function () { return _WebPack || (_WebPack = require("./gulplib/webpack.js")); } },
+	});
+})();
 
 gulp.task("default", ["libjass.js", "libjass.min.js"]);
 
@@ -197,6 +201,8 @@ gulp.task("demo", ["libjass.js"], function () {
 });
 
 gulp.task("doc", ["libjass.js"], function () {
+	var Doc = require("./gulplib/doc.js");
+
 	return gulp.src("./src/tsconfig.json")
 		.pipe(Doc("./api.xhtml", "./src/index.ts", "libjass"))
 		.pipe(gulp.dest("../libjass-gh-pages/"));
