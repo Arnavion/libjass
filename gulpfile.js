@@ -25,7 +25,6 @@ var gulp = require("gulp");
 
 var helpers = require("./gulplib/helpers.js");
 var Transform = helpers.Transform;
-var SingletonChildProcess = helpers.SingletonChildProcess;
 
 (function () {
 	var _TypeScript = null;
@@ -177,22 +176,41 @@ gulp.task("clean", function () {
 });
 
 gulp.task("watch", ["clean"], function (callback) {
-	var gulpTestProcess = SingletonChildProcess(path.resolve("./gulplib/test-runner.js"));
+	var npm = require("npm");
 
-	gulp.src("./src/tsconfig.json")
-	.pipe(TypeScript.watch())
-	.pipe(gulp.dest("./lib"))
-	.pipe(WebPack("./lib/index.js", "libjass"))
-	.pipe(UglifyJS.fixup())
-	.pipe(gulp.dest("./lib"))
-	.pipe(Transform(function (file) {
-		if (path.basename(file.path) === "libjass.js") {
-			gulpTestProcess();
-		}
-	}));
+	npm.load(fs.readFileSync("package.json", { encoding: "utf8" }), function () {
+		var testRunning = false;
+		var rerunTest = false;
 
-	gulp.watch(["./tests/test-*.js"], { debounceDelay: 1 }, function () {
-		gulpTestProcess();
+		var startTest = function () {
+			npm.commands.test(function () {
+				testRunning = false;
+
+				if (rerunTest) {
+					startTest();
+					rerunTest = false;
+				}
+			});
+
+			testRunning = true;
+		};
+
+		var runTest = function () {
+			if (!testRunning) {
+				startTest();
+			}
+			else {
+				rerunTest = true;
+			}
+		};
+
+		gulp.src("./src/tsconfig.json")
+		.pipe(TypeScript.watch("./src/libjass.ts", "libjass", runTest))
+		.pipe(gulp.dest("./lib"));
+
+		gulp.watch(["./tests/specs/*.js"], { debounceDelay: 1 }, function () {
+			runTest();
+		});
 	});
 });
 

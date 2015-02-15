@@ -1,7 +1,5 @@
-lib/libjass.js
-lib/libjass.js.map
-lib/libjass.min.js
-lib/libjass.min.js.map
+lib/
+!lib/libjass.css
 
 node_modules/
 

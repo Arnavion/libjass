@@ -114,15 +114,15 @@ var CompilerHost = function () {
 
 var WatchCompilerHost = function (_super) {
 	__extends(WatchCompilerHost, _super);
-	function WatchCompilerHost() {
+	function WatchCompilerHost(onChangeCallback) {
 		_super.call(this);
 
-		this._sourceFiles = Object.create(null);
-	}
+		this._onChangeCallback = onChangeCallback;
 
-	WatchCompilerHost.prototype.markFileChanged = function (filename) {
-		delete this._sourceFiles[filename];
-	};
+		this._sourceFiles = Object.create(null);
+
+		this._filesChangedSinceLast = [];
+	}
 
 	WatchCompilerHost.prototype.getSourceFile = function (filename, languageVersion, onError) {
 		if (filename in this._sourceFiles) {
@@ -134,8 +134,43 @@ var WatchCompilerHost = function (_super) {
 			this._sourceFiles[filename] = result;
 		}
 
+		this._watchFile(filename);
+
 		return result;
 	};
+
+	WatchCompilerHost.prototype._watchFile = function (filename) {
+		var _this = this;
+
+		function watchFileCallback(currentFile, previousFile) {
+			if (currentFile.mtime >= previousFile.mtime) {
+				_this._fileChangedCallback(filename);
+			}
+			else {
+				fs.unwatchFile(filename, watchFileCallback);
+
+				_this._fileChangedCallback(filename);
+			}
+		}
+
+		fs.watchFile(filename, { interval: 500 }, watchFileCallback);
+	}
+
+	WatchCompilerHost.prototype._fileChangedCallback = function (filename) {
+		var _this = this;
+
+		delete this._sourceFiles[filename];
+
+		if (this._filesChangedSinceLast.length === 0) {
+			setTimeout(function () {
+				_this._filesChangedSinceLast = [];
+
+				_this._onChangeCallback();
+			}, 100);
+		}
+
+		this._filesChangedSinceLast.push(filename);
+	}
 
 	return WatchCompilerHost;
 }(CompilerHost);
@@ -220,7 +255,7 @@ exports.Compiler = Compiler;
 exports.gulp = function (astModifier, root, rootNamespaceName) {
 	var compiler = new Compiler();
 
-	return Transform(function (file, encoding) {
+	return Transform(function (file) {
 		try {
 			console.log("Compiling " + file.path + "...");
 
@@ -246,83 +281,48 @@ exports.gulp = function (astModifier, root, rootNamespaceName) {
 	});
 };
 
-exports.watch = function (outputCodePath, outputSourceMapPath) {
-	var compilerHost = new WatchCompilerHost();
-
-	var filenames = [];
-
+exports.watch = function (root, rootNamespaceName, callback) {
 	return Transform(function (file) {
-		filenames.push(file.path);
-	}, function (callback) {
 		var _this = this;
 
-		var compiler = compile();
-
-		compiler.sourceFiles.forEach(function (sourceFile) {
-			watchFile(sourceFile.filename, fileChangedCallback, fileChangedCallback);
-		});
-
-		console.log("Listening for changes...");
-
-		var changedFiles = [];
-
-		function fileChangedCallback(filename) {
-			compilerHost.markFileChanged(filename);
-
-			if (changedFiles.length === 0) {
-				setTimeout(function () {
-					processChangedFiles();
-				}, 100);
-			}
-
-			changedFiles.push(filename);
-		}
-
-		function processChangedFiles() {
-			changedFiles = [];
-
-			compile();
-		}
-
-		function compile() {
+		var compilerHost = new WatchCompilerHost(function () {
 			try {
-				console.log("Compiling " + JSON.stringify(filenames) + "...");
+				console.log("Compiling " + file.path + "...");
 
-				var compiler = new Compiler(compilerHost);
+				compiler.compile(file);
 
-				filenames.forEach(function (filename) {
-					compiler.addFile(filename);
-				});
-
-				compiler.compile();
-				compiler.writeFiles(outputCodePath, outputSourceMapPath, _this);
+				compiler.writeFiles(_this);
 
 				console.log("Compile succeeded.");
 
-				return compiler;
+				callback();
 			}
 			catch (ex) {
 				console.error("Compile failed." + ex.stack);
+			}
+		});
 
-				return null;
+		var compiler = new Compiler(compilerHost);
+
+		try {
+			console.log("Compiling " + file.path + "...");
+
+			compiler.compile(file);
+
+			compiler.writeFiles(this);
+
+			console.log("Listening for changes...");
+		}
+		catch (ex) {
+			if (ex instanceof Error) {
+				throw ex;
+			}
+			else {
+				throw new Error("Internal compiler error: " + ex.stack + "\n");
 			}
 		}
+	}, function (callback) {
 	});
-};
-
-var watchFile = function (filename, onChange, onDelete) {
-	function watchFileCallback(currentFile, previousFile) {
-		if (currentFile.mtime >= previousFile.mtime) {
-			onChange(filename);
-		}
-		else {
-			fs.unwatchFile(filename, watchFileCallback);
-
-			onDelete(filename);
-		}
-	}
-
-	fs.watchFile(filename, { interval: 500 }, watchFileCallback);
 };
 
 var parseConfigFile = function (json, basePath) {
