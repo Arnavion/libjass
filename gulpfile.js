@@ -178,7 +178,7 @@ gulp.task("clean", function () {
 gulp.task("watch", ["clean"], function (callback) {
 	var npm = require("npm");
 
-	npm.load(fs.readFileSync("package.json", { encoding: "utf8" }), function () {
+	npm.load(function () {
 		var testRunning = false;
 		var rerunTest = false;
 
