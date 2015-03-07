@@ -1255,7 +1255,23 @@ class ParserRun {
 	 * @return {libjass.parser.ParseNode}
 	 */
 	parse_tag_k(parent: ParseNode): ParseNode {
-		throw new Error("Method not implemented.");
+		var current = new ParseNode(parent);
+
+		if (this.read(current, "k") === null) {
+			parent.pop();
+			return null;
+		}
+
+		var valueNode = this.parse_decimal(current);
+
+		if (valueNode === null) {
+			parent.pop();
+			return null;
+		}
+
+		current.value = new parts.ColorKaraoke(valueNode.value / 100);
+
+		return current;
 	}
 
 	/**
@@ -1263,7 +1279,23 @@ class ParserRun {
 	 * @return {libjass.parser.ParseNode}
 	 */
 	parse_tag_K(parent: ParseNode): ParseNode {
-		throw new Error("Method not implemented.");
+		var current = new ParseNode(parent);
+
+		if (this.read(current, "K") === null) {
+			parent.pop();
+			return null;
+		}
+
+		var valueNode = this.parse_decimal(current);
+
+		if (valueNode === null) {
+			parent.pop();
+			return null;
+		}
+
+		current.value = new parts.SweepingColorKaraoke(valueNode.value / 100);
+
+		return current;
 	}
 
 	/**
@@ -1271,7 +1303,23 @@ class ParserRun {
 	 * @return {libjass.parser.ParseNode}
 	 */
 	parse_tag_kf(parent: ParseNode): ParseNode {
-		throw new Error("Method not implemented.");
+		var current = new ParseNode(parent);
+
+		if (this.read(current, "kf") === null) {
+			parent.pop();
+			return null;
+		}
+
+		var valueNode = this.parse_decimal(current);
+
+		if (valueNode === null) {
+			parent.pop();
+			return null;
+		}
+
+		current.value = new parts.SweepingColorKaraoke(valueNode.value / 100);
+
+		return current;
 	}
 
 	/**
@@ -1279,7 +1327,23 @@ class ParserRun {
 	 * @return {libjass.parser.ParseNode}
 	 */
 	parse_tag_ko(parent: ParseNode): ParseNode {
-		throw new Error("Method not implemented.");
+		var current = new ParseNode(parent);
+
+		if (this.read(current, "ko") === null) {
+			parent.pop();
+			return null;
+		}
+
+		var valueNode = this.parse_decimal(current);
+
+		if (valueNode === null) {
+			parent.pop();
+			return null;
+		}
+
+		current.value = new parts.OutlineKaraoke(valueNode.value / 100);
+
+		return current;
 	}
 
 	/**
@@ -2412,10 +2476,6 @@ makeTagParserFunction("frz", parts.RotateZ, ParserRun.prototype.parse_decimal, f
 makeTagParserFunction("fs", parts.FontSize, ParserRun.prototype.parse_decimal, false);
 makeTagParserFunction("fsp", parts.LetterSpacing, ParserRun.prototype.parse_decimal, false);
 makeTagParserFunction("i", parts.Italic, ParserRun.prototype.parse_enableDisable, false);
-makeTagParserFunction("k", parts.ColorKaraoke, ParserRun.prototype.parse_decimal, true);
-makeTagParserFunction("K", parts.SweepingColorKaraoke, ParserRun.prototype.parse_decimal, true);
-makeTagParserFunction("kf", parts.SweepingColorKaraoke, ParserRun.prototype.parse_decimal, true);
-makeTagParserFunction("ko", parts.OutlineKaraoke, ParserRun.prototype.parse_decimal, true);
 makeTagParserFunction("p", parts.DrawingMode, ParserRun.prototype.parse_decimal, true);
 makeTagParserFunction("pbo", parts.DrawingBaselineOffset, ParserRun.prototype.parse_decimal, true);
 makeTagParserFunction("s", parts.StrikeThrough, ParserRun.prototype.parse_enableDisable, false);
