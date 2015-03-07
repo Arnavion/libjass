@@ -199,7 +199,7 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 		sub.style.marginTop = sub.style.marginBottom = `${ (this._scaleY * dialogue.style.marginVertical).toFixed(3) }px`;
 		sub.style.minWidth = `${ (this._subsWrapper.offsetWidth - this._scaleX * (dialogue.style.marginLeft + dialogue.style.marginRight)).toFixed(3) }px`;
 
-		var animationCollection = new AnimationCollection(this, dialogue);
+		var animationCollection = new AnimationCollection(this);
 
 		var currentSpan: HTMLSpanElement = null;
 		var currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, this._svgDefsElement);
@@ -1356,12 +1356,11 @@ ${ blurFilter }
  * The collection can then be converted to a CSS3 representation.
  *
  * @param {!libjass.renderers.NullRenderer} renderer The renderer that this collection is associated with
- * @param {!libjass.Dialogue} dialogue The Dialogue that this collection is associated with
  */
 class AnimationCollection {
+	private static _nextId: number = 0;
+
 	private _id: string;
-	private _start: number;
-	private _end: number;
 	private _rate: number;
 
 	private _cssText: string = "";
@@ -1369,10 +1368,8 @@ class AnimationCollection {
 	private _animationDelays: number[] = [];
 	private _numAnimations: number = 0;
 
-	constructor(renderer: NullRenderer, dialogue: Dialogue) {
-		this._id = `${ renderer.id }-${ dialogue.id }`;
-		this._start = dialogue.start;
-		this._end = dialogue.end;
+	constructor(renderer: NullRenderer) {
+		this._id = `${ renderer.id }-${ AnimationCollection._nextId++ }`;
 		this._rate = renderer.clock.rate;
 	}
 
@@ -1410,20 +1407,22 @@ class AnimationCollection {
 	 * @param {!Array.<!libjass.renderers.Keyframe>} keyframes
 	 */
 	add(timingFunction: string, keyframes: Keyframe[]): void {
-		var startTime: number = null;
-		var endTime: number = null;
+		var start: number = null;
+		var end: number = null;
 
 		var ruleCssText = "";
 
 		keyframes.forEach(keyframe => {
-			if (startTime === null) {
-				startTime = keyframe.time;
+			if (start === null) {
+				start = keyframe.time;
 			}
 
-			endTime = keyframe.time;
+			end = keyframe.time;
+		});
 
+		keyframes.forEach(keyframe => {
 			ruleCssText +=
-`	${ (100 * keyframe.time / (this._end - this._start)).toFixed(3) }% {
+`	${ (100 * ((end - start === 0) ? 1 : ((keyframe.time - start) / (end - start)))).toFixed(3) }% {
 `;
 
 			keyframe.properties.forEach((value, name) => {
@@ -1437,7 +1436,7 @@ class AnimationCollection {
 `;
 		});
 
-		var animationName = `dialogue-${ this._id }-${ this._numAnimations++ }`;
+		var animationName = `animation-${ this._id }-${ this._numAnimations++ }`;
 
 		this._cssText +=
 `@-webkit-keyframes ${ animationName } {
@@ -1454,8 +1453,8 @@ ${ ruleCssText }
 			this._animationStyle += ",";
 		}
 
-		this._animationStyle += `${ animationName } ${ ((endTime - startTime) / this._rate).toFixed(3) }s ${ timingFunction }`;
-		this._animationDelays.push(startTime);
+		this._animationStyle += `${ animationName } ${ ((end - start) / this._rate).toFixed(3) }s ${ timingFunction }`;
+		this._animationDelays.push(start);
 	}
 }
 
