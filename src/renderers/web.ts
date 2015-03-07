@@ -230,140 +230,140 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		dialogue.parts.forEach(part => {
 			if (part instanceof parts.Italic) {
-				currentSpanStyles.italic = (<parts.Italic>part).value;
+				currentSpanStyles.italic = part.value;
 			}
 
 			else if (part instanceof parts.Bold) {
-				currentSpanStyles.bold = (<parts.Bold>part).value;
+				currentSpanStyles.bold = part.value;
 			}
 
 			else if (part instanceof parts.Underline) {
-				currentSpanStyles.underline = (<parts.Underline>part).value;
+				currentSpanStyles.underline = part.value;
 			}
 
 			else if (part instanceof parts.StrikeThrough) {
-				currentSpanStyles.strikeThrough = (<parts.StrikeThrough>part).value;
+				currentSpanStyles.strikeThrough = part.value;
 			}
 
 			else if (part instanceof parts.Border) {
-				currentSpanStyles.outlineWidth = (<parts.Border>part).value;
-				currentSpanStyles.outlineHeight = (<parts.Border>part).value;
+				currentSpanStyles.outlineWidth = part.value;
+				currentSpanStyles.outlineHeight = part.value;
 			}
 
 			else if (part instanceof parts.BorderX) {
-				currentSpanStyles.outlineWidth = (<parts.BorderX>part).value;
+				currentSpanStyles.outlineWidth = part.value;
 			}
 
 			else if (part instanceof parts.BorderY) {
-				currentSpanStyles.outlineHeight = (<parts.BorderY>part).value;
+				currentSpanStyles.outlineHeight = part.value;
 			}
 
 			else if (part instanceof parts.Shadow) {
-				currentSpanStyles.shadowDepthX = (<parts.Shadow>part).value;
-				currentSpanStyles.shadowDepthY = (<parts.Shadow>part).value;
+				currentSpanStyles.shadowDepthX = part.value;
+				currentSpanStyles.shadowDepthY = part.value;
 			}
 
 			else if (part instanceof parts.ShadowX) {
-				currentSpanStyles.shadowDepthX = (<parts.ShadowX>part).value;
+				currentSpanStyles.shadowDepthX = part.value;
 			}
 
 			else if (part instanceof parts.ShadowY) {
-				currentSpanStyles.shadowDepthY = (<parts.ShadowY>part).value;
+				currentSpanStyles.shadowDepthY = part.value;
 			}
 
 			else if (part instanceof parts.Blur) {
-				currentSpanStyles.blur = (<parts.Blur>part).value;
+				currentSpanStyles.blur = part.value;
 			}
 
 			else if (part instanceof parts.GaussianBlur) {
-				currentSpanStyles.gaussianBlur = (<parts.GaussianBlur>part).value;
+				currentSpanStyles.gaussianBlur = part.value;
 			}
 
 			else if (part instanceof parts.FontName) {
-				currentSpanStyles.fontName = (<parts.FontName>part).value;
+				currentSpanStyles.fontName = part.value;
 			}
 
 			else if (part instanceof parts.FontSize) {
-				currentSpanStyles.fontSize = (<parts.FontSize>part).value;
+				currentSpanStyles.fontSize = part.value;
 			}
 
 			else if (part instanceof parts.FontSizePlus) {
-				currentSpanStyles.fontSize += (<parts.FontSizePlus>part).value;
+				currentSpanStyles.fontSize += part.value;
 			}
 
 			else if (part instanceof parts.FontSizeMinus) {
-				currentSpanStyles.fontSize -= (<parts.FontSizeMinus>part).value;
+				currentSpanStyles.fontSize -= part.value;
 			}
 
 			else if (part instanceof parts.FontScaleX) {
-				currentSpanStyles.fontScaleX = (<parts.FontScaleX>part).value;
+				currentSpanStyles.fontScaleX = part.value;
 			}
 
 			else if (part instanceof parts.FontScaleY) {
-				currentSpanStyles.fontScaleY = (<parts.FontScaleY>part).value;
+				currentSpanStyles.fontScaleY = part.value;
 			}
 
 			else if (part instanceof parts.LetterSpacing) {
-				currentSpanStyles.letterSpacing = (<parts.LetterSpacing>part).value;
+				currentSpanStyles.letterSpacing = part.value;
 			}
 
 			else if (part instanceof parts.RotateX) {
-				currentSpanStyles.rotationX = (<parts.RotateX>part).value;
+				currentSpanStyles.rotationX = part.value;
 			}
 
 			else if (part instanceof parts.RotateY) {
-				currentSpanStyles.rotationY = (<parts.RotateY>part).value;
+				currentSpanStyles.rotationY = part.value;
 			}
 
 			else if (part instanceof parts.RotateZ) {
-				currentSpanStyles.rotationZ = (<parts.RotateZ>part).value;
+				currentSpanStyles.rotationZ = part.value;
 			}
 
 			else if (part instanceof parts.SkewX) {
-				currentSpanStyles.skewX = (<parts.SkewX>part).value;
+				currentSpanStyles.skewX = part.value;
 			}
 
 			else if (part instanceof parts.SkewY) {
-				currentSpanStyles.skewY = (<parts.SkewY>part).value;
+				currentSpanStyles.skewY = part.value;
 			}
 
 			else if (part instanceof parts.PrimaryColor) {
-				currentSpanStyles.primaryColor = (<parts.PrimaryColor>part).value;
+				currentSpanStyles.primaryColor = part.value;
 			}
 
 			else if (part instanceof parts.SecondaryColor) {
-				currentSpanStyles.secondaryColor = (<parts.SecondaryColor>part).value;
+				currentSpanStyles.secondaryColor = part.value;
 			}
 
 			else if (part instanceof parts.OutlineColor) {
-				currentSpanStyles.outlineColor = (<parts.OutlineColor>part).value;
+				currentSpanStyles.outlineColor = part.value;
 			}
 
 			else if (part instanceof parts.ShadowColor) {
-				currentSpanStyles.shadowColor = (<parts.ShadowColor>part).value;
+				currentSpanStyles.shadowColor = part.value;
 			}
 
 			else if (part instanceof parts.Alpha) {
-				currentSpanStyles.primaryAlpha = (<parts.Alpha>part).value;
-				currentSpanStyles.secondaryAlpha = (<parts.Alpha>part).value;
-				currentSpanStyles.outlineAlpha = (<parts.Alpha>part).value;
-				currentSpanStyles.shadowAlpha = (<parts.Alpha>part).value;
+				currentSpanStyles.primaryAlpha = part.value;
+				currentSpanStyles.secondaryAlpha = part.value;
+				currentSpanStyles.outlineAlpha = part.value;
+				currentSpanStyles.shadowAlpha = part.value;
 			}
 
 			else if (part instanceof parts.PrimaryAlpha) {
-				currentSpanStyles.primaryAlpha = (<parts.PrimaryAlpha>part).value;
+				currentSpanStyles.primaryAlpha = part.value;
 			}
 
 			else if (part instanceof parts.SecondaryAlpha) {
-				currentSpanStyles.secondaryAlpha = (<parts.SecondaryAlpha>part).value;
+				currentSpanStyles.secondaryAlpha = part.value;
 			}
 
 			else if (part instanceof parts.OutlineAlpha) {
-				currentSpanStyles.outlineAlpha = (<parts.OutlineAlpha>part).value;
+				currentSpanStyles.outlineAlpha = part.value;
 			}
 
 			else if (part instanceof parts.ShadowAlpha) {
-				currentSpanStyles.shadowAlpha = (<parts.ShadowAlpha>part).value;
+				currentSpanStyles.shadowAlpha = part.value;
 			}
 
 			else if (part instanceof parts.Alignment) {
@@ -371,11 +371,11 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.WrappingStyle) {
-				wrappingStyle = (<parts.WrappingStyle>part).value;
+				wrappingStyle = part.value;
 			}
 
 			else if (part instanceof parts.Reset) {
-				var newStyleName = (<parts.Reset>part).value;
+				var newStyleName = part.value;
 				var newStyle: Style = null;
 				if (newStyleName !== null) {
 					newStyle = this.ass.styles.get(newStyleName);
@@ -384,40 +384,34 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.Position) {
-				var positionPart = <parts.Position>part;
-
 				sub.style.position = "absolute";
-				sub.style.left = `${ (this._scaleX * positionPart.x).toFixed(3) }px`;
-				sub.style.top = `${ (this._scaleY * positionPart.y).toFixed(3) }px`;
+				sub.style.left = `${ (this._scaleX * part.x).toFixed(3) }px`;
+				sub.style.top = `${ (this._scaleY * part.y).toFixed(3) }px`;
 			}
 
 			else if (part instanceof parts.Move) {
-				var movePart = <parts.Move>part;
-
 				sub.style.position = "absolute";
 				animationCollection.add("linear", [new Keyframe(0, new map.Map([
-					["left", `${ (this._scaleX * movePart.x1).toFixed(3) }px`],
-					["top", `${ (this._scaleY * movePart.y1).toFixed(3) }px`],
-				])), new Keyframe(movePart.t1, new map.Map([
-					["left", `${ (this._scaleX * movePart.x1).toFixed(3) }px`],
-					["top", `${ (this._scaleY * movePart.y1).toFixed(3) }px`],
-				])), new Keyframe(movePart.t2, new map.Map([
-					["left", `${ (this._scaleX * movePart.x2).toFixed(3) }px`],
-					["top", `${ (this._scaleY * movePart.y2).toFixed(3) }px`],
+					["left", `${ (this._scaleX * part.x1).toFixed(3) }px`],
+					["top", `${ (this._scaleY * part.y1).toFixed(3) }px`],
+				])), new Keyframe(part.t1, new map.Map([
+					["left", `${ (this._scaleX * part.x1).toFixed(3) }px`],
+					["top", `${ (this._scaleY * part.y1).toFixed(3) }px`],
+				])), new Keyframe(part.t2, new map.Map([
+					["left", `${ (this._scaleX * part.x2).toFixed(3) }px`],
+					["top", `${ (this._scaleY * part.y2).toFixed(3) }px`],
 				])), new Keyframe(dialogue.end - dialogue.start, new map.Map([
-					["left", `${ (this._scaleX * movePart.x2).toFixed(3) }px`],
-					["top", `${ (this._scaleY * movePart.y2).toFixed(3) }px`],
+					["left", `${ (this._scaleX * part.x2).toFixed(3) }px`],
+					["top", `${ (this._scaleY * part.y2).toFixed(3) }px`],
 				]))]);
 			}
 
 			else if (part instanceof parts.Fade) {
-				var fadePart = <parts.Fade>part;
-
 				animationCollection.add("linear", [new Keyframe(0, new map.Map([
 					["opacity", "0"],
-				])), new Keyframe(fadePart.start, new map.Map([
+				])), new Keyframe(part.start, new map.Map([
 					["opacity", "1"],
-				])), new Keyframe(dialogue.end - dialogue.start - fadePart.end, new map.Map([
+				])), new Keyframe(dialogue.end - dialogue.start - part.end, new map.Map([
 					["opacity", "1"],
 				])), new Keyframe(dialogue.end - dialogue.start, new map.Map([
 					["opacity", "0"],
@@ -425,46 +419,43 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.ComplexFade) {
-				var complexFadePart = <parts.ComplexFade>part;
-
 				animationCollection.add("linear", [new Keyframe(0, new map.Map([
-					["opacity", complexFadePart.a1.toFixed(3)],
-				])), new Keyframe(complexFadePart.t1, new map.Map([
-					["opacity", complexFadePart.a1.toFixed(3)],
-				])), new Keyframe(complexFadePart.t2, new map.Map([
-					["opacity", complexFadePart.a2.toFixed(3)],
-				])), new Keyframe(complexFadePart.t3, new map.Map([
-					["opacity", complexFadePart.a2.toFixed(3)],
-				])), new Keyframe(complexFadePart.t4, new map.Map([
-					["opacity", complexFadePart.a3.toFixed(3)],
+					["opacity", part.a1.toFixed(3)],
+				])), new Keyframe(part.t1, new map.Map([
+					["opacity", part.a1.toFixed(3)],
+				])), new Keyframe(part.t2, new map.Map([
+					["opacity", part.a2.toFixed(3)],
+				])), new Keyframe(part.t3, new map.Map([
+					["opacity", part.a2.toFixed(3)],
+				])), new Keyframe(part.t4, new map.Map([
+					["opacity", part.a3.toFixed(3)],
 				])), new Keyframe(dialogue.end - dialogue.start, new map.Map([
-					["opacity", complexFadePart.a3.toFixed(3)],
+					["opacity", part.a3.toFixed(3)],
 				]))]);
 			}
 
 			else if (part instanceof parts.DrawingMode) {
-				var drawingModePart = <parts.DrawingMode>part;
-				if (drawingModePart.scale !== 0) {
-					currentDrawingStyles.scale = drawingModePart.scale;
+				if (part.scale !== 0) {
+					currentDrawingStyles.scale = part.scale;
 				}
 			}
 
 			else if (part instanceof parts.DrawingBaselineOffset) {
-				currentDrawingStyles.baselineOffset = (<parts.DrawingBaselineOffset>part).value;
+				currentDrawingStyles.baselineOffset = part.value;
 			}
 
 			else if (part instanceof parts.DrawingInstructions) {
-				currentSpan.appendChild(currentDrawingStyles.toSVG(<parts.DrawingInstructions>part, currentSpanStyles.primaryColor.withAlpha(currentSpanStyles.primaryAlpha)));
+				currentSpan.appendChild(currentDrawingStyles.toSVG(part, currentSpanStyles.primaryColor.withAlpha(currentSpanStyles.primaryAlpha)));
 				startNewSpan(false);
 			}
 
 			else if (part instanceof parts.Text) {
-				currentSpan.appendChild(document.createTextNode((<parts.Text>part).value));
+				currentSpan.appendChild(document.createTextNode(part.value));
 				startNewSpan(false);
 			}
 
 			else if (globalSettings.debugMode && part instanceof parts.Comment) {
-				currentSpan.appendChild(document.createTextNode((<parts.Comment>part).value));
+				currentSpan.appendChild(document.createTextNode(part.value));
 				startNewSpan(false);
 			}
 
