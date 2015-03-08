@@ -204,15 +204,21 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 		sub.style.marginTop = sub.style.marginBottom = `${ (this._scaleY * dialogue.style.marginVertical).toFixed(3) }px`;
 		sub.style.minWidth = `${ (this._subsWrapper.offsetWidth - this._scaleX * (dialogue.style.marginLeft + dialogue.style.marginRight)).toFixed(3) }px`;
 
-		var animationCollection = new AnimationCollection(this);
+		var dialogueAnimationCollection = new AnimationCollection(this);
 
 		var currentSpan: HTMLSpanElement = null;
 		var currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, this._svgDefsElement);
 
+		var currentAnimationCollection: AnimationCollection = null;
+
 		var previousAddNewLine = false; // If two or more \N's are encountered in sequence, then all but the first will be created using currentSpanStyles.makeNewLine() instead
 		var startNewSpan = (addNewLine: boolean): void => {
 			if (currentSpan !== null && currentSpan.textContent !== "") {
-				sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan));
+				sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan, currentAnimationCollection, this._animationStyleElement));
+			}
+
+			if (currentAnimationCollection !== null) {
+				currentAnimationCollection.animationDelays.forEach((delay, name) => dialogueAnimationCollection.animationDelays.set(name, delay));
 			}
 
 			if (addNewLine) {
@@ -225,6 +231,8 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			currentSpan = document.createElement("span");
+			currentAnimationCollection = new AnimationCollection(this);
+
 			previousAddNewLine = addNewLine;
 		};
 		startNewSpan(false);
@@ -396,7 +404,7 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 
 			else if (part instanceof parts.Move) {
 				sub.style.position = "absolute";
-				animationCollection.add("linear", [new Keyframe(0, new map.Map([
+				dialogueAnimationCollection.add("linear", [new Keyframe(0, new map.Map([
 					["left", `${ (this._scaleX * part.x1).toFixed(3) }px`],
 					["top", `${ (this._scaleY * part.y1).toFixed(3) }px`],
 				])), new Keyframe(part.t1, new map.Map([
@@ -412,7 +420,7 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.Fade) {
-				animationCollection.add("linear", [new Keyframe(0, new map.Map([
+				dialogueAnimationCollection.add("linear", [new Keyframe(0, new map.Map([
 					["opacity", "0"],
 				])), new Keyframe(part.start, new map.Map([
 					["opacity", "1"],
@@ -424,7 +432,7 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.ComplexFade) {
-				animationCollection.add("linear", [new Keyframe(0, new map.Map([
+				dialogueAnimationCollection.add("linear", [new Keyframe(0, new map.Map([
 					["opacity", part.a1.toFixed(3)],
 				])), new Keyframe(part.t1, new map.Map([
 					["opacity", part.a1.toFixed(3)],
@@ -509,15 +517,14 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 		}
 
-		this._animationStyleElement.appendChild(document.createTextNode(animationCollection.cssText));
+		this._animationStyleElement.appendChild(document.createTextNode(dialogueAnimationCollection.cssText));
 
-
-		sub.style.webkitAnimation = animationCollection.animationStyle;
-		sub.style.animation = animationCollection.animationStyle;
+		sub.style.webkitAnimation = dialogueAnimationCollection.animationStyle;
+		sub.style.animation = dialogueAnimationCollection.animationStyle;
 
 		sub.setAttribute("data-dialogue-id", `${ this.id }-${ dialogue.id }`);
 
-		this._preRenderedSubs.set(dialogue.id, { sub: sub, animationDelays: animationCollection.animationDelays });
+		this._preRenderedSubs.set(dialogue.id, { sub: sub, animationDelays: dialogueAnimationCollection.animationDelays });
 	}
 
 	/**
@@ -832,9 +839,11 @@ class SpanStyles {
 	 * Sets the style attribute on the given span element.
 	 *
 	 * @param {!HTMLSpanElement} span
+	 * @param {!AnimationCollection} animationCollection
+	 * @param {!HTMLStyleElement} animationStyleElement
 	 * @return {!HTMLSpanElement} The resulting <span> with the CSS styles applied. This may be a wrapper around the input <span> if the styles were applied using SVG filters.
 	 */
-	setStylesOnSpan(span: HTMLSpanElement): HTMLSpanElement {
+	setStylesOnSpan(span: HTMLSpanElement, animationCollection: AnimationCollection, animationStyleElement: HTMLStyleElement): HTMLSpanElement {
 		var isTextOnlySpan = span.childNodes[0] instanceof Text;
 
 		var fontStyleOrWeight = "";
@@ -1057,6 +1066,11 @@ ${ blurFilter }
 			// Perspective needs to be set on a "transformable element"
 			filterWrapperSpan.style.display = "inline-block";
 		}
+
+		animationStyleElement.appendChild(document.createTextNode(animationCollection.cssText));
+
+		span.style.webkitAnimation = animationCollection.animationStyle;
+		span.style.animation = animationCollection.animationStyle;
 
 		return filterWrapperSpan;
 	}
