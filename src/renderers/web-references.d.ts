@@ -32,6 +32,11 @@ interface CSSStyleDeclaration {
 	/**
 	 * @type {string}
 	 */
+	webkitAnimationName: string;
+
+	/**
+	 * @type {string}
+	 */
 	webkitFilter: string;
 
 	/**

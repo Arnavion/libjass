@@ -59,7 +59,7 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 	private _svgDefsElement: SVGDefsElement;
 
 	private _currentSubs: map.Map<Dialogue, HTMLDivElement> = new map.Map<Dialogue, HTMLDivElement>();
-	private _preRenderedSubs: map.Map<number, { sub: HTMLDivElement; animationDelays: number[] }> = new map.Map<number, { sub: HTMLDivElement; animationDelays: number[] }>();
+	private _preRenderedSubs: map.Map<number, PreRenderedSub> = new map.Map<number, PreRenderedSub>();
 
 	private _scaleX: number;
 	private _scaleY: number;
@@ -552,9 +552,24 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		var result = <HTMLDivElement>preRenderedSub.sub.cloneNode(true);
 
-		var animationDelay = preRenderedSub.animationDelays.map(delay => `${ ((delay + dialogue.start - this.clock.currentTime) / this.clock.rate).toFixed(3) }s`).join(", ");
-		result.style.webkitAnimationDelay = animationDelay;
-		result.style.animationDelay = animationDelay;
+		var applyAnimationDelays = (node: HTMLElement) => {
+			var animationNames = node.style.animationName || node.style.webkitAnimationName;
+			if (animationNames !== undefined && animationNames !== "") {
+				var animationDelays = animationNames.split(",").map(name => {
+					name = name.trim();
+					var delay = preRenderedSub.animationDelays.get(name);
+					return `${ ((delay + dialogue.start - this.clock.currentTime) / this.clock.rate).toFixed(3) }s`;
+				}).join(", ");
+
+				node.style.webkitAnimationDelay = animationDelays;
+				node.style.animationDelay = animationDelays;
+			}
+
+			for (var i = 0; i < node.children.length; i++) {
+				applyAnimationDelays(<HTMLElement>node.children[i]);
+			}
+		}
+		applyAnimationDelays(result);
 
 		var layer = dialogue.layer;
 		var alignment = (result.style.position === "absolute") ? 0 : dialogue.alignment; // Alignment 0 is for absolutely-positioned subs
@@ -1364,7 +1379,7 @@ class AnimationCollection {
 
 	private _cssText: string = "";
 	private _animationStyle: string = "";
-	private _animationDelays: number[] = [];
+	private _animationDelays: map.Map<string, number> = new map.Map<string, number>();
 	private _numAnimations: number = 0;
 
 	constructor(renderer: NullRenderer) {
@@ -1395,7 +1410,7 @@ class AnimationCollection {
 	 *
 	 * @type {!Array.<number>}
 	 */
-	get animationDelays(): number[] {
+	get animationDelays(): map.Map<string, number> {
 		return this._animationDelays;
 	}
 
@@ -1453,7 +1468,7 @@ ${ ruleCssText }
 		}
 
 		this._animationStyle += `${ animationName } ${ ((end - start) / this._rate).toFixed(3) }s ${ timingFunction }`;
-		this._animationDelays.push(start);
+		this._animationDelays.set(animationName, start);
 	}
 }
 
@@ -1553,6 +1568,14 @@ class DrawingStyles {
 
 		return <SVGSVGElement>domParser.parseFromString(result, "image/svg+xml").childNodes[0];
 	}
+}
+
+interface PreRenderedSub {
+	/** @type {!HTMLDivElement} */
+	sub: HTMLDivElement;
+
+	/** @type {!Map.<string, number>} */
+	animationDelays: map.Map<string, number>;
 }
 
 var domParser: DOMParser;
