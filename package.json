@@ -21,12 +21,12 @@
 	},
 	"scripts": {
 		"postinstall": "gulp clean default",
-		"test": "mocha --ui tdd --reporter spec tests/specs/"
+		"test": "intern-client config=./tests/intern reporters=pretty"
 	},
 	"dependencies": {
 		"gulp": "3.x",
+		"intern": "2.x",
 		"memory-fs": "latest",
-		"mocha": "2.x",
 		"npm": "2.x",
 		"source-map-loader": "https://github.com/Arnavion/source-map-loader/archive/75faa177461df3a611840b82a5e5ab79312985a0.tar.gz",
 		"typescript": "1.4.1",

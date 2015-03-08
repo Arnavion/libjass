@@ -18,36 +18,32 @@
  * limitations under the License.
  */
 
-var libjass = require("../lib/libjass.js");
-var assert = require("assert");
+define(["intern/chai!assert", "../lib/libjass.js"], function (assert, libjass) {
+	return function (input, rule, expected) {
+		return function () {
+			var actual = null;
 
-function parserTest(input, rule, expected) {
-	return function () {
-		var actual = null;
+			try {
+				actual = libjass.parser.parse(input, rule);
+			}
+			catch (parseException) {
+				if (expected !== null) {
+					throw new Error("Expected parse to succeed but it threw an exception: " + parseException.stack);
+				}
 
-		try {
-			actual = libjass.parser.parse(input, rule);
-		}
-		catch (parseException) {
-			if (expected === null) {
+				assert.strictEqual(parseException.message, "Parse failed.");
 				return;
 			}
 
-			throw new Error("Expected parse to succeed but it threw an exception: " + parseException.stack);
-		}
+			if (expected === null) {
+				throw new Error("Expected parse to fail.");
+			}
 
-		if (expected === null) {
-			throw new Error("Expected parse to fail.");
-		}
+			if (actual === null) {
+				throw new Error("Parse failed without throwing an exception.");
+			}
 
-		if (actual === null) {
-			throw new Error("Parse failed without throwing an exception.");
-		}
-
-		assert.deepEqual(actual, expected);
-	};
-}
-
-if (typeof module !== "undefined") {
-	module.exports = parserTest;
-}
+			assert.deepEqual(actual, expected);
+		};
+	}
+});
