@@ -21,7 +21,7 @@
 import clocks = require("./clocks");
 import VideoClock = clocks.VideoClock;
 import RendererSettings = require("./settings");
-import WebRenderer = require("./web");
+import WebRenderer = require("./web/renderer");
 
 import ASS = require("../types/ass");
 

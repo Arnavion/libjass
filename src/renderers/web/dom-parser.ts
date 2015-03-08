@@ -18,14 +18,10 @@
  * limitations under the License.
  */
 
-import clocks = require("./clocks");
-export import EventSource = clocks.EventSource;
-export import ClockEvent = clocks.ClockEvent;
-export import Clock = clocks.Clock;
-export import ManualClock = clocks.ManualClock;
-export import VideoClock = clocks.VideoClock;
+/** @type {!DomParser} */
+var domParser: DOMParser = null;
+if (typeof DOMParser !== "undefined") {
+	domParser = new DOMParser();
+}
 
-export import DefaultRenderer = require("./default");
-export import NullRenderer = require("./null");
-export import WebRenderer = require("./web/renderer");
-export import RendererSettings = require("./settings");
+export = domParser;

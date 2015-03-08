@@ -18,14 +18,30 @@
  * limitations under the License.
  */
 
-import clocks = require("./clocks");
-export import EventSource = clocks.EventSource;
-export import ClockEvent = clocks.ClockEvent;
-export import Clock = clocks.Clock;
-export import ManualClock = clocks.ManualClock;
-export import VideoClock = clocks.VideoClock;
+import map = require("../../utility/map");
 
-export import DefaultRenderer = require("./default");
-export import NullRenderer = require("./null");
-export import WebRenderer = require("./web/renderer");
-export import RendererSettings = require("./settings");
+/**
+ * This class represents a single keyframe. It has a list of CSS properties (names and values) associated with a point in time. Multiple keyframes make up an animation.
+ *
+ * @param {number} time
+ * @param {!Map.<string, string>} properties
+ */
+class Keyframe {
+	constructor(private _time: number, private _properties: map.Map<string, string>) { }
+
+	/**
+	 * @type {number}
+	 */
+	get time(): number {
+		return this._time;
+	}
+
+	/**
+	 * @type {!Map.<string, string>}
+	 */
+	get properties(): map.Map<string, string> {
+		return this._properties;
+	}
+}
+
+export = Keyframe;
