@@ -241,6 +241,8 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		var wrappingStyle = this.ass.properties.wrappingStyle;
 
+		var karaokeTimesAccumulator = 0;
+
 		dialogue.parts.forEach(part => {
 			if (part instanceof parts.Italic) {
 				currentSpanStyles.italic = part.value;
@@ -381,6 +383,20 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 
 			else if (part instanceof parts.Alignment) {
 				// Already handled in Dialogue
+			}
+
+			else if (part instanceof parts.ColorKaraoke) {
+				startNewSpan(false);
+
+				currentAnimationCollection.add("step-end", [
+					new Keyframe(0, new map.Map([
+						["color", currentSpanStyles.secondaryColor.withAlpha(currentSpanStyles.secondaryAlpha).toString()],
+					])), new Keyframe(karaokeTimesAccumulator, new map.Map([
+						["color", currentSpanStyles.primaryColor.withAlpha(currentSpanStyles.primaryAlpha).toString()],
+					]))
+				]);
+
+				karaokeTimesAccumulator += part.duration;
 			}
 
 			else if (part instanceof parts.WrappingStyle) {
