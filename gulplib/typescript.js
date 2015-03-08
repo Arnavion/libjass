@@ -1397,7 +1397,7 @@ var walk = function (compiler, root, rootNamespaceName) {
 		if (
 			path.basename(sourceFile.filename) === "lib.core.d.ts" ||
 			path.basename(sourceFile.filename) === "lib.dom.d.ts" ||
-			sourceFile.filename.substr(-"-references.d.ts".length) === "-references.d.ts"
+			sourceFile.filename.substr(-"references.d.ts".length) === "references.d.ts"
 		) {
 			return;
 		}
