@@ -96,7 +96,45 @@ var GulpFileSystem = (function () {
 	return GulpFileSystem;
 })();
 
-module.exports = function (entry, outputLibraryName, modulesRoot) {
+function runWebpack(entry, outputLibraryName, modulesRoot, fileSystem, callback) {
+	var compiler = webpack({
+		devtool: "source-map",
+		entry: entry,
+		module: {
+			preLoaders: [{
+				test: /\.js$/,
+				loader: "source-map-loader"
+			}]
+		},
+		output: {
+			filename: outputLibraryName + ".js",
+			library: outputLibraryName,
+			libraryTarget: "umd",
+			sourceMapFilename: outputLibraryName + ".js.map"
+		},
+		resolve: {
+			root: path.resolve(modulesRoot)
+		}
+	});
+
+	compiler.inputFileSystem = fileSystem;
+	compiler.resolvers.normal.fileSystem = compiler.inputFileSystem;
+	compiler.resolvers.context.fileSystem = compiler.inputFileSystem;
+	compiler.resolvers.loader.fileSystem = compiler.inputFileSystem;
+
+	compiler.outputFileSystem = fileSystem;
+
+	compiler.run(function (err, stats) {
+		if (err) {
+			callback(err);
+			return;
+		}
+
+		callback();
+	});
+}
+
+exports.build = function (entry, outputLibraryName, modulesRoot) {
 	var fileSystem = null;
 
 	return Transform(function (file) {
@@ -106,40 +144,24 @@ module.exports = function (entry, outputLibraryName, modulesRoot) {
 
 		fileSystem.load(file);
 	}, function (callback) {
-		var compiler = webpack({
-			devtool: "source-map",
-			entry: entry,
-			module: {
-				preLoaders: [{
-					test: /\.js$/,
-					loader: "source-map-loader"
-				}]
-			},
-			output: {
-				filename: outputLibraryName + ".js",
-				library: outputLibraryName,
-				libraryTarget: "umd",
-				sourceMapFilename: outputLibraryName + ".js.map"
-			},
-			resolve: {
-				root: path.resolve(modulesRoot)
-			}
-		});
+		runWebpack(entry, outputLibraryName, modulesRoot, fileSystem, callback);
+	});
+};
 
-		compiler.inputFileSystem = fileSystem;
-		compiler.resolvers.normal.fileSystem = compiler.inputFileSystem;
-		compiler.resolvers.context.fileSystem = compiler.inputFileSystem;
-		compiler.resolvers.loader.fileSystem = compiler.inputFileSystem;
+exports.watch = function (entry, outputLibraryName, modulesRoot) {
+	var fileSystem = null;
 
-		compiler.outputFileSystem = fileSystem;
+	return Transform(function (file, encoding, callback) {
+		if (fileSystem == null) {
+			fileSystem = new GulpFileSystem(this);
+		}
 
-		compiler.run(function (err, stats) {
-			if (err) {
-				callback(err);
-				return;
-			}
-
+		if (file.path !== "END") {
+			fileSystem.load(file);
 			callback();
-		});
+		}
+		else {
+			runWebpack(entry, outputLibraryName, modulesRoot, fileSystem, callback);
+		}
 	});
 };

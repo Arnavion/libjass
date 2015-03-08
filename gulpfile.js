@@ -115,7 +115,7 @@ gulp.task("libjass.js", function () {
 
 	return gulp.src("./src/tsconfig.json")
 		.pipe(TypeScript.gulp(ASTModifer, "./src/libjass.ts", "libjass"))
-		.pipe(WebPack("./src/libjass.js", "libjass", "./node_modules"))
+		.pipe(WebPack.build("./src/libjass.js", "libjass", "./node_modules"))
 		.pipe(UglifyJS.fixup(["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle", "clocks", "parts", "types"]))
 		.pipe(gulp.dest("./lib"));
 });
@@ -173,8 +173,15 @@ gulp.task("watch", ["clean"], function (callback) {
 		};
 
 		gulp.src("./src/tsconfig.json")
-		.pipe(TypeScript.watch("./src/libjass.ts", "libjass", runTest))
-		.pipe(gulp.dest("./lib"));
+		.pipe(TypeScript.watch("./src/libjass.ts", "libjass"))
+		.pipe(WebPack.watch("./src/libjass.js", "libjass", "./node_modules"))
+		.pipe(UglifyJS.fixup(["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle", "clocks", "parts", "types"]))
+		.pipe(gulp.dest("./lib"))
+		.pipe(Transform(function (file) {
+			if (path.basename(file.path) === "libjass.js") {
+				runTest();
+			}
+		}));
 
 		gulp.watch(["./tests/unit/*.js"], { debounceDelay: 1 }, function () {
 			runTest();

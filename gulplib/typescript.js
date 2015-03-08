@@ -281,21 +281,29 @@ exports.gulp = function (astModifier, root, rootNamespaceName) {
 	});
 };
 
-exports.watch = function (root, rootNamespaceName, callback) {
+exports.watch = function (root, rootNamespaceName) {
 	return Transform(function (file) {
 		var _this = this;
 
+		var compile = function () {
+			console.log("Compiling " + file.path + "...");
+
+			compiler.compile(file);
+
+			compiler.writeFiles(_this);
+
+			console.log("Compile succeeded.");
+
+			_this.push(new Vinyl({
+				base: this._outputPathsRelativeTo,
+				path: "END",
+				contents: new Buffer("")
+			}));
+		};
+
 		var compilerHost = new WatchCompilerHost(function () {
 			try {
-				console.log("Compiling " + file.path + "...");
-
-				compiler.compile(file);
-
-				compiler.writeFiles(_this);
-
-				console.log("Compile succeeded.");
-
-				callback();
+				compile();
 			}
 			catch (ex) {
 				console.error("Compile failed." + ex.stack);
@@ -305,11 +313,7 @@ exports.watch = function (root, rootNamespaceName, callback) {
 		var compiler = new Compiler(compilerHost);
 
 		try {
-			console.log("Compiling " + file.path + "...");
-
-			compiler.compile(file);
-
-			compiler.writeFiles(this);
+			compile();
 
 			console.log("Listening for changes...");
 		}
