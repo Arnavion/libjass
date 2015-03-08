@@ -26,7 +26,7 @@ var UglifyJS = require("uglify-js");
 var Transform = require("./helpers.js").Transform;
 
 module.exports = {
-	fixup: function () {
+	fixup: function (unusedVarsToIgnore) {
 		var codeFile = null;
 		var sourceMapFile = null;
 
@@ -52,6 +52,9 @@ module.exports = {
 
 				root.figure_out_scope({ screw_ie8: true });
 
+
+				// Set if there are any unused variables apart from the ones in unusedVarsToIgnore
+				var haveUnusedVars = false;
 
 				// Remove some things from the AST
 				var nodesToRemove;
@@ -175,13 +178,14 @@ module.exports = {
 								}
 							}
 							else if (node instanceof UglifyJS.AST_SymbolVar) {
-								nodesToRemove.push({ node: this.parent(), parent: this.parent(1).definitions });
-								if (this.parent(1).definitions.length === 1) {
-									nodesToRemove.push({ node: this.parent(1), parent: this.parent(2).body });
+								if (unusedVarsToIgnore.indexOf(node.name) !== -1) {
+									nodesToRemove.push({ node: this.parent(), parent: this.parent(1).definitions });
+									if (this.parent(1).definitions.length === 1) {
+										nodesToRemove.push({ node: this.parent(1), parent: this.parent(2).body });
+									}
 								}
-
-								if (["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle", "clocks", "types"].indexOf(node.name) === -1) {
-									console.warn("Unused variable %s at %s:%s:%s", node.name, node.start.file, node.start.line, node.start.col);
+								else {
+									haveUnusedVars = true;
 								}
 							}
 							else if (node instanceof UglifyJS.AST_SymbolDefun) {
@@ -250,6 +254,26 @@ module.exports = {
 
 				sourceMapFile.contents = new Buffer(output.source_map.toString());
 				this.push(sourceMapFile);
+
+
+				// Print unused variables
+				if (haveUnusedVars) {
+					var root = UglifyJS.parse(stream.toString(), {
+						filename: path.basename(codeFile.path),
+						toplevel: null
+					});
+
+					root.figure_out_scope({ screw_ie8: true });
+
+					root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+						if (node instanceof UglifyJS.AST_SymbolVar && node.unreferenced()) {
+							if (unusedVarsToIgnore.indexOf(node.name) === -1) {
+								console.warn("Unused variable %s at %s:%s:%s", node.name, node.start.file, node.start.line, node.start.col);
+							}
+						}
+					}));
+				}
+
 
 				codeFile = null;
 				sourceMapFile = null;

@@ -148,7 +148,7 @@ gulp.task("libjass.js", function () {
 	return gulp.src("./src/tsconfig.json")
 		.pipe(TypeScript.gulp(ASTModifer, "./src/libjass.ts", "libjass"))
 		.pipe(WebPack("./src/libjass.js", "libjass", "./node_modules"))
-		.pipe(UglifyJS.fixup())
+		.pipe(UglifyJS.fixup(["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle", "clocks", "parts", "types"]))
 		.pipe(gulp.dest("./lib"));
 });
 
