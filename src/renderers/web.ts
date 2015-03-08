@@ -54,9 +54,9 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 	private _subsWrapper: HTMLDivElement;
 	private _layerWrappers: HTMLDivElement[] = [];
 	private _layerAlignmentWrappers: HTMLDivElement[][] = [];
-	private _fontSizeElement: HTMLDivElement = null;
-	private _animationStyleElement: HTMLStyleElement = null;
-	private _svgDefsElement: SVGDefsElement = null;
+	private _fontSizeElement: HTMLDivElement;
+	private _animationStyleElement: HTMLStyleElement;
+	private _svgDefsElement: SVGDefsElement;
 
 	private _currentSubs: map.Map<Dialogue, HTMLDivElement> = new map.Map<Dialogue, HTMLDivElement>();
 	private _preRenderedSubs: map.Map<number, { sub: HTMLDivElement; animationDelays: number[] }> = new map.Map<number, { sub: HTMLDivElement; animationDelays: number[] }>();
@@ -86,6 +86,11 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 		this._libjassSubsWrapper.appendChild(this._fontSizeElement);
 		this._fontSizeElement.className = "libjass-font-measure";
 		this._fontSizeElement.appendChild(document.createTextNode("M"));
+
+		this._animationStyleElement = document.createElement("style");
+		this._animationStyleElement.id = `libjass-animation-styles-${ this.id }`;
+		this._animationStyleElement.type = "text/css";
+		document.querySelector("head").appendChild(this._animationStyleElement);
 
 		var svgElement = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
 		this._libjassSubsWrapper.appendChild(svgElement);
@@ -504,14 +509,8 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 		}
 
-		if (this._animationStyleElement === null) {
-			this._animationStyleElement = document.createElement("style");
-			this._animationStyleElement.id = `libjass-animation-styles-${ this.id }`;
-			this._animationStyleElement.type = "text/css";
-			document.querySelector("head").appendChild(this._animationStyleElement);
-		}
-
 		this._animationStyleElement.appendChild(document.createTextNode(animationCollection.cssText));
+
 
 		sub.style.webkitAnimation = animationCollection.animationStyle;
 		sub.style.animation = animationCollection.animationStyle;
