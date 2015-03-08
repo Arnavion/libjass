@@ -2618,7 +2618,7 @@ webworker._registerWorkerCommand(webworker.WorkerCommands.Parse, (parameters: an
 		result = parse(parameters.input, parameters.rule);
 	}
 	catch (ex) {
-		response(ex, null);
+		response({ message: ex.message, stack: ex.stack }, null);
 		return;
 	}
 
