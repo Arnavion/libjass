@@ -1283,6 +1283,15 @@ ${ blurFilter }
 	}
 
 	/**
+	 * Gets the secondary color property.
+	 *
+	 * @type {!libjass.parts.Color}
+	 */
+	get secondaryColor(): parts.Color {
+		return this._secondaryColor;
+	}
+
+	/**
 	 * Sets the secondary color property. null defaults it to the default style's value.
 	 *
 	 * @type {libjass.parts.Color}
@@ -1325,6 +1334,15 @@ ${ blurFilter }
 	 */
 	set primaryAlpha(value: number) {
 		this._primaryAlpha = value;
+	}
+
+	/**
+	 * Gets the secondary alpha property.
+	 *
+	 * @type {?number}
+	 */
+	get secondaryAlpha(): number {
+		return this._secondaryAlpha;
 	}
 
 	/**
