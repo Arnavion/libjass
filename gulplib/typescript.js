@@ -1328,7 +1328,7 @@ var Walker = function () {
 		});
 
 		_this.namespaces[rootNamespaceName] = this._scope.enter(new Namespace(rootNamespaceName));
-		this._moduleToNamespace(this.modules["./" + rootNamespaceName], rootNamespaceName);
+		this._moduleToNamespace(this.modules["./index"], rootNamespaceName);
 		this._scope.leave();
 	};
 

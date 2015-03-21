@@ -114,8 +114,8 @@ gulp.task("libjass.js", function () {
 	}
 
 	return gulp.src("./src/tsconfig.json")
-		.pipe(TypeScript.gulp(ASTModifer, "./src/libjass.ts", "libjass"))
-		.pipe(WebPack.build("./src/libjass.js", "libjass", "./node_modules"))
+		.pipe(TypeScript.gulp(ASTModifer, "./src/index.ts", "libjass"))
+		.pipe(WebPack.build("./src/index.js", "libjass", "./node_modules"))
 		.pipe(UglifyJS.fixup(["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle", "clocks", "parts", "types"]))
 		.pipe(gulp.dest("./lib"));
 });
@@ -173,8 +173,8 @@ gulp.task("watch", ["clean"], function (callback) {
 		};
 
 		gulp.src("./src/tsconfig.json")
-		.pipe(TypeScript.watch("./src/libjass.ts", "libjass"))
-		.pipe(WebPack.watch("./src/libjass.js", "libjass", "./node_modules"))
+		.pipe(TypeScript.watch("./src/index.ts", "libjass"))
+		.pipe(WebPack.watch("./src/index.js", "libjass", "./node_modules"))
 		.pipe(UglifyJS.fixup(["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle", "clocks", "parts", "types"]))
 		.pipe(gulp.dest("./lib"))
 		.pipe(Transform(function (file) {
@@ -197,6 +197,6 @@ gulp.task("doc", ["libjass.js"], function () {
 	var Doc = require("./gulplib/doc.js");
 
 	return gulp.src("./src/tsconfig.json")
-		.pipe(Doc("./api.xhtml", "./src/libjass.ts", "libjass"))
+		.pipe(Doc("./api.xhtml", "./src/index.ts", "libjass"))
 		.pipe(gulp.dest("../libjass-gh-pages/"));
 });
