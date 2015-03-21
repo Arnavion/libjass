@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-define(["intern!tdd", "intern/chai!assert", "../parser-test.js", "../../lib/libjass.js"], function (tdd, assert, parserTest, libjass) {
+define(["intern!tdd", "intern/chai!assert", "tests/support/parser-test", "lib/libjass"], function (tdd, assert, parserTest, libjass) {
 	tdd.suite("Miscellaneous", function () {
 		tdd.test("herkz", parserTest("{\\pos(311,4)\\blur0.8\\fs40\\bord0\\c&H3F171F&\\t(3820,3820,\\blur6}Chi{\\c&H422CB1&}tose {\\c&H3F171F&}Furu", "dialogueParts", [
 			new libjass.parts.Position(311, 4),
