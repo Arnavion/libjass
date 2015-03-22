@@ -3,7 +3,4 @@ lib/
 
 node_modules/
 
-tests/mocha.js
-tests/mocha.css
-
 npm-debug.log
