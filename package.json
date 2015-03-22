@@ -4,14 +4,9 @@
 	"description": "A library to render ASS subtitles on HTML5 video in the browser.",
 	"keywords": ["browser", "html5", "subtitles"],
 	"homepage": "https://github.com/Arnavion/libjass",
-	"bugs": {
-		"url": "https://github.com/Arnavion/libjass/issues"
-	},
-	"licenses": [{
-		"type": "Apache-2.0",
-		"url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-	}],
-	"maintainers": [{
+	"bugs": "https://github.com/Arnavion/libjass/issues",
+	"license": "Apache-2.0",
+	"contributors": [{
 		"name": "Arnav Singh",
 		"email": "arnavion@gmail.com"
 	}],
@@ -19,13 +14,14 @@
 		"type": "git",
 		"url": "https://github.com/Arnavion/libjass"
 	},
+	"main": "lib/libjass.js",
 	"scripts": {
-		"postinstall": "gulp clean default",
+		"prepublish": "gulp clean default",
 		"test": "gulp test",
 		"test-lib": "intern-client config=./tests/intern reporters=pretty",
 		"test-minified": "intern-client config=./tests/intern reporters=pretty minified=true"
 	},
-	"dependencies": {
+	"devDependencies": {
 		"gulp": "3.x",
 		"intern": "2.x",
 		"memory-fs": "latest",
