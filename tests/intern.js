@@ -21,6 +21,7 @@
 define(["intern"], function (intern) {
 	var result = {
 		suites: [
+			"tests/unit/minified",
 			"tests/unit/miscellaneous",
 			"tests/unit/primitives",
 			"tests/unit/tags",
