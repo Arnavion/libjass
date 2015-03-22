@@ -19,9 +19,9 @@
  */
 
 define(["intern!tdd", "intern/chai!assert", "lib/libjass", "require"], function (tdd, assert, libjass, require) {
-	var workerChannel = null;
-
 	tdd.suite("Web worker", function () {
+		var workerChannel = null;
+
 		if (libjass.webworker.supported) {
 			workerChannel = libjass.webworker.createWorker(require.toUrl("lib/libjass.js"));
 		}
