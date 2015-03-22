@@ -214,3 +214,58 @@ gulp.task("doc", ["libjass.js"], function () {
 		.pipe(Doc("./api.xhtml", "./src/index.ts", "libjass"))
 		.pipe(gulp.dest("../libjass-gh-pages/"));
 });
+
+gulp.task("dist", ["clean", "default", "test", "demo", "doc"], function () {
+	var inputFiles = [
+		"./README.md", "./CHANGELOG.md", "./LICENSE",
+		"./lib/libjass.js", "./lib/libjass.js.map",
+		"./lib/libjass.min.js", "./lib/libjass.min.js.map",
+		"./lib/libjass.css"
+	];
+
+	var files = Object.create(null);
+	inputFiles.forEach(function (filename) {
+		files["./dist/" + path.basename(filename)] = filename;
+	});
+
+	// Clean dist/
+	Object.keys(files).concat("./dist/package.json").forEach(function (file) {
+		try {
+			fs.unlinkSync(file);
+		}
+		catch (ex) {
+			if (ex.code !== "ENOENT") {
+				throw ex;
+			}
+		}
+	});
+
+	// Create dist/ if necessary
+	try {
+		fs.mkdirSync("./dist");
+	}
+	catch (ex) {
+		if (ex.code !== "EEXIST") {
+			throw ex;
+		}
+	}
+
+	// Copy all files except package.json
+	Object.keys(files).forEach(function (outputFilename) {
+		var inputFilename = files[outputFilename];
+		var contents = fs.readFileSync(inputFilename);
+		fs.writeFileSync(outputFilename, contents);
+	});
+
+	// Copy package.json
+	var packageJson = fs.readFileSync("./package.json");
+	packageJson = JSON.parse(packageJson);
+
+	packageJson.devDependencies = undefined;
+	packageJson.private = undefined;
+	packageJson.scripts = undefined;
+	packageJson.main = "libjass.js";
+
+	packageJson = JSON.stringify(packageJson, null, "\t");
+	fs.writeFileSync("./dist/package.json", packageJson, { encoding: "utf8" });
+});

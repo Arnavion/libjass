@@ -1,3 +1,5 @@
+dist/
+
 lib/
 !lib/libjass.css
 
