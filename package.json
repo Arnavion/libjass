@@ -21,7 +21,9 @@
 	},
 	"scripts": {
 		"postinstall": "gulp clean default",
-		"test": "intern-client config=./tests/intern reporters=pretty"
+		"test": "gulp test",
+		"test-lib": "intern-client config=./tests/intern reporters=pretty",
+		"test-minified": "intern-client config=./tests/intern reporters=pretty minified=true"
 	},
 	"dependencies": {
 		"gulp": "3.x",

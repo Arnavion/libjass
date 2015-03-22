@@ -18,12 +18,27 @@
  * limitations under the License.
  */
 
-define ({
-	suites: [
-		"tests/unit/miscellaneous",
-		"tests/unit/primitives",
-		"tests/unit/tags",
-		"tests/unit/webworker"
-	],
-	excludeInstrumentation: /^(?:tests|node_modules)[/\\]/,
+define(["intern"], function (intern) {
+	var result = {
+		suites: [
+			"tests/unit/miscellaneous",
+			"tests/unit/primitives",
+			"tests/unit/tags",
+			"tests/unit/webworker"
+		],
+		excludeInstrumentation: /^(?:tests|node_modules)[/\\]/,
+	};
+
+	if (intern.args.minified === "true") {
+		result.loader = {
+			map: {
+				tests: {
+					"lib/libjass": "lib/libjass.min",
+					"lib/libjass.js": "lib/libjass.min.js",
+				}
+			}
+		};
+	}
+
+	return result;
 });

@@ -30,11 +30,13 @@ var Transform = helpers.Transform;
 	var _TypeScript = null;
 	var _UglifyJS = null;
 	var _WebPack = null;
+	var _npm = null;
 
 	Object.defineProperties(global, {
 		TypeScript: { get: function () { return _TypeScript || (_TypeScript = require("./gulplib/typescript.js")); } },
 		UglifyJS: { get: function () { return _UglifyJS || (_UglifyJS = require("./gulplib/uglify.js")); } },
 		WebPack: { get: function () { return _WebPack || (_WebPack = require("./gulplib/webpack.js")); } },
+		npm: { get: function () { return _npm || (_npm = require("npm")); } },
 	});
 })();
 
@@ -144,14 +146,12 @@ gulp.task("clean", function () {
 });
 
 gulp.task("watch", ["clean"], function (callback) {
-	var npm = require("npm");
-
 	npm.load(function () {
 		var testRunning = false;
 		var rerunTest = false;
 
 		var startTest = function () {
-			npm.commands.test(function () {
+			npm.commands["run-script"](["test-lib"], function () {
 				testRunning = false;
 
 				if (rerunTest) {
@@ -188,6 +188,20 @@ gulp.task("watch", ["clean"], function (callback) {
 		});
 	});
 });
+
+gulp.task("test-lib", ["libjass.js"], function (callback) {
+	npm.load(function () {
+		npm.commands["run-script"](["test-lib"], callback);
+	});
+});
+
+gulp.task("test-minified", ["libjass.min.js"], function (callback) {
+	npm.load(function () {
+		npm.commands["run-script"](["test-minified"], callback);
+	});
+});
+
+gulp.task("test", ["test-lib", "test-minified"]);
 
 gulp.task("demo", ["libjass.js"], function () {
 	return gulp.src(["./lib/libjass.js", "./lib/libjass.js.map", "./lib/libjass.css"]).pipe(gulp.dest("../libjass-gh-pages/demo/"));
