@@ -28,7 +28,7 @@ define(["intern!tdd", "intern/chai!assert", "lib/libjass", "require"], function 
 
 		tdd.test("Parse", function () {
 			if (!libjass.webworker.supported) {
-				this.skip("Parse: Web workers not supported in this environment.");
+				this.skip("Web workers not supported in this environment.");
 			}
 
 			var deferred = this.async(1000);
@@ -52,7 +52,7 @@ define(["intern!tdd", "intern/chai!assert", "lib/libjass", "require"], function 
 
 		tdd.test("Parse failure", function () {
 			if (!libjass.webworker.supported) {
-				this.skip("Parse: Web workers not supported in this environment.");
+				this.skip("Web workers not supported in this environment.");
 			}
 
 			var deferred = this.async(1000);
