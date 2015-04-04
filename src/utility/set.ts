@@ -124,28 +124,28 @@ export interface Set<T> {
 	 * @param {T} value
 	 * @return {libjass.Set.<T>} This set
 	 */
-    add(value: T): Set<T>;
+	add(value: T): Set<T>;
 
 	/**
 	 */
-    clear(): void;
+	clear(): void;
 
 	/**
 	 * @param {T} value
 	 * @return {boolean}
 	 */
-    has(value: T): boolean;
+	has(value: T): boolean;
 
 	/**
 	 * @param {function(T, T, libjass.Set.<T>)} callbackfn A function that is called with each value in the set.
 	 * @param {*} thisArg
 	 */
-    forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void;
+	forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void;
 
 	/**
 	 * @type {number}
 	 */
-    size: number;
+	size: number;
 }
 
 /**
@@ -155,7 +155,7 @@ export interface Set<T> {
  */
 export var Set: {
 	new <T>(iterable?: T[]): Set<T>;
-    prototype: Set<any>;
+	prototype: Set<any>;
 } = global.Set;
 
 if (Set === undefined || typeof Set.prototype.forEach !== "function" || (() => {

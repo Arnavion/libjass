@@ -173,15 +173,15 @@ gulp.task("watch", ["clean"], function (callback) {
 		};
 
 		gulp.src("./src/tsconfig.json")
-		.pipe(TypeScript.watch("./src/index.ts", "libjass"))
-		.pipe(WebPack.watch("./src/index.js", "libjass", "./node_modules"))
-		.pipe(UglifyJS.fixup(["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle", "clocks", "parts", "types"]))
-		.pipe(gulp.dest("./lib"))
-		.pipe(Transform(function (file) {
-			if (path.basename(file.path) === "libjass.js") {
-				runTest();
-			}
-		}));
+			.pipe(TypeScript.watch("./src/index.ts", "libjass"))
+			.pipe(WebPack.watch("./src/index.js", "libjass", "./node_modules"))
+			.pipe(UglifyJS.fixup(["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle", "clocks", "parts", "types"]))
+			.pipe(gulp.dest("./lib"))
+			.pipe(Transform(function (file) {
+				if (path.basename(file.path) === "libjass.js") {
+					runTest();
+				}
+			}));
 
 		gulp.watch(["./tests/unit/*.js"], { debounceDelay: 1 }, function () {
 			runTest();
