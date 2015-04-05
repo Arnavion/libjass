@@ -1433,7 +1433,7 @@ var Walker = function () {
 					_this._scope.current.members[actualMember.name] = actualMember;
 				}
 			}
-			else {
+			else if (!member.isPrivate) {
 				_this._scope.enter(member);
 				_this._scope.leave();
 				_this._scope.current.members[member.name] = member;
