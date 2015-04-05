@@ -2507,7 +2507,7 @@ Object.keys(ParserRun.prototype).forEach(key => {
  * @param {libjass.parser.ParseNode} parent The parent of this parse node.
  * @param {*=null} value If provided, it is assigned as the value of the node.
  */
-export class ParseNode {
+class ParseNode {
 	private _children: ParseNode[] = [];
 
 	private _start: number;
