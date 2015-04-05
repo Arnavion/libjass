@@ -252,7 +252,7 @@ var Compiler = function () {
 
 exports.Compiler = Compiler;
 
-exports.gulp = function (astModifier, root, rootNamespaceName) {
+exports.gulp = function (root, rootNamespaceName) {
 	var compiler = new Compiler();
 
 	return Transform(function (file) {
@@ -261,10 +261,8 @@ exports.gulp = function (astModifier, root, rootNamespaceName) {
 
 			compiler.compile(file);
 
-			if (astModifier !== undefined) {
-				var walkResult = exports.AST.walk(compiler, root, rootNamespaceName);
-				astModifier(walkResult.namespaces);
-			}
+			var walkResult = exports.AST.walk(compiler, root, rootNamespaceName);
+			addJSDocComments(walkResult.namespaces);
 
 			compiler.writeFiles(this);
 
@@ -328,6 +326,74 @@ exports.watch = function (root, rootNamespaceName) {
 	}, function (callback) {
 	});
 };
+
+function addJSDocComments(namespaces) {
+	function visitor(current) {
+		var newComments = [];
+
+		if (current instanceof Namespace) {
+			Object.keys(current.members).forEach(function (memberName) {
+				visitor(current.members[memberName]);
+			});
+		}
+		else if (current instanceof Constructor) {
+			newComments.push("@constructor");
+
+			if (current.baseType !== null) {
+				newComments.push(
+					"@extends {" +
+					current.baseType.type.fullName +
+					(current.baseType.generics.length > 0 ? (".<" + current.baseType.generics.join(", ") + ">") : "") +
+					"}"
+				);
+			}
+
+			if (current.interfaces.length > 0) {
+				current.interfaces.forEach(function (interface) {
+					newComments.push(
+						"@implements {" +
+						interface.type.fullName +
+						(interface.generics.length > 0 ? (".<" + interface.generics.join(", ") + ">") : "") +
+						"}"
+					);
+				});
+			}
+
+			if (current.parent !== null) {
+				newComments.push("@memberOf " + current.parent.fullName);
+			}
+
+			Object.keys(current.members).forEach(function (memberName) {
+				visitor(current.members[memberName]);
+			});
+		}
+		else if (current instanceof Enum) {
+			newComments.push("@enum");
+		}
+
+		if ((current.generics !== undefined) && (current.generics.length > 0)) {
+			newComments.push("@template " + current.generics.join(", "));
+		}
+
+		if (current.isPrivate) {
+			newComments.push("@private");
+		}
+
+		if (current.isProtected) {
+			newComments.push("@protected");
+		}
+
+		if (current.isStatic) {
+			newComments.push("@static");
+		}
+
+		if (newComments.length > 0) {
+			current.astNode["gulp-typescript-new-comment"] = newComments;
+		}
+	};
+
+	Object.keys(namespaces).forEach(function (namespaceName) { visitor(namespaces[namespaceName]); });
+}
 
 var parseConfigFile = function (json, basePath) {
 	var options = json.compilerOptions;
