@@ -494,6 +494,14 @@ module.exports = function (outputFilePath, root, rootNamespaceName) {
 				'				margin-right: 20px;',
 				'			}',
 				'',
+				'			.navigation .namespace, .navigation .module {',
+				'				margin-top: 1em;',
+				'			}',
+				'',
+				'			.navigation .elements {',
+				'				margin: 0;',
+				'			}',
+				'',
 				'			.content > section:not(:last-child) {',
 				'				border-bottom: 1px solid black;',
 				'			}',
@@ -558,11 +566,11 @@ module.exports = function (outputFilePath, root, rootNamespaceName) {
 				'				content: "abstract ";',
 				'			}',
 				'',
-				'			.private > .name:before {',
+				'			.constructor .private > .name:before {',
 				'				content: "private ";',
 				'			}',
 				'',
-				'			.protected > .name:before {',
+				'			.constructor .protected > .name:before {',
 				'				content: "protected ";',
 				'			}',
 				'',
@@ -586,7 +594,7 @@ module.exports = function (outputFilePath, root, rootNamespaceName) {
 				'				content: "static protected ";',
 				'			}',
 				'',
-				'			body:not(.show-private) .private, body:not(.show-private) .protected {',
+				'			body:not(.show-private) .constructor .private, body:not(.show-private) .constructor .protected, body:not(.show-private) .module {',
 				'				display: none;',
 				'			}',
 				'',
@@ -620,40 +628,37 @@ module.exports = function (outputFilePath, root, rootNamespaceName) {
 				'	<body>',
 				'		<nav class="navigation">',
 				'			<label><input type="checkbox" id="show-private" />Show private</label>',
-				'',
-				'			<h2>Namespaces</h2>'
+				''
 			].concatMany(namespaceNames.map(function (namespaceName) {
 				var namespace = namespaces[namespaceName];
 
 				return [
-				'			<span class="namespace"><a href="#' + sanitize(namespaceName) + '">' + sanitize(namespaceName) + '</a></span>',
-				'			<ul class="namespace-elements">'
+				'			<fieldset class="namespace">',
+				'				<legend><a href="#' + sanitize(namespaceName) + '">' + sanitize(namespaceName) + '</a></legend>',
+				'				<ul class="elements">'
 				].concatMany(namespace.members.map(function (value) {
 					return (
-				'				<li' +
-						((value.isPrivate === true) ? ' class="private"' : '') +
-						'><a href="#' + sanitize(value.fullName) + '">' + sanitize(value.name) + '</a></li>'
+				'					<li><a href="#' + sanitize(value.fullName) + '">' + sanitize(value.name) + '</a></li>'
 					);
 				})).concat([
-				'			</ul>',
+				'				</ul>',
+				'			</fieldset>',
 				''
 				]);
-			})).concat([
-				'			<h2>Modules</h2>'
-			]).concatMany(moduleNames.map(function (moduleName) {
+			})).concatMany(moduleNames.map(function (moduleName) {
 				var module = modules[moduleName];
 
 				return [
-				'			<span class="module"><a href="#' + sanitize(moduleName) + '">' + sanitize(moduleName) + '</a></span>',
-				'			<ul class="module-elements">'
+				'			<fieldset class="module">',
+				'				<legend><a href="#' + sanitize(moduleName) + '">' + sanitize(moduleName) + '</a></legend>',
+				'				<ul class="elements">'
 				].concatMany(module.members.map(function (value) {
 					return (
-				'				<li' +
-						((value.isPrivate === true) ? ' class="private"' : '') +
-						'><a href="#' + sanitize(value.fullName) + '">' + sanitize(value.name) + '</a></li>'
+				'					<li><a href="#' + sanitize(value.fullName) + '">' + sanitize(value.name) + '</a></li>'
 					);
 				})).concat([
-				'			</ul>',
+				'				</ul>',
+				'			</fieldset>',
 				''
 				]);
 			})).concat([
@@ -683,7 +688,7 @@ module.exports = function (outputFilePath, root, rootNamespaceName) {
 				});
 
 				var result = [
-				'			<section>',
+				'			<section class="namespace">',
 				'				<h1 id="' + sanitize(namespaceName) + '">Namespace ' + sanitize(namespaceName) + '</h1>',
 				''
 				];
@@ -775,7 +780,7 @@ module.exports = function (outputFilePath, root, rootNamespaceName) {
 				});
 
 				var result = [
-				'			<section>',
+				'			<section class="module">',
 				'				<h1 id="' + sanitize(moduleName) + '">Module ' + sanitize(moduleName) + '</h1>',
 				''
 				];
