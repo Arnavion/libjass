@@ -261,8 +261,8 @@ exports.gulp = function (root, rootNamespaceName) {
 
 			compiler.compile(file);
 
-			var walkResult = exports.AST.walk(compiler, root, rootNamespaceName);
-			addJSDocComments(walkResult.namespaces);
+			var walkResult = walk(compiler, root, rootNamespaceName);
+			addJSDocComments(walkResult.modules);
 
 			compiler.writeFiles(this);
 
@@ -327,11 +327,11 @@ exports.watch = function (root, rootNamespaceName) {
 	});
 };
 
-function addJSDocComments(namespaces) {
+function addJSDocComments(modules) {
 	function visitor(current) {
 		var newComments = [];
 
-		if (current instanceof Namespace) {
+		if (current instanceof Module) {
 			Object.keys(current.members).forEach(function (memberName) {
 				visitor(current.members[memberName]);
 			});
@@ -359,7 +359,7 @@ function addJSDocComments(namespaces) {
 				});
 			}
 
-			if (current.parent !== null) {
+			if (current.parent !== null && !(current.parent instanceof Module)) {
 				newComments.push("@memberOf " + current.parent.fullName);
 			}
 
@@ -369,6 +369,9 @@ function addJSDocComments(namespaces) {
 		}
 		else if (current instanceof Enum) {
 			newComments.push("@enum");
+		}
+		else if (current instanceof Reference) {
+			return;
 		}
 
 		if ((current.generics !== undefined) && (current.generics.length > 0)) {
@@ -390,9 +393,9 @@ function addJSDocComments(namespaces) {
 		if (newComments.length > 0) {
 			current.astNode["gulp-typescript-new-comment"] = newComments;
 		}
-	};
+	}
 
-	Object.keys(namespaces).forEach(function (namespaceName) { visitor(namespaces[namespaceName]); });
+	Object.keys(modules).forEach(function (moduleName) { visitor(modules[moduleName]); });
 }
 
 var parseConfigFile = function (json, basePath) {
