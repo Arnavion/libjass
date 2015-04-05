@@ -18,11 +18,11 @@
  * limitations under the License.
  */
 
-import Keyframe = require("./keyframe");
+import { Keyframe } from "./keyframe";
 
-import NullRenderer = require("../null");
+import { NullRenderer } from "../null";
 
-import map = require("../../utility/map");
+import { Map } from "../../utility/map";
 
 /**
  * This class represents a collection of animations. Each animation contains one or more keyframes.
@@ -30,7 +30,7 @@ import map = require("../../utility/map");
  *
  * @param {!libjass.renderers.NullRenderer} renderer The renderer that this collection is associated with
  */
-class AnimationCollection {
+export class AnimationCollection {
 	private static _nextId: number = 0;
 
 	private _id: string;
@@ -38,7 +38,7 @@ class AnimationCollection {
 
 	private _cssText: string = "";
 	private _animationStyle: string = "";
-	private _animationDelays: map.Map<string, number> = new map.Map<string, number>();
+	private _animationDelays: Map<string, number> = new Map<string, number>();
 	private _numAnimations: number = 0;
 
 	constructor(renderer: NullRenderer) {
@@ -69,7 +69,7 @@ class AnimationCollection {
 	 *
 	 * @type {!Array.<number>}
 	 */
-	get animationDelays(): map.Map<string, number> {
+	get animationDelays(): Map<string, number> {
 		return this._animationDelays;
 	}
 
@@ -130,5 +130,3 @@ ${ ruleCssText }
 		this._animationDelays.set(animationName, start);
 	}
 }
-
-export = AnimationCollection;

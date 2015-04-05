@@ -18,15 +18,13 @@
  * limitations under the License.
  */
 
-import types = require("./misc");
-import valueOrDefault = types.valueOrDefault;
-import BorderStyle = types.BorderStyle;
+import { valueOrDefault, BorderStyle } from "./misc";
 
-import parser = require("../parser");
+import { parse } from "../parser";
 
-import parts = require("../parts/index");
+import { Color } from "../parts/index";
 
-import map = require("../utility/map");
+import { Map } from "../utility/map";
 
 /**
  * This class represents a single global style declaration in a {@link libjass.ASS} script. The styles can be obtained via the {@link libjass.ASS.styles} property.
@@ -52,7 +50,7 @@ import map = require("../utility/map");
  * @param {string} template["MarginR"] The right margin
  * @param {string} template["MarginV"] The vertical margin
  */
-class Style {
+export class Style {
 	private _name: string;
 
 	private _italic: boolean;
@@ -70,10 +68,10 @@ class Style {
 
 	private _rotationZ: number;
 
-	private _primaryColor: parts.Color;
-	private _secondaryColor: parts.Color;
-	private _outlineColor: parts.Color;
-	private _shadowColor: parts.Color;
+	private _primaryColor: Color;
+	private _secondaryColor: Color;
+	private _outlineColor: Color;
+	private _shadowColor: Color;
 
 	private _outlineThickness: number;
 	private _borderStyle: BorderStyle;
@@ -86,7 +84,7 @@ class Style {
 	private _marginRight: number;
 	private _marginVertical: number;
 
-	constructor(template: map.Map<string, string>) {
+	constructor(template: Map<string, string>) {
 		this._name = template.get("Name");
 		if (this._name === undefined || this._name === null || this._name.constructor !== String) {
 			throw new Error("Style doesn't have a name.");
@@ -107,10 +105,10 @@ class Style {
 
 		this._rotationZ = valueOrDefault(template, "Angle", parseFloat, value => !isNaN(value), "0");
 
-		this._primaryColor = valueOrDefault(template, "PrimaryColour", str => <parts.Color>parser.parse(str, "colorWithAlpha"), null, "&H0000FFFF");
-		this._secondaryColor = valueOrDefault(template, "SecondaryColour", str => <parts.Color>parser.parse(str, "colorWithAlpha"), null, "&H00000000");
-		this._outlineColor = valueOrDefault(template, "OutlineColour", str => <parts.Color>parser.parse(str, "colorWithAlpha"), null, "&H00000000");
-		this._shadowColor = valueOrDefault(template, "BackColour", str => <parts.Color>parser.parse(str, "colorWithAlpha"), null, "&H00000000");
+		this._primaryColor = valueOrDefault(template, "PrimaryColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H0000FFFF");
+		this._secondaryColor = valueOrDefault(template, "SecondaryColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00000000");
+		this._outlineColor = valueOrDefault(template, "OutlineColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00000000");
+		this._shadowColor = valueOrDefault(template, "BackColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00000000");
 
 		this._outlineThickness = valueOrDefault(template, "Outline", parseFloat, value => !isNaN(value), "1");
 		this._borderStyle = valueOrDefault(template, "BorderStyle", parseInt, value => !isNaN(value), "1");
@@ -228,7 +226,7 @@ class Style {
 	 *
 	 * @type {!libjass.parts.Color}
 	 */
-	get primaryColor(): parts.Color {
+	get primaryColor(): Color {
 		return this._primaryColor;
 	}
 
@@ -237,7 +235,7 @@ class Style {
 	 *
 	 * @type {!libjass.parts.Color}
 	 */
-	get secondaryColor(): parts.Color {
+	get secondaryColor(): Color {
 		return this._secondaryColor;
 	}
 
@@ -246,7 +244,7 @@ class Style {
 	 *
 	 * @type {!libjass.parts.Color}
 	 */
-	get outlineColor(): parts.Color {
+	get outlineColor(): Color {
 		return this._outlineColor;
 	}
 
@@ -255,7 +253,7 @@ class Style {
 	 *
 	 * @type {!libjass.parts.Color}
 	 */
-	get shadowColor(): parts.Color {
+	get shadowColor(): Color {
 		return this._shadowColor;
 	}
 
@@ -322,5 +320,3 @@ class Style {
 		return this._marginVertical;
 	}
 }
-
-export = Style;

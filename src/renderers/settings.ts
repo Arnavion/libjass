@@ -18,12 +18,12 @@
  * limitations under the License.
  */
 
-import map = require("../utility/map");
+import { Map } from "../utility/map";
 
 /**
  * Settings for the renderer.
  */
-class RendererSettings {
+export class RendererSettings {
 	/**
 	 * A map of font name to one or more URLs of that font. If provided, the fonts in this map are pre-loaded by the WebRenderer when it's created.
 	 *
@@ -32,7 +32,7 @@ class RendererSettings {
 	 *
 	 * @type {!Map.<string, !Array.<string>>}
 	 */
-	fontMap: map.Map<string, string[]>;
+	fontMap: Map<string, string[]>;
 
 	/**
 	 * Subtitles will be pre-rendered for this amount of time (seconds).
@@ -76,8 +76,8 @@ class RendererSettings {
 	 * @param {!LinkStyle} linkStyle
 	 * @return {!Map.<string, !Array.<string>>}
 	 */
-	static makeFontMapFromStyleElement(linkStyle: LinkStyle): map.Map<string, string[]> {
-		var fontMap = new map.Map<string, string[]>();
+	static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string[]> {
+		var fontMap = new Map<string, string[]>();
 
 		var styleSheet = <CSSStyleSheet>linkStyle.sheet;
 		var rules: CSSFontFaceRule[] = Array.prototype.filter.call(styleSheet.cssRules, (rule: CSSRule) => rule.type === CSSRule.FONT_FACE_RULE);
@@ -129,7 +129,7 @@ class RendererSettings {
 	 * @param {boolean=true} enableSvg
 	 * @return {!libjass.renderers.RendererSettings}
 	 */
-	private static _from(fontMap: map.Map<string, string[]> = null, preRenderTime: number = 5, preciseOutlines: boolean = false, enableSvg: boolean = true): RendererSettings {
+	private static _from(fontMap: Map<string, string[]> = null, preRenderTime: number = 5, preciseOutlines: boolean = false, enableSvg: boolean = true): RendererSettings {
 		var result = new RendererSettings();
 		result.fontMap = fontMap;
 		result.preRenderTime = preRenderTime;
@@ -146,5 +146,3 @@ class RendererSettings {
 		return str.match(/^["']?(.*?)["']?$/)[1];
 	}
 }
-
-export = RendererSettings;

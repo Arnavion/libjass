@@ -391,7 +391,7 @@ export var Promise: {
 } = global.Promise;
 
 if (Promise === undefined) {
-	Promise = <any>SimplePromise;
+	Promise = SimplePromise;
 }
 
 /**
@@ -429,4 +429,13 @@ export class DeferredPromise<T> {
 	reject(reason: any): void {
 		this._reject(reason);
 	}
+}
+
+/**
+ * Sets the Promise implementation used by libjass to the provided one.
+ *
+ * @param {function(new:Promise)} value
+ */
+export function setImplementation(value: typeof Promise): void {
+	Promise = value;
 }

@@ -18,13 +18,12 @@
  * limitations under the License.
  */
 
-import types = require("./misc");
-import WrappingStyle = types.WrappingStyle;
+import { WrappingStyle } from "./misc";
 
 /**
  * This class represents the properties of a {@link libjass.ASS} script.
  */
-class ScriptProperties {
+export class ScriptProperties {
 	private _resolutionX: number;
 	private _resolutionY: number;
 	private _wrappingStyle: WrappingStyle;
@@ -102,5 +101,3 @@ class ScriptProperties {
 		this._scaleBorderAndShadow = value;
 	}
 }
-
-export = ScriptProperties;

@@ -18,9 +18,10 @@
  * limitations under the License.
  */
 
-import types = require("../types/misc");
+import { WrappingStyle as WrappingStyleType } from "../types/misc";
 
-export import drawing = require("./drawing");
+import * as drawing from "./drawing";
+export { drawing };
 
 /**
  * Represents a CSS color with red, green, blue and alpha components.
@@ -817,14 +818,14 @@ export class OutlineKaraoke {
  * @param {number} value {\q###} -> style (number)
  */
 export class WrappingStyle {
-	constructor(private _value: types.WrappingStyle) { }
+	constructor(private _value: WrappingStyleType) { }
 
 	/**
 	 * The value of this wrapping style tag.
 	 *
 	 * @type {number}
 	 */
-	get value(): types.WrappingStyle {
+	get value(): WrappingStyleType {
 		return this._value;
 	}
 }
@@ -1293,7 +1294,7 @@ var addToString = function (ctor: Function, ctorName: string) {
 	}
 };
 
-import webworker = require("../web-worker");
+import { _registerClassPrototype } from "../web-worker";
 
 declare var exports: any;
 
@@ -1301,7 +1302,7 @@ Object.keys(exports).forEach(key => {
 	var value: any = exports[key];
 	if (value instanceof Function) {
 		addToString(value, key);
-		webworker._registerClassPrototype(value.prototype);
+		_registerClassPrototype(value.prototype);
 	}
 });
 
@@ -1309,6 +1310,6 @@ Object.keys(drawing).forEach(key => {
 	var value: any = (<any>drawing)[key];
 	if (value instanceof Function) {
 		addToString(value, `Drawing${ key }`);
-		webworker._registerClassPrototype(value.prototype);
+		_registerClassPrototype(value.prototype);
 	}
 });

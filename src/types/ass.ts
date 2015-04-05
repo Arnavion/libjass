@@ -18,26 +18,25 @@
  * limitations under the License.
  */
 
-import Dialogue = require("./dialogue");
-import Style = require("./style");
-import ScriptProperties = require("./script-properties");
+import { Dialogue } from "./dialogue";
+import { Style } from "./style";
+import { ScriptProperties } from "./script-properties";
 
-import types = require("./misc");
-import Format = types.Format;
+import { Format } from "./misc";
 
-import globalSettings = require("../settings");
+import { verboseMode } from "../settings";
 
-import parser = require("../parser");
+import * as parser from "../parser";
 
-import map = require("../utility/map");
-import promise = require("../utility/promise");
+import { Map } from "../utility/map";
+import { Promise } from "../utility/promise";
 
 /**
  * This class represents an ASS script. It contains the {@link libjass.ScriptProperties}, an array of {@link libjass.Style}s, and an array of {@link libjass.Dialogue}s.
  */
-class ASS {
+export class ASS {
 	private _properties: ScriptProperties = new ScriptProperties();
-	private _styles: map.Map<string, Style> = new map.Map<string, Style>();
+	private _styles: Map<string, Style> = new Map<string, Style>();
 	private _dialogues: Dialogue[] = [];
 
 	private _stylesFormatSpecifier: string[] = null;
@@ -57,7 +56,7 @@ class ASS {
 	 *
 	 * @type {!Map.<string, !libjass.Style>}
 	 */
-	get styles(): map.Map<string, Style> {
+	get styles(): Map<string, Style> {
 		return this._styles;
 	}
 
@@ -126,7 +125,7 @@ class ASS {
 
 		var styleTemplate = styleLine.template;
 
-		if (globalSettings.verboseMode) {
+		if (verboseMode) {
 			var repr = "";
 			styleTemplate.forEach((value, key) => repr += `${ key } = ${ value }, `);
 			console.log(`Read style: ${ repr }`);
@@ -150,7 +149,7 @@ class ASS {
 
 		var dialogueTemplate = dialogueLine.template;
 
-		if (globalSettings.verboseMode) {
+		if (verboseMode) {
 			var repr = "";
 			dialogueTemplate.forEach((value, key) => repr += `${ key } = ${ value }, `);
 			console.log(`Read dialogue: ${ repr }`);
@@ -167,7 +166,7 @@ class ASS {
 	 * @param {number=0} type The type of the script. One of the {@link libjass.Format} constants.
 	 * @return {!Promise.<!libjass.ASS>}
 	 */
-	static fromString(raw: string, type: Format = Format.ASS): promise.Promise<ASS> {
+	static fromString(raw: string, type: Format = Format.ASS): Promise<ASS> {
 		if ((<{ [index: string]: any }><any>Format)[Format[type]] !== type) {
 			throw new Error(`Illegal value of type: ${ type }`);
 		}
@@ -182,7 +181,7 @@ class ASS {
 	 * @param {number=0} type The type of the script. One of the {@link libjass.Format} constants.
 	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 	 */
-	static fromStream(stream: parser.Stream, type: Format = Format.ASS): promise.Promise<ASS> {
+	static fromStream(stream: parser.Stream, type: Format = Format.ASS): Promise<ASS> {
 		switch (type) {
 			case Format.ASS:
 				return new parser.StreamParser(stream).ass;
@@ -200,7 +199,7 @@ class ASS {
 	 * @param {number=0} type The type of the script. One of the {@link libjass.Format} constants.
 	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 	 */
-	static fromUrl(url: string, type: Format = Format.ASS): promise.Promise<ASS> {
+	static fromUrl(url: string, type: Format = Format.ASS): Promise<ASS> {
 		if ((<{ [index: string]: any }><any>Format)[Format[type]] !== type) {
 			throw new Error(`Illegal value of type: ${ type }`);
 		}
@@ -212,5 +211,3 @@ class ASS {
 		return result;
 	}
 }
-
-export = ASS;

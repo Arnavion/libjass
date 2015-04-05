@@ -18,20 +18,19 @@
  * limitations under the License.
  */
 
-import AnimationCollection = require("./animation-collection");
-import domParser = require("./dom-parser");
+import { AnimationCollection } from "./animation-collection";
+import { domParser } from "./dom-parser";
 
-import WebRenderer = require("./renderer");
+import { WebRenderer } from "./renderer";
 
-import RendererSettings = require("../settings");
+import { RendererSettings } from "../settings";
 
-import parts = require("../../parts/index");
-import Color = parts.Color;
+import { Color } from "../../parts/index";
 
-import Style = require("../../types/style");
-import Dialogue = require("../../types/dialogue");
+import { Style } from "../../types/style";
+import { Dialogue } from "../../types/dialogue";
 
-import map = require("../../utility/map");
+import { Map } from "../../utility/map";
 
 ///<reference path="./web-references.d.ts" />
 
@@ -47,8 +46,8 @@ import map = require("../../utility/map");
  * @param {!HTMLDivElement} fontSizeElement A <div> element to measure font sizes with
  * @param {!SVGDefsElement} svgDefsElement An SVG <defs> element to append filter definitions to
  */
-class SpanStyles {
-	private static _fontSizeCache: map.Map<string, map.Map<number, number>> = new map.Map<string, map.Map<number, number>>();
+export class SpanStyles {
+	private static _fontSizeCache: Map<string, Map<number, number>> = new Map<string, Map<number, number>>();
 
 	private _id: string;
 	private _defaultStyle: Style;
@@ -699,7 +698,7 @@ ${ blurFilter }
 	private static _getFontSize(fontFamily: string, lineHeight: number, fontSizeElement: HTMLDivElement): number {
 		var existingFontSizeMap = SpanStyles._fontSizeCache.get(fontFamily);
 		if (existingFontSizeMap === undefined) {
-			SpanStyles._fontSizeCache.set(fontFamily, existingFontSizeMap = new map.Map<number, number>());
+			SpanStyles._fontSizeCache.set(fontFamily, existingFontSizeMap = new Map<number, number>());
 		}
 
 		var existingFontSize = existingFontSizeMap.get(lineHeight);
@@ -712,5 +711,3 @@ ${ blurFilter }
 		return existingFontSize;
 	}
 }
-
-export = SpanStyles;

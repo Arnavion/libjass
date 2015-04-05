@@ -18,12 +18,11 @@
  * limitations under the License.
  */
 
-import clocks = require("./clocks");
-import VideoClock = clocks.VideoClock;
-import RendererSettings = require("./settings");
-import WebRenderer = require("./web/renderer");
+import { VideoClock } from "./clocks";
+import { RendererSettings } from "./settings";
+import { WebRenderer } from "./web/renderer";
 
-import ASS = require("../types/ass");
+import { ASS } from "../types/ass";
 
 ///<reference path="./default-references.d.ts" />
 
@@ -34,7 +33,7 @@ import ASS = require("../types/ass");
  * @param {!libjass.ASS} ass
  * @param {libjass.renderers.RendererSettings} settings
  */
-class DefaultRenderer extends WebRenderer {
+export class DefaultRenderer extends WebRenderer {
 	private _videoIsFullScreen: boolean = false;
 
 	constructor(private _video: HTMLVideoElement, ass: ASS, settings?: RendererSettings) {
@@ -91,5 +90,3 @@ class DefaultRenderer extends WebRenderer {
 		}
 	}
 }
-
-export = DefaultRenderer;

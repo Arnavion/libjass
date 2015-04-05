@@ -18,10 +18,9 @@
  * limitations under the License.
  */
 
-import map = require("./utility/map");
+import { Map } from "./utility/map";
 
-import promise = require("./utility/promise");
-import DeferredPromise = promise.DeferredPromise;
+import { Promise, DeferredPromise } from "./utility/promise";
 
 ///<reference path="web-worker-references.d.ts" />
 
@@ -44,7 +43,7 @@ export interface WorkerChannel {
 	 * @param {*} parameters
 	 * @return {!Promise.<*>} A promise that will get resolved when the other side computes the result
 	 */
-	request(command: WorkerCommands, parameters: any): promise.Promise<any>;
+	request(command: WorkerCommands, parameters: any): Promise<any>;
 }
 
 /**
@@ -105,9 +104,9 @@ if (typeof document !== "undefined" && document.currentScript !== undefined) {
 	_scriptNode = document.currentScript;
 }
 
-var workerCommands = new map.Map<WorkerCommands, WorkerCommandHandler>();
+var workerCommands = new Map<WorkerCommands, WorkerCommandHandler>();
 
-var classPrototypes = new map.Map<number, any>();
+var classPrototypes = new Map<number, any>();
 
 /**
  * The interface implemented by a communication channel to the other side.
@@ -193,7 +192,7 @@ interface WorkerResponseMessage {
 class WorkerChannelImpl implements WorkerChannel {
 	private static _lastRequestId: number = -1;
 
-	private _pendingRequests = new map.Map<number, DeferredPromise<any>>();
+	private _pendingRequests = new Map<number, DeferredPromise<any>>();
 
 	constructor(private _comm: WorkerCommunication) {
 		this._comm.addEventListener("message", ev => this._onMessage(<string>ev.data), false);
@@ -204,7 +203,7 @@ class WorkerChannelImpl implements WorkerChannel {
 	 * @param {*} parameters
 	 * @return {!Promise.<*>}
 	 */
-	request(command: WorkerCommands, parameters: any): promise.Promise<any> {
+	request(command: WorkerCommands, parameters: any): Promise<any> {
 		var deferred = new DeferredPromise<any>();
 		var requestId = ++WorkerChannelImpl._lastRequestId;
 		this._pendingRequests.set(requestId, deferred);

@@ -19,9 +19,7 @@
  */
 
 /** @type {!DomParser} */
-var domParser: DOMParser = null;
+export var domParser: DOMParser = null;
 if (typeof DOMParser !== "undefined") {
 	domParser = new DOMParser();
 }
-
-export = domParser;

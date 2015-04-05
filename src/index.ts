@@ -18,54 +18,59 @@
  * limitations under the License.
  */
 
-export import settings = require("./settings");
+import * as settings from "./settings";
+export { debugMode, verboseMode } from "./settings";
 
-import set = require("./utility/set");
-import map = require("./utility/map");
+import * as set from "./utility/set";
+export { Set } from "./utility/set";
 
-import promise = require("./utility/promise");
-export import DeferredPromise = promise.DeferredPromise;
+import * as map from "./utility/map";
+export { Map } from "./utility/map";
 
-export import webworker = require("./web-worker");
+import * as promise from "./utility/promise";
+export { Promise, DeferredPromise } from "./utility/promise";
 
-export import parts = require("./parts/index");
+import * as webworker from "./web-worker";
+export { webworker };
 
-export import parser = require("./parser");
+import * as parts from "./parts/index";
+export { parts };
 
-export import renderers = require("./renderers/index");
+import * as parser from "./parser";
+export { parser };
 
-export import ASS = require("./types/ass");
-export import Dialogue = require("./types/dialogue");
-export import ScriptProperties = require("./types/script-properties");
-export import Style = require("./types/style");
+import * as renderers from "./renderers/index";
+export { renderers };
 
-import types = require("./types/misc");
-export import BorderStyle = types.BorderStyle;
-export import Format = types.Format;
-export import WrappingStyle = types.WrappingStyle;
+export { ASS } from "./types/ass";
+export { Dialogue } from "./types/dialogue";
+export { ScriptProperties } from "./types/script-properties";
+export { Style } from "./types/style";
+
+export { BorderStyle, Format, WrappingStyle } from "./types/misc";
 
 declare var exports: any;
 
 Object.defineProperties(exports, {
 	debugMode: {
 		get: () => settings.debugMode,
-		set: (value: boolean) => settings.debugMode = value,
+		set: settings.setDebugMode,
 	},
 
 	verboseMode: {
 		get: () => settings.verboseMode,
-		set: (value: boolean) => settings.verboseMode = value,
+		set: settings.setVerboseMode,
 	},
 	Set: {
 		get: () => set.Set,
-		set: (value: typeof set.Set) => set.Set = value,
+		set: set.setImplementation,
 	},
 	Map: {
 		get: () => map.Map,
-		set: (value: typeof map.Map) => map.Map = value,
+		set: map.setImplementation,
 	},
 	Promise: {
 		get: () => promise.Promise,
-		set: (value: typeof promise.Promise) => promise.Promise = value,
+		set: promise.setImplementation,
 	},
 });

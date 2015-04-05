@@ -18,16 +18,14 @@
  * limitations under the License.
  */
 
-import clocks = require("./clocks");
-import Clock = clocks.Clock;
-import ClockEvent = clocks.ClockEvent;
+import { Clock, ClockEvent } from "./clocks";
 
-import RendererSettings = require("./settings");
+import { RendererSettings } from "./settings";
 
-import globalSettings = require("../settings");
+import { verboseMode } from "../settings";
 
-import ASS = require("../types/ass");
-import Dialogue = require("../types/dialogue");
+import { ASS } from "../types/ass";
+import { Dialogue } from "../types/dialogue";
 
 /**
  * A renderer implementation that doesn't output anything.
@@ -36,7 +34,7 @@ import Dialogue = require("../types/dialogue");
  * @param {!libjass.renderers.Clock} clock
  * @param {libjass.renderers.RendererSettings} settings
  */
-class NullRenderer {
+export class NullRenderer {
 	private static _lastRendererId = -1;
 
 	private _id: number;
@@ -145,7 +143,7 @@ class NullRenderer {
 	 * Runs when the clock is enabled, or starts playing, or is resumed from pause.
 	 */
 	protected _onClockPlay(): void {
-		if (globalSettings.verboseMode) {
+		if (verboseMode) {
 			console.log("NullRenderer._onClockPlay");
 		}
 	}
@@ -156,7 +154,7 @@ class NullRenderer {
 	protected _onClockTick(): void {
 		var currentTime = this._clock.currentTime;
 
-		if (globalSettings.verboseMode) {
+		if (verboseMode) {
 			console.log(`NullRenderer._onClockTick: currentTime = ${ currentTime }`);
 		}
 
@@ -180,7 +178,7 @@ class NullRenderer {
 	 * Runs when the clock is paused.
 	 */
 	protected _onClockPause(): void {
-		if (globalSettings.verboseMode) {
+		if (verboseMode) {
 			console.log("NullRenderer._onClockPause");
 		}
 	}
@@ -189,7 +187,7 @@ class NullRenderer {
 	 * Runs when the clock is disabled.
 	 */
 	protected _onClockStop(): void {
-		if (globalSettings.verboseMode) {
+		if (verboseMode) {
 			console.log("NullRenderer._onClockStop");
 		}
 	}
@@ -198,10 +196,8 @@ class NullRenderer {
 	 * Runs when the clock changes its rate.
 	 */
 	protected _onClockRateChange(): void {
-		if (globalSettings.verboseMode) {
+		if (verboseMode) {
 			console.log("NullRenderer._onClockRateChange");
 		}
 	}
 }
-
-export = NullRenderer;

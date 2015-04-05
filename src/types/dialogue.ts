@@ -18,19 +18,18 @@
  * limitations under the License.
  */
 
-import ASS = require("./ass");
-import Style = require("./style");
+import { ASS } from "./ass";
+import { Style } from "./style";
 
-import types = require("./misc");
-import valueOrDefault = types.valueOrDefault;
+import { valueOrDefault } from "./misc";
 
-import parser = require("../parser");
+import { parse } from "../parser";
 
-import parts = require("../parts/index");
+import * as parts from "../parts/index";
 
-import globalSettings = require("../settings");
+import { debugMode } from "../settings";
 
-import map = require("../utility/map");
+import { Map } from "../utility/map";
 
 /**
  * This class represents a dialogue in a {@link libjass.ASS} script.
@@ -43,7 +42,7 @@ import map = require("../utility/map");
  * @param {string} template["Text"] The text of this dialogue
  * @param {ASS} ass The ASS object to which this dialogue belongs
  */
-class Dialogue {
+export class Dialogue {
 	private static _lastDialogueId = -1;
 
 	private _id: number;
@@ -61,7 +60,7 @@ class Dialogue {
 
 	private _sub: HTMLDivElement = null;
 
-	constructor(template: map.Map<string, string>, ass: ASS) {
+	constructor(template: Map<string, string>, ass: ASS) {
 		this._id = ++Dialogue._lastDialogueId;
 
 		var style = template.get("Style");
@@ -163,7 +162,7 @@ class Dialogue {
 	 * Parses this dialogue's parts from the raw parts string.
 	 */
 	private _parsePartsString(): void {
-		this._parts = <parts.Part[]>parser.parse(this._rawPartsString, "dialogueParts");
+		this._parts = <parts.Part[]>parse(this._rawPartsString, "dialogueParts");
 
 		this._alignment = this._style.alignment;
 
@@ -197,7 +196,7 @@ class Dialogue {
 			}
 		});
 
-		if (globalSettings.debugMode) {
+		if (debugMode) {
 			var possiblyIncorrectParses = this._parts.filter(part => part instanceof parts.Comment && (<parts.Comment>part).value.indexOf("\\") !== -1);
 			if (possiblyIncorrectParses.length > 0) {
 				console.warn(
@@ -222,5 +221,3 @@ ${ possiblyIncorrectParses.join("\n") }`
 		return str.split(":").reduce<number>((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);
 	}
 }
-
-export = Dialogue;

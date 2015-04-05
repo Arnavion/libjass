@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import map = require("../utility/map");
+import { Map } from "../utility/map";
 
 /**
  * The format of the string passed to {@link libjass.ASS.fromString}
@@ -73,7 +73,7 @@ export interface TypedTemplate {
 	/**
 	 * @type {!Map.<string, string>}
 	 */
-	template: map.Map<string, string>;
+	template: Map<string, string>;
 }
 
 /**
@@ -84,7 +84,7 @@ export interface TypedTemplate {
  * @param {T} defaultValue
  * @return {T}
  */
-export function valueOrDefault<T>(template: map.Map<string, string>, key: string, converter: (str: string) => T, validator: (value: T) => boolean, defaultValue: string): T {
+export function valueOrDefault<T>(template: Map<string, string>, key: string, converter: (str: string) => T, validator: (value: T) => boolean, defaultValue: string): T {
 	var value = template.get(key);
 	if (value === undefined) {
 		return converter(defaultValue);

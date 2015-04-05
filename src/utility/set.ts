@@ -166,5 +166,14 @@ if (Set === undefined || typeof Set.prototype.forEach !== "function" || (() => {
 		return true;
 	}
 })()) {
-	Set = <any>SimpleSet;
+	Set = SimpleSet;
+}
+
+/**
+ * Sets the Set implementation used by libjass to the provided one.
+ *
+ * @param {function(new:Set, !Array.<T>=)} value
+ */
+export function setImplementation(value: typeof Set): void {
+	Set = value;
 }
