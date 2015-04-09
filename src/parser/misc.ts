@@ -37,7 +37,7 @@ export function parseLineIntoProperty(line: string): Property {
 	var name = line.substr(0, colonPos);
 	var value = line.substr(colonPos + 1).replace(/^\s+/, "");
 
-	return { name: name, value: value };
+	return { name, value };
 }
 
 /**
@@ -64,5 +64,5 @@ export function parseLineIntoTypedTemplate(line: string, formatSpecifier: string
 		template.set(formatKey, value[index]);
 	});
 
-	return { type: property.name, template: template };
+	return { type: property.name, template };
 }

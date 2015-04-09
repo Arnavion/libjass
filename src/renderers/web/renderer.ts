@@ -536,7 +536,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		sub.setAttribute("data-dialogue-id", `${ this.id }-${ dialogue.id }`);
 
-		this._preRenderedSubs.set(dialogue.id, { sub: sub, animationDelays: dialogueAnimationCollection.animationDelays });
+		this._preRenderedSubs.set(dialogue.id, { sub, animationDelays: dialogueAnimationCollection.animationDelays });
 	}
 
 	/**

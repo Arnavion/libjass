@@ -208,7 +208,7 @@ class WorkerChannelImpl implements WorkerChannel {
 		var requestId = ++WorkerChannelImpl._lastRequestId;
 		this._pendingRequests.set(requestId, deferred);
 
-		var requestMessage: WorkerRequestMessage = { requestId: requestId, command: command, parameters: parameters };
+		var requestMessage: WorkerRequestMessage = { requestId, command, parameters };
 		this._comm.postMessage(WorkerChannelImpl._toJSON(requestMessage));
 
 		return deferred.promise;
@@ -265,7 +265,7 @@ class WorkerChannelImpl implements WorkerChannel {
 			return;
 		}
 
-		commandCallback(requestMessage.parameters, (error: any, result: any) => this._respond({ requestId: requestMessage.requestId, error: error, result: result }));
+		commandCallback(requestMessage.parameters, (error: any, result: any) => this._respond({ requestId: requestMessage.requestId, error, result }));
 	}
 
 	/**
