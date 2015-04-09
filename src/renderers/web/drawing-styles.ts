@@ -18,9 +18,9 @@
  * limitations under the License.
  */
 
-import domParser = require("./dom-parser");
+import { domParser } from "./dom-parser";
 
-import parts = require("../../parts/index");
+import * as parts from "../../parts/index";
 
 /**
  * This class represents an ASS drawing - a set of drawing instructions between {\p} tags.
@@ -28,7 +28,7 @@ import parts = require("../../parts/index");
  * @param {number} outputScaleX
  * @param {number} outputScaleY
  */
-class DrawingStyles {
+export class DrawingStyles {
 	private _scale: number = 1;
 	private _baselineOffset: number = 0;
 
@@ -92,5 +92,3 @@ class DrawingStyles {
 		return <SVGSVGElement>domParser.parseFromString(result, "image/svg+xml").childNodes[0];
 	}
 }
-
-export = DrawingStyles;

@@ -18,31 +18,28 @@
  * limitations under the License.
  */
 
-import AnimationCollection = require("./animation-collection");
-import DrawingStyles = require("./drawing-styles");
-import Keyframe = require("./keyframe");
-import SpanStyles = require("./span-styles");
+import { AnimationCollection } from "./animation-collection";
+import { DrawingStyles } from "./drawing-styles";
+import { Keyframe } from "./keyframe";
+import { SpanStyles } from "./span-styles";
 
-import clocks = require("../clocks");
-import Clock = clocks.Clock;
-import EventSource = clocks.EventSource;
+import { Clock, EventSource } from "../clocks";
 
-import NullRenderer = require("../null");
-import RendererSettings = require("../settings");
+import { NullRenderer } from "../null";
+import { RendererSettings } from "../settings";
 
-import parts = require("../../parts/index");
+import * as parts from "../../parts/index";
 
-import globalSettings = require("../../settings");
+import { debugMode } from "../../settings";
 
-import ASS = require("../../types/ass");
-import Dialogue = require("../../types/dialogue");
-import types = require("../../types/misc");
-import WrappingStyle = types.WrappingStyle;
+import { ASS } from "../../types/ass";
+import { Dialogue } from "../../types/dialogue";
+import { WrappingStyle } from "../../types/misc";
 
-import mixin = require("../../utility/mixin");
-import map = require("../../utility/map");
-import set = require("../../utility/set");
-import promise = require("../../utility/promise");
+import { mixin } from "../../utility/mixin";
+import { Map } from "../../utility/map";
+import { Set } from "../../utility/set";
+import { Promise } from "../../utility/promise";
 
 ///<reference path="./references.d.ts" />
 
@@ -54,7 +51,7 @@ import promise = require("../../utility/promise");
  * @param {!HTMLDivElement} libjassSubsWrapper Subtitles will be rendered to this <div>
  * @param {!libjass.renderers.RendererSettings} settings
  */
-class WebRenderer extends NullRenderer implements EventSource<string> {
+export class WebRenderer extends NullRenderer implements EventSource<string> {
 	private _subsWrapper: HTMLDivElement;
 	private _layerWrappers: HTMLDivElement[] = [];
 	private _layerAlignmentWrappers: HTMLDivElement[][] = [];
@@ -62,8 +59,8 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 	private _animationStyleElement: HTMLStyleElement;
 	private _svgDefsElement: SVGDefsElement;
 
-	private _currentSubs: map.Map<Dialogue, HTMLDivElement> = new map.Map<Dialogue, HTMLDivElement>();
-	private _preRenderedSubs: map.Map<number, PreRenderedSub> = new map.Map<number, PreRenderedSub>();
+	private _currentSubs: Map<Dialogue, HTMLDivElement> = new Map<Dialogue, HTMLDivElement>();
+	private _preRenderedSubs: Map<number, PreRenderedSub> = new Map<number, PreRenderedSub>();
 
 	private _scaleX: number;
 	private _scaleY: number;
@@ -109,23 +106,23 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		// Preload fonts
 
-		var urlsToPreload = new set.Set<string>();
+		var urlsToPreload = new Set<string>();
 		if (this.settings.fontMap !== null) {
 			this.settings.fontMap.forEach(srcs => {
 				srcs.forEach(src => urlsToPreload.add(src));
 			});
 		}
 
-		if (globalSettings.debugMode) {
+		if (debugMode) {
 			console.log(`Preloading ${ urlsToPreload.size } fonts...`);
 		}
 
-		var xhrPromises: promise.Promise<void>[] = [];
+		var xhrPromises: Promise<void>[] = [];
 		urlsToPreload.forEach(url => {
-			xhrPromises.push(new promise.Promise<void>((resolve, reject) => {
+			xhrPromises.push(new Promise<void>((resolve, reject) => {
 				var xhr = new XMLHttpRequest();
 				xhr.addEventListener("load", () => {
-					if (globalSettings.debugMode) {
+					if (debugMode) {
 						console.log(`Preloaded ${ url }.`);
 					}
 
@@ -136,8 +133,8 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			}));
 		});
 
-		promise.Promise.all(xhrPromises).then(() => {
-			if (globalSettings.debugMode) {
+		Promise.all(xhrPromises).then(() => {
+			if (debugMode) {
 				console.log("All fonts have been preloaded.");
 			}
 
@@ -393,9 +390,9 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 				startNewSpan(false);
 
 				currentAnimationCollection.add("step-end", [
-					new Keyframe(0, new map.Map([
+					new Keyframe(0, new Map([
 						["color", currentSpanStyles.secondaryColor.withAlpha(currentSpanStyles.secondaryAlpha).toString()],
-					])), new Keyframe(karaokeTimesAccumulator, new map.Map([
+					])), new Keyframe(karaokeTimesAccumulator, new Map([
 						["color", currentSpanStyles.primaryColor.withAlpha(currentSpanStyles.primaryAlpha).toString()],
 					]))
 				]);
@@ -419,45 +416,45 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 
 			else if (part instanceof parts.Move) {
 				sub.style.position = "absolute";
-				dialogueAnimationCollection.add("linear", [new Keyframe(0, new map.Map([
+				dialogueAnimationCollection.add("linear", [new Keyframe(0, new Map([
 					["left", `${ (this._scaleX * part.x1).toFixed(3) }px`],
 					["top", `${ (this._scaleY * part.y1).toFixed(3) }px`],
-				])), new Keyframe(part.t1, new map.Map([
+				])), new Keyframe(part.t1, new Map([
 					["left", `${ (this._scaleX * part.x1).toFixed(3) }px`],
 					["top", `${ (this._scaleY * part.y1).toFixed(3) }px`],
-				])), new Keyframe(part.t2, new map.Map([
+				])), new Keyframe(part.t2, new Map([
 					["left", `${ (this._scaleX * part.x2).toFixed(3) }px`],
 					["top", `${ (this._scaleY * part.y2).toFixed(3) }px`],
-				])), new Keyframe(dialogue.end - dialogue.start, new map.Map([
+				])), new Keyframe(dialogue.end - dialogue.start, new Map([
 					["left", `${ (this._scaleX * part.x2).toFixed(3) }px`],
 					["top", `${ (this._scaleY * part.y2).toFixed(3) }px`],
 				]))]);
 			}
 
 			else if (part instanceof parts.Fade) {
-				dialogueAnimationCollection.add("linear", [new Keyframe(0, new map.Map([
+				dialogueAnimationCollection.add("linear", [new Keyframe(0, new Map([
 					["opacity", "0"],
-				])), new Keyframe(part.start, new map.Map([
+				])), new Keyframe(part.start, new Map([
 					["opacity", "1"],
-				])), new Keyframe(dialogue.end - dialogue.start - part.end, new map.Map([
+				])), new Keyframe(dialogue.end - dialogue.start - part.end, new Map([
 					["opacity", "1"],
-				])), new Keyframe(dialogue.end - dialogue.start, new map.Map([
+				])), new Keyframe(dialogue.end - dialogue.start, new Map([
 					["opacity", "0"],
 				]))]);
 			}
 
 			else if (part instanceof parts.ComplexFade) {
-				dialogueAnimationCollection.add("linear", [new Keyframe(0, new map.Map([
+				dialogueAnimationCollection.add("linear", [new Keyframe(0, new Map([
 					["opacity", part.a1.toFixed(3)],
-				])), new Keyframe(part.t1, new map.Map([
+				])), new Keyframe(part.t1, new Map([
 					["opacity", part.a1.toFixed(3)],
-				])), new Keyframe(part.t2, new map.Map([
+				])), new Keyframe(part.t2, new Map([
 					["opacity", part.a2.toFixed(3)],
-				])), new Keyframe(part.t3, new map.Map([
+				])), new Keyframe(part.t3, new Map([
 					["opacity", part.a2.toFixed(3)],
-				])), new Keyframe(part.t4, new map.Map([
+				])), new Keyframe(part.t4, new Map([
 					["opacity", part.a3.toFixed(3)],
-				])), new Keyframe(dialogue.end - dialogue.start, new map.Map([
+				])), new Keyframe(dialogue.end - dialogue.start, new Map([
 					["opacity", part.a3.toFixed(3)],
 				]))]);
 			}
@@ -482,7 +479,7 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 				startNewSpan(false);
 			}
 
-			else if (globalSettings.debugMode && part instanceof parts.Comment) {
+			else if (debugMode && part instanceof parts.Comment) {
 				currentSpan.appendChild(document.createTextNode(part.value));
 				startNewSpan(false);
 			}
@@ -553,21 +550,21 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 			return;
 		}
 
-		if (globalSettings.debugMode) {
+		if (debugMode) {
 			console.log(dialogue.toString());
 		}
 
 		var preRenderedSub = this._preRenderedSubs.get(dialogue.id);
 
 		if (preRenderedSub === undefined) {
-			if (globalSettings.debugMode) {
+			if (debugMode) {
 				console.warn("This dialogue was not pre-rendered. Call preRender() before calling draw() so that draw() is faster.");
 			}
 
 			this.preRender(dialogue);
 			preRenderedSub = this._preRenderedSubs.get(dialogue.id);
 
-			if (globalSettings.debugMode) {
+			if (debugMode) {
 				console.log(dialogue.toString());
 			}
 		}
@@ -720,7 +717,7 @@ class WebRenderer extends NullRenderer implements EventSource<string> {
 	/**
 	 * @type {!Map.<T, !Array.<Function>>}
 	 */
-	_eventListeners: map.Map<string, Function[]> = new map.Map<string, Function[]>();
+	_eventListeners: Map<string, Function[]> = new Map<string, Function[]>();
 
 	/**
 	 * @type {function(number, !Function)}
@@ -739,7 +736,5 @@ interface PreRenderedSub {
 	sub: HTMLDivElement;
 
 	/** @type {!Map.<string, number>} */
-	animationDelays: map.Map<string, number>;
+	animationDelays: Map<string, number>;
 }
-
-export = WebRenderer;

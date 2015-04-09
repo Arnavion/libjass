@@ -24,12 +24,10 @@
  * @param {!*} clazz
  * @param {!Array.<*>} mixins
  */
-function mixin(clazz: any, mixins: any[]): void {
+export function mixin(clazz: any, mixins: any[]): void {
 	mixins.forEach((mixin: any) => {
 		Object.getOwnPropertyNames(mixin.prototype).forEach(name => {
 			clazz.prototype[name] = mixin.prototype[name];
 		});
 	});
 }
-
-export = mixin;

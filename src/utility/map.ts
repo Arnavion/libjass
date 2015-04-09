@@ -224,5 +224,14 @@ if (Map === undefined || typeof Map.prototype.forEach !== "function" || (() => {
 		return true;
 	}
 })()) {
-	Map = <any>SimpleMap;
+	Map = SimpleMap;
+}
+
+/**
+ * Sets the Map implementation used by libjass to the provided one.
+ *
+ * @param {function(new:Map, !Array.<!Array.<*>>=)} value
+ */
+export function setImplementation(value: typeof Map): void {
+	Map = value;
 }

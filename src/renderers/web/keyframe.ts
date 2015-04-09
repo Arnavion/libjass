@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import map = require("../../utility/map");
+import { Map } from "../../utility/map";
 
 /**
  * This class represents a single keyframe. It has a list of CSS properties (names and values) associated with a point in time. Multiple keyframes make up an animation.
@@ -26,8 +26,8 @@ import map = require("../../utility/map");
  * @param {number} time
  * @param {!Map.<string, string>} properties
  */
-class Keyframe {
-	constructor(private _time: number, private _properties: map.Map<string, string>) { }
+export class Keyframe {
+	constructor(private _time: number, private _properties: Map<string, string>) { }
 
 	/**
 	 * @type {number}
@@ -39,9 +39,7 @@ class Keyframe {
 	/**
 	 * @type {!Map.<string, string>}
 	 */
-	get properties(): map.Map<string, string> {
+	get properties(): Map<string, string> {
 		return this._properties;
 	}
 }
-
-export = Keyframe;

@@ -20,29 +20,13 @@
 
 var fs = require("fs");
 var path = require("path");
-var vm = require("vm");
 
+var ts = require("typescript");
 var Vinyl = require("vinyl");
 
 var Transform = require("./helpers.js").Transform;
 
 var typeScriptModulePath = path.resolve("./node_modules/typescript/bin");
-var typeScriptJsPath = path.join(typeScriptModulePath, "typescriptServices.js");
-
-var ts = {};
-vm.runInNewContext(fs.readFileSync(typeScriptJsPath, { encoding: "utf8" }).replace(
-	"function writeCommentRange(",
-	"ts.writeCommentRange = function ("
-).replace(/writeCommentRange(?=[();])/g, "ts.writeCommentRange"), {
-	module: Object.defineProperty(Object.create(null), "exports", {
-		get: function () { return ts; },
-		set: function (value) { ts = value; },
-	}),
-	require: require,
-	process: process,
-	__filename: typeScriptJsPath,
-	__dirname: typeScriptModulePath
-});
 
 var __extends = function (d, b) {
 	for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -54,131 +38,123 @@ var __extends = function (d, b) {
 };
 
 var CompilerHost = function () {
-	function CompilerHost() {
-		this._outputCodePath = null;
-		this._outputSourceMapPath = null;
-		this._outputStream = null;
-		this._outputPathsRelativeTo = null;
-	}
+	var _outputCodePath = null;
+	var _outputSourceMapPath = null;
+	var _outputStream = null;
+	var _outputPathsRelativeTo = null;
 
-	CompilerHost.prototype.setOutputStream = function (outputStream) {
-		this._outputStream = outputStream;
-	};
+	return {
+		setOutputStream: function (outputStream) {
+			_outputStream = outputStream;
+		},
 
-	CompilerHost.prototype.setOutputPathsRelativeTo = function (path) {
-		this._outputPathsRelativeTo = path;
-	};
+		setOutputPathsRelativeTo: function (path) {
+			_outputPathsRelativeTo = path;
+		},
 
-	// ts.CompilerHost members
+		// ts.CompilerHost members
 
-	CompilerHost.prototype.getSourceFile = function (filename, languageVersion, onError) {
-		var text;
-		try {
-			text = fs.readFileSync(filename, { encoding: "utf8" });
+		getSourceFile: function (fileName, languageVersion, onError) {
+			var text;
+			try {
+				text = fs.readFileSync(fileName, { encoding: "utf8" });
 
-			if (path.basename(filename) === "lib.dom.d.ts") {
-				var startOfES6Extensions = text.indexOf("/// IE11 ECMAScript Extensions");
-				var endOfES6Extensions = text.indexOf("/// ECMAScript Internationalization API", startOfES6Extensions);
-				text = text.substring(0, startOfES6Extensions) + text.substring(endOfES6Extensions);
+				if (path.basename(fileName) === "lib.dom.d.ts") {
+					var startOfES6Extensions = text.indexOf("/// IE11 ECMAScript Extensions");
+					var endOfES6Extensions = text.indexOf("/// ECMAScript Internationalization API", startOfES6Extensions);
+					text = text.substring(0, startOfES6Extensions) + text.substring(endOfES6Extensions);
+				}
 			}
-		}
-		catch (ex) {
-			if (onError) {
-				onError(ex.message);
+			catch (ex) {
+				if (onError) {
+					onError(ex.message);
+				}
 			}
+
+			return (text !== undefined) ? ts.createSourceFile(fileName, text, ts.ScriptTarget.ES5) : undefined;
+		},
+
+		getDefaultLibFileName: function () { return path.join(typeScriptModulePath, "lib.dom.d.ts"); },
+
+		writeFile: function (fileName, data, writeByteOrderMark, onError) {
+			_outputStream.push(new Vinyl({
+				base: _outputPathsRelativeTo,
+				path: fileName,
+				contents: new Buffer(data)
+			}));
+		},
+
+		getCurrentDirectory: function () { return path.resolve("."); },
+
+		getCanonicalFileName: function (fileName) { return ts.normalizeSlashes(path.resolve(fileName)); },
+
+		useCaseSensitiveFileNames: function () { return true; },
+
+		getNewLine: function () { return "\n"; },
+	};
+};
+
+var WatchCompilerHost = function (onChangeCallback) {
+	var compilerHost = CompilerHost();
+
+	var _onChangeCallback = onChangeCallback;
+
+	var _sourceFiles = Object.create(null);
+
+	var _filesChangedSinceLast = [];
+
+	var _super_getSourceFile = compilerHost.getSourceFile;
+	compilerHost.getSourceFile = function (fileName, languageVersion, onError) {
+		if (fileName in _sourceFiles) {
+			return _sourceFiles[fileName];
 		}
 
-		return (text !== undefined) ? ts.createSourceFile(filename, text, ts.ScriptTarget.ES5) : undefined;
-	};
-
-	CompilerHost.prototype.getDefaultLibFilename = function () { return path.join(typeScriptModulePath, "lib.dom.d.ts"); };
-
-	CompilerHost.prototype.writeFile = function (filename, data, writeByteOrderMark, onError) {
-		this._outputStream.push(new Vinyl({
-			base: this._outputPathsRelativeTo,
-			path: filename,
-			contents: new Buffer(data)
-		}));
-	};
-
-	CompilerHost.prototype.getCurrentDirectory = function () { return path.resolve("."); };
-
-	CompilerHost.prototype.getCanonicalFileName = function (filename) { return ts.normalizeSlashes(path.resolve(filename)); };
-
-	CompilerHost.prototype.useCaseSensitiveFileNames = function () { return true; };
-
-	CompilerHost.prototype.getNewLine = function () { return "\n"; };
-
-	return CompilerHost;
-}();
-
-var WatchCompilerHost = function (_super) {
-	__extends(WatchCompilerHost, _super);
-	function WatchCompilerHost(onChangeCallback) {
-		_super.call(this);
-
-		this._onChangeCallback = onChangeCallback;
-
-		this._sourceFiles = Object.create(null);
-
-		this._filesChangedSinceLast = [];
-	}
-
-	WatchCompilerHost.prototype.getSourceFile = function (filename, languageVersion, onError) {
-		if (filename in this._sourceFiles) {
-			return this._sourceFiles[filename];
-		}
-
-		var result = _super.prototype.getSourceFile.call(this, filename, languageVersion, onError);
+		var result = _super_getSourceFile(fileName, languageVersion, onError);
 		if (result !== undefined) {
-			this._sourceFiles[filename] = result;
+			_sourceFiles[fileName] = result;
 		}
 
-		this._watchFile(filename);
+		compilerHost._watchFile(fileName);
 
 		return result;
 	};
 
-	WatchCompilerHost.prototype._watchFile = function (filename) {
-		var _this = this;
-
+	compilerHost._watchFile = function (fileName) {
 		function watchFileCallback(currentFile, previousFile) {
 			if (currentFile.mtime >= previousFile.mtime) {
-				_this._fileChangedCallback(filename);
+				compilerHost._fileChangedCallback(fileName);
 			}
 			else {
-				fs.unwatchFile(filename, watchFileCallback);
+				fs.unwatchFile(fileName, watchFileCallback);
 
-				_this._fileChangedCallback(filename);
+				compilerHost._fileChangedCallback(fileName);
 			}
 		}
 
-		fs.watchFile(filename, { interval: 500 }, watchFileCallback);
+		fs.watchFile(fileName, { interval: 500 }, watchFileCallback);
 	}
 
-	WatchCompilerHost.prototype._fileChangedCallback = function (filename) {
-		var _this = this;
+	compilerHost._fileChangedCallback = function (fileName) {
+		delete _sourceFiles[fileName];
 
-		delete this._sourceFiles[filename];
-
-		if (this._filesChangedSinceLast.length === 0) {
+		if (_filesChangedSinceLast.length === 0) {
 			setTimeout(function () {
-				_this._filesChangedSinceLast = [];
+				_filesChangedSinceLast = [];
 
-				_this._onChangeCallback();
+				_onChangeCallback();
 			}, 100);
 		}
 
-		this._filesChangedSinceLast.push(filename);
+		_filesChangedSinceLast.push(fileName);
 	}
 
-	return WatchCompilerHost;
-}(CompilerHost);
+	return compilerHost;
+};
 
 var Compiler = function () {
 	function Compiler(host) {
 		if (host === undefined) {
-			host = new CompilerHost();
+			host = CompilerHost();
 		}
 
 		var _this = this;
@@ -187,7 +163,6 @@ var Compiler = function () {
 
 		this._projectRoot = null;
 		this._program = null;
-		this._checker = null;
 	}
 
 	Compiler.prototype.compile = function (projectConfigFile) {
@@ -201,50 +176,59 @@ var Compiler = function () {
 
 		this._host.setOutputPathsRelativeTo(this._projectRoot);
 
-		this._program = ts.createProgram(projectConfig.filenames, projectConfig.options, this._host);
+		this._program = ts.createProgram(projectConfig.fileNames, projectConfig.options, this._host);
 
-		var errors = this._program.getDiagnostics();
-		var error = this._reportErrors(errors);
-		if (error) {
-			throw new Error("There were one or more errors.");
+		var syntacticDiagnostics = this._program.getSyntacticDiagnostics();
+		if (syntacticDiagnostics.length > 0) {
+			this._reportDiagnostics(syntacticDiagnostics);
+			throw new Error("There were one or more syntactic diagnostics.");
 		}
 
-		this._checker = this._program.getTypeChecker(true);
+		var globalDiagnostics = this._program.getGlobalDiagnostics();
+		if (globalDiagnostics.length > 0) {
+			this._reportDiagnostics(globalDiagnostics);
+			throw new Error("There were one or more global diagnostics.");
+		}
 
-		var errors = this._checker.getDiagnostics();
-		if (this._reportErrors(errors)) {
-			throw new Error("There were one or more errors.");
+		var semanticDiagnostics = this._program.getSemanticDiagnostics();
+		if (semanticDiagnostics.length > 0) {
+			this._reportDiagnostics(semanticDiagnostics);
+			throw new Error("There were one or more semantic diagnostics.");
 		}
 	};
 
 	Compiler.prototype.writeFiles = function (outputStream) {
 		this._host.setOutputStream(outputStream);
 
-		var emitErrors = this._checker.emitFiles().diagnostics;
-		if (this._reportErrors(emitErrors)) {
-			throw new Error("There were one or more errors.");
+		var emitDiagnostics = this._program.emit().diagnostics;
+		if (emitDiagnostics.length > 0) {
+			this._reportDiagnostics(emitDiagnostics);
+			throw new Error("There were one or more emit diagnostics.");
 		}
 	};
 
 	Object.defineProperties(Compiler.prototype, {
 		projectRoot: { get: function () { return this._projectRoot; } },
-		typeChecker: { get: function () { return this._checker; } },
+		typeChecker: { get: function () { return this._program.getTypeChecker(); } },
 		sourceFiles: { get: function () { return this._program.getSourceFiles(); } },
 	});
 
-	Compiler.prototype._reportErrors = function (errors) {
-		errors.forEach(function (error) {
-			var message = error.messageText;
+	Compiler.prototype._reportDiagnostics = function (diagnostics) {
+		diagnostics.forEach(function (diagnostic) {
+			var message = "";
 
-			if (error.file) {
-				var position = error.file.getLineAndCharacterFromPosition(error.start);
-				message = error.file.filename + "(" + position.line + "," + position.character + "): " + message;
+			if (diagnostic.file) {
+				var location = ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start);
+				message = diagnostic.file.fileName + "(" + (location.line + 1) + "," + location.character + "): ";
 			}
+
+			message +=
+				ts.DiagnosticCategory[diagnostic.category].toLowerCase() +
+				" TS" + diagnostic.code + ": " +
+				ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
 
 			console.error(message);
 		});
-
-		return errors.some(function (error) { return error.category === ts.DiagnosticCategory.Error; });
 	};
 
 	return Compiler;
@@ -256,26 +240,16 @@ exports.gulp = function (root, rootNamespaceName) {
 	var compiler = new Compiler();
 
 	return Transform(function (file) {
-		try {
-			console.log("Compiling " + file.path + "...");
+		console.log("Compiling " + file.path + "...");
 
-			compiler.compile(file);
+		compiler.compile(file);
 
-			var walkResult = walk(compiler, root, rootNamespaceName);
-			addJSDocComments(walkResult.modules);
+		var walkResult = walk(compiler, root, rootNamespaceName);
+		addJSDocComments(walkResult.modules);
 
-			compiler.writeFiles(this);
+		compiler.writeFiles(this);
 
-			console.log("Compile succeeded.");
-		}
-		catch (ex) {
-			if (ex instanceof Error) {
-				throw ex;
-			}
-			else {
-				throw new Error("Internal compiler error: " + ex.stack + "\n");
-			}
-		}
+		console.log("Compile succeeded.");
 	});
 };
 
@@ -299,7 +273,7 @@ exports.watch = function (root, rootNamespaceName) {
 			}));
 		};
 
-		var compilerHost = new WatchCompilerHost(function () {
+		var compilerHost = WatchCompilerHost(function () {
 			try {
 				compile();
 			}
@@ -310,19 +284,9 @@ exports.watch = function (root, rootNamespaceName) {
 
 		var compiler = new Compiler(compilerHost);
 
-		try {
-			compile();
+		compile();
 
-			console.log("Listening for changes...");
-		}
-		catch (ex) {
-			if (ex instanceof Error) {
-				throw ex;
-			}
-			else {
-				throw new Error("Internal compiler error: " + ex.stack + "\n");
-			}
-		}
+		console.log("Listening for changes...");
 	}, function (callback) {
 	});
 };
@@ -403,7 +367,7 @@ var parseConfigFile = function (json, basePath) {
 	options.module = ts.ModuleKind[options.module];
 	options.target = ts.ScriptTarget[options.target];
 
-	var filenames = [];
+	var fileNames = [];
 
 	function walk(directory) {
 		fs.readdirSync(directory).forEach(function (entry) {
@@ -411,7 +375,7 @@ var parseConfigFile = function (json, basePath) {
 			var stat = fs.lstatSync(entryPath);
 			if (stat.isFile()) {
 				if (path.extname(entry) === ".ts") {
-					filenames.push(entryPath);
+					fileNames.push(entryPath);
 				}
 			}
 			else if (stat.isDirectory()) {
@@ -424,7 +388,7 @@ var parseConfigFile = function (json, basePath) {
 
 	return {
 		options: options,
-		filenames: filenames,
+		fileNames: fileNames,
 		errors: [],
 	};
 };
@@ -773,8 +737,8 @@ var Walker = function () {
 				this._visitImportDeclaration(node);
 				break;
 
-			case ts.SyntaxKind.ExportAssignment:
-				this._visitExportAssignment(node);
+			case ts.SyntaxKind.ExportDeclaration:
+				this._visitExportDeclaration(node);
 				break;
 
 			case ts.SyntaxKind.ExpressionStatement:
@@ -789,11 +753,13 @@ var Walker = function () {
 
 	Walker.prototype._walkClassMember = function (node) {
 		switch (node.kind) {
-			case ts.SyntaxKind.Property:
+			case ts.SyntaxKind.PropertySignature:
+			case ts.SyntaxKind.PropertyDeclaration:
 				this._visitProperty(node);
 				break;
 
-			case ts.SyntaxKind.Method:
+			case ts.SyntaxKind.MethodSignature:
+			case ts.SyntaxKind.MethodDeclaration:
 				this._visitMethod(node);
 				break;
 
@@ -818,11 +784,13 @@ var Walker = function () {
 
 	Walker.prototype._walkInterfaceMember = function (node) {
 		switch (node.kind) {
-			case ts.SyntaxKind.Property:
+			case ts.SyntaxKind.PropertySignature:
+			case ts.SyntaxKind.PropertyDeclaration:
 				this._visitProperty(node);
 				break;
 
-			case ts.SyntaxKind.Method:
+			case ts.SyntaxKind.MethodSignature:
+			case ts.SyntaxKind.MethodDeclaration:
 				this._visitMethod(node);
 				break;
 
@@ -929,11 +897,11 @@ var Walker = function () {
 	};
 
 	Walker.prototype._visitVariableStatement = function (node) {
-		if (node.declarations.length > 1) {
+		if (node.declarationList.declarations.length > 1) {
 			return;
 		}
 
-		var declaration = node.declarations[0];
+		var declaration = node.declarationList.declarations[0];
 		if ((declaration.flags & ts.NodeFlags.Ambient) === ts.NodeFlags.Ambient) {
 			return;
 		}
@@ -963,7 +931,11 @@ var Walker = function () {
 			return "Could not find @param annotation for " + parameterName + " on function " + node.name.text;
 		});
 
-		if (jsDoc.returnType === null && node.type.kind !== ts.SyntaxKind.VoidKeyword) {
+		if (node.type === undefined) {
+			this._notifyIncorrectJsDoc("Missing return type annotation for function " + node.name.text);
+			jsDoc.returnType = new ReturnType("", "*");
+		}
+		else if (jsDoc.returnType === null && node.type.kind !== ts.SyntaxKind.VoidKeyword) {
 			this._notifyIncorrectJsDoc("Missing @return annotation for function " + node.name.text);
 			jsDoc.returnType = new ReturnType("", "*");
 		}
@@ -980,13 +952,13 @@ var Walker = function () {
 
 		var _this = this;
 
-		var baseType = ts.getClassBaseTypeNode(node) || null;
+		var baseType = ts.getClassExtendsHeritageClauseElement(node) || null;
 		if (baseType !== null) {
-			baseType = new UnresolvedType(baseType.typeName.text, this._getGenericsOfTypeReferenceNode(baseType));
+			baseType = new UnresolvedType(baseType.expression.text, this._getGenericsOfTypeReferenceNode(baseType));
 		}
 
-		var interfaces = (ts.getClassImplementedTypeNodes(node) || []).map(function (type) {
-			return new UnresolvedType(type.typeName.text, _this._getGenericsOfTypeReferenceNode(type));
+		var interfaces = (ts.getClassImplementsHeritageClauseElements(node) || []).map(function (type) {
+			return new UnresolvedType(type.expression.text, _this._getGenericsOfTypeReferenceNode(type));
 		});
 
 		var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
@@ -1035,7 +1007,7 @@ var Walker = function () {
 		var _this = this;
 
 		var baseTypes = (ts.getInterfaceBaseTypeNodes(node) || []).map(function (type) {
-			return new UnresolvedType(type.typeName.text, _this._getGenericsOfTypeReferenceNode(type));
+			return new UnresolvedType(type.expression.text, _this._getGenericsOfTypeReferenceNode(type));
 		});
 
 		var existingInterfaceType = this._scope.current.members[node.name.text];
@@ -1098,27 +1070,52 @@ var Walker = function () {
 	};
 
 	Walker.prototype._visitImportDeclaration = function (node) {
-		var importReference = null;
+		if (node.importClause === undefined) {
+			// import "foo";
+			return;
+		}
 
-		var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
+		if (node.importClause.namedBindings === undefined) {
+			throw new Error("Default import is not supported.");
+		}
 
-		if (node.moduleReference.expression) {
-			var importPath = this._resolve(node.moduleReference.expression.text);
-			importReference = new Reference(importPath, "default", isPrivate);
+		var _this = this;
+
+		var module = this._resolve(node.moduleSpecifier.text);
+
+		if (node.importClause.namedBindings.name !== undefined) {
+			// import * as foo from "baz";
+			_this._currentModule.members[node.importClause.namedBindings.name.text] = new Reference(module, "*", true);
+		}
+		else if (node.importClause.namedBindings.elements !== undefined) {
+			// import { foo, bar } from "baz";
+			node.importClause.namedBindings.elements.forEach(function (element) {
+				var importedName = element.propertyName && element.propertyName.text || element.name.text;
+				_this._currentModule.members[element.name.text] = new Reference(module, importedName, true);
+			});
 		}
 		else {
-			var moduleImportReference = this._currentModule.members[node.moduleReference.left.text];
-			importReference = new Reference(moduleImportReference.module, node.name.text, isPrivate);
+			throw new Error("Unrecognized import declaration syntax.");
 		}
-
-		this._currentModule.members[node.name.text] = importReference;
 	};
 
-	Walker.prototype._visitExportAssignment = function (node) {
-		var exportedMember = this._currentModule.members[node.exportName.text];
-		delete this._currentModule.members[node.exportName.text];
-		this._currentModule.members.default = exportedMember;
-		exportedMember.isPrivate = false;
+	Walker.prototype._visitExportDeclaration = function (node) {
+		var _this = this;
+
+		if (node.moduleSpecifier !== undefined) {
+			// export { foo } from "bar";
+			var module = this._resolve(node.moduleSpecifier.text);
+			node.exportClause.elements.forEach(function (element) {
+				var importedName = element.propertyName && element.propertyName.text || element.name.text;
+				_this._currentModule.members[element.name.text] = new Reference(module, importedName, false);
+			});
+		}
+		else {
+			// export { foo };
+			node.exportClause.elements.forEach(function (element) {
+				_this._currentModule.members[element.name.text].isPrivate = false;
+			});
+		}
 	};
 
 	Walker.prototype._resolve = function (relativeModuleName) {
@@ -1336,13 +1333,13 @@ var Walker = function () {
 	};
 
 	Walker.prototype._notifyIncorrectJsDoc = function (message) {
-		var filename = path.basename(this._currentSourceFile.filename);
-		if (filename === "lib.core.d.ts" || filename === "lib.dom.d.ts") {
+		var fileName = path.basename(this._currentSourceFile.fileName);
+		if (fileName === "lib.core.d.ts" || fileName === "lib.dom.d.ts") {
 			return;
 		}
 
 		throw new Error(
-			filename + ": " +
+			fileName + ": " +
 			this._scope.current.fullName + ": " +
 			message
 		);
@@ -1412,7 +1409,7 @@ var Walker = function () {
 					return;
 				}
 
-				if (member.name === "default" && _this.modules[member.module].members.default === undefined) {
+				if (member.name === "*") {
 					var newNamespace = _this._scope.enter(new Namespace(memberName));
 
 					var existingNamespace = _this.namespaces[newNamespace.fullName];
@@ -1458,9 +1455,9 @@ var Walker = function () {
 
 var walk = function (compiler, root, rootNamespaceName) {
 	var sourceFiles = compiler.sourceFiles;
-	var rootFilename = ts.normalizeSlashes(path.resolve(root));
+	var rootFileName = ts.normalizeSlashes(path.resolve(root));
 	var rootSourceFile = sourceFiles.filter(function (sourceFile) {
-		return sourceFile.filename === rootFilename;
+		return sourceFile.fileName === rootFileName;
 	})[0];
 
 	var walker = new Walker(compiler.typeChecker);
@@ -1468,14 +1465,14 @@ var walk = function (compiler, root, rootNamespaceName) {
 	// Walk
 	sourceFiles.forEach(function (sourceFile) {
 		if (
-			path.basename(sourceFile.filename) === "lib.core.d.ts" ||
-			path.basename(sourceFile.filename) === "lib.dom.d.ts" ||
-			sourceFile.filename.substr(-"references.d.ts".length) === "references.d.ts"
+			path.basename(sourceFile.fileName) === "lib.core.d.ts" ||
+			path.basename(sourceFile.fileName) === "lib.dom.d.ts" ||
+			sourceFile.fileName.substr(-"references.d.ts".length) === "references.d.ts"
 		) {
 			return;
 		}
 
-		var moduleName = ts.normalizeSlashes(path.relative(compiler.projectRoot, sourceFile.filename));
+		var moduleName = ts.normalizeSlashes(path.relative(compiler.projectRoot, sourceFile.fileName));
 		moduleName = moduleName.substr(0, moduleName.length - ".ts".length);
 		if (moduleName[0] !== ".") {
 			moduleName = "./" + moduleName;
@@ -1512,26 +1509,20 @@ exports.AST = {
 
 var FakeSourceFile = (function () {
 	function FakeSourceFile(originalSourceFile) {
-		this._text = originalSourceFile.text;
-		this._originalLength = this._text.length;
-		this._originalLastLine = originalSourceFile.getLineAndCharacterFromPosition(this._text.length);
-
-		this._lastLine = this._originalLastLine.line;
-
-		this._lineStarts = [[this._text.length, this._lastLine]];
+		this.text = originalSourceFile.text;
+		this.lineMap = ts.getLineStarts(originalSourceFile).slice();
 	}
 
 	FakeSourceFile.prototype.addComment = function (originalComment, newComments) {
-		var pos = this._text.length;
+		var pos = this.text.length;
 
-		this._text += "/**\n";
-		this._lineStarts.push([this._text.length, ++this._lastLine]);
+		this.text += "/**\n";
+		this.lineMap.push(this.text.length);
 
-		var originalCommentLines = this._text.substring(originalComment.pos, originalComment.end).split("\n");
+		var originalCommentLines = this.text.substring(originalComment.pos, originalComment.end).split("\n");
 		originalCommentLines.shift();
-		originalCommentLines = originalCommentLines.map(function (originalCommentLine) {
-			return originalCommentLine.replace(/^\s+/, " ");
-		});
+
+		originalCommentLines = originalCommentLines.map(function (line) { return line.replace(/^\s+/, " "); });
 
 		if (originalCommentLines.length > 1) {
 			originalCommentLines.splice(originalCommentLines.length - 1, 0, " *");
@@ -1542,34 +1533,13 @@ var FakeSourceFile = (function () {
 		}, this);
 
 		originalCommentLines.forEach(function (newCommentLine) {
-			this._text += newCommentLine + "\n";
-			this._lineStarts.push([this._text.length, ++this._lastLine]);
+			this.text += newCommentLine + "\n";
+			this.lineMap.push(this.text.length);
 		}, this);
 
-		this._text += "\n";
-		this._lineStarts.push([this._text.length, ++this._lastLine]);
+		var end = this.text.length;
 
-		var end = this._text.length;
-
-		return { pos: pos, end: end, hasTrailingNewLine: true, sourceFile: this };
-	};
-
-	Object.defineProperty(FakeSourceFile.prototype, "text", {
-		get: function () { return this._text; },
-		enumerable: true,
-		configurable: true
-	});
-
-	FakeSourceFile.prototype.getLineAndCharacterFromPosition = function (position) {
-		for (var i = 0; i < this._lineStarts.length; i++) {
-			if (i === this._lineStarts.length - 1 || position >= this._lineStarts[i][0] && position < this._lineStarts[i + 1][0]) {
-				return { line: this._lineStarts[i][1], character: position - this._lineStarts[i][0] + 1 };
-			}
-		}
-	};
-
-	FakeSourceFile.prototype.getPositionFromLineAndCharacter = function (line, character) {
-		return this._lineStarts[line - this._originalLastLine.line][0] + character - 1;
+		return { pos: pos, end: end, hasTrailingNewLine: originalComment.hasTrailingNewLine, sourceFile: this };
 	};
 
 	return FakeSourceFile;
@@ -1581,21 +1551,18 @@ var oldGetLeadingCommentRangesOfNode = ts.getLeadingCommentRangesOfNode.bind(ts)
 ts.getLeadingCommentRangesOfNode = function (node, sourceFileOfNode) {
 	sourceFileOfNode = sourceFileOfNode || ts.getSourceFileOfNode(node);
 
-	if (node["gulp-typescript-new-comment"] !== undefined) {
-		var originalComments = oldGetLeadingCommentRangesOfNode(node, sourceFileOfNode);
-		if (originalComments !== undefined) {
-			var fakeSourceFile = fakeSourceFiles[sourceFileOfNode.filename];
-			if (fakeSourceFile === undefined) {
-				fakeSourceFile = fakeSourceFiles[sourceFileOfNode.filename] = new FakeSourceFile(sourceFileOfNode);
-			}
+	var originalComments = oldGetLeadingCommentRangesOfNode(node, sourceFileOfNode);
 
-			originalComments[originalComments.length - 1] = fakeSourceFile.addComment(originalComments[originalComments.length - 1], node["gulp-typescript-new-comment"]);
-
-			return originalComments;
+	if (originalComments !== undefined && node["gulp-typescript-new-comment"] !== undefined) {
+		var fakeSourceFile = fakeSourceFiles[sourceFileOfNode.fileName];
+		if (fakeSourceFile === undefined) {
+			fakeSourceFile = fakeSourceFiles[sourceFileOfNode.fileName] = new FakeSourceFile(sourceFileOfNode);
 		}
+
+		originalComments[originalComments.length - 1] = fakeSourceFile.addComment(originalComments[originalComments.length - 1], node["gulp-typescript-new-comment"]);
 	}
 
-	return oldGetLeadingCommentRangesOfNode(node, sourceFileOfNode);
+	return originalComments;
 };
 
 var oldWriteCommentRange = ts.writeCommentRange.bind(ts);

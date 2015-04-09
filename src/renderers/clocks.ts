@@ -18,10 +18,10 @@
  * limitations under the License.
  */
 
-import globalSettings = require("../settings");
+import { debugMode } from "../settings";
 
-import mixin = require("../utility/mixin");
-import map = require("../utility/map");
+import { mixin } from "../utility/mixin";
+import { Map } from "../utility/map";
 
 /**
  * A mixin class that represents an event source.
@@ -32,7 +32,7 @@ export class EventSource<T> {
 	 *
 	 * @type {!Map.<T, !Array.<Function>>}
 	 */
-	_eventListeners: map.Map<T, Function[]>;
+	_eventListeners: Map<T, Function[]>;
 
 	/**
 	 * Add a listener for the given event.
@@ -271,7 +271,7 @@ export class ManualClock implements Clock {
 	/**
 	 * @type {!Map.<T, !Array.<Function>>}
 	 */
-	_eventListeners: map.Map<ClockEvent, Function[]> = new map.Map<ClockEvent, Function[]>();
+	_eventListeners: Map<ClockEvent, Function[]> = new Map<ClockEvent, Function[]>();
 
 	/**
 	 * @type {function(number, !Function)}
@@ -351,7 +351,7 @@ export class VideoClock implements Clock {
 		}
 
 		if (this._videoState !== VideoState.Paused) {
-			if (globalSettings.debugMode) {
+			if (debugMode) {
 				console.warn("VideoClock.enable: Abnormal state detected. VideoClock._videoState should have been VideoState.Paused");
 			}
 		}
@@ -440,7 +440,7 @@ export class VideoClock implements Clock {
 		this._dispatchEvent(ClockEvent.Pause, []);
 
 		if (this._nextAnimationFrameRequestId === null) {
-			if (globalSettings.debugMode) {
+			if (debugMode) {
 				console.warn("VideoClock._onVideoPause: Abnormal state detected. VideoClock._nextAnimationFrameRequestId should not have been null");
 			}
 
@@ -529,7 +529,7 @@ export class VideoClock implements Clock {
 	/**
 	 * @type {!Map.<T, !Array.<Function>>}
 	 */
-	_eventListeners: map.Map<ClockEvent, Function[]> = new map.Map<ClockEvent, Function[]>();
+	_eventListeners: Map<ClockEvent, Function[]> = new Map<ClockEvent, Function[]>();
 
 	/**
 	 * @type {function(number, !Function)}

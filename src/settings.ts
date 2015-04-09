@@ -21,17 +21,31 @@
 /**
  * Debug mode. When true, libjass logs some debug messages.
  *
- * Also available as libjass.debugMode for backward-compatibility.
- *
  * @type {boolean}
  */
 export var debugMode: boolean = false;
 
 /**
- * Verbose debug mode. When true, libjass logs some more debug messages. This setting is independent of {@link libjass.settings.debugMode}
- *
- * Also available as libjass.verboseMode for backward-compatibility.
+ * Verbose debug mode. When true, libjass logs some more debug messages. This setting is independent of {@link libjass.debugMode}
  *
  * @type {boolean}
  */
 export var verboseMode: boolean = false;
+
+/**
+ * Sets the debug mode.
+ *
+ * @param {boolean} value
+ */
+export function setDebugMode(value: boolean): void {
+	debugMode = value;
+}
+
+/**
+ * Sets the verbose debug mode.
+ *
+ * @param {boolean} value
+ */
+export function setVerboseMode(value: boolean): void {
+	verboseMode = value;
+}
