@@ -96,15 +96,15 @@ You can also join the IRC channel in the links section below and ask any questio
 ### Supported features
 
 * Styles: Italic, Bold, Underline, StrikeOut, FontName, FontSize, ScaleX, ScaleY, Spacing, PrimaryColor, OutlineColor, BackColor, Outline, Shadow, Alignment, MarginL, MarginR, MarginV
-* Tags: \i, \b, \u, \s, \bord, \xbord, \ybord, \shad, \xshad, \yshad, \be, \blur, \fn, \fs, \fscx, \fscy, \fsp, \frx, \fry, \frz, \fr, \fax, \fay, \c, \1c, \3c, \4c, \alpha, \1a, \3a, \4a, \an, \a, \k, \r, \pos, \move, \fad, \fade, \p
+* Tags: \i, \b, \u, \s, \bord, \xbord, \ybord, \shad, \xshad, \yshad, \be, \blur, \fn, \fs, \fscx, \fscy, \fsp, \frx, \fry, \frz, \fr, \fax, \fay, \c, \1c, \3c, \4c, \alpha, \1a, \3a, \4a, \an, \a, \k, \q, \r, \pos, \move, \fad, \fade, \p
 * Custom fonts, using CSS web fonts.
 
 
 ### Known issues
 
-* Unsupported tags: \fe, \2c, \2a, \K, \kf, \ko, \q, \org, \t, \clip, \iclip
+* Unsupported tags: \fe, \2c, \2a, \K, \kf, \ko, \org, \t, \clip, \iclip
 * \an4, \an5, \an6 aren't positioned correctly.
-* All lines are rendered as [wrapping style 1 (end-of-line wrapping)](http://docs.aegisub.org/3.0/ASS_Tags/#wrapstyle)
+* Smart line wrapping is not supported. Such lines are rendered as [wrapping style 1 (end-of-line wrapping).](http://docs.aegisub.org/3.0/ASS_Tags/#wrapstyle)
 * Lines with multiple rotations aren't rotated the same as VSFilter or libass. See [#14](https://github.com/Arnavion/libjass/issues/14)
 
 
