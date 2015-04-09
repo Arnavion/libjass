@@ -36,7 +36,7 @@ export { webworker };
 import * as parts from "./parts/index";
 export { parts };
 
-import * as parser from "./parser";
+import * as parser from "./parser/index";
 export { parser };
 
 import * as renderers from "./renderers/index";

@@ -79,7 +79,7 @@ true
 8
 ```
 
-[libjass.parser.parse](http://arnavion.github.io/libjass/api.xhtml#libjass.parser.parse) parses the first parameter using the second parameter as the rule name. The rule names are derived from the methods on the [ParserRun class](http://arnavion.github.io/libjass/api.xhtml#libjass.parser.ParserRun). For example, [dialogueParts](http://arnavion.github.io/libjass/api.xhtml#libjass.parser.ParserRun.parse_dialogueParts) can be used to get an array of [libjass.parts](http://arnavion.github.io/libjass/api.xhtml#libjass.parts) objects that represent the parts of an ASS dialogue line.
+[libjass.parser.parse](http://arnavion.github.io/libjass/api.xhtml#libjass.parser.parse) parses the first parameter using the second parameter as the rule name. The rule names are derived from the methods on the [ParserRun class](http://arnavion.github.io/libjass/api.xhtml#./parser/parse.ParserRun). For example, [dialogueParts](http://arnavion.github.io/libjass/api.xhtml#./parse/parse.ParserRun.parse_dialogueParts) can be used to get an array of [libjass.parts](http://arnavion.github.io/libjass/api.xhtml#libjass.parts) objects that represent the parts of an ASS dialogue line.
 
 Entire scripts can be parsed via [ASS.fromString()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromString)
 

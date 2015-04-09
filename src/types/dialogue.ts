@@ -23,7 +23,7 @@ import { Style } from "./style";
 
 import { valueOrDefault } from "./misc";
 
-import { parse } from "../parser";
+import { parse } from "../parser/parse";
 
 import * as parts from "../parts/index";
 

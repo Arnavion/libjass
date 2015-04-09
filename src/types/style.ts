@@ -20,7 +20,7 @@
 
 import { valueOrDefault, BorderStyle } from "./misc";
 
-import { parse } from "../parser";
+import { parse } from "../parser/parse";
 
 import { Color } from "../parts/index";
 

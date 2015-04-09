@@ -26,7 +26,8 @@ import { Format } from "./misc";
 
 import { verboseMode } from "../settings";
 
-import * as parser from "../parser";
+import * as parser from "../parser/index";
+import { parseLineIntoTypedTemplate } from "../parser/misc";
 
 import { Map } from "../utility/map";
 import { Promise } from "../utility/promise";
@@ -118,7 +119,7 @@ export class ASS {
 	 * @param {string} line The line from the script that contains the new style.
 	 */
 	addStyle(line: string): void {
-		var styleLine = parser.parseLineIntoTypedTemplate(line, this._stylesFormatSpecifier);
+		var styleLine = parseLineIntoTypedTemplate(line, this._stylesFormatSpecifier);
 		if (styleLine === null || styleLine.type !== "Style") {
 			return;
 		}
@@ -142,7 +143,7 @@ export class ASS {
 	 * @param {string} line The line from the script that contains the new event.
 	 */
 	addEvent(line: string): void {
-		var dialogueLine = parser.parseLineIntoTypedTemplate(line, this._dialoguesFormatSpecifier);
+		var dialogueLine = parseLineIntoTypedTemplate(line, this._dialoguesFormatSpecifier);
 		if (dialogueLine === null || dialogueLine.type !== "Dialogue") {
 			return;
 		}
