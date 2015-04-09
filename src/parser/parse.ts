@@ -2017,7 +2017,7 @@ class ParserRun {
 }
 
 /**
- * Constructs a simple tag parser function and sets it on the prototype of the {@link ./parse/parse.ParserRun} class.
+ * Constructs a simple tag parser function and sets it on the prototype of the {@link ./parser/parse.ParserRun} class.
  *
  * @param {string} tagName The name of the tag to generate the parser function for
  * @param {function(new: !libjass.parts.Part, *)} tagConstructor The type of tag to be returned by the generated parser function
