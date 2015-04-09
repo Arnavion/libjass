@@ -509,14 +509,18 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		});
 
 		switch (wrappingStyle) {
-			case WrappingStyle.SmartWrappingWithWiderTopLine:
-			case WrappingStyle.SmartWrappingWithWiderBottomLine:
+			case WrappingStyle.EndOfLineWrapping:
 				sub.style.whiteSpace = "pre-wrap";
 				break;
 
-			case WrappingStyle.EndOfLineWrapping:
 			case WrappingStyle.NoLineWrapping:
 				sub.style.whiteSpace = "pre";
+				break;
+
+			case WrappingStyle.SmartWrappingWithWiderTopLine:
+			case WrappingStyle.SmartWrappingWithWiderBottomLine:
+				/* Not supported. Treat the same as EndOfLineWrapping */
+				sub.style.whiteSpace = "pre-wrap";
 				break;
 		}
 
