@@ -32,6 +32,10 @@ class SimpleSet<T> {
 	constructor(iterable?: T[]) {
 		this.clear();
 
+		if (iterable === undefined) {
+			return;
+		}
+
 		if (!Array.isArray(iterable)) {
 			throw new Error("Non-array iterables are not supported by the SimpleSet constructor.");
 		}

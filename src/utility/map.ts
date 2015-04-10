@@ -33,6 +33,10 @@ class SimpleMap<K, V> {
 	constructor(iterable?: [K, V][]) {
 		this.clear();
 
+		if (iterable === undefined) {
+			return;
+		}
+
 		if (!Array.isArray(iterable)) {
 			throw new Error("Non-array iterables are not supported by the SimpleMap constructor.");
 		}
