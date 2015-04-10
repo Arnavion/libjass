@@ -167,9 +167,20 @@ module.exports = {
 				root.figure_out_scope({ screw_ie8: true });
 
 
+				// 9. Remove 'module' parameter from all module bodies and caller in __webpack_require__.
+				var factoryExpression = root.body[0].body.args[1].body[1].value;
+				factoryExpression.args[0].elements.forEach(function (moduleFactory) {
+					moduleFactory.argnames.shift();
+				});
+				factoryExpression.expression.body[1].body[2].body.expression = factoryExpression.expression.body[1].body[2].body.expression.expression;
+				factoryExpression.expression.body[1].body[2].body.args.splice(0, 2);
+
+				root.figure_out_scope({ screw_ie8: true });
+
+
 				// Repeat because removing some declarations may make others unreferenced
 				for (;;) {
-					// 9. Unreferenced variable and function declarations, and unreferenced terminal function arguments
+					// 10. Unreferenced variable and function declarations, and unreferenced terminal function arguments
 					root.walk(new UglifyJS.TreeWalker(function (node, descend) {
 						if (node instanceof UglifyJS.AST_SymbolDeclaration && node.unreferenced()) {
 							if (node instanceof UglifyJS.AST_SymbolFunarg) {
