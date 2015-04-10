@@ -168,36 +168,32 @@ export class Dialogue {
 
 		this._parts.forEach((part, index) => {
 			if (part instanceof parts.Alignment) {
-				this._alignment = (<parts.Alignment>part).value;
+				this._alignment = part.value;
 			}
 			else if (part instanceof parts.Move) {
-				var movePart = <parts.Move>part;
-
-				if (movePart.t1 === null || movePart.t2 === null) {
+				if (part.t1 === null || part.t2 === null) {
 					this._parts[index] =
 						new parts.Move(
-							movePart.x1, movePart.y1, movePart.x2, movePart.y2,
+							part.x1, part.y1, part.x2, part.y2,
 							0, this._end - this._start
 						);
 				}
 			}
 			else if (part instanceof parts.Transform) {
-				var transformPart = <parts.Transform>part;
-
-				if (transformPart.start === null || transformPart.end === null || transformPart.accel === null) {
+				if (part.start === null || part.end === null || part.accel === null) {
 					this._parts[index] =
 						new parts.Transform(
-							(transformPart.start === null) ? 0 : transformPart.start,
-							(transformPart.end === null) ? (this._end - this._start) : transformPart.end,
-							(transformPart.accel === null) ? 1 : transformPart.accel,
-							transformPart.tags
+							(part.start === null) ? 0 : part.start,
+							(part.end === null) ? (this._end - this._start) : part.end,
+							(part.accel === null) ? 1 : part.accel,
+							part.tags
 						);
 				}
 			}
 		});
 
 		if (debugMode) {
-			var possiblyIncorrectParses = this._parts.filter(part => part instanceof parts.Comment && (<parts.Comment>part).value.indexOf("\\") !== -1);
+			var possiblyIncorrectParses = this._parts.filter(part => part instanceof parts.Comment && part.value.indexOf("\\") !== -1);
 			if (possiblyIncorrectParses.length > 0) {
 				console.warn(
 `Possible incorrect parse:

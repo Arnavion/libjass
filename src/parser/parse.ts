@@ -107,11 +107,11 @@ class ParserRun {
 
 		current.value.forEach((part: parts.Part, i: number) => {
 			if (part instanceof parts.DrawingMode) {
-				inDrawingMode = (<parts.DrawingMode>part).scale !== 0;
+				inDrawingMode = part.scale !== 0;
 			}
 
 			else if (part instanceof parts.Text && inDrawingMode) {
-				current.value[i] = new parts.DrawingInstructions(<parts.drawing.Instruction[]>parse((<parts.Text>part).value, "drawingInstructions"));
+				current.value[i] = new parts.DrawingInstructions(<parts.drawing.Instruction[]>parse(part.value, "drawingInstructions"));
 			}
 		});
 
