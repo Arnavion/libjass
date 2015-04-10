@@ -32,8 +32,12 @@ class SimpleSet<T> {
 	constructor(iterable?: T[]) {
 		this.clear();
 
-		if (Array.isArray(iterable)) {
-			(<T[]>iterable).forEach(value => this.add(value));
+		if (!Array.isArray(iterable)) {
+			throw new Error("Non-array iterables are not supported by the SimpleSet constructor.");
+		}
+
+		for (let value of iterable) {
+			this.add(value);
 		}
 	}
 

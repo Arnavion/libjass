@@ -33,8 +33,12 @@ class SimpleMap<K, V> {
 	constructor(iterable?: [K, V][]) {
 		this.clear();
 
-		if (Array.isArray(iterable)) {
-			(<[K, V][]>iterable).forEach(element => this.set(element[0], element[1]));
+		if (!Array.isArray(iterable)) {
+			throw new Error("Non-array iterables are not supported by the SimpleMap constructor.");
+		}
+
+		for (let element of iterable) {
+			this.set(element[0], element[1]);
 		}
 	}
 
