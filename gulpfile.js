@@ -29,13 +29,11 @@ var Transform = helpers.Transform;
 (function () {
 	var _TypeScript = null;
 	var _UglifyJS = null;
-	var _WebPack = null;
 	var _npm = null;
 
 	Object.defineProperties(global, {
 		TypeScript: { get: function () { return _TypeScript || (_TypeScript = require("./gulplib/typescript.js")); } },
 		UglifyJS: { get: function () { return _UglifyJS || (_UglifyJS = require("./gulplib/uglify.js")); } },
-		WebPack: { get: function () { return _WebPack || (_WebPack = require("./gulplib/webpack.js")); } },
 		npm: { get: function () { return _npm || (_npm = require("npm")); } },
 	});
 })();
@@ -49,8 +47,7 @@ gulp.task("libjass.js", function () {
 
 	return gulp.src("./src/tsconfig.json")
 		.pipe(TypeScript.gulp("./src/index.ts", "libjass"))
-		.pipe(WebPack.build("./src/index.js", "libjass", "./node_modules"))
-		.pipe(UglifyJS.fixup(["BorderStyle", "Format", "WrappingStyle"]))
+		.pipe(UglifyJS.gulp("./src/index", "libjass", ["BorderStyle", "Format", "WrappingStyle"]))
 		.pipe(gulp.dest("./lib"));
 });
 
@@ -106,8 +103,7 @@ gulp.task("watch", ["clean"], function (callback) {
 
 		gulp.src("./src/tsconfig.json")
 			.pipe(TypeScript.watch("./src/index.ts", "libjass"))
-			.pipe(WebPack.watch("./src/index.js", "libjass", "./node_modules"))
-			.pipe(UglifyJS.fixup(["BorderStyle", "Format", "WrappingStyle"]))
+			.pipe(UglifyJS.watch("./src/index", "libjass", ["BorderStyle", "Format", "WrappingStyle"]))
 			.pipe(gulp.dest("./lib"))
 			.pipe(Transform(function (file) {
 				if (path.basename(file.path) === "libjass.js") {

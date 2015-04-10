@@ -24,13 +24,10 @@
 	"devDependencies": {
 		"gulp": "3.x",
 		"intern": "2.x",
-		"memory-fs": "latest",
 		"npm": "2.x",
-		"source-map-loader": "https://github.com/Arnavion/source-map-loader/archive/75faa177461df3a611840b82a5e5ab79312985a0.tar.gz",
 		"typescript": "1.5.0-alpha",
 		"uglify-js": "2.x >=2.4.16",
-		"vinyl": "latest",
-		"webpack": "1.x"
+		"vinyl": "latest"
 	},
 	"private": "true"
 }
