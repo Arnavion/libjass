@@ -116,22 +116,13 @@ export class RendererSettings {
 			object = {};
 		}
 
-		return RendererSettings._from(object.fontMap, object.preRenderTime, object.preciseOutlines, object.enableSvg);
-	}
-
-	/**
-	 * @param {Map.<string, !Array.<string>>=null} fontMap
-	 * @param {number=5} preRenderTime
-	 * @param {boolean=false} preciseOutlines
-	 * @param {boolean=true} enableSvg
-	 * @return {!libjass.renderers.RendererSettings}
-	 */
-	private static _from(fontMap: Map<string, string[]> = null, preRenderTime: number = 5, preciseOutlines: boolean = false, enableSvg: boolean = true): RendererSettings {
+		var { fontMap = null, preRenderTime = 5, preciseOutlines = false, enableSvg = true } = <RendererSettings>object;
 		var result = new RendererSettings();
 		result.fontMap = fontMap;
 		result.preRenderTime = preRenderTime;
 		result.preciseOutlines = preciseOutlines;
 		result.enableSvg = enableSvg;
+
 		return result;
 	}
 

@@ -168,10 +168,6 @@ export class ASS {
 	 * @return {!Promise.<!libjass.ASS>}
 	 */
 	static fromString(raw: string, type: Format = Format.ASS): Promise<ASS> {
-		if ((<{ [index: string]: any }><any>Format)[Format[type]] !== type) {
-			throw new Error(`Illegal value of type: ${ type }`);
-		}
-
 		return ASS.fromStream(new parser.StringStream(raw), type);
 	}
 
@@ -201,10 +197,6 @@ export class ASS {
 	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 	 */
 	static fromUrl(url: string, type: Format = Format.ASS): Promise<ASS> {
-		if ((<{ [index: string]: any }><any>Format)[Format[type]] !== type) {
-			throw new Error(`Illegal value of type: ${ type }`);
-		}
-
 		var xhr = new XMLHttpRequest();
 		var result = ASS.fromStream(new parser.XhrStream(xhr), type);
 		xhr.open("GET", url, true);

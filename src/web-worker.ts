@@ -253,19 +253,18 @@ class WorkerChannelImpl implements WorkerChannel {
 					deferred.reject(responseMessage.error);
 				}
 			}
-
-			return;
 		}
+		else {
+			var requestMessage = <WorkerRequestMessage>message;
 
-		var requestMessage = <WorkerRequestMessage>message;
+			var commandCallback = workerCommands.get(requestMessage.command);
+			if (commandCallback === undefined) {
+				this._respond({ requestId: requestMessage.requestId, error: new Error(`Unrecognized command: ${ requestMessage.command }`), result: null });
+				return;
+			}
 
-		var commandCallback = workerCommands.get(requestMessage.command);
-		if (commandCallback === undefined) {
-			this._respond({ requestId: requestMessage.requestId, error: new Error(`Unrecognized command: ${ requestMessage.command }`), result: null });
-			return;
+			commandCallback(requestMessage.parameters, (error: any, result: any) => this._respond({ requestId: requestMessage.requestId, error, result }));
 		}
-
-		commandCallback(requestMessage.parameters, (error: any, result: any) => this._respond({ requestId: requestMessage.requestId, error, result }));
 	}
 
 	/**
@@ -305,7 +304,6 @@ class WorkerChannelImpl implements WorkerChannel {
 
 declare var global: any;
 
-var inWorker = (typeof WorkerGlobalScope !== "undefined" && global instanceof WorkerGlobalScope);
-if (inWorker) {
-	new WorkerChannelImpl(<WorkerGlobalScope><any>global);
+if (typeof WorkerGlobalScope !== "undefined" && global instanceof WorkerGlobalScope) {
+	new WorkerChannelImpl(global);
 }

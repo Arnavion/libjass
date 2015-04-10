@@ -83,8 +83,6 @@ export class AnimationCollection {
 		var start: number = null;
 		var end: number = null;
 
-		var ruleCssText = "";
-
 		for (let keyframe of keyframes) {
 			if (start === null) {
 				start = keyframe.time;
@@ -92,6 +90,8 @@ export class AnimationCollection {
 
 			end = keyframe.time;
 		}
+
+		var ruleCssText = "";
 
 		for (let keyframe of keyframes) {
 			ruleCssText +=
