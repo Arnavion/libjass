@@ -1298,18 +1298,18 @@ import { _registerClassPrototype } from "../web-worker";
 
 declare var exports: any;
 
-Object.keys(exports).forEach(key => {
+for (let key of Object.keys(exports)) {
 	var value: any = exports[key];
 	if (value instanceof Function) {
 		addToString(value, key);
 		_registerClassPrototype(value.prototype);
 	}
-});
+}
 
-Object.keys(drawing).forEach(key => {
+for (let key of Object.keys(drawing)) {
 	var value: any = (<any>drawing)[key];
 	if (value instanceof Function) {
 		addToString(value, `Drawing${ key }`);
 		_registerClassPrototype(value.prototype);
 	}
-});
+}

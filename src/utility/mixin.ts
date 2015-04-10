@@ -25,9 +25,9 @@
  * @param {!Array.<*>} mixins
  */
 export function mixin(clazz: any, mixins: any[]): void {
-	mixins.forEach((mixin: any) => {
-		Object.getOwnPropertyNames(mixin.prototype).forEach(name => {
+	for (let mixin of mixins) {
+		for (let name of Object.getOwnPropertyNames(mixin.prototype)) {
 			clazz.prototype[name] = mixin.prototype[name];
-		});
-	});
+		}
+	}
 }

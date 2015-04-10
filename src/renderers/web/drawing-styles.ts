@@ -64,7 +64,7 @@ export class DrawingStyles {
 		var bboxWidth = 0;
 		var bboxHeight = 0;
 
-		drawingInstructions.instructions.forEach(instruction => {
+		for (let instruction of drawingInstructions.instructions) {
 			if (instruction instanceof parts.drawing.MoveInstruction) {
 				path += ` M ${ instruction.x } ${ instruction.y + this._baselineOffset }`;
 				bboxWidth = Math.max(bboxWidth, instruction.x);
@@ -80,7 +80,7 @@ export class DrawingStyles {
 				bboxWidth = Math.max(bboxWidth, instruction.x1, instruction.x2, instruction.x3);
 				bboxHeight = Math.max(bboxHeight, instruction.y1 + this._baselineOffset, instruction.y2 + this._baselineOffset, instruction.y3 + this._baselineOffset);
 			}
-		});
+		}
 
 		var result =
 `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="${ (bboxWidth * scaleX).toFixed(3) }px" height="${ (bboxHeight * scaleY).toFixed(3) }px">

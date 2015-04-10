@@ -2089,11 +2089,11 @@ makeTagParserFunction("4a", parts.ShadowAlpha, ParserRun.prototype.parse_alpha, 
 makeTagParserFunction("4c", parts.ShadowColor, ParserRun.prototype.parse_color, false);
 
 var rules = new Map<string, (parent: ParseNode) => ParseNode>();
-Object.keys(ParserRun.prototype).forEach(key => {
+for (let key of Object.keys(ParserRun.prototype)) {
 	if (key.indexOf("parse_") === 0 && typeof (<any>ParserRun.prototype)[key] === "function") {
 		rules.set(key.substr("parse_".length), (<any>ParserRun.prototype)[key]);
 	}
-});
+}
 
 /**
  * This class represents a single parse node. It has a start and end position, and an optional value object.

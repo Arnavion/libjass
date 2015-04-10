@@ -290,11 +290,11 @@ class WorkerChannelImpl implements WorkerChannel {
 		return JSON.parse(str, (/* ujs:unreferenced */ key: string, value: any) => {
 			if (value && value._classTag !== undefined) {
 				var hydratedValue = Object.create(classPrototypes.get(value._classTag));
-				Object.keys(value).forEach(key => {
+				for (let key of Object.keys(value)) {
 					if (key !== "_classTag") {
 						hydratedValue[key] = value[key];
 					}
-				});
+				}
 				value = hydratedValue;
 			}
 

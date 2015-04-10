@@ -81,19 +81,16 @@ export class RendererSettings {
 
 		var styleSheet = <CSSStyleSheet>linkStyle.sheet;
 		var rules: CSSFontFaceRule[] = Array.prototype.filter.call(styleSheet.cssRules, (rule: CSSRule) => rule.type === CSSRule.FONT_FACE_RULE);
-		rules.forEach((rule: CSSFontFaceRule) => {
+		for (let rule of rules) {
 			var src = rule.style.getPropertyValue("src");
-			var urls: string[] = [];
-
 			if (!src) {
 				src = rule.cssText.split("\n")
-					.map((line: string) => line.match(/src: ([^;]+);/))
-					.filter((matches: string[]) => matches !== null)
-					.map((matches: string[]) => matches[1])[0];
+					.map(line => line.match(/src: ([^;]+);/))
+					.filter(matches => matches !== null)
+					.map(matches => matches[1])[0];
 			}
 
-			urls = src.split(/,\s*/).map((url: string) => url.match(/^url\((.+)\)$/)[1]);
-
+			var urls = src.split(/,\s*/).map(url => RendererSettings._stripQuotes(url.match(/^url\((.+)\)$/)[1]));
 			if (urls.length > 0) {
 				var name = RendererSettings._stripQuotes(rule.style.getPropertyValue("font-family"));
 				var existingList = fontMap.get(name);
@@ -101,9 +98,9 @@ export class RendererSettings {
 					existingList = [];
 					fontMap.set(name, existingList);
 				}
-				existingList.unshift.apply(existingList, urls.map(RendererSettings._stripQuotes));
+				existingList.unshift.apply(existingList, urls);
 			}
-		});
+		}
 
 		return fontMap;
 	}

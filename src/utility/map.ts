@@ -123,9 +123,7 @@ class SimpleMap<K, V> {
 	 * @param {*} thisArg
 	 */
 	forEach(callbackfn: (value: V, index: K, map: Map<K, V>) => void, thisArg?: any): void {
-		var keysArray = Object.keys(this._keys);
-		for (var i = 0; i < keysArray.length; i++) {
-			var property = keysArray[i];
+		for (let property of Object.keys(this._keys)) {
 			callbackfn.call(thisArg, this._values[property], this._keys[property], this);
 		}
 	}

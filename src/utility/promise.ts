@@ -318,7 +318,9 @@ class SimplePromise<T> {
 				var processing = pending;
 				pending = [];
 
-				processing.forEach(callback => callback());
+				for (let callback of processing) {
+					callback();
+				}
 
 				currentlyPending = false;
 

@@ -109,7 +109,9 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		var urlsToPreload = new Set<string>();
 		if (this.settings.fontMap !== null) {
 			this.settings.fontMap.forEach(srcs => {
-				srcs.forEach(src => urlsToPreload.add(src));
+				for (let src of srcs) {
+					urlsToPreload.add(src);
+				}
 			});
 		}
 
@@ -244,7 +246,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		var karaokeTimesAccumulator = 0;
 
-		dialogue.parts.forEach(part => {
+		for (let part of dialogue.parts) {
 			if (part instanceof parts.Italic) {
 				currentSpanStyles.italic = part.value;
 			}
@@ -487,9 +489,9 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			else if (part instanceof parts.NewLine) {
 				startNewSpan(true);
 			}
-		});
+		}
 
-		dialogue.parts.some(part => {
+		for (let part of dialogue.parts) {
 			if (part instanceof parts.Position || part instanceof parts.Move) {
 				var transformOrigin = WebRenderer._transformOrigins[dialogue.alignment];
 
@@ -502,11 +504,9 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 				sub.style.transform = divTransformStyle;
 				sub.style.transformOrigin = transformOriginString;
 
-				return true;
+				break;
 			}
-
-			return false;
-		});
+		}
 
 		switch (wrappingStyle) {
 			case WrappingStyle.EndOfLineWrapping:

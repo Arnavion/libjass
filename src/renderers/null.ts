@@ -158,9 +158,7 @@ export class NullRenderer {
 			console.log(`NullRenderer._onClockTick: currentTime = ${ currentTime }`);
 		}
 
-		for (var i = 0; i < this._ass.dialogues.length; i++) {
-			var dialogue = this._ass.dialogues[i];
-
+		for (let dialogue of this._ass.dialogues) {
 			if (dialogue.end > currentTime) {
 				if (dialogue.start <= currentTime) {
 					// This dialogue is visible right now. Draw it.

@@ -85,15 +85,15 @@ export class AnimationCollection {
 
 		var ruleCssText = "";
 
-		keyframes.forEach(keyframe => {
+		for (let keyframe of keyframes) {
 			if (start === null) {
 				start = keyframe.time;
 			}
 
 			end = keyframe.time;
-		});
+		}
 
-		keyframes.forEach(keyframe => {
+		for (let keyframe of keyframes) {
 			ruleCssText +=
 `	${ (100 * ((end - start === 0) ? 1 : ((keyframe.time - start) / (end - start)))).toFixed(3) }% {
 `;
@@ -107,7 +107,7 @@ export class AnimationCollection {
 			ruleCssText +=
 `	}
 `;
-		});
+		}
 
 		var animationName = `animation-${ this._id }-${ this._numAnimations++ }`;
 

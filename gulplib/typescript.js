@@ -742,6 +742,7 @@ var Walker = function () {
 				break;
 
 			case ts.SyntaxKind.ExpressionStatement:
+			case ts.SyntaxKind.ForOfStatement:
 			case ts.SyntaxKind.IfStatement:
 				break;
 

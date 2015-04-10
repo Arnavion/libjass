@@ -83,10 +83,10 @@ class SimpleSet<T> {
 	 * @param {*} thisArg
 	 */
 	forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void {
-		Object.keys(this._elements).map((property: string) => {
+		for (let property of Object.keys(this._elements)) {
 			var element = this._elements[property];
 			callbackfn.call(thisArg, element, element, this);
-		});
+		}
 	}
 
 	/**
