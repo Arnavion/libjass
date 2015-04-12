@@ -30,7 +30,7 @@ export { Map } from "./utility/map";
 import * as promise from "./utility/promise";
 export { Promise, DeferredPromise } from "./utility/promise";
 
-import * as webworker from "./web-worker";
+import * as webworker from "./webworker/index";
 export { webworker };
 
 import * as parts from "./parts/index";

@@ -18,19 +18,13 @@
  * limitations under the License.
  */
 
-import { Map } from "./utility/map";
+import { Map } from "../utility/map";
 
-import { Promise, DeferredPromise } from "./utility/promise";
+import { Promise, DeferredPromise } from "../utility/promise";
 
-///<reference path="web-worker-references.d.ts" />
+import { WorkerCommands } from "./commands";
 
-declare var exports: any;
-
-Object.defineProperty(exports, "supported", {
-	value: typeof Worker !== "undefined",
-	configurable: true,
-	enumerable: true
-});
+import { getWorkerCommandHandler, serialize, deserialize } from "./misc";
 
 /**
  * Represents a communication channel between the host and the web worker. An instance of this class is created by calling {@link libjass.webworker.createWorker}
@@ -47,25 +41,6 @@ export interface WorkerChannel {
 }
 
 /**
- * Create a new web worker and returns a {@link libjass.webworker.WorkerChannel} to it.
- *
- * @param {string=} scriptPath The path to libjass.js to be loaded in the web worker. If the browser supports document.currentScript, the parameter is optional and, if not provided,
- * the path will be determined from the src attribute of the <script> element that contains the currently running copy of libjass.js
- * @return {!libjass.webworker.WorkerChannel} A communication channel to the new web worker.
- */
-export function createWorker(scriptPath: string = _scriptNode.src): WorkerChannel {
-	return new WorkerChannelImpl(new Worker(scriptPath));
-}
-
-/**
- * The commands that can be sent to or from a web worker.
- */
-export enum WorkerCommands {
-	Response = 0,
-	Parse = 1,
-}
-
-/**
  * The signature of a handler registered to handle a particular command in {@link libjass.webworker.WorkerCommands}
  */
 export interface WorkerCommandHandler {
@@ -78,35 +53,6 @@ export interface WorkerCommandHandler {
 export interface WorkerResultCallback {
 	(error: any, result: any): void;
 }
-
-/**
- * Registers a handler for the given worker command.
- *
- * @param {number} command The command that this handler will handle. One of the {@link libjass.webworker.WorkerCommands} constants.
- * @param {function(*, function(*, *))} handler The handler. A function of the form (parameters: *, response: function(error: *, result: *): void): void
- */
-export function _registerWorkerCommand(command: WorkerCommands, handler: WorkerCommandHandler): void {
-	workerCommands.set(command, handler);
-}
-
-/**
- * Registers a prototype as a deserializable type.
- *
- * @param {!*} prototype
- */
-export function _registerClassPrototype(prototype: any): void {
-	prototype._classTag = classPrototypes.size;
-	classPrototypes.set(prototype._classTag, prototype);
-}
-
-var _scriptNode: HTMLScriptElement = null;
-if (typeof document !== "undefined" && document.currentScript !== undefined) {
-	_scriptNode = document.currentScript;
-}
-
-var workerCommands = new Map<WorkerCommands, WorkerCommandHandler>();
-
-var classPrototypes = new Map<number, any>();
 
 /**
  * The interface implemented by a communication channel to the other side.
@@ -187,9 +133,10 @@ interface WorkerResponseMessage {
 /**
  * Internal implementation of libjass.webworker.WorkerChannel
  *
- * @param {!*} comm The other side of the channel. When created by the host, this is the web worker. When created by the web worker, this is its global object.
+ * @param {!*} comm The object used to talk to the other side of the channel. When created by the main thread, this is the Worker object.
+ * When created by the web worker, this is its global object.
  */
-class WorkerChannelImpl implements WorkerChannel {
+export class WorkerChannelImpl implements WorkerChannel {
 	private static _lastRequestId: number = -1;
 
 	private _pendingRequests = new Map<number, DeferredPromise<any>>();
@@ -209,7 +156,7 @@ class WorkerChannelImpl implements WorkerChannel {
 		this._pendingRequests.set(requestId, deferred);
 
 		var requestMessage: WorkerRequestMessage = { requestId, command, parameters };
-		this._comm.postMessage(WorkerChannelImpl._toJSON(requestMessage));
+		this._comm.postMessage(serialize(requestMessage));
 
 		return deferred.promise;
 	}
@@ -231,14 +178,14 @@ class WorkerChannelImpl implements WorkerChannel {
 	 * @param {!WorkerResponseMessage} message
 	 */
 	private _respond(message: WorkerResponseMessage): void {
-		this._comm.postMessage(WorkerChannelImpl._toJSON({ command: WorkerCommands.Response, requestId: message.requestId, error: message.error, result: message.result }));
+		this._comm.postMessage(serialize({ command: WorkerCommands.Response, requestId: message.requestId, error: message.error, result: message.result }));
 	}
 
 	/**
 	 * @param {string} rawMessage
 	 */
 	private _onMessage(rawMessage: string): void {
-		var message = <{ command: WorkerCommands }>WorkerChannelImpl._fromJSON(rawMessage);
+		var message = <{ command: WorkerCommands }>deserialize(rawMessage);
 
 		if (message.command === WorkerCommands.Response) {
 			var responseMessage = <WorkerResponseMessage><any>message;
@@ -257,7 +204,7 @@ class WorkerChannelImpl implements WorkerChannel {
 		else {
 			var requestMessage = <WorkerRequestMessage>message;
 
-			var commandCallback = workerCommands.get(requestMessage.command);
+			var commandCallback = getWorkerCommandHandler(requestMessage.command);
 			if (commandCallback === undefined) {
 				this._respond({ requestId: requestMessage.requestId, error: new Error(`Unrecognized command: ${ requestMessage.command }`), result: null });
 				return;
@@ -266,44 +213,4 @@ class WorkerChannelImpl implements WorkerChannel {
 			commandCallback(requestMessage.parameters, (error: any, result: any) => this._respond({ requestId: requestMessage.requestId, error, result }));
 		}
 	}
-
-	/**
-	 * @param {*} obj
-	 * @return {string}
-	 */
-	private static _toJSON(obj: any): string {
-		return JSON.stringify(obj, (/* ujs:unreferenced */ key: string, value: any) => {
-			if (value && value._classTag !== undefined) {
-				value._classTag = value._classTag;
-			}
-
-			return value;
-		});
-	}
-
-	/**
-	 * @param {string} str
-	 * @return {*}
-	 */
-	private static _fromJSON(str: string): any {
-		return JSON.parse(str, (/* ujs:unreferenced */ key: string, value: any) => {
-			if (value && value._classTag !== undefined) {
-				var hydratedValue = Object.create(classPrototypes.get(value._classTag));
-				for (let key of Object.keys(value)) {
-					if (key !== "_classTag") {
-						hydratedValue[key] = value[key];
-					}
-				}
-				value = hydratedValue;
-			}
-
-			return value;
-		});
-	}
-}
-
-declare var global: any;
-
-if (typeof WorkerGlobalScope !== "undefined" && global instanceof WorkerGlobalScope) {
-	new WorkerChannelImpl(global);
 }

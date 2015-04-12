@@ -2203,13 +2203,13 @@ class ParseNode {
 	}
 }
 
-import * as webworker from "../web-worker";
 
-webworker._registerWorkerCommand(webworker.WorkerCommands.Parse, (parameters: any, response: webworker.WorkerResultCallback): void => {
-	var result: any;
+import { WorkerCommands } from "../webworker/commands";
+import { registerWorkerCommand } from "../webworker/misc";
 
+registerWorkerCommand(WorkerCommands.Parse, (parameters, response) => {
 	try {
-		result = parse(parameters.input, parameters.rule);
+		var result = parse(parameters.input, parameters.rule);
 	}
 	catch (ex) {
 		response({ message: ex.message, stack: ex.stack }, null);

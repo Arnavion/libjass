@@ -1294,7 +1294,7 @@ var addToString = function (ctor: Function, ctorName: string) {
 	}
 };
 
-import { _registerClassPrototype } from "../web-worker";
+import { registerClassPrototype } from "../webworker/misc";
 
 declare var exports: any;
 
@@ -1302,7 +1302,7 @@ for (let key of Object.keys(exports)) {
 	var value: any = exports[key];
 	if (value instanceof Function) {
 		addToString(value, key);
-		_registerClassPrototype(value.prototype);
+		registerClassPrototype(value.prototype);
 	}
 }
 
@@ -1310,6 +1310,6 @@ for (let key of Object.keys(drawing)) {
 	var value: any = (<any>drawing)[key];
 	if (value instanceof Function) {
 		addToString(value, `Drawing${ key }`);
-		_registerClassPrototype(value.prototype);
+		registerClassPrototype(value.prototype);
 	}
 }
