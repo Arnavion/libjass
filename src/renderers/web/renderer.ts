@@ -544,8 +544,8 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	}
 
 	/**
-	 * Returns the subtitle div for display. The {@link libjass.renderers.WebRenderer.currentTime} is used to shift the animations appropriately, so that at the time the
-	 * div is inserted into the DOM and the animations begin, they are in sync with the clock time.
+	 * Returns the subtitle div for display. The {@link libjass.renderers.Clock.currentTime} of the {@link libjass.renderers.NullRenderer.clock} is used to shift the
+	 * animations appropriately, so that at the time the div is inserted into the DOM and the animations begin, they are in sync with the clock time.
 	 *
 	 * @param {!libjass.Dialogue} dialogue
 	 */
