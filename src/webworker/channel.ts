@@ -44,14 +44,7 @@ export interface WorkerChannel {
  * The signature of a handler registered to handle a particular command in {@link libjass.webworker.WorkerCommands}
  */
 export interface WorkerCommandHandler {
-	(parameters: any, response: WorkerResultCallback): void;
-}
-
-/**
- * The signature of a callback called by a {@link libjass.webworker.WorkerCommandHandler} to report its result back to the caller.
- */
-export interface WorkerResultCallback {
-	(error: any, result: any): void;
+	(parameters: any): Promise<any>;
 }
 
 /**
@@ -178,7 +171,11 @@ export class WorkerChannelImpl implements WorkerChannel {
 	 * @param {!WorkerResponseMessage} message
 	 */
 	private _respond(message: WorkerResponseMessage): void {
-		this._comm.postMessage(serialize({ command: WorkerCommands.Response, requestId: message.requestId, error: message.error, result: message.result }));
+		var { requestId, error, result } = message;
+		if (error instanceof Error) {
+			error = { message: error.message, stack: error.stack };
+		}
+		this._comm.postMessage(serialize({ command: WorkerCommands.Response, requestId, error, result }));
 	}
 
 	/**
@@ -203,14 +200,18 @@ export class WorkerChannelImpl implements WorkerChannel {
 		}
 		else {
 			var requestMessage = <WorkerRequestMessage>message;
+			var requestId = requestMessage.requestId;
 
 			var commandCallback = getWorkerCommandHandler(requestMessage.command);
 			if (commandCallback === undefined) {
-				this._respond({ requestId: requestMessage.requestId, error: new Error(`Unrecognized command: ${ requestMessage.command }`), result: null });
+				this._respond({ requestId, error: new Error(`No handler registered for command ${ requestMessage.command }`), result: null });
 				return;
 			}
 
-			commandCallback(requestMessage.parameters, (error: any, result: any) => this._respond({ requestId: requestMessage.requestId, error, result }));
+			commandCallback(requestMessage.parameters).then<WorkerResponseMessage>(
+				result => ({ requestId, error: null, result }),
+				error => ({ requestId, error, result: null })
+			).then(responseMessage => this._respond(responseMessage));
 		}
 	}
 }

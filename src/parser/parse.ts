@@ -2203,22 +2203,11 @@ class ParseNode {
 	}
 }
 
+import { Promise } from "../utility/promise";
 
 import { WorkerCommands } from "../webworker/commands";
 import { registerWorkerCommand } from "../webworker/misc";
 
-registerWorkerCommand(WorkerCommands.Parse, (parameters, response) => {
-	try {
-		var result = parse(parameters.input, parameters.rule);
-	}
-	catch (ex) {
-		response({ message: ex.message, stack: ex.stack }, null);
-		return;
-	}
-
-	try {
-		response(null, result);
-	}
-	catch (ex) {
-	}
-});
+registerWorkerCommand(WorkerCommands.Parse, parameters => new Promise(resolve => {
+	resolve(parse(parameters.input, parameters.rule));
+}));
