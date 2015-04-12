@@ -381,7 +381,9 @@ export interface Promise<T> {
 }
 
 /**
- * Set to browser's implementation of Promise if it has one, else set to {@link ./utility/promise.SimplePromise}
+ * Set to the global implementation of Promise if the environment has one, else set to {@link ./utility/promise.SimplePromise}
+ *
+ * Set it to null to force {@link ./utility/promise.SimplePromise} to be used even if a global Promise is present.
  *
  * @type {function(new:Promise)}
  */
@@ -394,6 +396,20 @@ export var Promise: {
 
 if (Promise === undefined) {
 	Promise = SimplePromise;
+}
+
+/**
+ * Sets the Promise implementation used by libjass to the provided one. If null, {@link ./utility/promise.SimplePromise} is used.
+ *
+ * @param {?function(new:Promise)} value
+ */
+export function setImplementation(value: typeof Promise): void {
+	if (value !== null) {
+		Promise = value;
+	}
+	else {
+		Promise = SimplePromise;
+	}
 }
 
 /**
@@ -431,13 +447,4 @@ export class DeferredPromise<T> {
 	reject(reason: any): void {
 		this._reject(reason);
 	}
-}
-
-/**
- * Sets the Promise implementation used by libjass to the provided one.
- *
- * @param {function(new:Promise)} value
- */
-export function setImplementation(value: typeof Promise): void {
-	Promise = value;
 }

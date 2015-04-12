@@ -157,7 +157,9 @@ export interface Set<T> {
 }
 
 /**
- * Set to browser's implementation of Set if it has one, else set to {@link ./utility/set.SimpleSet}
+ * Set to the global implementation of Set if the environment has one, else set to {@link ./utility/set.SimpleSet}
+ *
+ * Set it to null to force {@link ./utility/set.SimpleSet} to be used even if a global Set is present.
  *
  * @type {function(new:Set, !Array.<T>=)}
  */
@@ -178,10 +180,15 @@ if (Set === undefined || typeof Set.prototype.forEach !== "function" || (() => {
 }
 
 /**
- * Sets the Set implementation used by libjass to the provided one.
+ * Sets the Set implementation used by libjass to the provided one. If null, {@link ./utility/set.SimpleSet} is used.
  *
- * @param {function(new:Set, !Array.<T>=)} value
+ * @param {?function(new:Set, !Array.<T>=)} value
  */
 export function setImplementation(value: typeof Set): void {
-	Set = value;
+	if (value !== null) {
+		Set = value;
+	}
+	else {
+		Set = SimpleSet;
+	}
 }

@@ -213,7 +213,9 @@ export interface Map<K, V> {
 }
 
 /**
- * Set to browser's implementation of Map if it has one, else set to {@link ./utility/map.SimpleMap}
+ * Set to the global implementation of Map if the environment has one, else set to {@link ./utility/map.SimpleMap}
+ *
+ * Set it to null to force {@link ./utility/map.SimpleMap} to be used even if a global Map is present.
  *
  * @type {function(new:Map, !Array.<!Array.<*>>=)}
  */
@@ -234,10 +236,15 @@ if (Map === undefined || typeof Map.prototype.forEach !== "function" || (() => {
 }
 
 /**
- * Sets the Map implementation used by libjass to the provided one.
+ * Sets the Map implementation used by libjass to the provided one. If null, {@link ./utility/map.SimpleMap} is used.
  *
- * @param {function(new:Map, !Array.<!Array.<*>>=)} value
+ * @param {?function(new:Map, !Array.<!Array.<*>>=)} value
  */
 export function setImplementation(value: typeof Map): void {
-	Map = value;
+	if (value !== null) {
+		Map = value;
+	}
+	else {
+		Map = SimpleMap;
+	}
 }

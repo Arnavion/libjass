@@ -23,6 +23,7 @@ define(["intern"], function (intern) {
 		suites: [
 			"tests/unit/minified",
 			"tests/unit/miscellaneous",
+			"tests/unit/polyfills",
 			"tests/unit/primitives",
 			"tests/unit/tags",
 			"tests/unit/webworker"
