@@ -171,7 +171,7 @@ var Run = (function () {
 				}
 			});
 
-			var wrapper = UglifyJS.parse('/* ' + module.id  + ' */ function x(exports, require) { }');
+			var wrapper = UglifyJS.parse('/* ' + module.id + ' ./' + path.relative(path.join(_this._entry, ".."), moduleName).replace(/\\/g, "/") + ' */ function x(exports, require) { }');
 			var func = wrapper.body[0];
 			func.body = module.root.body;
 			func.name = null;
