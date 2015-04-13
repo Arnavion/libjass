@@ -150,13 +150,32 @@ export class ManualClock implements Clock {
 	}
 
 	/**
-	 * Trigger a {@link libjass.renderers.ClockEvent.Tick}
+	 * Trigger a {@link libjass.renderers.ClockEvent.Tick} with the given time.
 	 *
 	 * @param {number} currentTime
 	 */
 	tick(currentTime: number): void {
 		this._currentTime = currentTime;
 		this._dispatchEvent(ClockEvent.Tick, []);
+	}
+
+	/**
+	 * Seek to the given time. Unlike {@link libjass.renderers.ManualClock.tick} this is used to represent a discontinuous jump, such as the user seeking
+	 * via the video element's position bar.
+	 *
+	 * @param {number} time
+	 */
+	seek(time: number): void {
+		if (this._currentTime === time) {
+			return;
+		}
+
+		this._dispatchEvent(ClockEvent.Pause, []);
+		this._dispatchEvent(ClockEvent.Stop, []);
+		this._currentTime = time;
+		this._dispatchEvent(ClockEvent.Play, []);
+		this._dispatchEvent(ClockEvent.Tick, []);
+		this._dispatchEvent(ClockEvent.Pause, []);
 	}
 
 	/**
@@ -455,18 +474,22 @@ export class VideoClock implements Clock {
 			return;
 		}
 
+		if (this._currentTime === this._video.currentTime) {
+			return;
+		}
+
 		if (this._videoState === VideoState.Playing) {
 			this._videoState = VideoState.Paused;
 			this._dispatchEvent(ClockEvent.Pause, []);
 		}
 
-		if (this._currentTime === this._video.currentTime) {
-			return;
-		}
+		this._dispatchEvent(ClockEvent.Stop, []);
 
 		this._currentTime = this._video.currentTime;
 
+		this._dispatchEvent(ClockEvent.Play, []);
 		this._dispatchEvent(ClockEvent.Tick, []);
+		this._dispatchEvent(ClockEvent.Pause, []);
 	}
 
 	/**
