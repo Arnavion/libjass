@@ -129,6 +129,12 @@ gulp.task("test-minified", ["libjass.min.js"], function (callback) {
 	});
 });
 
+gulp.task("test-browser", ["libjass.min.js"], function (callback) {
+	npm.load(function () {
+		npm.commands["run-script"](["test-browser"], callback);
+	});
+});
+
 gulp.task("test", ["test-lib", "test-minified"]);
 
 gulp.task("demo", ["libjass.js"], function () {
@@ -143,7 +149,7 @@ gulp.task("doc", ["libjass.js"], function () {
 		.pipe(gulp.dest("../libjass-gh-pages/"));
 });
 
-gulp.task("dist", ["clean", "default", "test", "demo", "doc"], function () {
+gulp.task("dist", ["clean", "default", "test", "test-browser", "demo", "doc"], function () {
 	var inputFiles = [
 		"./README.md", "./CHANGELOG.md", "./LICENSE",
 		"./lib/libjass.js", "./lib/libjass.js.map",
