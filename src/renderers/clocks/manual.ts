@@ -154,6 +154,10 @@ export class ManualClock implements Clock {
 	 * @param {number} rate The new rate of the clock.
 	 */
 	setRate(rate: number): void {
+		if (this._rate === rate) {
+			return;
+		}
+
 		this._rate = rate;
 
 		this._dispatchEvent(ClockEvent.RateChange, []);
