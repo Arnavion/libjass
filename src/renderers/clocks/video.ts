@@ -23,36 +23,23 @@ import { debugMode } from "../../settings";
 import { mixin } from "../../utility/mixin";
 import { Map } from "../../utility/map";
 
+import { AutoClock } from "./auto";
 import { Clock, ClockEvent, EventSource } from "./base";
 
 /**
- * The state of the video.
- */
-enum VideoState {
-	Playing = 0,
-	Paused = 1,
-}
-
-/**
- * An implementation of libjass.renderers.Clock that generates play, pause and timeUpdate events according to the state of a <video> element.
+ * An implementation of libjass.renderers.Clock that generates {@link libjass.renderers.ClockEvent}s according to the state of a <video> element.
  *
  * @param {!HTMLVideoElement} video
  */
 export class VideoClock implements Clock {
-	private _currentTime: number = -1;
+	private _autoClock: AutoClock;
 
-	private _enabled: boolean = true;
-
-	private _videoState: VideoState;
-
-	private _nextAnimationFrameRequestId: number = null;
-	private _possiblePauseAnimationFrameTimeStamp: number = null;
-
-	constructor(private _video: HTMLVideoElement) {
-		this._video.addEventListener("playing", () => this._onVideoPlaying(), false);
-		this._video.addEventListener("pause", () => this._onVideoPause(), false);
-		this._video.addEventListener("seeking", () => this._onVideoSeeking(), false);
-		this._video.addEventListener("ratechange", () => this._onVideoRateChange(), false);
+	constructor(video: HTMLVideoElement) {
+		this._autoClock = new AutoClock(() => video.currentTime, 100);
+		video.addEventListener("playing", () => this._autoClock.play(), false);
+		video.addEventListener("pause", () => this._autoClock.pause(), false);
+		video.addEventListener("seeking", () => this._autoClock.seeking(), false);
+		video.addEventListener("ratechange", () => this._autoClock.rate = video.playbackRate, false);
 	}
 
 	// Clock members
@@ -61,14 +48,14 @@ export class VideoClock implements Clock {
 	 * @type {number}
 	 */
 	get currentTime(): number {
-		return this._currentTime;
+		return this._autoClock.currentTime;
 	}
 
 	/**
 	 * @type {boolean}
 	 */
 	get enabled(): boolean {
-		return this._enabled;
+		return this._autoClock.enabled;
 	}
 
 	/**
@@ -77,7 +64,7 @@ export class VideoClock implements Clock {
 	 * @type {number}
 	 */
 	get rate(): number {
-		return this._video.playbackRate;
+		return this._autoClock.rate;
 	}
 
 	/**
@@ -86,21 +73,7 @@ export class VideoClock implements Clock {
 	 * @return {boolean} True if the clock is now enabled, false if it was already enabled.
 	 */
 	enable(): boolean {
-		if (this._enabled) {
-			return false;
-		}
-
-		if (this._videoState !== VideoState.Paused) {
-			if (debugMode) {
-				console.warn("VideoClock.enable: Abnormal state detected. VideoClock._videoState should have been VideoState.Paused");
-			}
-		}
-
-		this._enabled = true;
-
-		this._startTicking();
-
-		return true;
+		return this._autoClock.enable();
 	}
 
 	/**
@@ -109,34 +82,14 @@ export class VideoClock implements Clock {
 	 * @return {boolean} True if the clock is now disabled, false if it was already disabled.
 	 */
 	disable(): boolean {
-		if (!this._enabled) {
-			return false;
-		}
-
-		if (this._videoState === VideoState.Playing) {
-			this._videoState = VideoState.Paused;
-			this._dispatchEvent(ClockEvent.Pause, []);
-		}
-
-		this._enabled = false;
-
-		this._dispatchEvent(ClockEvent.Stop, []);
-
-		this._stopTicking();
-
-		return true;
+		return this._autoClock.disable();
 	}
 
 	/**
 	 * Toggle the clock.
 	 */
 	toggle(): void {
-		if (this._enabled) {
-			this.disable();
-		}
-		else {
-			this.enable();
-		}
+		this._autoClock.toggle();
 	}
 
 	/**
@@ -146,143 +99,28 @@ export class VideoClock implements Clock {
 	 * @return {boolean} True if the clock is now in the given state, false if it was already in that state.
 	 */
 	setEnabled(enabled: boolean): boolean {
-		if (enabled) {
-			return this.enable();
-		}
-		else {
-			return this.disable();
-		}
-	}
-
-	private _onVideoPlaying(): void {
-		if (!this._enabled) {
-			return;
-		}
-
-		if (this._videoState === VideoState.Playing) {
-			return;
-		}
-
-		this._startTicking();
-	}
-
-	private _onVideoPause(): void {
-		if (!this._enabled) {
-			return;
-		}
-
-		if (this._videoState === VideoState.Paused) {
-			return;
-		}
-
-		this._videoState = VideoState.Paused;
-
-		this._dispatchEvent(ClockEvent.Pause, []);
-
-		if (this._nextAnimationFrameRequestId === null) {
-			if (debugMode) {
-				console.warn("VideoClock._onVideoPause: Abnormal state detected. VideoClock._nextAnimationFrameRequestId should not have been null");
-			}
-
-			return;
-		}
-
-		this._stopTicking();
-	}
-
-	private _onVideoSeeking(): void {
-		if (!this._enabled) {
-			return;
-		}
-
-		if (this._currentTime === this._video.currentTime) {
-			return;
-		}
-
-		if (this._videoState === VideoState.Playing) {
-			this._videoState = VideoState.Paused;
-			this._dispatchEvent(ClockEvent.Pause, []);
-		}
-
-		this._dispatchEvent(ClockEvent.Stop, []);
-
-		this._currentTime = this._video.currentTime;
-
-		this._dispatchEvent(ClockEvent.Play, []);
-		this._dispatchEvent(ClockEvent.Tick, []);
-		this._dispatchEvent(ClockEvent.Pause, []);
-	}
-
-	/**
-	 * @param {number} timeStamp
-	 */
-	private _onTimerTick(timeStamp: number): void {
-		if (!this._enabled) {
-			return;
-		}
-
-		if (this._videoState === VideoState.Playing) {
-			if (this._currentTime !== this._video.currentTime) {
-				this._currentTime = this._video.currentTime;
-				this._possiblePauseAnimationFrameTimeStamp = null;
-				this._dispatchEvent(ClockEvent.Tick, []);
-			}
-			else {
-				if (this._possiblePauseAnimationFrameTimeStamp === null) {
-					this._possiblePauseAnimationFrameTimeStamp = timeStamp;
-				}
-				else if (timeStamp - this._possiblePauseAnimationFrameTimeStamp > 100) {
-					this._possiblePauseAnimationFrameTimeStamp = null;
-					this._videoState = VideoState.Paused;
-					this._dispatchEvent(ClockEvent.Pause, []);
-				}
-			}
-		}
-		else {
-			if (this._currentTime !== this._video.currentTime) {
-				this._currentTime = this._video.currentTime;
-				this._possiblePauseAnimationFrameTimeStamp = null;
-				this._videoState = VideoState.Playing;
-				this._dispatchEvent(ClockEvent.Play, []);
-				this._dispatchEvent(ClockEvent.Tick, []);
-			}
-		}
-
-		this._nextAnimationFrameRequestId = requestAnimationFrame(timeStamp => this._onTimerTick(timeStamp));
-	}
-
-	private _onVideoRateChange(): void {
-		this._dispatchEvent(ClockEvent.RateChange, []);
-	}
-
-	private _startTicking(): void {
-		if (this._nextAnimationFrameRequestId === null) {
-			this._nextAnimationFrameRequestId = requestAnimationFrame(timeStamp => this._onTimerTick(timeStamp));
-		}
-	}
-
-	private _stopTicking(): void {
-		if (this._nextAnimationFrameRequestId !== null) {
-			cancelAnimationFrame(this._nextAnimationFrameRequestId);
-			this._nextAnimationFrameRequestId = null;
-		}
+		return this._autoClock.setEnabled(enabled);
 	}
 
 	// EventSource members
 
 	/**
+	 * Not used.
+	 *
 	 * @type {!Map.<T, !Array.<Function>>}
 	 */
-	_eventListeners: Map<ClockEvent, Function[]> = new Map<ClockEvent, Function[]>();
+	_eventListeners: Map<ClockEvent, Function[]>;
 
 	/**
-	 * @type {function(number, !Function)}
+	 * @param {number} type
+	 * @param {!Function} listener
 	 */
-	addEventListener: (type: ClockEvent, listener: Function) => void;
+	addEventListener(type: ClockEvent, listener: Function): void {
+		this._autoClock.addEventListener(type, listener);
+	}
 
 	/**
 	 * @type {function(number, Array.<*>)}
 	 */
 	_dispatchEvent: (type: ClockEvent, args: Object[]) => void;
 }
-mixin(VideoClock, [EventSource]);

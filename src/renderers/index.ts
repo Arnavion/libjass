@@ -19,6 +19,7 @@
  */
 
 export { Clock, ClockEvent, EventSource } from "./clocks/base";
+export { AutoClock } from "./clocks/auto";
 export { ManualClock } from "./clocks/manual";
 export { VideoClock } from "./clocks/video";
 

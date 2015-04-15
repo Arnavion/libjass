@@ -24,7 +24,7 @@ import { Map } from "../../utility/map";
 import { Clock, ClockEvent, EventSource } from "./base";
 
 /**
- * An implementation of {@link libjass.renderers.Clock} that allows user script to manually trigger play, pause and timeUpdate events.
+ * An implementation of {@link libjass.renderers.Clock} that allows user script to manually trigger {@link libjass.renderers.ClockEvent}s.
  */
 export class ManualClock implements Clock {
 	private _currentTime: number = -1;
