@@ -47,7 +47,7 @@ gulp.task("libjass.js", function () {
 
 	return gulp.src("./src/tsconfig.json")
 		.pipe(TypeScript.gulp("./src/index.ts", "libjass"))
-		.pipe(UglifyJS.gulp("./src/index", "libjass", ["BorderStyle", "Format", "WorkerCommands", "WrappingStyle"]))
+		.pipe(UglifyJS.gulp("./src/index", "libjass", ["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle"]))
 		.pipe(gulp.dest("./lib"));
 });
 
@@ -103,7 +103,7 @@ gulp.task("watch", ["clean"], function (callback) {
 
 		gulp.src("./src/tsconfig.json")
 			.pipe(TypeScript.watch("./src/index.ts", "libjass"))
-			.pipe(UglifyJS.watch("./src/index", "libjass", ["BorderStyle", "Format", "WorkerCommands", "WrappingStyle"]))
+			.pipe(UglifyJS.watch("./src/index", "libjass", ["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle"]))
 			.pipe(gulp.dest("./lib"))
 			.pipe(Transform(function (file) {
 				if (path.basename(file.path) === "libjass.js") {

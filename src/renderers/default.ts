@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import { VideoClock } from "./clocks";
+import { VideoClock } from "./clocks/video";
 import { RendererSettings } from "./settings";
 import { WebRenderer } from "./web/renderer";
 

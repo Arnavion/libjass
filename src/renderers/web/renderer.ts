@@ -23,7 +23,7 @@ import { DrawingStyles } from "./drawing-styles";
 import { Keyframe } from "./keyframe";
 import { SpanStyles } from "./span-styles";
 
-import { Clock, EventSource } from "../clocks";
+import { Clock, EventSource } from "../clocks/base";
 
 import { NullRenderer } from "../null";
 import { RendererSettings } from "../settings";

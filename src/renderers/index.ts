@@ -18,7 +18,9 @@
  * limitations under the License.
  */
 
-export { Clock, ClockEvent, EventSource, ManualClock, VideoClock } from "./clocks";
+export { Clock, ClockEvent, EventSource } from "./clocks/base";
+export { ManualClock } from "./clocks/manual";
+export { VideoClock } from "./clocks/video";
 
 export { DefaultRenderer } from "./default";
 export { NullRenderer } from "./null";

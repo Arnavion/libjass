@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import { Clock, ClockEvent } from "./clocks";
+import { Clock, ClockEvent } from "./clocks/base";
 
 import { RendererSettings } from "./settings";
 
