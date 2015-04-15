@@ -26,7 +26,7 @@ import { Clock, ClockEvent, EventSource } from "./base";
 /**
  * An implementation of {@link libjass.renderers.Clock} that allows user script to manually trigger {@link libjass.renderers.ClockEvent}s.
  */
-export class ManualClock implements Clock {
+export class ManualClock implements Clock, EventSource<ClockEvent> {
 	private _currentTime: number = -1;
 	private _rate: number = 1;
 
