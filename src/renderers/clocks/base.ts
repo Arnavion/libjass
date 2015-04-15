@@ -89,6 +89,11 @@ export interface Clock extends EventSource<ClockEvent> {
 	enabled: boolean;
 
 	/**
+	 * @type {boolean}
+	 */
+	paused: boolean;
+
+	/**
 	 * Gets the rate of the clock - how fast the clock ticks compared to real time.
 	 *
 	 * @type {number}

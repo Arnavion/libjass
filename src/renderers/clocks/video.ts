@@ -39,7 +39,7 @@ export class VideoClock implements Clock {
 		video.addEventListener("playing", () => this._autoClock.play(), false);
 		video.addEventListener("pause", () => this._autoClock.pause(), false);
 		video.addEventListener("seeking", () => this._autoClock.seeking(), false);
-		video.addEventListener("ratechange", () => this._autoClock.rate = video.playbackRate, false);
+		video.addEventListener("ratechange", () => this._autoClock.setRate(video.playbackRate), false);
 	}
 
 	// Clock members
@@ -56,6 +56,13 @@ export class VideoClock implements Clock {
 	 */
 	get enabled(): boolean {
 		return this._autoClock.enabled;
+	}
+
+	/**
+	 * @type {boolean}
+	 */
+	get paused(): boolean {
+		return this._autoClock.paused;
 	}
 
 	/**

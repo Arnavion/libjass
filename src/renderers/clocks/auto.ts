@@ -24,6 +24,7 @@ import { mixin } from "../../utility/mixin";
 import { Map } from "../../utility/map";
 
 import { Clock, ClockEvent, EventSource } from "./base";
+import { ManualClock } from "./manual";
 
 /**
  * An implementation of libjass.renderers.Clock that automatically ticks and generates {@link libjass.renderers.ClockEvent}s according to the state of an external driver.
@@ -41,18 +42,53 @@ import { Clock, ClockEvent, EventSource } from "./base";
  * considered to have paused.
  */
 export class AutoClock implements Clock {
-	private _currentTime: number = -1;
-
-	private _rate: number = 1;
-
-	private _enabled: boolean = true;
-
-	private _paused: boolean = true;
+	private _manualClock: ManualClock = new ManualClock();
 
 	private _nextAnimationFrameRequestId: number = null;
 	private _possiblePauseAnimationFrameTimeStamp: number = null;
 
 	constructor(private _getCurrentTime: () => number, private _currentTimeUpdateMaxDelay: number) { }
+
+	/**
+	 * Tells the clock to start generating ticks.
+	 */
+	play(): void {
+		if (!this._manualClock.enabled) {
+			return;
+		}
+
+		this._startTicking();
+
+		this._manualClock.play();
+	}
+
+	/**
+	 * Tells the clock to pause.
+	 */
+	pause(): void {
+		if (!this._manualClock.enabled) {
+			return;
+		}
+
+		if (this._nextAnimationFrameRequestId === null) {
+			if (debugMode) {
+				console.warn("AutoClock.pause: Abnormal state detected. AutoClock._nextAnimationFrameRequestId should not have been null.");
+			}
+
+			return;
+		}
+
+		this._stopTicking();
+
+		this._manualClock.pause();
+	}
+
+	/**
+	 * Tells the clock that the external driver is seeking.
+	 */
+	seeking(): void {
+		this._manualClock.seek(this._getCurrentTime());
+	}
 
 	// Clock members
 
@@ -60,14 +96,21 @@ export class AutoClock implements Clock {
 	 * @type {number}
 	 */
 	get currentTime(): number {
-		return this._currentTime;
+		return this._manualClock.currentTime;
 	}
 
 	/**
 	 * @type {boolean}
 	 */
 	get enabled(): boolean {
-		return this._enabled;
+		return this._manualClock.enabled;
+	}
+
+	/**
+	 * @type {boolean}
+	 */
+	get paused(): boolean {
+		return this._manualClock.paused;
 	}
 
 	/**
@@ -76,17 +119,16 @@ export class AutoClock implements Clock {
 	 * @type {number}
 	 */
 	get rate(): number {
-		return this._rate;
+		return this._manualClock.rate;
 	}
 
 	/**
 	 * Sets the rate of the clock - how fast the clock ticks compared to real time.
 	 *
-	 * @type {number}
+	 * @param {number} rate The new rate of the clock.
 	 */
-	set rate(value: number) {
-		this._rate = value;
-		this._dispatchEvent(ClockEvent.RateChange, []);
+	setRate(rate: number): void {
+		this._manualClock.setRate(rate);
 	}
 
 	/**
@@ -95,17 +137,9 @@ export class AutoClock implements Clock {
 	 * @return {boolean} True if the clock is now enabled, false if it was already enabled.
 	 */
 	enable(): boolean {
-		if (this._enabled) {
+		if (!this._manualClock.enable()) {
 			return false;
 		}
-
-		if (!this._paused) {
-			if (debugMode) {
-				console.warn("AutoClock.enable: Abnormal state detected. AutoClock._paused should have been true.");
-			}
-		}
-
-		this._enabled = true;
 
 		this._startTicking();
 
@@ -118,18 +152,9 @@ export class AutoClock implements Clock {
 	 * @return {boolean} True if the clock is now disabled, false if it was already disabled.
 	 */
 	disable(): boolean {
-		if (!this._enabled) {
+		if (!this._manualClock.disable()) {
 			return false;
 		}
-
-		if (!this._paused) {
-			this._paused = true;
-			this._dispatchEvent(ClockEvent.Pause, []);
-		}
-
-		this._enabled = false;
-
-		this._dispatchEvent(ClockEvent.Stop, []);
 
 		this._stopTicking();
 
@@ -140,12 +165,7 @@ export class AutoClock implements Clock {
 	 * Toggle the clock.
 	 */
 	toggle(): void {
-		if (this._enabled) {
-			this.disable();
-		}
-		else {
-			this.enable();
-		}
+		this._manualClock.toggle();
 	}
 
 	/**
@@ -155,99 +175,28 @@ export class AutoClock implements Clock {
 	 * @return {boolean} True if the clock is now in the given state, false if it was already in that state.
 	 */
 	setEnabled(enabled: boolean): boolean {
-		if (enabled) {
-			return this.enable();
-		}
-		else {
-			return this.disable();
-		}
-	}
-
-	/**
-	 * Tells the clock to start generating ticks.
-	 */
-	play(): void {
-		if (!this._enabled) {
-			return;
-		}
-
-		if (!this._paused) {
-			return;
-		}
-
-		this._startTicking();
-	}
-
-	/**
-	 * Tells the clock to pause.
-	 */
-	pause(): void {
-		if (!this._enabled) {
-			return;
-		}
-
-		if (this._paused) {
-			return;
-		}
-
-		this._paused = true;
-
-		this._dispatchEvent(ClockEvent.Pause, []);
-
-		if (this._nextAnimationFrameRequestId === null) {
-			if (debugMode) {
-				console.warn("AutoClock._onVideoPause: Abnormal state detected. AutoClock._nextAnimationFrameRequestId should not have been null");
-			}
-
-			return;
-		}
-
-		this._stopTicking();
-	}
-
-	/**
-	 * Tells the clock that the external driver is seeking.
-	 */
-	seeking(): void {
-		if (!this._enabled) {
-			return;
-		}
-
-		var currentTime = this._getCurrentTime();
-
-		if (this._currentTime === currentTime) {
-			return;
-		}
-
-		if (!this._paused) {
-			this._paused = true;
-			this._dispatchEvent(ClockEvent.Pause, []);
-		}
-
-		this._dispatchEvent(ClockEvent.Stop, []);
-
-		this._currentTime = currentTime;
-
-		this._dispatchEvent(ClockEvent.Play, []);
-		this._dispatchEvent(ClockEvent.Tick, []);
-		this._dispatchEvent(ClockEvent.Pause, []);
+		return this._manualClock.setEnabled(enabled);
 	}
 
 	/**
 	 * @param {number} timeStamp
 	 */
 	private _onTimerTick(timeStamp: number): void {
-		if (!this._enabled) {
+		if (!this._manualClock.enabled) {
+			if (debugMode) {
+				console.warn("AutoClock._onTimerTick: Called when disabled.");
+			}
+
 			return;
 		}
 
-		var currentTime = this._getCurrentTime();
+		var currentTime = this._manualClock.currentTime;
+		var currentExternalTime = this._getCurrentTime();
 
-		if (!this._paused) {
-			if (this._currentTime !== currentTime) {
-				this._currentTime = currentTime;
+		if (!this._manualClock.paused) {
+			if (currentTime !== currentExternalTime) {
 				this._possiblePauseAnimationFrameTimeStamp = null;
-				this._dispatchEvent(ClockEvent.Tick, []);
+				this._manualClock.tick(currentExternalTime);
 			}
 			else {
 				if (this._possiblePauseAnimationFrameTimeStamp === null) {
@@ -255,18 +204,15 @@ export class AutoClock implements Clock {
 				}
 				else if (timeStamp - this._possiblePauseAnimationFrameTimeStamp > this._currentTimeUpdateMaxDelay) {
 					this._possiblePauseAnimationFrameTimeStamp = null;
-					this._paused = true;
-					this._dispatchEvent(ClockEvent.Pause, []);
+					this._manualClock.pause();
 				}
 			}
 		}
 		else {
-			if (this._currentTime !== currentTime) {
-				this._currentTime = currentTime;
+			if (currentTime !== currentExternalTime) {
+				currentTime = currentExternalTime;
 				this._possiblePauseAnimationFrameTimeStamp = null;
-				this._paused = false;
-				this._dispatchEvent(ClockEvent.Play, []);
-				this._dispatchEvent(ClockEvent.Tick, []);
+				this._manualClock.tick(currentExternalTime);
 			}
 		}
 
@@ -289,18 +235,22 @@ export class AutoClock implements Clock {
 	// EventSource members
 
 	/**
+	 * Not used.
+	 *
 	 * @type {!Map.<T, !Array.<Function>>}
 	 */
-	_eventListeners: Map<ClockEvent, Function[]> = new Map<ClockEvent, Function[]>();
+	_eventListeners: Map<ClockEvent, Function[]>;
 
 	/**
-	 * @type {function(number, !Function)}
+	 * @param {number} type
+	 * @param {!Function} listener
 	 */
-	addEventListener: (type: ClockEvent, listener: Function) => void;
+	addEventListener(type: ClockEvent, listener: Function): void {
+		this._manualClock.addEventListener(type, listener);
+	};
 
 	/**
 	 * @type {function(number, Array.<*>)}
 	 */
 	_dispatchEvent: (type: ClockEvent, args: Object[]) => void;
 }
-mixin(AutoClock, [EventSource]);

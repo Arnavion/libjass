@@ -28,13 +28,25 @@ import { Clock, ClockEvent, EventSource } from "./base";
  */
 export class ManualClock implements Clock {
 	private _currentTime: number = -1;
-	private _enabled: boolean = true;
 	private _rate: number = 1;
+
+	private _enabled: boolean = true;
+	private _paused: boolean = true;
 
 	/**
 	 * Trigger a {@link libjass.renderers.ClockEvent.Play}
 	 */
 	play(): void {
+		if (!this._enabled) {
+			return;
+		}
+
+		if (!this._paused) {
+			return;
+		}
+
+		this._paused = false;
+
 		this._dispatchEvent(ClockEvent.Play, []);
 	}
 
@@ -44,6 +56,14 @@ export class ManualClock implements Clock {
 	 * @param {number} currentTime
 	 */
 	tick(currentTime: number): void {
+		if (!this._enabled) {
+			return;
+		}
+
+		if (this._currentTime !== currentTime) {
+			this.play();
+		}
+
 		this._currentTime = currentTime;
 		this._dispatchEvent(ClockEvent.Tick, []);
 	}
@@ -55,22 +75,37 @@ export class ManualClock implements Clock {
 	 * @param {number} time
 	 */
 	seek(time: number): void {
+		if (!this._enabled) {
+			return;
+		}
+
+		this.pause();
+
 		if (this._currentTime === time) {
 			return;
 		}
 
-		this._dispatchEvent(ClockEvent.Pause, []);
-		this._dispatchEvent(ClockEvent.Stop, []);
-		this._currentTime = time;
-		this._dispatchEvent(ClockEvent.Play, []);
-		this._dispatchEvent(ClockEvent.Tick, []);
-		this._dispatchEvent(ClockEvent.Pause, []);
+		this.stop();
+
+		this.tick(time);
+
+		this.pause();
 	}
 
 	/**
 	 * Trigger a {@link libjass.renderers.ClockEvent.Pause}
 	 */
 	pause(): void {
+		if (!this._enabled) {
+			return;
+		}
+
+		if (this._paused) {
+			return;
+		}
+
+		this._paused = true;
+
 		this._dispatchEvent(ClockEvent.Pause, []);
 	}
 
@@ -98,12 +133,30 @@ export class ManualClock implements Clock {
 	}
 
 	/**
+	 * @type {boolean}
+	 */
+	get paused(): boolean {
+		return this._paused;
+	}
+
+	/**
 	 * Gets the rate of the clock - how fast the clock ticks compared to real time.
 	 *
 	 * @type {number}
 	 */
 	get rate(): number {
 		return this._rate;
+	}
+
+	/**
+	 * Sets the rate of the clock - how fast the clock ticks compared to real time.
+	 *
+	 * @param {number} rate The new rate of the clock.
+	 */
+	setRate(rate: number): void {
+		this._rate = rate;
+
+		this._dispatchEvent(ClockEvent.RateChange, []);
 	}
 
 	/**
@@ -133,6 +186,10 @@ export class ManualClock implements Clock {
 
 		this._enabled = false;
 
+		this.pause();
+
+		this.stop();
+
 		return true;
 	}
 
@@ -161,17 +218,6 @@ export class ManualClock implements Clock {
 		else {
 			return this.disable();
 		}
-	}
-
-	/**
-	 * Sets the rate of the clock - how fast the clock ticks compared to real time.
-	 *
-	 * @param {number} rate The new rate of the clock.
-	 */
-	setRate(rate: number): void {
-		this._rate = rate;
-
-		this._dispatchEvent(ClockEvent.RateChange, []);
 	}
 
 	// EventSource members
