@@ -18,13 +18,8 @@
  * limitations under the License.
  */
 
-import { debugMode } from "../../settings";
-
-import { mixin } from "../../utility/mixin";
-import { Map } from "../../utility/map";
-
 import { AutoClock } from "./auto";
-import { Clock, ClockEvent, EventSource } from "./base";
+import { Clock, ClockEvent } from "./base";
 
 /**
  * An implementation of libjass.renderers.Clock that generates {@link libjass.renderers.ClockEvent}s according to the state of a <video> element.

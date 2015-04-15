@@ -20,10 +20,7 @@
 
 import { debugMode } from "../../settings";
 
-import { mixin } from "../../utility/mixin";
-import { Map } from "../../utility/map";
-
-import { Clock, ClockEvent, EventSource } from "./base";
+import { Clock, ClockEvent } from "./base";
 import { ManualClock } from "./manual";
 
 /**
