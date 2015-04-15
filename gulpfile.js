@@ -141,12 +141,20 @@ gulp.task("demo", ["libjass.js"], function () {
 	return gulp.src(["./lib/libjass.js", "./lib/libjass.js.map", "./lib/libjass.css"]).pipe(gulp.dest("../libjass-gh-pages/demo/"));
 });
 
-gulp.task("doc", ["libjass.js"], function () {
+gulp.task("doc", ["make-doc", "test-doc"]);
+
+gulp.task("make-doc", ["libjass.js"], function () {
 	var Doc = require("./gulplib/doc.js");
 
 	return gulp.src("./src/tsconfig.json")
 		.pipe(Doc("./api.xhtml", "./src/index.ts", "libjass"))
 		.pipe(gulp.dest("../libjass-gh-pages/"));
+});
+
+gulp.task("test-doc", ["make-doc", "libjass.js"], function (callback) {
+	npm.load(function () {
+		npm.commands["run-script"](["test-doc"], callback);
+	});
 });
 
 gulp.task("dist", ["clean", "default", "test", "test-browser", "demo", "doc"], function () {

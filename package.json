@@ -20,13 +20,15 @@
 		"test": "gulp test",
 		"test-lib": "intern-client config=./tests/intern reporters=pretty",
 		"test-minified": "intern-client config=./tests/intern reporters=pretty minified=true",
-		"test-browser": "intern-runner config=./tests/intern"
+		"test-browser": "intern-runner config=./tests/intern",
+		"test-doc": "intern-client config=./tests/intern-doc reporters=pretty"
 	},
 	"devDependencies": {
 		"gulp": "3.x",
 		"intern": "2.x",
 		"npm": "2.x",
 		"pngjs": "0.4.0",
+		"sax": "0.6.x",
 		"typescript": "1.5.0-alpha",
 		"uglify-js": "2.x >=2.4.16",
 		"vinyl": "latest"
