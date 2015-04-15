@@ -179,6 +179,14 @@ export class AutoClock implements Clock {
 	}
 
 	/**
+	 * @param {number} type
+	 * @param {!Function} listener
+	 */
+	addEventListener(type: ClockEvent, listener: Function): void {
+		this._manualClock.addEventListener(type, listener);
+	};
+
+	/**
 	 * @param {number} timeStamp
 	 */
 	private _onTimerTick(timeStamp: number): void {
@@ -231,26 +239,4 @@ export class AutoClock implements Clock {
 			this._nextAnimationFrameRequestId = null;
 		}
 	}
-
-	// EventSource members
-
-	/**
-	 * Not used.
-	 *
-	 * @type {!Map.<T, !Array.<Function>>}
-	 */
-	_eventListeners: Map<ClockEvent, Function[]>;
-
-	/**
-	 * @param {number} type
-	 * @param {!Function} listener
-	 */
-	addEventListener(type: ClockEvent, listener: Function): void {
-		this._manualClock.addEventListener(type, listener);
-	};
-
-	/**
-	 * @type {function(number, Array.<*>)}
-	 */
-	_dispatchEvent: (type: ClockEvent, args: Object[]) => void;
 }

@@ -77,7 +77,7 @@ export enum ClockEvent {
 /**
  * The clock interface. A clock is used by a renderer as a source of {@link libjass.renderers.ClockEvent}s.
  */
-export interface Clock extends EventSource<ClockEvent> {
+export interface Clock {
 	/**
 	 * @type {number}
 	 */

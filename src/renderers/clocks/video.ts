@@ -42,8 +42,6 @@ export class VideoClock implements Clock {
 		video.addEventListener("ratechange", () => this._autoClock.setRate(video.playbackRate), false);
 	}
 
-	// Clock members
-
 	/**
 	 * @type {number}
 	 */
@@ -109,15 +107,6 @@ export class VideoClock implements Clock {
 		return this._autoClock.setEnabled(enabled);
 	}
 
-	// EventSource members
-
-	/**
-	 * Not used.
-	 *
-	 * @type {!Map.<T, !Array.<Function>>}
-	 */
-	_eventListeners: Map<ClockEvent, Function[]>;
-
 	/**
 	 * @param {number} type
 	 * @param {!Function} listener
@@ -125,9 +114,4 @@ export class VideoClock implements Clock {
 	addEventListener(type: ClockEvent, listener: Function): void {
 		this._autoClock.addEventListener(type, listener);
 	}
-
-	/**
-	 * @type {function(number, Array.<*>)}
-	 */
-	_dispatchEvent: (type: ClockEvent, args: Object[]) => void;
 }
