@@ -1,5 +1,9 @@
 dist/
 
+gulplib/doc.js
+gulplib/helpers.js
+gulplib/typescript/*.js
+
 lib/
 !lib/libjass.css
 

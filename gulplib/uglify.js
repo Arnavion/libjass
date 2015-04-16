@@ -25,7 +25,7 @@ var SourceMap = require("uglify-js/node_modules/source-map");
 var UglifyJS = require("uglify-js");
 var Vinyl = require("vinyl");
 
-var Transform = require("./helpers.js").Transform;
+var makeTransform = require("./helpers.js").makeTransform;
 
 var Run = (function () {
 	function Run(entry, outputLibraryName, unusedVarsToIgnore) {
@@ -338,7 +338,7 @@ module.exports = {
 	gulp: function (entry, outputLibraryName, unusedVarsToIgnore) {
 		var run = new Run(entry, outputLibraryName, unusedVarsToIgnore);
 
-		return Transform(function (file) {
+		return makeTransform(function (file) {
 			run.addFile(file);
 		}, function () {
 			run.build(this);
@@ -348,7 +348,7 @@ module.exports = {
 	watch: function (entry, outputLibraryName, unusedVarsToIgnore) {
 		var files = Object.create(null);
 
-		return Transform(function (file) {
+		return makeTransform(function (file) {
 			if (file.path !== "END") {
 				files[file.path] = file;
 			}
@@ -366,7 +366,7 @@ module.exports = {
 		var codeFile = null;
 		var sourceMapFile = null;
 
-		return Transform(function (file) {
+		return makeTransform(function (file) {
 			switch (path.extname(file.path)) {
 				case ".js":
 					codeFile = file;

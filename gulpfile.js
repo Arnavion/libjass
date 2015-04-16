@@ -23,16 +23,13 @@ var path = require("path");
 
 var gulp = require("gulp");
 
-var helpers = require("./gulplib/helpers.js");
-var Transform = helpers.Transform;
-
 (function () {
 	var _TypeScript = null;
 	var _UglifyJS = null;
 	var _npm = null;
 
 	Object.defineProperties(global, {
-		TypeScript: { get: function () { return _TypeScript || (_TypeScript = require("./gulplib/typescript.js")); } },
+		TypeScript: { get: function () { return _TypeScript || (_TypeScript = require("./gulplib/typescript/index.js")); } },
 		UglifyJS: { get: function () { return _UglifyJS || (_UglifyJS = require("./gulplib/uglify.js")); } },
 		npm: { get: function () { return _npm || (_npm = require("npm")); } },
 	});
@@ -40,7 +37,7 @@ var Transform = helpers.Transform;
 
 gulp.task("default", ["libjass.js", "libjass.min.js"]);
 
-gulp.task("libjass.js", function () {
+gulp.task("libjass.js", ["build-gulplib"], function () {
 	if (fs.existsSync("./lib/libjass.js")) {
 		return;
 	}
@@ -74,7 +71,9 @@ gulp.task("clean", function () {
 	});
 });
 
-gulp.task("watch", ["clean"], function (callback) {
+gulp.task("watch", ["clean", "build-gulplib"], function (callback) {
+	var helpers = require("./gulplib/helpers.js");
+
 	npm.load(function () {
 		var testRunning = false;
 		var rerunTest = false;
@@ -105,7 +104,7 @@ gulp.task("watch", ["clean"], function (callback) {
 			.pipe(TypeScript.watch("./src/index.ts", "libjass"))
 			.pipe(UglifyJS.watch("./src/index", "libjass", ["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle"]))
 			.pipe(gulp.dest("./lib"))
-			.pipe(Transform(function (file) {
+			.pipe(helpers.makeTransform(function (file) {
 				if (path.basename(file.path) === "libjass.js") {
 					runTest();
 				}
@@ -147,7 +146,7 @@ gulp.task("make-doc", ["libjass.js"], function () {
 	var Doc = require("./gulplib/doc.js");
 
 	return gulp.src("./src/tsconfig.json")
-		.pipe(Doc("./api.xhtml", "./src/index.ts", "libjass"))
+		.pipe(Doc.gulp("./api.xhtml", "./src/index.ts", "libjass"))
 		.pipe(gulp.dest("../libjass-gh-pages/"));
 });
 
@@ -210,4 +209,15 @@ gulp.task("dist", ["clean", "default", "test", "test-browser", "demo", "doc"], f
 
 	packageJson = JSON.stringify(packageJson, null, "\t");
 	fs.writeFileSync("./dist/package.json", packageJson, { encoding: "utf8" });
+});
+
+gulp.task("build-gulplib", function (callback) {
+	if (fs.existsSync("./gulplib/typescript/index.js") && fs.existsSync("./gulplib/doc.js")) {
+		callback();
+		return;
+	}
+
+	npm.load(function () {
+		npm.commands["run-script"](["build-gulplib"], callback);
+	});
 });
