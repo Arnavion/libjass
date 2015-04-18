@@ -42,7 +42,9 @@ export class AutoClock implements Clock {
 	private _manualClock: ManualClock = new ManualClock();
 
 	private _nextAnimationFrameRequestId: number = null;
-	private _possiblePauseAnimationFrameTimeStamp: number = null;
+
+	private _lastKnownExternalTime: number = null;
+	private _lastKnownExternalTimeObtainedAt: number = null;
 
 	constructor(private _getCurrentTime: () => number, private _currentTimeUpdateMaxDelay: number) { }
 
@@ -199,24 +201,25 @@ export class AutoClock implements Clock {
 		var currentExternalTime = this._getCurrentTime();
 
 		if (!this._manualClock.paused) {
-			if (currentTime !== currentExternalTime) {
-				this._possiblePauseAnimationFrameTimeStamp = null;
-				this._manualClock.tick(currentExternalTime);
-			}
-			else {
-				if (this._possiblePauseAnimationFrameTimeStamp === null) {
-					this._possiblePauseAnimationFrameTimeStamp = timeStamp;
-				}
-				else if (timeStamp - this._possiblePauseAnimationFrameTimeStamp > this._currentTimeUpdateMaxDelay) {
-					this._possiblePauseAnimationFrameTimeStamp = null;
+			if (this._lastKnownExternalTime !== null && currentExternalTime === this._lastKnownExternalTime) {
+				if (timeStamp - this._lastKnownExternalTimeObtainedAt > this._currentTimeUpdateMaxDelay) {
+					this._lastKnownExternalTimeObtainedAt = null;
 					this._manualClock.pause();
 				}
+				else {
+					this._manualClock.tick((timeStamp - this._lastKnownExternalTimeObtainedAt) / 1000 * this._manualClock.rate + this._lastKnownExternalTime);
+				}
+			}
+			else {
+				this._lastKnownExternalTime = currentExternalTime;
+				this._lastKnownExternalTimeObtainedAt = timeStamp;
+				this._manualClock.tick(currentExternalTime);
 			}
 		}
 		else {
 			if (currentTime !== currentExternalTime) {
-				currentTime = currentExternalTime;
-				this._possiblePauseAnimationFrameTimeStamp = null;
+				this._lastKnownExternalTime = currentExternalTime;
+				this._lastKnownExternalTimeObtainedAt = timeStamp;
 				this._manualClock.tick(currentExternalTime);
 			}
 		}
