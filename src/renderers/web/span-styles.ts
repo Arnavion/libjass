@@ -295,9 +295,9 @@ export class SpanStyles {
 				outlineFilter +=
 `	<feMerge result="outline">
 ${ mergeOutlinesFilter }
-</feMerge>
-<feFlood flood-color="${ outlineColor.toString() }" />
-<feComposite operator="in" in2="outline" />
+	</feMerge>
+	<feFlood flood-color="${ outlineColor.toString() }" />
+	<feComposite operator="in" in2="outline" />
 `;
 			}
 
@@ -351,10 +351,10 @@ ${ mergeOutlinesFilter }
 `<filter xmlns="http://www.w3.org/2000/svg" id="${ filterId }" x="-50%" width="200%" y="-50%" height="200%">
 ${ outlineFilter }
 ${ blurFilter }
-<feMerge>
-	<feMergeNode />
-	<feMergeNode in="SourceGraphic" />
-</feMerge>
+	<feMerge>
+		<feMergeNode />
+		<feMergeNode in="SourceGraphic" />
+	</feMerge>
 </filter>
 `;
 
