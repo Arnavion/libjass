@@ -64,9 +64,7 @@ class Walker {
 	constructor(private _compiler: Compiler) {
 		this._typeChecker = _compiler.typeChecker;
 
-		this._globalNS.getMemberFullName = function (member) {
-			return member.name;
-		};
+		this._globalNS.getMemberFullName = member => member.name;
 	}
 
 	walk(sourceFile: ts.SourceFile): void {
@@ -639,9 +637,7 @@ class Walker {
 			return [];
 		}
 
-		return signatureDeclaration.typeParameters.map(function (typeParameter) {
-			return typeParameter.name.text;
-		});
+		return signatureDeclaration.typeParameters.map(typeParameter => typeParameter.name.text);
 	}
 
 	private _getGenericsOfTypeReferenceNode(typeReferenceNode: ts.TypeReferenceNode | ts.HeritageClauseElement): (AST.UnresolvedType | AST.IntrinsicTypeReference)[] {
@@ -843,9 +839,7 @@ class Walker {
 export function walk(compiler: Compiler, root: string, rootNamespaceName: string) {
 	var sourceFiles = compiler.sourceFiles;
 	var rootFileName = ts.normalizeSlashes(path.resolve(root));
-	var rootSourceFile = sourceFiles.filter(function (sourceFile) {
-		return sourceFile.fileName === rootFileName;
-	})[0];
+	var rootSourceFile = sourceFiles.filter(sourceFile => sourceFile.fileName === rootFileName)[0];
 
 	var walker = new Walker(compiler);
 

@@ -112,8 +112,6 @@ export class Compiler {
 const typeScriptModulePath = path.resolve("./node_modules/typescript/bin");
 
 function CompilerHost(): GulpCompilerHost {
-	var _outputCodePath: string = null;
-	var _outputSourceMapPath: string = null;
 	var _outputStream: Transform = null;
 	var _outputPathsRelativeTo: string = null;
 
@@ -147,7 +145,7 @@ function CompilerHost(): GulpCompilerHost {
 			return (text !== undefined) ? ts.createSourceFile(fileName, text, ts.ScriptTarget.ES5) : undefined;
 		},
 
-		getDefaultLibFileName(): string { return path.join(typeScriptModulePath, "lib.dom.d.ts"); },
+		getDefaultLibFileName: () => path.join(typeScriptModulePath, "lib.dom.d.ts"),
 
 		writeFile(fileName: string, data: string, writeByteOrderMark: boolean, onError: (message?: string) => void) {
 			_outputStream.push(new Vinyl({
@@ -157,13 +155,13 @@ function CompilerHost(): GulpCompilerHost {
 			}));
 		},
 
-		getCurrentDirectory(): string { return path.resolve("."); },
+		getCurrentDirectory: () => path.resolve("."),
 
-		getCanonicalFileName(fileName: string): string { return ts.normalizeSlashes(path.resolve(fileName)); },
+		getCanonicalFileName: (fileName: string) => ts.normalizeSlashes(path.resolve(fileName)),
 
-		useCaseSensitiveFileNames(): boolean { return true; },
+		useCaseSensitiveFileNames: () => true,
 
-		getNewLine(): string { return "\n"; },
+		getNewLine: () => "\n",
 	};
 };
 
@@ -177,7 +175,7 @@ function WatchCompilerHost(onChangeCallback: () => void): GulpCompilerHost {
 	var _filesChangedSinceLast: string[] = [];
 
 	var _super_getSourceFile = compilerHost.getSourceFile;
-	compilerHost.getSourceFile = function (fileName, languageVersion, onError) {
+	compilerHost.getSourceFile = (fileName, languageVersion, onError) => {
 		if (fileName in _sourceFiles) {
 			return _sourceFiles[fileName];
 		}
@@ -211,7 +209,7 @@ function WatchCompilerHost(onChangeCallback: () => void): GulpCompilerHost {
 		delete _sourceFiles[fileName];
 
 		if (_filesChangedSinceLast.length === 0) {
-			setTimeout(function () {
+			setTimeout(() => {
 				_filesChangedSinceLast = [];
 
 				_onChangeCallback();
@@ -247,7 +245,7 @@ export function watch(root: string, rootNamespaceName: string) {
 	return makeTransform(function (projectConfigFile: Vinyl) {
 		var self: Transform = this;
 
-		var compile = function () {
+		function compile() {
 			console.log("Compiling " + projectConfigFile.path + "...");
 
 			compiler.compile(projectConfigFile);
@@ -322,9 +320,7 @@ function addJSDocComments(modules: { [name: string]: AST.Module }) {
 				});
 			}
 
-			Object.keys(current.members).forEach(function (memberName) {
-				visitor(current.members[memberName]);
-			});
+			Object.keys(current.members).forEach(memberName => visitor(current.members[memberName]));
 		}
 		else if (current instanceof AST.Enum) {
 			newComments.push("@enum");
@@ -381,7 +377,7 @@ function parseConfigFile(json: { compilerOptions: ts.CompilerOptions }, basePath
 	var fileNames: string[] = [];
 
 	function walk(directory: string) {
-		fs.readdirSync(directory).forEach(function (entry) {
+		fs.readdirSync(directory).forEach(entry => {
 			var entryPath = path.join(directory, entry);
 			var stat = fs.lstatSync(entryPath);
 			if (stat.isFile()) {

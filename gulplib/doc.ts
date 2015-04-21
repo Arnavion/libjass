@@ -39,7 +39,7 @@ function flatten<T>(arr: T[][]): T[] {
 	return result;
 }
 
-var sorter = (function () {
+var sorter = (() => {
 	function visibilitySorter(value1: { isPrivate?: boolean; isProtected?: boolean; }, value2: { isPrivate?: boolean; isProtected?: boolean; }) {
 		if (value1.isPrivate === value2.isPrivate && value1.isProtected === value2.isProtected) {
 			return 0;
@@ -88,7 +88,7 @@ var sorter = (function () {
 
 	var sorters: ((value1: AST.ModuleMember, value2: AST.ModuleMember) => number)[] = [visibilitySorter, typeSorter, nameSorter];
 
-	return function (value1: AST.ModuleMember, value2: AST.ModuleMember) {
+	return (value1: AST.ModuleMember, value2: AST.ModuleMember) => {
 		for (var i = 0; i < sorters.length; i++) {
 			var result = sorters[i](value1, value2);
 
@@ -205,12 +205,10 @@ function toLink(item: AST.ModuleMember | AST.EnumMember | AST.TypeReference): st
 }
 
 function writeDescription(text: string): string {
-	var result = sanitize(text).replace(/\{@link ([^} ]+)\}/g, function (substring, linkTarget) {
-		return `<a href="#${ linkTarget }">${ linkTarget }</a>`;
-	});
+	var result = sanitize(text).replace(/\{@link ([^} ]+)\}/g, (substring, linkTarget) => `<a href="#${ linkTarget }">${ linkTarget }</a>`);
 
 	var inCodeBlock = false;
-	result = result.split("\n").map(function (line) {
+	result = result.split("\n").map(line => {
 		if (line.substr(0, "    ".length) === "    ") {
 			line = line.substr("    ".length);
 
@@ -284,9 +282,7 @@ function functionToHtml(func: AST.Function): string[] {
 
 function interfaceToHtml(interfase: AST.Interface): string[] {
 	var members: AST.InterfaceMember[] = [];
-	Object.keys(interfase.members).forEach(function (memberName) {
-		members.push(interfase.members[memberName]);
-	});
+	Object.keys(interfase.members).forEach(memberName => members.push(interfase.members[memberName]));
 
 	members.sort(sorter);
 
@@ -318,9 +314,7 @@ function interfaceToHtml(interfase: AST.Interface): string[] {
 
 function classToHtml(clazz: AST.Class): string[] {
 	var members: AST.InterfaceMember[] = [];
-	Object.keys(clazz.members).forEach(function (memberName) {
-		members.push(clazz.members[memberName]);
-	});
+	Object.keys(clazz.members).forEach(memberName => members.push(clazz.members[memberName]));
 
 	members.sort(sorter);
 
