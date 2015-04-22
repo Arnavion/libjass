@@ -162,6 +162,7 @@ export class StreamParser {
 	private _minimalDeferred: DeferredPromise<ASS> = new DeferredPromise<ASS>();
 	private _deferred: DeferredPromise<ASS> = new DeferredPromise<ASS>();
 
+	private _shouldSwallowBom: boolean = true;
 	private _currentSectionName: string = null;
 
 	constructor(private _stream: Stream) {
@@ -196,6 +197,12 @@ export class StreamParser {
 		if (line[line.length - 1] === "\r") {
 			line = line.substr(0, line.length - 1);
 		}
+
+		if (line.charCodeAt(0) === 0xfeff && this._shouldSwallowBom) {
+			line = line.substr(1);
+		}
+
+		this._shouldSwallowBom = false;
 
 		if (line === "" || line[0] === ";") {
 			// Ignore empty lines and comments
