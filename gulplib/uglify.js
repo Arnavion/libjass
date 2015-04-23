@@ -142,14 +142,10 @@ var Run = (function () {
 		// Assign IDs to all modules
 		var moduleNames = Object.keys(this._modules);
 		moduleNames.sort(function (name1, name2) { return (name1 === name2) ? 0 : (name1 < name2 ? -1 : 1); });
+		moduleNames.unshift.apply(moduleNames, moduleNames.splice(moduleNames.indexOf(this._entry), 1));
 
-		this._modules[this._entry].id = 0;
-
-		var id = 1;
-		moduleNames.forEach(function (moduleName) {
-			if (moduleName !== _this._entry) {
-				_this._modules[moduleName].id = id++;
-			}
+		moduleNames.forEach(function (moduleName, index) {
+			_this._modules[moduleName].id = index;
 		});
 
 
@@ -158,16 +154,20 @@ var Run = (function () {
 			var module = _this._modules[moduleName];
 
 			module.root.body.forEach(function (statement) {
-				if (
-					statement instanceof UglifyJS.AST_Var &&
-					statement.definitions.length === 1 &&
-					statement.definitions[0].value instanceof UglifyJS.AST_Call &&
-					statement.definitions[0].value.expression.name === "require"
-				) {
-					var importRelativePath = statement.definitions[0].value.args[0].value;
-					var importAbsolutePath = path.join(moduleName, "..", importRelativePath).replace(/\\/g, "/");
-					var stringArg = statement.definitions[0].value.args[0];
-					statement.definitions[0].value.args[0] = new UglifyJS.AST_Number({ start: stringArg.start, end: stringArg.end, value: _this._modules[importAbsolutePath].id });
+				if (statement instanceof UglifyJS.AST_Var && statement.definitions.length === 1) {
+					if (
+						statement.definitions[0].value instanceof UglifyJS.AST_Call &&
+						statement.definitions[0].value.expression.name === "require"
+					) {
+						var importRelativePath = statement.definitions[0].value.args[0].value;
+						var importAbsolutePath = path.join(moduleName, "..", importRelativePath).replace(/\\/g, "/");
+						var stringArg = statement.definitions[0].value.args[0];
+						statement.definitions[0].value.args[0] = new UglifyJS.AST_Number({ start: stringArg.start, end: stringArg.end, value: _this._modules[importAbsolutePath].id });
+					}
+					else if (statement.definitions[0].name.name === "__extends") {
+						var importAbsolutePath = path.join(_this._entry, "..", "utility", "extends").replace(/\\/g, "/");
+						statement.definitions[0].value = UglifyJS.parse('require(' + _this._modules[importAbsolutePath].id + ').__extends').body[0].body;
+					}
 				}
 			});
 
