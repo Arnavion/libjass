@@ -22,9 +22,11 @@ define(["intern!tdd", "intern/chai!assert", "lib/libjass", "require"], function 
 	tdd.suite("Web worker", function () {
 		var workerChannel = null;
 
-		if (libjass.webworker.supported) {
-			workerChannel = libjass.webworker.createWorker(require.toUrl("lib/libjass.js"));
-		}
+		tdd.before(function () {
+			if (libjass.webworker.supported) {
+				workerChannel = libjass.webworker.createWorker(require.toUrl("lib/libjass.js"));
+			}
+		});
 
 		tdd.test("Parse", function () {
 			if (!libjass.webworker.supported) {
