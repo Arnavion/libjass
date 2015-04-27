@@ -28,10 +28,16 @@ import { verboseMode } from "../settings";
 
 import * as parser from "../parser/index";
 import { parseLineIntoTypedTemplate } from "../parser/misc";
-import { ReadableStream } from "./parser/streams";
+import { ReadableStream, TextDecoder, TextDecoderConstructor } from "../parser/streams";
 
 import { Map } from "../utility/map";
 import { Promise } from "../utility/promise";
+
+declare var global: {
+	fetch?(url: string): Promise<{ body: ReadableStream }>;
+	ReadableStream?: { prototype: ReadableStream; };
+	TextDecoder?: TextDecoderConstructor;
+};
 
 /**
  * This class represents an ASS script. It contains the {@link libjass.ScriptProperties}, an array of {@link libjass.Style}s, and an array of {@link libjass.Dialogue}s.
@@ -198,6 +204,14 @@ export class ASS {
 	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 	 */
 	static fromUrl(url: string, type: Format = Format.ASS): Promise<ASS> {
+		if (
+			typeof global.fetch === "function" &&
+			typeof global.ReadableStream === "function" && typeof global.ReadableStream.prototype.getReader === "function" &&
+			typeof global.TextDecoder === "function"
+		) {
+			return global.fetch(url).then(response => ASS.fromReadableStream(response.body, "utf-8", type));
+		}
+
 		var xhr = new XMLHttpRequest();
 		var result = ASS.fromStream(new parser.XhrStream(xhr), type);
 		xhr.open("GET", url, true);
