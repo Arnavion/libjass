@@ -19,10 +19,10 @@
 		"prepublish": "gulp clean default",
 		"build-gulplib": "tsc ./gulplib/typescript/index.ts ./gulplib/doc.ts ./gulplib/typings.d.ts ./node_modules/typescript/bin/typescript.d.ts ./node_modules/typescript/bin/typescript_internal.d.ts -m commonjs -t es5",
 		"test": "gulp test",
-		"test-lib": "intern-client config=./tests/intern reporters=pretty",
-		"test-minified": "intern-client config=./tests/intern reporters=pretty minified=true",
-		"test-browser": "intern-runner config=./tests/intern",
-		"test-doc": "intern-client config=./tests/intern-doc reporters=pretty"
+		"test-lib": "intern-client config=tests/intern reporters=pretty",
+		"test-minified": "intern-client config=tests/intern reporters=pretty minified=true",
+		"test-browser": "intern-runner config=tests/intern",
+		"test-doc": "intern-client config=tests/intern-doc reporters=pretty"
 	},
 	"devDependencies": {
 		"gulp": "3.x",
