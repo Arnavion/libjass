@@ -587,12 +587,12 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 				node.style.webkitAnimationDelay = animationDelays;
 				node.style.animationDelay = animationDelays;
 			}
-
-			for (var i = 0; i < node.children.length; i++) {
-				applyAnimationDelays(<HTMLElement>node.children[i]);
-			}
 		}
 		applyAnimationDelays(result);
+		var animatedDescendants = result.querySelectorAll('[style*="animation:"]');
+		for (var i = 0; i < animatedDescendants.length; i++) {
+			applyAnimationDelays(<HTMLElement>animatedDescendants[i]);
+		}
 
 		var layer = dialogue.layer;
 		var alignment = (result.style.position === "absolute") ? 0 : dialogue.alignment; // Alignment 0 is for absolutely-positioned subs
