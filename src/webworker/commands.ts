@@ -24,4 +24,5 @@
 export enum WorkerCommands {
 	Response = 0,
 	Parse = 1,
+	Ping = 2,
 }

@@ -24,7 +24,7 @@ import { Promise, DeferredPromise } from "../utility/promise";
 
 import { WorkerCommands } from "./commands";
 
-import { getWorkerCommandHandler, serialize, deserialize } from "./misc";
+import { getWorkerCommandHandler, serialize, deserialize, registerWorkerCommand } from "./misc";
 
 /**
  * Represents a communication channel between the host and the web worker. An instance of this class is created by calling {@link libjass.webworker.createWorker}
@@ -215,3 +215,5 @@ export class WorkerChannelImpl implements WorkerChannel {
 		}
 	}
 }
+
+registerWorkerCommand(WorkerCommands.Ping, parameters => new Promise(resolve => resolve()));
