@@ -19,5 +19,5 @@
  */
 
 export { parse } from "./parse";
-export { Stream, StringStream, XhrStream } from "./streams";
+export { BrowserReadableStream, Stream, StringStream, XhrStream } from "./streams";
 export { StreamParser, SrtStreamParser } from "./stream-parsers";

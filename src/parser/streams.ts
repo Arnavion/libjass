@@ -20,6 +20,43 @@
 
 import { Promise, DeferredPromise } from "../utility/promise";
 
+export interface ReadableStream {
+	/**
+	 * @return {!ReadableStreamReader}
+	 */
+	getReader(): ReadableStreamReader;
+}
+
+interface ReadableStreamReader {
+	/**
+	 * @return {!Promise.<{ value?: Uint8Array, done: boolean }>}
+	 */
+	read(): Promise<{ value: Uint8Array; done: boolean; }>;
+}
+
+export interface TextDecoder {
+	/**
+	 * @param {!ArrayBuffer|!ArrayBufferView} input
+	 * @param {{ stream: boolean }} options
+	 * @return {string}
+	 */
+	decode(input: ArrayBuffer | ArrayBufferView, options: { stream: boolean }): string;
+}
+export interface TextDecoderConstructor {
+	new (encoding: string, options: { ignoreBOM: boolean }): TextDecoder;
+
+	/**
+	 * @type {!TextDecoder}
+	 */
+	prototype: TextDecoder;
+}
+
+declare var global: {
+	/**
+	 * @type {!TextDecoderConstructor}
+	 */
+	TextDecoder?: TextDecoderConstructor;
+};
 
 /**
  * An interface for a stream.
@@ -141,6 +178,73 @@ export class XhrStream implements Stream {
 			}
 
 			this._pendingDeferred = null;
+		}
+	}
+}
+
+/**
+ * A {@link libjass.parser.Stream} that reads from a ReadableStream object.
+ *
+ * @param {!ReadableStream} stream
+ * @param {string} encoding
+ */
+export class BrowserReadableStream implements Stream {
+	private _reader: ReadableStreamReader;
+	private _decoder: TextDecoder;
+	private _buffer: string = "";
+	private _pendingDeferred: DeferredPromise<string> = null;
+
+	constructor(stream: ReadableStream, encoding: string) {
+		this._reader = stream.getReader();
+		this._decoder = new global.TextDecoder(encoding, { ignoreBOM: true });
+	}
+
+	/**
+	 * @return {!Promise.<?string>} A promise that will be resolved with the next line, or null if the stream is exhausted.
+	 */
+	nextLine(): Promise<string> {
+		if (this._pendingDeferred !== null) {
+			throw new Error("BrowserReadableStream only supports one pending unfulfilled read at a time.");
+		}
+
+		var deferred = this._pendingDeferred = new DeferredPromise<string>();
+
+		this._tryResolveNextLine();
+
+		return deferred.promise;
+	}
+
+	/**
+	 */
+	private _tryResolveNextLine(): void {
+		var nextNewLinePos = this._buffer.indexOf("\n");
+		if (nextNewLinePos !== -1) {
+			this._pendingDeferred.resolve(this._buffer.substr(0, nextNewLinePos));
+			this._buffer = this._buffer.substr(nextNewLinePos + 1);
+			this._pendingDeferred = null;
+		}
+
+		else {
+			this._reader.read().then(next => {
+				var { value, done } = next;
+
+				if (!done) {
+					this._buffer += this._decoder.decode(value, { stream: true });
+					this._tryResolveNextLine();
+				}
+				else {
+					// No more data.
+					if (this._buffer.length === 0) {
+						this._pendingDeferred.resolve(null);
+					}
+					else {
+						this._pendingDeferred.resolve(this._buffer);
+						this._buffer = "";
+					}
+
+					this._pendingDeferred = null;
+				}
+			});
 		}
 	}
 }
