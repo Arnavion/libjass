@@ -28,6 +28,7 @@ import { verboseMode } from "../settings";
 
 import * as parser from "../parser/index";
 import { parseLineIntoTypedTemplate } from "../parser/misc";
+import { ReadableStream } from "./parser/streams";
 
 import { Map } from "../utility/map";
 import { Promise } from "../utility/promise";
@@ -202,5 +203,17 @@ export class ASS {
 		xhr.open("GET", url, true);
 		xhr.send();
 		return result;
+	}
+
+	/**
+	 * Creates an ASS object from the given ReadableStream.
+	 *
+	 * @param {!ReadableStream} stream
+	 * @param {string="utf-8"} encoding
+	 * @param {number=0} type The type of the script. One of the {@link libjass.Format} constants.
+	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
+	 */
+	static fromReadableStream(stream: ReadableStream, encoding: string = "utf-8", type: Format = Format.ASS): Promise<ASS> {
+		return ASS.fromStream(new parser.BrowserReadableStream(stream, encoding), type);
 	}
 }
