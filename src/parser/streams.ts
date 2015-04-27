@@ -77,7 +77,8 @@ export class StringStream implements Stream {
 /**
  * A {@link libjass.parser.Stream} that reads from an XMLHttpRequest object.
  *
- * @param {!XMLHttpRequest} xhr The XMLHttpRequest object
+ * @param {!XMLHttpRequest} xhr The XMLHttpRequest object. Make sure to not call .open() on this object before passing it in here,
+ * since event handlers cannot be registered after open() has been called.
  */
 export class XhrStream implements Stream {
 	private _readTill: number = 0;
