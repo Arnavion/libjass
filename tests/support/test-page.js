@@ -65,6 +65,8 @@ define([
 	TestPage.prototype.seekAndCompareScreenshot = function (time, filename) {
 		var _this = this;
 
+		filename = path.join(path.dirname(filename), this._remote.session.capabilities.browserName, path.basename(filename));
+
 		return this._remote
 			.execute(function (time) { clock.seek(time); }, [time])
 			.takeScreenshot()
