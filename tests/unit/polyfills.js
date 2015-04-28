@@ -27,14 +27,23 @@ define(["intern!tdd", "intern/chai!assert", "lib/libjass"], function (tdd, asser
 
 			originalSet = libjass.Set;
 
-			if (typeof Set !== "undefined") {
+			var nativeSetShouldBeUsed = typeof Set !== "undefined" && typeof Set.prototype.forEach === "function" && (function () {
+				try {
+					return new Set([1, 2]).size === 2;
+				}
+				catch (ex) {
+					return false;
+				}
+			})();
+
+			if (nativeSetShouldBeUsed) {
 				assert.equal(originalSet, Set, "libjass.Set did not default to the runtime's implementation.");
 			}
 
 			libjass.Set = null;
 			assert.isNotNull(libjass.Set, "libjass.Set actually got set to null instead of SimpleSet.");
 
-			if (typeof Set !== "undefined") {
+			if (nativeSetShouldBeUsed) {
 				assert.notEqual(libjass.Set, originalSet, "libjass.Set is still the runtime's implementation of Set.");
 			}
 		});
@@ -122,14 +131,23 @@ define(["intern!tdd", "intern/chai!assert", "lib/libjass"], function (tdd, asser
 
 			originalMap = libjass.Map;
 
-			if (typeof Map !== "undefined") {
+			var nativeMapShouldBeUsed = typeof Map === "function" && typeof Map.prototype.forEach === "function" && (function () {
+				try {
+					return new Map([[1, "foo"], [2, "bar"]]).size === 2;
+				}
+				catch (ex) {
+					return false;
+				}
+			})();
+
+			if (nativeMapShouldBeUsed) {
 				assert.equal(originalMap, Map, "libjass.Map did not default to the runtime's implementation.");
 			}
 
 			libjass.Map = null;
 			assert.isNotNull(libjass.Map, "libjass.Map actually got set to null instead of SimpleMap.");
 
-			if (typeof Map !== "undefined") {
+			if (nativeMapShouldBeUsed) {
 				assert.notEqual(libjass.Map, originalMap, "libjass.Map is still the runtime's implementation of Map.");
 			}
 		});
