@@ -35,6 +35,7 @@ define(["intern"], function (intern) {
 		tunnel: "NullTunnel",
 		environments: [
 			{ browserName: "chrome" },
+			{ browserName: "firefox" },
 			{ browserName: "internet explorer", version: "11" }
 		],
 	};
