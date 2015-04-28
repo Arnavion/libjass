@@ -43,7 +43,7 @@ define([
 			.setWindowSize(1280, 720)
 			.get(this._pageUrl)
 			.then(pollUntil('return (document.readyState === "complete") ? true : null;'), 100)
-			.executeAsync(function (assUrl, callback) {
+			.executeAsync(function (assUrl, enableSvg, callback) {
 				window.clock = new libjass.renderers.ManualClock();
 				var libjassSubsWrapper = document.querySelector(".libjass-wrapper");
 
@@ -51,14 +51,14 @@ define([
 					libjassSubsWrapper.style.width = ass.properties.resolutionX + "px";
 					libjassSubsWrapper.style.height = ass.properties.resolutionY + "px";
 
-					var renderer = new libjass.renderers.WebRenderer(ass, clock, libjassSubsWrapper);
+					var renderer = new libjass.renderers.WebRenderer(ass, clock, libjassSubsWrapper, { enableSvg: enableSvg });
 					renderer.addEventListener("ready", function () {
 						renderer.resize(ass.properties.resolutionX, ass.properties.resolutionY);
 						clock.pause();
 						callback();
 					});
 				});
-			}, [this._assUrl])
+			}, [this._assUrl, this._remote.session.capabilities.browserName !== "internet explorer"])
 			.then(function () { return _this; });
 	};
 

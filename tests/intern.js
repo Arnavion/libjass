@@ -33,9 +33,10 @@ define(["intern"], function (intern) {
 		],
 		excludeInstrumentation: /^(?:tests|node_modules)[/\\]/,
 		tunnel: "NullTunnel",
-		environments: [{
-			browserName: "chrome",
-		}],
+		environments: [
+			{ browserName: "chrome" },
+			{ browserName: "internet explorer", version: "11" }
+		],
 	};
 
 	if (intern.args.minified === "true") {
