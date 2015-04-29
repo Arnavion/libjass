@@ -32,9 +32,9 @@ class SimplePromise<T> {
 	private _alreadyFulfilledValue: T = null;
 	private _alreadyRejectedReason: any = null;
 
-	constructor(private _resolver: (resolve: (value: T | Promise<T>) => void, reject: (reason: any) => void) => void) {
+	constructor(resolver: (resolve: (value: T | Promise<T>) => void, reject: (reason: any) => void) => void) {
 		try {
-			_resolver(value => this._resolve(value), reason => this._reject(reason));
+			resolver(value => this._resolve(value), reason => this._reject(reason));
 		}
 		catch (ex) {
 			this._reject(ex);
