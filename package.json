@@ -34,5 +34,5 @@
 		"uglify-js": "2.x >=2.4.16",
 		"vinyl": "latest"
 	},
-	"private": "true"
+	"private": true
 }
