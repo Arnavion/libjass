@@ -34,12 +34,12 @@ declare module "path" {
 }
 
 declare module "stream" {
-	export class Transform {
+	export class Transform<T> {
 		constructor(opts?: { objectMode?: boolean; });
 
-		_transform(chunk: any, encoding: string, callback: (error?: Error) => void): void;
+		_transform(chunk: T, encoding: string, callback: (error?: Error) => void): void;
 		_flush(callback: (error?: Error) => void): void;
-		push(chunk: any, encoding?: string): boolean;
+		push(chunk: T, encoding?: string): boolean;
 	}
 }
 

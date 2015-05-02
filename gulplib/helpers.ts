@@ -20,11 +20,11 @@
 
 import { Transform } from "stream";
 
-export function makeTransform<T>(transform: (chunk: any, encoding?: string, callback?: (error?: Error) => void) => void, flush?: (callback?: (error?: Error) => void) => void): Transform {
+export function makeTransform<T>(transform: (chunk: T, encoding?: string, callback?: (error?: Error) => void) => void, flush?: (callback?: (error?: Error) => void) => void): Transform<T> {
 	return new GulpTransformer<T>(transform, flush);
 }
 
-class GulpTransformer<T> extends Transform {
+class GulpTransformer<T> extends Transform<T> {
 	constructor(transform?: (chunk: T, encoding?: string, callback?: (error?: Error) => void) => void, flush?: (callback?: (error?: Error) => void) => void) {
 		super({ objectMode: true });
 

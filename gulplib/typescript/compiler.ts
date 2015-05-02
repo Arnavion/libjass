@@ -29,7 +29,7 @@ import { makeTransform } from "../helpers";
 import { walk } from "./walker";
 
 export interface GulpCompilerHost extends ts.CompilerHost {
-	setOutputStream(outputStream: Transform): void;
+	setOutputStream(outputStream: Transform<Vinyl>): void;
 
 	setOutputPathsRelativeTo(path: string): void;
 }
@@ -68,7 +68,7 @@ export class Compiler {
 		}
 	};
 
-	writeFiles(outputStream: Transform) {
+	writeFiles(outputStream: Transform<Vinyl>) {
 		this._host.setOutputStream(outputStream);
 
 		var emitDiagnostics = this._program.emit().diagnostics;
@@ -112,11 +112,11 @@ export class Compiler {
 const typeScriptModulePath = path.resolve("./node_modules/typescript/bin");
 
 function CompilerHost(): GulpCompilerHost {
-	var _outputStream: Transform = null;
+	var _outputStream: Transform<Vinyl> = null;
 	var _outputPathsRelativeTo: string = null;
 
 	return {
-		setOutputStream(outputStream: Transform): void {
+		setOutputStream(outputStream: Transform<Vinyl>): void {
 			_outputStream = outputStream;
 		},
 
@@ -190,7 +190,7 @@ function WatchCompilerHost(onChangeCallback: () => void): GulpCompilerHost {
 		return result;
 	};
 
-	function watchFile(fileName: string) {
+	function watchFile(fileName: string): void {
 		function watchFileCallback(currentFile: fs.Stats, previousFile: fs.Stats) {
 			if (currentFile.mtime >= previousFile.mtime) {
 				fileChangedCallback(fileName);
@@ -205,7 +205,7 @@ function WatchCompilerHost(onChangeCallback: () => void): GulpCompilerHost {
 		fs.watchFile(fileName, { interval: 500 }, watchFileCallback);
 	}
 
-	function fileChangedCallback(fileName: string) {
+	function fileChangedCallback(fileName: string): void {
 		delete _sourceFiles[fileName];
 
 		if (_filesChangedSinceLast.length === 0) {
@@ -222,11 +222,11 @@ function WatchCompilerHost(onChangeCallback: () => void): GulpCompilerHost {
 	return compilerHost;
 };
 
-export function gulp(root: string, rootNamespaceName: string) {
+export function gulp(root: string, rootNamespaceName: string): Transform<Vinyl> {
 	var compiler = new Compiler();
 
-	return makeTransform(function (projectConfigFile: Vinyl) {
-		var self: Transform = this;
+	return makeTransform(function (projectConfigFile: Vinyl): void {
+		var self: Transform<Vinyl> = this;
 
 		console.log("Compiling " + projectConfigFile.path + "...");
 
@@ -241,9 +241,9 @@ export function gulp(root: string, rootNamespaceName: string) {
 	});
 };
 
-export function watch(root: string, rootNamespaceName: string) {
-	return makeTransform(function (projectConfigFile: Vinyl) {
-		var self: Transform = this;
+export function watch(root: string, rootNamespaceName: string): Transform<Vinyl> {
+	return makeTransform(function (projectConfigFile: Vinyl): void {
+		var self: Transform<Vinyl> = this;
 
 		function compile() {
 			console.log("Compiling " + projectConfigFile.path + "...");
@@ -278,7 +278,7 @@ export function watch(root: string, rootNamespaceName: string) {
 	}, callback => { });
 };
 
-function addJSDocComments(modules: { [name: string]: AST.Module }) {
+function addJSDocComments(modules: { [name: string]: AST.Module }): void {
 	function visitor(current: AST.Module | AST.ModuleMember | AST.InterfaceMember) {
 		if (current instanceof AST.Module) {
 			for (let memberName of Object.keys(current.members)) {

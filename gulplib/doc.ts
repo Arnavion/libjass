@@ -401,8 +401,8 @@ function propertyToHtml(property: AST.Property): string[] {
 export function gulp(outputFilePath: string, root: string, rootNamespaceName: string): any {
 	var compiler = new Compiler();
 
-	return makeTransform(function (file: Vinyl) {
-		var self: Transform = this;
+	return makeTransform(function (file: Vinyl): void {
+		var self: Transform<Vinyl> = this;
 
 		// Compile
 		compiler.compile(file);
