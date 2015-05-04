@@ -129,8 +129,7 @@ gulp.task("test-minified", ["libjass.min.js"], function (callback) {
 });
 
 // Start Selenium server with
-//    java.exe -jar .\selenium-server-standalone-2.45.0.jar "-Dwebdriver.ie.driver=$PWD\IEDriverServer.exe" "-Dwebdriver.chrome.driver=$PWD\chromedriver.exe" '-Dwebdriver.firefox.profile=default'
-// For Nightly, disable e10s for the default profile.
+//    java.exe -jar .\selenium-server-standalone-2.45.0.jar "-Dwebdriver.ie.driver=$PWD\IEDriverServer.exe" "-Dwebdriver.chrome.driver=$PWD\chromedriver.exe"
 gulp.task("test-browser", ["libjass.js"], function (callback) {
 	npm.load(function () {
 		npm.commands["run-script"](["test-browser"], callback);
