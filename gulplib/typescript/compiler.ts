@@ -163,7 +163,7 @@ function CompilerHost(): GulpCompilerHost {
 
 		getNewLine: () => "\n",
 	};
-};
+}
 
 function WatchCompilerHost(onChangeCallback: () => void): GulpCompilerHost {
 	var compilerHost = CompilerHost();
@@ -220,7 +220,7 @@ function WatchCompilerHost(onChangeCallback: () => void): GulpCompilerHost {
 	}
 
 	return compilerHost;
-};
+}
 
 export function gulp(root: string, rootNamespaceName: string): Transform<Vinyl> {
 	var compiler = new Compiler();
@@ -239,7 +239,7 @@ export function gulp(root: string, rootNamespaceName: string): Transform<Vinyl> 
 
 		console.log("Compile succeeded.");
 	});
-};
+}
 
 export function watch(root: string, rootNamespaceName: string): Transform<Vinyl> {
 	return makeTransform(function (projectConfigFile: Vinyl): void {
@@ -276,7 +276,7 @@ export function watch(root: string, rootNamespaceName: string): Transform<Vinyl>
 
 		console.log("Listening for changes...");
 	}, callback => { });
-};
+}
 
 function addJSDocComments(modules: { [name: string]: AST.Module }): void {
 	function visitor(current: AST.Module | AST.ModuleMember | AST.InterfaceMember) {
@@ -394,7 +394,7 @@ function parseConfigFile(json: { compilerOptions: ts.CompilerOptions }, basePath
 	walk(basePath);
 
 	return { options, fileNames };
-};
+}
 
 class FakeSourceFile {
 	public text: string;

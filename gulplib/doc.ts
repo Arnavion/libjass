@@ -882,4 +882,4 @@ export function gulp(outputFilePath: string, root: string, rootNamespaceName: st
 			)]))
 		}));
 	});
-};
+}
