@@ -1,3 +1,17 @@
+### v0.10.0 - 2015/05/05
+- Implemented libjass.renderers.AutoClock, a clock that automatically ticks and generates clock events according to the state of an external driver.
+- Implemented \k
+- libjass.{Set, Map, Promise} can now be set to null to force the use of the polyfills, even if it defaulted to a runtime-provided implementation.
+- Added ASS.fromReadableStream(), a function that can be used to parse ASS from a readable stream such as the response of window.fetch().
+- ASS.fromUrl() now tries to use window.fetch() if available instead of XMLHttpRequest.
+- Fixed constant pausing and playing on Firefox triggered by how slowly it updates video.currentTime (wasn't noticeable but still undesirable).
+- Fixed a dialogue's animation state not getting updated while seeking if the start and end times of the seek were within its start and end times.
+- Fixed wrapping mode 1 (end-of-line wrapping) to actually wrap.
+- Fixed parser to parse the time components of karaoke tags as centiseconds instead of seconds.
+- Fixed parser to swallow leading BOM, if any.
+- Fixed errors reported by webworker API were empty objects without message and stack properties.
+
+
 ### v0.9.0 - 2014/11/27
 - BREAKING CHANGE - ASS.fromString() now returns a Promise of an ASS object, not an ASS object directly. The synchronous ASS parser used by ASS.fromString() is no more.
 - BACKWARD-COMPATIBLE CHANGE - WebRenderer constructor parameters order has changed from (ass, clock, settings, libjassSubsWrapper) to (ass, clock, libjassSubsWrapper, settings). The constructor will detect the old order and reorder accordingly.
