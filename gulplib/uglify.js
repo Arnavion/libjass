@@ -73,9 +73,7 @@ var Run = (function () {
 			'		return require(0);\n' +
 			'	})([\n' +
 			'	]);\n' +
-			'});', {
-			filename: this._outputLibraryName + ".js"
-		});
+			'});');
 
 		this._root.figure_out_scope({ screw_ie8: true });
 
@@ -85,7 +83,7 @@ var Run = (function () {
 
 		this._modules = Object.create(null);
 
-		this._rootSourceMap = new UjsSourceMap(this._outputLibraryName + ".js", "");
+		this._rootSourceMap = UjsSourceMap({ file: this._outputLibraryName + ".js", root: "" });
 	}
 
 	Run.prototype.addFile = function (file) {
@@ -98,12 +96,14 @@ var Run = (function () {
 
 		var module = this._modules[moduleName];
 
-		var filenameForSourceMap = path.relative(path.join(this._entry, ".."), moduleName + ".ts").replace(/\\/g, "/");
+		var filenameWithoutExtension = path.relative(path.join(this._entry, ".."), moduleName).replace(/\\/g, "/");
+		var tsFilename = filenameWithoutExtension + ".ts";
+		var jsFilename = filenameWithoutExtension + ".js";
 
 		switch (path.extname(file.path)) {
 			case ".js":
 				module.root = UglifyJS.parse(file.contents.toString(), {
-					filename: filenameForSourceMap,
+					filename: jsFilename,
 					toplevel: null,
 				});
 
@@ -130,8 +130,11 @@ var Run = (function () {
 				}
 				break;
 			case ".map":
-				this._rootSourceMap.addInput(filenameForSourceMap, fs.readFileSync(moduleName + ".ts", { encoding: "utf8" }), file.contents);
-				module.codeBuffer = undefined;
+				var sourceMapContents = JSON.parse(file.contents.toString());
+				sourceMapContents.sources[0] = tsFilename;
+				sourceMapContents.file = jsFilename;
+				this._rootSourceMap.addInput(sourceMapContents);
+				this._rootSourceMap.get().setSourceContent(tsFilename, fs.readFileSync(moduleName + ".ts", { encoding: "utf8" }));
 				break;
 		}
 	};
@@ -284,7 +287,7 @@ var Run = (function () {
 
 		// Output
 		var output = {
-			source_map: _this._rootSourceMap.asUjsOutputSourceMap(),
+			source_map: _this._rootSourceMap,
 			beautify: true,
 			comments: function (node, comment) {
 				// If this is the first license header, keep it.
@@ -316,7 +319,7 @@ var Run = (function () {
 
 		outputStream.push(new Vinyl({
 			path: _this._outputLibraryName + ".js.map",
-			contents: _this._rootSourceMap.toBuffer()
+			contents: new Buffer(_this._rootSourceMap.get().toString())
 		}));
 
 		// Print unused variables
@@ -510,31 +513,30 @@ module.exports = {
 	}
 };
 
-var UjsSourceMap = (function () {
-	function UjsSourceMap(outputFilename, sourceRoot) {
-		this._outputFilename = outputFilename;
-		this._inputs = Object.create(null);
+function UjsSourceMap(options) {
+	var orig_maps = Object.create(null);
 
-		this._generator = new SourceMap.SourceMapGenerator({
-			file: outputFilename,
-			sourceRoot: sourceRoot,
-		});
-	}
+	var generator = new SourceMap.SourceMapGenerator({
+		file: options.file,
+		sourceRoot: options.root,
+	});
 
-	UjsSourceMap.prototype.addInput = function (codeFilename, code, sourceMapContents) {
-		this._inputs[codeFilename] = new SourceMap.SourceMapConsumer(sourceMapContents.toString());
-		this._generator.setSourceContent(codeFilename, code);
-	};
+	return {
+		addInput: function (rawSourceMap) {
+			var consumer = new SourceMap.SourceMapConsumer(rawSourceMap);
+			orig_maps[consumer.file] = consumer;
+		},
+		add: function (source, gen_line, gen_col, orig_line, orig_col, name) {
+			var originalMap;
+			if (source) {
+				originalMap = orig_maps[source];
+			}
+			else {
+				source = "?";
+			}
 
-	UjsSourceMap.prototype.asUjsOutputSourceMap = function () {
-		var _this = this;
-
-		return {
-			add: function (source, gen_line, gen_col, orig_line, orig_col, name) {
-				if (source === _this._outputFilename || source === "?") {
-					return;
-				}
-				var info = _this._inputs[source].originalPositionFor({
+			if (originalMap) {
+				var info = originalMap.originalPositionFor({
 					line: orig_line,
 					column: orig_col
 				});
@@ -543,24 +545,23 @@ var UjsSourceMap = (function () {
 					return;
 				}
 
-				_this._generator.addMapping({
-					generated: { line: gen_line, column: gen_col },
-					original: { line: info.line, column: info.column },
-					source: source,
-					name: info.name || name
-				});
-			},
-			get: function () { return _this._generator; },
-			toString: function () { return _this._generator.toString(); },
-		};
-	};
+				source = info.source;
+				orig_line = info.line;
+				orig_col = info.column;
+				name = info.name || name;
+			}
 
-	UjsSourceMap.prototype.toBuffer = function () {
-		return new Buffer(this._generator.toString());
+			generator.addMapping({
+				generated : { line: gen_line, column: gen_col },
+				original  : { line: orig_line, column: orig_col },
+				source    : source,
+				name      : name
+			});
+		},
+		get: function () { return generator; },
+		toString: function () { return generator.toString(); },
 	};
-
-	return UjsSourceMap;
-})();
+}
 
 var originalSymbolUnreferenced = UglifyJS.AST_Symbol.prototype.unreferenced;
 
