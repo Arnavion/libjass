@@ -51,7 +51,7 @@ class SimpleMap<K, V> {
 	 * @return {V}
 	 */
 	get(key: K): V {
-		var property = this._keyToProperty(key);
+		const property = this._keyToProperty(key);
 
 		if (property === null) {
 			return undefined;
@@ -65,7 +65,7 @@ class SimpleMap<K, V> {
 	 * @return {boolean}
 	 */
 	has(key: K): boolean {
-		var property = this._keyToProperty(key);
+		const property = this._keyToProperty(key);
 
 		if (property === null) {
 			return false;
@@ -80,7 +80,7 @@ class SimpleMap<K, V> {
 	 * @return {libjass.Map.<K, V>} This map
 	 */
 	set(key: K, value: V): Map<K, V> {
-		var property = this._keyToProperty(key);
+		const property = this._keyToProperty(key);
 
 		if (property === null) {
 			throw new Error("This Map implementation only supports Number and String keys, or keys with an id property.");
@@ -101,13 +101,13 @@ class SimpleMap<K, V> {
 	 * @return {boolean} true if the key was present before being deleted, false otherwise
 	 */
 	delete(key: K): boolean {
-		var property = this._keyToProperty(key);
+		const property = this._keyToProperty(key);
 
 		if (property === null) {
 			return false;
 		}
 
-		var result = property in this._keys;
+		const result = property in this._keys;
 
 		if (result) {
 			delete this._keys[property];
@@ -166,7 +166,7 @@ class SimpleMap<K, V> {
 	}
 }
 
-declare var global: {
+declare const global: {
 	Map?: typeof SimpleMap;
 };
 

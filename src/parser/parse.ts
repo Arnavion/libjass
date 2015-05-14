@@ -24,6 +24,8 @@ import { debugMode } from "../settings";
 
 import { Map } from "../utility/map";
 
+const rules = new Map<string, (parent: ParseNode) => ParseNode>();
+
 /**
  * Parses a given string with the specified rule.
  *
@@ -32,7 +34,7 @@ import { Map } from "../utility/map";
  * @return {*} The value returned depends on the rule used.
  */
 export function parse(input: string, rule: string): any {
-	var run = new ParserRun(input, rule);
+	const run = new ParserRun(input, rule);
 
 	if (run.result === null || run.result.end !== input.length) {
 		if (debugMode) {
@@ -73,19 +75,19 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_dialogueParts(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		current.value = [];
 
 		while (this._haveMore()) {
-			var enclosedTagsNode = this.parse_enclosedTags(current);
+			const enclosedTagsNode = this.parse_enclosedTags(current);
 
 			if (enclosedTagsNode !== null) {
 				current.value.push.apply(current.value, enclosedTagsNode.value);
 			}
 
 			else {
-				var whiteSpaceOrTextNode = this.parse_newline(current) || this.parse_hardspace(current) || this.parse_text(current);
+				const whiteSpaceOrTextNode = this.parse_newline(current) || this.parse_hardspace(current) || this.parse_text(current);
 
 				if (whiteSpaceOrTextNode === null) {
 					parent.pop();
@@ -94,7 +96,7 @@ class ParserRun {
 
 				if (whiteSpaceOrTextNode.value instanceof parts.Text && current.value[current.value.length - 1] instanceof parts.Text) {
 					// Merge consecutive text parts into one part
-					var previousTextPart = <parts.Text>current.value[current.value.length - 1];
+					const previousTextPart = <parts.Text>current.value[current.value.length - 1];
 					current.value[current.value.length - 1] = new parts.Text(previousTextPart.value + (<parts.Text>whiteSpaceOrTextNode.value).value);
 				}
 				else {
@@ -103,7 +105,7 @@ class ParserRun {
 			}
 		}
 
-		var inDrawingMode = false;
+		let inDrawingMode = false;
 
 		current.value.forEach((part: parts.Part, i: number) => {
 			if (part instanceof parts.DrawingMode) {
@@ -123,7 +125,7 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_enclosedTags(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		current.value = [];
 
@@ -132,8 +134,8 @@ class ParserRun {
 			return null;
 		}
 
-		for (var next = this._peek(); this._haveMore() && next !== "}"; next = this._peek()) {
-			var childNode: ParseNode = null;
+		for (let next = this._peek(); this._haveMore() && next !== "}"; next = this._peek()) {
+			let childNode: ParseNode = null;
 
 			if (this.read(current, "\\") !== null) {
 				childNode =
@@ -236,7 +238,7 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_newline(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "\\N") === null) {
 			parent.pop();
@@ -253,7 +255,7 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_hardspace(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "\\h") === null) {
 			parent.pop();
@@ -270,10 +272,10 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_text(parent: ParseNode): ParseNode {
-		var value = this._peek();
+		const value = this._peek();
 
-		var current = new ParseNode(parent);
-		var valueNode = new ParseNode(current, value);
+		const current = new ParseNode(parent);
+		const valueNode = new ParseNode(current, value);
 
 		current.value = new parts.Text(valueNode.value);
 
@@ -285,10 +287,10 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_comment(parent: ParseNode): ParseNode {
-		var value = this._peek();
+		const value = this._peek();
 
-		var current = new ParseNode(parent);
-		var valueNode = new ParseNode(current, value);
+		const current = new ParseNode(parent);
+		const valueNode = new ParseNode(current, value);
 
 		current.value = new parts.Comment(valueNode.value);
 
@@ -300,18 +302,18 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_a(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "a") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var next = this._peek();
+		let next = this._peek();
 
 		switch (next) {
 			case "1":
-				var next2 = this._peek(2);
+				const next2 = this._peek(2);
 
 				switch (next2) {
 					case "10":
@@ -335,9 +337,9 @@ class ParserRun {
 				return null;
 		}
 
-		var valueNode = new ParseNode(current, next);
+		const valueNode = new ParseNode(current, next);
 
-		var value: number = null;
+		let value: number = null;
 		switch (valueNode.value) {
 			case "1":
 				value = 1;
@@ -394,21 +396,21 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_an(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "an") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var next = this._peek();
+		const next = this._peek();
 
 		if (next < "1" || next > "9") {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode = new ParseNode(current, next);
+		const valueNode = new ParseNode(current, next);
 
 		current.value = new parts.Alignment(parseInt(valueNode.value));
 
@@ -420,16 +422,16 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_b(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "b") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode: ParseNode = null;
+		let valueNode: ParseNode = null;
 
-		var next = this._peek();
+		let next = this._peek();
 
 		if (next >= "1" && next <= "9") {
 			next = this._peek(3);
@@ -498,7 +500,7 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_fad(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "fad") === null) {
 			parent.pop();
@@ -510,7 +512,7 @@ class ParserRun {
 			return null;
 		}
 
-		var startNode = this.parse_decimal(current);
+		const startNode = this.parse_decimal(current);
 		if (startNode === null) {
 			parent.pop();
 			return null;
@@ -521,7 +523,7 @@ class ParserRun {
 			return null;
 		}
 
-		var endNode = this.parse_decimal(current);
+		const endNode = this.parse_decimal(current);
 		if (endNode === null) {
 			parent.pop();
 			return null;
@@ -542,7 +544,7 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_fade(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "fade") === null) {
 			parent.pop();
@@ -554,7 +556,7 @@ class ParserRun {
 			return null;
 		}
 
-		var a1Node = this.parse_decimal(current);
+		const a1Node = this.parse_decimal(current);
 		if (a1Node === null) {
 			parent.pop();
 			return null;
@@ -565,7 +567,7 @@ class ParserRun {
 			return null;
 		}
 
-		var a2Node = this.parse_decimal(current);
+		const a2Node = this.parse_decimal(current);
 		if (a2Node === null) {
 			parent.pop();
 			return null;
@@ -576,7 +578,7 @@ class ParserRun {
 			return null;
 		}
 
-		var a3Node = this.parse_decimal(current);
+		const a3Node = this.parse_decimal(current);
 		if (a3Node === null) {
 			parent.pop();
 			return null;
@@ -587,7 +589,7 @@ class ParserRun {
 			return null;
 		}
 
-		var t1Node = this.parse_decimal(current);
+		const t1Node = this.parse_decimal(current);
 		if (t1Node === null) {
 			parent.pop();
 			return null;
@@ -598,7 +600,7 @@ class ParserRun {
 			return null;
 		}
 
-		var t2Node = this.parse_decimal(current);
+		const t2Node = this.parse_decimal(current);
 		if (t2Node === null) {
 			parent.pop();
 			return null;
@@ -609,7 +611,7 @@ class ParserRun {
 			return null;
 		}
 
-		var t3Node = this.parse_decimal(current);
+		const t3Node = this.parse_decimal(current);
 		if (t3Node === null) {
 			parent.pop();
 			return null;
@@ -620,7 +622,7 @@ class ParserRun {
 			return null;
 		}
 
-		var t4Node = this.parse_decimal(current);
+		const t4Node = this.parse_decimal(current);
 		if (t4Node === null) {
 			parent.pop();
 			return null;
@@ -661,16 +663,16 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_fn(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "fn") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode = new ParseNode(current, "");
+		const valueNode = new ParseNode(current, "");
 
-		for (var next = this._peek(); this._haveMore() && next !== "\\" && next !== "}"; next = this._peek()) {
+		for (let next = this._peek(); this._haveMore() && next !== "\\" && next !== "}"; next = this._peek()) {
 			valueNode.value += next;
 		}
 
@@ -729,14 +731,14 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_fsplus(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "fs+") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode = this.parse_decimal(current);
+		const valueNode = this.parse_decimal(current);
 
 		if (valueNode === null) {
 			parent.pop();
@@ -753,14 +755,14 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_fsminus(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "fs-") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode = this.parse_decimal(current);
+		const valueNode = this.parse_decimal(current);
 
 		if (valueNode === null) {
 			parent.pop();
@@ -777,14 +779,14 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_fscx(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "fscx") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode = this.parse_decimal(current);
+		const valueNode = this.parse_decimal(current);
 
 		if (valueNode === null) {
 			parent.pop();
@@ -801,14 +803,14 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_fscy(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "fscy") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode = this.parse_decimal(current);
+		const valueNode = this.parse_decimal(current);
 
 		if (valueNode === null) {
 			parent.pop();
@@ -849,14 +851,14 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_k(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "k") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode = this.parse_decimal(current);
+		const valueNode = this.parse_decimal(current);
 
 		if (valueNode === null) {
 			parent.pop();
@@ -873,14 +875,14 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_K(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "K") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode = this.parse_decimal(current);
+		const valueNode = this.parse_decimal(current);
 
 		if (valueNode === null) {
 			parent.pop();
@@ -897,14 +899,14 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_kf(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "kf") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode = this.parse_decimal(current);
+		const valueNode = this.parse_decimal(current);
 
 		if (valueNode === null) {
 			parent.pop();
@@ -921,14 +923,14 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_ko(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "ko") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode = this.parse_decimal(current);
+		const valueNode = this.parse_decimal(current);
 
 		if (valueNode === null) {
 			parent.pop();
@@ -945,7 +947,7 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_move(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "move") === null) {
 			parent.pop();
@@ -957,7 +959,7 @@ class ParserRun {
 			return null;
 		}
 
-		var x1Node = this.parse_decimal(current);
+		const x1Node = this.parse_decimal(current);
 		if (x1Node === null) {
 			parent.pop();
 			return null;
@@ -968,7 +970,7 @@ class ParserRun {
 			return null;
 		}
 
-		var y1Node = this.parse_decimal(current);
+		const y1Node = this.parse_decimal(current);
 		if (y1Node === null) {
 			parent.pop();
 			return null;
@@ -979,7 +981,7 @@ class ParserRun {
 			return null;
 		}
 
-		var x2Node = this.parse_decimal(current);
+		const x2Node = this.parse_decimal(current);
 		if (x2Node === null) {
 			parent.pop();
 			return null;
@@ -990,14 +992,14 @@ class ParserRun {
 			return null;
 		}
 
-		var y2Node = this.parse_decimal(current);
+		const y2Node = this.parse_decimal(current);
 		if (y2Node === null) {
 			parent.pop();
 			return null;
 		}
 
-		var t1Node: ParseNode = null;
-		var t2Node: ParseNode = null;
+		let t1Node: ParseNode = null;
+		let t2Node: ParseNode = null;
 
 		if (this.read(current, ",") !== null) {
 			t1Node = this.parse_decimal(current);
@@ -1036,7 +1038,7 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_org(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "org") === null) {
 			parent.pop();
@@ -1048,7 +1050,7 @@ class ParserRun {
 			return null;
 		}
 
-		var xNode = this.parse_decimal(current);
+		const xNode = this.parse_decimal(current);
 		if (xNode === null) {
 			parent.pop();
 			return null;
@@ -1059,7 +1061,7 @@ class ParserRun {
 			return null;
 		}
 
-		var yNode = this.parse_decimal(current);
+		const yNode = this.parse_decimal(current);
 		if (yNode === null) {
 			parent.pop();
 			return null;
@@ -1096,7 +1098,7 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_pos(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "pos") === null) {
 			parent.pop();
@@ -1108,7 +1110,7 @@ class ParserRun {
 			return null;
 		}
 
-		var xNode = this.parse_decimal(current);
+		const xNode = this.parse_decimal(current);
 		if (xNode === null) {
 			parent.pop();
 			return null;
@@ -1119,7 +1121,7 @@ class ParserRun {
 			return null;
 		}
 
-		var yNode = this.parse_decimal(current);
+		const yNode = this.parse_decimal(current);
 		if (yNode === null) {
 			parent.pop();
 			return null;
@@ -1140,21 +1142,21 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_q(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "q") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var next = this._peek();
+		const next = this._peek();
 
 		if (next < "0" || next > "3") {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode = new ParseNode(current, next);
+		const valueNode = new ParseNode(current, next);
 
 		current.value = new parts.WrappingStyle(parseInt(valueNode.value));
 
@@ -1166,16 +1168,16 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_r(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "r") === null) {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode = new ParseNode(current, "");
+		const valueNode = new ParseNode(current, "");
 
-		for (var next = this._peek(); this._haveMore() && next !== "\\" && next !== "}"; next = this._peek()) {
+		for (let next = this._peek(); this._haveMore() && next !== "\\" && next !== "}"; next = this._peek()) {
 			valueNode.value += next;
 		}
 
@@ -1210,7 +1212,7 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_tag_t(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, "t") === null) {
 			parent.pop();
@@ -1222,18 +1224,18 @@ class ParserRun {
 			return null;
 		}
 
-		var startNode: ParseNode = null;
-		var endNode: ParseNode = null;
-		var accelNode: ParseNode = null;
+		let startNode: ParseNode = null;
+		let endNode: ParseNode = null;
+		let accelNode: ParseNode = null;
 
-		var firstNode = this.parse_decimal(current);
+		const firstNode = this.parse_decimal(current);
 		if (firstNode !== null) {
 			if (this.read(current, ",") === null) {
 				parent.pop();
 				return null;
 			}
 
-			var secondNode = this.parse_decimal(current);
+			const secondNode = this.parse_decimal(current);
 			if (secondNode !== null) {
 				startNode = firstNode;
 				endNode = secondNode;
@@ -1243,7 +1245,7 @@ class ParserRun {
 					return null;
 				}
 
-				var thirdNode = this.parse_decimal(current);
+				const thirdNode = this.parse_decimal(current);
 				if (thirdNode !== null) {
 					accelNode = thirdNode;
 
@@ -1263,10 +1265,10 @@ class ParserRun {
 			}
 		}
 
-		var transformTags: parts.Part[] = [];
+		const transformTags: parts.Part[] = [];
 
-		for (var next = this._peek(); this._haveMore() && next !== ")" && next !== "}"; next = this._peek()) {
-			var childNode: ParseNode = null;
+		for (let next = this._peek(); this._haveMore() && next !== ")" && next !== "}"; next = this._peek()) {
+			let childNode: ParseNode = null;
 
 			if (this.read(current, "\\") !== null) {
 				childNode =
@@ -1457,9 +1459,9 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_drawingInstructions(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
-		var lastType: string = null;
+		let lastType: string = null;
 
 		current.value = [];
 
@@ -1469,9 +1471,9 @@ class ParserRun {
 				break;
 			}
 
-			var currentType: string = null;
+			let currentType: string = null;
 
-			var typePart = this.parse_text(current);
+			const typePart = this.parse_text(current);
 			if (typePart === null) {
 				parent.pop();
 				return null;
@@ -1498,7 +1500,7 @@ class ParserRun {
 
 			switch (currentType) {
 				case "m":
-					var movePart = this.parse_drawingInstructionMove(current);
+					const movePart = this.parse_drawingInstructionMove(current);
 					if (movePart === null) {
 						parent.pop();
 						return null;
@@ -1508,7 +1510,7 @@ class ParserRun {
 					break;
 
 				case "l":
-					var linePart = this.parse_drawingInstructionLine(current);
+					const linePart = this.parse_drawingInstructionLine(current);
 					if (linePart === null) {
 						parent.pop();
 						return null;
@@ -1518,7 +1520,7 @@ class ParserRun {
 					break;
 
 				case "b":
-					var cubicBezierCurvePart = this.parse_drawingInstructionCubicBezierCurve(current);
+					const cubicBezierCurvePart = this.parse_drawingInstructionCubicBezierCurve(current);
 					if (cubicBezierCurvePart === null) {
 						parent.pop();
 						return null;
@@ -1539,11 +1541,11 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_drawingInstructionMove(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		while (this.read(current, " ") !== null) { }
 
-		var xPart = this.parse_decimal(current);
+		const xPart = this.parse_decimal(current);
 		if (xPart === null) {
 			parent.pop();
 			return null;
@@ -1551,7 +1553,7 @@ class ParserRun {
 
 		while (this.read(current, " ") !== null) { }
 
-		var yPart = this.parse_decimal(current);
+		const yPart = this.parse_decimal(current);
 		if (yPart === null) {
 			parent.pop();
 			return null;
@@ -1567,11 +1569,11 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_drawingInstructionLine(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		while (this.read(current, " ") !== null) { }
 
-		var xPart = this.parse_decimal(current);
+		const xPart = this.parse_decimal(current);
 		if (xPart === null) {
 			parent.pop();
 			return null;
@@ -1579,7 +1581,7 @@ class ParserRun {
 
 		while (this.read(current, " ") !== null) { }
 
-		var yPart = this.parse_decimal(current);
+		const yPart = this.parse_decimal(current);
 		if (yPart === null) {
 			parent.pop();
 			return null;
@@ -1595,11 +1597,11 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_drawingInstructionCubicBezierCurve(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		while (this.read(current, " ") !== null) { }
 
-		var x1Part = this.parse_decimal(current);
+		const x1Part = this.parse_decimal(current);
 		if (x1Part === null) {
 			parent.pop();
 			return null;
@@ -1607,7 +1609,7 @@ class ParserRun {
 
 		while (this.read(current, " ") !== null) { }
 
-		var y1Part = this.parse_decimal(current);
+		const y1Part = this.parse_decimal(current);
 		if (y1Part === null) {
 			parent.pop();
 			return null;
@@ -1615,7 +1617,7 @@ class ParserRun {
 
 		while (this.read(current, " ") !== null) { }
 
-		var x2Part = this.parse_decimal(current);
+		const x2Part = this.parse_decimal(current);
 		if (x2Part === null) {
 			parent.pop();
 			return null;
@@ -1623,7 +1625,7 @@ class ParserRun {
 
 		while (this.read(current, " ") !== null) { }
 
-		var y2Part = this.parse_decimal(current);
+		const y2Part = this.parse_decimal(current);
 		if (y2Part === null) {
 			parent.pop();
 			return null;
@@ -1631,7 +1633,7 @@ class ParserRun {
 
 		while (this.read(current, " ") !== null) { }
 
-		var x3Part = this.parse_decimal(current);
+		const x3Part = this.parse_decimal(current);
 		if (x3Part === null) {
 			parent.pop();
 			return null;
@@ -1639,7 +1641,7 @@ class ParserRun {
 
 		while (this.read(current, " ") !== null) { }
 
-		var y3Part = this.parse_decimal(current);
+		const y3Part = this.parse_decimal(current);
 		if (y3Part === null) {
 			parent.pop();
 			return null;
@@ -1655,12 +1657,12 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_decimalInt32(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
-		var isNegative = this.read(current, "-") !== null;
+		const isNegative = this.read(current, "-") !== null;
 
-		var numberNode = new ParseNode(current, "");
-		for (var next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
+		const numberNode = new ParseNode(current, "");
+		for (let next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
 			numberNode.value += next;
 		}
 
@@ -1669,7 +1671,7 @@ class ParserRun {
 			return null;
 		}
 
-		var value = parseInt(numberNode.value);
+		let value = parseInt(numberNode.value);
 		if (value >= 0xFFFFFFFF) {
 			value = 0xFFFFFFFF;
 		}
@@ -1687,13 +1689,13 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_hexInt32(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
-		var isNegative = this.read(current, "-") !== null;
+		const isNegative = this.read(current, "-") !== null;
 
-		var numberNode = new ParseNode(current, "");
+		const numberNode = new ParseNode(current, "");
 		for (
-			var next = this._peek();
+			let next = this._peek();
 			this._haveMore() && (
 				(next >= "0" && next <= "9") ||
 				(next >= "a" && next <= "f") ||
@@ -1709,7 +1711,7 @@ class ParserRun {
 			return null;
 		}
 
-		var value = parseInt(numberNode.value, 16);
+		let value = parseInt(numberNode.value, 16);
 		if (value >= 0xFFFFFFFF) {
 			value = 0xFFFFFFFF;
 		}
@@ -1727,15 +1729,12 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_decimalOrHexInt32(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
-		var valueNode: ParseNode = null;
-		if (this.read(current, "&H") !== null || this.read(current, "&h") !== null) {
-			valueNode = this.parse_hexInt32(current);
-		}
-		else {
-			valueNode = this.parse_decimalInt32(current);
-		}
+		const valueNode =
+			(this.read(current, "&H") !== null || this.read(current, "&h") !== null) ?
+				 this.parse_hexInt32(current) :
+				 this.parse_decimalInt32(current);
 
 		if (valueNode === null) {
 			parent.pop();
@@ -1752,11 +1751,11 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_decimal(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
-		var negative = (this.read(current, "-") !== null);
+		const negative = (this.read(current, "-") !== null);
 
-		var numericalPart = this.parse_unsignedDecimal(current);
+		const numericalPart = this.parse_unsignedDecimal(current);
 
 		if (numericalPart === null) {
 			parent.pop();
@@ -1777,14 +1776,13 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_unsignedDecimal(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
-		var characteristicNode = new ParseNode(current, "");
+		const characteristicNode = new ParseNode(current, "");
 
-		var mantissaNode: ParseNode = null;
+		let mantissaNode: ParseNode = null;
 
-		var next: string;
-		for (next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
+		for (let next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
 			characteristicNode.value += next;
 		}
 
@@ -1796,7 +1794,7 @@ class ParserRun {
 		if (this.read(current, ".") !== null) {
 			mantissaNode = new ParseNode(current, "");
 
-			for (next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
+			for (let next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
 				mantissaNode.value += next;
 			}
 
@@ -1816,10 +1814,10 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_enableDisable(parent: ParseNode): ParseNode {
-		var next = this._peek();
+		const next = this._peek();
 
 		if (next === "0" || next === "1") {
-			var result = new ParseNode(parent, next);
+			const result = new ParseNode(parent, next);
 			result.value = (result.value === "1");
 
 			return result;
@@ -1833,17 +1831,17 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_color(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		while (this.read(current, "&") !== null || this.read(current, "H") !== null) { }
 
-		var valueNode = this.parse_hexInt32(current);
+		const valueNode = this.parse_hexInt32(current);
 		if (valueNode === null) {
 			parent.pop();
 			return null;
 		}
 
-		var value = valueNode.value;
+		const value = valueNode.value;
 
 		current.value = new parts.Color(
 			value & 0xFF,
@@ -1861,17 +1859,17 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_alpha(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		while (this.read(current, "&") !== null || this.read(current, "H") !== null) { }
 
-		var valueNode = this.parse_hexInt32(current);
+		const valueNode = this.parse_hexInt32(current);
 		if (valueNode === null) {
 			parent.pop();
 			return null;
 		}
 
-		var value = valueNode.value;
+		const value = valueNode.value;
 
 		current.value = 1 - (value & 0xFF) / 0xFF;
 
@@ -1885,15 +1883,15 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	parse_colorWithAlpha(parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
-		var valueNode = this.parse_decimalOrHexInt32(current);
+		const valueNode = this.parse_decimalOrHexInt32(current);
 		if (valueNode === null) {
 			parent.pop();
 			return null;
 		}
 
-		var value = valueNode.value;
+		const value = valueNode.value;
 
 		current.value = new parts.Color(
 			value & 0xFF,
@@ -1942,7 +1940,7 @@ class ParserRun {
 	 * @return {ParseNode}
 	 */
 	private _parse_tag_clip_or_iclip(tagName: string, parent: ParseNode): ParseNode {
-		var current = new ParseNode(parent);
+		const current = new ParseNode(parent);
 
 		if (this.read(current, tagName) === null) {
 			parent.pop();
@@ -1954,14 +1952,14 @@ class ParserRun {
 			return null;
 		}
 
-		var x1Node: ParseNode = null;
-		var x2Node: ParseNode = null;
-		var y1Node: ParseNode = null;
-		var y2Node: ParseNode = null;
-		var scaleNode: ParseNode = null;
-		var commandsNode: ParseNode = null;
+		let x1Node: ParseNode = null;
+		let x2Node: ParseNode = null;
+		let y1Node: ParseNode = null;
+		let y2Node: ParseNode = null;
+		let scaleNode: ParseNode = null;
+		let commandsNode: ParseNode = null;
 
-		var firstNode = this.parse_decimal(current);
+		const firstNode = this.parse_decimal(current);
 
 		if (firstNode !== null) {
 			if (this.read(current, ",") === null) {
@@ -1969,7 +1967,7 @@ class ParserRun {
 				return null;
 			}
 
-			var secondNode = this.parse_decimal(current);
+			const secondNode = this.parse_decimal(current);
 
 			if (secondNode !== null) {
 				x1Node = firstNode;
@@ -2000,7 +1998,7 @@ class ParserRun {
 		else {
 			commandsNode = new ParseNode(current, "");
 
-			for (var next = this._peek(); this._haveMore() && next !== ")" && next !== "}"; next = this._peek()) {
+			for (let next = this._peek(); this._haveMore() && next !== ")" && next !== "}"; next = this._peek()) {
 				commandsNode.value += next;
 			}
 
@@ -2031,15 +2029,15 @@ function makeTagParserFunction(
 	required: boolean
 ): void {
 	(<any>ParserRun.prototype)[`parse_tag_${ tagName }`] = function (parent: ParseNode): ParseNode {
-		var self = <ParserRun>this;
-		var current = new ParseNode(parent);
+		const self = <ParserRun>this;
+		const current = new ParseNode(parent);
 
 		if (self.read(current, tagName) === null) {
 			parent.pop();
 			return null;
 		}
 
-		var valueNode = valueParser.call(self, current);
+		const valueNode = valueParser.call(self, current);
 
 		if (valueNode !== null) {
 			current.value = new tagConstructor(valueNode.value);
@@ -2088,7 +2086,6 @@ makeTagParserFunction("3c", parts.OutlineColor, ParserRun.prototype.parse_color,
 makeTagParserFunction("4a", parts.ShadowAlpha, ParserRun.prototype.parse_alpha, false);
 makeTagParserFunction("4c", parts.ShadowColor, ParserRun.prototype.parse_color, false);
 
-var rules = new Map<string, (parent: ParseNode) => ParseNode>();
 for (let key of Object.keys(ParserRun.prototype)) {
 	if (key.indexOf("parse_") === 0 && typeof (<any>ParserRun.prototype)[key] === "function") {
 		rules.set(key.substr("parse_".length), (<any>ParserRun.prototype)[key]);

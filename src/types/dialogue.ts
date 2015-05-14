@@ -63,7 +63,7 @@ export class Dialogue {
 	constructor(template: Map<string, string>, ass: ASS) {
 		this._id = ++Dialogue._lastDialogueId;
 
-		var style = template.get("Style");
+		const style = template.get("Style");
 		this._style = ass.styles.get(style);
 		if (this._style === undefined) {
 			throw new Error(`Unrecognized style ${ style }`);
@@ -193,7 +193,7 @@ export class Dialogue {
 		});
 
 		if (debugMode) {
-			var possiblyIncorrectParses = this._parts.filter(part => part instanceof parts.Comment && part.value.indexOf("\\") !== -1);
+			const possiblyIncorrectParses = this._parts.filter(part => part instanceof parts.Comment && part.value.indexOf("\\") !== -1);
 			if (possiblyIncorrectParses.length > 0) {
 				console.warn(
 `Possible incorrect parse:

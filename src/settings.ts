@@ -23,14 +23,14 @@
  *
  * @type {boolean}
  */
-export var debugMode: boolean = false;
+export let debugMode: boolean = false;
 
 /**
  * Verbose debug mode. When true, libjass logs some more debug messages. This setting is independent of {@link libjass.debugMode}
  *
  * @type {boolean}
  */
-export var verboseMode: boolean = false;
+export let verboseMode: boolean = false;
 
 /**
  * Sets the debug mode.

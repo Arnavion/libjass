@@ -80,8 +80,8 @@ export class AnimationCollection {
 	 * @param {!Array.<!libjass.renderers.Keyframe>} keyframes
 	 */
 	add(timingFunction: string, keyframes: Keyframe[]): void {
-		var start: number = null;
-		var end: number = null;
+		let start: number = null;
+		let end: number = null;
 
 		for (let keyframe of keyframes) {
 			if (start === null) {
@@ -91,7 +91,7 @@ export class AnimationCollection {
 			end = keyframe.time;
 		}
 
-		var ruleCssText = "";
+		let ruleCssText = "";
 
 		for (let keyframe of keyframes) {
 			ruleCssText +=
@@ -109,7 +109,7 @@ export class AnimationCollection {
 `;
 		}
 
-		var animationName = `animation-${ this._id }-${ this._numAnimations++ }`;
+		const animationName = `animation-${ this._id }-${ this._numAnimations++ }`;
 
 		this._cssText +=
 `@-webkit-keyframes ${ animationName } {

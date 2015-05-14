@@ -197,8 +197,8 @@ export class AutoClock implements Clock {
 			return;
 		}
 
-		var currentTime = this._manualClock.currentTime;
-		var currentExternalTime = this._getCurrentTime();
+		const currentTime = this._manualClock.currentTime;
+		const currentExternalTime = this._getCurrentTime();
 
 		if (!this._manualClock.paused) {
 			if (this._lastKnownExternalTime !== null && currentExternalTime === this._lastKnownExternalTime) {

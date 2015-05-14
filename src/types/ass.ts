@@ -33,7 +33,7 @@ import { ReadableStream, TextDecoder, TextDecoderConstructor } from "../parser/s
 import { Map } from "../utility/map";
 import { Promise } from "../utility/promise";
 
-declare var global: {
+declare const global: {
 	fetch?(url: string): Promise<{ body: ReadableStream }>;
 	ReadableStream?: { prototype: ReadableStream; };
 	TextDecoder?: TextDecoderConstructor;
@@ -126,21 +126,21 @@ export class ASS {
 	 * @param {string} line The line from the script that contains the new style.
 	 */
 	addStyle(line: string): void {
-		var styleLine = parseLineIntoTypedTemplate(line, this._stylesFormatSpecifier);
+		const styleLine = parseLineIntoTypedTemplate(line, this._stylesFormatSpecifier);
 		if (styleLine === null || styleLine.type !== "Style") {
 			return;
 		}
 
-		var styleTemplate = styleLine.template;
+		const styleTemplate = styleLine.template;
 
 		if (verboseMode) {
-			var repr = "";
+			let repr = "";
 			styleTemplate.forEach((value, key) => repr += `${ key } = ${ value }, `);
 			console.log(`Read style: ${ repr }`);
 		}
 
 		// Create the dialogue and add it to the dialogues array
-		var style = new Style(styleTemplate);
+		const style = new Style(styleTemplate);
 		this._styles.set(style.name, style);
 	}
 
@@ -150,15 +150,15 @@ export class ASS {
 	 * @param {string} line The line from the script that contains the new event.
 	 */
 	addEvent(line: string): void {
-		var dialogueLine = parseLineIntoTypedTemplate(line, this._dialoguesFormatSpecifier);
+		const dialogueLine = parseLineIntoTypedTemplate(line, this._dialoguesFormatSpecifier);
 		if (dialogueLine === null || dialogueLine.type !== "Dialogue") {
 			return;
 		}
 
-		var dialogueTemplate = dialogueLine.template;
+		const dialogueTemplate = dialogueLine.template;
 
 		if (verboseMode) {
-			var repr = "";
+			let repr = "";
 			dialogueTemplate.forEach((value, key) => repr += `${ key } = ${ value }, `);
 			console.log(`Read dialogue: ${ repr }`);
 		}
@@ -212,8 +212,8 @@ export class ASS {
 			return global.fetch(url).then(response => ASS.fromReadableStream(response.body, "utf-8", type));
 		}
 
-		var xhr = new XMLHttpRequest();
-		var result = ASS.fromStream(new parser.XhrStream(xhr), type);
+		const xhr = new XMLHttpRequest();
+		const result = ASS.fromStream(new parser.XhrStream(xhr), type);
 		xhr.open("GET", url, true);
 		xhr.send();
 		return result;

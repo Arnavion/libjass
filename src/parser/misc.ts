@@ -29,13 +29,13 @@ import { Map } from "../utility/map";
  * @return {!Property}
  */
 export function parseLineIntoProperty(line: string): Property {
-	var colonPos = line.indexOf(":");
+	const colonPos = line.indexOf(":");
 	if (colonPos === -1) {
 		return null;
 	}
 
-	var name = line.substr(0, colonPos);
-	var value = line.substr(colonPos + 1).replace(/^\s+/, "");
+	const name = line.substr(0, colonPos);
+	const value = line.substr(colonPos + 1).replace(/^\s+/, "");
 
 	return { name, value };
 }
@@ -48,18 +48,18 @@ export function parseLineIntoProperty(line: string): Property {
  * @return {!TypedTemplate}
  */
 export function parseLineIntoTypedTemplate(line: string, formatSpecifier: string[]): TypedTemplate {
-	var property = parseLineIntoProperty(line);
+	const property = parseLineIntoProperty(line);
 	if (property === null) {
 		return null;
 	}
 
-	var value = property.value.split(",");
+	const value = property.value.split(",");
 
 	if (value.length > formatSpecifier.length) {
 		value[formatSpecifier.length - 1] = value.slice(formatSpecifier.length - 1).join(",");
 	}
 
-	var template = new Map<string, string>();
+	const template = new Map<string, string>();
 	formatSpecifier.forEach((formatKey, index) => {
 		template.set(formatKey, value[index]);
 	});

@@ -144,11 +144,11 @@ export class WorkerChannelImpl implements WorkerChannel {
 	 * @return {!Promise.<*>}
 	 */
 	request(command: WorkerCommands, parameters: any): Promise<any> {
-		var deferred = new DeferredPromise<any>();
-		var requestId = ++WorkerChannelImpl._lastRequestId;
+		const deferred = new DeferredPromise<any>();
+		const requestId = ++WorkerChannelImpl._lastRequestId;
 		this._pendingRequests.set(requestId, deferred);
 
-		var requestMessage: WorkerRequestMessage = { requestId, command, parameters };
+		const requestMessage: WorkerRequestMessage = { requestId, command, parameters };
 		this._comm.postMessage(serialize(requestMessage));
 
 		return deferred.promise;
@@ -158,7 +158,7 @@ export class WorkerChannelImpl implements WorkerChannel {
 	 * @param {number} requestId
 	 */
 	cancelRequest(requestId: number): void {
-		var deferred = this._pendingRequests.get(requestId);
+		const deferred = this._pendingRequests.get(requestId);
 		if (deferred === undefined) {
 			return;
 		}
@@ -171,7 +171,7 @@ export class WorkerChannelImpl implements WorkerChannel {
 	 * @param {!WorkerResponseMessage} message
 	 */
 	private _respond(message: WorkerResponseMessage): void {
-		var { requestId, error, result } = message;
+		let { requestId, error, result } = message;
 		if (error instanceof Error) {
 			error = { message: error.message, stack: error.stack };
 		}
@@ -182,12 +182,12 @@ export class WorkerChannelImpl implements WorkerChannel {
 	 * @param {string} rawMessage
 	 */
 	private _onMessage(rawMessage: string): void {
-		var message = <{ command: WorkerCommands }>deserialize(rawMessage);
+		const message = <{ command: WorkerCommands }>deserialize(rawMessage);
 
 		if (message.command === WorkerCommands.Response) {
-			var responseMessage = <WorkerResponseMessage><any>message;
+			const responseMessage = <WorkerResponseMessage><any>message;
 
-			var deferred = this._pendingRequests.get(responseMessage.requestId);
+			const deferred = this._pendingRequests.get(responseMessage.requestId);
 			if (deferred !== undefined) {
 				this._pendingRequests.delete(responseMessage.requestId);
 				if (responseMessage.error === null) {
@@ -199,10 +199,10 @@ export class WorkerChannelImpl implements WorkerChannel {
 			}
 		}
 		else {
-			var requestMessage = <WorkerRequestMessage>message;
-			var requestId = requestMessage.requestId;
+			const requestMessage = <WorkerRequestMessage>message;
+			const requestId = requestMessage.requestId;
 
-			var commandCallback = getWorkerCommandHandler(requestMessage.command);
+			const commandCallback = getWorkerCommandHandler(requestMessage.command);
 			if (commandCallback === undefined) {
 				this._respond({ requestId, error: new Error(`No handler registered for command ${ requestMessage.command }`), result: null });
 				return;

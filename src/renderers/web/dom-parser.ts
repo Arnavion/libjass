@@ -19,7 +19,4 @@
  */
 
 /** @type {!DomParser} */
-export var domParser: DOMParser = null;
-if (typeof DOMParser !== "undefined") {
-	domParser = new DOMParser();
-}
+export const domParser: DOMParser = (typeof DOMParser !== "undefined") ? new DOMParser() : null;

@@ -159,9 +159,9 @@ export class SpanStyles {
 	 * @return {!HTMLSpanElement} The resulting <span> with the CSS styles applied. This may be a wrapper around the input <span> if the styles were applied using SVG filters.
 	 */
 	setStylesOnSpan(span: HTMLSpanElement, animationCollection: AnimationCollection, animationStyleElement: HTMLStyleElement): HTMLSpanElement {
-		var isTextOnlySpan = span.childNodes[0] instanceof Text;
+		const isTextOnlySpan = span.childNodes[0] instanceof Text;
 
-		var fontStyleOrWeight = "";
+		let fontStyleOrWeight = "";
 		if (this._italic) {
 			fontStyleOrWeight += "italic ";
 		}
@@ -171,17 +171,11 @@ export class SpanStyles {
 		else if (this._bold !== false) {
 			fontStyleOrWeight += this._bold + " ";
 		}
-		var fontSize: string;
-		if (isTextOnlySpan) {
-			fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize * this._fontScaleY, this._fontSizeElement)).toFixed(3);
-		}
-		else {
-			fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize, this._fontSizeElement)).toFixed(3);
-		}
-		var lineHeight = (this._scaleY * this._fontSize).toFixed(3);
+		const fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize * (isTextOnlySpan ? this._fontScaleY : 1), this._fontSizeElement)).toFixed(3);
+		const lineHeight = (this._scaleY * this._fontSize).toFixed(3);
 		span.style.font = `${ fontStyleOrWeight }${ fontSize }px/${ lineHeight }px "${ this._fontName }"`;
 
-		var textDecoration = "";
+		let textDecoration = "";
 		if (this._underline) {
 			textDecoration = "underline";
 		}
@@ -190,7 +184,7 @@ export class SpanStyles {
 		}
 		span.style.textDecoration = textDecoration.trim();
 
-		var transform = "";
+		let transform = "";
 		if (isTextOnlySpan) {
 			if (this._fontScaleY !== this._fontScaleX) {
 				transform += `scaleY(${ (this._fontScaleY / this._fontScaleX).toFixed(3) }) `;
@@ -214,8 +208,8 @@ export class SpanStyles {
 			transform += `rotateZ(${ -1 * this._rotationZ }deg) `;
 		}
 		if (this._skewX !== null || this._skewY !== null) {
-			var skewX = SpanStyles._valueOrDefault(this._skewX, 0);
-			var skewY = SpanStyles._valueOrDefault(this._skewY, 0);
+			const skewX = SpanStyles._valueOrDefault(this._skewX, 0);
+			const skewY = SpanStyles._valueOrDefault(this._skewY, 0);
 			transform += `matrix(1, ${ skewY }, ${ skewX }, 1, 0, 0) `;
 		}
 		if (transform !== "") {
@@ -228,35 +222,35 @@ export class SpanStyles {
 
 		span.style.letterSpacing = `${ (this._scaleX * this._letterSpacing).toFixed(3) }px`;
 
-		var primaryColor = this._primaryColor.withAlpha(this._primaryAlpha);
+		const primaryColor = this._primaryColor.withAlpha(this._primaryAlpha);
 		span.style.color = primaryColor.toString();
 
-		var outlineColor = this._outlineColor.withAlpha(this._outlineAlpha);
+		const outlineColor = this._outlineColor.withAlpha(this._outlineAlpha);
 
-		var outlineWidth = this._scaleX * this._outlineWidth;
-		var outlineHeight = this._scaleY * this._outlineHeight;
+		const outlineWidth = this._scaleX * this._outlineWidth;
+		const outlineHeight = this._scaleY * this._outlineHeight;
 
-		var outlineFilter = '';
-		var blurFilter = '';
+		let outlineFilter = '';
+		let blurFilter = '';
+		const filterId = `svg-filter-${ this._id }-${ this._nextFilterId++ }`;
 
 		if (this._settings.enableSvg) {
-			var filterId = `svg-filter-${ this._id }-${ this._nextFilterId++ }`;
-
 			if (outlineWidth > 0 || outlineHeight > 0) {
 				/* Construct an elliptical border by merging together many rectangles. The border is creating using dilate morphology filters, but these only support
 				 * generating rectangles.   http://lists.w3.org/Archives/Public/public-fx/2012OctDec/0003.html
 				 */
 
-				var mergeOutlinesFilter = '';
+				let mergeOutlinesFilter = '';
 
-				var outlineNumber = 0;
+				let outlineNumber = 0;
 
-				var increment = (!this._settings.preciseOutlines && this._gaussianBlur > 0) ? this._gaussianBlur : 1;
+				const increment = (!this._settings.preciseOutlines && this._gaussianBlur > 0) ? this._gaussianBlur : 1;
 
 				((addOutline: (x: number, y: number) => void) => {
 					if (outlineWidth <= outlineHeight) {
 						if (outlineWidth > 0) {
-							for (var x = 0; x <= outlineWidth; x += increment) {
+							let x: number;
+							for (x = 0; x <= outlineWidth; x += increment) {
 								addOutline(x, outlineHeight / outlineWidth * Math.sqrt(outlineWidth * outlineWidth - x * x));
 							}
 							if (x !== outlineWidth + increment) {
@@ -269,7 +263,8 @@ export class SpanStyles {
 					}
 					else {
 						if (outlineHeight > 0) {
-							for (var y = 0; y <= outlineHeight; y += increment) {
+							let y: number;
+							for (y = 0; y <= outlineHeight; y += increment) {
 								addOutline(outlineWidth / outlineHeight * Math.sqrt(outlineHeight * outlineHeight - y * y), y);
 							}
 							if (y !== outlineHeight + increment) {
@@ -306,7 +301,7 @@ ${ mergeOutlinesFilter }
 `	<feGaussianBlur stdDeviation="${ this._gaussianBlur }" />
 `;
 			}
-			for (var i = 0; i < this._blur; i++) {
+			for (let i = 0; i < this._blur; i++) {
 				blurFilter +=
 `	<feConvolveMatrix kernelMatrix="1 2 1 2 4 2 1 2 1" edgeMode="none" />
 `;
@@ -314,12 +309,12 @@ ${ mergeOutlinesFilter }
 		}
 		else {
 			if (outlineWidth > 0 || outlineHeight > 0) {
-				var outlineCssString = "";
+				let outlineCssString = "";
 
 				((addOutline: (x: number, y: number) => void) => {
-					for (var x = 0; x <= outlineWidth; x++) {
-						var maxY = (outlineWidth === 0) ? outlineHeight : outlineHeight * Math.sqrt(1 - ((x * x) / (outlineWidth * outlineWidth)));
-						for (var y = 0; y <= maxY; y++) {
+					for (let x = 0; x <= outlineWidth; x++) {
+						const maxY = (outlineWidth === 0) ? outlineHeight : outlineHeight * Math.sqrt(1 - ((x * x) / (outlineWidth * outlineWidth)));
+						for (let y = 0; y <= maxY; y++) {
 							addOutline(x, y);
 
 							if (x !== 0) {
@@ -343,11 +338,11 @@ ${ mergeOutlinesFilter }
 			}
 		}
 
-		var filterWrapperSpan = document.createElement("span");
+		const filterWrapperSpan = document.createElement("span");
 		filterWrapperSpan.appendChild(span);
 
 		if (outlineFilter !== '' || blurFilter !== '') {
-			var filterString =
+			const filterString =
 `<filter xmlns="http://www.w3.org/2000/svg" id="${ filterId }" x="-50%" width="200%" y="-50%" height="200%">
 ${ outlineFilter }
 ${ blurFilter }
@@ -358,7 +353,7 @@ ${ blurFilter }
 </filter>
 `;
 
-			var filterElement = domParser.parseFromString(filterString, "image/svg+xml").childNodes[0];
+			const filterElement = domParser.parseFromString(filterString, "image/svg+xml").childNodes[0];
 
 			this._svgDefsElement.appendChild(filterElement);
 
@@ -367,8 +362,8 @@ ${ blurFilter }
 		}
 
 		if (this._shadowDepthX !== 0 || this._shadowDepthY !== 0) {
-			var shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
-			var shadowCssString = `${ shadowColor.toString() } ${ (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) }px ${ (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) }px 0px`;
+			const shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
+			const shadowCssString = `${ shadowColor.toString() } ${ (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) }px ${ (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) }px 0px`;
 			if (span.style.textShadow === "") {
 				span.style.textShadow = shadowCssString;
 			}
@@ -394,7 +389,7 @@ ${ blurFilter }
 	 * @return {!HTMLBRElement}
 	 */
 	makeNewLine(): HTMLBRElement {
-		var result = document.createElement("br");
+		const result = document.createElement("br");
 		result.style.lineHeight = `${ (this._scaleY * this._fontSize).toFixed(3) }px`;
 		return result;
 	}
@@ -696,12 +691,12 @@ ${ blurFilter }
 	 * @return {number}
 	 */
 	private static _getFontSize(fontFamily: string, lineHeight: number, fontSizeElement: HTMLDivElement): number {
-		var existingFontSizeMap = SpanStyles._fontSizeCache.get(fontFamily);
+		let existingFontSizeMap = SpanStyles._fontSizeCache.get(fontFamily);
 		if (existingFontSizeMap === undefined) {
 			SpanStyles._fontSizeCache.set(fontFamily, existingFontSizeMap = new Map<number, number>());
 		}
 
-		var existingFontSize = existingFontSizeMap.get(lineHeight);
+		let existingFontSize = existingFontSizeMap.get(lineHeight);
 		if (existingFontSize === undefined) {
 			fontSizeElement.style.fontFamily = fontFamily;
 			fontSizeElement.style.fontSize = `${ lineHeight }px`;

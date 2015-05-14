@@ -77,12 +77,12 @@ export class RendererSettings {
 	 * @return {!Map.<string, !Array.<string>>}
 	 */
 	static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string[]> {
-		var fontMap = new Map<string, string[]>();
+		const fontMap = new Map<string, string[]>();
 
-		var styleSheet = <CSSStyleSheet>linkStyle.sheet;
-		var rules: CSSFontFaceRule[] = Array.prototype.filter.call(styleSheet.cssRules, (rule: CSSRule) => rule.type === CSSRule.FONT_FACE_RULE);
+		const styleSheet = <CSSStyleSheet>linkStyle.sheet;
+		const rules: CSSFontFaceRule[] = Array.prototype.filter.call(styleSheet.cssRules, (rule: CSSRule) => rule.type === CSSRule.FONT_FACE_RULE);
 		for (let rule of rules) {
-			var src = rule.style.getPropertyValue("src");
+			let src = rule.style.getPropertyValue("src");
 			if (!src) {
 				src = rule.cssText.split("\n")
 					.map(line => line.match(/src: ([^;]+);/))
@@ -90,13 +90,12 @@ export class RendererSettings {
 					.map(matches => matches[1])[0];
 			}
 
-			var urls = src.split(/,\s*/).map(url => RendererSettings._stripQuotes(url.match(/^url\((.+)\)$/)[1]));
+			const urls = src.split(/,\s*/).map(url => RendererSettings._stripQuotes(url.match(/^url\((.+)\)$/)[1]));
 			if (urls.length > 0) {
-				var name = RendererSettings._stripQuotes(rule.style.getPropertyValue("font-family"));
-				var existingList = fontMap.get(name);
+				const name = RendererSettings._stripQuotes(rule.style.getPropertyValue("font-family"));
+				let existingList = fontMap.get(name);
 				if (existingList === undefined) {
-					existingList = [];
-					fontMap.set(name, existingList);
+					fontMap.set(name, existingList = []);
 				}
 				existingList.unshift.apply(existingList, urls);
 			}
@@ -116,8 +115,8 @@ export class RendererSettings {
 			object = {};
 		}
 
-		var { fontMap = null, preRenderTime = 5, preciseOutlines = false, enableSvg = true } = <RendererSettings>object;
-		var result = new RendererSettings();
+		const { fontMap = null, preRenderTime = 5, preciseOutlines = false, enableSvg = true } = <RendererSettings>object;
+		const result = new RendererSettings();
 		result.fontMap = fontMap;
 		result.preRenderTime = preRenderTime;
 		result.preciseOutlines = preciseOutlines;

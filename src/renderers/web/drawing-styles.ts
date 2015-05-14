@@ -56,13 +56,13 @@ export class DrawingStyles {
 	 * @return {!SVGSVGElement}
 	 */
 	toSVG(drawingInstructions: parts.DrawingInstructions, fillColor: parts.Color): SVGElement {
-		var scaleFactor = Math.pow(2, this._scale - 1);
-		var scaleX = this._outputScaleX / scaleFactor;
-		var scaleY = this._outputScaleY / scaleFactor;
+		const scaleFactor = Math.pow(2, this._scale - 1);
+		const scaleX = this._outputScaleX / scaleFactor;
+		const scaleY = this._outputScaleY / scaleFactor;
 
-		var path = "";
-		var bboxWidth = 0;
-		var bboxHeight = 0;
+		let path = "";
+		let bboxWidth = 0;
+		let bboxHeight = 0;
 
 		for (let instruction of drawingInstructions.instructions) {
 			if (instruction instanceof parts.drawing.MoveInstruction) {
@@ -82,7 +82,7 @@ export class DrawingStyles {
 			}
 		}
 
-		var result =
+		const result =
 `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="${ (bboxWidth * scaleX).toFixed(3) }px" height="${ (bboxHeight * scaleY).toFixed(3) }px">
 <g transform="scale(${ scaleX.toFixed(3) } ${ scaleY.toFixed(3) })">
 	<path d="${ path }" fill="${ fillColor.toString() }" />

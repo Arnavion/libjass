@@ -38,7 +38,7 @@ export class EventSource<T> {
 	 * @param {!Function} listener The listener
 	 */
 	addEventListener(type: T, listener: Function): void {
-		var listeners = this._eventListeners.get(type);
+		let listeners = this._eventListeners.get(type);
 
 		if (listeners === undefined) {
 			this._eventListeners.set(type, listeners = []);
@@ -54,7 +54,7 @@ export class EventSource<T> {
 	 * @param {!Array.<*>} args Arguments for the listeners of the event
 	 */
 	_dispatchEvent(type: T, args: Object[]): void {
-		var listeners = this._eventListeners.get(type);
+		const listeners = this._eventListeners.get(type);
 		if (listeners !== undefined) {
 			for (let listener of listeners) {
 				listener.apply(this, args);

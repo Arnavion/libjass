@@ -152,7 +152,7 @@ export class NullRenderer {
 	 * Runs when the clock's current time changed. This might be a result of either regular playback or seeking.
 	 */
 	protected _onClockTick(): void {
-		var currentTime = this._clock.currentTime;
+		const currentTime = this._clock.currentTime;
 
 		if (verboseMode) {
 			console.log(`NullRenderer._onClockTick: currentTime = ${ currentTime }`);

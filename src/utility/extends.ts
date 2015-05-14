@@ -25,7 +25,7 @@
  * @param {!Function} base
  */
 export function __extends(derived: any, base: any): void {
-	for (var property in base) {
+	for (const property in base) {
 		if (base.hasOwnProperty(property)) {
 			derived[property] = base[property];
 		}

@@ -49,7 +49,7 @@ export { Style } from "./types/style";
 
 export { BorderStyle, Format, WrappingStyle } from "./types/misc";
 
-declare var exports: any;
+declare const exports: any;
 
 Object.defineProperties(exports, {
 	debugMode: {

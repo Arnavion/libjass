@@ -85,13 +85,13 @@ export interface TypedTemplate {
  * @return {T}
  */
 export function valueOrDefault<T>(template: Map<string, string>, key: string, converter: (str: string) => T, validator: (value: T) => boolean, defaultValue: string): T {
-	var value = template.get(key);
+	const value = template.get(key);
 	if (value === undefined) {
 		return converter(defaultValue);
 	}
 
 	try {
-		var numValue = converter(value);
+		const numValue = converter(value);
 
 		if (validator !== null && !validator(numValue)) {
 			throw new Error("Validation failed.");

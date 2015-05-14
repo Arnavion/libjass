@@ -100,7 +100,7 @@ export class StreamParser {
 		else {
 			switch (this._currentSectionName) {
 				case "Script Info":
-					var property = parseLineIntoProperty(line);
+					const property = parseLineIntoProperty(line);
 					if (property !== null) {
 						switch (property.name) {
 							case "PlayResX":
@@ -121,7 +121,7 @@ export class StreamParser {
 
 				case "V4+ Styles":
 					if (this._ass.stylesFormatSpecifier === null) {
-						var property = parseLineIntoProperty(line);
+						const property = parseLineIntoProperty(line);
 						if (property !== null && property.name === "Format") {
 							this._ass.stylesFormatSpecifier = property.value.split(",").map(str => str.trim());
 						}
@@ -136,7 +136,7 @@ export class StreamParser {
 
 				case "Events":
 					if (this._ass.dialoguesFormatSpecifier === null) {
-						var property = parseLineIntoProperty(line);
+						const property = parseLineIntoProperty(line);
 						if (property !== null && property.name === "Format") {
 							this._ass.dialoguesFormatSpecifier = property.value.split(",").map(str => str.trim());
 						}
@@ -181,7 +181,7 @@ export class SrtStreamParser {
 		this._ass.properties.wrappingStyle = 1;
 		this._ass.properties.scaleBorderAndShadow = true;
 
-		var newStyle = new Style(new Map([["Name", "Default"]]));
+		const newStyle = new Style(new Map([["Name", "Default"]]));
 		this._ass.styles.set(newStyle.name, newStyle);
 	}
 
@@ -233,7 +233,7 @@ export class SrtStreamParser {
 				}
 			}
 			else if (this._currentDialogueStart === null && this._currentDialogueEnd === null) {
-				var match = /^(\d\d:\d\d:\d\d,\d\d\d) --> (\d\d:\d\d:\d\d,\d\d\d)/.exec(line);
+				const match = /^(\d\d:\d\d:\d\d,\d\d\d) --> (\d\d:\d\d:\d\d,\d\d\d)/.exec(line);
 				if (match !== null) {
 					this._currentDialogueStart = match[1].replace(",", ".");
 					this._currentDialogueEnd = match[2].replace(",", ".");

@@ -18,6 +18,15 @@
  * limitations under the License.
  */
 
+declare const global: {
+	Promise?: typeof SimplePromise;
+	MutationObserver?: typeof MutationObserver;
+	WebkitMutationObserver?: typeof MutationObserver;
+	process?: {
+		nextTick(callback: () => void): void;
+	}
+};
+
 /**
  * Promise implementation for browsers that don't support it.
  *
@@ -62,7 +71,7 @@ class SimplePromise<T> {
 			rejectedHandler = (reason): U => { throw reason; };
 		}
 
-		var result = new Promise<U>((resolve, reject) => {
+		const result = new Promise<U>((resolve, reject) => {
 			this._thens.push({
 				propagateFulfilling: value => {
 					try {
@@ -156,9 +165,9 @@ class SimplePromise<T> {
 	 */
 	static all<T>(values: (T | Promise<T>)[]): Promise<T[]> {
 		return new Promise<T[]>((resolve, reject) => {
-			var result: T[] = [];
+			const result: T[] = [];
 
-			var numUnresolved = values.length;
+			let numUnresolved = values.length;
 			if (numUnresolved === 0) {
 				resolve(result);
 				return;
@@ -179,14 +188,14 @@ class SimplePromise<T> {
 	 * @param {T|!Promise.<T>} value
 	 */
 	private _resolve(value: T | Promise<T>): void {
-		var alreadyCalled = false;
+		let alreadyCalled = false;
 
 		try {
 			if (value === this) {
 				throw new TypeError("2.3.1");
 			}
 
-			var thenMethod = SimplePromise._getThenMethod<T>(value);
+			const thenMethod = SimplePromise._getThenMethod<T>(value);
 			if (thenMethod === null) {
 				this._fulfill(<T>value);
 				return;
@@ -261,7 +270,7 @@ class SimplePromise<T> {
 			return null;
 		}
 
-		var then: any = obj.then;
+		const then: any = obj.then;
 		if (typeof then !== "function") {
 			return null;
 		}
@@ -287,13 +296,13 @@ class SimplePromise<T> {
 
 			if (this._state === SimplePromiseState.FULFILLED) {
 				while (this._thens.length > 0) {
-					var nextThen = this._thens.shift();
+					const nextThen = this._thens.shift();
 					nextThen.propagateFulfilling(this._alreadyFulfilledValue);
 				}
 			}
 			else if (this._state === SimplePromiseState.REJECTED) {
 				while (this._thens.length > 0) {
-					var nextThen = this._thens.shift();
+					const nextThen = this._thens.shift();
 					nextThen.propagateRejection(this._alreadyRejectedReason);
 				}
 			}
@@ -302,21 +311,20 @@ class SimplePromise<T> {
 
 	// Based on https://github.com/petkaantonov/bluebird/blob/1b1467b95442c12378d0ea280ede61d640ab5510/src/schedule.js
 	private static _nextTick: (callback: () => void) => void = (function () {
-		var MutationObserver = global.MutationObserver || global.WebkitMutationObserver;
+		const MutationObserver = global.MutationObserver || global.WebkitMutationObserver;
 		if (global.process !== undefined && typeof global.process.nextTick === "function") {
 			return (callback: () => void) => {
 				global.process.nextTick(callback);
 			};
 		}
 		else if (MutationObserver !== undefined) {
-			var pending: (() => void)[] = [];
-			var currentlyPending = false;
+			const pending: (() => void)[] = [];
+			let currentlyPending = false;
 
-			var div = document.createElement("div");
+			const div = document.createElement("div");
 
-			var observer = new MutationObserver(() => {
-				var processing = pending;
-				pending = [];
+			const observer = new MutationObserver(() => {
+				const processing = pending.splice(0, pending.length);
 
 				for (let callback of processing) {
 					callback();
@@ -355,15 +363,6 @@ enum SimplePromiseState {
 	FULFILLED = 1,
 	REJECTED = 2,
 }
-
-declare var global: {
-	Promise?: typeof SimplePromise;
-	MutationObserver?: typeof MutationObserver;
-	WebkitMutationObserver?: typeof MutationObserver;
-	process?: {
-		nextTick(callback: () => void): void;
-	}
-};
 
 export interface Promise<T> {
 	/**

@@ -50,7 +50,7 @@ class SimpleSet<T> {
 	 * @return {libjass.Set.<T>} This set
 	 */
 	add(value: T): Set<T> {
-		var property = this._toProperty(value);
+		const property = this._toProperty(value);
 
 		if (property === null) {
 			throw new Error("This Set implementation only supports Number and String values.");
@@ -77,7 +77,7 @@ class SimpleSet<T> {
 	 * @return {boolean}
 	 */
 	has(value: T): boolean {
-		var property = this._toProperty(value);
+		const property = this._toProperty(value);
 
 		if (property === null) {
 			return false;
@@ -92,7 +92,7 @@ class SimpleSet<T> {
 	 */
 	forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void {
 		for (let property of Object.keys(this._elements)) {
-			var element = this._elements[property];
+			const element = this._elements[property];
 			callbackfn.call(thisArg, element, element, this);
 		}
 	}
@@ -123,7 +123,7 @@ class SimpleSet<T> {
 	}
 }
 
-declare var global: {
+declare const global: {
 	Set?: typeof SimpleSet;
 };
 

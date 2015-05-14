@@ -68,7 +68,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	constructor(ass: ASS, clock: Clock, private _libjassSubsWrapper: HTMLDivElement, settings?: RendererSettings) {
 		super(ass, clock, (() => {
 			if (!(_libjassSubsWrapper instanceof HTMLDivElement)) {
-				var temp = settings;
+				const temp = settings;
 				settings = <any>_libjassSubsWrapper;
 				_libjassSubsWrapper = <any>temp;
 				console.warn("WebRenderer's constructor now takes libjassSubsWrapper as the third parameter and settings as the fourth parameter. Please update the caller.");
@@ -93,7 +93,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		this._animationStyleElement.type = "text/css";
 		document.querySelector("head").appendChild(this._animationStyleElement);
 
-		var svgElement = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		const svgElement = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
 		this._libjassSubsWrapper.appendChild(svgElement);
 		svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 		svgElement.setAttribute("version", "1.1");
@@ -106,7 +106,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		// Preload fonts
 
-		var urlsToPreload = new Set<string>();
+		const urlsToPreload = new Set<string>();
 		if (this.settings.fontMap !== null) {
 			this.settings.fontMap.forEach(srcs => {
 				for (let src of srcs) {
@@ -119,10 +119,10 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			console.log(`Preloading ${ urlsToPreload.size } fonts...`);
 		}
 
-		var xhrPromises: Promise<void>[] = [];
+		const xhrPromises: Promise<void>[] = [];
 		urlsToPreload.forEach(url => {
 			xhrPromises.push(new Promise<void>((resolve, reject) => {
-				var xhr = new XMLHttpRequest();
+				const xhr = new XMLHttpRequest();
 				xhr.addEventListener("load", () => {
 					if (debugMode) {
 						console.log(`Preloaded ${ url }.`);
@@ -160,9 +160,9 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	resize(width: number, height: number): void {
 		this._removeAllSubs();
 
-		var ratio = Math.min(width / this.ass.properties.resolutionX, height / this.ass.properties.resolutionY);
-		var subsWrapperWidth = this.ass.properties.resolutionX * ratio;
-		var subsWrapperHeight = this.ass.properties.resolutionY * ratio;
+		const ratio = Math.min(width / this.ass.properties.resolutionX, height / this.ass.properties.resolutionY);
+		const subsWrapperWidth = this.ass.properties.resolutionX * ratio;
+		const subsWrapperHeight = this.ass.properties.resolutionY * ratio;
 		this._subsWrapper.style.width = `${ subsWrapperWidth.toFixed(3) }px`;
 		this._subsWrapper.style.height = `${ subsWrapperHeight.toFixed(3) }px`;
 		this._subsWrapper.style.left = `${ ((width - subsWrapperWidth) / 2).toFixed(3) }px`;
@@ -200,22 +200,22 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			return;
 		}
 
-		var sub = document.createElement("div");
+		const sub = document.createElement("div");
 
 		sub.style.marginLeft = `${ (this._scaleX * dialogue.style.marginLeft).toFixed(3) }px`;
 		sub.style.marginRight = `${ (this._scaleX * dialogue.style.marginRight).toFixed(3) }px`;
 		sub.style.marginTop = sub.style.marginBottom = `${ (this._scaleY * dialogue.style.marginVertical).toFixed(3) }px`;
 		sub.style.minWidth = `${ (this._subsWrapper.offsetWidth - this._scaleX * (dialogue.style.marginLeft + dialogue.style.marginRight)).toFixed(3) }px`;
 
-		var dialogueAnimationCollection = new AnimationCollection(this);
+		const dialogueAnimationCollection = new AnimationCollection(this);
 
-		var currentSpan: HTMLSpanElement = null;
-		var currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, this._svgDefsElement);
+		let currentSpan: HTMLSpanElement = null;
+		const currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, this._svgDefsElement);
 
-		var currentAnimationCollection: AnimationCollection = null;
+		let currentAnimationCollection: AnimationCollection = null;
 
-		var previousAddNewLine = false; // If two or more \N's are encountered in sequence, then all but the first will be created using currentSpanStyles.makeNewLine() instead
-		var startNewSpan = (addNewLine: boolean): void => {
+		let previousAddNewLine = false; // If two or more \N's are encountered in sequence, then all but the first will be created using currentSpanStyles.makeNewLine() instead
+		const startNewSpan = (addNewLine: boolean): void => {
 			if (currentSpan !== null && currentSpan.textContent !== "") {
 				sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan, currentAnimationCollection, this._animationStyleElement));
 			}
@@ -240,11 +240,11 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		};
 		startNewSpan(false);
 
-		var currentDrawingStyles: DrawingStyles = new DrawingStyles(this._scaleX, this._scaleY);
+		const currentDrawingStyles: DrawingStyles = new DrawingStyles(this._scaleX, this._scaleY);
 
-		var wrappingStyle = this.ass.properties.wrappingStyle;
+		let wrappingStyle = this.ass.properties.wrappingStyle;
 
-		var karaokeTimesAccumulator = 0;
+		let karaokeTimesAccumulator = 0;
 
 		for (let part of dialogue.parts) {
 			if (part instanceof parts.Italic) {
@@ -493,10 +493,10 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		for (let part of dialogue.parts) {
 			if (part instanceof parts.Position || part instanceof parts.Move) {
-				var transformOrigin = WebRenderer._transformOrigins[dialogue.alignment];
+				const transformOrigin = WebRenderer._transformOrigins[dialogue.alignment];
 
-				var divTransformStyle = `translate(${ -transformOrigin[0] }%, ${ -transformOrigin[1] }%) translate(-${ sub.style.marginLeft }, -${ sub.style.marginTop })`;
-				var transformOriginString = `${ transformOrigin[0] }% ${ transformOrigin[1] }%`;
+				const divTransformStyle = `translate(${ -transformOrigin[0] }%, ${ -transformOrigin[1] }%) translate(-${ sub.style.marginLeft }, -${ sub.style.marginTop })`;
+				const transformOriginString = `${ transformOrigin[0] }% ${ transformOrigin[1] }%`;
 
 				sub.style.webkitTransform = divTransformStyle;
 				sub.style.webkitTransformOrigin = transformOriginString;
@@ -558,7 +558,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			console.log(dialogue.toString());
 		}
 
-		var preRenderedSub = this._preRenderedSubs.get(dialogue.id);
+		let preRenderedSub = this._preRenderedSubs.get(dialogue.id);
 
 		if (preRenderedSub === undefined) {
 			if (debugMode) {
@@ -573,14 +573,14 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 		}
 
-		var result = <HTMLDivElement>preRenderedSub.sub.cloneNode(true);
+		const result = <HTMLDivElement>preRenderedSub.sub.cloneNode(true);
 
-		var applyAnimationDelays = (node: HTMLElement) => {
-			var animationNames = node.style.animationName || node.style.webkitAnimationName;
+		const applyAnimationDelays = (node: HTMLElement) => {
+			const animationNames = node.style.animationName || node.style.webkitAnimationName;
 			if (animationNames !== undefined && animationNames !== "") {
-				var animationDelays = animationNames.split(",").map(name => {
+				const animationDelays = animationNames.split(",").map(name => {
 					name = name.trim();
-					var delay = preRenderedSub.animationDelays.get(name);
+					const delay = preRenderedSub.animationDelays.get(name);
 					return `${ ((delay + dialogue.start - this.clock.currentTime) / this.clock.rate).toFixed(3) }s`;
 				}).join(", ");
 
@@ -589,22 +589,22 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 		}
 		applyAnimationDelays(result);
-		var animatedDescendants = result.querySelectorAll('[style*="animation:"]');
-		for (var i = 0; i < animatedDescendants.length; i++) {
+		const animatedDescendants = result.querySelectorAll('[style*="animation:"]');
+		for (let i = 0; i < animatedDescendants.length; i++) {
 			applyAnimationDelays(<HTMLElement>animatedDescendants[i]);
 		}
 
-		var layer = dialogue.layer;
-		var alignment = (result.style.position === "absolute") ? 0 : dialogue.alignment; // Alignment 0 is for absolutely-positioned subs
+		const layer = dialogue.layer;
+		const alignment = (result.style.position === "absolute") ? 0 : dialogue.alignment; // Alignment 0 is for absolutely-positioned subs
 
 		// Create the layer wrapper div and the alignment div inside it if not already created
 		if (this._layerWrappers[layer] === undefined) {
-			var layerWrapper = document.createElement("div");
+			const layerWrapper = document.createElement("div");
 			layerWrapper.className = `layer layer${ layer }`;
 
 			// Find the next greater layer div and insert this div before that one
-			var insertBeforeElement: HTMLDivElement = null;
-			for (var insertBeforeLayer = layer + 1; insertBeforeLayer < this._layerWrappers.length && insertBeforeElement === null; insertBeforeLayer++) {
+			let insertBeforeElement: HTMLDivElement = null;
+			for (let insertBeforeLayer = layer + 1; insertBeforeLayer < this._layerWrappers.length && insertBeforeElement === null; insertBeforeLayer++) {
 				if (this._layerWrappers[insertBeforeLayer] !== undefined) {
 					insertBeforeElement = this._layerWrappers[insertBeforeLayer];
 				}
@@ -617,13 +617,13 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		}
 
 		if (this._layerAlignmentWrappers[layer][alignment] === undefined) {
-			var layerAlignmentWrapper = document.createElement("div");
+			const layerAlignmentWrapper = document.createElement("div");
 			layerAlignmentWrapper.className = `an an${ alignment }`;
 
 			// Find the next greater layer,alignment div and insert this div before that one
-			var layerWrapper = this._layerWrappers[layer];
-			var insertBeforeElement: HTMLDivElement = null;
-			for (var insertBeforeAlignment = alignment + 1; insertBeforeAlignment < this._layerAlignmentWrappers[layer].length && insertBeforeElement === null; insertBeforeAlignment++) {
+			const layerWrapper = this._layerWrappers[layer];
+			let insertBeforeElement: HTMLDivElement = null;
+			for (let insertBeforeAlignment = alignment + 1; insertBeforeAlignment < this._layerAlignmentWrappers[layer].length && insertBeforeElement === null; insertBeforeAlignment++) {
 				if (this._layerAlignmentWrappers[layer][insertBeforeAlignment] !== undefined) {
 					insertBeforeElement = this._layerAlignmentWrappers[layer][insertBeforeAlignment];
 				}
@@ -652,7 +652,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	protected _onClockTick(): void {
 		// Remove dialogues that should be removed before adding new ones via super._onClockTick()
 
-		var currentTime = this.clock.currentTime;
+		const currentTime = this.clock.currentTime;
 
 		this._currentSubs.forEach((sub: HTMLDivElement, dialogue: Dialogue) => {
 			if (dialogue.start > currentTime || dialogue.end < currentTime) {

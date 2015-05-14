@@ -1279,9 +1279,9 @@ export class DrawingInstructions {
 	}
 }
 
-var addToString = function (ctor: Function, ctorName: string) {
+const addToString = function (ctor: Function, ctorName: string) {
 	if (!ctor.prototype.hasOwnProperty("toString")) {
-		var propertyNames = Object.getOwnPropertyNames(ctor.prototype).filter(property => property !== "constructor");
+		const propertyNames = Object.getOwnPropertyNames(ctor.prototype).filter(property => property !== "constructor");
 
 		ctor.prototype.toString = function () {
 			return (
@@ -1296,10 +1296,10 @@ var addToString = function (ctor: Function, ctorName: string) {
 
 import { registerClassPrototype } from "../webworker/misc";
 
-declare var exports: any;
+declare const exports: any;
 
 for (let key of Object.keys(exports)) {
-	var value: any = exports[key];
+	const value: any = exports[key];
 	if (value instanceof Function) {
 		addToString(value, key);
 		registerClassPrototype(value.prototype);
@@ -1307,7 +1307,7 @@ for (let key of Object.keys(exports)) {
 }
 
 for (let key of Object.keys(drawing)) {
-	var value: any = (<any>drawing)[key];
+	const value: any = (<any>drawing)[key];
 	if (value instanceof Function) {
 		addToString(value, `Drawing${ key }`);
 		registerClassPrototype(value.prototype);

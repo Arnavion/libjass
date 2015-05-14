@@ -51,7 +51,7 @@ export interface TextDecoderConstructor {
 	prototype: TextDecoder;
 }
 
-declare var global: {
+declare const global: {
 	/**
 	 * @type {!TextDecoderConstructor}
 	 */
@@ -82,10 +82,10 @@ export class StringStream implements Stream {
 	 * @return {!Promise.<?string>} A promise that will be resolved with the next line, or null if the string has been completely read.
 	 */
 	nextLine(): Promise<string> {
-		var result: Promise<string> = null;
+		let result: Promise<string> = null;
 
 		if (this._readTill < this._str.length) {
-			var nextNewLinePos = this._str.indexOf("\n", this._readTill);
+			const nextNewLinePos = this._str.indexOf("\n", this._readTill);
 			if (nextNewLinePos !== -1) {
 				result = Promise.resolve(this._str.substring(this._readTill, nextNewLinePos));
 				this._readTill = nextNewLinePos + 1;
@@ -126,7 +126,7 @@ export class XhrStream implements Stream {
 			throw new Error("XhrStream only supports one pending unfulfilled read at a time.");
 		}
 
-		var deferred = this._pendingDeferred = new DeferredPromise<string>();
+		const deferred = this._pendingDeferred = new DeferredPromise<string>();
 
 		this._tryResolveNextLine();
 
@@ -158,9 +158,9 @@ export class XhrStream implements Stream {
 	/**
 	 */
 	private _tryResolveNextLine(): void {
-		var response = this._xhr.responseText;
+		const response = this._xhr.responseText;
 
-		var nextNewLinePos = response.indexOf("\n", this._readTill);
+		const nextNewLinePos = response.indexOf("\n", this._readTill);
 		if (nextNewLinePos !== -1) {
 			this._pendingDeferred.resolve(response.substring(this._readTill, nextNewLinePos));
 			this._readTill = nextNewLinePos + 1;
@@ -207,7 +207,7 @@ export class BrowserReadableStream implements Stream {
 			throw new Error("BrowserReadableStream only supports one pending unfulfilled read at a time.");
 		}
 
-		var deferred = this._pendingDeferred = new DeferredPromise<string>();
+		const deferred = this._pendingDeferred = new DeferredPromise<string>();
 
 		this._tryResolveNextLine();
 
@@ -217,7 +217,7 @@ export class BrowserReadableStream implements Stream {
 	/**
 	 */
 	private _tryResolveNextLine(): void {
-		var nextNewLinePos = this._buffer.indexOf("\n");
+		const nextNewLinePos = this._buffer.indexOf("\n");
 		if (nextNewLinePos !== -1) {
 			this._pendingDeferred.resolve(this._buffer.substr(0, nextNewLinePos));
 			this._buffer = this._buffer.substr(nextNewLinePos + 1);
@@ -226,7 +226,7 @@ export class BrowserReadableStream implements Stream {
 
 		else {
 			this._reader.read().then(next => {
-				var { value, done } = next;
+				const { value, done } = next;
 
 				if (!done) {
 					this._buffer += this._decoder.decode(value, { stream: true });
