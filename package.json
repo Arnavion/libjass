@@ -25,6 +25,7 @@
 		"test-doc": "intern-client config=tests/intern-doc reporters=pretty"
 	},
 	"devDependencies": {
+		"firefox-profile": "0.3.x",
 		"gulp": "3.x",
 		"intern": "2.x",
 		"npm": "2.x",
