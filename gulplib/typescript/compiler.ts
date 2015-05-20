@@ -109,7 +109,7 @@ export class Compiler {
 	};
 }
 
-const typeScriptModulePath = path.resolve("./node_modules/typescript/bin");
+const typeScriptModulePath = path.dirname(require.resolve("typescript"));
 
 function CompilerHost(): GulpCompilerHost {
 	var _outputStream: Transform<Vinyl> = null;

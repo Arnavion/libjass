@@ -21,7 +21,6 @@
 var fs = require("fs");
 var path = require("path");
 
-var SourceMap = require("uglify-js/node_modules/source-map");
 var UglifyJS = require("uglify-js");
 var Vinyl = require("vinyl");
 
@@ -512,6 +511,8 @@ module.exports = {
 		});
 	}
 };
+
+var SourceMap = require.cache[require.resolve("uglify-js")].require("source-map");
 
 function UjsSourceMap(options) {
 	var orig_maps = Object.create(null);

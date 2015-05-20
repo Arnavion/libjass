@@ -10,6 +10,10 @@ declare var Buffer: {
 	concat(list: Buffer[]): Buffer;
 };
 
+declare var require: {
+    resolve(id: string): string;
+};
+
 declare module "fs" {
 	export function lstatSync(path: string): Stats;
 	export function readdirSync(path: string): string[];
