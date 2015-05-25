@@ -44,22 +44,39 @@ define([
 			.get(this._pageUrl)
 			.then(pollUntil('return (document.readyState === "complete") ? true : null;'), 100)
 			.executeAsync(function (assUrl, enableSvg, callback) {
-				window.clock = new libjass.renderers.ManualClock();
-				var libjassSubsWrapper = document.querySelector(".libjass-wrapper");
-
 				libjass.ASS.fromUrl(assUrl).then(function (ass) {
+					var clock = window.clock = new libjass.renderers.ManualClock();
+					var libjassSubsWrapper = document.querySelector(".libjass-wrapper");
+
 					libjassSubsWrapper.style.width = ass.properties.resolutionX + "px";
 					libjassSubsWrapper.style.height = ass.properties.resolutionY + "px";
 
 					var renderer = new libjass.renderers.WebRenderer(ass, clock, libjassSubsWrapper, { enableSvg: enableSvg });
 					renderer.addEventListener("ready", function () {
-						renderer.resize(ass.properties.resolutionX, ass.properties.resolutionY);
-						clock.pause();
-						callback();
+						try {
+							renderer.resize(ass.properties.resolutionX, ass.properties.resolutionY);
+							clock.pause();
+							callback(null);
+						}
+						catch (ex) {
+							callback({ name: ex.name, message: ex.message, stack: ex.stack });
+						}
 					});
+				}).catch(function (ex) {
+					callback({ name: ex.name, message: ex.message, stack: ex.stack });
 				});
 			}, [this._assUrl, this._remote.session.capabilities.browserName !== "internet explorer"])
-			.then(function () { return _this; });
+			.then(function (err) {
+				if (err) {
+					throw Object.create(Error.prototype, {
+						name: { value: err.name },
+						message: { value: err.message },
+						stack: { value: err.stack }
+					});
+				}
+
+				return _this;
+			});
 	};
 
 	TestPage.prototype.seekAndCompareScreenshot = function (time, filename) {
@@ -68,7 +85,7 @@ define([
 		filename = path.join(path.dirname(filename), this._remote.session.capabilities.browserName, path.basename(filename));
 
 		return this._remote
-			.execute(function (time) { clock.seek(time); }, [time])
+			.execute(function (time) { window.clock.seek(time); }, [time])
 			.takeScreenshot()
 			.then(function (buffer) {
 				return new libjass.Promise(function (resolve, reject) {
