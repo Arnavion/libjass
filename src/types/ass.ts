@@ -163,8 +163,13 @@ export class ASS {
 			console.log(`Read dialogue: ${ repr }`);
 		}
 
-		// Create the dialogue and add it to the dialogues array
-		this.dialogues.push(new Dialogue(dialogueTemplate, this));
+		try {
+			// Create the dialogue and add it to the dialogues array
+			this.dialogues.push(new Dialogue(dialogueTemplate, this));
+		}
+		catch (e) {
+			console.log(e);
+		}
 	}
 
 	/**
