@@ -95,7 +95,7 @@ export class Style {
 		this._underline = template.get("Underline") === "-1";
 		this._strikeThrough = template.get("StrikeOut") === "-1";
 
-		this._fontName = template.get("Fontname");
+		this._fontName = valueOrDefault(template, "Fontname", str => str, value => value.constructor === String, "sans-serif");
 		this._fontSize = valueOrDefault(template, "Fontsize", parseFloat, value => !isNaN(value), "50");
 
 		this._fontScaleX = valueOrDefault(template, "ScaleX", parseFloat, value => !isNaN(value), "100") / 100;
