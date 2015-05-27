@@ -96,7 +96,7 @@ export class Style {
 		this._strikeThrough = template.get("StrikeOut") === "-1";
 
 		this._fontName = valueOrDefault(template, "Fontname", str => str, value => value.constructor === String, "sans-serif");
-		this._fontSize = valueOrDefault(template, "Fontsize", parseFloat, value => !isNaN(value), "50");
+		this._fontSize = valueOrDefault(template, "Fontsize", parseFloat, value => !isNaN(value), "18");
 
 		this._fontScaleX = valueOrDefault(template, "ScaleX", parseFloat, value => !isNaN(value), "100") / 100;
 		this._fontScaleY = valueOrDefault(template, "ScaleY", parseFloat, value => !isNaN(value), "100") / 100;
@@ -105,21 +105,21 @@ export class Style {
 
 		this._rotationZ = valueOrDefault(template, "Angle", parseFloat, value => !isNaN(value), "0");
 
-		this._primaryColor = valueOrDefault(template, "PrimaryColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H0000FFFF");
-		this._secondaryColor = valueOrDefault(template, "SecondaryColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00000000");
+		this._primaryColor = valueOrDefault(template, "PrimaryColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00FFFFFF");
+		this._secondaryColor = valueOrDefault(template, "SecondaryColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00FFFF00");
 		this._outlineColor = valueOrDefault(template, "OutlineColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00000000");
-		this._shadowColor = valueOrDefault(template, "BackColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00000000");
+		this._shadowColor = valueOrDefault(template, "BackColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H80000000");
 
-		this._outlineThickness = valueOrDefault(template, "Outline", parseFloat, value => !isNaN(value), "1");
+		this._outlineThickness = valueOrDefault(template, "Outline", parseFloat, value => !isNaN(value), "2");
 		this._borderStyle = valueOrDefault(template, "BorderStyle", parseInt, value => !isNaN(value), "1");
 
-		this._shadowDepth = valueOrDefault(template, "Shadow", parseFloat, value => !isNaN(value), "1");
+		this._shadowDepth = valueOrDefault(template, "Shadow", parseFloat, value => !isNaN(value), "3");
 
 		this._alignment = valueOrDefault(template, "Alignment", parseInt, value => !isNaN(value), "2");
 
-		this._marginLeft = valueOrDefault(template, "MarginL", parseFloat, value => !isNaN(value), "80");
-		this._marginRight = valueOrDefault(template, "MarginR", parseFloat, value => !isNaN(value), "80");
-		this._marginVertical = valueOrDefault(template, "MarginV", parseFloat, value => !isNaN(value), "35");
+		this._marginLeft = valueOrDefault(template, "MarginL", parseFloat, value => !isNaN(value), "20");
+		this._marginRight = valueOrDefault(template, "MarginR", parseFloat, value => !isNaN(value), "20");
+		this._marginVertical = valueOrDefault(template, "MarginV", parseFloat, value => !isNaN(value), "20");
 	}
 
 	/**
