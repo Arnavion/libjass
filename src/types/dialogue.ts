@@ -23,6 +23,8 @@ import { Style } from "./style";
 
 import { valueOrDefault } from "./misc";
 
+import { parseLineIntoTypedTemplate } from "../parser/misc";
+
 import { parse } from "../parser/parse";
 
 import * as parts from "../parts/index";
@@ -63,10 +65,17 @@ export class Dialogue {
 	constructor(template: Map<string, string>, ass: ASS) {
 		this._id = ++Dialogue._lastDialogueId;
 
-		const style = template.get("Style");
-		this._style = ass.styles.get(style);
+		const styleName = template.get("Style");
+		this._style = ass.styles.get(styleName);
 		if (this._style === undefined) {
-			throw new Error(`Unrecognized style ${ style }`);
+			if (debugMode) {
+				console.warn(`Unrecognized style ${ styleName }. Falling back to "Default"`);
+			}
+
+			this._style = ass.styles.get("Default");
+		}
+		if (this._style === undefined) {
+			throw new Error(`Unrecognized style ${ styleName }`);
 		}
 
 		this._start = Dialogue._toTime(template.get("Start"));

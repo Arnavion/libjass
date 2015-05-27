@@ -118,6 +118,8 @@ export class ASS {
 		if (arguments.length === 1) {
 			throw new Error("Constructor `new ASS(rawASS)` has been deprecated. Use `ASS.fromString(rawASS)` instead.");
 		}
+
+		this._styles.set("Default", new Style(new Map([["Name", "Default"]])));
 	}
 
 	/**
