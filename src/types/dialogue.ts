@@ -23,6 +23,8 @@ import { Style } from "./style";
 
 import { valueOrDefault } from "./misc";
 
+import { parseLineIntoTypedTemplate } from "../parser/misc";
+
 import { parse } from "../parser/parse";
 
 import * as parts from "../parts/index";
@@ -66,7 +68,12 @@ export class Dialogue {
 		const style = template.get("Style");
 		this._style = ass.styles.get(style);
 		if (this._style === undefined) {
-			throw new Error(`Unrecognized style ${ style }`);
+			this._style = ass.styles.get("Default");
+		}
+		if (this._style === undefined) {
+			let styleLine = parseLineIntoTypedTemplate("Style: Default,Open Sans Semibold,36,&H00FFFFFF,&H000000FF,&H00020713,&H00000000,-1,0,0,0,100,100,0,0,1,1.7,0,2,0,0,28,1", ["Name", "Fontname", "Fontsize", "PrimaryColour", "SecondaryColour", "OutlineColour", "BackColour", "Bold", "Italic", "Underline", "StrikeOut", "ScaleX", "ScaleY", "Spacing", "Angle", "BorderStyle", "Outline", "Shadow", "Alignment", "MarginL", "MarginR", "MarginV", "Encoding"]);
+			ass.styles.set("Default", new Style(styleLine.template));
+			this._style = ass.styles.get("Default");
 		}
 
 		this._start = Dialogue._toTime(template.get("Start"));
