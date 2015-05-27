@@ -85,41 +85,49 @@ export class Style {
 	private _marginVertical: number;
 
 	constructor(template: Map<string, string>) {
-		this._name = template.get("Name");
+		{
+			let normalizedTemplate = new Map<string, string>();
+			template.forEach((value, key) => {
+				normalizedTemplate.set(key.toLowerCase(), value);
+			});
+			template = normalizedTemplate;
+		}
+
+		this._name = template.get("name");
 		if (this._name === undefined || this._name === null || this._name.constructor !== String) {
 			throw new Error("Style doesn't have a name.");
 		}
 
-		this._italic = template.get("Italic") === "-1";
-		this._bold = template.get("Bold") === "-1";
-		this._underline = template.get("Underline") === "-1";
-		this._strikeThrough = template.get("StrikeOut") === "-1";
+		this._italic = template.get("italic") === "-1";
+		this._bold = template.get("bold") === "-1";
+		this._underline = template.get("underline") === "-1";
+		this._strikeThrough = template.get("strikeout") === "-1";
 
-		this._fontName = valueOrDefault(template, "Fontname", str => str, value => value.constructor === String, "sans-serif");
-		this._fontSize = valueOrDefault(template, "Fontsize", parseFloat, value => !isNaN(value), "18");
+		this._fontName = valueOrDefault(template, "fontname", str => str, value => value.constructor === String, "sans-serif");
+		this._fontSize = valueOrDefault(template, "fontsize", parseFloat, value => !isNaN(value), "18");
 
-		this._fontScaleX = valueOrDefault(template, "ScaleX", parseFloat, value => !isNaN(value), "100") / 100;
-		this._fontScaleY = valueOrDefault(template, "ScaleY", parseFloat, value => !isNaN(value), "100") / 100;
+		this._fontScaleX = valueOrDefault(template, "scalex", parseFloat, value => !isNaN(value), "100") / 100;
+		this._fontScaleY = valueOrDefault(template, "scaley", parseFloat, value => !isNaN(value), "100") / 100;
 
-		this._letterSpacing = valueOrDefault(template, "Spacing", parseFloat, value => !isNaN(value), "0");
+		this._letterSpacing = valueOrDefault(template, "spacing", parseFloat, value => !isNaN(value), "0");
 
-		this._rotationZ = valueOrDefault(template, "Angle", parseFloat, value => !isNaN(value), "0");
+		this._rotationZ = valueOrDefault(template, "angle", parseFloat, value => !isNaN(value), "0");
 
-		this._primaryColor = valueOrDefault(template, "PrimaryColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00FFFFFF");
-		this._secondaryColor = valueOrDefault(template, "SecondaryColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00FFFF00");
-		this._outlineColor = valueOrDefault(template, "OutlineColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00000000");
-		this._shadowColor = valueOrDefault(template, "BackColour", str => <Color>parse(str, "colorWithAlpha"), null, "&H80000000");
+		this._primaryColor = valueOrDefault(template, "primarycolour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00FFFFFF");
+		this._secondaryColor = valueOrDefault(template, "secondarycolour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00FFFF00");
+		this._outlineColor = valueOrDefault(template, "outlinecolour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00000000");
+		this._shadowColor = valueOrDefault(template, "backcolour", str => <Color>parse(str, "colorWithAlpha"), null, "&H80000000");
 
-		this._outlineThickness = valueOrDefault(template, "Outline", parseFloat, value => !isNaN(value), "2");
-		this._borderStyle = valueOrDefault(template, "BorderStyle", parseInt, value => !isNaN(value), "1");
+		this._outlineThickness = valueOrDefault(template, "outline", parseFloat, value => !isNaN(value), "2");
+		this._borderStyle = valueOrDefault(template, "borderstyle", parseInt, value => !isNaN(value), "1");
 
-		this._shadowDepth = valueOrDefault(template, "Shadow", parseFloat, value => !isNaN(value), "3");
+		this._shadowDepth = valueOrDefault(template, "shadow", parseFloat, value => !isNaN(value), "3");
 
-		this._alignment = valueOrDefault(template, "Alignment", parseInt, value => !isNaN(value), "2");
+		this._alignment = valueOrDefault(template, "alignment", parseInt, value => !isNaN(value), "2");
 
-		this._marginLeft = valueOrDefault(template, "MarginL", parseFloat, value => !isNaN(value), "20");
-		this._marginRight = valueOrDefault(template, "MarginR", parseFloat, value => !isNaN(value), "20");
-		this._marginVertical = valueOrDefault(template, "MarginV", parseFloat, value => !isNaN(value), "20");
+		this._marginLeft = valueOrDefault(template, "marginl", parseFloat, value => !isNaN(value), "20");
+		this._marginRight = valueOrDefault(template, "marginr", parseFloat, value => !isNaN(value), "20");
+		this._marginVertical = valueOrDefault(template, "marginv", parseFloat, value => !isNaN(value), "20");
 	}
 
 	/**

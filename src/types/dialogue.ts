@@ -63,9 +63,17 @@ export class Dialogue {
 	private _sub: HTMLDivElement = null;
 
 	constructor(template: Map<string, string>, ass: ASS) {
+		{
+			let normalizedTemplate = new Map<string, string>();
+			template.forEach((value, key) => {
+				normalizedTemplate.set(key.toLowerCase(), value);
+			});
+			template = normalizedTemplate;
+		}
+
 		this._id = ++Dialogue._lastDialogueId;
 
-		const styleName = template.get("Style");
+		const styleName = template.get("style");
 		this._style = ass.styles.get(styleName);
 		if (this._style === undefined) {
 			if (debugMode) {
@@ -78,12 +86,12 @@ export class Dialogue {
 			throw new Error(`Unrecognized style ${ styleName }`);
 		}
 
-		this._start = Dialogue._toTime(template.get("Start"));
-		this._end = Dialogue._toTime(template.get("End"));
+		this._start = Dialogue._toTime(template.get("start"));
+		this._end = Dialogue._toTime(template.get("end"));
 
-		this._layer = Math.max(valueOrDefault(template, "Layer", parseInt, value => !isNaN(value), "0"), 0);
+		this._layer = Math.max(valueOrDefault(template, "layer", parseInt, value => !isNaN(value), "0"), 0);
 
-		this._rawPartsString = template.get("Text");
+		this._rawPartsString = template.get("text");
 		if (this._rawPartsString === undefined || this._rawPartsString === null || this._rawPartsString.constructor !== String) {
 			throw new Error("Dialogue doesn't have any text.");
 		}
