@@ -18,6 +18,8 @@
  * limitations under the License.
  */
 
+import { debugMode } from "../settings";
+
 import { ASS } from "../types/ass";
 import { Style } from "../types/style";
 import { Dialogue } from "../types/dialogue";
@@ -131,7 +133,14 @@ export class StreamParser {
 						}
 					}
 					else {
-						this._ass.addStyle(line);
+						try {
+							this._ass.addStyle(line);
+						}
+						catch (ex) {
+							if (debugMode) {
+								console.error(`Could not parse style from line ${ line } - ${ ex.stack || ex }`);
+							}
+						}
 					}
 					break;
 
@@ -146,7 +155,14 @@ export class StreamParser {
 						}
 					}
 					else {
-						this._ass.addEvent(line);
+						try {
+							this._ass.addEvent(line);
+						}
+						catch (ex) {
+							if (debugMode) {
+								console.error(`Could not parse event from line ${ line } - ${ ex.stack || ex }`);
+							}
+						}
 					}
 					break;
 
