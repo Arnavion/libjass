@@ -91,13 +91,13 @@ export function valueOrDefault<T>(template: Map<string, string>, key: string, co
 	}
 
 	try {
-		const numValue = converter(value);
+		const result = converter(value);
 
-		if (validator !== null && !validator(numValue)) {
+		if (validator !== null && !validator(result)) {
 			throw new Error("Validation failed.");
 		}
 
-		return numValue;
+		return result;
 	}
 	catch (ex) {
 		throw new Error(`Property ${ key } has invalid value ${ value } - ${ ex.stack }`);
