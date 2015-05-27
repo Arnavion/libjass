@@ -120,6 +120,7 @@ export class StreamParser {
 					break;
 
 				case "V4+ Styles":
+				case "V4 Styles":
 					if (this._ass.stylesFormatSpecifier === null) {
 						const property = parseLineIntoProperty(line);
 						if (property !== null && property.name === "Format") {
