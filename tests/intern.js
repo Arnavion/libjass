@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-define(["intern", "intern/dojo/text!tests/support/encoded-firefox-profile.txt"], function (intern, encodedFirefoxProfile) {
+define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profile!"], function (intern, encodedFirefoxProfile) {
 	var result = {
 		suites: [
 			"tests/unit/minified",

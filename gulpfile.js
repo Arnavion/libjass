@@ -116,37 +116,13 @@ gulp.task("watch", ["clean", "build-gulplib"], function (callback) {
 	});
 });
 
-gulp.task("test-create-encoded-firefox-profile", function (callback) {
-	fs.exists("./tests/support/encoded-firefox-profile.txt", function (exists) {
-		if (!exists) {
-			try {
-				var FirefoxProfile = require("firefox-profile");
-				var firefoxProfile = new FirefoxProfile();
-
-				firefoxProfile.setPreference("browser.displayedE10SPrompt.1", 5);
-				firefoxProfile.setPreference("browser.tabs.remote.autostart.2", false);
-
-				firefoxProfile.encoded(function (encodedProfile) {
-					fs.writeFile("./tests/support/encoded-firefox-profile.txt", encodedProfile, callback);
-				});
-			}
-			catch (ex) {
-				callback(ex);
-			}
-		}
-		else {
-			callback(null);
-		}
-	});
-});
-
-gulp.task("test-lib", ["libjass.js", "test-create-encoded-firefox-profile"], function (callback) {
+gulp.task("test-lib", ["libjass.js"], function (callback) {
 	npm.load(function () {
 		npm.commands["run-script"](["test-lib"], callback);
 	});
 });
 
-gulp.task("test-minified", ["libjass.min.js", "test-create-encoded-firefox-profile"], function (callback) {
+gulp.task("test-minified", ["libjass.min.js"], function (callback) {
 	npm.load(function () {
 		npm.commands["run-script"](["test-minified"], callback);
 	});
@@ -154,7 +130,7 @@ gulp.task("test-minified", ["libjass.min.js", "test-create-encoded-firefox-profi
 
 // Start Selenium server with
 //    java.exe -jar .\selenium-server-standalone-2.45.0.jar "-Dwebdriver.ie.driver=$PWD\IEDriverServer.exe" "-Dwebdriver.chrome.driver=$PWD\chromedriver.exe"
-gulp.task("test-browser", ["libjass.js", "test-create-encoded-firefox-profile"], function (callback) {
+gulp.task("test-browser", ["libjass.js"], function (callback) {
 	npm.load(function () {
 		npm.commands["run-script"](["test-browser"], callback);
 	});
