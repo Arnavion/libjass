@@ -387,7 +387,7 @@ export interface Promise<T> {
  * @type {function(new:Promise)}
  */
 export var Promise: {
-	new <T>(init: (resolve: (value?: T | Promise<T>) => void, reject: (reason?: any) => void) => void): Promise<T>;
+	new <T>(init: (resolve: (value: T | Promise<T>) => void, reject: (reason: any) => void) => void): Promise<T>;
 	prototype: Promise<any>;
 	resolve<T>(value: T | Promise<T>): Promise<T>;
 	all<T>(values: (T | Promise<T>)[]): Promise<T[]>;
