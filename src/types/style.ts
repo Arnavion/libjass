@@ -86,7 +86,7 @@ export class Style {
 
 	constructor(template: Map<string, string>) {
 		{
-			let normalizedTemplate = new Map<string, string>();
+			const normalizedTemplate = new Map<string, string>();
 			template.forEach((value, key) => {
 				normalizedTemplate.set(key.toLowerCase(), value);
 			});

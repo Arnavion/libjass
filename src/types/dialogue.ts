@@ -64,7 +64,7 @@ export class Dialogue {
 
 	constructor(template: Map<string, string>, ass: ASS) {
 		{
-			let normalizedTemplate = new Map<string, string>();
+			const normalizedTemplate = new Map<string, string>();
 			template.forEach((value, key) => {
 				normalizedTemplate.set(key.toLowerCase(), value);
 			});
