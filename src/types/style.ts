@@ -97,6 +97,7 @@ export class Style {
 		if (this._name === undefined || this._name === null || this._name.constructor !== String) {
 			throw new Error("Style doesn't have a name.");
 		}
+		this._name = this._name.replace(/^\*+/, "");
 
 		this._italic = !!valueOrDefault(template, "italic", parseFloat, value => !isNaN(value), "0");
 		this._bold = !!valueOrDefault(template, "bold", parseFloat, value => !isNaN(value), "0");

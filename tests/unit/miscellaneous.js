@@ -25,8 +25,11 @@ define([
 	"lib/libjass",
 	"intern/dojo/text!./1.ass",
 	"intern/dojo/text!./2.ass",
-	"intern/dojo/text!./3.ass"
-], function (tdd, assert, parserTest, libjass, ass_1, ass_2, ass_3) {
+	"intern/dojo/text!./3.ass",
+	"intern/dojo/text!./4.ass",
+	"intern/dojo/text!./5.ass",
+	"intern/dojo/text!./6.ass"
+], function (tdd, assert, parserTest, libjass, ass_1, ass_2, ass_3, ass_4, ass_5, ass_6) {
 	tdd.suite("Miscellaneous", function () {
 		tdd.test("herkz", parserTest("{\\pos(311,4)\\blur0.8\\fs40\\bord0\\c&H3F171F&\\t(3820,3820,\\blur6}Chi{\\c&H422CB1&}tose {\\c&H3F171F&}Furu", "dialogueParts", [
 			new libjass.parts.Position(311, 4),
@@ -322,6 +325,65 @@ define([
 				assert.strictEqual(ass.properties.resolutionY, 720);
 				assert.strictEqual(ass.properties.wrappingStyle, libjass.WrappingStyle.SmartWrappingWithWiderTopLine);
 				assert.strictEqual(ass.properties.scaleBorderAndShadow, true);
+			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
+
+			return deferred.promise;
+		});
+
+		tdd.test("Reference to 'default' style should match style named 'Default'", function () {
+			var deferred = this.async(1000);
+
+			libjass.ASS.fromString(ass_4, libjass.Format.ASS).then(function (ass) {
+				assert.strictEqual(ass.styles.size, 1);
+
+				assert.strictEqual(ass.styles.get("Default").name, "Default");
+				assert.strictEqual(ass.styles.get("Default").fontName, "Arial");
+
+				assert.strictEqual(ass.dialogues.length, 1);
+
+				assert.strictEqual(ass.dialogues[0].style, ass.styles.get("Default"));
+			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
+
+			return deferred.promise;
+		});
+
+		tdd.test("Reference to style named 'default' should not match style named 'default'", function () {
+			var deferred = this.async(1000);
+
+			libjass.ASS.fromString(ass_5, libjass.Format.ASS).then(function (ass) {
+				assert.strictEqual(ass.styles.size, 2);
+
+				assert.strictEqual(ass.styles.get("default").name, "default");
+				assert.strictEqual(ass.styles.get("default").fontName, "Arial");
+
+				assert.strictEqual(ass.styles.get("Default").name, "Default");
+				assert.strictEqual(ass.styles.get("Default").fontName, "sans-serif");
+
+				assert.strictEqual(ass.dialogues.length, 1);
+
+				assert.strictEqual(ass.dialogues[0].style, ass.styles.get("Default"));
+			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
+
+			return deferred.promise;
+		});
+
+		tdd.test("Leading asterisks in style names are stripped", function () {
+			var deferred = this.async(1000);
+
+			libjass.ASS.fromString(ass_6, libjass.Format.ASS).then(function (ass) {
+				assert.strictEqual(ass.styles.size, 2);
+
+				assert.strictEqual(ass.styles.get("Default").name, "Default");
+				assert.strictEqual(ass.styles.get("Default").fontName, "Arial");
+
+				assert.strictEqual(ass.styles.get("sign1").name, "sign1");
+				assert.strictEqual(ass.styles.get("sign1").fontName, "Times New Roman");
+
+				assert.strictEqual(ass.dialogues.length, 2);
+
+				assert.strictEqual(ass.dialogues[0].style, ass.styles.get("sign1"));
+
+				assert.strictEqual(ass.dialogues[1].style, ass.styles.get("Default"));
 			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
 
 			return deferred.promise;

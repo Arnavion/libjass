@@ -73,7 +73,14 @@ export class Dialogue {
 
 		this._id = ++Dialogue._lastDialogueId;
 
-		const styleName = template.get("style");
+		let styleName = template.get("style");
+		if (styleName !== undefined && styleName !== null && styleName.constructor === String) {
+			styleName = styleName.replace(/^\*+/, "");
+			if (styleName.match(/^Default$/i) !== null) {
+				styleName = "Default";
+			}
+		}
+
 		this._style = ass.styles.get(styleName);
 		if (this._style === undefined) {
 			if (debugMode) {
