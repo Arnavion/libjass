@@ -85,7 +85,7 @@ define([
 		filename = path.join(path.dirname(filename), this._remote.session.capabilities.browserName, path.basename(filename));
 
 		return this._remote
-			.execute(function (time) { window.clock.seek(time); }, [time])
+			.executeAsync(function (time, callback) { window.clock.seek(time); setTimeout(callback, 1000); }, [time])
 			.takeScreenshot()
 			.then(function (buffer) {
 				return new libjass.Promise(function (resolve, reject) {
