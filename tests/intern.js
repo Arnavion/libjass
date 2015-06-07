@@ -44,6 +44,7 @@ define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profi
 		result.loader = {
 			map: {
 				tests: {
+					"intern/dojo/text": "intern/node_modules/dojo/text",
 					"lib/libjass": "lib/libjass.min",
 					"lib/libjass.js": "lib/libjass.min.js",
 				}
