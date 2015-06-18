@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-define(["intern!tdd", "intern/chai!assert", "lib/libjass", "intern"], function (tdd, assert, libjass, intern) {
+define(["intern!tdd", "intern/chai!assert", "libjass", "intern"], function (tdd, assert, libjass, intern) {
 	tdd.suite("Minified script-specific tests", function () {
 		tdd.test("libjass.js is not minified", function () {
 			if (intern.args.minified === "true") {

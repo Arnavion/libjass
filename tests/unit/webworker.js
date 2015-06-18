@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-define(["intern!tdd", "intern/chai!assert", "lib/libjass", "require"], function (tdd, assert, libjass, require) {
+define(["intern!tdd", "intern/chai!assert", "libjass", "require"], function (tdd, assert, libjass, require) {
 	tdd.suite("Web worker", function () {
 		var workerChannel = null;
 
@@ -27,7 +27,7 @@ define(["intern!tdd", "intern/chai!assert", "lib/libjass", "require"], function 
 				return;
 			}
 
-			workerChannel = libjass.webworker.createWorker(require.toUrl("lib/libjass.js"));
+			workerChannel = libjass.webworker.createWorker(require.toUrl("libjass") + require.toAbsMid("libjass").substr("libjass".length) + ".js");
 			return workerChannel.request(libjass.webworker.WorkerCommands.Ping);
 		});
 

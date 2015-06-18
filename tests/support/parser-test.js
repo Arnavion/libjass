@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-define(["intern/chai!assert", "lib/libjass"], function (assert, libjass) {
+define(["intern/chai!assert", "libjass"], function (assert, libjass) {
 	return function (input, rule, expected) {
 		return function () {
 			var actual = null;

@@ -31,6 +31,13 @@ define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profi
 		functionalSuites: [
 			"tests/functional/kfx/kfx"
 		],
+		loader: {
+			packages: [{
+				name: "libjass",
+				location: "lib",
+				main: (intern.args.minified === "true") ? "libjass.min" : "libjass",
+			}]
+		},
 		excludeInstrumentation: /^(?:tests|node_modules)[/\\]/,
 		tunnel: "NullTunnel",
 		environments: [
@@ -39,18 +46,6 @@ define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profi
 			{ browserName: "internet explorer", version: "11" }
 		],
 	};
-
-	if (intern.args.minified === "true") {
-		result.loader = {
-			map: {
-				tests: {
-					"intern/dojo/text": "intern/node_modules/dojo/text",
-					"lib/libjass": "lib/libjass.min",
-					"lib/libjass.js": "lib/libjass.min.js",
-				}
-			}
-		};
-	}
 
 	return result;
 });

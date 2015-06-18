@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-define(["intern!tdd", "intern/chai!assert", "lib/libjass"], function (tdd, assert, libjass) {
+define(["intern!tdd", "intern/chai!assert", "libjass"], function (tdd, assert, libjass) {
 	tdd.suite("SimpleSet", function () {
 		var originalSet = null;
 

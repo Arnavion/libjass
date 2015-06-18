@@ -24,7 +24,7 @@ define([
 	"intern/dojo/node!pngjs",
 	"intern/chai!assert",
 	"intern/dojo/node!intern/node_modules/leadfoot/helpers/pollUntil",
-	"lib/libjass"
+	"libjass"
 ], function (fs, path, pngjs, assert, pollUntil, libjass) {
 	function TestPage(remote, pageUrl, assUrl, targetWidth, targetHeight) {
 		this._remote = remote;

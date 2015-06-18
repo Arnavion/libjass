@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-define(["intern!tdd", "tests/support/parser-test", "lib/libjass"], function (tdd, parserTest, libjass) {
+define(["intern!tdd", "tests/support/parser-test", "libjass"], function (tdd, parserTest, libjass) {
 	tdd.suite("Tags", function () {
 		tdd.suite("Bold tag - \\b", function () {
 			tdd.test("True", parserTest("b1", "tag_b", new libjass.parts.Bold(true)));

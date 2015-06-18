@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-define(["intern!tdd", "tests/support/parser-test", "lib/libjass"], function (tdd, parserTest, libjass) {
+define(["intern!tdd", "tests/support/parser-test", "libjass"], function (tdd, parserTest, libjass) {
 	tdd.suite("Primitives", function () {
 		tdd.suite("Color", function () {
 			tdd.test("Starts with &H", parserTest("&H3F171F&", "color", new libjass.parts.Color(31, 23, 63, 1)));

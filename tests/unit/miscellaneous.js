@@ -22,7 +22,7 @@ define([
 	"intern!tdd",
 	"intern/chai!assert",
 	"tests/support/parser-test",
-	"lib/libjass",
+	"libjass",
 	"intern/dojo/text!./1.ass",
 	"intern/dojo/text!./2.ass",
 	"intern/dojo/text!./3.ass",
