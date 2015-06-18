@@ -35,7 +35,19 @@ var Run = (function () {
 		this._root = UglifyJS.parse(
 			'(function (root, factory) {\n' +
 			'	var global = this;\n' +
-			'	if (typeof exports === "object" && typeof module === "object") {\n' +
+			'\n' +
+			'	if (typeof System === "object" && typeof System.register === "function") {\n' +
+			'		System.register([], function ($__export) {\n' +
+			'			$__export("default", factory(global));\n' +
+			'			$__export("__useDefault", true);\n' +
+			'\n' +
+			'			return {\n' +
+			'				setters: function () { },\n' +
+			'				execute: function () { },\n' +
+			'			};\n' +
+			'		});\n' +
+			'	}\n' +
+			'	else if (typeof exports === "object" && typeof module === "object") {\n' +
 			'		module.exports = factory(global);\n' +
 			'	}\n' +
 			'	else if (typeof define === "function" && define.amd) {\n' +
