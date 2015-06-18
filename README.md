@@ -14,7 +14,13 @@ As a result, libjass is able to render subtitles with very low CPU usage. The do
 
 ### I want to use libjass for my website. What do I need to do?
 
-You can install the latest release of libjass using npm with `npm install libjass` or using bower with `bower install https://github.com/Arnavion/libjass/releases/download/<release name>/libjass.zip`. Inside the package, you will find libjass.js and libjass.css, which you need to load on your website with your video.
+You can install the latest release of libjass
+
+* using npm with `npm install libjass` and load with `var libjass = require("libjass");`
+* using bower with `bower install https://github.com/Arnavion/libjass/releases/download/<release name>/libjass.zip`
+* using jspm with `jspm install github:Arnavion/libjass` and load with `import libjass from "Arnavion/libjass";`
+
+Inside the package, you will find libjass.js and libjass.css, which you need to load on your website with your video.
 
 Alternatively, you can build libjass from source by cloning this repository and running `npm install`. This will install the dependencies and run the build. libjass.js and libjass.css will be found in the lib/ directory.
 
