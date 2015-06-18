@@ -39,7 +39,7 @@ var Run = (function () {
 			'		module.exports = factory(global);\n' +
 			'	}\n' +
 			'	else if (typeof define === "function" && define.amd) {\n' +
-			'		define(function() {\n' +
+			'		define([], function() {\n' +
 			'			return factory(global);\n' +
 			'		});\n' +
 			'	}\n' +
