@@ -83,7 +83,7 @@ class ParserRun {
 			const enclosedTagsNode = this.parse_enclosedTags(current);
 
 			if (enclosedTagsNode !== null) {
-				current.value.push.apply(current.value, enclosedTagsNode.value);
+				current.value.push(...enclosedTagsNode.value);
 			}
 
 			else {

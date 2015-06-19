@@ -97,7 +97,7 @@ export class RendererSettings {
 				if (existingList === undefined) {
 					fontMap.set(name, existingList = []);
 				}
-				existingList.unshift.apply(existingList, urls);
+				existingList.unshift(...urls);
 			}
 		}
 
