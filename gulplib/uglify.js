@@ -293,6 +293,21 @@ var Run = (function () {
 		}));
 
 
+		// Split multiple vars per declaration into one var per declaration
+		this._root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+			if (
+				node instanceof UglifyJS.AST_Var &&
+				node.definitions.length > 1 &&
+				this.parent() instanceof UglifyJS.AST_Block
+			) {
+				var parent = this.parent().body;
+				parent.splice.apply(parent, [parent.indexOf(node), 1].concat(node.definitions.map(function (definition) {
+					return new UglifyJS.AST_Var({ start: node.start, end: node.end, definitions: [definition] });
+				})));
+			}
+		}));
+
+
 		// Rename all function arguments that begin with _ to not have the _.
 		// This converts the TypeScript syntax of declaring private members in the constructor declaration `function Color(private _red: number, ...)` to `function Color(red, ...)`
 		// so that it matches the JSDoc (and looks nicer).
