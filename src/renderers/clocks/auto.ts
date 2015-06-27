@@ -24,10 +24,10 @@ import { Clock, ClockEvent } from "./base";
 import { ManualClock } from "./manual";
 
 /**
- * An implementation of libjass.renderers.Clock that automatically ticks and generates {@link libjass.renderers.ClockEvent}s according to the state of an external driver.
+ * An implementation of {@link libjass.renderers.Clock} that automatically ticks and generates {@link libjass.renderers.ClockEvent}s according to the state of an external driver.
  *
  * For example, if you're using libjass to render subtitles on a canvas with your own video controls, these video controls will function as the driver to this AutoClock.
- * It would call {@link libjass.renderers.AutoClock.play}, {@link libjass.renderers.AutoClock.play}, etc. when the user pressed the corresponding video controls.
+ * It would call {@link libjass.renderers.AutoClock.play}, {@link libjass.renderers.AutoClock.pause}, etc. when the user pressed the corresponding video controls.
  *
  * The difference from ManualClock is that AutoClock does not require the driver to call something like {@link libjass.renderers.ManualClock.tick}. Instead it keeps its
  * own time with a high-resolution requestAnimationFrame-based timer.
