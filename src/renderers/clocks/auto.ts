@@ -35,7 +35,7 @@ import { ManualClock } from "./manual";
  * If using libjass with a <video> element, consider using {@link libjass.renderers.VideoClock} that uses the video element as a driver.
  *
  * @param {function():number} getCurrentTime A callback that will be invoked to get the current time of the external driver.
- * @param {number} currentTimeUpdateMaxDelay If two calls to getCurrentTime are more than currentTimeUpdateMaxDelay milliseconds apart, then the external driver will be
+ * @param {number} autoPauseAfter If two calls to getCurrentTime are more than autoPauseAfter milliseconds apart but return the same time, then the external driver will be
  * considered to have paused.
  */
 export class AutoClock implements Clock {
@@ -46,7 +46,7 @@ export class AutoClock implements Clock {
 	private _lastKnownExternalTime: number = null;
 	private _lastKnownExternalTimeObtainedAt: number = null;
 
-	constructor(private _getCurrentTime: () => number, private _currentTimeUpdateMaxDelay: number) { }
+	constructor(private _getCurrentTime: () => number, private _autoPauseAfter: number) { }
 
 	/**
 	 * Tells the clock to start generating ticks.
@@ -202,7 +202,7 @@ export class AutoClock implements Clock {
 
 		if (!this._manualClock.paused) {
 			if (this._lastKnownExternalTime !== null && currentExternalTime === this._lastKnownExternalTime) {
-				if (timeStamp - this._lastKnownExternalTimeObtainedAt > this._currentTimeUpdateMaxDelay) {
+				if (timeStamp - this._lastKnownExternalTimeObtainedAt > this._autoPauseAfter) {
 					this._lastKnownExternalTimeObtainedAt = null;
 					this._manualClock.pause();
 				}
