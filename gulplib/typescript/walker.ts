@@ -524,7 +524,7 @@ class Walker {
 						return "";
 					}
 					return match[1];
-				}).filter(line => line.length > 0);
+				});
 
 		var rootDescription = "";
 
@@ -540,8 +540,8 @@ class Walker {
 
 		for (let line of lines) {
 			var firstWordMatch = line.match(/^\s*(\S+)(\s*)/);
-			var firstWord = firstWordMatch[1];
-			var remainingLine = line.substring(firstWordMatch[0].length);
+			var firstWord = (firstWordMatch !== null) ? firstWordMatch[1] : "";
+			var remainingLine = (firstWordMatch !== null) ? line.substring(firstWordMatch[0].length) : "";
 
 			if (firstWord[0] === "@") {
 				lastRead = null;

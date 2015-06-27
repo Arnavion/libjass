@@ -221,12 +221,21 @@ function writeDescription(text: string): string {
 			inCodeBlock = false;
 			line = `</code></pre>${ line }`;
 		}
+		else if (line.length === 0 && !inCodeBlock) {
+			line = "</p><p>";
+		}
 
 		return line;
 	}).join("\n");
 
 	if (inCodeBlock) {
 		result += '</code></pre>';
+	}
+
+	result = `<p>${ result }</p>`.replace(/<p>\s*<\/p>/g, "").replace(/<p>\s+/g, "<p>").replace(/\s+<\/p>/g, "</p>");
+
+	if (result.substr("<p>".length).indexOf("<p>") === -1) {
+		result = result.substring("<p>".length, result.length - "</p>".length);
 	}
 
 	return result;
@@ -261,7 +270,7 @@ function functionToHtml(func: AST.Function): string[] {
 			func.isStatic ? ' static' : ''}">`,
 		`	<dt class="name">${ toLink(func) }</dt>`,
 		'	<dd class="description">',
-		`		<p>${ writeDescription(func.description) }</p>`,
+		`		${ writeDescription(func.description) }`,
 		'	</dd>',
 		`	<dd class="usage"><fieldset><legend /><pre><code>${
 				sanitize(
@@ -292,7 +301,7 @@ function interfaceToHtml(interfase: AST.Interface): string[] {
 			interfase.baseTypes.map(baseType => baseType instanceof AST.TypeReference ? toLink(baseType) : baseType.name).join(', ')
 		}` : '' }</dt>`,
 		'	<dd class="description">',
-		`		<p>${ writeDescription(interfase.description) }</p>`,
+		`		${ writeDescription(interfase.description) }`,
 		'	</dd>',
 		'	<dd class="members">'
 	].concat(flatten(members.map(member => {
@@ -326,7 +335,7 @@ function classToHtml(clazz: AST.Class): string[] {
 				(clazz.baseType !== null) ? ` extends ${ (clazz.baseType instanceof AST.TypeReference) ? toLink(<AST.TypeReference>clazz.baseType) : clazz.baseType.name }` : '' }${
 				(clazz.interfaces.length > 0) ? ` implements ${ clazz.interfaces.map(interfase => interfase instanceof AST.TypeReference ? toLink(interfase) : interfase.name).join(', ') }` : ''}</dt>`,
 		'	<dd class="description">',
-		`		<p>${ writeDescription(clazz.description) }</p>`,
+		`		${ writeDescription(clazz.description) }`,
 		'	</dd>',
 		`	<dd class="usage"><fieldset><legend /><pre><code>${
 				sanitize(
@@ -357,7 +366,7 @@ function enumToHtml(enumType: AST.Enum): string[] {
 		`<dl id="${ toId(enumType) }" class="enum${ enumType.isPrivate ? ' private' : '' }">`,
 		`	<dt class="name">enum <a href="#${ sanitize(enumType.fullName) }">${ sanitize(enumType.name) }</a></dt>`,
 		'	<dd class="description">',
-		`		<p>${ writeDescription(enumType.description) }</p>`,
+		`		${ writeDescription(enumType.description) }`,
 		'	</dd>'
 	].concat([
 		'	<dd class="members">'
@@ -365,7 +374,7 @@ function enumToHtml(enumType: AST.Enum): string[] {
 		`		<dl id="${ toId(member) }" class="member">`,
 		`			<dt class="name">${ toLink(member) } = ${ member.value }</dt>`,
 		'			<dd class="description">',
-		`				<p>${ writeDescription(member.description) }</p>`,
+		`				${ writeDescription(member.description) }`,
 		'			</dd>',
 		'		</dl>'
 		]))).concat([
@@ -382,14 +391,14 @@ function propertyToHtml(property: AST.Property): string[] {
 	].concat((property.getter === null) ? [] : [
 		`	<dt class="getter${ property.getter.isPrivate ? ' private' : '' }">Getter</dt>`,
 		'	<dd class="description">',
-		`		<p>${ writeDescription(property.getter.description) }</p>`,
+		`		${ writeDescription(property.getter.description) }`,
 		'	</dd>',
 		`	<dd class="usage"><fieldset><legend /><pre><code>${ sanitize(`var result = ${ toUsageName(property) };`) }</code></pre></fieldset></dd>`,
 		`	<dd class="return type">${ sanitize(property.getter.type) }</dd>`
 	]).concat((property.setter === null) ? [] : [
 		`	<dt class="setter${ property.setter.isPrivate ? ' private' : '' }">Setter</dt>`,
 		'	<dd class="description">',
-		`		<p>${ writeDescription(property.setter.description) }</p>`,
+		`		${ writeDescription(property.setter.description) }`,
 		'	</dd>',
 		`	<dd class="usage"><fieldset><legend /><pre><code>${ sanitize(`${ toUsageName(property) } = value;`) }</code></pre></fieldset></dd>`
 	].concat(writeParameters([new AST.Parameter("value", "", property.setter.type)]).map(indenter(1)))).concat([
