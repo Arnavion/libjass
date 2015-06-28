@@ -53,6 +53,8 @@ import { Promise } from "../../utility/promise";
  */
 export class WebRenderer extends NullRenderer implements EventSource<string> {
 	private _subsWrapper: HTMLDivElement;
+	private _subsWrapperWidth: number; // this._subsWrapper.offsetWidth is expensive, so cache this.
+
 	private _layerWrappers: HTMLDivElement[] = [];
 	private _layerAlignmentWrappers: HTMLDivElement[][] = [];
 	private _fontSizeElement: HTMLDivElement;
@@ -161,14 +163,14 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		this._removeAllSubs();
 
 		const ratio = Math.min(width / this.ass.properties.resolutionX, height / this.ass.properties.resolutionY);
-		const subsWrapperWidth = this.ass.properties.resolutionX * ratio;
+		this._subsWrapperWidth = this.ass.properties.resolutionX * ratio;
 		const subsWrapperHeight = this.ass.properties.resolutionY * ratio;
-		this._subsWrapper.style.width = `${ subsWrapperWidth.toFixed(3) }px`;
+		this._subsWrapper.style.width = `${ this._subsWrapperWidth.toFixed(3) }px`;
 		this._subsWrapper.style.height = `${ subsWrapperHeight.toFixed(3) }px`;
-		this._subsWrapper.style.left = `${ ((width - subsWrapperWidth) / 2).toFixed(3) }px`;
+		this._subsWrapper.style.left = `${ ((width - this._subsWrapperWidth) / 2).toFixed(3) }px`;
 		this._subsWrapper.style.top = `${ ((height - subsWrapperHeight) / 2).toFixed(3) }px`;
 
-		this._scaleX = subsWrapperWidth / this.ass.properties.resolutionX;
+		this._scaleX = this._subsWrapperWidth / this.ass.properties.resolutionX;
 		this._scaleY = subsWrapperHeight / this.ass.properties.resolutionY;
 
 		// Any dialogues which have been pre-rendered will need to be pre-rendered again.
@@ -205,7 +207,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		sub.style.marginLeft = `${ (this._scaleX * dialogue.style.marginLeft).toFixed(3) }px`;
 		sub.style.marginRight = `${ (this._scaleX * dialogue.style.marginRight).toFixed(3) }px`;
 		sub.style.marginTop = sub.style.marginBottom = `${ (this._scaleY * dialogue.style.marginVertical).toFixed(3) }px`;
-		sub.style.minWidth = `${ (this._subsWrapper.offsetWidth - this._scaleX * (dialogue.style.marginLeft + dialogue.style.marginRight)).toFixed(3) }px`;
+		sub.style.minWidth = `${ (this._subsWrapperWidth - this._scaleX * (dialogue.style.marginLeft + dialogue.style.marginRight)).toFixed(3) }px`;
 
 		const dialogueAnimationCollection = new AnimationCollection(this);
 
