@@ -47,8 +47,6 @@ import { Map } from "../../utility/map";
  * @param {!SVGDefsElement} svgDefsElement An SVG <defs> element to append filter definitions to
  */
 export class SpanStyles {
-	private static _fontSizeCache: Map<string, Map<number, number>> = new Map<string, Map<number, number>>();
-
 	private _id: string;
 	private _defaultStyle: Style;
 
@@ -171,7 +169,7 @@ export class SpanStyles {
 		else if (this._bold !== false) {
 			fontStyleOrWeight += this._bold + " ";
 		}
-		const fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize * (isTextOnlySpan ? this._fontScaleY : 1), this._fontSizeElement)).toFixed(3);
+		const fontSize = (this._scaleY * fontSizeForLineHeight(this._fontName, this._fontSize * (isTextOnlySpan ? this._fontScaleY : 1), this._fontSizeElement)).toFixed(3);
 		const lineHeight = (this._scaleY * this._fontSize).toFixed(3);
 		span.style.font = `${ fontStyleOrWeight }${ fontSize }px/${ lineHeight }px "${ this._fontName }"`;
 
@@ -683,26 +681,40 @@ ${ blurFilter }
 	}
 
 	private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);
+}
 
-	/**
-	 * @param {string} fontFamily
-	 * @param {number} lineHeight
-	 * @param {!HTMLDivElement} fontSizeElement
-	 * @return {number}
-	 */
-	private static _getFontSize(fontFamily: string, lineHeight: number, fontSizeElement: HTMLDivElement): number {
-		let existingFontSizeMap = SpanStyles._fontSizeCache.get(fontFamily);
-		if (existingFontSizeMap === undefined) {
-			SpanStyles._fontSizeCache.set(fontFamily, existingFontSizeMap = new Map<number, number>());
-		}
+const lineHeightsCache = new Map<string, [number, number]>();
 
-		let existingFontSize = existingFontSizeMap.get(lineHeight);
-		if (existingFontSize === undefined) {
-			fontSizeElement.style.fontFamily = fontFamily;
-			fontSizeElement.style.fontSize = `${ lineHeight }px`;
-			existingFontSizeMap.set(lineHeight, existingFontSize = lineHeight * lineHeight / fontSizeElement.offsetHeight);
-		}
-
-		return existingFontSize;
+/**
+ * Uses linear interpolation to calculate the CSS font size that would give the specified line height for the specified font family.
+ *
+ * @param {string} fontFamily
+ * @param {number} lineHeight
+ * @param {!HTMLDivElement} fontSizeElement
+ * @return {number}
+ */
+function fontSizeForLineHeight(fontFamily: string, lineHeight: number, fontSizeElement: HTMLDivElement): number {
+	let existingLineHeights = lineHeightsCache.get(fontFamily);
+	if (existingLineHeights === undefined) {
+		const lowerLineHeight = lineHeightForFontSize(fontFamily, 180, fontSizeElement);
+		const upperLineHeight = lineHeightForFontSize(fontFamily, 360, fontSizeElement);
+		existingLineHeights = [lowerLineHeight, (360 - 180) / (upperLineHeight - lowerLineHeight)];
+		lineHeightsCache.set(fontFamily, existingLineHeights);
 	}
+
+	const [lowerLineHeight, factor] = existingLineHeights;
+
+	return 180 + (lineHeight - lowerLineHeight) * factor;
+}
+
+/**
+ * @param {string} fontFamily
+ * @param {number} fontSize
+ * @param {!HTMLDivElement} fontSizeElement
+ * @return {number}
+ */
+function lineHeightForFontSize(fontFamily: string, fontSize: number, fontSizeElement: HTMLDivElement): number {
+	fontSizeElement.style.fontFamily = fontFamily;
+	fontSizeElement.style.fontSize = `${ fontSize }px`;
+	return fontSizeElement.offsetHeight;
 }
