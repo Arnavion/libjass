@@ -1095,7 +1095,7 @@ export class Transform {
 	/**
 	 * The starting time of this transform tag.
 	 *
-	 * @type {number}
+	 * @type {?number}
 	 */
 	get start(): number {
 		return this._start;
@@ -1104,7 +1104,7 @@ export class Transform {
 	/**
 	 * The ending time of this transform tag.
 	 *
-	 * @type {number}
+	 * @type {?number}
 	 */
 	get end(): number {
 		return this._end;
@@ -1113,7 +1113,7 @@ export class Transform {
 	/**
 	 * The acceleration of this transform tag.
 	 *
-	 * @type {number}
+	 * @type {?number}
 	 */
 	get accel(): number {
 		return this._accel;
