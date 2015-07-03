@@ -58,7 +58,6 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	private _layerWrappers: HTMLDivElement[] = [];
 	private _layerAlignmentWrappers: HTMLDivElement[][] = [];
 	private _fontSizeElement: HTMLDivElement;
-	private _animationStyleElement: HTMLStyleElement;
 	private _svgDefsElement: SVGDefsElement;
 
 	private _currentSubs: Map<Dialogue, HTMLDivElement> = new Map<Dialogue, HTMLDivElement>();
@@ -89,11 +88,6 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		this._libjassSubsWrapper.appendChild(this._fontSizeElement);
 		this._fontSizeElement.className = "libjass-font-measure";
 		this._fontSizeElement.appendChild(document.createTextNode("M"));
-
-		this._animationStyleElement = document.createElement("style");
-		this._animationStyleElement.id = `libjass-animation-styles-${ this.id }`;
-		this._animationStyleElement.type = "text/css";
-		document.querySelector("head").appendChild(this._animationStyleElement);
 
 		const svgElement = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
 		this._libjassSubsWrapper.appendChild(svgElement);
@@ -175,12 +169,6 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		// Any dialogues which have been pre-rendered will need to be pre-rendered again.
 		this._preRenderedSubs.clear();
 
-		if (this._animationStyleElement !== null) {
-			while (this._animationStyleElement.firstChild !== null) {
-				this._animationStyleElement.removeChild(this._animationStyleElement.firstChild);
-			}
-		}
-
 		while (this._svgDefsElement.firstChild !== null) {
 			this._svgDefsElement.removeChild(this._svgDefsElement.firstChild);
 		}
@@ -208,6 +196,10 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		sub.style.marginTop = sub.style.marginBottom = `${ (this._scaleY * dialogue.style.marginVertical).toFixed(3) }px`;
 		sub.style.minWidth = `${ (this._subsWrapperWidth - this._scaleX * (dialogue.style.marginLeft + dialogue.style.marginRight)).toFixed(3) }px`;
 
+		const dialogueAnimationStylesElement = document.createElement("style");
+		dialogueAnimationStylesElement.id = `libjass-animation-styles-${ this.id }-${ dialogue.id }`;
+		dialogueAnimationStylesElement.type = "text/css";
+
 		const dialogueAnimationCollection = new AnimationCollection(this);
 
 		let currentSpan: HTMLSpanElement = null;
@@ -220,7 +212,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			if (currentSpan !== null && currentSpan.hasChildNodes()) {
 				sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan, currentAnimationCollection));
 
-				this._animationStyleElement.appendChild(document.createTextNode(currentAnimationCollection.cssText));
+				dialogueAnimationStylesElement.appendChild(document.createTextNode(currentAnimationCollection.cssText));
 			}
 
 			if (currentAnimationCollection !== null) {
@@ -536,12 +528,16 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 		}
 
-		this._animationStyleElement.appendChild(document.createTextNode(dialogueAnimationCollection.cssText));
+		dialogueAnimationStylesElement.appendChild(document.createTextNode(dialogueAnimationCollection.cssText));
 
 		sub.style.webkitAnimation = dialogueAnimationCollection.animationStyle;
 		sub.style.animation = dialogueAnimationCollection.animationStyle;
 
 		sub.setAttribute("data-dialogue-id", `${ this.id }-${ dialogue.id }`);
+
+		if (dialogueAnimationStylesElement.textContent !== "") {
+			sub.appendChild(dialogueAnimationStylesElement);
+		}
 
 		this._preRenderedSubs.set(dialogue.id, { sub, animationDelays: dialogueAnimationCollection.animationDelays });
 	}
@@ -639,6 +635,15 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		this._layerAlignmentWrappers[layer][alignment].appendChild(result);
 
+		// Workaround for IE
+		const dialogueAnimationStylesElement = result.getElementsByTagName("style")[0];
+		if (dialogueAnimationStylesElement !== undefined) {
+			const sheet = <CSSStyleSheet>dialogueAnimationStylesElement.sheet;
+			if (sheet.cssRules.length === 0) {
+				sheet.cssText = dialogueAnimationStylesElement.textContent;
+			}
+		}
+
 		this._currentSubs.set(dialogue, result);
 	}
 
@@ -684,12 +689,6 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		// Any dialogues which have been pre-rendered will need to be pre-rendered again.
 		this._preRenderedSubs.clear();
-
-		if (this._animationStyleElement !== null) {
-			while (this._animationStyleElement.firstChild !== null) {
-				this._animationStyleElement.removeChild(this._animationStyleElement.firstChild);
-			}
-		}
 
 		while (this._svgDefsElement.firstChild !== null) {
 			this._svgDefsElement.removeChild(this._svgDefsElement.firstChild);
