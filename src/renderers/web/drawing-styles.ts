@@ -18,8 +18,6 @@
  * limitations under the License.
  */
 
-import { domParser } from "./dom-parser";
-
 import * as parts from "../../parts/index";
 
 /**
@@ -55,40 +53,46 @@ export class DrawingStyles {
 	 * @param {!libjass.parts.Color} fillColor
 	 * @return {!SVGSVGElement}
 	 */
-	toSVG(drawingInstructions: parts.DrawingInstructions, fillColor: parts.Color): SVGElement {
+	toSVG(drawingInstructions: parts.DrawingInstructions, fillColor: parts.Color): SVGSVGElement {
 		const scaleFactor = Math.pow(2, this._scale - 1);
 		const scaleX = this._outputScaleX / scaleFactor;
 		const scaleY = this._outputScaleY / scaleFactor;
 
-		let path = "";
+		const path = <SVGPathElement>document.createElementNS("http://www.w3.org/2000/svg", "path");
+
 		let bboxWidth = 0;
 		let bboxHeight = 0;
 
 		for (let instruction of drawingInstructions.instructions) {
 			if (instruction instanceof parts.drawing.MoveInstruction) {
-				path += ` M ${ instruction.x } ${ instruction.y + this._baselineOffset }`;
+				path.pathSegList.appendItem(path.createSVGPathSegMovetoAbs(instruction.x, instruction.y + this._baselineOffset));
 				bboxWidth = Math.max(bboxWidth, instruction.x);
 				bboxHeight = Math.max(bboxHeight, instruction.y + this._baselineOffset);
 			}
 			else if (instruction instanceof parts.drawing.LineInstruction) {
-				path += ` L ${ instruction.x } ${ instruction.y + this._baselineOffset }`;
+				path.pathSegList.appendItem(path.createSVGPathSegLinetoAbs(instruction.x, instruction.y + this._baselineOffset));
 				bboxWidth = Math.max(bboxWidth, instruction.x);
 				bboxHeight = Math.max(bboxHeight, instruction.y + this._baselineOffset);
 			}
 			else if (instruction instanceof parts.drawing.CubicBezierCurveInstruction) {
-				path += ` C ${ instruction.x1 } ${ instruction.y1 + this._baselineOffset }, ${ instruction.x2 } ${ instruction.y2 + this._baselineOffset }, ${ instruction.x3 } ${ instruction.y3 + this._baselineOffset }`;
+				path.pathSegList.appendItem(path.createSVGPathSegCurvetoCubicAbs(instruction.x3, instruction.y3 + this._baselineOffset, instruction.x1, instruction.y1 + this._baselineOffset, instruction.x2, instruction.y2 + this._baselineOffset));
 				bboxWidth = Math.max(bboxWidth, instruction.x1, instruction.x2, instruction.x3);
 				bboxHeight = Math.max(bboxHeight, instruction.y1 + this._baselineOffset, instruction.y2 + this._baselineOffset, instruction.y3 + this._baselineOffset);
 			}
 		}
 
-		const result =
-`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="${ (bboxWidth * scaleX).toFixed(3) }px" height="${ (bboxHeight * scaleY).toFixed(3) }px">
-<g transform="scale(${ scaleX.toFixed(3) } ${ scaleY.toFixed(3) })">
-	<path d="${ path }" fill="${ fillColor.toString() }" />
-</g>
-</svg>`;
+		const svg = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		svg.setAttribute("version", "1.1");
+		svg.width.baseVal.valueAsString = `${ (bboxWidth * scaleX).toFixed(3) }px`;
+		svg.height.baseVal.valueAsString = `${ (bboxHeight * scaleY).toFixed(3) }px`;
 
-		return <SVGSVGElement>domParser.parseFromString(result, "image/svg+xml").childNodes[0];
+		const g = <SVGGElement>document.createElementNS("http://www.w3.org/2000/svg", "g");
+		svg.appendChild(g);
+		g.setAttribute("transform", `scale(${ scaleX.toFixed(3) } ${ scaleY.toFixed(3) })`);
+
+		g.appendChild(path);
+		path.setAttribute("fill", fillColor.toString());
+
+		return svg;
 	}
 }

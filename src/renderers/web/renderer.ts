@@ -97,11 +97,10 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		const svgElement = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
 		this._libjassSubsWrapper.appendChild(svgElement);
-		svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 		svgElement.setAttribute("version", "1.1");
 		svgElement.setAttribute("class", "libjass-filters");
-		svgElement.setAttribute("width", "0");
-		svgElement.setAttribute("height", "0");
+		svgElement.width.baseVal.valueAsString = "0";
+		svgElement.height.baseVal.valueAsString = "0";
 
 		this._svgDefsElement = <SVGDefsElement>document.createElementNS("http://www.w3.org/2000/svg", "defs");
 		svgElement.appendChild(this._svgDefsElement);
@@ -218,8 +217,10 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		let previousAddNewLine = false; // If two or more \N's are encountered in sequence, then all but the first will be created using currentSpanStyles.makeNewLine() instead
 		const startNewSpan = (addNewLine: boolean): void => {
-			if (currentSpan !== null && currentSpan.textContent !== "") {
-				sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan, currentAnimationCollection, this._animationStyleElement));
+			if (currentSpan !== null && currentSpan.hasChildNodes()) {
+				sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan, currentAnimationCollection));
+
+				this._animationStyleElement.appendChild(document.createTextNode(currentAnimationCollection.cssText));
 			}
 
 			if (currentAnimationCollection !== null) {

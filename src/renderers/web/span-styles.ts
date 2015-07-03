@@ -19,7 +19,6 @@
  */
 
 import { AnimationCollection } from "./animation-collection";
-import { domParser } from "./dom-parser";
 
 import { WebRenderer } from "./renderer";
 
@@ -153,10 +152,9 @@ export class SpanStyles {
 	 *
 	 * @param {!HTMLSpanElement} span
 	 * @param {!AnimationCollection} animationCollection
-	 * @param {!HTMLStyleElement} animationStyleElement
 	 * @return {!HTMLSpanElement} The resulting <span> with the CSS styles applied. This may be a wrapper around the input <span> if the styles were applied using SVG filters.
 	 */
-	setStylesOnSpan(span: HTMLSpanElement, animationCollection: AnimationCollection, animationStyleElement: HTMLStyleElement): HTMLSpanElement {
+	setStylesOnSpan(span: HTMLSpanElement, animationCollection: AnimationCollection): HTMLSpanElement {
 		const isTextOnlySpan = span.childNodes[0] instanceof Text;
 
 		let fontStyleOrWeight = "";
@@ -228,17 +226,23 @@ export class SpanStyles {
 		const outlineWidth = this._scaleX * this._outlineWidth;
 		const outlineHeight = this._scaleY * this._outlineHeight;
 
-		let outlineFilter = '';
-		let blurFilter = '';
-		const filterId = `svg-filter-${ this._id }-${ this._nextFilterId++ }`;
+		const filterWrapperSpan = document.createElement("span");
+		filterWrapperSpan.appendChild(span);
 
 		if (this._settings.enableSvg) {
+			const filterId = `svg-filter-${ this._id }-${ this._nextFilterId++ }`;
+
+			const filterElement = <SVGFilterElement>document.createElementNS("http://www.w3.org/2000/svg", "filter");
+			filterElement.id = filterId;
+			filterElement.x.baseVal.valueAsString = "-50%";
+			filterElement.width.baseVal.valueAsString = "200%";
+			filterElement.y.baseVal.valueAsString = "-50%";
+			filterElement.height.baseVal.valueAsString = "200%";
+
 			if (outlineWidth > 0 || outlineHeight > 0) {
 				/* Construct an elliptical border by merging together many rectangles. The border is creating using dilate morphology filters, but these only support
 				 * generating rectangles.   http://lists.w3.org/Archives/Public/public-fx/2012OctDec/0003.html
 				 */
-
-				let mergeOutlinesFilter = '';
 
 				let outlineNumber = 0;
 
@@ -274,35 +278,67 @@ export class SpanStyles {
 						}
 					}
 				})((x: number, y: number): void => {
-					outlineFilter +=
-`	<feMorphology in="SourceAlpha" operator="dilate" radius="${ x.toFixed(3) } ${ y.toFixed(3) }" result="outline${ outlineNumber }" />
-`;
-
-					mergeOutlinesFilter +=
-`		<feMergeNode in="outline${ outlineNumber }" />
-`;
+					const outlineFilter = <SVGFEMorphologyElement>document.createElementNS("http://www.w3.org/2000/svg", "feMorphology");
+					filterElement.appendChild(outlineFilter);
+					outlineFilter.in1.baseVal = "SourceAlpha";
+					outlineFilter.operator.baseVal = SVGFEMorphologyElement.SVG_MORPHOLOGY_OPERATOR_DILATE;
+					outlineFilter.radiusX.baseVal = x;
+					outlineFilter.radiusY.baseVal = y;
+					outlineFilter.result.baseVal = `outline${ outlineNumber }`;
 
 					outlineNumber++;
 				});
 
-				outlineFilter +=
-`	<feMerge result="outline">
-${ mergeOutlinesFilter }
-	</feMerge>
-	<feFlood flood-color="${ outlineColor.toString() }" />
-	<feComposite operator="in" in2="outline" />
-`;
+				if (outlineNumber > 0) {
+					const mergedOutlines = <SVGFEMergeElement>document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+					filterElement.appendChild(mergedOutlines);
+					mergedOutlines.result.baseVal = "outline";
+
+					for (let i = 0; i < outlineNumber; i++) {
+						const outlineReferenceNode = <SVGFEMergeNodeElement>document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+						mergedOutlines.appendChild(outlineReferenceNode);
+						outlineReferenceNode.in1.baseVal = `outline${ i }`;
+					}
+
+					const outlineColorFilter = <SVGFEFloodElement>document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
+					filterElement.appendChild(outlineColorFilter);
+					outlineColorFilter.setAttribute("flood-color", outlineColor.toString());
+
+					const coloredOutline = <SVGFECompositeElement>document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+					filterElement.appendChild(coloredOutline);
+					coloredOutline.operator.baseVal = SVGFECompositeElement.SVG_FECOMPOSITE_OPERATOR_IN;
+					coloredOutline.in2.baseVal = "outline";
+				}
 			}
 
 			if (this._gaussianBlur > 0) {
-				blurFilter +=
-`	<feGaussianBlur stdDeviation="${ this._gaussianBlur }" />
-`;
+				const gaussianBlurFilter = <SVGFEGaussianBlurElement>document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+				filterElement.appendChild(gaussianBlurFilter);
+				gaussianBlurFilter.stdDeviationX.baseVal = this._gaussianBlur;
+				gaussianBlurFilter.stdDeviationY.baseVal = this._gaussianBlur;
 			}
 			for (let i = 0; i < this._blur; i++) {
-				blurFilter +=
-`	<feConvolveMatrix kernelMatrix="1 2 1 2 4 2 1 2 1" edgeMode="none" />
-`;
+				const blurFilter = <SVGFEConvolveMatrixElement>document.createElementNS("http://www.w3.org/2000/svg", "feConvolveMatrix");
+				filterElement.appendChild(blurFilter);
+				blurFilter.setAttribute("kernelMatrix", "1 2 1 2 4 2 1 2 1");
+				blurFilter.edgeMode.baseVal = SVGFEConvolveMatrixElement.SVG_EDGEMODE_NONE;
+			}
+
+			if (filterElement.childElementCount > 0) {
+				const mergedOutlineAndSourceGraphic = <SVGFEMergeElement>document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+				filterElement.appendChild(mergedOutlineAndSourceGraphic);
+
+				const outlineReferenceNode = <SVGFEMergeNodeElement>document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+				mergedOutlineAndSourceGraphic.appendChild(outlineReferenceNode);
+
+				const sourceGraphicReferenceNode = <SVGFEMergeNodeElement>document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+				mergedOutlineAndSourceGraphic.appendChild(sourceGraphicReferenceNode);
+				sourceGraphicReferenceNode.in1.baseVal = "SourceGraphic";
+
+				this._svgDefsElement.appendChild(filterElement);
+
+				filterWrapperSpan.style.webkitFilter = `url("#${ filterId }")`;
+				filterWrapperSpan.style.filter = `url("#${ filterId }")`;
 			}
 		}
 		else {
@@ -336,29 +372,6 @@ ${ mergeOutlinesFilter }
 			}
 		}
 
-		const filterWrapperSpan = document.createElement("span");
-		filterWrapperSpan.appendChild(span);
-
-		if (outlineFilter !== '' || blurFilter !== '') {
-			const filterString =
-`<filter xmlns="http://www.w3.org/2000/svg" id="${ filterId }" x="-50%" width="200%" y="-50%" height="200%">
-${ outlineFilter }
-${ blurFilter }
-	<feMerge>
-		<feMergeNode />
-		<feMergeNode in="SourceGraphic" />
-	</feMerge>
-</filter>
-`;
-
-			const filterElement = domParser.parseFromString(filterString, "image/svg+xml").childNodes[0];
-
-			this._svgDefsElement.appendChild(filterElement);
-
-			filterWrapperSpan.style.webkitFilter = `url("#${ filterId }")`;
-			filterWrapperSpan.style.filter = `url("#${ filterId }")`;
-		}
-
 		if (this._shadowDepthX !== 0 || this._shadowDepthY !== 0) {
 			const shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
 			const shadowCssString = `${ shadowColor.toString() } ${ (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) }px ${ (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) }px 0px`;
@@ -374,8 +387,6 @@ ${ blurFilter }
 			// Perspective needs to be set on a "transformable element"
 			filterWrapperSpan.style.display = "inline-block";
 		}
-
-		animationStyleElement.appendChild(document.createTextNode(animationCollection.cssText));
 
 		span.style.webkitAnimation = animationCollection.animationStyle;
 		span.style.animation = animationCollection.animationStyle;
