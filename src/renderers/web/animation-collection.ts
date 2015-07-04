@@ -29,6 +29,7 @@ import { Map } from "../../utility/map";
  * The collection can then be converted to a CSS3 representation.
  *
  * @param {!libjass.renderers.NullRenderer} renderer The renderer that this collection is associated with
+ * @param {!HTMLStyleElement} style A <style> element to insert the animation rules into
  */
 export class AnimationCollection {
 	private static _nextId: number = 0;
@@ -36,23 +37,13 @@ export class AnimationCollection {
 	private _id: string;
 	private _rate: number;
 
-	private _cssText: string = "";
 	private _animationStyle: string = "";
 	private _animationDelays: Map<string, number> = new Map<string, number>();
 	private _numAnimations: number = 0;
 
-	constructor(renderer: NullRenderer) {
+	constructor(renderer: NullRenderer, private _style: HTMLStyleElement) {
 		this._id = `${ renderer.id }-${ AnimationCollection._nextId++ }`;
 		this._rate = renderer.clock.rate;
-	}
-
-	/**
-	 * This string contains the animation definitions and should be inserted into a <style> element.
-	 *
-	 * @type {string}
-	 */
-	get cssText(): string {
-		return this._cssText;
 	}
 
 	/**
@@ -111,16 +102,15 @@ export class AnimationCollection {
 
 		const animationName = `animation-${ this._id }-${ this._numAnimations++ }`;
 
-		this._cssText +=
+		this._style.appendChild(document.createTextNode(
 `@-webkit-keyframes ${ animationName } {
 ${ ruleCssText }
-}
+}`));
 
-@keyframes ${ animationName } {
+		this._style.appendChild(document.createTextNode(
+`@keyframes ${ animationName } {
 ${ ruleCssText }
-}
-
-`;
+}`));
 
 		if (this._animationStyle !== "") {
 			this._animationStyle += ",";

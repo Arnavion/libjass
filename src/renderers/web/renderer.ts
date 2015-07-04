@@ -200,7 +200,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		dialogueAnimationStylesElement.id = `libjass-animation-styles-${ this.id }-${ dialogue.id }`;
 		dialogueAnimationStylesElement.type = "text/css";
 
-		const dialogueAnimationCollection = new AnimationCollection(this);
+		const dialogueAnimationCollection = new AnimationCollection(this, dialogueAnimationStylesElement);
 
 		let currentSpan: HTMLSpanElement = null;
 		const currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, this._svgDefsElement);
@@ -211,8 +211,6 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		const startNewSpan = (addNewLine: boolean): void => {
 			if (currentSpan !== null && currentSpan.hasChildNodes()) {
 				sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan, currentAnimationCollection));
-
-				dialogueAnimationStylesElement.appendChild(document.createTextNode(currentAnimationCollection.cssText));
 			}
 
 			if (currentAnimationCollection !== null) {
@@ -229,7 +227,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			currentSpan = document.createElement("span");
-			currentAnimationCollection = new AnimationCollection(this);
+			currentAnimationCollection = new AnimationCollection(this, dialogueAnimationStylesElement);
 
 			previousAddNewLine = addNewLine;
 		};
@@ -527,8 +525,6 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 				case 3: case 6: case 9: sub.style.textAlign = "right"; break;
 			}
 		}
-
-		dialogueAnimationStylesElement.appendChild(document.createTextNode(dialogueAnimationCollection.cssText));
 
 		sub.style.webkitAnimation = dialogueAnimationCollection.animationStyle;
 		sub.style.animation = dialogueAnimationCollection.animationStyle;
