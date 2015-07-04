@@ -90,6 +90,22 @@ export class Color {
 	toString(): string {
 		return `rgba(${ this._red }, ${ this._green }, ${ this._blue }, ${ this._alpha.toFixed(3) })`;
 	}
+
+	/**
+	 * Returns a new Color by interpolating the current color to the final color by the given progression.
+	 *
+	 * @param {!libjass.parts.Color} final
+	 * @param {number} progression
+	 * @return {!libjass.parts.Color}
+	 */
+	interpolate(final: Color, progression: number): Color {
+		return new Color(
+			this._red + progression * (final.red - this._red),
+			this._green + progression * (final.green - this._green),
+			this._blue + progression * (final.blue - this._blue),
+			this._alpha + progression * (final.alpha - this._alpha)
+		);
+	}
 }
 
 /**

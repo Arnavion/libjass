@@ -168,9 +168,16 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	 * The magic happens here. The subtitle div is rendered and stored. Call {@link libjass.renderers.WebRenderer.draw} to get a clone of the div to display.
 	 *
 	 * @param {!libjass.Dialogue} dialogue
+	 * @return {!PreRenderedSub}
 	 */
-	preRender(dialogue: Dialogue): void {
+	preRender(dialogue: Dialogue): PreRenderedSub {
 		if (this._preRenderedSubs.has(dialogue.id)) {
+			return;
+		}
+
+		const currentTimeRelativeToDialogueStart = this.clock.currentTime - dialogue.start;
+
+		if (dialogue.containsTransformTag && currentTimeRelativeToDialogueStart < 0) {
 			return;
 		}
 
@@ -448,6 +455,132 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 				]))]);
 			}
 
+			else if (part instanceof parts.Transform) {
+				const progression =
+					(currentTimeRelativeToDialogueStart <= part.start) ? 0 :
+					(currentTimeRelativeToDialogueStart >= part.end) ? 1 :
+					Math.pow((currentTimeRelativeToDialogueStart - part.start) / (part.end - part.start), part.accel);
+
+				for (let tag of part.tags) {
+					if (part instanceof parts.Border) {
+						currentSpanStyles.outlineWidth += progression * (part.value - currentSpanStyles.outlineWidth);
+						currentSpanStyles.outlineHeight += progression * (part.value - currentSpanStyles.outlineHeight);
+					}
+
+					else if (part instanceof parts.BorderX) {
+						currentSpanStyles.outlineWidth += progression * (part.value - currentSpanStyles.outlineWidth);
+					}
+
+					else if (part instanceof parts.BorderY) {
+						currentSpanStyles.outlineHeight += progression * (part.value - currentSpanStyles.outlineHeight);
+					}
+
+					else if (part instanceof parts.Shadow) {
+						currentSpanStyles.shadowDepthX += progression * (part.value - currentSpanStyles.shadowDepthX);
+						currentSpanStyles.shadowDepthY += progression * (part.value - currentSpanStyles.shadowDepthY);
+					}
+
+					else if (part instanceof parts.ShadowX) {
+						currentSpanStyles.shadowDepthX += progression * (part.value - currentSpanStyles.shadowDepthX);
+					}
+
+					else if (part instanceof parts.ShadowY) {
+						currentSpanStyles.shadowDepthY += progression * (part.value - currentSpanStyles.shadowDepthY);
+					}
+
+					else if (part instanceof parts.Blur) {
+						currentSpanStyles.blur += progression * (part.value - currentSpanStyles.blur);
+					}
+
+					else if (part instanceof parts.GaussianBlur) {
+						currentSpanStyles.gaussianBlur += progression * (part.value - currentSpanStyles.gaussianBlur);
+					}
+
+					else if (part instanceof parts.FontSize) {
+						currentSpanStyles.fontSize += progression * (part.value - currentSpanStyles.fontSize);
+					}
+
+					else if (part instanceof parts.FontSizePlus) {
+						currentSpanStyles.fontSize += progression * part.value;
+					}
+
+					else if (part instanceof parts.FontSizeMinus) {
+						currentSpanStyles.fontSize -= progression * part.value;
+					}
+
+					else if (part instanceof parts.FontScaleX) {
+						currentSpanStyles.fontScaleX += progression * (part.value - currentSpanStyles.fontScaleX);
+					}
+
+					else if (part instanceof parts.FontScaleY) {
+						currentSpanStyles.fontScaleY += progression * (part.value - currentSpanStyles.fontScaleY);
+					}
+
+					else if (part instanceof parts.LetterSpacing) {
+						currentSpanStyles.letterSpacing += progression * (part.value - currentSpanStyles.letterSpacing);
+					}
+
+					else if (part instanceof parts.RotateX) {
+						currentSpanStyles.rotationX += progression * (part.value - currentSpanStyles.rotationX);
+					}
+
+					else if (part instanceof parts.RotateY) {
+						currentSpanStyles.rotationY += progression * (part.value - currentSpanStyles.rotationY);
+					}
+
+					else if (part instanceof parts.RotateZ) {
+						currentSpanStyles.rotationZ += progression * (part.value - currentSpanStyles.rotationZ);
+					}
+
+					else if (part instanceof parts.SkewX) {
+						currentSpanStyles.skewX += progression * (part.value - currentSpanStyles.skewX);
+					}
+
+					else if (part instanceof parts.SkewY) {
+						currentSpanStyles.skewY += progression * (part.value - currentSpanStyles.skewY);
+					}
+
+					else if (part instanceof parts.PrimaryColor) {
+						currentSpanStyles.primaryColor = currentSpanStyles.primaryColor.interpolate(part.value, progression);
+					}
+
+					else if (part instanceof parts.SecondaryColor) {
+						currentSpanStyles.secondaryColor = currentSpanStyles.secondaryColor.interpolate(part.value, progression);
+					}
+
+					else if (part instanceof parts.OutlineColor) {
+						currentSpanStyles.outlineColor = currentSpanStyles.outlineColor.interpolate(part.value, progression);
+					}
+
+					else if (part instanceof parts.ShadowColor) {
+						currentSpanStyles.shadowColor = currentSpanStyles.shadowColor.interpolate(part.value, progression);
+					}
+
+					else if (tag instanceof parts.Alpha) {
+						currentSpanStyles.primaryAlpha += progression * (tag.value - currentSpanStyles.primaryAlpha);
+						currentSpanStyles.secondaryAlpha += progression * (tag.value - currentSpanStyles.secondaryAlpha);
+						currentSpanStyles.outlineAlpha += progression * (tag.value - currentSpanStyles.outlineAlpha);
+						currentSpanStyles.shadowAlpha += progression * (tag.value - currentSpanStyles.shadowAlpha);
+					}
+
+					else if (tag instanceof parts.PrimaryAlpha) {
+						currentSpanStyles.primaryAlpha += progression * (tag.value - currentSpanStyles.primaryAlpha);
+					}
+
+					else if (tag instanceof parts.SecondaryAlpha) {
+						currentSpanStyles.secondaryAlpha += progression * (tag.value - currentSpanStyles.secondaryAlpha);
+					}
+
+					else if (tag instanceof parts.OutlineAlpha) {
+						currentSpanStyles.outlineAlpha += progression * (tag.value - currentSpanStyles.outlineAlpha);
+					}
+
+					else if (tag instanceof parts.ShadowAlpha) {
+						currentSpanStyles.shadowAlpha += progression * (tag.value - currentSpanStyles.shadowAlpha);
+					}
+				}
+			}
+
 			else if (part instanceof parts.DrawingMode) {
 				if (part.scale !== 0) {
 					currentDrawingStyles.scale = part.scale;
@@ -533,7 +666,13 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			sub.appendChild(svgElement);
 		}
 
-		this._preRenderedSubs.set(dialogue.id, { sub, animationDelays: dialogueAnimationCollection.animationDelays });
+		const result = { sub, animationDelays: dialogueAnimationCollection.animationDelays };
+
+		if (!dialogue.containsTransformTag) {
+			this._preRenderedSubs.set(dialogue.id, result);
+		}
+
+		return result;
 	}
 
 	/**
@@ -543,7 +682,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	 * @param {!libjass.Dialogue} dialogue
 	 */
 	draw(dialogue: Dialogue): void {
-		if (this._currentSubs.has(dialogue)) {
+		if (this._currentSubs.has(dialogue) && !dialogue.containsTransformTag) {
 			return;
 		}
 
@@ -554,12 +693,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		let preRenderedSub = this._preRenderedSubs.get(dialogue.id);
 
 		if (preRenderedSub === undefined) {
-			if (debugMode) {
-				console.warn("This dialogue was not pre-rendered. Call preRender() before calling draw() so that draw() is faster.");
-			}
-
-			this.preRender(dialogue);
-			preRenderedSub = this._preRenderedSubs.get(dialogue.id);
+			preRenderedSub = this.preRender(dialogue);
 
 			if (debugMode) {
 				console.log(dialogue.toString());
@@ -657,7 +791,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		const currentTime = this.clock.currentTime;
 
 		this._currentSubs.forEach((sub: HTMLDivElement, dialogue: Dialogue) => {
-			if (dialogue.start > currentTime || dialogue.end < currentTime) {
+			if (dialogue.start > currentTime || dialogue.end < currentTime || dialogue.containsTransformTag) {
 				this._currentSubs.delete(dialogue);
 				this._removeSub(sub);
 			}

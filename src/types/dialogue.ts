@@ -60,6 +60,7 @@ export class Dialogue {
 	private _rawPartsString: string;
 	private _parts: parts.Part[] = null;
 
+	private _containsTransformTag: boolean = false;
 
 	constructor(template: Map<string, string>, ass: ASS) {
 		{
@@ -175,6 +176,19 @@ export class Dialogue {
 	}
 
 	/**
+	 * Convenience getter for whether this dialogue contains a {\t} tag.
+	 *
+	 * @type {boolean}
+	 */
+	get containsTransformTag(): boolean {
+		if (this._parts === null) {
+			this._parsePartsString();
+		}
+
+		return this._containsTransformTag;
+	}
+
+	/**
 	 * @return {string} A simple representation of this dialogue's properties and parts.
 	 */
 	toString(): string {
@@ -212,6 +226,8 @@ export class Dialogue {
 							part.tags
 						);
 				}
+
+				this._containsTransformTag = true;
 			}
 		});
 
