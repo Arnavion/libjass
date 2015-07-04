@@ -60,7 +60,6 @@ export class Dialogue {
 	private _rawPartsString: string;
 	private _parts: parts.Part[] = null;
 
-	private _sub: HTMLDivElement = null;
 
 	constructor(template: Map<string, string>, ass: ASS) {
 		{
