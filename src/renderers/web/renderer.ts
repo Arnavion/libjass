@@ -58,7 +58,6 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	private _layerWrappers: HTMLDivElement[] = [];
 	private _layerAlignmentWrappers: HTMLDivElement[][] = [];
 	private _fontSizeElement: HTMLDivElement;
-	private _svgDefsElement: SVGDefsElement;
 
 	private _currentSubs: Map<Dialogue, HTMLDivElement> = new Map<Dialogue, HTMLDivElement>();
 	private _preRenderedSubs: Map<number, PreRenderedSub> = new Map<number, PreRenderedSub>();
@@ -88,16 +87,6 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		this._libjassSubsWrapper.appendChild(this._fontSizeElement);
 		this._fontSizeElement.className = "libjass-font-measure";
 		this._fontSizeElement.appendChild(document.createTextNode("M"));
-
-		const svgElement = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
-		this._libjassSubsWrapper.appendChild(svgElement);
-		svgElement.setAttribute("version", "1.1");
-		svgElement.setAttribute("class", "libjass-filters");
-		svgElement.width.baseVal.valueAsString = "0";
-		svgElement.height.baseVal.valueAsString = "0";
-
-		this._svgDefsElement = <SVGDefsElement>document.createElementNS("http://www.w3.org/2000/svg", "defs");
-		svgElement.appendChild(this._svgDefsElement);
 
 		// Preload fonts
 
@@ -169,10 +158,6 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		// Any dialogues which have been pre-rendered will need to be pre-rendered again.
 		this._preRenderedSubs.clear();
 
-		while (this._svgDefsElement.firstChild !== null) {
-			this._svgDefsElement.removeChild(this._svgDefsElement.firstChild);
-		}
-
 		// this.currentTime will be -1 if resize() is called before the clock begins playing for the first time. In this situation, there is no need to force a redraw.
 		if (this.clock.currentTime !== -1) {
 			this._onClockTick();
@@ -202,8 +187,17 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		const dialogueAnimationCollection = new AnimationCollection(this, dialogueAnimationStylesElement);
 
+		const svgElement = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		svgElement.setAttribute("version", "1.1");
+		svgElement.setAttribute("class", "libjass-filters");
+		svgElement.width.baseVal.valueAsString = "0";
+		svgElement.height.baseVal.valueAsString = "0";
+
+		const svgDefsElement = <SVGDefsElement>document.createElementNS("http://www.w3.org/2000/svg", "defs");
+		svgElement.appendChild(svgDefsElement);
+
 		let currentSpan: HTMLSpanElement = null;
-		const currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, this._svgDefsElement);
+		const currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, svgDefsElement);
 
 		let currentAnimationCollection: AnimationCollection = null;
 
@@ -535,6 +529,10 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			sub.appendChild(dialogueAnimationStylesElement);
 		}
 
+		if (svgDefsElement.hasChildNodes()) {
+			sub.appendChild(svgElement);
+		}
+
 		this._preRenderedSubs.set(dialogue.id, { sub, animationDelays: dialogueAnimationCollection.animationDelays });
 	}
 
@@ -685,10 +683,6 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		// Any dialogues which have been pre-rendered will need to be pre-rendered again.
 		this._preRenderedSubs.clear();
-
-		while (this._svgDefsElement.firstChild !== null) {
-			this._svgDefsElement.removeChild(this._svgDefsElement.firstChild);
-		}
 	}
 
 	protected _ready(): void {
