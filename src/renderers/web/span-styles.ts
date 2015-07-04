@@ -440,12 +440,30 @@ export class SpanStyles {
 	}
 
 	/**
+	 * Gets the outline width property.
+	 *
+	 * @type {number}
+	 */
+	get outlineWidth() {
+		return this._outlineWidth;
+	}
+
+	/**
 	 * Sets the outline width property. null defaults it to the style's original outline width value.
 	 *
 	 * @type {?number}
 	 */
 	set outlineWidth(value: number) {
 		this._outlineWidth = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineThickness);
+	}
+
+	/**
+	 * Gets the outline width property.
+	 *
+	 * @type {number}
+	 */
+	get outlineHeight() {
+		return this._outlineWidth;
 	}
 
 	/**
@@ -458,7 +476,16 @@ export class SpanStyles {
 	}
 
 	/**
-	 * Sets the outline width property. null defaults it to the style's original shadow depth X value.
+	 * Gets the shadow width property.
+	 *
+	 * @type {number}
+	 */
+	get shadowDepthX() {
+		return this._shadowDepthX;
+	}
+
+	/**
+	 * Sets the shadow width property. null defaults it to the style's original shadow depth value.
 	 *
 	 * @type {?number}
 	 */
@@ -467,12 +494,30 @@ export class SpanStyles {
 	}
 
 	/**
-	 * Sets the shadow height property. null defaults it to the style's original shadow depth Y value.
+	 * Gets the shadow height property.
+	 *
+	 * @type {number}
+	 */
+	get shadowDepthY() {
+		return this._shadowDepthY;
+	}
+
+	/**
+	 * Sets the shadow height property. null defaults it to the style's original shadow depth value.
 	 *
 	 * @type {?number}
 	 */
 	set shadowDepthY(value: number) {
 		this._shadowDepthY = SpanStyles._valueOrDefault(value, this._defaultStyle.shadowDepth);
+	}
+
+	/**
+	 * Gets the blur property.
+	 *
+	 * @type {number}
+	 */
+	get blur() {
+		return this._blur;
 	}
 
 	/**
@@ -482,6 +527,15 @@ export class SpanStyles {
 	 */
 	set blur(value: number) {
 		this._blur = SpanStyles._valueOrDefault(value, 0);
+	}
+
+	/**
+	 * Gets the Gaussian blur property.
+	 *
+	 * @type {number}
+	 */
+	get gaussianBlur() {
+		return this._gaussianBlur;
 	}
 
 	/**
@@ -503,12 +557,30 @@ export class SpanStyles {
 	}
 
 	/**
+	 * Gets the font size property.
+	 *
+	 * @type {number}
+	 */
+	get fontSize() {
+		return this._fontSize;
+	}
+
+	/**
 	 * Sets the font size property. null defaults it to the default style's value.
 	 *
 	 * @type {?number}
 	 */
 	set fontSize(value: number) {
 		this._fontSize = SpanStyles._valueOrDefault(value, this._defaultStyle.fontSize);
+	}
+
+	/**
+	 * Gets the horizontal font scaling property.
+	 *
+	 * @type {number}
+	 */
+	get fontScaleX() {
+		return this._fontScaleX;
 	}
 
 	/**
@@ -521,12 +593,30 @@ export class SpanStyles {
 	}
 
 	/**
+	 * Gets the vertical font scaling property.
+	 *
+	 * @type {number}
+	 */
+	get fontScaleY() {
+		return this._fontScaleY;
+	}
+
+	/**
 	 * Sets the vertical font scaling property. null defaults it to the default style's value.
 	 *
 	 * @type {?number}
 	 */
 	set fontScaleY(value: number) {
 		this._fontScaleY = SpanStyles._valueOrDefault(value, this._defaultStyle.fontScaleY);
+	}
+
+	/**
+	 * Gets the letter spacing property.
+	 *
+	 * @type {number}
+	 */
+	get letterSpacing() {
+		return this._letterSpacing;
 	}
 
 	/**
@@ -539,12 +629,30 @@ export class SpanStyles {
 	}
 
 	/**
+	 * Gets the X-axis rotation property.
+	 *
+	 * @type {?number}
+	 */
+	get rotationX() {
+		return this._rotationX;
+	}
+
+	/**
 	 * Sets the X-axis rotation property.
 	 *
 	 * @type {?number}
 	 */
 	set rotationX(value: number) {
 		this._rotationX = value;
+	}
+
+	/**
+	 * Gets the Y-axis rotation property.
+	 *
+	 * @type {?number}
+	 */
+	get rotationY() {
+		return this._rotationY;
 	}
 
 	/**
@@ -557,6 +665,15 @@ export class SpanStyles {
 	}
 
 	/**
+	 * Gets the Z-axis rotation property.
+	 *
+	 * @type {?number}
+	 */
+	get rotationZ() {
+		return this._rotationZ;
+	}
+
+	/**
 	 * Sets the Z-axis rotation property.
 	 *
 	 * @type {?number}
@@ -566,12 +683,30 @@ export class SpanStyles {
 	}
 
 	/**
+	 * Gets the X-axis skew property.
+	 *
+	 * @type {?number}
+	 */
+	get skewX() {
+		return this._skewX;
+	}
+
+	/**
 	 * Sets the X-axis skew property.
 	 *
 	 * @type {?number}
 	 */
 	set skewX(value: number) {
 		this._skewX = value;
+	}
+
+	/**
+	 * Gets the Y-axis skew property.
+	 *
+	 * @type {?number}
+	 */
+	get skewY() {
+		return this._skewY;
 	}
 
 	/**
@@ -674,12 +809,30 @@ export class SpanStyles {
 	}
 
 	/**
+	 * Gets the outline alpha property.
+	 *
+	 * @type {number}
+	 */
+	get outlineAlpha(): number {
+		return this._outlineAlpha;
+	}
+
+	/**
 	 * Sets the outline alpha property.
 	 *
 	 * @type {?number}
 	 */
 	set outlineAlpha(value: number) {
 		this._outlineAlpha = value;
+	}
+
+	/**
+	 * Gets the shadow alpha property.
+	 *
+	 * @type {number}
+	 */
+	get shadowAlpha(): number {
+		return this._shadowAlpha;
 	}
 
 	/**
