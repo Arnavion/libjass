@@ -1474,60 +1474,59 @@ class ParserRun {
 			let currentType: string = null;
 
 			const typePart = this.parse_text(current);
-			if (typePart === null) {
-				parent.pop();
-				return null;
-			}
 
-			currentType = typePart.value.value;
-			switch (currentType) {
-				case "m":
-				case "l":
-				case "b":
-					lastType = currentType;
-					break;
-
-				default:
-					if (lastType === null) {
-						parent.pop();
-						return null;
-					}
-
-					currentType = lastType;
-					current.pop();
-					break;
-			}
-
-			switch (currentType) {
-				case "m":
-					const movePart = this.parse_drawingInstructionMove(current);
-					if (movePart === null) {
-						parent.pop();
-						return null;
-					}
-
-					current.value.push(movePart.value);
-					break;
-
-				case "l":
-					const linePart = this.parse_drawingInstructionLine(current);
-					if (linePart === null) {
-						parent.pop();
-						return null;
-					}
-
-					current.value.push(linePart.value);
-					break;
-
-				case "b":
-					const cubicBezierCurvePart = this.parse_drawingInstructionCubicBezierCurve(current);
-					if (cubicBezierCurvePart === null) {
-						parent.pop();
-						return null;
-					}
-
-					current.value.push(cubicBezierCurvePart.value);
-					break;
+			if (typePart !== null) {
+				currentType = typePart.value.value;
+				switch (currentType) {
+					case "m":
+					case "l":
+					case "b":
+						lastType = currentType;
+						break;
+	
+					default:
+						if (lastType !== null) {
+							currentType = lastType;
+							current.pop();
+						}
+						break;
+				}
+	
+				switch (currentType) {
+					case "m":
+						const movePart = this.parse_drawingInstructionMove(current);
+						if (movePart !== null) {
+							current.value.push(movePart.value);
+						}
+						else
+						{
+							this.parse_text(current);
+						}
+						break;
+	
+					case "l":
+						const linePart = this.parse_drawingInstructionLine(current);
+						if (linePart !== null) {
+							current.value.push(linePart.value);
+						}
+						else
+						{
+							this.parse_text(current);
+						}
+						break;
+	
+					case "b":
+						const cubicBezierCurvePart = this.parse_drawingInstructionCubicBezierCurve(current);
+						if (cubicBezierCurvePart !== null) {
+							current.value.push(cubicBezierCurvePart.value);
+						}
+						else
+						{
+							this.parse_text(current);
+						}
+	
+						break;
+				}
 			}
 		}
 
