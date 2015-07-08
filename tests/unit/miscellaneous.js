@@ -28,8 +28,9 @@ define([
 	"intern/dojo/text!./3.ass",
 	"intern/dojo/text!./4.ass",
 	"intern/dojo/text!./5.ass",
-	"intern/dojo/text!./6.ass"
-], function (tdd, assert, parserTest, libjass, ass_1, ass_2, ass_3, ass_4, ass_5, ass_6) {
+	"intern/dojo/text!./6.ass",
+	"intern/dojo/text!./7.ass"
+], function (tdd, assert, parserTest, libjass, ass_1, ass_2, ass_3, ass_4, ass_5, ass_6, ass_7) {
 	tdd.suite("Miscellaneous", function () {
 		tdd.test("herkz", parserTest("{\\pos(311,4)\\blur0.8\\fs40\\bord0\\c&H3F171F&\\t(3820,3820,\\blur6}Chi{\\c&H422CB1&}tose {\\c&H3F171F&}Furu", "dialogueParts", [
 			new libjass.parts.Position(311, 4),
@@ -384,6 +385,17 @@ define([
 				assert.strictEqual(ass.dialogues[0].style, ass.styles.get("sign1"));
 
 				assert.strictEqual(ass.dialogues[1].style, ass.styles.get("Default"));
+			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
+
+			return deferred.promise;
+		});
+
+		tdd.test("First unnamed section should be treated as Script Info", function () {
+			var deferred = this.async(1000);
+
+			libjass.ASS.fromString(ass_7, libjass.Format.ASS).then(function (ass) {
+				assert.strictEqual(ass.properties.resolutionX, 1280);
+				assert.strictEqual(ass.properties.resolutionY, 720);
 			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
 
 			return deferred.promise;

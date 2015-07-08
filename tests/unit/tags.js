@@ -157,6 +157,28 @@ define(["intern!tdd", "tests/support/parser-test", "libjass"], function (tdd, pa
 				new libjass.parts.drawing.CubicBezierCurveInstruction(983, 524, 987, 496, 984, 459)
 			]));
 
+			tdd.test("Unrecognized text after instruction", parserTest("m 100 200 l 300 400k", "drawingInstructions", [
+				new libjass.parts.drawing.MoveInstruction(100, 200),
+				new libjass.parts.drawing.LineInstruction(300, 400)
+			]));
+
+			tdd.test("Instruction without parameters", parserTest("m 100 200 l 300 400 m", "drawingInstructions", [
+				new libjass.parts.drawing.MoveInstruction(100, 200),
+				new libjass.parts.drawing.LineInstruction(300, 400)
+			]));
+
+			tdd.test("Unrecognized text between valid parts of the instruction", parserTest("m 100 k 200", "drawingInstructions", []));
+
+			tdd.test("Unrecognized text before instruction", parserTest("k 100 m 200 300", "drawingInstructions", [
+				new libjass.parts.drawing.MoveInstruction(200, 300)
+			]));
+
+			tdd.test("Unrecognized text between instructions", parserTest("m 100 200 k 300 400 l 500 600", "drawingInstructions", [
+				new libjass.parts.drawing.MoveInstruction(100, 200),
+				new libjass.parts.drawing.MoveInstruction(300, 400),
+				new libjass.parts.drawing.LineInstruction(500, 600)
+			]));
+
 			tdd.test("Leading space", parserTest(" m 984 425", "drawingInstructions", [
 				new libjass.parts.drawing.MoveInstruction(984, 425)
 			]));
