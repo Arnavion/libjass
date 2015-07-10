@@ -1461,7 +1461,8 @@ class ParserRun {
 	parse_drawingInstructions(parent: ParseNode): ParseNode {
 		const current = new ParseNode(parent);
 
-		let lastType: string = null;
+		let currentType: string = null;
+		const numberParts: ParseNode[] = [];
 
 		current.value = [];
 
@@ -1471,183 +1472,48 @@ class ParserRun {
 				break;
 			}
 
-			let currentType: string = null;
+			if (currentType !== null) {
+				const numberPart = this.parse_decimal(current);
+				if (numberPart !== null) {
+					numberParts.push(numberPart);
+
+					if (currentType === "m" && numberParts.length === 2) {
+						current.value.push(new parts.drawing.MoveInstruction(numberParts[0].value, numberParts[1].value));
+						numberParts.splice(0, numberParts.length);
+					}
+					else if (currentType === "l" && numberParts.length === 2) {
+						current.value.push(new parts.drawing.LineInstruction(numberParts[0].value, numberParts[1].value));
+						numberParts.splice(0, numberParts.length);
+					}
+					else if (currentType === "b" && numberParts.length === 6) {
+						current.value.push(new parts.drawing.CubicBezierCurveInstruction(
+							numberParts[0].value, numberParts[1].value,
+							numberParts[2].value, numberParts[3].value,
+							numberParts[4].value, numberParts[5].value));
+						numberParts.splice(0, numberParts.length);
+					}
+
+					continue;
+				}
+			}
 
 			const typePart = this.parse_text(current);
 			if (typePart === null) {
-				parent.pop();
-				return null;
+				break;
 			}
 
-			currentType = typePart.value.value;
-			switch (currentType) {
+			let newType = (<parts.Text>typePart.value).value;
+			switch (newType) {
 				case "m":
 				case "l":
 				case "b":
-					lastType = currentType;
-					break;
-
-				default:
-					if (lastType === null) {
-						parent.pop();
-						return null;
-					}
-
-					currentType = lastType;
-					current.pop();
-					break;
-			}
-
-			switch (currentType) {
-				case "m":
-					const movePart = this.parse_drawingInstructionMove(current);
-					if (movePart === null) {
-						parent.pop();
-						return null;
-					}
-
-					current.value.push(movePart.value);
-					break;
-
-				case "l":
-					const linePart = this.parse_drawingInstructionLine(current);
-					if (linePart === null) {
-						parent.pop();
-						return null;
-					}
-
-					current.value.push(linePart.value);
-					break;
-
-				case "b":
-					const cubicBezierCurvePart = this.parse_drawingInstructionCubicBezierCurve(current);
-					if (cubicBezierCurvePart === null) {
-						parent.pop();
-						return null;
-					}
-
-					current.value.push(cubicBezierCurvePart.value);
+					currentType = newType;
+					numberParts.splice(0, numberParts.length);
 					break;
 			}
 		}
 
 		while (this.read(current, " ") !== null) { }
-
-		return current;
-	}
-
-	/**
-	 * @param {!ParseNode} parent
-	 * @return {ParseNode}
-	 */
-	parse_drawingInstructionMove(parent: ParseNode): ParseNode {
-		const current = new ParseNode(parent);
-
-		while (this.read(current, " ") !== null) { }
-
-		const xPart = this.parse_decimal(current);
-		if (xPart === null) {
-			parent.pop();
-			return null;
-		}
-
-		while (this.read(current, " ") !== null) { }
-
-		const yPart = this.parse_decimal(current);
-		if (yPart === null) {
-			parent.pop();
-			return null;
-		}
-
-		current.value = new parts.drawing.MoveInstruction(xPart.value, yPart.value);
-
-		return current;
-	}
-
-	/**
-	 * @param {!ParseNode} parent
-	 * @return {ParseNode}
-	 */
-	parse_drawingInstructionLine(parent: ParseNode): ParseNode {
-		const current = new ParseNode(parent);
-
-		while (this.read(current, " ") !== null) { }
-
-		const xPart = this.parse_decimal(current);
-		if (xPart === null) {
-			parent.pop();
-			return null;
-		}
-
-		while (this.read(current, " ") !== null) { }
-
-		const yPart = this.parse_decimal(current);
-		if (yPart === null) {
-			parent.pop();
-			return null;
-		}
-
-		current.value = new parts.drawing.LineInstruction(xPart.value, yPart.value);
-
-		return current;
-	}
-
-	/**
-	 * @param {!ParseNode} parent
-	 * @return {ParseNode}
-	 */
-	parse_drawingInstructionCubicBezierCurve(parent: ParseNode): ParseNode {
-		const current = new ParseNode(parent);
-
-		while (this.read(current, " ") !== null) { }
-
-		const x1Part = this.parse_decimal(current);
-		if (x1Part === null) {
-			parent.pop();
-			return null;
-		}
-
-		while (this.read(current, " ") !== null) { }
-
-		const y1Part = this.parse_decimal(current);
-		if (y1Part === null) {
-			parent.pop();
-			return null;
-		}
-
-		while (this.read(current, " ") !== null) { }
-
-		const x2Part = this.parse_decimal(current);
-		if (x2Part === null) {
-			parent.pop();
-			return null;
-		}
-
-		while (this.read(current, " ") !== null) { }
-
-		const y2Part = this.parse_decimal(current);
-		if (y2Part === null) {
-			parent.pop();
-			return null;
-		}
-
-		while (this.read(current, " ") !== null) { }
-
-		const x3Part = this.parse_decimal(current);
-		if (x3Part === null) {
-			parent.pop();
-			return null;
-		}
-
-		while (this.read(current, " ") !== null) { }
-
-		const y3Part = this.parse_decimal(current);
-		if (y3Part === null) {
-			parent.pop();
-			return null;
-		}
-
-		current.value = new parts.drawing.CubicBezierCurveInstruction(x1Part.value, y1Part.value, x2Part.value, y2Part.value, x3Part.value, y3Part.value);
 
 		return current;
 	}
