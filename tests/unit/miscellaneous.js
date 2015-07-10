@@ -244,7 +244,26 @@ define([
 			return deferred.promise;
 		});
 
-		tdd.test("ASS", function () {
+		tdd.test("Minimal ASS", function () {
+			var deferred = this.async(1000);
+
+			var stream = new libjass.parser.StringStream(ass_1);
+			var streamParser = new libjass.parser.StreamParser(stream);
+			streamParser.minimalASS.then(function (ass) {
+				assert.strictEqual(ass.properties.resolutionX, 1280);
+				assert.strictEqual(ass.properties.resolutionY, 720);
+				assert.strictEqual(ass.properties.wrappingStyle, libjass.WrappingStyle.SmartWrappingWithWiderTopLine);
+				assert.strictEqual(ass.properties.scaleBorderAndShadow, true);
+
+				assert.strictEqual(ass.styles.size, 1);
+
+				assert.strictEqual(ass.dialogues.length, 0);
+			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
+
+			return deferred.promise;
+		});
+
+		tdd.test("ASS 2", function () {
 			var deferred = this.async(1000);
 
 			libjass.ASS.fromString(ass_2, libjass.Format.ASS).then(function (ass) {
