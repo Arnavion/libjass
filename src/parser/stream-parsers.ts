@@ -101,6 +101,8 @@ export class StreamParser {
 
 		else {
 			switch (this._currentSectionName) {
+				case null:
+					this._currentSectionName = "Script Info";
 				case "Script Info":
 					const property = parseLineIntoProperty(line);
 					if (property !== null) {
