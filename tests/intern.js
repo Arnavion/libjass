@@ -21,6 +21,7 @@
 define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profile!"], function (intern, encodedFirefoxProfile) {
 	var result = {
 		suites: [
+			"tests/unit/manual-clock",
 			"tests/unit/minified",
 			"tests/unit/miscellaneous",
 			"tests/unit/polyfills",
@@ -29,6 +30,7 @@ define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profi
 			"tests/unit/webworker"
 		],
 		functionalSuites: [
+			"tests/functional/auto-clock",
 			"tests/functional/kfx/kfx"
 		],
 		loader: {
