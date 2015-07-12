@@ -190,11 +190,11 @@ export class ManualClock implements Clock, EventSource<ClockEvent> {
 			return false;
 		}
 
-		this._enabled = false;
-
 		this.pause();
 
 		this.stop();
+
+		this._enabled = false;
 
 		return true;
 	}
