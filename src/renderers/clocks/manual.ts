@@ -60,9 +60,11 @@ export class ManualClock implements Clock, EventSource<ClockEvent> {
 			return;
 		}
 
-		if (this._currentTime !== currentTime) {
-			this.play();
+		if (this._currentTime === currentTime) {
+			return;
 		}
+
+		this.play();
 
 		this._currentTime = currentTime;
 		this._dispatchEvent(ClockEvent.Tick, []);
