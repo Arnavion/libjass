@@ -58,6 +58,8 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	private _layerWrappers: HTMLDivElement[] = [];
 	private _layerAlignmentWrappers: HTMLDivElement[][] = [];
 	private _fontSizeElement: HTMLDivElement;
+	
+	private _lineHeightsCache: Map<string, [number, number]> = new Map<string, [number, number]>();
 
 	private _currentSubs: Map<Dialogue, HTMLDivElement> = new Map<Dialogue, HTMLDivElement>();
 	private _preRenderedSubs: Map<number, PreRenderedSub> = new Map<number, PreRenderedSub>();
@@ -204,7 +206,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		svgElement.appendChild(svgDefsElement);
 
 		let currentSpan: HTMLSpanElement = null;
-		const currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, svgDefsElement);
+		const currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, svgDefsElement, this._lineHeightsCache);
 
 		let currentAnimationCollection: AnimationCollection = null;
 

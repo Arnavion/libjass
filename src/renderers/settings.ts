@@ -64,6 +64,17 @@ export class RendererSettings {
 	enableSvg: boolean;
 
 	/**
+	 * Comma-separated list of fonts to be used when font specified in ASS Styles not loaded.
+	 * 
+	 * Value should be a valid CSS font-family property (i.e. comma-separated and individual names in quotes if necessary).
+	 *
+	 * Defaults to 'Arial, Helvetica, sans-serif, "Segoe UI Symbol"'.
+	 *
+	 * @type {string}
+	 */
+	fallbackFonts: string;
+
+	/**
 	 * A convenience method to create a font map from a <style> or <link> element that contains @font-face rules. There should be one @font-face rule for each font name, mapping to a font file URL.
 	 *
 	 * For example:
@@ -115,12 +126,13 @@ export class RendererSettings {
 			object = {};
 		}
 
-		const { fontMap = null, preRenderTime = 5, preciseOutlines = false, enableSvg = true } = <RendererSettings>object;
+		const { fontMap = null, preRenderTime = 5, preciseOutlines = false, enableSvg = true, fallbackFonts = 'Arial, Helvetica, sans-serif, "Segoe UI Symbol"' } = <RendererSettings>object;
 		const result = new RendererSettings();
 		result.fontMap = fontMap;
 		result.preRenderTime = preRenderTime;
 		result.preciseOutlines = preciseOutlines;
 		result.enableSvg = enableSvg;
+		result.fallbackFonts = fallbackFonts;
 
 		return result;
 	}
