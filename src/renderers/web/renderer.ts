@@ -460,98 +460,98 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 					Math.pow((currentTimeRelativeToDialogueStart - part.start) / (part.end - part.start), part.accel);
 
 				for (let tag of part.tags) {
-					if (part instanceof parts.Border) {
-						currentSpanStyles.outlineWidth += progression * (part.value - currentSpanStyles.outlineWidth);
-						currentSpanStyles.outlineHeight += progression * (part.value - currentSpanStyles.outlineHeight);
+					if (tag instanceof parts.Border) {
+						currentSpanStyles.outlineWidth += progression * (tag.value - currentSpanStyles.outlineWidth);
+						currentSpanStyles.outlineHeight += progression * (tag.value - currentSpanStyles.outlineHeight);
 					}
 
-					else if (part instanceof parts.BorderX) {
-						currentSpanStyles.outlineWidth += progression * (part.value - currentSpanStyles.outlineWidth);
+					else if (tag instanceof parts.BorderX) {
+						currentSpanStyles.outlineWidth += progression * (tag.value - currentSpanStyles.outlineWidth);
 					}
 
-					else if (part instanceof parts.BorderY) {
-						currentSpanStyles.outlineHeight += progression * (part.value - currentSpanStyles.outlineHeight);
+					else if (tag instanceof parts.BorderY) {
+						currentSpanStyles.outlineHeight += progression * (tag.value - currentSpanStyles.outlineHeight);
 					}
 
-					else if (part instanceof parts.Shadow) {
-						currentSpanStyles.shadowDepthX += progression * (part.value - currentSpanStyles.shadowDepthX);
-						currentSpanStyles.shadowDepthY += progression * (part.value - currentSpanStyles.shadowDepthY);
+					else if (tag instanceof parts.Shadow) {
+						currentSpanStyles.shadowDepthX += progression * (tag.value - currentSpanStyles.shadowDepthX);
+						currentSpanStyles.shadowDepthY += progression * (tag.value - currentSpanStyles.shadowDepthY);
 					}
 
-					else if (part instanceof parts.ShadowX) {
-						currentSpanStyles.shadowDepthX += progression * (part.value - currentSpanStyles.shadowDepthX);
+					else if (tag instanceof parts.ShadowX) {
+						currentSpanStyles.shadowDepthX += progression * (tag.value - currentSpanStyles.shadowDepthX);
 					}
 
-					else if (part instanceof parts.ShadowY) {
-						currentSpanStyles.shadowDepthY += progression * (part.value - currentSpanStyles.shadowDepthY);
+					else if (tag instanceof parts.ShadowY) {
+						currentSpanStyles.shadowDepthY += progression * (tag.value - currentSpanStyles.shadowDepthY);
 					}
 
-					else if (part instanceof parts.Blur) {
-						currentSpanStyles.blur += progression * (part.value - currentSpanStyles.blur);
+					else if (tag instanceof parts.Blur) {
+						currentSpanStyles.blur += progression * (tag.value - currentSpanStyles.blur);
 					}
 
-					else if (part instanceof parts.GaussianBlur) {
-						currentSpanStyles.gaussianBlur += progression * (part.value - currentSpanStyles.gaussianBlur);
+					else if (tag instanceof parts.GaussianBlur) {
+						currentSpanStyles.gaussianBlur += progression * (tag.value - currentSpanStyles.gaussianBlur);
 					}
 
-					else if (part instanceof parts.FontSize) {
-						currentSpanStyles.fontSize += progression * (part.value - currentSpanStyles.fontSize);
+					else if (tag instanceof parts.FontSize) {
+						currentSpanStyles.fontSize += progression * (tag.value - currentSpanStyles.fontSize);
 					}
 
-					else if (part instanceof parts.FontSizePlus) {
-						currentSpanStyles.fontSize += progression * part.value;
+					else if (tag instanceof parts.FontSizePlus) {
+						currentSpanStyles.fontSize += progression * tag.value;
 					}
 
-					else if (part instanceof parts.FontSizeMinus) {
-						currentSpanStyles.fontSize -= progression * part.value;
+					else if (tag instanceof parts.FontSizeMinus) {
+						currentSpanStyles.fontSize -= progression * tag.value;
 					}
 
-					else if (part instanceof parts.FontScaleX) {
-						currentSpanStyles.fontScaleX += progression * (part.value - currentSpanStyles.fontScaleX);
+					else if (tag instanceof parts.FontScaleX) {
+						currentSpanStyles.fontScaleX += progression * (tag.value - currentSpanStyles.fontScaleX);
 					}
 
-					else if (part instanceof parts.FontScaleY) {
-						currentSpanStyles.fontScaleY += progression * (part.value - currentSpanStyles.fontScaleY);
+					else if (tag instanceof parts.FontScaleY) {
+						currentSpanStyles.fontScaleY += progression * (tag.value - currentSpanStyles.fontScaleY);
 					}
 
-					else if (part instanceof parts.LetterSpacing) {
-						currentSpanStyles.letterSpacing += progression * (part.value - currentSpanStyles.letterSpacing);
+					else if (tag instanceof parts.LetterSpacing) {
+						currentSpanStyles.letterSpacing += progression * (tag.value - currentSpanStyles.letterSpacing);
 					}
 
-					else if (part instanceof parts.RotateX) {
-						currentSpanStyles.rotationX += progression * (part.value - currentSpanStyles.rotationX);
+					else if (tag instanceof parts.RotateX) {
+						currentSpanStyles.rotationX += progression * (tag.value - currentSpanStyles.rotationX);
 					}
 
-					else if (part instanceof parts.RotateY) {
-						currentSpanStyles.rotationY += progression * (part.value - currentSpanStyles.rotationY);
+					else if (tag instanceof parts.RotateY) {
+						currentSpanStyles.rotationY += progression * (tag.value - currentSpanStyles.rotationY);
 					}
 
-					else if (part instanceof parts.RotateZ) {
-						currentSpanStyles.rotationZ += progression * (part.value - currentSpanStyles.rotationZ);
+					else if (tag instanceof parts.RotateZ) {
+						currentSpanStyles.rotationZ += progression * (tag.value - currentSpanStyles.rotationZ);
 					}
 
-					else if (part instanceof parts.SkewX) {
-						currentSpanStyles.skewX += progression * (part.value - currentSpanStyles.skewX);
+					else if (tag instanceof parts.SkewX) {
+						currentSpanStyles.skewX += progression * (tag.value - currentSpanStyles.skewX);
 					}
 
-					else if (part instanceof parts.SkewY) {
-						currentSpanStyles.skewY += progression * (part.value - currentSpanStyles.skewY);
+					else if (tag instanceof parts.SkewY) {
+						currentSpanStyles.skewY += progression * (tag.value - currentSpanStyles.skewY);
 					}
 
-					else if (part instanceof parts.PrimaryColor) {
-						currentSpanStyles.primaryColor = currentSpanStyles.primaryColor.interpolate(part.value, progression);
+					else if (tag instanceof parts.PrimaryColor) {
+						currentSpanStyles.primaryColor = currentSpanStyles.primaryColor.interpolate(tag.value, progression);
 					}
 
-					else if (part instanceof parts.SecondaryColor) {
-						currentSpanStyles.secondaryColor = currentSpanStyles.secondaryColor.interpolate(part.value, progression);
+					else if (tag instanceof parts.SecondaryColor) {
+						currentSpanStyles.secondaryColor = currentSpanStyles.secondaryColor.interpolate(tag.value, progression);
 					}
 
-					else if (part instanceof parts.OutlineColor) {
-						currentSpanStyles.outlineColor = currentSpanStyles.outlineColor.interpolate(part.value, progression);
+					else if (tag instanceof parts.OutlineColor) {
+						currentSpanStyles.outlineColor = currentSpanStyles.outlineColor.interpolate(tag.value, progression);
 					}
 
-					else if (part instanceof parts.ShadowColor) {
-						currentSpanStyles.shadowColor = currentSpanStyles.shadowColor.interpolate(part.value, progression);
+					else if (tag instanceof parts.ShadowColor) {
+						currentSpanStyles.shadowColor = currentSpanStyles.shadowColor.interpolate(tag.value, progression);
 					}
 
 					else if (tag instanceof parts.Alpha) {
