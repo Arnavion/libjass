@@ -22,15 +22,10 @@ interface Document {
 	/**
 	 * @type {Element}
 	 */
-	fullscreenElement: Element;
-
-	/**
-	 * @type {Element}
-	 */
 	mozFullScreenElement: Element;
 
 	/**
 	 * @type {Element}
 	 */
-	webkitFullscreenElement: Element;
+	msFullscreenElement: Element;
 }

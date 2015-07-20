@@ -17,7 +17,7 @@
 	"main": "lib/libjass.js",
 	"scripts": {
 		"prepublish": "gulp clean default",
-		"build-gulplib": "tsc ./gulplib/typescript/index.ts ./gulplib/doc.ts ./gulplib/typings.d.ts ./node_modules/typescript/bin/typescript.d.ts ./node_modules/typescript/bin/typescript_internal.d.ts -m commonjs -t es5 -noImplicitAny",
+		"build-gulplib": "tsc ./gulplib/typescript/index.ts ./gulplib/doc.ts ./gulplib/typings.d.ts ./node_modules/typescript/bin/typescript.d.ts -m commonjs -t es5 -noImplicitAny",
 		"test": "gulp test",
 		"test-lib": "intern-client config=tests/intern reporters=pretty",
 		"test-minified": "intern-client config=tests/intern reporters=pretty minified=true",
@@ -31,7 +31,7 @@
 		"npm": "2.x",
 		"pngjs": "0.4.0",
 		"sax": "1.x",
-		"typescript": "1.5.0-alpha",
+		"typescript": "1.5.3",
 		"uglify-js": "2.x >=2.4.16",
 		"vinyl": "latest"
 	},

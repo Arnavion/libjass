@@ -41,8 +41,6 @@ import { Map } from "../../utility/map";
 import { Set } from "../../utility/set";
 import { Promise } from "../../utility/promise";
 
-///<reference path="./references.d.ts" />
-
 /**
  * A renderer implementation that draws subtitles to the given <div>
  *

@@ -38,7 +38,7 @@ export class Compiler {
 	private _projectRoot: string = null;
 	private _program: ts.Program = null;
 
-	constructor(private _host: GulpCompilerHost = CompilerHost()) { }
+	constructor(private _host: GulpCompilerHost = new CompilerHost()) { }
 
 	compile(projectConfigFile: Vinyl) {
 		this._projectRoot = path.dirname(projectConfigFile.path);
@@ -111,115 +111,114 @@ export class Compiler {
 
 const typeScriptModulePath = path.dirname(require.resolve("typescript"));
 
-function CompilerHost(): GulpCompilerHost {
-	var _outputStream: Transform<Vinyl> = null;
-	var _outputPathsRelativeTo: string = null;
+class CompilerHost implements GulpCompilerHost {
+	private _outputStream: Transform<Vinyl> = null;
+	private _outputPathsRelativeTo: string = null;
 
-	return {
-		setOutputStream(outputStream: Transform<Vinyl>): void {
-			_outputStream = outputStream;
-		},
+	setOutputStream(outputStream: Transform<Vinyl>): void {
+		this._outputStream = outputStream;
+	}
 
-		setOutputPathsRelativeTo(path: string): void {
-			_outputPathsRelativeTo = path;
-		},
+	setOutputPathsRelativeTo(path: string): void {
+		this._outputPathsRelativeTo = path;
+	}
 
-		// ts.CompilerHost members
+	// ts.CompilerHost members
 
-		getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError: (message: string) => void): ts.SourceFile {
-			try {
-				var text = fs.readFileSync(fileName, { encoding: "utf8" });
-
-				if (path.basename(fileName) === "lib.dom.d.ts") {
-					var startOfES6Extensions = text.indexOf("/// IE11 ECMAScript Extensions");
-					var endOfES6Extensions = text.indexOf("/// ECMAScript Internationalization API", startOfES6Extensions);
-					text = text.substring(0, startOfES6Extensions) + text.substring(endOfES6Extensions);
-				}
+	getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError: (message: string) => void): ts.SourceFile {
+		try {
+			var text = fs.readFileSync(fileName, { encoding: "utf8" });
+		}
+		catch (ex) {
+			if (onError) {
+				onError(ex.message);
 			}
-			catch (ex) {
-				if (onError) {
-					onError(ex.message);
-				}
-			}
+		}
 
-			return (text !== undefined) ? ts.createSourceFile(fileName, text, ts.ScriptTarget.ES5) : undefined;
-		},
+		return (text !== undefined) ? ts.createSourceFile(fileName, text, ts.ScriptTarget.ES5) : undefined;
+	}
 
-		getDefaultLibFileName: () => path.join(typeScriptModulePath, "lib.dom.d.ts"),
+	getDefaultLibFileName(): string {
+		return path.join(typeScriptModulePath, "lib.dom.d.ts");
+	}
 
-		writeFile(fileName: string, data: string, writeByteOrderMark: boolean, onError: (message?: string) => void) {
-			_outputStream.push(new Vinyl({
-				base: _outputPathsRelativeTo,
-				path: fileName,
-				contents: new Buffer(data)
-			}));
-		},
+	writeFile(fileName: string, data: string, writeByteOrderMark: boolean, onError: (message?: string) => void): void {
+		this._outputStream.push(new Vinyl({
+			base: this._outputPathsRelativeTo,
+			path: fileName,
+			contents: new Buffer(data)
+		}));
+	}
 
-		getCurrentDirectory: () => path.resolve("."),
+	getCurrentDirectory(): string {
+		return path.resolve(".");
+	}
 
-		getCanonicalFileName: (fileName: string) => ts.normalizeSlashes(path.resolve(fileName)),
+	getCanonicalFileName(fileName: string): string {
+		return ts.normalizeSlashes(path.resolve(fileName));
+	}
 
-		useCaseSensitiveFileNames: () => true,
+	useCaseSensitiveFileNames(): boolean {
+		return true;
+	}
 
-		getNewLine: () => "\n",
-	};
+	getNewLine(): string {
+		return "\n";
+	}
 }
 
-function WatchCompilerHost(onChangeCallback: () => void): GulpCompilerHost {
-	var compilerHost = CompilerHost();
+class WatchCompilerHost extends CompilerHost {
+	private _sourceFiles = Object.create(null);
 
-	var _onChangeCallback = onChangeCallback;
+	private _filesChangedSinceLast: string[] = [];
 
-	var _sourceFiles = Object.create(null);
+	constructor(private _onChangeCallback: () => void) {
+		super();
+	}
 
-	var _filesChangedSinceLast: string[] = [];
-
-	var _super_getSourceFile = compilerHost.getSourceFile;
-	compilerHost.getSourceFile = (fileName, languageVersion, onError) => {
-		if (fileName in _sourceFiles) {
-			return _sourceFiles[fileName];
+	getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError: (message: string) => void): ts.SourceFile {
+		if (fileName in this._sourceFiles) {
+			return this._sourceFiles[fileName];
 		}
 
-		var result = _super_getSourceFile(fileName, languageVersion, onError);
+		var result = super.getSourceFile(fileName, languageVersion, onError);
 		if (result !== undefined) {
-			_sourceFiles[fileName] = result;
+			this._sourceFiles[fileName] = result;
 		}
 
-		watchFile(fileName);
+		this._watchFile(fileName);
 
 		return result;
 	};
 
-	function watchFile(fileName: string): void {
-		function watchFileCallback(currentFile: fs.Stats, previousFile: fs.Stats) {
+	private _watchFile(fileName: string): void {
+		var watchFileCallback = (currentFile: fs.Stats, previousFile: fs.Stats) => {
 			if (currentFile.mtime >= previousFile.mtime) {
-				fileChangedCallback(fileName);
+				this._fileChangedCallback(fileName);
 			}
 			else {
 				fs.unwatchFile(fileName, watchFileCallback);
 
-				fileChangedCallback(fileName);
+				this._fileChangedCallback(fileName);
 			}
-		}
+		};
 
 		fs.watchFile(fileName, { interval: 500 }, watchFileCallback);
 	}
 
-	function fileChangedCallback(fileName: string): void {
-		delete _sourceFiles[fileName];
+	private _fileChangedCallback(fileName: string): void {
+		delete this._sourceFiles[fileName];
 
-		if (_filesChangedSinceLast.length === 0) {
+		if (this._filesChangedSinceLast.length === 0) {
 			setTimeout(() => {
-				_filesChangedSinceLast = [];
+				this._filesChangedSinceLast = [];
 
-				_onChangeCallback();
+				this._onChangeCallback();
 			}, 100);
 		}
 
-		_filesChangedSinceLast.push(fileName);
+		this._filesChangedSinceLast.push(fileName);
 	}
-
-	return compilerHost;
 }
 
 export function gulp(root: string, rootNamespaceName: string): Transform<Vinyl> {
@@ -261,7 +260,7 @@ export function watch(root: string, rootNamespaceName: string): Transform<Vinyl>
 			}));
 		};
 
-		var compilerHost = WatchCompilerHost(() => {
+		var compilerHost = new WatchCompilerHost(() => {
 			try {
 				compile();
 			}
@@ -431,7 +430,7 @@ class FakeSourceFile {
 
 		var end = this.text.length;
 
-		return { pos, end, hasTrailingNewLine: originalComment.hasTrailingNewLine, sourceFile: this };
+		return { pos, end, hasTrailingNewLine: originalComment.hasTrailingNewLine, kind: ts.SyntaxKind.MultiLineCommentTrivia, sourceFile: this };
 	}
 }
 

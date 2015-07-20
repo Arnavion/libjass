@@ -640,7 +640,7 @@ class Walker {
 		return signatureDeclaration.typeParameters.map(typeParameter => typeParameter.name.text);
 	}
 
-	private _getGenericsOfTypeReferenceNode(typeReferenceNode: ts.TypeReferenceNode | ts.HeritageClauseElement): (AST.UnresolvedType | AST.IntrinsicTypeReference)[] {
+	private _getGenericsOfTypeReferenceNode(typeReferenceNode: ts.ExpressionWithTypeArguments): (AST.UnresolvedType | AST.IntrinsicTypeReference)[] {
 		if (typeReferenceNode.typeArguments === undefined) {
 			return [];
 		}
