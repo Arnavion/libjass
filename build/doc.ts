@@ -21,9 +21,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import { Transform } from "stream";
-import Vinyl = require("vinyl");
 
-import { makeTransform } from "./helpers";
+import { File, FileTransform } from "async-build";
 
 import * as AST from "./typescript/ast";
 import { Compiler } from "./typescript/compiler";
@@ -407,11 +406,11 @@ function propertyToHtml(property: AST.Property): string[] {
 	]);
 }
 
-export function gulp(outputFilePath: string, root: string, rootNamespaceName: string): any {
+export function build(outputFilePath: string, root: string, rootNamespaceName: string): FileTransform {
 	var compiler = new Compiler();
 
-	return makeTransform(function (file: Vinyl): void {
-		var self: Transform<Vinyl> = this;
+	return new FileTransform(function (file: File): void {
+		var self: FileTransform = this;
 
 		// Compile
 		compiler.compile(file);
@@ -431,7 +430,7 @@ export function gulp(outputFilePath: string, root: string, rootNamespaceName: st
 
 		moduleNames = moduleNames.filter(moduleName => Object.keys(modules[moduleName].members).length > 0);
 
-		self.push(new Vinyl({
+		self.push({
 			path: outputFilePath,
 			contents: Buffer.concat([new Buffer(
 `<?xml version="1.0" encoding="utf-8" ?>
@@ -889,6 +888,6 @@ export function gulp(outputFilePath: string, root: string, rootNamespaceName: st
 </html>
 `
 			)]))
-		}));
+		});
 	});
 }

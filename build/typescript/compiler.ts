@@ -22,30 +22,26 @@ import * as fs from "fs";
 import * as path from "path";
 import { Transform } from "stream";
 import * as ts from "typescript";
-import Vinyl = require("vinyl");
+
+import { File, FileTransform, FileWatcher } from "async-build";
 
 import * as AST from "./ast";
-import { makeTransform } from "../helpers";
 import { walk } from "./walker";
 
-export interface GulpCompilerHost extends ts.CompilerHost {
-	setOutputStream(outputStream: Transform<Vinyl>): void;
-
-	setOutputPathsRelativeTo(path: string): void;
+export interface StreamingCompilerHost extends ts.CompilerHost {
+	setOutputStream(outputStream: FileTransform): void;
 }
 
 export class Compiler {
 	private _projectRoot: string = null;
 	private _program: ts.Program = null;
 
-	constructor(private _host: GulpCompilerHost = new CompilerHost()) { }
+	constructor(private _host: StreamingCompilerHost = new CompilerHost()) { }
 
-	compile(projectConfigFile: Vinyl) {
+	compile(projectConfigFile: File) {
 		this._projectRoot = path.dirname(projectConfigFile.path);
 
 		var projectConfig = parseConfigFile(JSON.parse(projectConfigFile.contents.toString()), this._projectRoot);
-
-		this._host.setOutputPathsRelativeTo(this._projectRoot);
 
 		this._program = ts.createProgram(projectConfig.fileNames, projectConfig.options, this._host);
 
@@ -68,7 +64,7 @@ export class Compiler {
 		}
 	};
 
-	writeFiles(outputStream: Transform<Vinyl>) {
+	writeFiles(outputStream: FileTransform) {
 		this._host.setOutputStream(outputStream);
 
 		var emitDiagnostics = this._program.emit().diagnostics;
@@ -111,23 +107,26 @@ export class Compiler {
 
 const typeScriptModulePath = path.dirname(require.resolve("typescript"));
 
-class CompilerHost implements GulpCompilerHost {
-	private _outputStream: Transform<Vinyl> = null;
-	private _outputPathsRelativeTo: string = null;
+class CompilerHost implements StreamingCompilerHost {
+	protected _sourceFiles = Object.create(null);
 
-	setOutputStream(outputStream: Transform<Vinyl>): void {
+	private _outputStream: FileTransform = null;
+
+	setOutputStream(outputStream: FileTransform): void {
 		this._outputStream = outputStream;
-	}
-
-	setOutputPathsRelativeTo(path: string): void {
-		this._outputPathsRelativeTo = path;
 	}
 
 	// ts.CompilerHost members
 
 	getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError: (message: string) => void): ts.SourceFile {
+		if (fileName in this._sourceFiles) {
+			return this._sourceFiles[fileName];
+		}
+
 		try {
 			var text = fs.readFileSync(fileName, { encoding: "utf8" });
+			var result = ts.createSourceFile(fileName, text, ts.ScriptTarget.ES5);
+			this._sourceFiles[fileName] = result;
 		}
 		catch (ex) {
 			if (onError) {
@@ -135,7 +134,7 @@ class CompilerHost implements GulpCompilerHost {
 			}
 		}
 
-		return (text !== undefined) ? ts.createSourceFile(fileName, text, ts.ScriptTarget.ES5) : undefined;
+		return result;
 	}
 
 	getDefaultLibFileName(): string {
@@ -143,11 +142,10 @@ class CompilerHost implements GulpCompilerHost {
 	}
 
 	writeFile(fileName: string, data: string, writeByteOrderMark: boolean, onError: (message?: string) => void): void {
-		this._outputStream.push(new Vinyl({
-			base: this._outputPathsRelativeTo,
+		this._outputStream.push({
 			path: fileName,
 			contents: new Buffer(data)
-		}));
+		});
 	}
 
 	getCurrentDirectory(): string {
@@ -168,7 +166,7 @@ class CompilerHost implements GulpCompilerHost {
 }
 
 class WatchCompilerHost extends CompilerHost {
-	private _sourceFiles = Object.create(null);
+	private _fileWatcher = new FileWatcher(fileNames => this._onFilesChanged(fileNames));
 
 	private _filesChangedSinceLast: string[] = [];
 
@@ -177,55 +175,28 @@ class WatchCompilerHost extends CompilerHost {
 	}
 
 	getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError: (message: string) => void): ts.SourceFile {
-		if (fileName in this._sourceFiles) {
-			return this._sourceFiles[fileName];
-		}
-
 		var result = super.getSourceFile(fileName, languageVersion, onError);
 		if (result !== undefined) {
-			this._sourceFiles[fileName] = result;
+			this._fileWatcher.watchFile(fileName);
 		}
-
-		this._watchFile(fileName);
 
 		return result;
 	};
 
-	private _watchFile(fileName: string): void {
-		var watchFileCallback = (currentFile: fs.Stats, previousFile: fs.Stats) => {
-			if (currentFile.mtime >= previousFile.mtime) {
-				this._fileChangedCallback(fileName);
-			}
-			else {
-				fs.unwatchFile(fileName, watchFileCallback);
-
-				this._fileChangedCallback(fileName);
-			}
-		};
-
-		fs.watchFile(fileName, { interval: 500 }, watchFileCallback);
-	}
-
-	private _fileChangedCallback(fileName: string): void {
-		delete this._sourceFiles[fileName];
-
-		if (this._filesChangedSinceLast.length === 0) {
-			setTimeout(() => {
-				this._filesChangedSinceLast = [];
-
-				this._onChangeCallback();
-			}, 100);
+	private _onFilesChanged(fileNames: string[]) {
+		for (let fileName of fileNames) {
+			delete this._sourceFiles[fileName];
 		}
 
-		this._filesChangedSinceLast.push(fileName);
+		this._onChangeCallback();
 	}
 }
 
-export function gulp(root: string, rootNamespaceName: string): Transform<Vinyl> {
+export function build(root: string, rootNamespaceName: string): FileTransform {
 	var compiler = new Compiler();
 
-	return makeTransform(function (projectConfigFile: Vinyl): void {
-		var self: Transform<Vinyl> = this;
+	return new FileTransform(function (projectConfigFile: File): void {
+		var self: FileTransform = this;
 
 		console.log("Compiling " + projectConfigFile.path + "...");
 
@@ -240,9 +211,9 @@ export function gulp(root: string, rootNamespaceName: string): Transform<Vinyl> 
 	});
 }
 
-export function watch(root: string, rootNamespaceName: string): Transform<Vinyl> {
-	return makeTransform(function (projectConfigFile: Vinyl): void {
-		var self: Transform<Vinyl> = this;
+export function watch(root: string, rootNamespaceName: string): FileTransform {
+	return new FileTransform(function (projectConfigFile: File): void {
+		var self: FileTransform = this;
 
 		function compile() {
 			console.log("Compiling " + projectConfigFile.path + "...");
@@ -253,11 +224,10 @@ export function watch(root: string, rootNamespaceName: string): Transform<Vinyl>
 
 			console.log("Compile succeeded.");
 
-			self.push(new Vinyl({
-				base: this._outputPathsRelativeTo,
+			self.push({
 				path: "END",
-				contents: new Buffer("")
-			}));
+				contents: ""
+			});
 		};
 
 		var compilerHost = new WatchCompilerHost(() => {
@@ -354,11 +324,11 @@ function addJSDocComments(modules: { [name: string]: AST.Module }): void {
 				if (current.getter !== null) { nodes.push(current.getter.astNode); }
 				if (current.setter !== null && nodes[0] !== current.setter.astNode) { nodes.push(current.setter.astNode); }
 				for (let node of nodes) {
-					(<any>node)["gulp-typescript-new-comment"] = newComments;
+					(<any>node)["typescript-new-comment"] = newComments;
 				}
 			}
 			else {
-				(<any>(<AST.Class | AST.Interface | AST.Function | AST.Enum>current).astNode)["gulp-typescript-new-comment"] = newComments;
+				(<any>(<AST.Class | AST.Interface | AST.Function | AST.Enum>current).astNode)["typescript-new-comment"] = newComments;
 			}
 		}
 	}
@@ -378,10 +348,10 @@ function parseConfigFile(json: { compilerOptions: ts.CompilerOptions }, basePath
 	function walk(directory: string) {
 		fs.readdirSync(directory).forEach(entry => {
 			var entryPath = path.join(directory, entry);
-			var stat = fs.lstatSync(entryPath);
+			var stat = fs.statSync(entryPath);
 			if (stat.isFile()) {
 				if (path.extname(entry) === ".ts") {
-					fileNames.push(entryPath);
+					fileNames.push(path.resolve(entryPath));
 				}
 			}
 			else if (stat.isDirectory()) {
@@ -442,13 +412,13 @@ ts.getLeadingCommentRangesOfNode = (node: ts.Node, sourceFileOfNode: ts.SourceFi
 
 	var originalComments = oldGetLeadingCommentRangesOfNode(node, sourceFileOfNode);
 
-	if (originalComments !== undefined && (<any>node)["gulp-typescript-new-comment"] !== undefined) {
+	if (originalComments !== undefined && (<any>node)["typescript-new-comment"] !== undefined) {
 		var fakeSourceFile = fakeSourceFiles[sourceFileOfNode.fileName];
 		if (fakeSourceFile === undefined) {
 			fakeSourceFile = fakeSourceFiles[sourceFileOfNode.fileName] = new FakeSourceFile(sourceFileOfNode);
 		}
 
-		originalComments[originalComments.length - 1] = fakeSourceFile.addComment(originalComments[originalComments.length - 1], (<any>node)["gulp-typescript-new-comment"]);
+		originalComments[originalComments.length - 1] = fakeSourceFile.addComment(originalComments[originalComments.length - 1], (<any>node)["typescript-new-comment"]);
 	}
 
 	return originalComments;

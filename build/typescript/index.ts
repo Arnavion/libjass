@@ -18,4 +18,4 @@
  * limitations under the License.
  */
 
-export { gulp, watch } from "./compiler";
+export { build, watch } from "./compiler";

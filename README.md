@@ -31,7 +31,7 @@ Only libjass.js and libjass.css are needed to use libjass on your website. The o
 
 * The src/ directory contains the source of libjass. They are TypeScript files and get compiled into JavaScript for the browser using the TypeScript compiler.
 
-* gulpfile.js is the build script. The build command will use this script to build libjass.js. The gulplib/ directory contains other files used for the build.
+* build.js is the build script. The build command will use this script to build libjass.js. The build/ directory contains other files used for the build.
 
 * The tests/ directory contains unit and functional tests.
 

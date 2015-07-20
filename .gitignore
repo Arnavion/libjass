@@ -1,8 +1,7 @@
-dist/
+build/doc.js
+build/typescript/*.js
 
-gulplib/doc.js
-gulplib/helpers.js
-gulplib/typescript/*.js
+dist/
 
 lib/
 !lib/libjass.css
