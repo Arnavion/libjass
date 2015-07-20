@@ -211,7 +211,7 @@ export class ASS {
 			typeof global.ReadableStream === "function" && typeof global.ReadableStream.prototype.getReader === "function" &&
 			typeof global.TextDecoder === "function"
 		) {
-			return global.fetch(url).then(response => ASS.fromReadableStream(response.body, "utf-8", type));
+			return global.fetch(url).then<ASS>(response => ASS.fromReadableStream(response.body, "utf-8", type));
 		}
 
 		const xhr = new XMLHttpRequest();

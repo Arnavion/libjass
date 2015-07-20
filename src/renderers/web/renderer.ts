@@ -117,7 +117,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}));
 		});
 
-		Promise.all(xhrPromises).then(() => {
+		Promise.all<void>(xhrPromises).then(() => {
 			if (debugMode) {
 				console.log("All fonts have been preloaded.");
 			}
