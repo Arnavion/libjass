@@ -788,12 +788,12 @@ class ParserRun {
 
 		const valueNode = this.parse_decimal(current);
 
-		if (valueNode === null) {
-			parent.pop();
-			return null;
+		if (valueNode !== null) {
+			current.value = new parts.FontScaleX(valueNode.value / 100);
 		}
-
-		current.value = new parts.FontScaleX(valueNode.value / 100);
+		else {
+			current.value = new parts.FontScaleX(null);
+		}
 
 		return current;
 	}
@@ -812,12 +812,12 @@ class ParserRun {
 
 		const valueNode = this.parse_decimal(current);
 
-		if (valueNode === null) {
-			parent.pop();
-			return null;
+		if (valueNode !== null) {
+			current.value = new parts.FontScaleY(valueNode.value / 100);
 		}
-
-		current.value = new parts.FontScaleY(valueNode.value / 100);
+		else {
+			current.value = new parts.FontScaleY(null);
+		}
 
 		return current;
 	}
