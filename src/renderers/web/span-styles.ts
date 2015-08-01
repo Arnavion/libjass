@@ -44,6 +44,7 @@ import { Map } from "../../utility/map";
  * @param {!libjass.renderers.RendererSettings} settings The renderer settings
  * @param {!HTMLDivElement} fontSizeElement A <div> element to measure font sizes with
  * @param {!SVGDefsElement} svgDefsElement An SVG <defs> element to append filter definitions to
+ * @param {!Map<string, [number, number]>} lineHeightsCache Line heights cache
  */
 export class SpanStyles {
 	private _id: string;
@@ -90,7 +91,7 @@ export class SpanStyles {
 
 	private _nextFilterId = 0;
 
-	constructor(renderer: WebRenderer, dialogue: Dialogue, private _scaleX: number, private _scaleY: number, private _settings: RendererSettings, private _fontSizeElement: HTMLDivElement, private _svgDefsElement: SVGDefsElement) {
+	constructor(renderer: WebRenderer, dialogue: Dialogue, private _scaleX: number, private _scaleY: number, private _settings: RendererSettings, private _fontSizeElement: HTMLDivElement, private _svgDefsElement: SVGDefsElement, private _lineHeightsCache: Map<string, [number, number]>) {
 		this._id = `${ renderer.id }-${ dialogue.id }`;
 		this._defaultStyle = dialogue.style;
 
@@ -167,9 +168,15 @@ export class SpanStyles {
 		else if (this._bold !== false) {
 			fontStyleOrWeight += this._bold + " ";
 		}
-		const fontSize = (this._scaleY * fontSizeForLineHeight(this._fontName, this._fontSize * (isTextOnlySpan ? this._fontScaleY : 1), this._fontSizeElement)).toFixed(3);
+		const fontSize = (this._scaleY * this._fontSizeForLineHeight(this._fontName, this._fontSize * (isTextOnlySpan ? this._fontScaleY : 1), this._fontSizeElement)).toFixed(3);
 		const lineHeight = (this._scaleY * this._fontSize).toFixed(3);
-		span.style.font = `${ fontStyleOrWeight }${ fontSize }px/${ lineHeight }px "${ this._fontName }"`;
+		
+		let fonts = `"${ this._fontName }"`;
+		if (this._settings.fallbackFonts !== "") {
+			fonts += `, ${ this._settings.fallbackFonts }`;
+		}
+		
+		span.style.font = `${ fontStyleOrWeight }${ fontSize }px/${ lineHeight }px ${ fonts }`;
 
 		let textDecoration = "";
 		if (this._underline) {
@@ -401,6 +408,46 @@ export class SpanStyles {
 		const result = document.createElement("br");
 		result.style.lineHeight = `${ (this._scaleY * this._fontSize).toFixed(3) }px`;
 		return result;
+	}
+	
+	/**
+	 * Uses linear interpolation to calculate the CSS font size that would give the specified line height for the specified font family.
+	 *
+	 * @param {string} fontFamily
+	 * @param {number} lineHeight
+	 * @param {!HTMLDivElement} fontSizeElement
+	 * @return {number}
+	 */
+	private _fontSizeForLineHeight(fontFamily: string, lineHeight: number, fontSizeElement: HTMLDivElement): number {
+		let existingLineHeights = this._lineHeightsCache.get(fontFamily);
+		if (existingLineHeights === undefined) {
+			const lowerLineHeight = this._lineHeightForFontSize(fontFamily, 180, fontSizeElement);
+			const upperLineHeight = this._lineHeightForFontSize(fontFamily, 360, fontSizeElement);
+			existingLineHeights = [lowerLineHeight, (360 - 180) / (upperLineHeight - lowerLineHeight)];
+			this._lineHeightsCache.set(fontFamily, existingLineHeights);
+		}
+	
+		const [lowerLineHeight, factor] = existingLineHeights;
+	
+		return 180 + (lineHeight - lowerLineHeight) * factor;
+	}
+	
+	/**
+	 * @param {string} fontFamily
+	 * @param {number} fontSize
+	 * @param {!HTMLDivElement} fontSizeElement
+	 * @return {number}
+	 */
+	private _lineHeightForFontSize(fontFamily: string, fontSize: number, fontSizeElement: HTMLDivElement): number {
+		let fonts = `"${ fontFamily }"`;
+		if (this._settings.fallbackFonts !== "") {
+			fonts += `, ${ this._settings.fallbackFonts }`;
+		}
+
+		fontSizeElement.style.fontFamily = fonts;
+		fontSizeElement.style.fontSize = `${ fontSize }px`;
+
+		return fontSizeElement.offsetHeight;
 	}
 
 	/**
@@ -845,40 +892,4 @@ export class SpanStyles {
 	}
 
 	private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);
-}
-
-const lineHeightsCache = new Map<string, [number, number]>();
-
-/**
- * Uses linear interpolation to calculate the CSS font size that would give the specified line height for the specified font family.
- *
- * @param {string} fontFamily
- * @param {number} lineHeight
- * @param {!HTMLDivElement} fontSizeElement
- * @return {number}
- */
-function fontSizeForLineHeight(fontFamily: string, lineHeight: number, fontSizeElement: HTMLDivElement): number {
-	let existingLineHeights = lineHeightsCache.get(fontFamily);
-	if (existingLineHeights === undefined) {
-		const lowerLineHeight = lineHeightForFontSize(fontFamily, 180, fontSizeElement);
-		const upperLineHeight = lineHeightForFontSize(fontFamily, 360, fontSizeElement);
-		existingLineHeights = [lowerLineHeight, (360 - 180) / (upperLineHeight - lowerLineHeight)];
-		lineHeightsCache.set(fontFamily, existingLineHeights);
-	}
-
-	const [lowerLineHeight, factor] = existingLineHeights;
-
-	return 180 + (lineHeight - lowerLineHeight) * factor;
-}
-
-/**
- * @param {string} fontFamily
- * @param {number} fontSize
- * @param {!HTMLDivElement} fontSizeElement
- * @return {number}
- */
-function lineHeightForFontSize(fontFamily: string, fontSize: number, fontSizeElement: HTMLDivElement): number {
-	fontSizeElement.style.fontFamily = fontFamily;
-	fontSizeElement.style.fontSize = `${ fontSize }px`;
-	return fontSizeElement.offsetHeight;
 }
