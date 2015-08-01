@@ -19,7 +19,7 @@
  */
 
 define(["intern!tdd", "require", "tests/support/test-page"], function (tdd, require, TestPage) {
-	tdd.suite("WebDriver", function () {
+	tdd.suite("kfx", function () {
 		tdd.test("Basic", function () {
 			var testPage = new TestPage(this.remote, require.toUrl("tests/support/browser-test-page.html"), "/tests/functional/kfx/kfx.ass", 256, 144);
 			return testPage
