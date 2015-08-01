@@ -185,7 +185,7 @@ class SimplePromise<T> {
 				if (numUnresolved === 0) {
 					resolve(result);
 				}
-			}), reject);
+			}, reject));
 		});
 	}
 
