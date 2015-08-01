@@ -234,7 +234,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		};
 		startNewSpan(false);
 
-		const currentDrawingStyles: DrawingStyles = new DrawingStyles(this._scaleX, this._scaleY);
+		const currentDrawingStyles = new DrawingStyles(this._scaleX, this._scaleY);
 
 		let wrappingStyle = this.ass.properties.wrappingStyle;
 
