@@ -1502,7 +1502,7 @@ class ParserRun {
 				break;
 			}
 
-			let newType = (<parts.Text>typePart.value).value;
+			const newType = (<parts.Text>typePart.value).value;
 			switch (newType) {
 				case "m":
 				case "l":
@@ -1952,7 +1952,7 @@ makeTagParserFunction("3c", parts.OutlineColor, ParserRun.prototype.parse_color,
 makeTagParserFunction("4a", parts.ShadowAlpha, ParserRun.prototype.parse_alpha, false);
 makeTagParserFunction("4c", parts.ShadowColor, ParserRun.prototype.parse_color, false);
 
-for (let key of Object.keys(ParserRun.prototype)) {
+for (const key of Object.keys(ParserRun.prototype)) {
 	if (key.indexOf("parse_") === 0 && typeof (<any>ParserRun.prototype)[key] === "function") {
 		rules.set(key.substr("parse_".length), (<any>ParserRun.prototype)[key]);
 	}

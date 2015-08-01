@@ -63,7 +63,7 @@ export class DrawingStyles {
 		let bboxWidth = 0;
 		let bboxHeight = 0;
 
-		for (let instruction of drawingInstructions.instructions) {
+		for (const instruction of drawingInstructions.instructions) {
 			if (instruction instanceof parts.drawing.MoveInstruction) {
 				path.pathSegList.appendItem(path.createSVGPathSegMovetoAbs(instruction.x, instruction.y + this._baselineOffset));
 				bboxWidth = Math.max(bboxWidth, instruction.x);

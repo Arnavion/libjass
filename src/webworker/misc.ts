@@ -79,7 +79,7 @@ export function deserialize(str: string): any {
 	return JSON.parse(str, (/* ujs:unreferenced */ key: string, value: any) => {
 		if (value && value._classTag !== undefined) {
 			const hydratedValue = Object.create(classPrototypes.get(value._classTag));
-			for (let key of Object.keys(value)) {
+			for (const key of Object.keys(value)) {
 				if (key !== "_classTag") {
 					hydratedValue[key] = value[key];
 				}

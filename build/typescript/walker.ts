@@ -77,7 +77,7 @@ class Walker {
 		var module = this._scope.enter(this.modules[moduleName]);
 		this._currentSourceFile = sourceFile;
 
-		for (let statement of sourceFile.statements) {
+		for (const statement of sourceFile.statements) {
 			this._walk(statement, module);
 		}
 
@@ -362,13 +362,13 @@ class Walker {
 				return;
 			}
 
-			for (let declaration of symbol.declarations) {
+			for (const declaration of symbol.declarations) {
 				this._walkClassMember(declaration, clazz);
 			}
 		});
 
 		ts.forEachValue(type.symbol.members, symbol => {
-			for (let declaration of symbol.declarations) {
+			for (const declaration of symbol.declarations) {
 				this._walkClassMember(declaration, clazz);
 			}
 		});
@@ -399,7 +399,7 @@ class Walker {
 		parent.members[interfase.name] = interfase;
 
 		ts.forEachValue(type.symbol.members, symbol => {
-			for (let declaration of symbol.declarations) {
+			for (const declaration of symbol.declarations) {
 				this._walkInterfaceMember(declaration, interfase);
 			}
 		});
@@ -459,7 +459,7 @@ class Walker {
 		}
 		else if ((<ts.NamedImports>node.importClause.namedBindings).elements !== undefined) {
 			// import { foo, bar } from "baz";
-			for (let element of (<ts.NamedImports>node.importClause.namedBindings).elements) {
+			for (const element of (<ts.NamedImports>node.importClause.namedBindings).elements) {
 				var importedName = element.propertyName && element.propertyName.text || element.name.text;
 				parent.members[element.name.text] = new AST.Reference(moduleName, importedName, true);
 			}
@@ -473,14 +473,14 @@ class Walker {
 		if (node.moduleSpecifier !== undefined) {
 			// export { foo } from "bar";
 			var moduleName = this._resolve((<ts.LiteralExpression>node.moduleSpecifier).text, parent);
-			for (let element of node.exportClause.elements) {
+			for (const element of node.exportClause.elements) {
 				var importedName = element.propertyName && element.propertyName.text || element.name.text;
 				parent.members[element.name.text] = new AST.Reference(moduleName, importedName, false);
 			}
 		}
 		else {
 			// export { foo };
-			for (let element of node.exportClause.elements) {
+			for (const element of node.exportClause.elements) {
 				(<AST.CanBePrivate><any>parent.members[element.name.text]).isPrivate = false;
 			}
 		}
@@ -538,7 +538,7 @@ class Walker {
 
 		var lastRead: { description: string } = null;
 
-		for (let line of lines) {
+		for (const line of lines) {
 			var firstWordMatch = line.match(/^\s*(\S+)(\s*)/);
 			var firstWord = (firstWordMatch !== null) ? firstWordMatch[1] : "";
 			var remainingLine = (firstWordMatch !== null) ? line.substring(firstWordMatch[0].length) : "";
@@ -694,10 +694,10 @@ class Walker {
 	}
 
 	link(rootNamespaceName: string): void {
-		for (let moduleName of Object.keys(this.modules)) {
+		for (const moduleName of Object.keys(this.modules)) {
 			var module = this.modules[moduleName];
 
-			for (let memberName of Object.keys(module.members)) {
+			for (const memberName of Object.keys(module.members)) {
 				var member = module.members[memberName];
 
 				if (member instanceof AST.Class) {
@@ -729,7 +729,7 @@ class Walker {
 
 				else if (member instanceof AST.Enum) {
 					var value = 0;
-					for (let enumMember of member.members) {
+					for (const enumMember of member.members) {
 						if (enumMember.value === null) {
 							enumMember.value = value;
 						}
@@ -749,7 +749,7 @@ class Walker {
 	}
 
 	private _moduleToNamespace(module: AST.Module): void {
-		for (let memberName of Object.keys(module.members)) {
+		for (const memberName of Object.keys(module.members)) {
 			var member = module.members[memberName];
 
 			if (member instanceof AST.Reference) {
@@ -844,7 +844,7 @@ export function walk(compiler: Compiler, root: string, rootNamespaceName: string
 	var walker = new Walker(compiler);
 
 	// Walk
-	for (let sourceFile of sourceFiles) {
+	for (const sourceFile of sourceFiles) {
 		if (
 			path.basename(sourceFile.fileName) === "lib.core.d.ts" ||
 			path.basename(sourceFile.fileName) === "lib.dom.d.ts" ||

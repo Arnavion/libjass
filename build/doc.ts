@@ -31,7 +31,7 @@ import { walk } from "./typescript/walker";
 function flatten<T>(arr: T[][]): T[] {
 	var result: T[] = [];
 
-	for (let a of arr) {
+	for (const a of arr) {
 		result = result.concat(a);
 	}
 
@@ -593,7 +593,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 				var namespace = namespaces[namespaceName];
 
 				var namespaceMembers: AST.NamespaceMember[] = [];
-				for (let memberName of Object.keys(namespace.members)) {
+				for (const memberName of Object.keys(namespace.members)) {
 					namespaceMembers.push(namespace.members[memberName]);
 				}
 
@@ -617,7 +617,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 				var module = modules[moduleName];
 
 				var moduleMembers: AST.ModuleMemberWithoutReference[] = [];
-				for (let memberName of Object.keys(module.members)) {
+				for (const memberName of Object.keys(module.members)) {
 					var member = module.members[memberName];
 					if ((<AST.HasParent><any>member).parent === module) {
 						moduleMembers.push(<AST.ModuleMemberWithoutReference>member);
@@ -653,7 +653,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 				var namespace = namespaces[namespaceName];
 
 				var namespaceMembers: AST.NamespaceMember[] = [];
-				for (let memberName of Object.keys(namespace.members)) {
+				for (const memberName of Object.keys(namespace.members)) {
 					namespaceMembers.push(namespace.members[memberName]);
 				}
 
@@ -678,7 +678,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 `
 					));
 
-					for (let property of properties) {
+					for (const property of properties) {
 						result.push(new Buffer(propertyToHtml(property).map(indenter(5)).join("\n")));
 					}
 
@@ -695,7 +695,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 `
 					));
 
-					for (let func of functions) {
+					for (const func of functions) {
 						result.push(new Buffer(functionToHtml(func).map(indenter(5)).join("\n")));
 					}
 
@@ -712,7 +712,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 `
 					));
 
-					for (let interfase of interfaces) {
+					for (const interfase of interfaces) {
 						result.push(new Buffer(interfaceToHtml(interfase).map(indenter(5)).join("\n")));
 					}
 
@@ -729,7 +729,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 `
 					));
 
-					for (let clazz of classes) {
+					for (const clazz of classes) {
 						result.push(new Buffer(classToHtml(clazz).map(indenter(5)).join("\n")));
 					}
 
@@ -746,7 +746,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 `
 					));
 
-					for (let enumType of enums) {
+					for (const enumType of enums) {
 						result.push(new Buffer(enumToHtml(enumType).map(indenter(5)).join("\n")));
 					}
 
@@ -766,7 +766,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 				var module = modules[moduleName];
 
 				var moduleMembers: AST.ModuleMember[] = [];
-				for (let memberName of Object.keys(module.members)) {
+				for (const memberName of Object.keys(module.members)) {
 					var member = module.members[memberName];
 					if ((<AST.HasParent><any>member).parent === module) {
 						moduleMembers.push(<AST.ModuleMember>member);
@@ -798,7 +798,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 `
 					));
 
-					for (let property of properties) {
+					for (const property of properties) {
 						result.push(new Buffer(propertyToHtml(property).map(indenter(5)).join("\n")));
 					}
 
@@ -815,7 +815,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 `
 					));
 
-					for (let func of functions) {
+					for (const func of functions) {
 						result.push(new Buffer(functionToHtml(func).map(indenter(5)).join("\n")));
 					}
 
@@ -832,7 +832,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 `
 					));
 
-					for (let interfase of interfaces) {
+					for (const interfase of interfaces) {
 						result.push(new Buffer(interfaceToHtml(interfase).map(indenter(5)).join("\n")));
 					}
 
@@ -849,7 +849,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 `
 					));
 
-					for (let clazz of classes) {
+					for (const clazz of classes) {
 						result.push(new Buffer(classToHtml(clazz).map(indenter(5)).join("\n")));
 					}
 
@@ -866,7 +866,7 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 `
 					));
 
-					for (let enumType of enums) {
+					for (const enumType of enums) {
 						result.push(new Buffer(enumToHtml(enumType).map(indenter(5)).join("\n")));
 					}
 

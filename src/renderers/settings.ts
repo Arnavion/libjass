@@ -92,7 +92,7 @@ export class RendererSettings {
 
 		const styleSheet = <CSSStyleSheet>linkStyle.sheet;
 		const rules: CSSFontFaceRule[] = Array.prototype.filter.call(styleSheet.cssRules, (rule: CSSRule) => rule.type === CSSRule.FONT_FACE_RULE);
-		for (let rule of rules) {
+		for (const rule of rules) {
 			let src = rule.style.getPropertyValue("src");
 			if (!src) {
 				src = rule.cssText.split("\n")

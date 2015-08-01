@@ -74,7 +74,7 @@ export class AnimationCollection {
 		let start: number = null;
 		let end: number = null;
 
-		for (let keyframe of keyframes) {
+		for (const keyframe of keyframes) {
 			if (start === null) {
 				start = keyframe.time;
 			}
@@ -84,7 +84,7 @@ export class AnimationCollection {
 
 		let ruleCssText = "";
 
-		for (let keyframe of keyframes) {
+		for (const keyframe of keyframes) {
 			ruleCssText +=
 `	${ (100 * ((end - start === 0) ? 1 : ((keyframe.time - start) / (end - start)))).toFixed(3) }% {
 `;

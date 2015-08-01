@@ -87,7 +87,7 @@ export class Compiler {
 	}
 
 	private _reportDiagnostics(diagnostics: ts.Diagnostic[]) {
-		for (let diagnostic of diagnostics) {
+		for (const diagnostic of diagnostics) {
 			var message = "";
 
 			if (diagnostic.file) {
@@ -184,7 +184,7 @@ class WatchCompilerHost extends CompilerHost {
 	};
 
 	private _onFilesChanged(fileNames: string[]) {
-		for (let fileName of fileNames) {
+		for (const fileName of fileNames) {
 			delete this._sourceFiles[fileName];
 		}
 
@@ -250,7 +250,7 @@ export function watch(root: string, rootNamespaceName: string): FileTransform {
 function addJSDocComments(modules: { [name: string]: AST.Module }): void {
 	function visitor(current: AST.Module | AST.ModuleMember | AST.InterfaceMember) {
 		if (current instanceof AST.Module) {
-			for (let memberName of Object.keys(current.members)) {
+			for (const memberName of Object.keys(current.members)) {
 				visitor(current.members[memberName]);
 			}
 
@@ -323,7 +323,7 @@ function addJSDocComments(modules: { [name: string]: AST.Module }): void {
 				var nodes: ts.Node[] = [];
 				if (current.getter !== null) { nodes.push(current.getter.astNode); }
 				if (current.setter !== null && nodes[0] !== current.setter.astNode) { nodes.push(current.setter.astNode); }
-				for (let node of nodes) {
+				for (const node of nodes) {
 					(<any>node)["typescript-new-comment"] = newComments;
 				}
 			}
@@ -333,7 +333,7 @@ function addJSDocComments(modules: { [name: string]: AST.Module }): void {
 		}
 	}
 
-	for (let moduleName of Object.keys(modules)) {
+	for (const moduleName of Object.keys(modules)) {
 		visitor(modules[moduleName]);
 	}
 }
@@ -389,11 +389,11 @@ class FakeSourceFile {
 			originalCommentLines.splice(originalCommentLines.length - 1, 0, " *");
 		}
 
-		for (let newComment of newComments) {
+		for (const newComment of newComments) {
 			originalCommentLines.splice(originalCommentLines.length - 1, 0, " * " + newComment);
 		}
 
-		for (let newCommentLine of originalCommentLines) {
+		for (const newCommentLine of originalCommentLines) {
 			this.text += newCommentLine + "\n";
 			this.lineMap.push(this.text.length);
 		}

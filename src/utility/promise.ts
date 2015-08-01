@@ -44,7 +44,7 @@ const enqueueJob: (callback: () => void) => void = (function () {
 		const observer = new MutationObserver(() => {
 			const processing = pending.splice(0, pending.length);
 
-			for (let callback of processing) {
+			for (const callback of processing) {
 				callback();
 			}
 
@@ -267,7 +267,7 @@ class SimplePromise<T> {
 		this._rejectReactions = undefined;
 		this._state = SimplePromiseState.FULFILLED;
 
-		for (let reaction of reactions) {
+		for (const reaction of reactions) {
 			this._enqueueReactionJob(reaction, value);
 		}
 	}
@@ -283,7 +283,7 @@ class SimplePromise<T> {
 		this._rejectReactions = undefined;
 		this._state = SimplePromiseState.REJECTED;
 
-		for (let reaction of reactions) {
+		for (const reaction of reactions) {
 			this._enqueueReactionJob(reaction, reason);
 		}
 	}

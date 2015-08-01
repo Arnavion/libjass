@@ -1314,7 +1314,7 @@ import { registerClassPrototype } from "../webworker/misc";
 
 declare const exports: any;
 
-for (let key of Object.keys(exports)) {
+for (const key of Object.keys(exports)) {
 	const value: any = exports[key];
 	if (value instanceof Function) {
 		addToString(value, key);
@@ -1322,7 +1322,7 @@ for (let key of Object.keys(exports)) {
 	}
 }
 
-for (let key of Object.keys(drawing)) {
+for (const key of Object.keys(drawing)) {
 	const value: any = (<any>drawing)[key];
 	if (value instanceof Function) {
 		addToString(value, `Drawing${ key }`);

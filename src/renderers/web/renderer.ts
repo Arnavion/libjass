@@ -93,7 +93,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		const urlsToPreload = new Set<string>();
 		if (this.settings.fontMap !== null) {
 			this.settings.fontMap.forEach(srcs => {
-				for (let src of srcs) {
+				for (const src of srcs) {
 					urlsToPreload.add(src);
 				}
 			});
@@ -240,7 +240,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		let karaokeTimesAccumulator = 0;
 
-		for (let part of dialogue.parts) {
+		for (const part of dialogue.parts) {
 			if (part instanceof parts.Italic) {
 				currentSpanStyles.italic = part.value;
 			}
@@ -461,7 +461,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 					(currentTimeRelativeToDialogueStart >= part.end) ? 1 :
 					Math.pow((currentTimeRelativeToDialogueStart - part.start) / (part.end - part.start), part.accel);
 
-				for (let tag of part.tags) {
+				for (const tag of part.tags) {
 					if (tag instanceof parts.Border) {
 						currentSpanStyles.outlineWidth += progression * (tag.value - currentSpanStyles.outlineWidth);
 						currentSpanStyles.outlineHeight += progression * (tag.value - currentSpanStyles.outlineHeight);
@@ -611,7 +611,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 		}
 
-		for (let part of dialogue.parts) {
+		for (const part of dialogue.parts) {
 			if (part instanceof parts.Position || part instanceof parts.Move) {
 				const transformOrigin = WebRenderer._transformOrigins[dialogue.alignment];
 

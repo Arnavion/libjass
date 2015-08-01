@@ -40,7 +40,7 @@ class SimpleSet<T> {
 			throw new Error("Non-array iterables are not supported by the SimpleSet constructor.");
 		}
 
-		for (let value of iterable) {
+		for (const value of iterable) {
 			this.add(value);
 		}
 	}
@@ -91,7 +91,7 @@ class SimpleSet<T> {
 	 * @param {*} thisArg
 	 */
 	forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void {
-		for (let property of Object.keys(this._elements)) {
+		for (const property of Object.keys(this._elements)) {
 			const element = this._elements[property];
 			callbackfn.call(thisArg, element, element, this);
 		}

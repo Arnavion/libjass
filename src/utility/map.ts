@@ -41,7 +41,7 @@ class SimpleMap<K, V> {
 			throw new Error("Non-array iterables are not supported by the SimpleMap constructor.");
 		}
 
-		for (let element of iterable) {
+		for (const element of iterable) {
 			this.set(element[0], element[1]);
 		}
 	}
@@ -131,7 +131,7 @@ class SimpleMap<K, V> {
 	 * @param {*} thisArg
 	 */
 	forEach(callbackfn: (value: V, index: K, map: Map<K, V>) => void, thisArg?: any): void {
-		for (let property of Object.keys(this._keys)) {
+		for (const property of Object.keys(this._keys)) {
 			callbackfn.call(thisArg, this._values[property], this._keys[property], this);
 		}
 	}

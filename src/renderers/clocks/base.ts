@@ -56,7 +56,7 @@ export class EventSource<T> {
 	_dispatchEvent(type: T, args: Object[]): void {
 		const listeners = this._eventListeners.get(type);
 		if (listeners !== undefined) {
-			for (let listener of listeners) {
+			for (const listener of listeners) {
 				listener.apply(this, args);
 			}
 		}
