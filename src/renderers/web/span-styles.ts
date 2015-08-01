@@ -168,7 +168,7 @@ export class SpanStyles {
 		else if (this._bold !== false) {
 			fontStyleOrWeight += this._bold + " ";
 		}
-		const fontSize = (this._scaleY * this._fontSizeForLineHeight(this._fontName, this._fontSize * (isTextOnlySpan ? this._fontScaleY : 1), this._fontSizeElement)).toFixed(3);
+		const fontSize = (this._scaleY * this._fontSizeForLineHeight(this._fontName, this._fontSize * (isTextOnlySpan ? this._fontScaleX : 1), this._fontSizeElement)).toFixed(3);
 		const lineHeight = (this._scaleY * this._fontSize).toFixed(3);
 		
 		let fonts = `"${ this._fontName }"`;
