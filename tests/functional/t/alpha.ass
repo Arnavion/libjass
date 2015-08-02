@@ -1,0 +1,24 @@
+﻿[Script Info]
+Title: 
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 256
+PlayResY: 144
+Scroll Position: 0
+Active Line: 0
+Video Zoom Percent: 1
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Arial,36,&H0F0000FF,&H00FFFFFF,&H0F00FF00,&H00000000,0,0,0,0,100,100,0,0,1,2,1.2,2,15,15,15,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:00.00,0:00:7.00,Default,,0,0,0,,{\t(2000,5000,\alpha&6F&)}test
+Dialogue: 1,0:00:00.90,0:00:01.10,Default,,0,0,0,,{\alpha&0F&)}test
+Dialogue: 1,0:00:01.90,0:00:02.10,Default,,0,0,0,,{\alpha&0F&)}test
+Dialogue: 1,0:00:02.90,0:00:03.10,Default,,0,0,0,,{\alpha&2F&)}test
+Dialogue: 1,0:00:03.90,0:00:04.10,Default,,0,0,0,,{\alpha&4F&)}test
+Dialogue: 1,0:00:04.90,0:00:05.10,Default,,0,0,0,,{\alpha&6F&)}test
+Dialogue: 1,0:00:05.90,0:00:06.10,Default,,0,0,0,,{\alpha&6F&)}test

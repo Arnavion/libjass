@@ -840,7 +840,7 @@ export class SpanStyles {
 	/**
 	 * Gets the primary alpha property.
 	 *
-	 * @type {?number}
+	 * @type {number}
 	 */
 	get primaryAlpha(): number {
 		return this._primaryAlpha;
@@ -852,13 +852,13 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set primaryAlpha(value: number) {
-		this._primaryAlpha = value;
+		this._primaryAlpha = SpanStyles._valueOrDefault(value, this._defaultStyle.primaryColor.alpha);
 	}
 
 	/**
 	 * Gets the secondary alpha property.
 	 *
-	 * @type {?number}
+	 * @type {number}
 	 */
 	get secondaryAlpha(): number {
 		return this._secondaryAlpha;
@@ -870,7 +870,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set secondaryAlpha(value: number) {
-		this._secondaryAlpha = value;
+		this._secondaryAlpha = SpanStyles._valueOrDefault(value, this._defaultStyle.secondaryColor.alpha);
 	}
 
 	/**
@@ -888,7 +888,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set outlineAlpha(value: number) {
-		this._outlineAlpha = value;
+		this._outlineAlpha = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineColor.alpha);
 	}
 
 	/**
@@ -906,7 +906,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set shadowAlpha(value: number) {
-		this._shadowAlpha = value;
+		this._shadowAlpha = SpanStyles._valueOrDefault(value, this._defaultStyle.shadowColor.alpha);
 	}
 
 	private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);

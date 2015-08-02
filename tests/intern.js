@@ -32,7 +32,8 @@ define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profi
 		functionalSuites: [
 			"tests/functional/auto-clock",
 			"tests/functional/fsc/fsc",
-			"tests/functional/kfx/kfx"
+			"tests/functional/kfx/kfx",
+			"tests/functional/t/alpha"
 		],
 		loader: {
 			packages: [{
