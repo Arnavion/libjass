@@ -139,10 +139,10 @@ export class SpanStyles {
 		this.outlineColor = newStyle.outlineColor;
 		this.shadowColor = newStyle.shadowColor;
 
-		this.primaryAlpha = null;
-		this.secondaryAlpha = null;
-		this.outlineAlpha = null;
-		this.shadowAlpha = null;
+		this.primaryAlpha = newStyle.primaryColor.alpha;
+		this.secondaryAlpha = newStyle.secondaryColor.alpha;
+		this.outlineAlpha = newStyle.outlineColor.alpha;
+		this.shadowAlpha = newStyle.shadowColor.alpha;
 
 		this.blur = null;
 		this.gaussianBlur = null;

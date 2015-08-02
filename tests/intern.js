@@ -33,6 +33,7 @@ define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profi
 			"tests/functional/auto-clock",
 			"tests/functional/fsc/fsc",
 			"tests/functional/kfx/kfx",
+			"tests/functional/r/alpha",
 			"tests/functional/t/alpha"
 		],
 		loader: {
