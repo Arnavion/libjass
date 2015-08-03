@@ -23,3 +23,7 @@ body {
 	padding: 0;
 	box-sizing: border-box;
 }
+
+.libjass-wrapper {
+	background-color: rgb(47, 163, 254);
+}
