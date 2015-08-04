@@ -53,7 +53,7 @@ define(["intern!tdd", "intern/chai!assert", "require", "intern/dojo/node!intern/
 					events.push("stop");
 				});
 
-				return { enabled: clock.enabled, paused: clock.paused, rate: clock.rate, events: events };
+				return { enabled: clock.enabled, paused: clock.paused, rate: clock.rate, events: events.slice() };
 			})
 			.then(function (clock) {
 				assert.strictEqual(clock.enabled, true);
@@ -65,7 +65,7 @@ define(["intern!tdd", "intern/chai!assert", "require", "intern/dojo/node!intern/
 				clock.play();
 
 				setTimeout(function () {
-					callback({ enabled: clock.enabled, paused: clock.paused, events: events });
+					callback({ enabled: clock.enabled, paused: clock.paused, events: events.slice() });
 				}, 1000);
 			})
 			.then(function (clock) {
@@ -83,7 +83,7 @@ define(["intern!tdd", "intern/chai!assert", "require", "intern/dojo/node!intern/
 
 				clock.disable();
 
-				return { enabled: clock.enabled, paused: clock.paused, events: events };
+				return { enabled: clock.enabled, paused: clock.paused, events: events.slice() };
 			})
 			.then(function (clock) {
 				assert.strictEqual(clock.enabled, false);
@@ -95,7 +95,7 @@ define(["intern!tdd", "intern/chai!assert", "require", "intern/dojo/node!intern/
 
 				clock.enable();
 
-				return { enabled: clock.enabled, paused: clock.paused, events: events };
+				return { enabled: clock.enabled, paused: clock.paused, events: events.slice() };
 			})
 			.then(function (clock) {
 				assert.strictEqual(clock.enabled, true);
@@ -106,7 +106,7 @@ define(["intern!tdd", "intern/chai!assert", "require", "intern/dojo/node!intern/
 				clock.play();
 
 				setTimeout(function () {
-					callback({ enabled: clock.enabled, paused: clock.paused, events: events });
+					callback({ enabled: clock.enabled, paused: clock.paused, events: events.slice() });
 				}, 1000);
 			})
 			.then(function (clock) {
@@ -125,7 +125,7 @@ define(["intern!tdd", "intern/chai!assert", "require", "intern/dojo/node!intern/
 				driverStartTime = 30000;
 				clock.seeking();
 
-				var result = { enabled: clock.enabled, paused: clock.paused, currentTime: clock.currentTime, events: events };
+				var result = { enabled: clock.enabled, paused: clock.paused, currentTime: clock.currentTime, events: events.slice() };
 				events = [];
 				return result;
 			})
@@ -137,7 +137,7 @@ define(["intern!tdd", "intern/chai!assert", "require", "intern/dojo/node!intern/
 			})
 			.executeAsync(function (callback) {
 				setTimeout(function () {
-					callback({ enabled: clock.enabled, paused: clock.paused, currentTime: clock.currentTime, events: events });
+					callback({ enabled: clock.enabled, paused: clock.paused, currentTime: clock.currentTime, events: events.slice() });
 				}, 1000);
 			})
 			.then(function (clock) {
