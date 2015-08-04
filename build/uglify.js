@@ -448,61 +448,9 @@ module.exports = {
 				root.figure_out_scope({ screw_ie8: true });
 				root.compute_char_frequency();
 				root.mangle_names({ screw_ie8: true });
-
-
-				// Mangle private members
-				var occurrences = Object.create(null);
-
-				root.walk(new UglifyJS.TreeWalker(function (node, descend) {
-					if (
-						node instanceof UglifyJS.AST_PropAccess &&
-						typeof node.property === "string" &&
-						node.property[0] === "_" &&
-						node.property[1] !== "_" && // Doesn't start with two leading underscores
-						node.property !== "_classTag" // webworker serializer uses this property by name, so it shouldn't be changed.
-					) {
-						var occurrence = occurrences[node.property];
-						if (occurrence === undefined) {
-							occurrences[node.property] = 1;
-						}
-						else {
-							occurrences[node.property]++;
-						}
-					}
-				}));
-
-				var identifiers = Object.keys(occurrences);
-				identifiers.sort(function (first, second) { return occurrences[second] - occurrences[first]; });
-
-				var generatedIdentifiers = occurrences;
-
-				var validIdentifierCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$_0123456789";
-				var toIdentifier = function (index) {
-					var result = validIdentifierCharacters[(index % validIdentifierCharacters.length)];
-					index = (index / validIdentifierCharacters.length) | 0;
-
-					while (index > 0) {
-						index--;
-						result = validIdentifierCharacters[index % validIdentifierCharacters.length] + result;
-						index = (index / validIdentifierCharacters.length) | 0;
-					}
-
-					return "_" + result;
-				};
-
-				identifiers.forEach(function (identifier, index) {
-					generatedIdentifiers[identifier] = toIdentifier(index);
+				root = UglifyJS.mangle_properties(root, {
+					regex: /^_/
 				});
-
-				root.walk(new UglifyJS.TreeWalker(function (node, descend) {
-					if (
-						node instanceof UglifyJS.AST_PropAccess &&
-						typeof node.property === "string" &&
-						node.property in generatedIdentifiers
-					) {
-						node.property = generatedIdentifiers[node.property];
-					}
-				}));
 
 
 				// Output

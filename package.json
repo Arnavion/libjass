@@ -33,7 +33,7 @@
 		"pngjs": "0.4.0",
 		"sax": "1.x",
 		"typescript": "1.5.3",
-		"uglify-js": "2.x >=2.4.16"
+		"uglify-js": "2.x >=2.4.24"
 	},
 	"private": true
 }
