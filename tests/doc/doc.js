@@ -38,7 +38,7 @@ define(["intern!tdd", "intern/chai!assert", "intern/dojo/node!fs", "intern/dojo/
 
 			parser.onerror = function (error) { throw error; };
 
-			parser.write(fs.readFileSync(require.toUrl("../libjass-gh-pages/api.xhtml"), { encoding: "utf8" })).close();
+			parser.write(fs.readFileSync(require.toUrl("../../libjass-gh-pages/api.xhtml"), { encoding: "utf8" })).close();
 		});
 
 		tdd.test("api.xhtml", function () {

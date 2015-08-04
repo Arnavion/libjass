@@ -19,16 +19,16 @@
 		"prepublish": "node ./build.js clean default",
 		"build": "tsc ./build/typescript/index.ts ./build/doc.ts ./build/typings.d.ts ./node_modules/async-build/typings.d.ts ./node_modules/typescript/bin/typescript.d.ts -m commonjs -t es5 -noImplicitAny",
 		"test": "node ./build.js test",
-		"test-lib": "intern-client config=tests/intern reporters=pretty",
-		"test-minified": "intern-client config=tests/intern reporters=pretty minified=true",
+		"test-lib": "intern-client config=tests/intern reporters=Pretty",
+		"test-minified": "intern-client config=tests/intern reporters=Pretty minified=true",
 		"test-browser": "intern-runner config=tests/intern",
-		"test-doc": "intern-client config=tests/intern-doc reporters=pretty"
+		"test-doc": "intern-client config=tests/intern-doc reporters=Pretty"
 	},
 	"devDependencies": {
 		"async": "0.9.x",
 		"async-build": "0.1.0",
 		"firefox-profile": "0.3.x",
-		"intern": "2.x",
+		"intern": "3.x",
 		"npm": "2.x",
 		"pngjs": "0.4.0",
 		"sax": "1.x",

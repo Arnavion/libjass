@@ -36,9 +36,9 @@ define(["intern!tdd", "intern/chai!assert", "libjass", "require"], function (tdd
 				this.skip("Web workers not supported in this environment.");
 			}
 
-			var deferred = this.async(1000);
+			this.timeout = 1000;
 
-			workerChannel.request(libjass.webworker.WorkerCommands.Parse, {
+			return workerChannel.request(libjass.webworker.WorkerCommands.Parse, {
 				input: "{\\an8}Are {\\i1}you{\\i0} the one who stole the clock?!",
 				rule: "dialogueParts"
 			}).then(function (value) {
@@ -50,9 +50,7 @@ define(["intern!tdd", "intern/chai!assert", "libjass", "require"], function (tdd
 					new libjass.parts.Italic(false),
 					new libjass.parts.Text(" the one who stole the clock?!")
 				]);
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 
 		tdd.test("Parse failure", function () {
@@ -60,18 +58,16 @@ define(["intern!tdd", "intern/chai!assert", "libjass", "require"], function (tdd
 				this.skip("Web workers not supported in this environment.");
 			}
 
-			var deferred = this.async(1000);
+			this.timeout = 1000;
 
-			workerChannel.request(libjass.webworker.WorkerCommands.Parse, {
+			return workerChannel.request(libjass.webworker.WorkerCommands.Parse, {
 				input: "a4",
 				rule: "tag_a"
 			}).then(function (value) {
 				throw new Error("Expected parse to fail.");
 			}, function (reason) {
 				assert.strictEqual(reason.message, "Parse failed.");
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 	});
 });
