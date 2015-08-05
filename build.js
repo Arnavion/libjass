@@ -195,8 +195,8 @@ task("dist", ["libjass.js", "libjass.min.js", "test", "test-browser", "demo", "d
 		},
 
 		// Copy all files except package.json
-		async.each.bind(async, Object.keys(files), function (outputFilename, callback) {
-			async.waterfall([fs.readFile.bind(fs, files[outputFilename]), fs.writeFile.bind(fs, outputFilename)], callback);
+		async.forEachOf.bind(async, files, function (inputFilename, outputFilename, callback) {
+			async.waterfall([fs.readFile.bind(fs, inputFilename), fs.writeFile.bind(fs, outputFilename)], callback);
 		}),
 
 		// Copy package.json

@@ -25,8 +25,8 @@
 		"test-doc": "intern-client config=tests/intern-doc reporters=pretty"
 	},
 	"devDependencies": {
-		"async": "0.9.x",
-		"async-build": "0.1.0",
+		"async": "1.x >=1.4",
+		"async-build": "0.2.0",
 		"firefox-profile": "0.3.x",
 		"intern": "2.x",
 		"npm": "2.x",
