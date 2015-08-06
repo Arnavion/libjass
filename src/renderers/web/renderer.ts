@@ -194,13 +194,13 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		const dialogueAnimationCollection = new AnimationCollection(this, dialogueAnimationStylesElement);
 
-		const svgElement = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 		svgElement.setAttribute("version", "1.1");
 		svgElement.setAttribute("class", "libjass-filters");
 		svgElement.width.baseVal.valueAsString = "0";
 		svgElement.height.baseVal.valueAsString = "0";
 
-		const svgDefsElement = <SVGDefsElement>document.createElementNS("http://www.w3.org/2000/svg", "defs");
+		const svgDefsElement = document.createElementNS("http://www.w3.org/2000/svg", "defs");
 		svgElement.appendChild(svgDefsElement);
 
 		let currentSpan: HTMLSpanElement = null;

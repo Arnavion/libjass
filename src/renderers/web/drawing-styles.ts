@@ -58,7 +58,7 @@ export class DrawingStyles {
 		const scaleX = this._outputScaleX / scaleFactor;
 		const scaleY = this._outputScaleY / scaleFactor;
 
-		const path = <SVGPathElement>document.createElementNS("http://www.w3.org/2000/svg", "path");
+		const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
 
 		let bboxWidth = 0;
 		let bboxHeight = 0;
@@ -81,12 +81,12 @@ export class DrawingStyles {
 			}
 		}
 
-		const svg = <SVGSVGElement>document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 		svg.setAttribute("version", "1.1");
 		svg.width.baseVal.valueAsString = `${ (bboxWidth * scaleX).toFixed(3) }px`;
 		svg.height.baseVal.valueAsString = `${ (bboxHeight * scaleY).toFixed(3) }px`;
 
-		const g = <SVGGElement>document.createElementNS("http://www.w3.org/2000/svg", "g");
+		const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
 		svg.appendChild(g);
 		g.setAttribute("transform", `scale(${ scaleX.toFixed(3) } ${ scaleY.toFixed(3) })`);
 

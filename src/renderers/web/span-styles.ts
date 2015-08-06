@@ -237,7 +237,7 @@ export class SpanStyles {
 		if (this._settings.enableSvg) {
 			const filterId = `svg-filter-${ this._id }-${ this._nextFilterId++ }`;
 
-			const filterElement = <SVGFilterElement>document.createElementNS("http://www.w3.org/2000/svg", "filter");
+			const filterElement = document.createElementNS("http://www.w3.org/2000/svg", "filter");
 			filterElement.id = filterId;
 			filterElement.x.baseVal.valueAsString = "-50%";
 			filterElement.width.baseVal.valueAsString = "200%";
@@ -283,7 +283,7 @@ export class SpanStyles {
 						}
 					}
 				})((x: number, y: number): void => {
-					const outlineFilter = <SVGFEMorphologyElement>document.createElementNS("http://www.w3.org/2000/svg", "feMorphology");
+					const outlineFilter = document.createElementNS("http://www.w3.org/2000/svg", "feMorphology");
 					filterElement.appendChild(outlineFilter);
 					outlineFilter.in1.baseVal = "source";
 					outlineFilter.operator.baseVal = SVGFEMorphologyElement.SVG_MORPHOLOGY_OPERATOR_DILATE;
@@ -295,50 +295,50 @@ export class SpanStyles {
 				});
 
 				// Start with SourceAlpha. Leave the alpha as 0 if it's 0, and set it to 1 if it's greater than 0
-				const source = <SVGFEComponentTransferElement>document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
+				const source = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
 				filterElement.insertBefore(source, filterElement.firstElementChild);
 				source.in1.baseVal = "SourceAlpha";
 				source.result.baseVal = "source";
 
-				const sourceAlphaTransferNode = <SVGFEFuncAElement>document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
+				const sourceAlphaTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
 				source.appendChild(sourceAlphaTransferNode);
 				sourceAlphaTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
 				sourceAlphaTransferNode.slope.baseVal = 1e6; // 0 remains 0, greater-than-0 becomes 1
 				sourceAlphaTransferNode.intercept.baseVal = 0;
 
 				// Merge the individual outlines
-				const mergedOutlines = <SVGFEMergeElement>document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+				const mergedOutlines = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
 				filterElement.appendChild(mergedOutlines);
 
 				for (let i = 0; i < outlineNumber; i++) {
-					const outlineReferenceNode = <SVGFEMergeNodeElement>document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+					const outlineReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
 					mergedOutlines.appendChild(outlineReferenceNode);
 					outlineReferenceNode.in1.baseVal = `outline${ i }`;
 				}
 
 				// Color it with the outline color
-				const coloredSource = <SVGFEComponentTransferElement>document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
+				const coloredSource = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
 				filterElement.appendChild(coloredSource);
 
-				const outlineRedTransferNode = <SVGFEFuncRElement>document.createElementNS("http://www.w3.org/2000/svg", "feFuncR");
+				const outlineRedTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncR");
 				coloredSource.appendChild(outlineRedTransferNode);
 				outlineRedTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
 				outlineRedTransferNode.slope.baseVal = 0;
 				outlineRedTransferNode.intercept.baseVal = outlineColor.red / 255 * outlineColor.alpha;
 
-				const outlineGreenTransferNode = <SVGFEFuncGElement>document.createElementNS("http://www.w3.org/2000/svg", "feFuncG");
+				const outlineGreenTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncG");
 				coloredSource.appendChild(outlineGreenTransferNode);
 				outlineGreenTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
 				outlineGreenTransferNode.slope.baseVal = 0;
 				outlineGreenTransferNode.intercept.baseVal = outlineColor.green / 255 * outlineColor.alpha;
 
-				const outlineBlueTransferNode = <SVGFEFuncBElement>document.createElementNS("http://www.w3.org/2000/svg", "feFuncB");
+				const outlineBlueTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncB");
 				coloredSource.appendChild(outlineBlueTransferNode);
 				outlineBlueTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
 				outlineBlueTransferNode.slope.baseVal = 0;
 				outlineBlueTransferNode.intercept.baseVal = outlineColor.blue / 255 * outlineColor.alpha;
 
-				const outlineAlphaTransferNode = <SVGFEFuncAElement>document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
+				const outlineAlphaTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
 				coloredSource.appendChild(outlineAlphaTransferNode);
 				outlineAlphaTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
 				outlineAlphaTransferNode.slope.baseVal = outlineColor.alpha;
@@ -346,45 +346,45 @@ export class SpanStyles {
 
 				// Blur the merged outline
 				if (this._gaussianBlur > 0) {
-					const gaussianBlurFilter = <SVGFEGaussianBlurElement>document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+					const gaussianBlurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
 					filterElement.appendChild(gaussianBlurFilter);
 					gaussianBlurFilter.stdDeviationX.baseVal = this._gaussianBlur;
 					gaussianBlurFilter.stdDeviationY.baseVal = this._gaussianBlur;
 				}
 				for (let i = 0; i < this._blur; i++) {
-					const blurFilter = <SVGFEConvolveMatrixElement>document.createElementNS("http://www.w3.org/2000/svg", "feConvolveMatrix");
+					const blurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feConvolveMatrix");
 					filterElement.appendChild(blurFilter);
 					blurFilter.setAttribute("kernelMatrix", "1 2 1 2 4 2 1 2 1");
 					blurFilter.edgeMode.baseVal = SVGFEConvolveMatrixElement.SVG_EDGEMODE_NONE;
 				}
 
 				// Cut out the source, so only the outline remains
-				const outlineCutoutNode = <SVGFECompositeElement>document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+				const outlineCutoutNode = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
 				filterElement.appendChild(outlineCutoutNode);
 				outlineCutoutNode.in2.baseVal = "source";
 				outlineCutoutNode.operator.baseVal = SVGFECompositeElement.SVG_FECOMPOSITE_OPERATOR_OUT;
 
 				// Merge the outline with the SourceGraphic
-				const mergedOutlineAndSourceGraphic = <SVGFEMergeElement>document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+				const mergedOutlineAndSourceGraphic = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
 				filterElement.appendChild(mergedOutlineAndSourceGraphic);
 
-				const outlineReferenceNode = <SVGFEMergeNodeElement>document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+				const outlineReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
 				mergedOutlineAndSourceGraphic.appendChild(outlineReferenceNode);
 
-				const sourceGraphicReferenceNode = <SVGFEMergeNodeElement>document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+				const sourceGraphicReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
 				mergedOutlineAndSourceGraphic.appendChild(sourceGraphicReferenceNode);
 				sourceGraphicReferenceNode.in1.baseVal = "SourceGraphic";
 			}
 			else {
 				// Blur the source graphic directly
 				if (this._gaussianBlur > 0) {
-					const gaussianBlurFilter = <SVGFEGaussianBlurElement>document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+					const gaussianBlurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
 					filterElement.appendChild(gaussianBlurFilter);
 					gaussianBlurFilter.stdDeviationX.baseVal = this._gaussianBlur;
 					gaussianBlurFilter.stdDeviationY.baseVal = this._gaussianBlur;
 				}
 				for (let i = 0; i < this._blur; i++) {
-					const blurFilter = <SVGFEConvolveMatrixElement>document.createElementNS("http://www.w3.org/2000/svg", "feConvolveMatrix");
+					const blurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feConvolveMatrix");
 					filterElement.appendChild(blurFilter);
 					blurFilter.setAttribute("kernelMatrix", "1 2 1 2 4 2 1 2 1");
 					blurFilter.edgeMode.baseVal = SVGFEConvolveMatrixElement.SVG_EDGEMODE_NONE;
