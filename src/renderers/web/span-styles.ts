@@ -31,8 +31,6 @@ import { Dialogue } from "../../types/dialogue";
 
 import { Map } from "../../utility/map";
 
-///<reference path="./web-references.d.ts" />
-
 /**
  * This class represents the style attribute of a span.
  * As a Dialogue's div is rendered, individual parts are added to span's, and this class is used to maintain the style attribute of those.

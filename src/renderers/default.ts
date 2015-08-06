@@ -24,8 +24,6 @@ import { WebRenderer } from "./web/renderer";
 
 import { ASS } from "../types/ass";
 
-///<reference path="./default-references.d.ts" />
-
 /**
  * A default renderer implementation.
  *
