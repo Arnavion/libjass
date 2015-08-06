@@ -223,214 +223,26 @@ export class SpanStyles {
 
 		span.style.letterSpacing = `${ (this._scaleX * this._letterSpacing).toFixed(3) }px`;
 
-		const primaryColor = this._primaryColor.withAlpha(this._primaryAlpha);
-		span.style.color = primaryColor.toString();
-
-		const outlineColor = this._outlineColor.withAlpha(this._outlineAlpha);
-
 		const outlineWidth = this._scaleX * this._outlineWidth;
 		const outlineHeight = this._scaleY * this._outlineHeight;
 
 		const filterWrapperSpan = document.createElement("span");
 		filterWrapperSpan.appendChild(span);
 
+		const primaryColor = this._primaryColor.withAlpha(this._primaryAlpha);
+		const outlineColor = this._outlineColor.withAlpha(this._outlineAlpha);
+		const shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
+
+		span.style.color = primaryColor.toString();
+
 		if (this._settings.enableSvg) {
-			const filterId = `svg-filter-${ this._id }-${ this._nextFilterId++ }`;
-
-			const filterElement = document.createElementNS("http://www.w3.org/2000/svg", "filter");
-			filterElement.id = filterId;
-			filterElement.x.baseVal.valueAsString = "-50%";
-			filterElement.width.baseVal.valueAsString = "200%";
-			filterElement.y.baseVal.valueAsString = "-50%";
-			filterElement.height.baseVal.valueAsString = "200%";
-
-			if (outlineWidth > 0 || outlineHeight > 0) {
-				/* Construct an elliptical border by merging together many rectangles. The border is creating using dilate morphology filters, but these only support
-				 * generating rectangles.   http://lists.w3.org/Archives/Public/public-fx/2012OctDec/0003.html
-				 */
-
-				let outlineNumber = 0;
-
-				const increment = (!this._settings.preciseOutlines && this._gaussianBlur > 0) ? this._gaussianBlur : 1;
-
-				((addOutline: (x: number, y: number) => void) => {
-					if (outlineWidth <= outlineHeight) {
-						if (outlineWidth > 0) {
-							let x: number;
-							for (x = 0; x <= outlineWidth; x += increment) {
-								addOutline(x, outlineHeight / outlineWidth * Math.sqrt(outlineWidth * outlineWidth - x * x));
-							}
-							if (x !== outlineWidth + increment) {
-								addOutline(outlineWidth, 0);
-							}
-						}
-						else {
-							addOutline(0, outlineHeight);
-						}
-					}
-					else {
-						if (outlineHeight > 0) {
-							let y: number;
-							for (y = 0; y <= outlineHeight; y += increment) {
-								addOutline(outlineWidth / outlineHeight * Math.sqrt(outlineHeight * outlineHeight - y * y), y);
-							}
-							if (y !== outlineHeight + increment) {
-								addOutline(0, outlineHeight);
-							}
-						}
-						else {
-							addOutline(outlineWidth, 0);
-						}
-					}
-				})((x: number, y: number): void => {
-					const outlineFilter = document.createElementNS("http://www.w3.org/2000/svg", "feMorphology");
-					filterElement.appendChild(outlineFilter);
-					outlineFilter.in1.baseVal = "source";
-					outlineFilter.operator.baseVal = SVGFEMorphologyElement.SVG_MORPHOLOGY_OPERATOR_DILATE;
-					outlineFilter.radiusX.baseVal = x;
-					outlineFilter.radiusY.baseVal = y;
-					outlineFilter.result.baseVal = `outline${ outlineNumber }`;
-
-					outlineNumber++;
-				});
-
-				// Start with SourceAlpha. Leave the alpha as 0 if it's 0, and set it to 1 if it's greater than 0
-				const source = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
-				filterElement.insertBefore(source, filterElement.firstElementChild);
-				source.in1.baseVal = "SourceAlpha";
-				source.result.baseVal = "source";
-
-				const sourceAlphaTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
-				source.appendChild(sourceAlphaTransferNode);
-				sourceAlphaTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
-				sourceAlphaTransferNode.slope.baseVal = 1e6; // 0 remains 0, greater-than-0 becomes 1
-				sourceAlphaTransferNode.intercept.baseVal = 0;
-
-				// Merge the individual outlines
-				const mergedOutlines = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
-				filterElement.appendChild(mergedOutlines);
-
-				for (let i = 0; i < outlineNumber; i++) {
-					const outlineReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
-					mergedOutlines.appendChild(outlineReferenceNode);
-					outlineReferenceNode.in1.baseVal = `outline${ i }`;
-				}
-
-				// Color it with the outline color
-				const coloredSource = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
-				filterElement.appendChild(coloredSource);
-
-				const outlineRedTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncR");
-				coloredSource.appendChild(outlineRedTransferNode);
-				outlineRedTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
-				outlineRedTransferNode.slope.baseVal = 0;
-				outlineRedTransferNode.intercept.baseVal = outlineColor.red / 255 * outlineColor.alpha;
-
-				const outlineGreenTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncG");
-				coloredSource.appendChild(outlineGreenTransferNode);
-				outlineGreenTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
-				outlineGreenTransferNode.slope.baseVal = 0;
-				outlineGreenTransferNode.intercept.baseVal = outlineColor.green / 255 * outlineColor.alpha;
-
-				const outlineBlueTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncB");
-				coloredSource.appendChild(outlineBlueTransferNode);
-				outlineBlueTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
-				outlineBlueTransferNode.slope.baseVal = 0;
-				outlineBlueTransferNode.intercept.baseVal = outlineColor.blue / 255 * outlineColor.alpha;
-
-				const outlineAlphaTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
-				coloredSource.appendChild(outlineAlphaTransferNode);
-				outlineAlphaTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
-				outlineAlphaTransferNode.slope.baseVal = outlineColor.alpha;
-				outlineAlphaTransferNode.intercept.baseVal = 0;
-
-				// Blur the merged outline
-				if (this._gaussianBlur > 0) {
-					const gaussianBlurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
-					filterElement.appendChild(gaussianBlurFilter);
-					gaussianBlurFilter.stdDeviationX.baseVal = this._gaussianBlur;
-					gaussianBlurFilter.stdDeviationY.baseVal = this._gaussianBlur;
-				}
-				for (let i = 0; i < this._blur; i++) {
-					const blurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feConvolveMatrix");
-					filterElement.appendChild(blurFilter);
-					blurFilter.setAttribute("kernelMatrix", "1 2 1 2 4 2 1 2 1");
-					blurFilter.edgeMode.baseVal = SVGFEConvolveMatrixElement.SVG_EDGEMODE_NONE;
-				}
-
-				// Cut out the source, so only the outline remains
-				const outlineCutoutNode = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
-				filterElement.appendChild(outlineCutoutNode);
-				outlineCutoutNode.in2.baseVal = "source";
-				outlineCutoutNode.operator.baseVal = SVGFECompositeElement.SVG_FECOMPOSITE_OPERATOR_OUT;
-
-				// Merge the outline with the SourceGraphic
-				const mergedOutlineAndSourceGraphic = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
-				filterElement.appendChild(mergedOutlineAndSourceGraphic);
-
-				const outlineReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
-				mergedOutlineAndSourceGraphic.appendChild(outlineReferenceNode);
-
-				const sourceGraphicReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
-				mergedOutlineAndSourceGraphic.appendChild(sourceGraphicReferenceNode);
-				sourceGraphicReferenceNode.in1.baseVal = "SourceGraphic";
-			}
-			else {
-				// Blur the source graphic directly
-				if (this._gaussianBlur > 0) {
-					const gaussianBlurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
-					filterElement.appendChild(gaussianBlurFilter);
-					gaussianBlurFilter.stdDeviationX.baseVal = this._gaussianBlur;
-					gaussianBlurFilter.stdDeviationY.baseVal = this._gaussianBlur;
-				}
-				for (let i = 0; i < this._blur; i++) {
-					const blurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feConvolveMatrix");
-					filterElement.appendChild(blurFilter);
-					blurFilter.setAttribute("kernelMatrix", "1 2 1 2 4 2 1 2 1");
-					blurFilter.edgeMode.baseVal = SVGFEConvolveMatrixElement.SVG_EDGEMODE_NONE;
-				}
-			}
-
-			if (filterElement.childElementCount > 0) {
-				this._svgDefsElement.appendChild(filterElement);
-
-				filterWrapperSpan.style.webkitFilter = `url("#${ filterId }")`;
-				filterWrapperSpan.style.filter = `url("#${ filterId }")`;
-			}
+			this._setSvgOutlineOnSpan(filterWrapperSpan, outlineWidth, outlineHeight, outlineColor);
 		}
 		else {
-			if (outlineWidth > 0 || outlineHeight > 0) {
-				let outlineCssString = "";
-
-				((addOutline: (x: number, y: number) => void) => {
-					for (let x = 0; x <= outlineWidth; x++) {
-						const maxY = (outlineWidth === 0) ? outlineHeight : outlineHeight * Math.sqrt(1 - ((x * x) / (outlineWidth * outlineWidth)));
-						for (let y = 0; y <= maxY; y++) {
-							addOutline(x, y);
-
-							if (x !== 0) {
-								addOutline(-x, y);
-							}
-
-							if (y !== 0) {
-								addOutline(x, -y);
-							}
-
-							if (x !== 0 && y !== 0) {
-								addOutline(-x, -y);
-							}
-						}
-					}
-				})((x: number, y: number): void => {
-					outlineCssString += `, ${ outlineColor.toString() } ${ x }px ${ y }px ${ this._gaussianBlur.toFixed(3) }px`;
-				});
-
-				span.style.textShadow = outlineCssString.substr(", ".length);
-			}
+			this._setTextShadowOutlineOnSpan(span, outlineWidth, outlineHeight, outlineColor);
 		}
 
 		if (this._shadowDepthX !== 0 || this._shadowDepthY !== 0) {
-			const shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
 			const shadowCssString = `${ shadowColor.toString() } ${ (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) }px ${ (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) }px 0px`;
 			if (span.style.textShadow === "") {
 				span.style.textShadow = shadowCssString;
@@ -449,6 +261,214 @@ export class SpanStyles {
 		span.style.animation = animationCollection.animationStyle;
 
 		return filterWrapperSpan;
+	}
+
+	/**
+	 * @param {!HTMLSpanElement} filterWrapperSpan
+	 * @param {number} outlineWidth
+	 * @param {number} outlineHeight
+	 * @param {!libjass.parts.Color} outlineColor
+	 */
+	private _setSvgOutlineOnSpan(filterWrapperSpan: HTMLSpanElement, outlineWidth: number, outlineHeight: number, outlineColor: Color): void {
+		const filterId = `svg-filter-${ this._id }-${ this._nextFilterId++ }`;
+
+		const filterElement = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+		filterElement.id = filterId;
+		filterElement.x.baseVal.valueAsString = "-50%";
+		filterElement.width.baseVal.valueAsString = "200%";
+		filterElement.y.baseVal.valueAsString = "-50%";
+		filterElement.height.baseVal.valueAsString = "200%";
+
+		if (outlineWidth > 0 || outlineHeight > 0) {
+			/* Construct an elliptical border by merging together many rectangles. The border is creating using dilate morphology filters, but these only support
+				* generating rectangles.   http://lists.w3.org/Archives/Public/public-fx/2012OctDec/0003.html
+				*/
+
+			let outlineNumber = 0;
+
+			const increment = (!this._settings.preciseOutlines && this._gaussianBlur > 0) ? this._gaussianBlur : 1;
+
+			((addOutline: (x: number, y: number) => void) => {
+				if (outlineWidth <= outlineHeight) {
+					if (outlineWidth > 0) {
+						let x: number;
+						for (x = 0; x <= outlineWidth; x += increment) {
+							addOutline(x, outlineHeight / outlineWidth * Math.sqrt(outlineWidth * outlineWidth - x * x));
+						}
+						if (x !== outlineWidth + increment) {
+							addOutline(outlineWidth, 0);
+						}
+					}
+					else {
+						addOutline(0, outlineHeight);
+					}
+				}
+				else {
+					if (outlineHeight > 0) {
+						let y: number;
+						for (y = 0; y <= outlineHeight; y += increment) {
+							addOutline(outlineWidth / outlineHeight * Math.sqrt(outlineHeight * outlineHeight - y * y), y);
+						}
+						if (y !== outlineHeight + increment) {
+							addOutline(0, outlineHeight);
+						}
+					}
+					else {
+						addOutline(outlineWidth, 0);
+					}
+				}
+			})((x: number, y: number): void => {
+				const outlineFilter = document.createElementNS("http://www.w3.org/2000/svg", "feMorphology");
+				filterElement.appendChild(outlineFilter);
+				outlineFilter.in1.baseVal = "source";
+				outlineFilter.operator.baseVal = SVGFEMorphologyElement.SVG_MORPHOLOGY_OPERATOR_DILATE;
+				outlineFilter.radiusX.baseVal = x;
+				outlineFilter.radiusY.baseVal = y;
+				outlineFilter.result.baseVal = `outline${ outlineNumber }`;
+
+				outlineNumber++;
+			});
+
+			// Start with SourceAlpha. Leave the alpha as 0 if it's 0, and set it to 1 if it's greater than 0
+			const source = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
+			filterElement.insertBefore(source, filterElement.firstElementChild);
+			source.in1.baseVal = "SourceAlpha";
+			source.result.baseVal = "source";
+
+			const sourceAlphaTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
+			source.appendChild(sourceAlphaTransferNode);
+			sourceAlphaTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
+			sourceAlphaTransferNode.slope.baseVal = 1e6; // 0 remains 0, greater-than-0 becomes 1
+			sourceAlphaTransferNode.intercept.baseVal = 0;
+
+			// Merge the individual outlines
+			const mergedOutlines = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+			filterElement.appendChild(mergedOutlines);
+
+			for (let i = 0; i < outlineNumber; i++) {
+				const outlineReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+				mergedOutlines.appendChild(outlineReferenceNode);
+				outlineReferenceNode.in1.baseVal = `outline${ i }`;
+			}
+
+			// Color it with the outline color
+			const coloredSource = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
+			filterElement.appendChild(coloredSource);
+
+			const outlineRedTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncR");
+			coloredSource.appendChild(outlineRedTransferNode);
+			outlineRedTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
+			outlineRedTransferNode.slope.baseVal = 0;
+			outlineRedTransferNode.intercept.baseVal = outlineColor.red / 255 * outlineColor.alpha;
+
+			const outlineGreenTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncG");
+			coloredSource.appendChild(outlineGreenTransferNode);
+			outlineGreenTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
+			outlineGreenTransferNode.slope.baseVal = 0;
+			outlineGreenTransferNode.intercept.baseVal = outlineColor.green / 255 * outlineColor.alpha;
+
+			const outlineBlueTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncB");
+			coloredSource.appendChild(outlineBlueTransferNode);
+			outlineBlueTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
+			outlineBlueTransferNode.slope.baseVal = 0;
+			outlineBlueTransferNode.intercept.baseVal = outlineColor.blue / 255 * outlineColor.alpha;
+
+			const outlineAlphaTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
+			coloredSource.appendChild(outlineAlphaTransferNode);
+			outlineAlphaTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
+			outlineAlphaTransferNode.slope.baseVal = outlineColor.alpha;
+			outlineAlphaTransferNode.intercept.baseVal = 0;
+
+			// Blur the merged outline
+			if (this._gaussianBlur > 0) {
+				const gaussianBlurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+				filterElement.appendChild(gaussianBlurFilter);
+				gaussianBlurFilter.stdDeviationX.baseVal = this._gaussianBlur;
+				gaussianBlurFilter.stdDeviationY.baseVal = this._gaussianBlur;
+			}
+			for (let i = 0; i < this._blur; i++) {
+				const blurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feConvolveMatrix");
+				filterElement.appendChild(blurFilter);
+				blurFilter.setAttribute("kernelMatrix", "1 2 1 2 4 2 1 2 1");
+				blurFilter.edgeMode.baseVal = SVGFEConvolveMatrixElement.SVG_EDGEMODE_NONE;
+			}
+
+			// Cut out the source, so only the outline remains
+			const outlineCutoutNode = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+			filterElement.appendChild(outlineCutoutNode);
+			outlineCutoutNode.in2.baseVal = "source";
+			outlineCutoutNode.operator.baseVal = SVGFECompositeElement.SVG_FECOMPOSITE_OPERATOR_OUT;
+
+			// Merge the outline with the SourceGraphic
+			const mergedOutlineAndSourceGraphic = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+			filterElement.appendChild(mergedOutlineAndSourceGraphic);
+
+			const outlineReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+			mergedOutlineAndSourceGraphic.appendChild(outlineReferenceNode);
+
+			const sourceGraphicReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+			mergedOutlineAndSourceGraphic.appendChild(sourceGraphicReferenceNode);
+			sourceGraphicReferenceNode.in1.baseVal = "SourceGraphic";
+		}
+		else {
+			// Blur the source graphic directly
+			if (this._gaussianBlur > 0) {
+				const gaussianBlurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+				filterElement.appendChild(gaussianBlurFilter);
+				gaussianBlurFilter.stdDeviationX.baseVal = this._gaussianBlur;
+				gaussianBlurFilter.stdDeviationY.baseVal = this._gaussianBlur;
+			}
+			for (let i = 0; i < this._blur; i++) {
+				const blurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feConvolveMatrix");
+				filterElement.appendChild(blurFilter);
+				blurFilter.setAttribute("kernelMatrix", "1 2 1 2 4 2 1 2 1");
+				blurFilter.edgeMode.baseVal = SVGFEConvolveMatrixElement.SVG_EDGEMODE_NONE;
+			}
+		}
+
+		if (filterElement.childElementCount > 0) {
+			this._svgDefsElement.appendChild(filterElement);
+
+			filterWrapperSpan.style.webkitFilter = `url("#${ filterId }")`;
+			filterWrapperSpan.style.filter = `url("#${ filterId }")`;
+		}
+	}
+
+	/**
+	 * @param {!HTMLSpanElement} span
+	 * @param {number} outlineWidth
+	 * @param {number} outlineHeight
+	 * @param {!libjass.parts.Color} outlineColor
+	 */
+	private _setTextShadowOutlineOnSpan(span: HTMLSpanElement, outlineWidth: number, outlineHeight: number, outlineColor: Color): void {
+		if (outlineWidth > 0 || outlineHeight > 0) {
+			let outlineCssString = "";
+
+			((addOutline: (x: number, y: number) => void) => {
+				for (let x = 0; x <= outlineWidth; x++) {
+					const maxY = (outlineWidth === 0) ? outlineHeight : outlineHeight * Math.sqrt(1 - ((x * x) / (outlineWidth * outlineWidth)));
+					for (let y = 0; y <= maxY; y++) {
+						addOutline(x, y);
+
+						if (x !== 0) {
+							addOutline(-x, y);
+						}
+
+						if (y !== 0) {
+							addOutline(x, -y);
+						}
+
+						if (x !== 0 && y !== 0) {
+							addOutline(-x, -y);
+						}
+					}
+				}
+			})((x: number, y: number): void => {
+				outlineCssString += `, ${ outlineColor.toString() } ${ x }px ${ y }px ${ this._gaussianBlur.toFixed(3) }px`;
+			});
+
+			span.style.textShadow = outlineCssString.substr(", ".length);
+		}
 	}
 
 	/**
