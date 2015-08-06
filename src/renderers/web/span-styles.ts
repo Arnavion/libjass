@@ -229,9 +229,22 @@ export class SpanStyles {
 		const filterWrapperSpan = document.createElement("span");
 		filterWrapperSpan.appendChild(span);
 
-		const primaryColor = this._primaryColor.withAlpha(this._primaryAlpha);
-		const outlineColor = this._outlineColor.withAlpha(this._outlineAlpha);
-		const shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
+		let primaryColor = this._primaryColor.withAlpha(this._primaryAlpha);
+		let outlineColor = this._outlineColor.withAlpha(this._outlineAlpha);
+		let shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
+
+		// If we're in non-SVG mode and all colors have the same alpha, then set all colors to alpha === 1 and set the common alpha as the span's opacity property instead
+		if (
+			!this._settings.enableSvg &&
+			((outlineWidth === 0 && outlineHeight === 0) || outlineColor.alpha === primaryColor.alpha) &&
+			((this._shadowDepthX === 0 && this._shadowDepthY === 0) || shadowColor.alpha === primaryColor.alpha)
+		) {
+			primaryColor = this._primaryColor.withAlpha(1);
+			outlineColor = this._outlineColor.withAlpha(1);
+			shadowColor = this._shadowColor.withAlpha(1);
+
+			span.style.opacity = this._primaryAlpha.toFixed(3);
+		}
 
 		span.style.color = primaryColor.toString();
 
