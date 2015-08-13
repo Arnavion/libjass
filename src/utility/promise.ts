@@ -19,13 +19,52 @@
  */
 
 declare const global: {
-	Promise?: typeof SimplePromise;
+	Promise?: typeof Promise;
 	MutationObserver?: typeof MutationObserver;
 	WebkitMutationObserver?: typeof MutationObserver;
 	process?: {
 		nextTick(callback: () => void): void;
 	}
 };
+
+export interface Thenable<T> {
+	/** @type {function(this:!Thenable.<T>, function(T|!Thenable.<T>), function(*))} */
+	then: ThenableThen<T>;
+}
+
+export interface ThenableThen<T> {
+	/** @type {function(this:!Thenable.<T>, function(T|!Thenable.<T>), function(*))} */
+	(resolve: (resolution: T | Thenable<T>) => void, reject: (reason: any) => void): void;
+}
+
+export interface Promise<T> extends Thenable<T> {
+	/**
+	 * @param {?function(T):(U|!Thenable.<U>)} onFulfilled
+	 * @param {?function(*):(U|!Thenable.<U>)} onRejected
+	 * @return {!Promise.<U>}
+	 */
+	then<U>(onFulfilled?: (value: T) => U | Thenable<U>, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
+
+	/**
+	 * @param {function(*):(T|!Thenable.<T>)} onRejected
+	 * @return {!Promise.<T>}
+	 */
+	catch(onRejected?: (reason: any) => T | Thenable<T>): Promise<T>
+}
+
+/**
+ * Set to the global implementation of Promise if the environment has one, else set to {@link ./utility/promise.SimplePromise}
+ *
+ * Set it to null to force {@link ./utility/promise.SimplePromise} to be used even if a global Promise is present.
+ *
+ * @type {function(new:Promise)}
+ */
+export var Promise: {
+	new <T>(init: (resolve: (value: T | Thenable<T>) => void, reject: (reason: any) => void) => void): Promise<T>;
+	prototype: Promise<any>;
+	resolve<T>(value: T | Thenable<T>): Promise<T>;
+	all<T>(values: (T | Thenable<T>)[]): Promise<T[]>;
+} = global.Promise;
 
 // Based on https://github.com/petkaantonov/bluebird/blob/1b1467b95442c12378d0ea280ede61d640ab5510/src/schedule.js
 const enqueueJob: (callback: () => void) => void = (function () {
@@ -311,6 +350,10 @@ class SimplePromise<T> {
 	}
 }
 
+if (Promise === undefined) {
+	Promise = SimplePromise;
+}
+
 interface PromiseReaction<T, U> {
 	/** @type {!libjass.DeferredPromise.<U>} */
 	capabilities: DeferredPromise<U>;
@@ -326,49 +369,6 @@ enum SimplePromiseState {
 	PENDING = 0,
 	FULFILLED = 1,
 	REJECTED = 2,
-}
-
-export interface Thenable<T> {
-	/** @type {function(this:!Thenable.<T>, function(T|!Thenable.<T>), function(*))} */
-	then: ThenableThen<T>;
-}
-
-export interface ThenableThen<T> {
-	/** @type {function(this:!Thenable.<T>, function(T|!Thenable.<T>), function(*))} */
-	(resolve: (resolution: T | Thenable<T>) => void, reject: (reason: any) => void): void;
-}
-
-export interface Promise<T> extends Thenable<T> {
-	/**
-	 * @param {?function(T):(U|!Thenable.<U>)} onFulfilled
-	 * @param {?function(*):(U|!Thenable.<U>)} onRejected
-	 * @return {!Promise.<U>}
-	 */
-	then<U>(onFulfilled?: (value: T) => U | Thenable<U>, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
-
-	/**
-	 * @param {function(*):(T|!Thenable.<T>)} onRejected
-	 * @return {!Promise.<T>}
-	 */
-	catch(onRejected?: (reason: any) => T | Thenable<T>): Promise<T>
-}
-
-/**
- * Set to the global implementation of Promise if the environment has one, else set to {@link ./utility/promise.SimplePromise}
- *
- * Set it to null to force {@link ./utility/promise.SimplePromise} to be used even if a global Promise is present.
- *
- * @type {function(new:Promise)}
- */
-export var Promise: {
-	new <T>(init: (resolve: (value: T | Thenable<T>) => void, reject: (reason: any) => void) => void): Promise<T>;
-	prototype: Promise<any>;
-	resolve<T>(value: T | Thenable<T>): Promise<T>;
-	all<T>(values: (T | Thenable<T>)[]): Promise<T[]>;
-} = global.Promise;
-
-if (Promise === undefined) {
-	Promise = SimplePromise;
 }
 
 /**

@@ -18,6 +18,64 @@
  * limitations under the License.
  */
 
+declare const global: {
+	Map?: typeof Map;
+};
+
+export interface Map<K, V> {
+	/**
+	 * @param {K} key
+	 * @return {V}
+	 */
+	get(key: K): V;
+
+	/**
+	 * @param {K} key
+	 * @return {boolean}
+	 */
+	has(key: K): boolean;
+
+	/**
+	 * @param {K} key
+	 * @param {V} value
+	 * @return {libjass.Map.<K, V>} This map
+	 */
+	set(key: K, value?: V): Map<K, V>;
+
+	/**
+	 * @param {K} key
+	 * @return {boolean} true if the key was present before being deleted, false otherwise
+	 */
+	delete(key: K): boolean;
+
+	/**
+	 */
+	clear(): void;
+
+	/**
+	 * @param {function(V, K, libjass.Map.<K, V>)} callbackfn A function that is called with each key and value in the map.
+	 * @param {*} thisArg
+	 */
+	forEach(callbackfn: (value: V, index: K, map: Map<K, V>) => void, thisArg?: any): void;
+
+	/**
+	 * @type {number}
+	 */
+	size: number;
+}
+
+/**
+ * Set to the global implementation of Map if the environment has one, else set to {@link ./utility/map.SimpleMap}
+ *
+ * Set it to null to force {@link ./utility/map.SimpleMap} to be used even if a global Map is present.
+ *
+ * @type {function(new:Map, !Array.<!Array.<*>>=)}
+ */
+export var Map: {
+	new <K, V>(iterable?: [K, V][]): Map<K, V>;
+	prototype: Map<any, any>;
+} = global.Map;
+
 /**
  * Map implementation for browsers that don't support it. Only supports keys which are of Number or String type, or which have a property called "id".
  *
@@ -165,64 +223,6 @@ class SimpleMap<K, V> {
 		return null;
 	}
 }
-
-declare const global: {
-	Map?: typeof SimpleMap;
-};
-
-export interface Map<K, V> {
-	/**
-	 * @param {K} key
-	 * @return {V}
-	 */
-	get(key: K): V;
-
-	/**
-	 * @param {K} key
-	 * @return {boolean}
-	 */
-	has(key: K): boolean;
-
-	/**
-	 * @param {K} key
-	 * @param {V} value
-	 * @return {libjass.Map.<K, V>} This map
-	 */
-	set(key: K, value?: V): Map<K, V>;
-
-	/**
-	 * @param {K} key
-	 * @return {boolean} true if the key was present before being deleted, false otherwise
-	 */
-	delete(key: K): boolean;
-
-	/**
-	 */
-	clear(): void;
-
-	/**
-	 * @param {function(V, K, libjass.Map.<K, V>)} callbackfn A function that is called with each key and value in the map.
-	 * @param {*} thisArg
-	 */
-	forEach(callbackfn: (value: V, index: K, map: Map<K, V>) => void, thisArg?: any): void;
-
-	/**
-	 * @type {number}
-	 */
-	size: number;
-}
-
-/**
- * Set to the global implementation of Map if the environment has one, else set to {@link ./utility/map.SimpleMap}
- *
- * Set it to null to force {@link ./utility/map.SimpleMap} to be used even if a global Map is present.
- *
- * @type {function(new:Map, !Array.<!Array.<*>>=)}
- */
-export var Map: {
-	new <K, V>(iterable?: [K, V][]): Map<K, V>;
-	prototype: Map<any, any>;
-} = global.Map;
 
 if (Map === undefined || typeof Map.prototype.forEach !== "function" || (() => {
 	try {

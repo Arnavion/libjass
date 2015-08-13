@@ -18,6 +18,51 @@
  * limitations under the License.
  */
 
+declare const global: {
+	Set?: typeof Set;
+};
+
+export interface Set<T> {
+	/**
+	 * @param {T} value
+	 * @return {libjass.Set.<T>} This set
+	 */
+	add(value: T): Set<T>;
+
+	/**
+	 */
+	clear(): void;
+
+	/**
+	 * @param {T} value
+	 * @return {boolean}
+	 */
+	has(value: T): boolean;
+
+	/**
+	 * @param {function(T, T, libjass.Set.<T>)} callbackfn A function that is called with each value in the set.
+	 * @param {*} thisArg
+	 */
+	forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void;
+
+	/**
+	 * @type {number}
+	 */
+	size: number;
+}
+
+/**
+ * Set to the global implementation of Set if the environment has one, else set to {@link ./utility/set.SimpleSet}
+ *
+ * Set it to null to force {@link ./utility/set.SimpleSet} to be used even if a global Set is present.
+ *
+ * @type {function(new:Set, !Array.<T>=)}
+ */
+export var Set: {
+	new <T>(iterable?: T[]): Set<T>;
+	prototype: Set<any>;
+} = global.Set;
+
 /**
  * Set implementation for browsers that don't support it. Only supports Number and String elements.
  *
@@ -122,51 +167,6 @@ class SimpleSet<T> {
 		return null;
 	}
 }
-
-declare const global: {
-	Set?: typeof SimpleSet;
-};
-
-export interface Set<T> {
-	/**
-	 * @param {T} value
-	 * @return {libjass.Set.<T>} This set
-	 */
-	add(value: T): Set<T>;
-
-	/**
-	 */
-	clear(): void;
-
-	/**
-	 * @param {T} value
-	 * @return {boolean}
-	 */
-	has(value: T): boolean;
-
-	/**
-	 * @param {function(T, T, libjass.Set.<T>)} callbackfn A function that is called with each value in the set.
-	 * @param {*} thisArg
-	 */
-	forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void;
-
-	/**
-	 * @type {number}
-	 */
-	size: number;
-}
-
-/**
- * Set to the global implementation of Set if the environment has one, else set to {@link ./utility/set.SimpleSet}
- *
- * Set it to null to force {@link ./utility/set.SimpleSet} to be used even if a global Set is present.
- *
- * @type {function(new:Set, !Array.<T>=)}
- */
-export var Set: {
-	new <T>(iterable?: T[]): Set<T>;
-	prototype: Set<any>;
-} = global.Set;
 
 if (Set === undefined || typeof Set.prototype.forEach !== "function" || (() => {
 	try {
