@@ -114,8 +114,8 @@ export class XhrStream implements Stream {
 	private _pendingDeferred: DeferredPromise<string> = null;
 
 	constructor(private _xhr: XMLHttpRequest) {
-		_xhr.addEventListener("progress", event => this._onXhrProgress(event), false);
-		_xhr.addEventListener("loadend", event => this._onXhrLoadEnd(event), false);
+		_xhr.addEventListener("progress", () => this._onXhrProgress(), false);
+		_xhr.addEventListener("loadend", () => this._onXhrLoadEnd(), false);
 	}
 
 	/**
@@ -134,9 +134,8 @@ export class XhrStream implements Stream {
 	}
 
 	/**
-	 * @param {!ProgressEvent} event
 	 */
-	private _onXhrProgress(event: ProgressEvent): void {
+	private _onXhrProgress(): void {
 		if (this._pendingDeferred === null) {
 			return;
 		}
@@ -145,9 +144,8 @@ export class XhrStream implements Stream {
 	}
 
 	/**
-	 * @param {!ProgressEvent} event
 	 */
-	private _onXhrLoadEnd(event: ProgressEvent): void {
+	private _onXhrLoadEnd(): void {
 		if (this._pendingDeferred === null) {
 			return;
 		}
