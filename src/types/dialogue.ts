@@ -42,7 +42,7 @@ import { Map } from "../utility/map";
  * @param {string} template["End"] The end time
  * @param {string} template["Layer"] The layer number
  * @param {string} template["Text"] The text of this dialogue
- * @param {ASS} ass The ASS object to which this dialogue belongs
+ * @param {!libjass.ASS} ass The ASS object to which this dialogue belongs
  */
 export class Dialogue {
 	private static _lastDialogueId = -1;
