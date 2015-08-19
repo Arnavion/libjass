@@ -63,7 +63,9 @@ export var Promise: {
 	new <T>(init: (resolve: (value: T | Thenable<T>) => void, reject: (reason: any) => void) => void): Promise<T>;
 	prototype: Promise<any>;
 	resolve<T>(value: T | Thenable<T>): Promise<T>;
+	reject(reason: any): Promise<any>;
 	all<T>(values: (T | Thenable<T>)[]): Promise<T[]>;
+	race<T>(values: (T | Thenable<T>)[]): Promise<T>;
 } = global.Promise;
 
 // Based on https://github.com/petkaantonov/bluebird/blob/1b1467b95442c12378d0ea280ede61d640ab5510/src/schedule.js
@@ -204,6 +206,14 @@ class SimplePromise<T> {
 	}
 
 	/**
+	 * @param {*} reason
+	 * @return {!Promise.<*>}
+	 */
+	static reject(reason: any): Promise<any> {
+		return new Promise<any>((resolve, reject) => reject(reason));
+	}
+
+	/**
 	 * @param {!Array.<T|!Thenable.<T>>} values
 	 * @return {!Promise.<!Array.<T>>}
 	 */
@@ -225,6 +235,18 @@ class SimplePromise<T> {
 					resolve(result);
 				}
 			}, reject));
+		});
+	}
+
+	/**
+	 * @param {!Array.<T|!Thenable.<T>>} values
+	 * @return {!Promise.<T>}
+	 */
+	static race<T>(values: (T | Thenable<T>)[]): Promise<T> {
+		return new Promise<T>((resolve, reject) => {
+			for (const value of values) {
+				Promise.resolve(value).then(resolve, reject);
+			}
 		});
 	}
 
