@@ -168,17 +168,19 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	 * The magic happens here. The subtitle div is rendered and stored. Call {@link libjass.renderers.WebRenderer.draw} to get a clone of the div to display.
 	 *
 	 * @param {!libjass.Dialogue} dialogue
-	 * @return {!PreRenderedSub}
+	 * @return {PreRenderedSub}
 	 */
 	preRender(dialogue: Dialogue): PreRenderedSub {
-		if (this._preRenderedSubs.has(dialogue.id)) {
-			return;
+		const alreadyPreRenderedSub = this._preRenderedSubs.get(dialogue.id);
+		if (alreadyPreRenderedSub) {
+			return alreadyPreRenderedSub;
 		}
 
 		const currentTimeRelativeToDialogueStart = this.clock.currentTime - dialogue.start;
 
 		if (dialogue.containsTransformTag && currentTimeRelativeToDialogueStart < 0) {
-			return;
+			// draw() expects this function to always return non-null, but it only calls this function when currentTimeRelativeToDialogueStart would be >= 0
+			return null;
 		}
 
 		const sub = document.createElement("div");
