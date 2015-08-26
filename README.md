@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/Arnavion/libjass.png?branch=master)](https://travis-ci.org/Arnavion/libjass)
 
-libjass is a JavaScript library written in TypeScript to render ASS subs on HTML5 video in the browser. [Check out the demo.](http://arnavion.github.io/libjass/demo/index.xhtml)
+libjass is a JavaScript library written in TypeScript to render ASS subs in the browser. [Check out the demo.](http://arnavion.github.io/libjass/demo/index.xhtml)
 
 
 ### What's special about libjass?
