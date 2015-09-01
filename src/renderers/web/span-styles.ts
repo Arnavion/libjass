@@ -187,7 +187,7 @@ export class SpanStyles {
 		if (this._settings.fallbackFonts !== "") {
 			fonts += `, ${ this._settings.fallbackFonts }`;
 		}
-		
+
 		span.style.font = `${ fontStyleOrWeight }${ fontSize }px/${ lineHeight }px ${ fonts }`;
 
 		let textDecoration = "";
@@ -506,7 +506,7 @@ export class SpanStyles {
 		result.style.lineHeight = `${ (this._scaleY * this._fontSize).toFixed(3) }px`;
 		return result;
 	}
-	
+
 	/**
 	 * Uses linear interpolation to calculate the CSS font size that would give the specified line height for the specified font family.
 	 *
@@ -523,12 +523,12 @@ export class SpanStyles {
 			existingLineHeights = [lowerLineHeight, (360 - 180) / (upperLineHeight - lowerLineHeight)];
 			this._lineHeightsCache.set(fontFamily, existingLineHeights);
 		}
-	
+
 		const [lowerLineHeight, factor] = existingLineHeights;
-	
+
 		return 180 + (lineHeight - lowerLineHeight) * factor;
 	}
-	
+
 	/**
 	 * @param {string} fontFamily
 	 * @param {number} fontSize

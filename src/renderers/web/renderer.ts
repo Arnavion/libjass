@@ -56,7 +56,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	private _layerWrappers: HTMLDivElement[] = [];
 	private _layerAlignmentWrappers: HTMLDivElement[][] = [];
 	private _fontSizeElement: HTMLDivElement;
-	
+
 	private _lineHeightsCache: Map<string, [number, number]> = new Map<string, [number, number]>();
 
 	private _currentSubs: Map<Dialogue, HTMLDivElement> = new Map<Dialogue, HTMLDivElement>();
