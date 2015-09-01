@@ -552,12 +552,9 @@ function UjsSourceMap(options) {
 
 var originalSymbolUnreferenced = UglifyJS.AST_Symbol.prototype.unreferenced;
 
+// Workaround for https://github.com/mishoo/UglifyJS2/issues/789 - Nodes explicitly marked with ujs:unreferenced will not be warned for.
 UglifyJS.AST_Symbol.prototype.unreferenced = function () {
 	if (this.start.comments_before.length > 0 && this.start.comments_before[0].value.trim() === "ujs:unreferenced") {
-		return false;
-	}
-
-	if (this.name === "module" || this.name === "exports") {
 		return false;
 	}
 
