@@ -210,7 +210,7 @@ class SimplePromise<T> {
 	 * @return {!Promise.<*>}
 	 */
 	static reject(reason: any): Promise<any> {
-		return new Promise<any>((resolve, reject) => reject(reason));
+		return new Promise<any>((/* ujs:unreferenced */ resolve, reject) => reject(reason));
 	}
 
 	/**
