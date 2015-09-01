@@ -168,8 +168,22 @@ export class SpanStyles {
 		}
 		const fontSize = (this._scaleY * this._fontSizeForLineHeight(this._fontName, this._fontSize * (isTextOnlySpan ? this._fontScaleX : 1), this._fontSizeElement)).toFixed(3);
 		const lineHeight = (this._scaleY * this._fontSize).toFixed(3);
-		
-		let fonts = `"${ this._fontName }"`;
+
+		let fonts = this._fontName;
+
+		// Quote the font family unless it's a generic family, as those must never be quoted
+		switch (fonts) {
+			case "cursive":
+			case "fantasy":
+			case "monospace":
+			case "sans-serif":
+			case "serif":
+				break;
+			default:
+				fonts = `"${ fonts }"`;
+				break;
+		}
+
 		if (this._settings.fallbackFonts !== "") {
 			fonts += `, ${ this._settings.fallbackFonts }`;
 		}
