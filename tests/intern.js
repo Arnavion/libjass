@@ -37,14 +37,14 @@ define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profi
 			"tests/functional/r/alpha",
 			"tests/functional/t/alpha"
 		],
-		loader: {
+		loaderOptions: {
 			packages: [{
 				name: "libjass",
 				location: "lib",
 				main: (intern.args.minified === "true") ? "libjass.min" : "libjass",
 			}]
 		},
-		excludeInstrumentation: /^(?:tests|node_modules)[/\\]/,
+		excludeInstrumentation: /^(?:tests|node_modules)\//,
 		tunnel: "NullTunnel",
 		environments: [
 			{ browserName: "chrome" },

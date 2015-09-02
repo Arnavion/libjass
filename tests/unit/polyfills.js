@@ -258,17 +258,15 @@ define(["intern!tdd", "intern/chai!assert", "libjass"], function (tdd, assert, l
 		});
 
 		tdd.test("Basic", function () {
-			var deferred = this.async(1000);
+			this.timeout = 1000;
 
-			new libjass.Promise(function (resolve, reject) {
+			return new libjass.Promise(function (resolve, reject) {
 				setTimeout(function () {
 					resolve(5);
 				}, 0);
 			}).then(function (value) {
 				assert.equal(value, 5);
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 
 		tdd.after(function () {

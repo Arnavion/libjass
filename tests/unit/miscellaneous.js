@@ -168,9 +168,9 @@ define([
 		]));
 
 		tdd.test("ASS", function () {
-			var deferred = this.async(1000);
+			this.timeout = 1000;
 
-			libjass.ASS.fromString(ass_1, libjass.Format.ASS).then(function (ass) {
+			return libjass.ASS.fromString(ass_1, libjass.Format.ASS).then(function (ass) {
 				assert.strictEqual(ass.properties.resolutionX, 1280);
 				assert.strictEqual(ass.properties.resolutionY, 720);
 				assert.strictEqual(ass.properties.wrappingStyle, libjass.WrappingStyle.SmartWrappingWithWiderTopLine);
@@ -240,17 +240,15 @@ define([
 				assert.deepEqual(ass.dialogues[4].parts, [
 					new libjass.parts.Text("Eget odio auctor pede porta?")
 				]);
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 
 		tdd.test("Minimal ASS", function () {
-			var deferred = this.async(1000);
+			this.timeout = 1000;
 
 			var stream = new libjass.parser.StringStream(ass_1);
 			var streamParser = new libjass.parser.StreamParser(stream);
-			streamParser.minimalASS.then(function (ass) {
+			return streamParser.minimalASS.then(function (ass) {
 				assert.strictEqual(ass.properties.resolutionX, 1280);
 				assert.strictEqual(ass.properties.resolutionY, 720);
 				assert.strictEqual(ass.properties.wrappingStyle, libjass.WrappingStyle.SmartWrappingWithWiderTopLine);
@@ -259,15 +257,13 @@ define([
 				assert.strictEqual(ass.styles.size, 1);
 
 				assert.strictEqual(ass.dialogues.length, 0);
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 
 		tdd.test("ASS 2", function () {
-			var deferred = this.async(1000);
+			this.timeout = 1000;
 
-			libjass.ASS.fromString(ass_2, libjass.Format.ASS).then(function (ass) {
+			return libjass.ASS.fromString(ass_2, libjass.Format.ASS).then(function (ass) {
 				assert.strictEqual(ass.properties.resolutionX, 1280);
 				assert.strictEqual(ass.properties.resolutionY, 720);
 				assert.strictEqual(ass.properties.wrappingStyle, libjass.WrappingStyle.SmartWrappingWithWiderTopLine);
@@ -328,32 +324,28 @@ define([
 					new libjass.parts.NewLine(),
 					new libjass.parts.Text("ante nisl pede aliquam")
 				]);
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 
 		tdd.test("ASS with BOM", function () {
+			this.timeout = 1000;
+
 			if (ass_3.charCodeAt(0) !== 0xfeff) {
 				ass_3 = String.fromCharCode(0xfeff) + ass_3;
 			}
 
-			var deferred = this.async(1000);
-
-			libjass.ASS.fromString(ass_3, libjass.Format.ASS).then(function (ass) {
+			return libjass.ASS.fromString(ass_3, libjass.Format.ASS).then(function (ass) {
 				assert.strictEqual(ass.properties.resolutionX, 1280);
 				assert.strictEqual(ass.properties.resolutionY, 720);
 				assert.strictEqual(ass.properties.wrappingStyle, libjass.WrappingStyle.SmartWrappingWithWiderTopLine);
 				assert.strictEqual(ass.properties.scaleBorderAndShadow, true);
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 
 		tdd.test("Reference to 'default' style should match style named 'Default'", function () {
-			var deferred = this.async(1000);
+			this.timeout = 1000;
 
-			libjass.ASS.fromString(ass_4, libjass.Format.ASS).then(function (ass) {
+			return libjass.ASS.fromString(ass_4, libjass.Format.ASS).then(function (ass) {
 				assert.strictEqual(ass.styles.size, 1);
 
 				assert.strictEqual(ass.styles.get("Default").name, "Default");
@@ -362,15 +354,13 @@ define([
 				assert.strictEqual(ass.dialogues.length, 1);
 
 				assert.strictEqual(ass.dialogues[0].style, ass.styles.get("Default"));
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 
 		tdd.test("Reference to style named 'default' should not match style named 'default'", function () {
-			var deferred = this.async(1000);
+			this.timeout = 1000;
 
-			libjass.ASS.fromString(ass_5, libjass.Format.ASS).then(function (ass) {
+			return libjass.ASS.fromString(ass_5, libjass.Format.ASS).then(function (ass) {
 				assert.strictEqual(ass.styles.size, 2);
 
 				assert.strictEqual(ass.styles.get("default").name, "default");
@@ -382,15 +372,13 @@ define([
 				assert.strictEqual(ass.dialogues.length, 1);
 
 				assert.strictEqual(ass.dialogues[0].style, ass.styles.get("Default"));
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 
 		tdd.test("Leading asterisks in style names are stripped", function () {
-			var deferred = this.async(1000);
+			this.timeout = 1000;
 
-			libjass.ASS.fromString(ass_6, libjass.Format.ASS).then(function (ass) {
+			return libjass.ASS.fromString(ass_6, libjass.Format.ASS).then(function (ass) {
 				assert.strictEqual(ass.styles.size, 2);
 
 				assert.strictEqual(ass.styles.get("Default").name, "Default");
@@ -404,46 +392,40 @@ define([
 				assert.strictEqual(ass.dialogues[0].style, ass.styles.get("sign1"));
 
 				assert.strictEqual(ass.dialogues[1].style, ass.styles.get("Default"));
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 
 		tdd.test("First unnamed section should be treated as Script Info", function () {
-			var deferred = this.async(1000);
+			this.timeout = 1000;
 
-			libjass.ASS.fromString(ass_7, libjass.Format.ASS).then(function (ass) {
+			return libjass.ASS.fromString(ass_7, libjass.Format.ASS).then(function (ass) {
 				assert.strictEqual(ass.properties.resolutionX, 1280);
 				assert.strictEqual(ass.properties.resolutionY, 720);
 				assert.strictEqual(ass.styles.size, 2);
 				assert.strictEqual(ass.dialogues.length, 6);
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 
 		tdd.test("First unnamed section should be treated as Script Info - minimal ASS", function () {
-			var deferred = this.async(1000);
+			this.timeout = 1000;
 
 			var stream = new libjass.parser.StringStream(ass_7);
 			var streamParser = new libjass.parser.StreamParser(stream);
-			streamParser.minimalASS.then(function (ass) {
+			return streamParser.minimalASS.then(function (ass) {
 				assert.strictEqual(ass.properties.resolutionX, 1280);
 				assert.strictEqual(ass.properties.resolutionY, 720);
 				assert.strictEqual(ass.styles.size, 1);
 				assert.strictEqual(ass.dialogues.length, 0);
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 
 		tdd.test("SRT", function () {
+			this.timeout = 1000;
+
 			var input =
 				"1\n00:00:10,500 --> 00:00:13,000\nElephant's Dream\n\n2\n00:00:15,000 --> 00:00:18,000 X1:52 X2:303 Y1:438 Y2:453\n<font color=\"cyan\">At the left we can see...</font>";
 
-			var deferred = this.async(1000);
-
-			libjass.ASS.fromString(input, libjass.Format.SRT).then(function (ass) {
+			return libjass.ASS.fromString(input, libjass.Format.SRT).then(function (ass) {
 				assert.strictEqual(ass.dialogues.length, 2);
 
 				assert.strictEqual(ass.dialogues[0].start, 10.500);
@@ -458,18 +440,16 @@ define([
 					new libjass.parts.Text("<font color=\"cyan\">At the left we can see..."),
 					new libjass.parts.PrimaryColor(null)
 				]);
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 
 		tdd.test("SRT", function () {
+			this.timeout = 1000;
+
 			var input =
 				"1\n00:01:15,940 --> 00:01:17,280\nHave you secured the key?\nWhy can't people forgive each other\n\n2\n00:01:17,280 --> 00:01:17,670\nWhy can't people forgive each other";
 
-			var deferred = this.async(1000);
-
-			libjass.ASS.fromString(input, libjass.Format.SRT).then(function (ass) {
+			return libjass.ASS.fromString(input, libjass.Format.SRT).then(function (ass) {
 				assert.strictEqual(ass.dialogues.length, 2);
 
 				assert.strictEqual(ass.dialogues[0].start, 1 * 60 + 15.940);
@@ -485,9 +465,7 @@ define([
 				assert.deepEqual(ass.dialogues[1].parts, [
 					new libjass.parts.Text("Why can't people forgive each other")
 				]);
-			}).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
-
-			return deferred.promise;
+			});
 		});
 	});
 });
