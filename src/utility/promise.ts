@@ -121,8 +121,8 @@ const enqueueJob: (callback: () => void) => void = (function () {
 class SimplePromise<T> {
 	private _state: SimplePromiseState = SimplePromiseState.PENDING;
 
-	private _fulfillReactions: PromiseReaction<T, any>[] = [];
-	private _rejectReactions: PromiseReaction<T, any>[] = [];
+	private _fulfillReactions: FulfilledPromiseReaction<T, any>[] = [];
+	private _rejectReactions: RejectedPromiseReaction<any>[] = [];
 
 	private _fulfilledValue: T = null;
 	private _rejectedReason: any = null;
@@ -157,12 +157,12 @@ class SimplePromise<T> {
 			onRejected = (reason: any): U => { throw reason; };
 		}
 
-		const fulfillReaction: PromiseReaction<T, U> = {
+		const fulfillReaction: FulfilledPromiseReaction<T, U> = {
 			capabilities: resultCapability,
 			handler: onFulfilled,
 		};
 
-		const rejectReaction: PromiseReaction<T, U> = {
+		const rejectReaction: RejectedPromiseReaction<U> = {
 			capabilities: resultCapability,
 			handler: onRejected,
 		};
@@ -174,11 +174,11 @@ class SimplePromise<T> {
 				break;
 
 			case SimplePromiseState.FULFILLED:
-				this._enqueueReactionJob(fulfillReaction, this._fulfilledValue);
+				this._enqueueFulfilledReactionJob(fulfillReaction, this._fulfilledValue);
 				break;
 
 			case SimplePromiseState.REJECTED:
-				this._enqueueReactionJob(rejectReaction, this._rejectedReason);
+				this._enqueueRejectedReactionJob(rejectReaction, this._rejectedReason);
 				break;
 		}
 
@@ -329,7 +329,7 @@ class SimplePromise<T> {
 		this._state = SimplePromiseState.FULFILLED;
 
 		for (const reaction of reactions) {
-			this._enqueueReactionJob(reaction, value);
+			this._enqueueFulfilledReactionJob(reaction, value);
 		}
 	}
 
@@ -345,22 +345,44 @@ class SimplePromise<T> {
 		this._state = SimplePromiseState.REJECTED;
 
 		for (const reaction of reactions) {
-			this._enqueueReactionJob(reaction, reason);
+			this._enqueueRejectedReactionJob(reaction, reason);
 		}
 	}
 
 	/**
-	 * @param {!PromiseReaction.<T, *>} reaction
-	 * @param {(T | *)} argument
+	 * @param {!FulfilledPromiseReaction.<T, *>} reaction
+	 * @param {T} value
 	 */
-	private _enqueueReactionJob(reaction: PromiseReaction<T, any>, argument: T | any): void {
+	private _enqueueFulfilledReactionJob(reaction: FulfilledPromiseReaction<T, any>, value: T): void {
 		enqueueJob(() => {
 			const { capabilities: { resolve, reject }, handler } = reaction;
 
 			let handlerResult: any | Thenable<any>;
 
 			try {
-				handlerResult = handler(argument);
+				handlerResult = handler(value);
+			}
+			catch (ex) {
+				reject(ex);
+				return;
+			}
+
+			resolve(handlerResult);
+		});
+	}
+
+	/**
+	 * @param {!RejectedPromiseReaction.<*>} reaction
+	 * @param {*} reason
+	 */
+	private _enqueueRejectedReactionJob(reaction: RejectedPromiseReaction<any>, reason: any): void {
+		enqueueJob(() => {
+			const { capabilities: { resolve, reject }, handler } = reaction;
+
+			let handlerResult: any | Thenable<any>;
+
+			try {
+				handlerResult = handler(reason);
 			}
 			catch (ex) {
 				reject(ex);
@@ -376,12 +398,26 @@ if (Promise === undefined) {
 	Promise = SimplePromise;
 }
 
-interface PromiseReaction<T, U> {
+interface FulfilledPromiseReaction<T, U> {
 	/** @type {!libjass.DeferredPromise.<U>} */
 	capabilities: DeferredPromise<U>;
 
-	/** @type {((function(T):U|!Thenable.<U>)|(function(*):U|!Thenable.<U>))} */
-	handler: ((value: T) => U | Thenable<U>) | ((reason: any) => U | Thenable<U>);
+	/**
+	 * @param {T} value
+	 * @return {U|!Thenable.<U>}
+	 */
+	handler(value: T): U | Thenable<U>;
+}
+
+interface RejectedPromiseReaction<U> {
+	/** @type {!libjass.DeferredPromise.<U>} */
+	capabilities: DeferredPromise<U>;
+
+	/**
+	 * @param {*} reason
+	 * @return {U|!Thenable.<U>}
+	 */
+	handler(reason: any): U | Thenable<U>;
 }
 
 /**
