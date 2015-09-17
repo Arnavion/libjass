@@ -769,7 +769,13 @@ class Walker {
 						this.namespaces[newNamespace.fullName] = newNamespace;
 					}
 
-					this._moduleToNamespace(this.modules[(<AST.Reference>member).moduleName]);
+					var referencedModuleName = (<AST.Reference>member).moduleName;
+					var referencedModule = this.modules[referencedModuleName];
+					if (referencedModule === undefined && ((referencedModuleName + "/index") in this.modules)) {
+						(<AST.Reference>member).moduleName = referencedModuleName = referencedModuleName + "/index";
+						referencedModule = this.modules[referencedModuleName];
+					}
+					this._moduleToNamespace(referencedModule);
 
 					this._scope.leave();
 				}

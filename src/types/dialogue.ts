@@ -27,7 +27,7 @@ import { parseLineIntoTypedTemplate } from "../parser/misc";
 
 import { parse } from "../parser/parse";
 
-import * as parts from "../parts/index";
+import * as parts from "../parts";
 
 import { debugMode } from "../settings";
 

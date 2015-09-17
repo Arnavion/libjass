@@ -26,7 +26,7 @@ import { Format } from "./misc";
 
 import { verboseMode } from "../settings";
 
-import * as parser from "../parser/index";
+import * as parser from "../parser";
 import { parseLineIntoTypedTemplate } from "../parser/misc";
 import { ReadableStream, TextDecoder, TextDecoderConstructor } from "../parser/streams";
 

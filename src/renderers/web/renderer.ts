@@ -28,7 +28,7 @@ import { Clock, EventSource } from "../clocks/base";
 import { NullRenderer } from "../null";
 import { RendererSettings } from "../settings";
 
-import * as parts from "../../parts/index";
+import * as parts from "../../parts";
 
 import { debugMode } from "../../settings";
 

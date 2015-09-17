@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import * as parts from "../parts/index";
+import * as parts from "../parts";
 
 import { debugMode } from "../settings";
 

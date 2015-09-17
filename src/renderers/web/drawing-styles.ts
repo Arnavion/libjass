@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import * as parts from "../../parts/index";
+import * as parts from "../../parts";
 
 /**
  * This class represents an ASS drawing - a set of drawing instructions between {\p} tags.

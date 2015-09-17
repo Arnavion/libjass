@@ -175,7 +175,11 @@ var Run = (function () {
 						var importRelativePath = statement.definitions[0].value.args[0].value;
 						var importAbsolutePath = path.join(moduleName, "..", importRelativePath).replace(/\\/g, "/");
 						var stringArg = statement.definitions[0].value.args[0];
-						statement.definitions[0].value.args[0] = new UglifyJS.AST_Number({ start: stringArg.start, end: stringArg.end, value: _this._modules[importAbsolutePath].id });
+						var importedModule = _this._modules[importAbsolutePath];
+						if (importedModule === undefined) {
+							importedModule = _this._modules[importAbsolutePath + "/index"];
+						}
+						statement.definitions[0].value.args[0] = new UglifyJS.AST_Number({ start: stringArg.start, end: stringArg.end, value: importedModule.id });
 					}
 					else if (statement.definitions[0].name.name === "__extends") {
 						var importAbsolutePath = path.join(_this._entry, "..", "utility", "extends").replace(/\\/g, "/");

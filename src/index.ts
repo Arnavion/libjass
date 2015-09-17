@@ -30,16 +30,16 @@ export { Map } from "./utility/map";
 import * as promise from "./utility/promise";
 export { Promise, DeferredPromise } from "./utility/promise";
 
-import * as webworker from "./webworker/index";
+import * as webworker from "./webworker";
 export { webworker };
 
-import * as parts from "./parts/index";
+import * as parts from "./parts";
 export { parts };
 
-import * as parser from "./parser/index";
+import * as parser from "./parser";
 export { parser };
 
-import * as renderers from "./renderers/index";
+import * as renderers from "./renderers";
 export { renderers };
 
 export { ASS } from "./types/ass";

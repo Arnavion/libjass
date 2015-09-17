@@ -24,7 +24,7 @@ import { WebRenderer } from "./renderer";
 
 import { RendererSettings } from "../settings";
 
-import { Color } from "../../parts/index";
+import { Color } from "../../parts";
 
 import { Style } from "../../types/style";
 import { Dialogue } from "../../types/dialogue";
