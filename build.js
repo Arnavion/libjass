@@ -39,15 +39,29 @@ var task = require("async-build");
 })();
 
 task("build-tools", function (callback) {
-	async.every(["./build/typescript/index.js", "./build/doc.js"], fs.exists.bind(fs), function (allExist) {
+	async.every(["./build/typescript/typescript.d.ts", "./build/typescript/index.js", "./build/doc.js"], fs.exists.bind(fs), function (allExist) {
 		if (allExist) {
 			callback();
 			return;
 		}
 
-		npm.load(function () {
-			npm.commands["run-script"](["build"], callback);
-		});
+		var typescriptPath = path.join(require.resolve("typescript"), "..", "..");
+
+		async.waterfall([
+			async.parallel.bind(async, [
+				fs.readFile.bind(fs, path.join(typescriptPath, "lib", "typescript.d.ts"), "utf8"),
+				fs.readFile.bind(fs, "./build/typescript/extras.d.ts", "utf8")
+			]),
+			function (results, callback) {
+				var newDts = results[0] + "\n\n" + results[1];
+				fs.writeFile("./build/typescript/typescript.d.ts", newDts, "utf8", callback);
+			},
+			function (callback) {
+				npm.load(function () {
+					npm.commands["run-script"](["build"], callback);
+				});
+			}
+		], callback);
 	});
 });
 

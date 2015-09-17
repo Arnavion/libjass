@@ -116,6 +116,19 @@ class CompilerHost implements StreamingCompilerHost {
 		this._outputStream = outputStream;
 	}
 
+	// ts.ModuleResolutionHost members
+	fileExists(fileName: string): boolean {
+		return fs.existsSync(fileName);
+	}
+
+	readFile(fileName: string): string {
+		if (!this.fileExists(fileName)) {
+			return undefined;
+		}
+
+		return fs.readFileSync(fileName, { encoding: "utf8" });
+	}
+
 	// ts.CompilerHost members
 
 	getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError: (message: string) => void): ts.SourceFile {
@@ -374,7 +387,7 @@ class FakeSourceFile {
 		this.lineMap = ts.getLineStarts(originalSourceFile).slice();
 	}
 
-	addComment(originalComment: ts.CommentRange, newComments: string[]): ts.CommentRange {
+	addComment(originalComment: ts.CommentRange, newComments: string[]): ts.CommentRange & { sourceFile: FakeSourceFile } {
 		var pos = this.text.length;
 
 		this.text += "/**\n";

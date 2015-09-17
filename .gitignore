@@ -1,4 +1,5 @@
 build/doc.js
+build/typescript/typescript.d.ts
 build/typescript/*.js
 
 dist/
