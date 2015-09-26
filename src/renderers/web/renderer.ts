@@ -20,6 +20,7 @@
 
 import { AnimationCollection } from "./animation-collection";
 import { DrawingStyles } from "./drawing-styles";
+import { calculateFontMetrics } from "./font-size";
 import { Keyframe } from "./keyframe";
 import { SpanStyles } from "./span-styles";
 
@@ -57,7 +58,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	private _layerAlignmentWrappers: HTMLDivElement[][] = [];
 	private _fontSizeElement: HTMLDivElement;
 
-	private _lineHeightsCache: Map<string, [number, number]> = new Map<string, [number, number]>();
+	private _fontMetricsCache: Map<string, [number, number]> = new Map<string, [number, number]>();
 
 	private _currentSubs: Map<Dialogue, HTMLDivElement> = new Map<Dialogue, HTMLDivElement>();
 	private _preRenderedSubs: Map<number, PreRenderedSub> = new Map<number, PreRenderedSub>();
@@ -90,36 +91,50 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		// Preload fonts
 
-		const urlsToPreload = new Set<string>();
+		if (debugMode) {
+			console.log(`Preloading fonts...`);
+		}
+
+		const fontMetricPromises = new Map<string, Promise<[number, number]>>();
+		const preloadFontPromises: Promise<void>[] = [];
 		if (this.settings.fontMap !== null) {
-			this.settings.fontMap.forEach(srcs => {
-				for (const src of srcs) {
-					urlsToPreload.add(src);
-				}
+			this.settings.fontMap.forEach((srcs, fontFamily) => {
+				srcs.forEach(src => {
+					let fontMetricPromise = fontMetricPromises.get(src);
+					if (fontMetricPromise === undefined) {
+						fontMetricPromise = new Promise<void>((resolve, reject) => {
+							const xhr = new XMLHttpRequest();
+							xhr.addEventListener("load", () => {
+								if (debugMode) {
+									console.log(`Preloaded ${ src }.`);
+								}
+
+								resolve(null);
+							});
+							xhr.open("GET", src, true);
+							xhr.send();
+						}).then<[number, number]>(() => {
+							const fontSizeElement = <HTMLDivElement>this._fontSizeElement.cloneNode(true);
+							this._libjassSubsWrapper.appendChild(fontSizeElement);
+							return calculateFontMetrics(fontFamily, this.settings.fallbackFonts, fontSizeElement).then(metrics => {
+								this._libjassSubsWrapper.removeChild(fontSizeElement);
+								return metrics;
+							});
+						});
+
+						fontMetricPromises.set(src, fontMetricPromise);
+					}
+
+					const preloadFontPromise = fontMetricPromise.then(metrics => {
+						this._fontMetricsCache.set(fontFamily, metrics);
+					});
+
+					preloadFontPromises.push(preloadFontPromise);
+				});
 			});
 		}
 
-		if (debugMode) {
-			console.log(`Preloading ${ urlsToPreload.size } fonts...`);
-		}
-
-		const xhrPromises: Promise<void>[] = [];
-		urlsToPreload.forEach(url => {
-			xhrPromises.push(new Promise<void>((resolve, reject) => {
-				const xhr = new XMLHttpRequest();
-				xhr.addEventListener("load", () => {
-					if (debugMode) {
-						console.log(`Preloaded ${ url }.`);
-					}
-
-					resolve(null);
-				});
-				xhr.open("GET", url, true);
-				xhr.send();
-			}));
-		});
-
-		Promise.all<void>(xhrPromises).then(() => {
+		Promise.all<void>(preloadFontPromises).then(() => {
 			if (debugMode) {
 				console.log("All fonts have been preloaded.");
 			}
@@ -206,7 +221,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		svgElement.appendChild(svgDefsElement);
 
 		let currentSpan: HTMLSpanElement = null;
-		const currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, svgDefsElement, this._lineHeightsCache);
+		const currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, svgDefsElement, this._fontMetricsCache);
 
 		let currentAnimationCollection: AnimationCollection = null;
 
