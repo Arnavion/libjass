@@ -107,8 +107,8 @@ export class Style {
 		this._fontName = valueOrDefault(template, "fontname", str => str, value => value.constructor === String, "sans-serif");
 		this._fontSize = valueOrDefault(template, "fontsize", parseFloat, value => !isNaN(value), "18");
 
-		this._fontScaleX = valueOrDefault(template, "scaleX", parseFloat, value => value >= 0, "100") / 100;
-		this._fontScaleY = valueOrDefault(template, "scaleY", parseFloat, value => value >= 0, "100") / 100;
+		this._fontScaleX = valueOrDefault(template, "scalex", parseFloat, value => value >= 0, "100") / 100;
+		this._fontScaleY = valueOrDefault(template, "scaley", parseFloat, value => value >= 0, "100") / 100;
 
 		this._letterSpacing = valueOrDefault(template, "spacing", parseFloat, value => value >= 0, "0");
 
