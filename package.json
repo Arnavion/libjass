@@ -30,7 +30,7 @@
 		"firefox-profile": "0.3.x",
 		"intern": "3.x >=3.0.1",
 		"npm": "2.x",
-		"pngjs": "0.4.0",
+		"pngjs": "2.1.0",
 		"sax": "1.x",
 		"typescript": "1.6.2",
 		"uglify-js": "2.x >=2.4.24"
