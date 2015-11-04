@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-define(["intern!tdd", "intern/chai!assert", "require", "intern/dojo/node!intern/node_modules/leadfoot/helpers/pollUntil"], function (tdd, assert, require, pollUntil) {
+define(["intern!tdd", "intern/chai!assert", "require", "intern/dojo/node!leadfoot/helpers/pollUntil"], function (tdd, assert, require, pollUntil) {
 	tdd.suite("Auto clock", function () {
 		tdd.test("Operations", function () {
 		this.remote.session.setExecuteAsyncTimeout(10000);
