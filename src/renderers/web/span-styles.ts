@@ -275,7 +275,7 @@ export class SpanStyles {
 		}
 
 		if (this._shadowDepthX !== 0 || this._shadowDepthY !== 0) {
-			const shadowCssString = `${ shadowColor.toString() } ${ (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) }px ${ (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) }px 0px`;
+			const shadowCssString = `${ shadowColor.toString() } ${ (this._shadowDepthX * this._scaleX).toFixed(3) }px ${ (this._shadowDepthY * this._scaleY).toFixed(3) }px 0px`;
 			if (span.style.textShadow === "") {
 				span.style.textShadow = shadowCssString;
 			}
