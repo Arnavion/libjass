@@ -313,8 +313,8 @@ export class SpanStyles {
 
 		if (outlineWidth > 0 || outlineHeight > 0) {
 			/* Construct an elliptical border by merging together many rectangles. The border is creating using dilate morphology filters, but these only support
-				* generating rectangles.   http://lists.w3.org/Archives/Public/public-fx/2012OctDec/0003.html
-				*/
+			 * generating rectangles.   http://lists.w3.org/Archives/Public/public-fx/2012OctDec/0003.html
+			 */
 
 			let outlineNumber = 0;
 
