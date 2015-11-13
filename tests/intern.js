@@ -30,6 +30,7 @@ define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profi
 			"tests/unit/webworker"
 		],
 		functionalSuites: [
+			"tests/functional/alpha/alpha",
 			"tests/functional/auto-clock",
 			"tests/functional/fsc/fsc",
 			"tests/functional/kfx/kfx",
