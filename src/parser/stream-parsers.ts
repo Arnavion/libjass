@@ -202,7 +202,7 @@ export class SrtStreamParser {
 		this._ass.properties.wrappingStyle = 1;
 		this._ass.properties.scaleBorderAndShadow = true;
 
-		const newStyle = new Style(new Map([["Name", "Default"]]));
+		const newStyle = new Style(new Map([["Name", "Default"], ["FontSize", "36"]]));
 		this._ass.styles.set(newStyle.name, newStyle);
 	}
 
