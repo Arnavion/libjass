@@ -49,7 +49,7 @@ define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profi
 		tunnel: "NullTunnel",
 		environments: [
 			{ browserName: "chrome" },
-			//{ browserName: "firefox", firefox_profile: encodedFirefoxProfile },
+			{ browserName: "firefox", firefox_profile: encodedFirefoxProfile },
 			{ browserName: "internet explorer", version: "11" }
 		],
 	};

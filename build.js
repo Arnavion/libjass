@@ -150,7 +150,7 @@ task("test-minified", ["libjass.min.js"], function (callback) {
 });
 
 // Start Selenium server with
-//    java.exe -jar .\selenium-server-standalone-2.46.0.jar "-Dwebdriver.ie.driver=$PWD\IEDriverServer.exe" "-Dwebdriver.chrome.driver=$PWD\chromedriver.exe"
+//    java.exe -jar .\selenium-server-standalone-2.48.2.jar -Dwebdriver.ie.driver=IEDriverServer.exe -Dwebdriver.chrome.driver=chromedriver.exe
 task("test-browser", ["libjass.js"], function (callback) {
 	npm.load(function () {
 		npm.commands["run-script"](["test-browser"], callback);
