@@ -187,6 +187,8 @@ export class SrtStreamParser {
 	private _ass: ASS = new ASS();
 	private _deferred: DeferredPromise<ASS> = new DeferredPromise<ASS>();
 
+	private _shouldSwallowBom: boolean = true;
+
 	private _currentDialogueNumber: string = null;
 	private _currentDialogueStart: string = null;
 	private _currentDialogueEnd: string = null;
@@ -232,6 +234,12 @@ export class SrtStreamParser {
 		if (line[line.length - 1] === "\r") {
 			line = line.substr(0, line.length - 1);
 		}
+
+		if (line.charCodeAt(0) === 0xfeff && this._shouldSwallowBom) {
+			line = line.substr(1);
+		}
+
+		this._shouldSwallowBom = false;
 
 		if (line === "") {
 			if (this._currentDialogueNumber !== null && this._currentDialogueStart !== null && this._currentDialogueEnd !== null && this._currentDialogueText !== null) {
