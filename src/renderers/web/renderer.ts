@@ -614,7 +614,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.Text) {
-				currentSpan.appendChild(document.createTextNode(part.value));
+				currentSpan.appendChild(document.createTextNode(part.value + "\u200C"));
 				startNewSpan(false);
 			}
 
