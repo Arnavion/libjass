@@ -81,10 +81,10 @@ function fontMetricsFromLineHeights(lowerLineHeight: number, upperLineHeight: nu
  * @return {!Promise.<number>}
  */
 export function calculateFontMetrics(fontFamily: string, fallbackFonts: string, fontSizeElement: HTMLDivElement): Promise<[number, number]> {
-	return lineHeightForFontSize(fontFamily, 180, fallbackFonts, fontSizeElement).then<[number, number]>(lowerLineHeight =>
-		lineHeightForFontSize(fontFamily, 360, fallbackFonts, fontSizeElement).then<[number, number]>(upperLineHeight => {
-			return fontMetricsFromLineHeights(lowerLineHeight, upperLineHeight);
-		})
+	return lineHeightForFontSize(fontFamily, 180, fallbackFonts, fontSizeElement).then(lowerLineHeight =>
+		lineHeightForFontSize(fontFamily, 360, fallbackFonts, fontSizeElement).then(upperLineHeight =>
+			fontMetricsFromLineHeights(lowerLineHeight, upperLineHeight)
+		)
 	);
 }
 

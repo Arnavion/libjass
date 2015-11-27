@@ -113,7 +113,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							});
 							xhr.open("GET", src, true);
 							xhr.send();
-						}).then<[number, number]>(() => {
+						}).then(() => {
 							const fontSizeElement = <HTMLDivElement>this._fontSizeElement.cloneNode(true);
 							this._libjassSubsWrapper.appendChild(fontSizeElement);
 							return calculateFontMetrics(fontFamily, this.settings.fallbackFonts, fontSizeElement).then(metrics => {

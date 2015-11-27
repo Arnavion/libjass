@@ -39,11 +39,18 @@ export interface ThenableThen<T> {
 
 export interface Promise<T> extends Thenable<T> {
 	/**
-	 * @param {?function(T):(U|!Thenable.<U>)} onFulfilled
+	 * @param {?function(T):!Thenable.<U>} onFulfilled
 	 * @param {?function(*):(U|!Thenable.<U>)} onRejected
 	 * @return {!Promise.<U>}
 	 */
-	then<U>(onFulfilled?: (value: T) => U | Thenable<U>, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
+	then<U>(onFulfilled?: (value: T) => Thenable<U>, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
+
+	/**
+	 * @param {?function(T):U} onFulfilled
+	 * @param {?function(*):(U|!Thenable.<U>)} onRejected
+	 * @return {!Promise.<U>}
+	 */
+	then<U>(onFulfilled?: (value: T) => U, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
 
 	/**
 	 * @param {function(*):(T|!Thenable.<T>)} onRejected
