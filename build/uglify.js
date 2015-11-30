@@ -35,30 +35,19 @@ var Run = (function () {
 			'(function (root, factory) {\n' +
 			'	var global = this;\n' +
 			'\n' +
-			'	if (typeof System === "object" && typeof System.register === "function") {\n' +
-			'		System.register([], function ($__export) {\n' +
-			'			$__export("default", factory(global));\n' +
-			'			$__export("__useDefault", true);\n' +
-			'\n' +
-			'			return {\n' +
-			'				setters: function () { },\n' +
-			'				execute: function () { },\n' +
-			'			};\n' +
+			'	if (typeof define === "function" && define.amd) {\n' +
+			'		define([], function() {\n' +
+			'			return factory(global);\n' +
 			'		});\n' +
 			'	}\n' +
 			'	else if (typeof exports === "object" && typeof module === "object") {\n' +
 			'		module.exports = factory(global);\n' +
 			'	}\n' +
-			'	else if (typeof define === "function" && define.amd) {\n' +
-			'		define([], function() {\n' +
-			'			return factory(global);\n' +
-			'		});\n' +
-			'	}\n' +
 			'	else if (typeof exports === "object") {\n' +
-			'		exports["libjass"] = factory(global);\n' +
+			'		exports.libjass = factory(global);\n' +
 			'	}\n' +
 			'	else {\n' +
-			'		root["libjass"] = factory(global);\n' +
+			'		root.libjass = factory(global);\n' +
 			'	}\n' +
 			'})(this, function (global) {\n' +
 			'	"use strict";\n' +
@@ -66,18 +55,12 @@ var Run = (function () {
 			'		var installedModules = Object.create(null);\n' +
 			'		function require(moduleId) {\n' +
 			'			if (installedModules[moduleId]) {\n' +
-			'				return installedModules[moduleId].exports;\n' +
+			'				return installedModules[moduleId];\n' +
 			'			}\n' +
 			'\n' +
-			'			var module = installedModules[moduleId] = {\n' +
-			'				exports: Object.create(null),\n' +
-			'				id: moduleId,\n' +
-			'				loaded: false,\n' +
-			'			};\n' +
-			'\n' +
-			'			modules[moduleId](module.exports, require);\n' +
-			'			module.loaded = true;\n' +
-			'			return module.exports;\n' +
+			'			var exports = installedModules[moduleId] = Object.create(null);\n' +
+			'			modules[moduleId](exports, require);\n' +
+			'			return exports;\n' +
 			'		}\n' +
 			'\n' +
 			'		return require(0);\n' +
