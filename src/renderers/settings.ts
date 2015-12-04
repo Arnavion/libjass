@@ -27,12 +27,24 @@ export class RendererSettings {
 	/**
 	 * A map of font name to one or more URLs of that font. If provided, the fonts in this map are pre-loaded by the WebRenderer when it's created.
 	 *
+	 * The key of each entry of the map is the font name used in the ASS script. There are three choices for the value:
+	 *
+	 * - A single string that you would use for the src attribute of a @font-face rule. Eg: `'url("/fonts.foo.ttf"), url("/fonts/foo-fallback.ttf"), local("Arial.ttf")'`
+	 *
+	 * - An array of the individual sources that you would use for the src attribute of a @font-face rule. Eg: `['url("/fonts.foo.ttf")', 'url("/fonts/foo-fallback.ttf")', 'local("Arial")']`
+	 *
+	 * - An array of URLs. Eg: `["/fonts.foo.ttf", "/fonts/foo-fallback.ttf"]`
+	 *
+	 * Only the first and second forms allow you to use local fonts. The third form only allows you to use remote fonts.
+	 *
 	 * If you have a <style> or <link> element on the page containing @font-face rules, you can use the {@link libjass.renderers.RendererSettings.makeFontMapFromStyleElement}
 	 * convenience method to create a font map.
 	 *
-	 * @type {!Map.<string, !Array.<string>>}
+	 * Defaults to null.
+	 *
+	 * @type {!Map.<string, (string|!Array.<string>)>}
 	 */
-	fontMap: Map<string, string[]>;
+	fontMap: Map<string, string | string[]>;
 
 	/**
 	 * Subtitles will be pre-rendered for this amount of time (seconds).
@@ -81,34 +93,31 @@ export class RendererSettings {
 	 *
 	 *     @font-face {
 	 *         font-family: "Helvetica";
-	 *         src: url("/fonts/helvetica.ttf");
+	 *         src: url("/fonts/helvetica.ttf"), local("Arial");
 	 *     }
 	 *
 	 * @param {!LinkStyle} linkStyle
-	 * @return {!Map.<string, !Array.<string>>}
+	 * @return {!Map.<string, string>}
 	 */
-	static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string[]> {
-		const fontMap = new Map<string, string[]>();
+	static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string> {
+		const fontMap = new Map<string, string>();
 
 		const styleSheet = <CSSStyleSheet>linkStyle.sheet;
-		const rules: CSSFontFaceRule[] = Array.prototype.filter.call(styleSheet.cssRules, (rule: CSSRule) => rule.type === CSSRule.FONT_FACE_RULE);
-		for (const rule of rules) {
-			let src = rule.style.getPropertyValue("src");
-			if (!src) {
-				src = rule.cssText.split("\n")
-					.map(line => line.match(/src: ([^;]+);/))
-					.filter(matches => matches !== null)
-					.map(matches => matches[1])[0];
-			}
+		for (let i = 0; i < styleSheet.cssRules.length; i++) {
+			const rule = styleSheet.cssRules[i];
 
-			const urls = src.split(/,\s*/).map(url => RendererSettings._stripQuotes(url.match(/^url\((.+)\)$/)[1]));
-			if (urls.length > 0) {
-				const name = RendererSettings._stripQuotes(rule.style.getPropertyValue("font-family"));
-				let existingList = fontMap.get(name);
-				if (existingList === undefined) {
-					fontMap.set(name, existingList = []);
+			if (isFontFaceRule(rule)) {
+				const name = rule.style.getPropertyValue("font-family").match(/^["']?(.*?)["']?$/)[1];
+
+				let src = rule.style.getPropertyValue("src");
+				if (!src) {
+					src = rule.cssText.split("\n")
+						.map(line => line.match(/src:\s*([^;]+?)\s*;/))
+						.filter(matches => matches !== null)
+						.map(matches => matches[1])[0];
 				}
-				existingList.unshift(...urls);
+
+				fontMap.set(name, src);
 			}
 		}
 
@@ -136,12 +145,12 @@ export class RendererSettings {
 
 		return result;
 	}
+}
 
-	/**
-	 * @param {string} str
-	 * @return {string}
-	 */
-	private static _stripQuotes(str: string): string {
-		return str.match(/^["']?(.*?)["']?$/)[1];
-	}
+/**
+ * @param {!CSSRule} rule
+ * @return {boolean}
+ */
+function isFontFaceRule(rule: CSSRule): rule is CSSFontFaceRule {
+	return rule.type === CSSRule.FONT_FACE_RULE;
 }

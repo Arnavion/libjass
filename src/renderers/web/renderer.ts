@@ -40,7 +40,9 @@ import { WrappingStyle } from "../../types/misc";
 import { mixin } from "../../utility/mixin";
 import { Map } from "../../utility/map";
 import { Set } from "../../utility/set";
-import { Promise } from "../../utility/promise";
+import { Promise, first as Promise_first, lastly as Promise_finally } from "../../utility/promise";
+
+const fontSrcUrlRegex = /^(url|local)\(["']?(.+?)["']?\)$/;
 
 /**
  * A renderer implementation that draws subtitles to the given <div>
@@ -95,46 +97,74 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			console.log(`Preloading fonts...`);
 		}
 
-		const fontMetricPromises = new Map<string, Promise<[number, number]>>();
-		const preloadFontPromises: Promise<void>[] = [];
-		if (this.settings.fontMap !== null) {
-			this.settings.fontMap.forEach((srcs, fontFamily) => {
-				srcs.forEach(src => {
-					let fontMetricPromise = fontMetricPromises.get(src);
-					if (fontMetricPromise === undefined) {
-						fontMetricPromise = new Promise<void>((resolve, reject) => {
-							const xhr = new XMLHttpRequest();
-							xhr.addEventListener("load", () => {
-								if (debugMode) {
-									console.log(`Preloaded ${ src }.`);
-								}
+		const preloadFontPromises: Promise<any>[] = [];
 
-								resolve(null);
-							});
-							xhr.open("GET", src, true);
-							xhr.send();
-						}).then(() => {
-							const fontSizeElement = <HTMLDivElement>this._fontSizeElement.cloneNode(true);
-							this._libjassSubsWrapper.appendChild(fontSizeElement);
-							return calculateFontMetrics(fontFamily, this.settings.fallbackFonts, fontSizeElement).then(metrics => {
-								this._libjassSubsWrapper.removeChild(fontSizeElement);
-								return metrics;
-							});
-						});
+		const fontFetchPromisesCache = new Map<string, Promise<any>>();
 
-						fontMetricPromises.set(src, fontMetricPromise);
+		const fontMap = (this.settings.fontMap === null) ? new Map<string, string | string[]>() : this.settings.fontMap;
+		fontMap.forEach((srcs, fontFamily) => {
+			// value should be string[]. If it's string, split it into string[]
+			const urls =
+				((typeof srcs === "string") ?
+					srcs.split(/,/) :
+					srcs).map(url => url.trim()).map(url => {
+						const match = url.match(fontSrcUrlRegex);
+
+						if (match === null) {
+							// A URL
+							return url;
+						}
+
+						if (match[1] === "local") {
+							// A local() URL. Don't fetch it.
+							return null;
+						}
+
+						// A url() URL. Extract the raw URL.
+						return match[2];
+					}).filter(url => url !== null);
+
+			const thisFontFamilysFetchPromises =
+				urls.map(url => {
+					let fontFetchPromise = fontFetchPromisesCache.get(url);
+					if (fontFetchPromise === undefined) {
+						fontFetchPromise =
+							new Promise<void>((resolve, reject) => {
+								const xhr = new XMLHttpRequest();
+								xhr.addEventListener("load", () => {
+									if (debugMode) {
+										console.log(`Preloaded ${ url }.`);
+									}
+
+									resolve(null);
+								});
+								xhr.addEventListener("error", err => {
+									reject(err);
+								});
+								xhr.open("GET", url, true);
+								xhr.send();
+							});
+
+						fontFetchPromisesCache.set(url, fontFetchPromise);
 					}
 
-					const preloadFontPromise = fontMetricPromise.then(metrics => {
-						this._fontMetricsCache.set(fontFamily, metrics);
+					return fontFetchPromise;
+				});
+
+			const allFontsFetchedPromise =
+				(thisFontFamilysFetchPromises.length === 0) ?
+					Promise.resolve<void>(null) :
+					Promise_first(thisFontFamilysFetchPromises).catch(reason => {
+						console.warn(`Fetching fonts for ${ fontFamily } at ${ urls.join(", ") } failed: %o`, reason);
+						return null;
 					});
 
-					preloadFontPromises.push(preloadFontPromise);
-				});
-			});
-		}
+			const fontFamilyMetricsPromise = this._calculateFontMetricsAfterFetch(fontFamily, allFontsFetchedPromise);
 
-		Promise.all<void>(preloadFontPromises).then(() => {
+			preloadFontPromises.push(fontFamilyMetricsPromise.then(metrics => this._fontMetricsCache.set(fontFamily, metrics)));
+		});
+
+		Promise.all(preloadFontPromises).then(() => {
 			if (debugMode) {
 				console.log("All fonts have been preloaded.");
 			}
@@ -838,6 +868,21 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 	protected _ready(): void {
 		this._dispatchEvent("ready", []);
+	}
+
+	/**
+	 * @param {string} fontFamily
+	 * @param {!Promise.<*>} fontFetchPromise
+	 * @return {!Promise.<[number, number]>}
+	 */
+	private _calculateFontMetricsAfterFetch(fontFamily: string, fontFetchPromise: Promise<any>): Promise<[number, number]> {
+		return fontFetchPromise.then(() => {
+			const fontSizeElement = <HTMLDivElement>this._fontSizeElement.cloneNode(true);
+			this._libjassSubsWrapper.appendChild(fontSizeElement);
+			return Promise_finally(calculateFontMetrics(fontFamily, this.settings.fallbackFonts, fontSizeElement), () => {
+				this._libjassSubsWrapper.removeChild(fontSizeElement);
+			});
+		});
 	}
 
 	/**

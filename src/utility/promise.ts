@@ -482,3 +482,44 @@ export class DeferredPromise<T> {
 		return this._promise;
 	}
 }
+
+/**
+ * Returns a promise that resolves to the first (in iteration order) promise that fulfills, and rejects if all the promises reject.
+ *
+ * @param {!Array.<!Promise.<T>>} promises
+ * @return {!Promise.<T>}
+ */
+export function first<T>(promises: Promise<T>[]): Promise<T> {
+	return first_rec(promises, []);
+}
+
+/**
+ * @param {!Array.<!Promise.<T>>} promises
+ * @param {!Array.<*>} previousRejections
+ * @return {!Promise.<T>}
+ */
+function first_rec<T>(promises: Promise<T>[], previousRejections: any[]): Promise<T> {
+	if (promises.length === 0) {
+		return Promise.reject(previousRejections);
+	}
+
+	const [head, ...tail] = promises;
+	return head.catch(reason => first_rec(tail, previousRejections.concat(reason)));
+}
+
+/**
+ * Returns a promise that runs the given callback when the promise has resolved regardless of whether it fulfilled or rejected.
+ *
+ * @param {!Promise.<T>} promise
+ * @param {function()} body
+ * @return {!Promise.<T>}
+ */
+export function lastly<T>(promise: Promise<T>, body: () => void): Promise<T> {
+	return promise.then<any>(value => {
+		body();
+		return value;
+	}, reason => {
+		body();
+		throw reason;
+	});
+}
