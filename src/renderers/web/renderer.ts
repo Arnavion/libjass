@@ -42,6 +42,31 @@ import { Map } from "../../utility/map";
 import { Set } from "../../utility/set";
 import { Promise, first as Promise_first, lastly as Promise_finally } from "../../utility/promise";
 
+declare const global: {
+	document: {
+		fonts?: FontFaceSet;
+	};
+};
+
+interface FontFaceSet {
+	/**
+	 * @param {!FontFace} fontFace
+	 * @return {!FontFaceSet}
+	 */
+	add(fontFace: FontFace): FontFaceSet;
+}
+
+interface FontFace {
+	/**
+	 * @return {!Promise.<!FontFace>}
+	 */
+	load(): Promise<FontFace>;
+}
+
+declare var FontFace: {
+	new (family: string, source: string): FontFace;
+};
+
 const fontSrcUrlRegex = /^(url|local)\(["']?(.+?)["']?\)$/;
 
 /**
@@ -103,63 +128,92 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		const fontMap = (this.settings.fontMap === null) ? new Map<string, string | string[]>() : this.settings.fontMap;
 		fontMap.forEach((srcs, fontFamily) => {
-			// value should be string[]. If it's string, split it into string[]
-			const urls =
-				((typeof srcs === "string") ?
-					srcs.split(/,/) :
-					srcs).map(url => url.trim()).map(url => {
-						const match = url.match(fontSrcUrlRegex);
+			let fontFamilyMetricsPromise: Promise<[number, number]>;
 
-						if (match === null) {
-							// A URL
-							return url;
-						}
+			if (global.document.fonts && global.document.fonts.add) {
+				// value should be string. If it's string[], combine it into string
+				const source =
+					(typeof srcs === "string") ?
+						srcs :
+						srcs.map(src =>
+							(src.match(fontSrcUrlRegex) !== null) ?
+								src :
+								`url("${ src }")`).join(", ");
 
-						if (match[1] === "local") {
-							// A local() URL. Don't fetch it.
+				let fontFetchPromise = fontFetchPromisesCache.get(source);
+				if (fontFetchPromise === undefined) {
+					const fontFace = new FontFace(`"${ fontFamily }"`, source); // Chrome is okay without the quotes, but FF requires them.
+
+					global.document.fonts.add(fontFace);
+					fontFetchPromise =
+						fontFace.load().catch(reason => {
+							console.warn(`Fetching fonts for ${ fontFamily } at ${ source } failed: %o`, reason);
 							return null;
+						});
+					fontFetchPromisesCache.set(source, fontFetchPromise);
+				}
+
+				fontFamilyMetricsPromise = this._calculateFontMetricsAfterFetch(fontFamily, fontFetchPromise);
+			}
+			else {
+				// value should be string[]. If it's string, split it into string[]
+				const urls =
+					((typeof srcs === "string") ?
+						srcs.split(/,/) :
+						srcs).map(url => url.trim()).map(url => {
+							const match = url.match(fontSrcUrlRegex);
+
+							if (match === null) {
+								// A URL
+								return url;
+							}
+
+							if (match[1] === "local") {
+								// A local() URL. Don't fetch it.
+								return null;
+							}
+
+							// A url() URL. Extract the raw URL.
+							return match[2];
+						}).filter(url => url !== null);
+
+				const thisFontFamilysFetchPromises =
+					urls.map(url => {
+						let fontFetchPromise = fontFetchPromisesCache.get(url);
+						if (fontFetchPromise === undefined) {
+							fontFetchPromise =
+								new Promise<void>((resolve, reject) => {
+									const xhr = new XMLHttpRequest();
+									xhr.addEventListener("load", () => {
+										if (debugMode) {
+											console.log(`Preloaded ${ url }.`);
+										}
+
+										resolve(null);
+									});
+									xhr.addEventListener("error", err => {
+										reject(err);
+									});
+									xhr.open("GET", url, true);
+									xhr.send();
+								});
+
+							fontFetchPromisesCache.set(url, fontFetchPromise);
 						}
 
-						// A url() URL. Extract the raw URL.
-						return match[2];
-					}).filter(url => url !== null);
-
-			const thisFontFamilysFetchPromises =
-				urls.map(url => {
-					let fontFetchPromise = fontFetchPromisesCache.get(url);
-					if (fontFetchPromise === undefined) {
-						fontFetchPromise =
-							new Promise<void>((resolve, reject) => {
-								const xhr = new XMLHttpRequest();
-								xhr.addEventListener("load", () => {
-									if (debugMode) {
-										console.log(`Preloaded ${ url }.`);
-									}
-
-									resolve(null);
-								});
-								xhr.addEventListener("error", err => {
-									reject(err);
-								});
-								xhr.open("GET", url, true);
-								xhr.send();
-							});
-
-						fontFetchPromisesCache.set(url, fontFetchPromise);
-					}
-
-					return fontFetchPromise;
-				});
-
-			const allFontsFetchedPromise =
-				(thisFontFamilysFetchPromises.length === 0) ?
-					Promise.resolve<void>(null) :
-					Promise_first(thisFontFamilysFetchPromises).catch(reason => {
-						console.warn(`Fetching fonts for ${ fontFamily } at ${ urls.join(", ") } failed: %o`, reason);
-						return null;
+						return fontFetchPromise;
 					});
 
-			const fontFamilyMetricsPromise = this._calculateFontMetricsAfterFetch(fontFamily, allFontsFetchedPromise);
+				const allFontsFetchedPromise =
+					(thisFontFamilysFetchPromises.length === 0) ?
+						Promise.resolve<void>(null) :
+						Promise_first(thisFontFamilysFetchPromises).catch(reason => {
+							console.warn(`Fetching fonts for ${ fontFamily } at ${ urls.join(", ") } failed: %o`, reason);
+							return null;
+						});
+
+				fontFamilyMetricsPromise = this._calculateFontMetricsAfterFetch(fontFamily, allFontsFetchedPromise);
+			}
 
 			preloadFontPromises.push(fontFamilyMetricsPromise.then(metrics => this._fontMetricsCache.set(fontFamily, metrics)));
 		});
