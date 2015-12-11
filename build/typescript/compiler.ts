@@ -28,7 +28,7 @@ import { File, FileTransform, FileWatcher } from "async-build";
 import * as AST from "./ast";
 import { walk } from "./walker";
 
-export interface StreamingCompilerHost extends ts.CompilerHost {
+export interface StreamingCompilerHost extends ts.CompilerHost, ts.ParseConfigHost {
 	setOutputStream(outputStream: FileTransform): void;
 }
 
@@ -41,7 +41,7 @@ export class Compiler {
 	compile(projectConfigFile: File) {
 		this._projectRoot = path.dirname(projectConfigFile.path);
 
-		var projectConfig = parseConfigFile(JSON.parse(projectConfigFile.contents.toString()), this._projectRoot);
+		var projectConfig = ts.parseConfigFile(JSON.parse(projectConfigFile.contents.toString()), this._host, this._projectRoot);
 
 		this._program = ts.createProgram(projectConfig.fileNames, projectConfig.options, this._host);
 
@@ -117,6 +117,7 @@ class CompilerHost implements StreamingCompilerHost {
 	}
 
 	// ts.ModuleResolutionHost members
+
 	fileExists(fileName: string): boolean {
 		return fs.existsSync(fileName);
 	}
@@ -175,6 +176,12 @@ class CompilerHost implements StreamingCompilerHost {
 
 	getNewLine(): string {
 		return "\n";
+	}
+
+	// ts.ParseConfigHost members
+
+	readDirectory(rootDir: string, extension: string, exclude: string[]): string[] {
+		return ts.sys.readDirectory(rootDir, extension, exclude).map(fileName => this.getCanonicalFileName(fileName));
 	}
 }
 
@@ -351,33 +358,6 @@ function addJSDocComments(modules: { [name: string]: AST.Module }): void {
 	}
 }
 
-function parseConfigFile(json: { compilerOptions: ts.CompilerOptions }, basePath: string): { options: ts.CompilerOptions, fileNames: string[] } {
-	var options = json.compilerOptions;
-	options.module = (<any>ts).ModuleKind[options.module];
-	options.target = (<any>ts).ScriptTarget[options.target];
-
-	var fileNames: string[] = [];
-
-	function walk(directory: string) {
-		fs.readdirSync(directory).forEach(entry => {
-			var entryPath = path.join(directory, entry);
-			var stat = fs.statSync(entryPath);
-			if (stat.isFile()) {
-				if (path.extname(entry) === ".ts") {
-					fileNames.push(path.resolve(entryPath));
-				}
-			}
-			else if (stat.isDirectory()) {
-				walk(entryPath);
-			}
-		});
-	}
-
-	walk(basePath);
-
-	return { options, fileNames };
-}
-
 class FakeSourceFile {
 	public text: string;
 	public lineMap: number[];
@@ -419,7 +399,7 @@ class FakeSourceFile {
 
 var fakeSourceFiles: { [name: string]: FakeSourceFile } = Object.create(null);
 
-export var oldGetLeadingCommentRangesOfNode: (node: ts.Node, sourceFileOfNode: ts.SourceFile) => ts.CommentRange[] = ts.getLeadingCommentRangesOfNode.bind(ts);
+export var oldGetLeadingCommentRangesOfNode: typeof ts.getLeadingCommentRangesOfNode = ts.getLeadingCommentRangesOfNode.bind(ts);
 ts.getLeadingCommentRangesOfNode = (node: ts.Node, sourceFileOfNode: ts.SourceFile) => {
 	sourceFileOfNode = sourceFileOfNode || ts.getSourceFileOfNode(node);
 
@@ -437,7 +417,7 @@ ts.getLeadingCommentRangesOfNode = (node: ts.Node, sourceFileOfNode: ts.SourceFi
 	return originalComments;
 };
 
-var oldWriteCommentRange = ts.writeCommentRange.bind(ts);
+var oldWriteCommentRange: typeof ts.writeCommentRange = ts.writeCommentRange.bind(ts);
 ts.writeCommentRange = (currentSourceFile: ts.SourceFile, writer: ts.EmitTextWriter, comment: ts.CommentRange, newLine: string) => {
 	if ((<{ sourceFile: ts.SourceFile }><any>comment).sourceFile) {
 		currentSourceFile = (<{ sourceFile: ts.SourceFile }><any>comment).sourceFile;

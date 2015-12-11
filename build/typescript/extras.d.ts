@@ -12,7 +12,7 @@ declare namespace ts {
 	export function getLeadingCommentRangesOfNode(node: Node, sourceFileOfNode: SourceFile): CommentRange[];
 	export function getLineStarts(sourceFile: SourceFile): number[];
 	export function getSourceFileOfNode(node: Node): SourceFile;
-	export function getTextOfNode(node: Node): string;
+	export function getTextOfNode(node: Node, includeTrivia?: boolean): string;
 	export function normalizeSlashes(path: string): string;
 	export function writeCommentRange(currentSourceFile: SourceFile, writer: EmitTextWriter, comment: CommentRange, newLine: string): void;
 }
