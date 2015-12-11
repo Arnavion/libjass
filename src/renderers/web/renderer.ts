@@ -39,7 +39,6 @@ import { WrappingStyle } from "../../types/misc";
 
 import { mixin } from "../../utility/mixin";
 import { Map } from "../../utility/map";
-import { Set } from "../../utility/set";
 import { Promise, first as Promise_first, lastly as Promise_finally } from "../../utility/promise";
 
 declare const global: {
