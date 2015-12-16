@@ -41,7 +41,7 @@ export class Compiler {
 	compile(projectConfigFile: File) {
 		this._projectRoot = path.dirname(projectConfigFile.path);
 
-		var projectConfig = ts.parseConfigFile(JSON.parse(projectConfigFile.contents.toString()), this._host, this._projectRoot);
+		var projectConfig = ts.parseJsonConfigFileContent(JSON.parse(projectConfigFile.contents.toString()), this._host, this._projectRoot);
 
 		this._program = ts.createProgram(projectConfig.fileNames, projectConfig.options, this._host);
 
