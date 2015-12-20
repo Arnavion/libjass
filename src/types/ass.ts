@@ -18,6 +18,7 @@
  * limitations under the License.
  */
 
+import { Attachment, AttachmentType } from "./attachment";
 import { Dialogue } from "./dialogue";
 import { Style } from "./style";
 import { ScriptProperties } from "./script-properties";
@@ -46,6 +47,7 @@ export class ASS {
 	private _properties: ScriptProperties = new ScriptProperties();
 	private _styles: Map<string, Style> = new Map<string, Style>();
 	private _dialogues: Dialogue[] = [];
+	private _attachments: Attachment[] = [];
 
 	private _stylesFormatSpecifier: string[] = null;
 	private _dialoguesFormatSpecifier: string[] = null;
@@ -75,6 +77,15 @@ export class ASS {
 	 */
 	get dialogues(): Dialogue[] {
 		return this._dialogues;
+	}
+
+	/**
+	 * The attachments of this script.
+	 *
+	 * @type {!Array.<!libjass.Attachment>}
+	 */
+	get attachments(): Attachment[] {
+		return this._attachments;
 	}
 
 	/**
@@ -167,6 +178,15 @@ export class ASS {
 
 		// Create the dialogue and add it to the dialogues array
 		this.dialogues.push(new Dialogue(dialogueTemplate, this));
+	}
+
+	/**
+	 * Add an attachment to this ASS script.
+	 *
+	 * @param {!libjass.Attachment} attachment
+	 */
+	addAttachment(attachment: Attachment): void {
+		this._attachments.push(attachment);
 	}
 
 	/**

@@ -21,6 +21,7 @@
 define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profile!"], function (intern, encodedFirefoxProfile) {
 	var result = {
 		suites: [
+			"tests/unit/attachments",
 			"tests/unit/manual-clock",
 			"tests/unit/minified",
 			"tests/unit/miscellaneous",

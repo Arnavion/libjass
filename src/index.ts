@@ -43,6 +43,7 @@ import * as renderers from "./renderers";
 export { renderers };
 
 export { ASS } from "./types/ass";
+export { Attachment, AttachmentType } from "./types/attachment";
 export { Dialogue } from "./types/dialogue";
 export { ScriptProperties } from "./types/script-properties";
 export { Style } from "./types/style";

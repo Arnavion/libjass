@@ -23,6 +23,7 @@ import { debugMode } from "../settings";
 import { ASS } from "../types/ass";
 import { Style } from "../types/style";
 import { Dialogue } from "../types/dialogue";
+import { Attachment, AttachmentType } from "../types/attachment";
 import { Property, TypedTemplate } from "../types/misc";
 
 import { Map } from "../utility/map";
@@ -36,6 +37,8 @@ enum Section {
 	ScriptInfo,
 	Styles,
 	Events,
+	Fonts,
+	Graphics,
 	Other,
 	EOF,
 }
@@ -52,6 +55,7 @@ export class StreamParser {
 
 	private _shouldSwallowBom: boolean = true;
 	private _currentSection: Section = Section.ScriptInfo;
+	private _currentAttachment: Attachment = null;
 
 	constructor(private _stream: Stream) {
 		this._stream.nextLine().then(line => this._onNextLine(line));
@@ -83,6 +87,11 @@ export class StreamParser {
 	 * @type {number}
 	 */
 	private set currentSection(value: Section) {
+		if (this._currentAttachment !== null) {
+			this._ass.addAttachment(this._currentAttachment);
+			this._currentAttachment = null;
+		}
+
 		if (this._currentSection === Section.ScriptInfo && value !== Section.ScriptInfo) {
 			// Exiting script info section
 			this._minimalDeferred.resolve(this._ass);
@@ -114,8 +123,12 @@ export class StreamParser {
 
 		this._shouldSwallowBom = false;
 
-		if (line === "" || line[0] === ";") {
-			// Ignore empty lines and comments
+		if (line === "") {
+			// Ignore empty lines.
+		}
+
+		else if (line[0] === ";" && this._currentAttachment === null) {
+			// Lines starting with ; are comments, unless reading an attachment.
 		}
 
 		else if (line === "[Script Info]") {
@@ -127,9 +140,18 @@ export class StreamParser {
 		else if (line === "[Events]") {
 			this.currentSection = Section.Events;
 		}
+		else if (line === "[Fonts]") {
+			this.currentSection = Section.Fonts;
+		}
+		else if (line === "[Graphics]") {
+			this.currentSection = Section.Graphics;
+		}
 		else {
-			if (line[0] === "[" && line[line.length - 1] === "]") {
-				// This looks like the start of a new section. The section name is unrecognized if it is.
+			if (this._currentAttachment === null && line[0] === "[" && line[line.length - 1] === "]") {
+				/* This looks like the start of a new section. The section name is unrecognized if it is.
+				 * Since there's no current attachment being parsed it's definitely the start of a new section.
+				 * If an attachment is being parsed, this might be part of the attachment.
+				 */
 				this.currentSection = Section.Other;
 			}
 
@@ -195,6 +217,38 @@ export class StreamParser {
 								console.error(`Could not parse event from line ${ line } - ${ ex.stack || ex }`);
 							}
 						}
+					}
+					break;
+
+				case Section.Fonts:
+				case Section.Graphics:
+					const startOfNewAttachmentRegex = (this.currentSection === Section.Fonts) ? /^fontname:(.+)/ : /^filename:(.+)/;
+					const startOfNewAttachment = startOfNewAttachmentRegex.exec(line);
+
+					if (startOfNewAttachment !== null) {
+						// Start of new attachment
+
+						if (this._currentAttachment !== null) {
+							this._ass.addAttachment(this._currentAttachment);
+							this._currentAttachment = null;
+						}
+
+						this._currentAttachment = new Attachment(startOfNewAttachment[1].trim(), (this.currentSection === Section.Fonts) ? AttachmentType.Font : AttachmentType.Graphic);
+					}
+					else if (this._currentAttachment !== null) {
+						try {
+							this._currentAttachment.contents += uuencodedToBase64(line);
+						}
+						catch (ex) {
+							if (debugMode) {
+								console.error(`Encountered error while reading font ${ this._currentAttachment.filename }: %o`, ex);
+							}
+
+							this._currentAttachment = null;
+						}
+					}
+					else {
+						// Ignore.
 					}
 					break;
 
@@ -323,4 +377,39 @@ export class SrtStreamParser {
 
 		this._stream.nextLine().then(line => this._onNextLine(line));
 	}
+}
+
+/**
+ * Converts a uuencoded string to a base64 string.
+ *
+ * @param {string} str
+ * @return {string}
+ */
+function uuencodedToBase64(str: string): string {
+	let result = "";
+
+	for (let i = 0; i < str.length; i++) {
+		const charCode = str.charCodeAt(i) - 33;
+
+		if (charCode < 0 || charCode > 63) {
+			throw new Error(`Out-of-range character code ${ charCode } at index ${ i } in string ${ str }`);
+		}
+		if (charCode < 26) {
+			result += String.fromCharCode("A".charCodeAt(0) + charCode);
+		}
+		else if (charCode < 52) {
+			result += String.fromCharCode("a".charCodeAt(0) + charCode - 26);
+		}
+		else if (charCode < 62) {
+			result += String.fromCharCode("0".charCodeAt(0) + charCode - 52);
+		}
+		else if (charCode === 62) {
+			result += "+";
+		}
+		else {
+			result += "/";
+		}
+	}
+
+	return result;
 }
