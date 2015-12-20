@@ -29,17 +29,21 @@ import { Clock, EventSource } from "../clocks/base";
 import { NullRenderer } from "../null";
 import { RendererSettings } from "../settings";
 
+import { getTtfNames } from "../../parser/ttf";
+
 import * as parts from "../../parts";
 
 import { debugMode } from "../../settings";
 
 import { ASS } from "../../types/ass";
+import { AttachmentType } from "../../types/attachment";
 import { Dialogue } from "../../types/dialogue";
 import { WrappingStyle } from "../../types/misc";
 
 import { mixin } from "../../utility/mixin";
 import { Map } from "../../utility/map";
 import { Promise, first as Promise_first, lastly as Promise_finally } from "../../utility/promise";
+import { Set } from "../../utility/set";
 
 declare const global: {
 	document: {
@@ -126,12 +130,57 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		const fontFetchPromisesCache = new Map<string, Promise<any>>();
 
 		const fontMap = (this.settings.fontMap === null) ? new Map<string, string | string[]>() : this.settings.fontMap;
+
+		const attachedFontsMap = new Map<string, string[]>();
+		if (this.settings.useAttachedFonts) {
+			ass.attachments.forEach(attachment => {
+				if (attachment.type !== AttachmentType.Font) {
+					return;
+				}
+
+				let ttfNames: Set<string> = null;
+				try {
+					ttfNames = getTtfNames(attachment);
+				}
+				catch (ex) {
+					console.error(ex);
+					return;
+				}
+
+				ttfNames.forEach(name => {
+					let correspondingFontMapEntry = fontMap.get(name);
+					if (correspondingFontMapEntry !== undefined) {
+						// Also defined in fontMap.
+						if (typeof correspondingFontMapEntry !== "string") {
+							// Entry in fontMap is an array. Append this URL to it.
+							correspondingFontMapEntry.push(attachment.url);
+						}
+						else {
+							/* The entry in fontMap is a string. Don't append this URL to it. Instead, put it in attachedFontsMap now
+							 * and it'll be merged with the entry from fontMap later. If it was added here, and later the string needed
+							 * to be split on commas, then the commas in the data URI would break the result.
+							 */
+							let existingList = attachedFontsMap.get(name);
+							if (existingList === undefined) {
+								attachedFontsMap.set(name, existingList = []);
+							}
+							existingList.push(attachment.url);
+						}
+					}
+					else {
+						// Not defined in fontMap. Add it there.
+						fontMap.set(name, [attachment.url]);
+					}
+				});
+			});
+		}
+
 		fontMap.forEach((srcs, fontFamily) => {
 			let fontFamilyMetricsPromise: Promise<[number, number]>;
 
 			if (global.document.fonts && global.document.fonts.add) {
 				// value should be string. If it's string[], combine it into string
-				const source =
+				let source =
 					(typeof srcs === "string") ?
 						srcs :
 						srcs.map(src =>
@@ -139,9 +188,16 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 								src :
 								`url("${ src }")`).join(", ");
 
+				const attachedFontUrls = attachedFontsMap.get(fontFamily);
+				if (attachedFontUrls !== undefined) {
+					for (const url of attachedFontUrls) {
+						source += `, url("${ url }")`;
+					}
+				}
+
 				let fontFetchPromise = fontFetchPromisesCache.get(source);
 				if (fontFetchPromise === undefined) {
-					const fontFace = new FontFace(`"${ fontFamily }"`, source); // Chrome is okay without the quotes, but FF requires them.
+					const fontFace = new FontFace(fontFamily, source);
 
 					global.document.fonts.add(fontFace);
 					fontFetchPromise =
@@ -156,7 +212,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 			else {
 				// value should be string[]. If it's string, split it into string[]
-				const urls =
+				let urls =
 					((typeof srcs === "string") ?
 						srcs.split(/,/) :
 						srcs).map(url => url.trim()).map(url => {
@@ -175,6 +231,11 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							// A url() URL. Extract the raw URL.
 							return match[2];
 						}).filter(url => url !== null);
+
+				const attachedFontUrls = attachedFontsMap.get(fontFamily);
+				if (attachedFontUrls !== undefined) {
+					urls = urls.concat(attachedFontUrls);
+				}
 
 				const thisFontFamilysFetchPromises =
 					urls.map(url => {

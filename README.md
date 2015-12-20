@@ -67,6 +67,8 @@ The API documentation is linked in the Links section below. Here's an overview:
 
 * WebRenderer and DefaultRenderer use [CSS3 animations](http://caniuse.com/#feat=css-animation) for effects like \mov and \fad.
 
+* Using fonts attached to the script requires [ES6 typed arrays](http://caniuse.com/#feat=typedarrays) (ArrayBuffer, DataView, Uint8Array, etc).
+
 
 ### Can I use libjass in node?
 

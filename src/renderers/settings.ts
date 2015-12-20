@@ -87,6 +87,17 @@ export class RendererSettings {
 	fallbackFonts: string;
 
 	/**
+	 * If true, attached TTF fonts in the ASS script will be used. The font is loaded as a data: URI. Requires ES6 typed arrays (ArrayBuffer, DataView, Uint8Array, etc).
+	 *
+	 * The font is naively parsed to extract the strings that will be used as the font family. Do not use this option with untrusted fonts or scripts.
+	 *
+	 * Defaults to false.
+	 *
+	 * @type {boolean}
+	 */
+	useAttachedFonts: boolean;
+
+	/**
 	 * A convenience method to create a font map from a <style> or <link> element that contains @font-face rules. There should be one @font-face rule for each font name, mapping to a font file URL.
 	 *
 	 * For example:
@@ -135,13 +146,14 @@ export class RendererSettings {
 			object = {};
 		}
 
-		const { fontMap = null, preRenderTime = 5, preciseOutlines = false, enableSvg = true, fallbackFonts = 'Arial, Helvetica, sans-serif, "Segoe UI Symbol"' } = <RendererSettings>object;
+		const { fontMap = null, preRenderTime = 5, preciseOutlines = false, enableSvg = true, fallbackFonts = 'Arial, Helvetica, sans-serif, "Segoe UI Symbol"', useAttachedFonts = false } = <RendererSettings>object;
 		const result = new RendererSettings();
 		result.fontMap = fontMap;
 		result.preRenderTime = preRenderTime;
 		result.preciseOutlines = preciseOutlines;
 		result.enableSvg = enableSvg;
 		result.fallbackFonts = fallbackFonts;
+		result.useAttachedFonts = useAttachedFonts;
 
 		return result;
 	}
