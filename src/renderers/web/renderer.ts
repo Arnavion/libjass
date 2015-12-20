@@ -198,10 +198,13 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 				let fontFetchPromise = fontFetchPromisesCache.get(source);
 				if (fontFetchPromise === undefined) {
 					const fontFace = new FontFace(fontFamily, source);
+					const quotedFontFace = new FontFace(`"${ fontFamily }"`, source);
 
 					global.document.fonts.add(fontFace);
+					global.document.fonts.add(quotedFontFace);
+
 					fontFetchPromise =
-						fontFace.load().catch(reason => {
+						Promise.race<FontFace>([fontFace.load(), quotedFontFace.load()]).catch(reason => {
 							console.warn(`Fetching fonts for ${ fontFamily } at ${ source } failed: %o`, reason);
 							return null;
 						});
