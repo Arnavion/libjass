@@ -32,6 +32,14 @@ import { Promise, DeferredPromise } from "../utility/promise";
 import { parseLineIntoProperty } from "./misc";
 import { Stream } from "./streams";
 
+enum Section {
+	ScriptInfo,
+	Styles,
+	Events,
+	Other,
+	EOF,
+}
+
 /**
  * A parser that parses an {@link libjass.ASS} object from a {@link libjass.parser.Stream}.
  *
@@ -43,7 +51,7 @@ export class StreamParser {
 	private _deferred: DeferredPromise<ASS> = new DeferredPromise<ASS>();
 
 	private _shouldSwallowBom: boolean = true;
-	private _currentSectionName: string = null;
+	private _currentSection: Section = Section.ScriptInfo;
 
 	constructor(private _stream: Stream) {
 		this._stream.nextLine().then(line => this._onNextLine(line));
@@ -65,12 +73,34 @@ export class StreamParser {
 	}
 
 	/**
+	 * @type {number}
+	 */
+	private get currentSection(): Section {
+		return this._currentSection;
+	}
+
+	/**
+	 * @type {number}
+	 */
+	private set currentSection(value: Section) {
+		if (this._currentSection === Section.ScriptInfo && value !== Section.ScriptInfo) {
+			// Exiting script info section
+			this._minimalDeferred.resolve(this._ass);
+		}
+		else if (value === Section.EOF) {
+			this._minimalDeferred.resolve(this._ass);
+			this._deferred.resolve(this._ass);
+		}
+
+		this._currentSection = value;
+	}
+
+	/**
 	 * @param {string} line
 	 */
 	private _onNextLine(line: string): void {
 		if (line === null) {
-			this._minimalDeferred.resolve(this._ass);
-			this._deferred.resolve(this._ass);
+			this.currentSection = Section.EOF;
 			return;
 		}
 
@@ -88,22 +118,23 @@ export class StreamParser {
 			// Ignore empty lines and comments
 		}
 
-		else if (line[0] === "[" && line[line.length - 1] === "]") {
-			// Start of new section
-
-			if (this._currentSectionName === "Script Info") {
-				// Exiting script info section
-				this._minimalDeferred.resolve(this._ass);
+		else if (line === "[Script Info]") {
+			this.currentSection = Section.ScriptInfo;
+		}
+		else if (line === "[V4+ Styles]" || line === "[V4 Styles]") {
+			this.currentSection = Section.Styles;
+		}
+		else if (line === "[Events]") {
+			this.currentSection = Section.Events;
+		}
+		else {
+			if (line[0] === "[" && line[line.length - 1] === "]") {
+				// This looks like the start of a new section. The section name is unrecognized if it is.
+				this.currentSection = Section.Other;
 			}
 
-			this._currentSectionName = line.substring(1, line.length - 1);
-		}
-
-		else {
-			switch (this._currentSectionName) {
-				case null:
-					this._currentSectionName = "Script Info";
-				case "Script Info":
+			switch (this.currentSection) {
+				case Section.ScriptInfo:
 					const property = parseLineIntoProperty(line);
 					if (property !== null) {
 						switch (property.name) {
@@ -123,8 +154,7 @@ export class StreamParser {
 					}
 					break;
 
-				case "V4+ Styles":
-				case "V4 Styles":
+				case Section.Styles:
 					if (this._ass.stylesFormatSpecifier === null) {
 						const property = parseLineIntoProperty(line);
 						if (property !== null && property.name === "Format") {
@@ -146,7 +176,7 @@ export class StreamParser {
 					}
 					break;
 
-				case "Events":
+				case Section.Events:
 					if (this._ass.dialoguesFormatSpecifier === null) {
 						const property = parseLineIntoProperty(line);
 						if (property !== null && property.name === "Format") {
@@ -168,9 +198,12 @@ export class StreamParser {
 					}
 					break;
 
-				default:
-					// Ignore other sections
+				case Section.Other:
+					// Ignore other sections.
 					break;
+
+				default:
+					throw new Error(`Unhandled state ${ this.currentSection }`);
 			}
 		}
 
