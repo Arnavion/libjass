@@ -20,7 +20,70 @@
 
 import { Attachment } from "../types/attachment";
 
+import { Map } from "../utility/map";
 import { Set } from "../utility/set";
+
+type DataReader = { dataView: DataView; position: number; };
+
+enum DataType {
+	Char,
+	Uint16,
+	Uint32,
+}
+
+type StructMemberDefinition = { type: DataType; field?: string; };
+
+const fieldDecorators = new Map<DataType, (proto: any, field: string) => void>();
+
+@struct
+class OffsetTable {
+	/** @type {number} */ @field(DataType.Uint16) majorVersion: number;
+	/** @type {number} */ @field(DataType.Uint16) minorVersion: number;
+	/** @type {number} */ @field(DataType.Uint16) numTables: number;
+	/** @type {number} */ @field(DataType.Uint16) searchRange: number;
+	/** @type {number} */ @field(DataType.Uint16) entrySelector: number;
+	/** @type {number} */ @field(DataType.Uint16) rangeShift: number;
+
+	/** @type {function(!{ dataView: DataView, position: number }): OffsetTable} */
+	static read: (reader: DataReader) => OffsetTable;
+}
+
+@struct
+class TableRecord {
+	/** @type {string} */ @field(DataType.Char) c1: string;
+	/** @type {string} */ @field(DataType.Char) c2: string;
+	/** @type {string} */ @field(DataType.Char) c3: string;
+	/** @type {string} */ @field(DataType.Char) c4: string;
+	/** @type {number} */ @field(DataType.Uint32) checksum: number;
+	/** @type {number} */ @field(DataType.Uint32) offset: number;
+	/** @type {number} */ @field(DataType.Uint32) length: number;
+
+	/** @type {function(!{ dataView: DataView, position: number }): TableRecord} */
+	static read: (reader: DataReader) => TableRecord;
+}
+
+@struct
+class NameTableHeader {
+	/** @type {number} */ @field(DataType.Uint16) formatSelector: number;
+	/** @type {number} */ @field(DataType.Uint16) count: number;
+	/** @type {number} */ @field(DataType.Uint16) stringOffset: number;
+
+	/** @type {function(!{ dataView: DataView, position: number }): NameTableHeader} */
+	static read: (reader: DataReader) => NameTableHeader;
+}
+
+@struct
+class NameRecord {
+	/** @type {number} */ @field(DataType.Uint16) platformId: number;
+	/** @type {number} */ @field(DataType.Uint16) encodingId: number;
+	/** @type {number} */ @field(DataType.Uint16) languageId: number;
+	/** @type {number} */ @field(DataType.Uint16) nameId: number;
+	/** @type {number} */ @field(DataType.Uint16) length: number;
+	/** @type {number} */ @field(DataType.Uint16) offset: number;
+
+	/** @type {function(!{ dataView: DataView, position: number }): NameRecord} */
+	static read: (reader: DataReader) => NameRecord;
+}
 
 /**
  * Gets all the font names from the given font attachment.
@@ -37,32 +100,31 @@ export function getTtfNames(attachment: Attachment): Set<string> {
 		bytes[i] = decoded.charCodeAt(i);
 	}
 
-	const dataView = new DataView(bytes.buffer);
+	const reader = { dataView: new DataView(bytes.buffer), position: 0 };
 
-	var offset = 0;
-	var [offsetTable, offset] = read(OffsetTable, dataView, offset);
-	let nameTableDirectory: TableDirectory = null;
-	for (let i = 0; i < offsetTable.numTableDirectories; i++) {
-		var [tableDirectory, offset] = read(TableDirectory, dataView, offset);
-		if (tableDirectory.tag === "name") {
-			nameTableDirectory = tableDirectory;
+	const offsetTable = OffsetTable.read(reader);
+	let nameTableRecord: TableRecord = null;
+	for (let i = 0; i < offsetTable.numTables; i++) {
+		const tableRecord = TableRecord.read(reader);
+		if (tableRecord.c1 + tableRecord.c2 + tableRecord.c3 + tableRecord.c4 === "name") {
+			nameTableRecord = tableRecord;
 			break;
 		}
 	}
 
-	offset = nameTableDirectory.offset;
-	var [nameTableHeader, offset] = read(NameTableHeader, dataView, offset);
+	reader.position = nameTableRecord.offset;
+	const nameTableHeader = NameTableHeader.read(reader);
 
 	const result = new Set<string>();
-	for (let i = 0; i < nameTableHeader.nrCount; i++) {
-		var [nameRecord, offset] = read(NameRecord, dataView, offset);
+	for (let i = 0; i < nameTableHeader.count; i++) {
+		const nameRecord = NameRecord.read(reader);
 
 		switch (nameRecord.nameId) {
 			case 1:
 			case 4:
 			case 6:
-				const recordOffset = nameTableDirectory.offset + nameTableHeader.storageOffset + nameRecord.stringOffset;
-				const nameBytes = bytes.subarray(recordOffset, recordOffset + nameRecord.stringLength);
+				const recordOffset = nameTableRecord.offset + nameTableHeader.stringOffset + nameRecord.offset;
+				const nameBytes = bytes.subarray(recordOffset, recordOffset + nameRecord.length);
 
 				switch (nameRecord.platformId) {
 					case 1: {
@@ -99,107 +161,61 @@ export function getTtfNames(attachment: Attachment): Set<string> {
 }
 
 /**
- * @param {!function(new(!DataView, number): T, number)} ctor
- * @param {!DataView} dataView
- * @param {number} offset
- * @return {[T, number]}
+ * @param {!function(new(): T)} clazz
+ * @return {!function(new(): T)}
  */
-function read<T>(ctor: { new (dataView: DataView, offset: number): T; size: number; }, dataView: DataView, offset: number): [T, number] {
-	const result = new ctor(dataView, offset);
-	return [result, offset + ctor.size];
+function struct<T>(clazz: { new (): T; read(reader: DataReader): T; }): { new (): T; read(reader: DataReader): T; } {
+	const fields: StructMemberDefinition[] = (<any>clazz).__fields;
+
+	clazz.read = (reader: DataReader) => {
+		const result: any = new clazz();
+
+		for (const field of fields) {
+			let value: any;
+			switch (field.type) {
+				case DataType.Char:
+					value = String.fromCharCode(reader.dataView.getInt8(reader.position));
+					reader.position += 1;
+					break;
+
+				case DataType.Uint16:
+					value = reader.dataView.getUint16(reader.position);
+					reader.position += 2;
+					break;
+
+				case DataType.Uint32:
+					value = reader.dataView.getUint32(reader.position);
+					reader.position += 4;
+					break;
+			}
+
+			result[field.field] = value;
+		}
+
+		return result;
+	};
+
+	return clazz;
 }
 
 /**
- * @param {!DataView} dataView
- * @param {number} offset
+ * @param {number} type
+ * @return {function(T, string)}
  */
-class OffsetTable {
-	/** @type {number} */
-	public numTableDirectories: number;
+function field<T>(type: DataType): (proto: T, field: string) => void {
+	let existingDecorator = fieldDecorators.get(type);
+	if (existingDecorator === undefined) {
+		existingDecorator =(proto: T, field: string) => {
+			const ctor: { __fields?: StructMemberDefinition[] } = proto.constructor;
+			if (ctor.__fields === undefined) {
+				ctor.__fields = [];
+			}
 
-	constructor(dataView: DataView, offset: number) {
-		this.numTableDirectories = dataView.getUint16(offset + 4, false);
+			ctor.__fields.push({ type, field });
+		};
+
+		fieldDecorators.set(type, existingDecorator);
 	}
 
-	/** @type {number} */
-	static size = 2 + 2 + 2 + 2 + 2 + 2;
-}
-
-/**
- * @param {!DataView} dataView
- * @param {number} offset
- */
-class TableDirectory {
-	/** @type {string} */
-	public tag: string;
-
-	/** @type {number} */
-	public offset: number;
-
-	constructor(dataView: DataView, offset: number) {
-		const c1 = dataView.getUint8(offset++);
-		const c2 = dataView.getUint8(offset++);
-		const c3 = dataView.getUint8(offset++);
-		const c4 = dataView.getUint8(offset++);
-		this.tag = String.fromCharCode(c1) + String.fromCharCode(c2) + String.fromCharCode(c3) + String.fromCharCode(c4);
-
-		this.offset = dataView.getUint32(offset + 4, false);
-	}
-
-	/** @type {number} */
-	static size = 4 + 4 + 4 + 4;
-}
-
-/**
- * @param {!DataView} dataView
- * @param {number} offset
- */
-class NameTableHeader {
-	/** @type {number} */
-	public nrCount: number;
-
-	/** @type {number} */
-	public storageOffset: number;
-
-	constructor(dataView: DataView, offset: number) {
-		offset += 2;
-		this.nrCount = dataView.getUint16(offset, false); offset += 2;
-		this.storageOffset = dataView.getUint16(offset, false);
-	}
-
-	/** @type {number} */
-	static size = 2 + 2 + 2;
-}
-
-/**
- * @param {!DataView} dataView
- * @param {number} offset
- */
-class NameRecord {
-	/** @type {number} */
-	public platformId: number;
-
-	/** @type {number} */
-	public encodingId: number;
-
-	/** @type {number} */
-	public nameId: number;
-
-	/** @type {number} */
-	public stringLength: number;
-
-	/** @type {number} */
-	public stringOffset: number;
-
-	constructor(dataView: DataView, offset: number) {
-		this.platformId = dataView.getUint16(offset, false); offset += 2;
-		this.encodingId = dataView.getUint16(offset, false); offset += 2;
-		offset += 2;
-		this.nameId = dataView.getUint16(offset, false); offset += 2;
-		this.stringLength = dataView.getUint16(offset, false); offset += 2;
-		this.stringOffset = dataView.getUint16(offset, false); offset += 2;
-	}
-
-	/** @type {number} */
-	static size = 2 + 2 + 2 + 2 + 2 + 2;
+	return existingDecorator;
 }

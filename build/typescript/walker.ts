@@ -117,6 +117,7 @@ class Walker {
 			case ts.SyntaxKind.ExpressionStatement:
 			case ts.SyntaxKind.ForOfStatement:
 			case ts.SyntaxKind.IfStatement:
+			case ts.SyntaxKind.TypeAliasDeclaration:
 				break;
 
 			default:

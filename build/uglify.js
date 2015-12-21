@@ -165,8 +165,12 @@ var Run = (function () {
 						statement.definitions[0].value.args[0] = new UglifyJS.AST_Number({ start: stringArg.start, end: stringArg.end, value: importedModule.id });
 					}
 					else if (statement.definitions[0].name.name === "__extends") {
-						var importAbsolutePath = path.join(_this._entry, "..", "utility", "extends").replace(/\\/g, "/");
+						var importAbsolutePath = path.join(_this._entry, "..", "utility", "ts-helpers").replace(/\\/g, "/");
 						statement.definitions[0].value = UglifyJS.parse('require(' + _this._modules[importAbsolutePath].id + ').__extends').body[0].body;
+					}
+					else if (statement.definitions[0].name.name === "__decorate") {
+						var importAbsolutePath = path.join(_this._entry, "..", "utility", "ts-helpers").replace(/\\/g, "/");
+						statement.definitions[0].value = UglifyJS.parse('require(' + _this._modules[importAbsolutePath].id + ').__decorate').body[0].body;
 					}
 				}
 			});
