@@ -147,13 +147,15 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 					return;
 				}
 
+				const attachmentUrl = `data:application/x-font-ttf;base64,${ attachment.contents }`;
+
 				ttfNames.forEach(name => {
 					let correspondingFontMapEntry = fontMap.get(name);
 					if (correspondingFontMapEntry !== undefined) {
 						// Also defined in fontMap.
 						if (typeof correspondingFontMapEntry !== "string") {
 							// Entry in fontMap is an array. Append this URL to it.
-							correspondingFontMapEntry.push(attachment.url);
+							correspondingFontMapEntry.push(attachmentUrl);
 						}
 						else {
 							/* The entry in fontMap is a string. Don't append this URL to it. Instead, put it in attachedFontsMap now
@@ -164,12 +166,12 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							if (existingList === undefined) {
 								attachedFontsMap.set(name, existingList = []);
 							}
-							existingList.push(attachment.url);
+							existingList.push(attachmentUrl);
 						}
 					}
 					else {
 						// Not defined in fontMap. Add it there.
-						fontMap.set(name, [attachment.url]);
+						fontMap.set(name, [attachmentUrl]);
 					}
 				});
 			});

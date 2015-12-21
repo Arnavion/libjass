@@ -72,14 +72,4 @@ export class Attachment {
 	set contents(value: string) {
 		this._contents = value;
 	}
-
-	/**
-	 * The data URL of this attachment.
-	 *
-	 * @type {string}
-	 */
-	get url(): string {
-		const mediaType = this._type === AttachmentType.Font ? "application/x-font-ttf" : "application/octet-stream";
-		return `data:${ mediaType };base64,${ this.contents }`;
-	}
 }

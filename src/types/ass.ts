@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import { Attachment, AttachmentType } from "./attachment";
+import { Attachment } from "./attachment";
 import { Dialogue } from "./dialogue";
 import { Style } from "./style";
 import { ScriptProperties } from "./script-properties";
