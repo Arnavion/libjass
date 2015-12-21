@@ -42,7 +42,7 @@ import { WrappingStyle } from "../../types/misc";
 
 import { mixin } from "../../utility/mixin";
 import { Map } from "../../utility/map";
-import { Promise, first as Promise_first, lastly as Promise_finally } from "../../utility/promise";
+import { Promise, any as Promise_any, first as Promise_first, lastly as Promise_finally } from "../../utility/promise";
 import { Set } from "../../utility/set";
 
 declare const global: {
@@ -57,9 +57,18 @@ interface FontFaceSet {
 	 * @return {!FontFaceSet}
 	 */
 	add(fontFace: FontFace): FontFaceSet;
+
+	/**
+	 * @param {function(!FontFace, !FontFace, !FontFaceSet)} callbackfn A function that is called with each value in the set.
+	 * @param {*} thisArg
+	 */
+	forEach(callbackfn: (fontFace: FontFace, index: FontFace, set: FontFaceSet) => void, thisArg?: any): void;
 }
 
 interface FontFace {
+	/** @type {string} */
+	family: string;
+
 	/**
 	 * @return {!Promise.<!FontFace>}
 	 */
@@ -197,23 +206,31 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 					}
 				}
 
-				let fontFetchPromise = fontFetchPromisesCache.get(source);
-				if (fontFetchPromise === undefined) {
+				let existingFontFaces: FontFace[] = [];
+				global.document.fonts.forEach(fontFace => {
+					if (fontFace.family === fontFamily || fontFace.family === `"${ fontFamily }"`) {
+						existingFontFaces.push(fontFace);
+					}
+				});
+
+				let fontFetchPromise: Promise<FontFace>;
+				if (existingFontFaces.length === 0) {
 					const fontFace = new FontFace(fontFamily, source);
 					const quotedFontFace = new FontFace(`"${ fontFamily }"`, source);
 
 					global.document.fonts.add(fontFace);
 					global.document.fonts.add(quotedFontFace);
 
-					fontFetchPromise =
-						Promise.race<FontFace>([fontFace.load(), quotedFontFace.load()]).catch(reason => {
-							console.warn(`Fetching fonts for ${ fontFamily } at ${ source } failed: %o`, reason);
-							return null;
-						});
-					fontFetchPromisesCache.set(source, fontFetchPromise);
+					fontFetchPromise = Promise_any([fontFace.load(), quotedFontFace.load()])
+				}
+				else {
+					fontFetchPromise = Promise_any(existingFontFaces.map(fontFace => fontFace.load()));
 				}
 
-				fontFamilyMetricsPromise = this._calculateFontMetricsAfterFetch(fontFamily, fontFetchPromise);
+				fontFamilyMetricsPromise = this._calculateFontMetricsAfterFetch(fontFamily, fontFetchPromise.catch(reason => {
+					console.warn(`Fetching fonts for ${ fontFamily } at ${ source } failed: %o`, reason);
+					return null;
+				}));
 			}
 			else {
 				// value should be string[]. If it's string, split it into string[]

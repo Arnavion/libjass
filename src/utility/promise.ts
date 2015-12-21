@@ -508,6 +508,17 @@ function first_rec<T>(promises: Promise<T>[], previousRejections: any[]): Promis
 }
 
 /**
+ * Returns a promise that resolves to the first (in time order) promise that fulfills, and rejects if all the promises reject.
+ *
+ * @param {!Array.<!Promise.<T>>} promises
+ * @return {!Promise.<T>}
+ */
+export function any<T>(promises: Promise<T>[]): Promise<T> {
+	return new Promise<T>((resolve, reject) =>
+		Promise.all<any>(promises.map(promise => promise.then(resolve, reason => reason))).then(reject));
+}
+
+/**
  * Returns a promise that runs the given callback when the promise has resolved regardless of whether it fulfilled or rejected.
  *
  * @param {!Promise.<T>} promise
