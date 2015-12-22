@@ -226,12 +226,14 @@ export class ASS {
 	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 	 */
 	static fromUrl(url: string, type: Format = Format.ASS): Promise<ASS> {
+		let fetchPromise: Promise<ASS>;
+
 		if (
 			typeof global.fetch === "function" &&
 			typeof global.ReadableStream === "function" && typeof global.ReadableStream.prototype.getReader === "function" &&
 			typeof global.TextDecoder === "function"
 		) {
-			return global.fetch(url).then(response => {
+			fetchPromise = global.fetch(url).then(response => {
 				if (response.ok === false || (response.ok === undefined && (response.status < 200 || response.status > 299))) {
 					throw new Error(`HTTP request for ${ url } failed with status code ${ response.status }`);
 				}
@@ -239,12 +241,19 @@ export class ASS {
 				return ASS.fromReadableStream(response.body, "utf-8", type);
 			});
 		}
+		else {
+			fetchPromise = Promise.reject<ASS>(new Error("Not supported."));
+		}
 
-		const xhr = new XMLHttpRequest();
-		const result = ASS.fromStream(new parser.XhrStream(xhr), type);
-		xhr.open("GET", url, true);
-		xhr.send();
-		return result;
+		return fetchPromise.catch(reason => {
+			console.warn("fetch() failed, falling back to XHR: %o", reason);
+
+			const xhr = new XMLHttpRequest();
+			const result = ASS.fromStream(new parser.XhrStream(xhr), type);
+			xhr.open("GET", url, true);
+			xhr.send();
+			return result;
+		});
 	}
 
 	/**
