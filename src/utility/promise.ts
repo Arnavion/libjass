@@ -70,7 +70,7 @@ export var Promise: {
 	new <T>(init: (resolve: (value: T | Thenable<T>) => void, reject: (reason: any) => void) => void): Promise<T>;
 	prototype: Promise<any>;
 	resolve<T>(value: T | Thenable<T>): Promise<T>;
-	reject(reason: any): Promise<any>;
+	reject<T>(reason: any): Promise<T>;
 	all<T>(values: (T | Thenable<T>)[]): Promise<T[]>;
 	race<T>(values: (T | Thenable<T>)[]): Promise<T>;
 } = global.Promise;
@@ -214,10 +214,10 @@ class SimplePromise<T> {
 
 	/**
 	 * @param {*} reason
-	 * @return {!Promise.<*>}
+	 * @return {!Promise.<T>}
 	 */
-	static reject(reason: any): Promise<any> {
-		return new Promise<any>((/* ujs:unreferenced */ resolve, reject) => reject(reason));
+	static reject<T>(reason: any): Promise<T> {
+		return new Promise<T>((/* ujs:unreferenced */ resolve, reject) => reject(reason));
 	}
 
 	/**
