@@ -112,10 +112,12 @@ export class StringStream implements Stream {
 export class XhrStream implements Stream {
 	private _readTill: number = 0;
 	private _pendingDeferred: DeferredPromise<string> = null;
+	private _failedError: ErrorEvent = null;
 
 	constructor(private _xhr: XMLHttpRequest) {
 		_xhr.addEventListener("progress", () => this._onXhrProgress(), false);
-		_xhr.addEventListener("loadend", () => this._onXhrLoadEnd(), false);
+		_xhr.addEventListener("load", () => this._onXhrLoad(), false);
+		_xhr.addEventListener("error", event => this._onXhrError(event), false);
 	}
 
 	/**
@@ -140,12 +142,34 @@ export class XhrStream implements Stream {
 			return;
 		}
 
+		if (this._xhr.readyState === XMLHttpRequest.DONE) {
+			/* Suppress resolving next line here. Let the "load" or "error" event handlers do it.
+			 *
+			 * This is required because a failed XHR fires the progress event with readyState === DONE before it fires the error event.
+			 * This would confuse _tryResolveNextLine() into thinking the request succeeded with no data if it was called here.
+			 */
+			return;
+		}
+
 		this._tryResolveNextLine();
 	}
 
 	/**
 	 */
-	private _onXhrLoadEnd(): void {
+	private _onXhrLoad(): void {
+		if (this._pendingDeferred === null) {
+			return;
+		}
+
+		this._tryResolveNextLine();
+	}
+
+	/**
+	 * @param {!ErrorEvent} event
+	 */
+	private _onXhrError(event: ErrorEvent): void {
+		this._failedError = event;
+
 		if (this._pendingDeferred === null) {
 			return;
 		}
@@ -156,6 +180,11 @@ export class XhrStream implements Stream {
 	/**
 	 */
 	private _tryResolveNextLine(): void {
+		if (this._failedError !== null) {
+			this._pendingDeferred.reject(this._failedError);
+			return;
+		}
+
 		const response = this._xhr.responseText;
 
 		const nextNewLinePos = response.indexOf("\n", this._readTill);
@@ -166,8 +195,12 @@ export class XhrStream implements Stream {
 		}
 
 		else if (this._xhr.readyState === XMLHttpRequest.DONE) {
+			if (this._failedError !== null) {
+				this._pendingDeferred.reject(this._failedError);
+			}
+
 			// No more data. This is the last line.
-			if (this._readTill < response.length) {
+			else if (this._readTill < response.length) {
 				this._pendingDeferred.resolve(response.substr(this._readTill));
 				this._readTill = response.length;
 			}

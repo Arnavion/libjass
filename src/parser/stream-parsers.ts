@@ -58,7 +58,10 @@ export class StreamParser {
 	private _currentAttachment: Attachment = null;
 
 	constructor(private _stream: Stream) {
-		this._stream.nextLine().then(line => this._onNextLine(line));
+		this._stream.nextLine().then(line => this._onNextLine(line), reason => {
+			this._minimalDeferred.reject(reason);
+			this._deferred.reject(reason);
+		});
 	}
 
 	/**
@@ -270,7 +273,10 @@ export class StreamParser {
 			}
 		}
 
-		this._stream.nextLine().then(line => this._onNextLine(line));
+		this._stream.nextLine().then(line => this._onNextLine(line), reason => {
+			this._minimalDeferred.reject(reason);
+			this._deferred.reject(reason);
+		});
 	}
 }
 
@@ -291,7 +297,9 @@ export class SrtStreamParser {
 	private _currentDialogueText: string = null;
 
 	constructor(private _stream: Stream) {
-		this._stream.nextLine().then(line => this._onNextLine(line));
+		this._stream.nextLine().then(line => this._onNextLine(line), reason => {
+			this._deferred.reject(reason);
+		});
 
 		this._ass.properties.resolutionX = 1280;
 		this._ass.properties.resolutionY = 720;
@@ -384,7 +392,9 @@ export class SrtStreamParser {
 			}
 		}
 
-		this._stream.nextLine().then(line => this._onNextLine(line));
+		this._stream.nextLine().then(line => this._onNextLine(line), reason => {
+			this._deferred.reject(reason);
+		});
 	}
 }
 
