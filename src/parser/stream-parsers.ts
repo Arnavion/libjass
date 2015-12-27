@@ -96,9 +96,18 @@ export class StreamParser {
 			// Exiting script info section
 			this._minimalDeferred.resolve(this._ass);
 		}
-		else if (value === Section.EOF) {
-			this._minimalDeferred.resolve(this._ass);
-			this._deferred.resolve(this._ass);
+
+		if (value === Section.EOF) {
+			const scriptProperties = this._ass.properties;
+			if (scriptProperties.resolutionX === undefined || scriptProperties.resolutionY === undefined) {
+				// Malformed script.
+				this._minimalDeferred.reject("Malformed ASS script.");
+				this._deferred.reject("Malformed ASS script.");
+			}
+			else {
+				this._minimalDeferred.resolve(this._ass);
+				this._deferred.resolve(this._ass);
+			}
 		}
 
 		this._currentSection = value;
