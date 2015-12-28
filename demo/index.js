@@ -305,7 +305,10 @@ function go(videoUrl, assPromise) {
 		var ass = results[1];
 
 		// Create a DefaultRenderer using the video element and the ASS object
-		var renderer = new libjass.renderers.DefaultRenderer(video, ass);
+		var renderer = new libjass.renderers.DefaultRenderer(video, ass, {
+			// IE doesn't support SVG filter effects on HTML. Unfortunately there isn't a clean way of feature-detecting this.
+			enableSvg: (navigator.userAgent.indexOf("Trident") === -1) && (location.search.indexOf("disableSvg") === -1)
+		});
 
 		// Export the renderer for debugging
 		window.renderer = renderer;
