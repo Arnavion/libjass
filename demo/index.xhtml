@@ -25,20 +25,71 @@
 -->
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
-		<title>&gt;2012 &gt;Streaman Animu</title>
+		<title>libjass demo</title>
 		<link rel="stylesheet" href="libjass.css" />
 		<link rel="stylesheet" href="index.css" />
 		<script src="libjass.js" />
 		<script src="index.js" />
 	</head>
 	<body>
-		<h1>libjass demo</h1>
+		<p>This is a demo page for the libjass library - a library for displaying ASS subtitles on HTML5 video. See the source of index.js for an explanation of how to use the library.</p>
 
-		<!-- Default look of the page - two input controls to let the user choose a video and subs file. -->
+		<!-- Default look of the page - input controls to let the user choose a video and an ASS script. -->
 		<div id="content">
-			<label for="video-input">Choose a video:</label><input type="file" id="video-input"></input>
-			<label for="script-input">Choose an ASS file:</label><input type="file" id="script-input"></input>
+			<fieldset>
+				<legend>Choose a video</legend>
+				<div>
+					<input type="radio" id="video-choice-local-file" name="video-choice" />
+					<label for="video-choice-local-file">Local file (The file won't be uploaded. It will be used directly within your browser.)</label>
+					<input type="file" id="video-input-local-file" />
+				</div>
+				<div>
+					<input type="radio" id="video-choice-url" name="video-choice" />
+					<label for="video-choice-url">Direct video URL (webm / MP4)</label>
+					<input type="url" id="video-input-url" />
+				</div>
+			</fieldset>
+			<fieldset>
+				<legend>Choose an ASS script</legend>
+				<div>
+					<input type="radio" id="ass-choice-local-file" name="ass-choice" />
+					<label for="ass-choice-local-file">Local file (The file won't be uploaded. It will be used directly within your browser.)</label>
+					<input type="file" id="ass-input-local-file" />
+				</div>
+				<div>
+					<input type="radio" id="ass-choice-url" name="ass-choice" />
+					<label for="ass-choice-url">Direct script URL (must be accessible via CORS)</label>
+					<input type="url" id="ass-input-url" />
+				</div>
+				<div>
+					<input type="radio" id="ass-choice-text" name="ass-choice" />
+					<label for="ass-choice-text">Text</label>
+					<textarea id="ass-input-text"></textarea>
+				</div>
+			</fieldset>
 			<button type="button" id="go-button" disabled="disabled">Go</button>
+		</div>
+
+		<fieldset id="console">
+			<legend>
+				Console output
+				<input type="checkbox" id="debug-mode" />
+				<label for="debug-mode">Enable debug mode</label>
+				<input type="checkbox" id="verbose-mode" />
+				<label for="verbose-mode">Enable verbose mode</label>
+			</legend>
+		</fieldset>
+
+		<div>
+			<p>Found a bug? Please check if there's already a similar issue already reported at <a href="https://github.com/Arnavion/libjass/issues">https://github.com/Arnavion/libjass/issues</a> If there isn't, please open a new issue. You can also report it in the #libjass channel on the Rizon IRC network.</p>
+			<p>Please include the following information in your bug report:
+				<ul>
+					<li>Your OS and browser versions. Eg: "Chrome 49 on Windows 7"</li>
+					<li>A description of the bug. What did you expect to see? What happened instead? Eg: "All the subtitles are visible except the one at 00:00:05 'Was it you who broke the clock?'" or "The subtitle at 00:00:05 should be red but instead it's blue."</li>
+					<li>If possible, a URL to the video and script that I can access for testing.</li>
+					<li>Any text from the "Console output" section above.</li>
+				</ul>
+			</p>
 		</div>
 
 		<script type="text/template" id="template">
@@ -46,7 +97,7 @@
 			<video data-id="video" controls="" />
 
 			<!-- These controls will be placed next to the video to allow changing its size, and for turning the subs off and on. -->
-			<form class="settings-form">
+			<form data-id="settings-form">
 				<fieldset>
 					<legend>Video size</legend>
 					<div data-id="video-size-selector">

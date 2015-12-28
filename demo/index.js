@@ -19,12 +19,10 @@
  */
 
 
-/* This page demonstrates how to use libjass. It allows you to choose two files - a video file that will be played in a <video> element,
- * and a .ass file that contains the subs. The two chosen files are converted to File URLs; if you were making a video playing site then
- * you would have the URLs already.
+/* This page demonstrates how to use libjass. It allows you to choose a video that will be played in a <video> element, and an ASS script.
  *
  *
- * Below you will find the basics of using libjass - the ASS.fromUrl() function and the DefaultRenderer class - and some advanced concepts:
+ * Below you will find the basics of using libjass - the ASS.fromUrl() and ASS.fromString() functions, and the DefaultRenderer class - and some advanced concepts:
  * - handling resizable video
  * - autoplaying video
  * - handling fullscreen video
@@ -48,23 +46,135 @@
 "use strict";
 
 
-/* This section sets up the default look of the page - two <input type="file"> controls that will be used to choose the files, and the
- * "Go" button that will transform the page into the <video> element. If you already have the URLs, you would skip this step and generate
- * the appropriate <video> element directly.
+/* This section sets up the default look of the page - a bunch of input controls for the video and ASS script, and the
+ * "Go" button that will create a <video> element and start rendering subs over it. If you already have URLs for a video and script on your website,
+ * you would just generate the <video> element and start using libjass directly.
  */
 addEventListener("DOMContentLoaded", function () {
+	var htmlConsole = document.querySelector("#console");
+	htmlConsoleLog = htmlConsoleLog(htmlConsole);
+	htmlConsoleError = htmlConsoleError(htmlConsole);
+	var originalConsoleLog = console.log.bind(console);
+	var originalConsoleWarn = console.warn.bind(console);
+	var originalConsoleError = console.log.bind(console);
+	console.log = function () {
+		htmlConsoleLog([].slice.call(arguments, 0));
+		originalConsoleLog.apply(null, arguments);
+	};
+	console.warn = function () {
+		htmlConsoleWarn([].slice.call(arguments, 0));
+		originalConsoleWarn.apply(null, arguments);
+	};
+	console.error = function () {
+		htmlConsoleError([].slice.call(arguments, 0));
+		originalConsoleError.apply(null, arguments);
+	};
+
 	var content = document.querySelector("#content");
 
-	var videoInput = document.querySelector("#video-input");
-	var scriptInput = document.querySelector("#script-input");
+	var videoChoiceLocalFileInput = document.querySelector("#video-choice-local-file");
+	var videoInputLocalFile = document.querySelector("#video-input-local-file");
+
+	var videoChoiceUrlInput = document.querySelector("#video-choice-url");
+	var videoInputUrl = document.querySelector("#video-input-url");
+
+	var assChoiceLocalFileInput = document.querySelector("#ass-choice-local-file");
+	var assInputLocalFile = document.querySelector("#ass-input-local-file");
+
+	var assChoiceUrlInput = document.querySelector("#ass-choice-url");
+	var assInputUrl = document.querySelector("#ass-input-url");
+
+	var assChoiceTextInput = document.querySelector("#ass-choice-text");
+	var assInputText = document.querySelector("#ass-input-text");
+
+	// Local file input requires URL.createObjectURL, so disable those inputs if the function doesn't exist.
+	if (typeof URL === "undefined" || typeof URL.createObjectURL !== "function") {
+		[
+			videoChoiceLocalFileInput,
+			assChoiceLocalFileInput
+		].forEach(function (input) {
+			input.disabled = true;
+			document.querySelector('label[for="' + input.id + '"]').appendChild(document.createTextNode(" (This browser doesn't support URL.createObjectURL)"));
+		});
+
+		[
+			videoInputLocalFile,
+			assInputLocalFile
+		].forEach(function (input) {
+			input.disabled = true;
+		});
+	}
+
+	// Register event handlers to enable the Go button if all inputs are valid.
+	[
+		videoChoiceLocalFileInput,
+		videoChoiceUrlInput,
+		assChoiceLocalFileInput,
+		assChoiceUrlInput,
+		assChoiceTextInput
+	].forEach(function (input) {
+		input.addEventListener("change", updateGoButton, false);
+	});
+
+	[
+		videoInputLocalFile,
+		assInputLocalFile,
+	].forEach(function (input) {
+		input.addEventListener("change", updateGoButton, false);
+	});
+
+	[
+		videoInputUrl,
+		assInputUrl,
+		assInputText
+	].forEach(function (input) {
+		input.addEventListener("input", updateGoButton, false);
+	});
+
+
+	// libjass.debugMode and libjass.verboseMode are two properties that can be set to true to have libjass print some debug information.
+	var debugModeCheckbox = document.querySelector("#debug-mode");
+	debugModeCheckbox.addEventListener("change", function () {
+		console.log((debugModeCheckbox.checked ? "Enabling" : "Disabling") + " debug mode.");
+		libjass.debugMode = debugModeCheckbox.checked;
+	}, false);
+	var verboseModeCheckbox = document.querySelector("#verbose-mode");
+	verboseModeCheckbox.addEventListener("change", function () {
+		console.log((debugModeCheckbox.checked ? "Enabling" : "Disabling") + " verbose mode.");
+		libjass.verboseMode = verboseModeCheckbox.checked;
+	}, false);
+
+
 	var goButton = document.querySelector("#go-button");
 
-	videoInput.addEventListener("change", updateGoButton, false);
-
-	scriptInput.addEventListener("change", updateGoButton, false);
-
 	function updateGoButton() {
-		goButton.disabled = videoInput.files.length !== 1 || scriptInput.files.length !== 1;
+		var videoOk = false;
+		var assOk = false;
+
+		var videoChoice = document.querySelector('input[name="video-choice"]:checked');
+		switch (videoChoice) {
+			case videoChoiceLocalFileInput:
+				videoOk = videoInputLocalFile.files.length === 1;
+				break;
+			case videoChoiceUrlInput:
+				videoOk = document.querySelector("#video-input-url:invalid") === null && videoInputUrl.value.length > 0;
+				break;
+		}
+
+		var assChoice = document.querySelector('input[name="ass-choice"]:checked');
+		switch (assChoice) {
+			case assChoiceLocalFileInput:
+				assOk = assInputLocalFile.files.length === 1;
+				break;
+			case assChoiceUrlInput:
+				assOk = document.querySelector("#ass-input-url:invalid") === null && assInputUrl.value.length > 0;
+				break;
+			case assChoiceTextInput:
+				assOk = document.querySelector("#ass-input-choice:invalid") === null && assInputText.value.length > 0;
+				break;
+		}
+
+		goButton.disabled = !videoOk || !assOk;
 	}
 
 	goButton.addEventListener("click", function () {
@@ -72,6 +182,34 @@ addEventListener("DOMContentLoaded", function () {
 
 		if (this.disabled) {
 			return;
+		}
+
+		var videoUrl = null;
+
+		var videoChoice = document.querySelector('input[name="video-choice"]:checked');
+		switch (videoChoice) {
+			case videoChoiceLocalFileInput:
+				// Video is a local file. Convert it into a blob URL.
+				videoUrl = URL.createObjectURL(videoInputLocalFile.files[0]);
+				break;
+			case videoChoiceUrlInput:
+				videoUrl = videoInputUrl.value;
+				break;
+		}
+
+		var assPromise = null;
+
+		var assChoice = document.querySelector('input[name="ass-choice"]:checked');
+		switch (assChoice) {
+			case assChoiceLocalFileInput:
+				assPromise = libjass.ASS.fromUrl(URL.createObjectURL(assInputLocalFile.files[0]));
+				break;
+			case assChoiceUrlInput:
+				assPromise = libjass.ASS.fromUrl(assInputUrl.value);
+				break;
+			case assChoiceTextInput:
+				assPromise = libjass.ASS.fromString(assInputText.value);
+				break;
 		}
 
 		while (content.firstChild) {
@@ -88,14 +226,14 @@ addEventListener("DOMContentLoaded", function () {
 			content.appendChild(element);
 		});
 
-		go(URL.createObjectURL(videoInput.files[0]), URL.createObjectURL(scriptInput.files[0]));
+		go(videoUrl, assPromise);
 	});
 }, false);
 
 
 /* This is a function that creates the <video> element with the given video URL, and sets up libjass to render the subs at the given ASS URL.
  */
-function go(videoUrl, assUrl) {
+function go(videoUrl, assPromise) {
 	var video = document.querySelector("#video");
 
 
@@ -118,6 +256,9 @@ function go(videoUrl, assUrl) {
 		if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
 			// Video metadata isn't available yet. Register an event handler for it.
 			video.addEventListener("loadedmetadata", function () { resolve(); }, false);
+			video.addEventListener("error", function (event) {
+				reject(video.error);
+			}, false);
 		}
 		else {
 			// Video metadata is already available.
@@ -129,6 +270,9 @@ function go(videoUrl, assUrl) {
 		// Prepare the "Video resolution" option label
 		document.querySelector("#video-resolution-label-width").appendChild(document.createTextNode(video.videoWidth));
 		document.querySelector("#video-resolution-label-height").appendChild(document.createTextNode(video.videoHeight));
+	}).catch(function (reason) {
+		console.error("Video could not be loaded: %o %o", [null, "MEDIA_ERR_ABORTED", "MEDIA_ERR_NETWORK", "MEDIA_ERR_DECODE", "MEDIA_ERR_SRC_NOT_SUPPORTED"][reason.code], reason);
+		throw reason;
 	});
 
 
@@ -136,7 +280,7 @@ function go(videoUrl, assUrl) {
 	 * function for this. It fetches the ASS script asynchronously and returns a promise that will be resolved when the script is fully
 	 * parsed.
 	 */
-	var assLoadedPromise = libjass.ASS.fromUrl(assUrl).then(function (ass) {
+	var assLoadedPromise = assPromise.then(function (ass) {
 		console.log("Script received.");
 
 		// Export the ASS object for debugging
@@ -147,6 +291,9 @@ function go(videoUrl, assUrl) {
 		document.querySelector("#script-resolution-label-height").appendChild(document.createTextNode(ass.properties.resolutionY));
 
 		return ass;
+	}).catch(function (reason) {
+		console.error("ASS could not be loaded: %o", reason);
+		throw reason;
 	});
 
 
@@ -233,8 +380,71 @@ function go(videoUrl, assUrl) {
 }
 
 
-/* libjass.debugMode and libjass.verboseMode are two properties that can be set to true to have libjass print some debug
- * information. This code sets them based on the querystring of the current page.
- */
-libjass.debugMode = (location.search === "?debug") || (location.search === "?verbose");
-libjass.verboseMode = (location.search === "?verbose");
+var htmlConsoleLog = function (htmlConsole) {
+	return function (items) {
+		var message = document.createElement("div");
+		htmlConsole.appendChild(message);
+		message.className = "log";
+
+		var text = new Date().toString() + ": ";
+		items.forEach(function (item) {
+			switch (typeof item) {
+				case "boolean":
+				case "number":
+				case "string":
+					text += item + " ";
+					break;
+				default:
+					text += item + "[Check browser console for more details.] ";
+					break;
+			}
+		});
+		message.appendChild(document.createTextNode(text));
+	};
+};
+
+var htmlConsoleWarn = function (htmlConsole) {
+	return function (items) {
+		var message = document.createElement("div");
+		htmlConsole.appendChild(message);
+		message.className = "warning";
+
+		var text = new Date().toString() + ": ";
+		items.forEach(function (item) {
+			switch (typeof item) {
+				case "boolean":
+				case "number":
+				case "string":
+					text += item + " ";
+					break;
+				default:
+					text += item + "[Check browser console for more details.] ";
+					break;
+			}
+		});
+		message.appendChild(document.createTextNode(text));
+	};
+};
+
+var htmlConsoleError = function (htmlConsole) {
+	return function (items) {
+		var message = document.createElement("div");
+		htmlConsole.appendChild(message);
+		message.className = "error";
+
+		var text = new Date().toString() + ": ";
+		items.forEach(function (item) {
+			switch (typeof item) {
+				case "boolean":
+				case "number":
+				case "string":
+					text += item + " ";
+					break;
+				default:
+					text += item + "[Check browser console for more details.] ";
+					break;
+			}
+		});
+		message.appendChild(document.createTextNode(text));
+	};
+};

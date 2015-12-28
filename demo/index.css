@@ -28,6 +28,14 @@ body {
 	z-index: 2147483647;
 }
 
-.settings-form > fieldset {
+#settings-form > fieldset {
 	display: inline-block;
+}
+
+#console > .warning {
+	color: yellow;
+}
+
+#console > .error {
+	color: red;
 }
