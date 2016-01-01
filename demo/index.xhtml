@@ -30,6 +30,7 @@
 		<link rel="stylesheet" href="index.css" />
 		<script src="libjass.js" />
 		<script src="index.js" />
+		<script src="dummy-video.js" />
 	</head>
 	<body>
 		<p>This is a demo page for the libjass library - a library for displaying ASS subtitles on HTML5 video. See the source of index.js for an explanation of how to use the library.</p>
@@ -38,16 +39,35 @@
 		<div id="content">
 			<fieldset>
 				<legend>Choose a video</legend>
-				<div>
-					<input type="radio" id="video-choice-local-file" name="video-choice" />
-					<label for="video-choice-local-file">Local file (The file won't be uploaded. It will be used directly within your browser.)</label>
-					<input type="file" id="video-input-local-file" />
-				</div>
-				<div>
-					<input type="radio" id="video-choice-url" name="video-choice" />
-					<label for="video-choice-url">Direct video URL (webm / MP4)</label>
-					<input type="url" id="video-input-url" />
-				</div>
+				<ul class="choices-list">
+					<li>
+						<input type="radio" id="video-choice-local-file" name="video-choice" />
+						<label for="video-choice-local-file">Local file (The file won't be uploaded. It will be used directly within your browser.)</label>
+						<input type="file" id="video-input-local-file" />
+					</li>
+					<li>
+						<input type="radio" id="video-choice-url" name="video-choice" />
+						<label for="video-choice-url">Direct video URL (webm / MP4)</label>
+						<input type="url" id="video-input-url" />
+					</li>
+					<li>
+						<input type="radio" id="video-choice-dummy" name="video-choice" />
+						<label id="video-input-dummy-description" for="video-choice-dummy">Dummy video</label>
+						<select id="video-input-dummy-resolution">
+							<option value="640x480">640 x 480 (SD fullscreen)</option>
+							<option value="704x480">704 x 480 (SD anamorphic)</option>
+							<option value="640x360">640 x 360 (SD widescreen)</option>
+							<option value="704x396">704 x 396 (SD widescreen)</option>
+							<option value="640x352">640 x 352 (SD widescreen MOD16)</option>
+							<option value="704x400">704 x 400 (SD widescreen MOD16)</option>
+							<option value="1280x720" selected="selected">1280 x 720 (HD 720p)</option>
+							<option value="1920x1080">1920 x 1080 (HD 1080p)</option>
+							<option value="1024x576">1024 x 576 (SuperPAL widescreen)</option>
+						</select>
+						<input type="color" id="video-input-dummy-color" value="#2fa3fe"></input>
+						<label><input type="number" id="video-input-dummy-duration" value="25"></input> mins</label>
+					</li>
+				</ul>
 			</fieldset>
 			<fieldset>
 				<legend>Choose an ASS script</legend>

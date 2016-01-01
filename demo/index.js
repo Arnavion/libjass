@@ -79,6 +79,12 @@ addEventListener("DOMContentLoaded", function () {
 	var videoChoiceUrlInput = document.querySelector("#video-choice-url");
 	var videoInputUrl = document.querySelector("#video-input-url");
 
+	var videoChoiceDummyInput = document.querySelector("#video-choice-dummy");
+	var videoInputDummyDescription = document.querySelector("#video-input-dummy-description");
+	var videoInputDummyResolution = document.querySelector("#video-input-dummy-resolution");
+	var videoInputDummyColor = document.querySelector("#video-input-dummy-color");
+	var videoInputDummyDuration = document.querySelector("#video-input-dummy-duration");
+
 	var assChoiceLocalFileInput = document.querySelector("#ass-choice-local-file");
 	var assInputLocalFile = document.querySelector("#ass-input-local-file");
 
@@ -106,10 +112,32 @@ addEventListener("DOMContentLoaded", function () {
 		});
 	}
 
+	if (
+		typeof HTMLCanvasElement.prototype.captureStream !== "function" ||
+		typeof MediaRecorder === "undefined" ||
+		typeof MediaSource === "undefined" ||
+		typeof MediaSource.isTypeSupported !== "function"/* ||
+		!MediaSource.isTypeSupported("video/webm")*/
+	) {
+		[
+			videoChoiceDummyInput,
+			videoInputDummyResolution,
+			videoInputDummyColor,
+			videoInputDummyDuration
+		].forEach(function (input) {
+			input.disabled = true;
+		});
+
+		videoInputDummyDescription.appendChild(document.createTextNode(
+			" (This browser doesn't support generating dummy video. Consider using Firefox 46 or newer and enabling media.mediasource.webm.enabled in about:config)"
+		));
+	}
+
 	// Register event handlers to enable the Go button if all inputs are valid.
 	[
 		videoChoiceLocalFileInput,
 		videoChoiceUrlInput,
+		videoChoiceDummyInput,
 		assChoiceLocalFileInput,
 		assChoiceUrlInput,
 		assChoiceTextInput
@@ -126,6 +154,7 @@ addEventListener("DOMContentLoaded", function () {
 
 	[
 		videoInputUrl,
+		videoInputDummyDuration,
 		assInputUrl,
 		assInputText
 	].forEach(function (input) {
@@ -160,6 +189,9 @@ addEventListener("DOMContentLoaded", function () {
 			case videoChoiceUrlInput:
 				videoOk = document.querySelector("#video-input-url:invalid") === null && videoInputUrl.value.length > 0;
 				break;
+			case videoChoiceDummyInput:
+				videoOk = videoInputDummyDuration.value.length > 0 && parseInt(videoInputDummyDuration.value) > 0;
+				break;
 		}
 
 		var assChoice = document.querySelector('input[name="ass-choice"]:checked');
@@ -185,33 +217,8 @@ addEventListener("DOMContentLoaded", function () {
 			return;
 		}
 
-		var videoUrl = null;
-
 		var videoChoice = document.querySelector('input[name="video-choice"]:checked');
-		switch (videoChoice) {
-			case videoChoiceLocalFileInput:
-				// Video is a local file. Convert it into a blob URL.
-				videoUrl = URL.createObjectURL(videoInputLocalFile.files[0]);
-				break;
-			case videoChoiceUrlInput:
-				videoUrl = videoInputUrl.value;
-				break;
-		}
-
-		var assPromise = null;
-
 		var assChoice = document.querySelector('input[name="ass-choice"]:checked');
-		switch (assChoice) {
-			case assChoiceLocalFileInput:
-				assPromise = libjass.ASS.fromUrl(URL.createObjectURL(assInputLocalFile.files[0]));
-				break;
-			case assChoiceUrlInput:
-				assPromise = libjass.ASS.fromUrl(assInputUrl.value);
-				break;
-			case assChoiceTextInput:
-				assPromise = libjass.ASS.fromString(assInputText.value);
-				break;
-		}
 
 		while (content.firstChild) {
 			content.removeChild(content.firstChild);
@@ -227,54 +234,106 @@ addEventListener("DOMContentLoaded", function () {
 			content.appendChild(element);
 		});
 
-		go(videoUrl, assPromise);
+		var videoPromise = null;
+
+		switch (videoChoice) {
+			case videoChoiceLocalFileInput:
+				// Video is a local file. Convert it into a blob URL.
+				videoPromise = prepareVideo(0 /* URL */, URL.createObjectURL(videoInputLocalFile.files[0]));
+				break;
+			case videoChoiceUrlInput:
+				videoPromise = prepareVideo(0 /* URL */, videoInputUrl.value);
+				break;
+			case videoChoiceDummyInput:
+				var resolution = videoInputDummyResolution.value.split("x");
+				var color = videoInputDummyColor.value;
+				var duration = parseInt(videoInputDummyDuration.value) * 60;
+				videoPromise = prepareVideo(1 /* dummy */, resolution[0], resolution[1], color, duration);
+				break;
+		}
+
+		var assPromise = null;
+
+		switch (assChoice) {
+			case assChoiceLocalFileInput:
+				assPromise = libjass.ASS.fromUrl(URL.createObjectURL(assInputLocalFile.files[0]));
+				break;
+			case assChoiceUrlInput:
+				assPromise = libjass.ASS.fromUrl(assInputUrl.value);
+				break;
+			case assChoiceTextInput:
+				assPromise = libjass.ASS.fromString(assInputText.value);
+				break;
+		}
+
+		go(videoPromise, assPromise);
 	});
 }, false);
 
 
-/* This is a function that creates the <video> element with the given video URL, and sets up libjass to render the subs at the given ASS URL.
- */
-function go(videoUrl, assPromise) {
+function prepareVideo(videoType /*, ...parameters */) {
 	var video = document.querySelector("#video");
 
+	var videoMetadataLoadedPromise = null;
 
-	/* Set the <video> element's src to the given URL
-	 */
-	video.src = videoUrl;
+	if (videoType === 0 /* URL */) {
+		var videoUrl = arguments[1];
+
+		videoMetadataLoadedPromise = new libjass.Promise(function (resolve, reject) {
+			/* Set the <video> element's src to the given URL
+			 */
+			video.src = videoUrl;
 
 
-	/* (Advanced)
-	 *
-	 * This demo lets you resize the video to its original resolution or the subs resolution. If you have control over the video, you
-	 * might already know the resolution of the video, and any alternative resolutions you want to provide, so you don't need to do this.
-	 *
-	 * We'll get the original video resolution from the video metadata. We can see if the video has metadata already by comparing
-	 * video.readyState to HTMLMediaElement.HAVE_METADATA. If not already loaded, we can wait for the loadedmetadata event.
-	 *
-	 * This code creates a promise that will be resolved when the video metadata is available.
-	 */
-	var videoMetadataLoadedPromise = new libjass.Promise(function (resolve, reject) {
-		if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
-			// Video metadata isn't available yet. Register an event handler for it.
-			video.addEventListener("loadedmetadata", function () { resolve(); }, false);
-			video.addEventListener("error", function (event) {
-				reject(video.error);
-			}, false);
-		}
-		else {
-			// Video metadata is already available.
-			resolve();
-		}
-	}).then(function () {
+			/* (Advanced)
+			 *
+			 * This demo lets you resize the video to its original resolution or the subs resolution. If you have control over the video, you
+			 * might already know the resolution of the video, and any alternative resolutions you want to provide, so you don't need to do this.
+			 *
+			 * We'll get the original video resolution from the video metadata. We can see if the video has metadata already by comparing
+			 * video.readyState to HTMLMediaElement.HAVE_METADATA. If not already loaded, we can wait for the loadedmetadata event.
+			 *
+			 * This code creates a promise that will be resolved when the video metadata is available.
+			 */
+			if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
+				// Video metadata isn't available yet. Register an event handler for it.
+				video.addEventListener("loadedmetadata", resolve, false);
+				video.addEventListener("error", function (event) { reject(video.error); }, false);
+			}
+			else {
+				// Video metadata is already available.
+				resolve();
+			}
+		});
+	}
+	else if (videoType === 1 /* dummy */) {
+		var width = arguments[1];
+		var height = arguments[2];
+		var color = arguments[3];
+		var duration = arguments[4];
+
+		videoMetadataLoadedPromise = makeDummyVideo(video, width, height, color, duration);
+	}
+
+	return videoMetadataLoadedPromise.then(function () {
 		console.log("Video metadata loaded.");
 
 		// Prepare the "Video resolution" option label
 		document.querySelector("#video-resolution-label-width").appendChild(document.createTextNode(video.videoWidth));
 		document.querySelector("#video-resolution-label-height").appendChild(document.createTextNode(video.videoHeight));
 	}).catch(function (reason) {
-		console.error("Video could not be loaded: %o %o", [null, "MEDIA_ERR_ABORTED", "MEDIA_ERR_NETWORK", "MEDIA_ERR_DECODE", "MEDIA_ERR_SRC_NOT_SUPPORTED"][reason.code], reason);
+		var errorCode = (reason.code !== undefined) ? [null, "MEDIA_ERR_ABORTED", "MEDIA_ERR_NETWORK", "MEDIA_ERR_DECODE", "MEDIA_ERR_SRC_NOT_SUPPORTED"][reason.code] : "";
+
+		console.error("Video could not be loaded: %o %o", errorCode, reason);
 		throw reason;
 	});
+}
+
+
+/* This is a function that sets up libjass to render the subs.
+ */
+function go(videoPromise, assPromise) {
+	var video = document.querySelector("#video");
 
 
 	/* Now we need to fetch the ASS script at the given URL and convert it into a libjass.ASS object. We use the libjass.ASS.fromUrl()
@@ -298,11 +357,11 @@ function go(videoUrl, assPromise) {
 	});
 
 
-	/* Next, we wait for both the video metadata and the libjass.ASS objects to be available, i.e., for their respective promises to be
+	/* Next, we wait for both the video and the libjass.ASS object to be available, i.e., for their respective promises to be
 	 * resolved. Once they have, we can create the libjass.renderers.DefaultRenderer object. This is the object that will display subs
 	 * on the <video> element.
 	 */
-	libjass.Promise.all([videoMetadataLoadedPromise, assLoadedPromise]).then(function (results) {
+	libjass.Promise.all([videoPromise, assLoadedPromise]).then(function (results) {
 		var ass = results[1];
 
 		// Create a DefaultRenderer using the video element and the ASS object

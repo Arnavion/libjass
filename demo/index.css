@@ -39,3 +39,8 @@ body {
 #console > .error {
 	color: red;
 }
+
+ul.choices-list {
+	list-style-type: none;
+	padding-left: 0;
+}
