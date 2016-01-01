@@ -53,6 +53,7 @@
 addEventListener("DOMContentLoaded", function () {
 	var htmlConsole = document.querySelector("#console");
 	htmlConsoleLog = htmlConsoleLog(htmlConsole);
+	htmlConsoleWarn = htmlConsoleWarn(htmlConsole);
 	htmlConsoleError = htmlConsoleError(htmlConsole);
 	var originalConsoleLog = console.log.bind(console);
 	var originalConsoleWarn = console.warn.bind(console);

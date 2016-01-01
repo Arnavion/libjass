@@ -33,7 +33,7 @@ body {
 }
 
 #console > .warning {
-	color: yellow;
+	color: orange;
 }
 
 #console > .error {
