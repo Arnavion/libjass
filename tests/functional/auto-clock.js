@@ -103,8 +103,6 @@ define(["intern!tdd", "intern/chai!assert", "require", "intern/dojo/node!leadfoo
 				assert.deepEqual(clock.events, []);
 			})
 			.executeAsync(function (callback) {
-				clock.play();
-
 				setTimeout(function () {
 					callback({ enabled: clock.enabled, paused: clock.paused, events: events.slice() });
 				}, 1000);
