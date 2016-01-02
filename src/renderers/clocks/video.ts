@@ -89,7 +89,12 @@ export class VideoClock implements Clock {
 	 * Toggle the clock.
 	 */
 	toggle(): void {
-		this._autoClock.toggle();
+		if (this._autoClock.enabled) {
+			this.disable();
+		}
+		else {
+			this.enable();
+		}
 	}
 
 	/**
@@ -99,7 +104,12 @@ export class VideoClock implements Clock {
 	 * @return {boolean} True if the clock is now in the given state, false if it was already in that state.
 	 */
 	setEnabled(enabled: boolean): boolean {
-		return this._autoClock.setEnabled(enabled);
+		if (enabled) {
+			return this.enable();
+		}
+		else {
+			return this.disable();
+		}
 	}
 
 	/**

@@ -164,7 +164,12 @@ export class AutoClock implements Clock {
 	 * Toggle the clock.
 	 */
 	toggle(): void {
-		this._manualClock.toggle();
+		if (this._manualClock.enabled) {
+			this.disable();
+		}
+		else {
+			this.enable();
+		}
 	}
 
 	/**
@@ -174,7 +179,12 @@ export class AutoClock implements Clock {
 	 * @return {boolean} True if the clock is now in the given state, false if it was already in that state.
 	 */
 	setEnabled(enabled: boolean): boolean {
-		return this._manualClock.setEnabled(enabled);
+		if (enabled) {
+			return this.enable();
+		}
+		else {
+			return this.disable();
+		}
 	}
 
 	/**
