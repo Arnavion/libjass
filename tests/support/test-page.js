@@ -42,7 +42,7 @@ define([
 		return this._remote
 			.setWindowSize(1280, 720)
 			.get(this._pageUrl)
-			.then(pollUntil('return (document.readyState === "complete") ? true : null;'), 100)
+			.then(pollUntil('return (document.readyState === "complete") ? true : null;', 100))
 			.executeAsync(function (assUrl, enableSvg, callback) {
 				libjass.ASS.fromUrl(assUrl).then(function (ass) {
 					var clock = window.clock = new libjass.renderers.ManualClock();

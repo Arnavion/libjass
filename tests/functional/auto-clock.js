@@ -25,7 +25,7 @@ define(["intern!tdd", "intern/chai!assert", "require", "intern/dojo/node!leadfoo
 
 		return this.remote
 			.get(require.toUrl("tests/support/browser-test-page.html"))
-			.then(pollUntil('return (document.readyState === "complete") ? true : null;'), 100)
+			.then(pollUntil('return (document.readyState === "complete") ? true : null;', 100))
 			.execute(function () {
 				window.driverStartTime = 0;
 				window.driverStartTimeAt = new Date();
