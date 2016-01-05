@@ -505,29 +505,24 @@ function UjsSourceMap(options) {
 			orig_maps[consumer.file] = consumer;
 		},
 		add: function (source, gen_line, gen_col, orig_line, orig_col, name) {
-			var originalMap;
-			if (source) {
-				originalMap = orig_maps[source];
-			}
-			else {
-				source = "?";
+			var originalMap = orig_maps[source];
+			if (originalMap === undefined) {
+				return;
 			}
 
-			if (originalMap) {
-				var info = originalMap.originalPositionFor({
-					line: orig_line,
-					column: orig_col
-				});
+			var info = originalMap.originalPositionFor({
+				line: orig_line,
+				column: orig_col
+			});
 
-				if (info.source === null) {
-					return;
-				}
-
-				source = info.source;
-				orig_line = info.line;
-				orig_col = info.column;
-				name = info.name || name;
+			if (info.source === null) {
+				return;
 			}
+
+			source = info.source;
+			orig_line = info.line;
+			orig_col = info.column;
+			name = info.name || name;
 
 			generator.addMapping({
 				generated : { line: gen_line, column: gen_col },
