@@ -393,6 +393,7 @@ export class SpanStyles {
 			// Color it with the outline color
 			const coloredSource = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
 			filterElement.appendChild(coloredSource);
+			coloredSource.setAttribute("color-interpolation-filters", "sRGB");
 
 			const outlineRedTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncR");
 			coloredSource.appendChild(outlineRedTransferNode);
