@@ -34,6 +34,8 @@
 
 .libjass-subs, .libjass-subs * {
 	pointer-events: none;
+	-webkit-animation-fill-mode: both !important;
+	animation-fill-mode: both !important;
 }
 
 .libjass-subs.paused * {
