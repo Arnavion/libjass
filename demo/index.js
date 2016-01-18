@@ -275,6 +275,8 @@ addEventListener("DOMContentLoaded", function () {
 
 		go(videoPromise, assPromise);
 	});
+
+	updateGoButton();
 }, false);
 
 
