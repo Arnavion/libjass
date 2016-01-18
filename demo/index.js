@@ -82,7 +82,6 @@ addEventListener("DOMContentLoaded", function () {
 	var videoChoiceSampleInput = document.querySelector("#video-choice-sample");
 
 	var videoChoiceDummyInput = document.querySelector("#video-choice-dummy");
-	var videoInputDummyDescription = document.querySelector("#video-input-dummy-description");
 	var videoInputDummyResolution = document.querySelector("#video-input-dummy-resolution");
 	var videoInputDummyColor = document.querySelector("#video-input-dummy-color");
 	var videoInputDummyDuration = document.querySelector("#video-input-dummy-duration");
@@ -103,7 +102,7 @@ addEventListener("DOMContentLoaded", function () {
 			assChoiceLocalFileInput
 		].forEach(function (input) {
 			input.disabled = true;
-			document.querySelector('label[for="' + input.id + '"]').appendChild(document.createTextNode(" (This browser doesn't support URL.createObjectURL)"));
+			input.parentElement.appendChild(document.createTextNode(" (This browser doesn't support URL.createObjectURL)"));
 		});
 
 		[
@@ -130,7 +129,7 @@ addEventListener("DOMContentLoaded", function () {
 			input.disabled = true;
 		});
 
-		videoInputDummyDescription.appendChild(document.createTextNode(
+		videoChoiceDummyInput.parentElement.appendChild(document.createTextNode(
 			" (This browser doesn't support generating dummy video. Consider using Firefox 46 or newer and enabling media.mediasource.webm.enabled in about:config)"
 		));
 	}
