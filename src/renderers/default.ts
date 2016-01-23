@@ -32,8 +32,6 @@ import { ASS } from "../types/ass";
  * @param {libjass.renderers.RendererSettings} settings
  */
 export class DefaultRenderer extends WebRenderer {
-	private _videoIsFullScreen: boolean = false;
-
 	constructor(private _video: HTMLVideoElement, ass: ASS, settings?: RendererSettings) {
 		super(ass, new VideoClock(_video), document.createElement("div"), settings);
 
@@ -53,38 +51,8 @@ export class DefaultRenderer extends WebRenderer {
 	}
 
 	protected _ready(): void {
-		document.addEventListener("mozfullscreenchange", event => this._onFullScreenChange(document.mozFullScreenElement), false);
-		document.addEventListener("webkitfullscreenchange", event => this._onFullScreenChange(document.webkitFullscreenElement), false);
-		document.addEventListener("fullscreenchange", event => this._onFullScreenChange(document.fullscreenElement), false);
-
 		this.resize(this._video.offsetWidth, this._video.offsetHeight);
 
 		super._ready();
-	}
-
-	/**
-	 * @param {!Element} fullScreenElement
-	 */
-	private _onFullScreenChange(fullScreenElement: Element): void {
-		if (fullScreenElement === undefined) {
-			fullScreenElement = document.msFullscreenElement;
-		}
-
-		if (fullScreenElement === this._video) {
-			this.libjassSubsWrapper.classList.add("libjass-full-screen");
-
-			this.resize(screen.width, screen.height);
-
-			this._videoIsFullScreen = true;
-
-			this._dispatchEvent("fullScreenChange", [this._videoIsFullScreen]);
-		}
-		else if (fullScreenElement === null && this._videoIsFullScreen) {
-			this.libjassSubsWrapper.classList.remove("libjass-full-screen");
-
-			this._videoIsFullScreen = false;
-
-			this._dispatchEvent("fullScreenChange", [this._videoIsFullScreen]);
-		}
 	}
 }
