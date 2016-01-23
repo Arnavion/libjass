@@ -40,18 +40,37 @@ export class DefaultRenderer extends WebRenderer {
 	}
 
 	/**
-	 * @deprecated
+	 * Resize the subtitles to the dimensions of the video element.
 	 *
-	 * @param {number} width
-	 * @param {number} height
+	 * This method accounts for letterboxing if the video element's size is not the same ratio as the video resolution.
 	 */
-	resizeVideo(width: number, height: number): void {
-		console.warn("`DefaultRenderer.resizeVideo(width, height)` has been deprecated. Use `DefaultRenderer.resize(width, height)` instead.");
-		this.resize(width, height);
+	resize(): void {
+		// Handle letterboxing around the video. If the width or height are greater than the video can be, then consider that dead space.
+
+		const videoWidth = this._video.videoWidth;
+		const videoHeight = this._video.videoHeight;
+		const videoOffsetWidth = this._video.offsetWidth;
+		const videoOffsetHeight = this._video.offsetHeight;
+
+		const ratio = Math.min(videoOffsetWidth / videoWidth, videoOffsetHeight / videoHeight);
+		const subsWrapperWidth = videoWidth * ratio;
+		const subsWrapperHeight = videoHeight * ratio;
+		const subsWrapperLeft = (videoOffsetWidth - subsWrapperWidth) / 2;
+		const subsWrapperTop = (videoOffsetHeight - subsWrapperHeight) / 2;
+
+		super.resize(subsWrapperWidth, subsWrapperHeight, subsWrapperLeft, subsWrapperTop);
+	}
+
+	/**
+	 * @deprecated
+	 */
+	resizeVideo(): void {
+		console.warn("`DefaultRenderer.resizeVideo(width, height)` has been deprecated. Use `DefaultRenderer.resize()` instead.");
+		this.resize();
 	}
 
 	protected _ready(): void {
-		this.resize(this._video.offsetWidth, this._video.offsetHeight);
+		this.resize();
 
 		super._ready();
 	}

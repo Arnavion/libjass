@@ -321,20 +321,21 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	 *
 	 * @param {number} width
 	 * @param {number} height
+	 * @param {number=0} left
+	 * @param {number=0} top
 	 */
-	resize(width: number, height: number): void {
+	resize(width: number, height: number, left: number = 0, top: number = 0): void {
 		this._removeAllSubs();
 
-		const ratio = Math.min(width / this.ass.properties.resolutionX, height / this.ass.properties.resolutionY);
-		this._subsWrapperWidth = this.ass.properties.resolutionX * ratio;
-		const subsWrapperHeight = this.ass.properties.resolutionY * ratio;
-		this._subsWrapper.style.width = `${ this._subsWrapperWidth.toFixed(3) }px`;
-		this._subsWrapper.style.height = `${ subsWrapperHeight.toFixed(3) }px`;
-		this._subsWrapper.style.left = `${ ((width - this._subsWrapperWidth) / 2).toFixed(3) }px`;
-		this._subsWrapper.style.top = `${ ((height - subsWrapperHeight) / 2).toFixed(3) }px`;
+		this._subsWrapper.style.width = `${ width.toFixed(3) }px`;
+		this._subsWrapper.style.height = `${ height.toFixed(3) }px`;
+		this._subsWrapper.style.left = `${ left.toFixed(3) }px`;
+		this._subsWrapper.style.top = `${ top.toFixed(3) }px`;
 
-		this._scaleX = this._subsWrapperWidth / this.ass.properties.resolutionX;
-		this._scaleY = subsWrapperHeight / this.ass.properties.resolutionY;
+		this._subsWrapperWidth = width;
+
+		this._scaleX = width / this.ass.properties.resolutionX;
+		this._scaleY = height / this.ass.properties.resolutionY;
 
 		// Any dialogues which have been pre-rendered will need to be pre-rendered again.
 		this._preRenderedSubs.clear();
