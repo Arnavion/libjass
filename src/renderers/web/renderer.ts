@@ -84,6 +84,8 @@ const fontSrcUrlRegex = /^(url|local)\(["']?(.+?)["']?\)$/;
 /**
  * A renderer implementation that draws subtitles to the given <div>
  *
+ * After the renderer fires its ready event, {@link libjass.renderers.WebRenderer.resize} must be called to initialize its size before starting the clock.
+ *
  * @param {!libjass.ASS} ass
  * @param {!libjass.renderers.Clock} clock
  * @param {!HTMLDivElement} libjassSubsWrapper Subtitles will be rendered to this <div>
