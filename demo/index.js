@@ -25,7 +25,6 @@
  * Below you will find the basics of using libjass - the ASS.fromUrl() and ASS.fromString() functions, and the DefaultRenderer class - and some advanced concepts:
  * - handling resizable video
  * - autoplaying video
- * - handling fullscreen video
  * - toggling subs on user input
  *
  * The advanced concepts are optional and marked with "(Advanced)"
@@ -33,7 +32,7 @@
  *
  * Some more advanced uses not demonstrated here include:
  * - renderer settings, such as using custom fonts or controlling the pre-render time
- * - using WebRenderer instead of DefaultRenderer for control over the placement of the subs <div>, custom handling of fullscreen, etc.
+ * - using WebRenderer instead of DefaultRenderer for control over the placement of the subs <div>, enabling fullscreen video, etc.
  * - using ASS.fromString() instead of ASS.fromUrl() when you have the ASS string already, such as in an online subs editor
  * - using libjass.parser.StreamParser and its minimalAss promise directly, such as for dynamically generated scripts
  * - working with SRT subs by specifying libjass.Format.SRT to the ASS.from*() functions
@@ -443,8 +442,7 @@ function go(videoPromise, assPromise) {
 		 * resolution. DefaultRenderer needs to be told of changes to the size of the <video> element because it needs the size information to
 		 * calculate the positions and sizes of the subs.
 		 *
-		 * This next function is called whenever the user chooses a different preset size for the video. It's also called when the video exits
-		 * fullscreen, so that the user's original selection can be restored.
+		 * This next function is called whenever the user chooses a different preset size for the video.
 		 */
 		var applyVideoSizeSelection = function () {
 			// Find which option is selected
@@ -456,7 +454,7 @@ function go(videoPromise, assPromise) {
 
 				video.style.width = video.videoWidth + "px";
 				video.style.height = video.videoHeight + "px";
-				renderer.resize(video.videoWidth, video.videoHeight);
+				renderer.resize();
 			}
 
 			else if (id === "video-size-script-radio") {
@@ -464,19 +462,12 @@ function go(videoPromise, assPromise) {
 
 				video.style.width = ass.properties.resolutionX + "px";
 				video.style.height = ass.properties.resolutionY + "px";
-				renderer.resize(ass.properties.resolutionX, ass.properties.resolutionY);
+				renderer.resize();
 			}
 		};
 
 		var videoSizeSelector = document.querySelector("#video-size-selector");
 		videoSizeSelector.addEventListener("change", function (event) { applyVideoSizeSelection(); }, false);
-
-		// When video exits full screen, restore the size according to the resolution option that's selected
-		renderer.addEventListener("fullScreenChange", function (videoIsFullScreen) {
-			if (!videoIsFullScreen) {
-				applyVideoSizeSelection();
-			}
-		});
 
 		// Set the resolution to whatever's selected by default
 		applyVideoSizeSelection();
