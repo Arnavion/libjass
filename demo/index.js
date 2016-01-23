@@ -83,6 +83,8 @@ addEventListener("DOMContentLoaded", function () {
 
 	var videoChoiceDummyInput = document.querySelector("#video-choice-dummy");
 	var videoInputDummyResolution = document.querySelector("#video-input-dummy-resolution");
+	var videoInputDummyWidth = document.querySelector("#video-input-dummy-width");
+	var videoInputDummyHeight = document.querySelector("#video-input-dummy-height");
 	var videoInputDummyColor = document.querySelector("#video-input-dummy-color");
 	var videoInputDummyDuration = document.querySelector("#video-input-dummy-duration");
 
@@ -123,6 +125,8 @@ addEventListener("DOMContentLoaded", function () {
 		[
 			videoChoiceDummyInput,
 			videoInputDummyResolution,
+			videoInputDummyWidth,
+			videoInputDummyHeight,
 			videoInputDummyColor,
 			videoInputDummyDuration
 		].forEach(function (input) {
@@ -133,6 +137,15 @@ addEventListener("DOMContentLoaded", function () {
 			" (This browser doesn't support generating dummy video. Consider using Firefox 46 or newer and enabling media.mediasource.webm.enabled in about:config)"
 		));
 	}
+
+	// Update dummy video width and height inputs when the dropdown selection changes
+	function updateDummyWidthAndHeight() {
+		var resolution = videoInputDummyResolution.value.split("x");
+		videoInputDummyWidth.value = resolution[0];
+		videoInputDummyHeight.value = resolution[1];
+	}
+	videoInputDummyResolution.addEventListener("change", updateDummyWidthAndHeight, false);
+	updateDummyWidthAndHeight();
 
 	// Register event handlers to enable the Go button if all inputs are valid.
 	[
@@ -194,7 +207,11 @@ addEventListener("DOMContentLoaded", function () {
 			case videoChoiceSampleInput:
 				videoOk = true;
 			case videoChoiceDummyInput:
-				videoOk = videoInputDummyDuration.value.length > 0 && parseInt(videoInputDummyDuration.value) > 0;
+				videoOk =
+					parseInt(videoInputDummyWidth.value) > 0 &&
+					parseInt(videoInputDummyHeight.value) > 0 &&
+					videoInputDummyDuration.value.length > 0 &&
+					parseInt(videoInputDummyDuration.value) > 0;
 				break;
 		}
 
@@ -252,10 +269,11 @@ addEventListener("DOMContentLoaded", function () {
 				videoPromise = prepareVideo(1 /* sample */);
 				break;
 			case videoChoiceDummyInput:
-				var resolution = videoInputDummyResolution.value.split("x");
+				var width = parseInt(videoInputDummyWidth.value);
+				var height = parseInt(videoInputDummyHeight.value);
 				var color = videoInputDummyColor.value;
 				var duration = parseInt(videoInputDummyDuration.value) * 60;
-				videoPromise = prepareVideo(2 /* dummy */, resolution[0], resolution[1], color, duration);
+				videoPromise = prepareVideo(2 /* dummy */, width, height, color, duration);
 				break;
 		}
 
