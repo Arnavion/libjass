@@ -1,3 +1,30 @@
+### v0.11.0 - 2016/01/24
+- BREAKING CHANGE - WebRenderer.resize(width, height) used to have a broken implementation of letterboxing to move the subs div right or down. Now it's WebRenderer.resize(width, height, left, top) and expects the caller to calculate letterboxing itself and supply left and top accordingly. DefaultRenderer does it using the video resolution and users of WebRenderer can do the same.
+- BREAKING CHANGE - DefaultRenderer.resize() now ignores its parameters and always resizes to its video element's dimensions. It had already stopped resizing the video element when it was renamed from resizeVideo in v0.6.0, so it doesn't make sense to let it take a completely different width and height.
+- BREAKING CHANGE - Removed fullscreen support in DefaultRenderer. It started out as a hack using max z-index and works on even fewer browsers now. It probably didn't work for you anyway so it should be no big loss.
+- Implemented experimental support for \t
+- Added RendererSettings.fallbackFonts to set the fallback fonts for all styles. Defaults to 'Arial, Helvetica, sans-serif, "Segoe UI Symbol"'.
+- Better compatibility with loose ASS scripts - assume unnamed first section is Script Info, fall back to Default style for missing styles, recognize arbitrary-case property names, normalize asterisks in style names, etc.
+- Various font size improvements - faster calculation, fix for incorrect size when line-height is overridden by site CSS, fix for incorrect scaled sizes for letterboxed subs, fix for incorrect metrics for web fonts, etc. The last one requires that all web fonts be specified in RendererSettings.fontMap to be rendered accurately.
+- WebRenderer now supports using local() URLs in addition to url() in CSS font-face rules.
+- Added RendererSettings.useAttachedFonts. If true, TTF fonts attached to the script will be used in addition to fonts specified in RendererSettings.fontMap. This setting is false by default, and should only be enabled on trusted fonts since it uses a very naive base64 and TTF parser to extract the font names from the attachment. It also requires ES6 typed arrays - ArrayBuffer, DataView, Uint8Array, etc. in the environment.
+- Various pre-render, SVG filter and DOM perf improvements.
+- Fixed \fscx and \fscy to not scale shadows.
+- Fixed \fscx and \fscy to have optional values.
+- Fixed \fs+ and \fs- to have required values.
+- Fixed \r<target_style> to use the target style's alpha values instead of 1.
+- Fixed \fad subs to not flash after the fade-out ends with low-resolution clocks.
+- Fixed outlines to not be darker than they should be.
+- Fixed styles to not ignore the ScaleX and ScaleY properties in the script.
+- Fixed lack of sufficient space between normal and italic text.
+- Fixed SVG filters to interpolate in sRGB space instead of RGB.
+- Fixed ASS parser to complain if a script doesn't have a Script Info section at all.
+- The promise returned from ASS.from*() is now properly rejected due to errors from loading the script, instead of just remaining unresolved forever.
+- Fixed SRT parser to swallow UTF-8 BOM just like the ASS parser.
+- Fixed all clocks to suppress redundant ticks if the current timestamp hasn't change from the last tick.
+- Fixed {AutoClock, VideoClock}.{setEnabled, toggle} methods to actually enable / disable the high-resolution timer.
+
+
 ### v0.10.0 - 2015/05/05
 - Implemented libjass.renderers.AutoClock, a clock that automatically ticks and generates clock events according to the state of an external driver.
 - Implemented \k
