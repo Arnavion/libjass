@@ -23,10 +23,6 @@
 	overflow: hidden;
 }
 
-.libjass-wrapper.libjass-full-screen {
-	position: static;
-}
-
 .libjass-subs {
 	position: absolute;
 	overflow: hidden;
@@ -34,6 +30,8 @@
 
 .libjass-subs, .libjass-subs * {
 	pointer-events: none;
+	-webkit-animation-fill-mode: both !important;
+	animation-fill-mode: both !important;
 }
 
 .libjass-subs.paused * {
@@ -94,6 +92,7 @@
 	border: 0;
 	margin: 0;
 	padding: 0;
+	line-height: normal;
 }
 
 .libjass-filters {

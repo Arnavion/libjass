@@ -19,16 +19,16 @@
  */
 (function (root, factory) {
     var global = this;
-    if (typeof exports === "object" && typeof module === "object") {
-        module.exports = factory(global);
-    } else if (typeof define === "function" && define.amd) {
-        define(function () {
+    if (typeof define === "function" && define.amd) {
+        define([], function () {
             return factory(global);
         });
+    } else if (typeof exports === "object" && typeof module === "object") {
+        module.exports = factory(global);
     } else if (typeof exports === "object") {
-        exports["libjass"] = factory(global);
+        exports.libjass = factory(global);
     } else {
-        root["libjass"] = factory(global);
+        root.libjass = factory(global);
     }
 })(this, function (global) {
     "use strict";
@@ -36,50 +36,48 @@
         var installedModules = Object.create(null);
         function require(moduleId) {
             if (installedModules[moduleId]) {
-                return installedModules[moduleId].exports;
+                return installedModules[moduleId];
             }
-            var module = installedModules[moduleId] = {
-                exports: Object.create(null),
-                id: moduleId,
-                loaded: false
-            };
-            modules[moduleId](module.exports, require);
-            module.loaded = true;
-            return module.exports;
+            var exports = installedModules[moduleId] = Object.create(null);
+            modules[moduleId](exports, require);
+            return exports;
         }
         return require(0);
     }([ /* 0 ./index */ function (exports, require) {
-        var settings = require(22);
-        var settings_1 = require(22);
+        var settings = require(23);
+        var settings_1 = require(23);
         exports.debugMode = settings_1.debugMode;
         exports.verboseMode = settings_1.verboseMode;
-        var set = require(32);
-        var set_1 = require(32);
+        var set = require(33);
+        var set_1 = require(33);
         exports.Set = set_1.Set;
-        var map = require(29);
-        var map_1 = require(29);
+        var map = require(30);
+        var map_1 = require(30);
         exports.Map = map_1.Map;
-        var promise = require(31);
-        var promise_1 = require(31);
+        var promise = require(32);
+        var promise_1 = require(32);
         exports.Promise = promise_1.Promise;
         exports.DeferredPromise = promise_1.DeferredPromise;
-        var webworker = require(35);
+        var webworker = require(37);
         exports.webworker = webworker;
-        var parts = require(7);
+        var parts = require(8);
         exports.parts = parts;
         var parser = require(1);
         exports.parser = parser;
-        var renderers = require(13);
+        var renderers = require(14);
         exports.renderers = renderers;
-        var ass_1 = require(23);
+        var ass_1 = require(24);
         exports.ASS = ass_1.ASS;
-        var dialogue_1 = require(24);
+        var attachment_1 = require(25);
+        exports.Attachment = attachment_1.Attachment;
+        exports.AttachmentType = attachment_1.AttachmentType;
+        var dialogue_1 = require(26);
         exports.Dialogue = dialogue_1.Dialogue;
-        var script_properties_1 = require(26);
+        var script_properties_1 = require(28);
         exports.ScriptProperties = script_properties_1.ScriptProperties;
-        var style_1 = require(27);
+        var style_1 = require(29);
         exports.Style = style_1.Style;
-        var misc_1 = require(25);
+        var misc_1 = require(27);
         exports.BorderStyle = misc_1.BorderStyle;
         exports.Format = misc_1.Format;
         exports.WrappingStyle = misc_1.WrappingStyle;
@@ -126,7 +124,7 @@
         exports.StreamParser = stream_parsers_1.StreamParser;
         exports.SrtStreamParser = stream_parsers_1.SrtStreamParser;
     }, /* 2 ./parser/misc */ function (exports, require) {
-        var map_1 = require(29);
+        var map_1 = require(30);
         /**
          * Parses a line into a {@link ./types/misc.Property}.
          *
@@ -173,9 +171,10 @@
         }
         exports.parseLineIntoTypedTemplate = parseLineIntoTypedTemplate;
     }, /* 3 ./parser/parse */ function (exports, require) {
-        var parts = require(7);
-        var settings_1 = require(22);
-        var map_1 = require(29);
+        var parts = require(8);
+        var settings_1 = require(23);
+        var map_1 = require(30);
+        var rules = new map_1.Map();
         /**
          * Parses a given string with the specified rule.
          *
@@ -226,12 +225,13 @@
              * @return {ParseNode}
              */
             ParserRun.prototype.parse_dialogueParts = function (parent) {
+                var _a;
                 var current = new ParseNode(parent);
                 current.value = [];
                 while (this._haveMore()) {
                     var enclosedTagsNode = this.parse_enclosedTags(current);
                     if (enclosedTagsNode !== null) {
-                        current.value.push.apply(current.value, enclosedTagsNode.value);
+                        (_a = current.value).push.apply(_a, enclosedTagsNode.value);
                     } else {
                         var whiteSpaceOrTextNode = this.parse_newline(current) || this.parse_hardspace(current) || this.parse_text(current);
                         if (whiteSpaceOrTextNode === null) {
@@ -743,11 +743,11 @@
                     return null;
                 }
                 var valueNode = this.parse_decimal(current);
-                if (valueNode === null) {
-                    parent.pop();
-                    return null;
+                if (valueNode !== null) {
+                    current.value = new parts.FontScaleX(valueNode.value / 100);
+                } else {
+                    current.value = new parts.FontScaleX(null);
                 }
-                current.value = new parts.FontScaleX(valueNode.value / 100);
                 return current;
             };
             /**
@@ -761,11 +761,11 @@
                     return null;
                 }
                 var valueNode = this.parse_decimal(current);
-                if (valueNode === null) {
-                    parent.pop();
-                    return null;
+                if (valueNode !== null) {
+                    current.value = new parts.FontScaleY(valueNode.value / 100);
+                } else {
+                    current.value = new parts.FontScaleY(null);
                 }
-                current.value = new parts.FontScaleY(valueNode.value / 100);
                 return current;
             };
             /**
@@ -1242,153 +1242,46 @@
              */
             ParserRun.prototype.parse_drawingInstructions = function (parent) {
                 var current = new ParseNode(parent);
-                var lastType = null;
+                var currentType = null;
+                var numberParts = [];
                 current.value = [];
                 while (this._haveMore()) {
                     while (this.read(current, " ") !== null) {}
                     if (!this._haveMore()) {
                         break;
                     }
-                    var currentType = null;
+                    if (currentType !== null) {
+                        var numberPart = this.parse_decimal(current);
+                        if (numberPart !== null) {
+                            numberParts.push(numberPart);
+                            if (currentType === "m" && numberParts.length === 2) {
+                                current.value.push(new parts.drawing.MoveInstruction(numberParts[0].value, numberParts[1].value));
+                                numberParts.splice(0, numberParts.length);
+                            } else if (currentType === "l" && numberParts.length === 2) {
+                                current.value.push(new parts.drawing.LineInstruction(numberParts[0].value, numberParts[1].value));
+                                numberParts.splice(0, numberParts.length);
+                            } else if (currentType === "b" && numberParts.length === 6) {
+                                current.value.push(new parts.drawing.CubicBezierCurveInstruction(numberParts[0].value, numberParts[1].value, numberParts[2].value, numberParts[3].value, numberParts[4].value, numberParts[5].value));
+                                numberParts.splice(0, numberParts.length);
+                            }
+                            continue;
+                        }
+                    }
                     var typePart = this.parse_text(current);
                     if (typePart === null) {
-                        parent.pop();
-                        return null;
+                        break;
                     }
-                    currentType = typePart.value.value;
-                    switch (currentType) {
+                    var newType = typePart.value.value;
+                    switch (newType) {
                       case "m":
                       case "l":
                       case "b":
-                        lastType = currentType;
-                        break;
-
-                      default:
-                        if (lastType === null) {
-                            parent.pop();
-                            return null;
-                        }
-                        currentType = lastType;
-                        current.pop();
-                        break;
-                    }
-                    switch (currentType) {
-                      case "m":
-                        var movePart = this.parse_drawingInstructionMove(current);
-                        if (movePart === null) {
-                            parent.pop();
-                            return null;
-                        }
-                        current.value.push(movePart.value);
-                        break;
-
-                      case "l":
-                        var linePart = this.parse_drawingInstructionLine(current);
-                        if (linePart === null) {
-                            parent.pop();
-                            return null;
-                        }
-                        current.value.push(linePart.value);
-                        break;
-
-                      case "b":
-                        var cubicBezierCurvePart = this.parse_drawingInstructionCubicBezierCurve(current);
-                        if (cubicBezierCurvePart === null) {
-                            parent.pop();
-                            return null;
-                        }
-                        current.value.push(cubicBezierCurvePart.value);
+                        currentType = newType;
+                        numberParts.splice(0, numberParts.length);
                         break;
                     }
                 }
                 while (this.read(current, " ") !== null) {}
-                return current;
-            };
-            /**
-             * @param {!ParseNode} parent
-             * @return {ParseNode}
-             */
-            ParserRun.prototype.parse_drawingInstructionMove = function (parent) {
-                var current = new ParseNode(parent);
-                while (this.read(current, " ") !== null) {}
-                var xPart = this.parse_decimal(current);
-                if (xPart === null) {
-                    parent.pop();
-                    return null;
-                }
-                while (this.read(current, " ") !== null) {}
-                var yPart = this.parse_decimal(current);
-                if (yPart === null) {
-                    parent.pop();
-                    return null;
-                }
-                current.value = new parts.drawing.MoveInstruction(xPart.value, yPart.value);
-                return current;
-            };
-            /**
-             * @param {!ParseNode} parent
-             * @return {ParseNode}
-             */
-            ParserRun.prototype.parse_drawingInstructionLine = function (parent) {
-                var current = new ParseNode(parent);
-                while (this.read(current, " ") !== null) {}
-                var xPart = this.parse_decimal(current);
-                if (xPart === null) {
-                    parent.pop();
-                    return null;
-                }
-                while (this.read(current, " ") !== null) {}
-                var yPart = this.parse_decimal(current);
-                if (yPart === null) {
-                    parent.pop();
-                    return null;
-                }
-                current.value = new parts.drawing.LineInstruction(xPart.value, yPart.value);
-                return current;
-            };
-            /**
-             * @param {!ParseNode} parent
-             * @return {ParseNode}
-             */
-            ParserRun.prototype.parse_drawingInstructionCubicBezierCurve = function (parent) {
-                var current = new ParseNode(parent);
-                while (this.read(current, " ") !== null) {}
-                var x1Part = this.parse_decimal(current);
-                if (x1Part === null) {
-                    parent.pop();
-                    return null;
-                }
-                while (this.read(current, " ") !== null) {}
-                var y1Part = this.parse_decimal(current);
-                if (y1Part === null) {
-                    parent.pop();
-                    return null;
-                }
-                while (this.read(current, " ") !== null) {}
-                var x2Part = this.parse_decimal(current);
-                if (x2Part === null) {
-                    parent.pop();
-                    return null;
-                }
-                while (this.read(current, " ") !== null) {}
-                var y2Part = this.parse_decimal(current);
-                if (y2Part === null) {
-                    parent.pop();
-                    return null;
-                }
-                while (this.read(current, " ") !== null) {}
-                var x3Part = this.parse_decimal(current);
-                if (x3Part === null) {
-                    parent.pop();
-                    return null;
-                }
-                while (this.read(current, " ") !== null) {}
-                var y3Part = this.parse_decimal(current);
-                if (y3Part === null) {
-                    parent.pop();
-                    return null;
-                }
-                current.value = new parts.drawing.CubicBezierCurveInstruction(x1Part.value, y1Part.value, x2Part.value, y2Part.value, x3Part.value, y3Part.value);
                 return current;
             };
             /**
@@ -1445,12 +1338,7 @@
              */
             ParserRun.prototype.parse_decimalOrHexInt32 = function (parent) {
                 var current = new ParseNode(parent);
-                var valueNode = null;
-                if (this.read(current, "&H") !== null || this.read(current, "&h") !== null) {
-                    valueNode = this.parse_hexInt32(current);
-                } else {
-                    valueNode = this.parse_decimalInt32(current);
-                }
+                var valueNode = this.read(current, "&H") !== null || this.read(current, "&h") !== null ? this.parse_hexInt32(current) : this.parse_decimalInt32(current);
                 if (valueNode === null) {
                     parent.pop();
                     return null;
@@ -1484,8 +1372,7 @@
                 var current = new ParseNode(parent);
                 var characteristicNode = new ParseNode(current, "");
                 var mantissaNode = null;
-                var next;
-                for (next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
+                for (var next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
                     characteristicNode.value += next;
                 }
                 if (characteristicNode.value.length === 0) {
@@ -1494,7 +1381,7 @@
                 }
                 if (this.read(current, ".") !== null) {
                     mantissaNode = new ParseNode(current, "");
-                    for (next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
+                    for (var next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
                         mantissaNode.value += next;
                     }
                     if (mantissaNode.value.length === 0) {
@@ -1727,7 +1614,6 @@
         makeTagParserFunction("3c", parts.OutlineColor, ParserRun.prototype.parse_color, false);
         makeTagParserFunction("4a", parts.ShadowAlpha, ParserRun.prototype.parse_alpha, false);
         makeTagParserFunction("4c", parts.ShadowColor, ParserRun.prototype.parse_color, false);
-        var rules = new map_1.Map();
         for (var _i = 0, _a = Object.keys(ParserRun.prototype); _i < _a.length; _i++) {
             var key = _a[_i];
             if (key.indexOf("parse_") === 0 && typeof ParserRun.prototype[key] === "function") {
@@ -1852,21 +1738,33 @@
             };
             return ParseNode;
         }();
-        var promise_1 = require(31);
-        var commands_1 = require(34);
-        var misc_1 = require(36);
+        var promise_1 = require(32);
+        var commands_1 = require(36);
+        var misc_1 = require(38);
         misc_1.registerWorkerCommand(commands_1.WorkerCommands.Parse, function (parameters) {
             return new promise_1.Promise(function (resolve) {
                 resolve(parse(parameters.input, parameters.rule));
             });
         });
     }, /* 4 ./parser/stream-parsers */ function (exports, require) {
-        var ass_1 = require(23);
-        var style_1 = require(27);
-        var dialogue_1 = require(24);
-        var map_1 = require(29);
-        var promise_1 = require(31);
+        var settings_1 = require(23);
+        var ass_1 = require(24);
+        var style_1 = require(29);
+        var dialogue_1 = require(26);
+        var attachment_1 = require(25);
+        var map_1 = require(30);
+        var promise_1 = require(32);
         var misc_1 = require(2);
+        var Section;
+        (function (Section) {
+            Section[Section["ScriptInfo"] = 0] = "ScriptInfo";
+            Section[Section["Styles"] = 1] = "Styles";
+            Section[Section["Events"] = 2] = "Events";
+            Section[Section["Fonts"] = 3] = "Fonts";
+            Section[Section["Graphics"] = 4] = "Graphics";
+            Section[Section["Other"] = 5] = "Other";
+            Section[Section["EOF"] = 6] = "EOF";
+        })(Section || (Section = {}));
         /**
          * A parser that parses an {@link libjass.ASS} object from a {@link libjass.parser.Stream}.
          *
@@ -1883,9 +1781,13 @@
                 this._minimalDeferred = new promise_1.DeferredPromise();
                 this._deferred = new promise_1.DeferredPromise();
                 this._shouldSwallowBom = true;
-                this._currentSectionName = null;
+                this._currentSection = Section.ScriptInfo;
+                this._currentAttachment = null;
                 this._stream.nextLine().then(function (line) {
                     return _this._onNextLine(line);
+                }, function (reason) {
+                    _this._minimalDeferred.reject(reason);
+                    _this._deferred.reject(reason);
                 });
             }
             Object.defineProperty(StreamParser.prototype, "minimalASS", {
@@ -1909,6 +1811,41 @@
                 enumerable: true,
                 configurable: true
             });
+            Object.defineProperty(StreamParser.prototype, "currentSection", {
+                /**
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._currentSection;
+                },
+                /**
+                 * @type {number}
+                 */
+                set: function (value) {
+                    if (this._currentAttachment !== null) {
+                        this._ass.addAttachment(this._currentAttachment);
+                        this._currentAttachment = null;
+                    }
+                    if (this._currentSection === Section.ScriptInfo && value !== Section.ScriptInfo) {
+                        // Exiting script info section
+                        this._minimalDeferred.resolve(this._ass);
+                    }
+                    if (value === Section.EOF) {
+                        var scriptProperties = this._ass.properties;
+                        if (scriptProperties.resolutionX === undefined || scriptProperties.resolutionY === undefined) {
+                            // Malformed script.
+                            this._minimalDeferred.reject("Malformed ASS script.");
+                            this._deferred.reject("Malformed ASS script.");
+                        } else {
+                            this._minimalDeferred.resolve(this._ass);
+                            this._deferred.resolve(this._ass);
+                        }
+                    }
+                    this._currentSection = value;
+                },
+                enumerable: true,
+                configurable: true
+            });
             /**
              * @param {string} line
              *
@@ -1917,8 +1854,7 @@
             StreamParser.prototype._onNextLine = function (line) {
                 var _this = this;
                 if (line === null) {
-                    this._minimalDeferred.resolve(this._ass);
-                    this._deferred.resolve(this._ass);
+                    this.currentSection = Section.EOF;
                     return;
                 }
                 if (line[line.length - 1] === "\r") {
@@ -1928,16 +1864,26 @@
                     line = line.substr(1);
                 }
                 this._shouldSwallowBom = false;
-                if (line === "" || line[0] === ";") {} else if (line[0] === "[" && line[line.length - 1] === "]") {
-                    // Start of new section
-                    if (this._currentSectionName === "Script Info") {
-                        // Exiting script info section
-                        this._minimalDeferred.resolve(this._ass);
-                    }
-                    this._currentSectionName = line.substring(1, line.length - 1);
+                if (line === "") {} else if (line[0] === ";" && this._currentAttachment === null) {} else if (line === "[Script Info]") {
+                    this.currentSection = Section.ScriptInfo;
+                } else if (line === "[V4+ Styles]" || line === "[V4 Styles]") {
+                    this.currentSection = Section.Styles;
+                } else if (line === "[Events]") {
+                    this.currentSection = Section.Events;
+                } else if (line === "[Fonts]") {
+                    this.currentSection = Section.Fonts;
+                } else if (line === "[Graphics]") {
+                    this.currentSection = Section.Graphics;
                 } else {
-                    switch (this._currentSectionName) {
-                      case "Script Info":
+                    if (this._currentAttachment === null && line[0] === "[" && line[line.length - 1] === "]") {
+                        /* This looks like the start of a new section. The section name is unrecognized if it is.
+                         * Since there's no current attachment being parsed it's definitely the start of a new section.
+                         * If an attachment is being parsed, this might be part of the attachment.
+                         */
+                        this.currentSection = Section.Other;
+                    }
+                    switch (this.currentSection) {
+                      case Section.ScriptInfo:
                         var property = misc_1.parseLineIntoProperty(line);
                         if (property !== null) {
                             switch (property.name) {
@@ -1960,39 +1906,80 @@
                         }
                         break;
 
-                      case "V4+ Styles":
+                      case Section.Styles:
                         if (this._ass.stylesFormatSpecifier === null) {
-                            var property = misc_1.parseLineIntoProperty(line);
-                            if (property !== null && property.name === "Format") {
-                                this._ass.stylesFormatSpecifier = property.value.split(",").map(function (str) {
+                            var property_1 = misc_1.parseLineIntoProperty(line);
+                            if (property_1 !== null && property_1.name === "Format") {
+                                this._ass.stylesFormatSpecifier = property_1.value.split(",").map(function (str) {
                                     return str.trim();
                                 });
                             } else {}
                         } else {
-                            this._ass.addStyle(line);
+                            try {
+                                this._ass.addStyle(line);
+                            } catch (ex) {
+                                if (settings_1.debugMode) {
+                                    console.error("Could not parse style from line " + line + " - " + (ex.stack || ex));
+                                }
+                            }
                         }
                         break;
 
-                      case "Events":
+                      case Section.Events:
                         if (this._ass.dialoguesFormatSpecifier === null) {
-                            var property = misc_1.parseLineIntoProperty(line);
-                            if (property !== null && property.name === "Format") {
-                                this._ass.dialoguesFormatSpecifier = property.value.split(",").map(function (str) {
+                            var property_2 = misc_1.parseLineIntoProperty(line);
+                            if (property_2 !== null && property_2.name === "Format") {
+                                this._ass.dialoguesFormatSpecifier = property_2.value.split(",").map(function (str) {
                                     return str.trim();
                                 });
                             } else {}
                         } else {
-                            this._ass.addEvent(line);
+                            try {
+                                this._ass.addEvent(line);
+                            } catch (ex) {
+                                if (settings_1.debugMode) {
+                                    console.error("Could not parse event from line " + line + " - " + (ex.stack || ex));
+                                }
+                            }
                         }
+                        break;
+
+                      case Section.Fonts:
+                      case Section.Graphics:
+                        var startOfNewAttachmentRegex = this.currentSection === Section.Fonts ? /^fontname:(.+)/ : /^filename:(.+)/;
+                        var startOfNewAttachment = startOfNewAttachmentRegex.exec(line);
+                        if (startOfNewAttachment !== null) {
+                            // Start of new attachment
+                            if (this._currentAttachment !== null) {
+                                this._ass.addAttachment(this._currentAttachment);
+                                this._currentAttachment = null;
+                            }
+                            this._currentAttachment = new attachment_1.Attachment(startOfNewAttachment[1].trim(), this.currentSection === Section.Fonts ? attachment_1.AttachmentType.Font : attachment_1.AttachmentType.Graphic);
+                        } else if (this._currentAttachment !== null) {
+                            try {
+                                this._currentAttachment.contents += uuencodedToBase64(line);
+                            } catch (ex) {
+                                if (settings_1.debugMode) {
+                                    console.error("Encountered error while reading font " + this._currentAttachment.filename + ": %o", ex);
+                                }
+                                this._currentAttachment = null;
+                            }
+                        } else {}
+                        break;
+
+                      case Section.Other:
+                        // Ignore other sections.
                         break;
 
                       default:
-                        // Ignore other sections
-                        break;
+                        throw new Error("Unhandled state " + this.currentSection);
                     }
                 }
                 this._stream.nextLine().then(function (line) {
                     return _this._onNextLine(line);
+                }, function (reason) {
+                    _this._minimalDeferred.reject(reason);
+                    _this._deferred.reject(reason);
                 });
             };
             return StreamParser;
@@ -2012,18 +1999,21 @@
                 this._stream = stream;
                 this._ass = new ass_1.ASS();
                 this._deferred = new promise_1.DeferredPromise();
+                this._shouldSwallowBom = true;
                 this._currentDialogueNumber = null;
                 this._currentDialogueStart = null;
                 this._currentDialogueEnd = null;
                 this._currentDialogueText = null;
                 this._stream.nextLine().then(function (line) {
                     return _this._onNextLine(line);
+                }, function (reason) {
+                    _this._deferred.reject(reason);
                 });
                 this._ass.properties.resolutionX = 1280;
                 this._ass.properties.resolutionY = 720;
                 this._ass.properties.wrappingStyle = 1;
                 this._ass.properties.scaleBorderAndShadow = true;
-                var newStyle = new style_1.Style(new map_1.Map([ [ "Name", "Default" ] ]));
+                var newStyle = new style_1.Style(new map_1.Map([ [ "Name", "Default" ], [ "FontSize", "36" ] ]));
                 this._ass.styles.set(newStyle.name, newStyle);
             }
             Object.defineProperty(SrtStreamParser.prototype, "ass", {
@@ -2053,6 +2043,10 @@
                 if (line[line.length - 1] === "\r") {
                     line = line.substr(0, line.length - 1);
                 }
+                if (line.charCodeAt(0) === 65279 && this._shouldSwallowBom) {
+                    line = line.substr(1);
+                }
+                this._shouldSwallowBom = false;
                 if (line === "") {
                     if (this._currentDialogueNumber !== null && this._currentDialogueStart !== null && this._currentDialogueEnd !== null && this._currentDialogueText !== null) {
                         this._ass.dialogues.push(new dialogue_1.Dialogue(new map_1.Map([ [ "Style", "Default" ], [ "Start", this._currentDialogueStart ], [ "End", this._currentDialogueEnd ], [ "Text", this._currentDialogueText ] ]), this._ass));
@@ -2082,13 +2076,44 @@
                 }
                 this._stream.nextLine().then(function (line) {
                     return _this._onNextLine(line);
+                }, function (reason) {
+                    _this._deferred.reject(reason);
                 });
             };
             return SrtStreamParser;
         }();
         exports.SrtStreamParser = SrtStreamParser;
+        /**
+         * Converts a uuencoded string to a base64 string.
+         *
+         * @param {string} str
+         * @return {string}
+         *
+         * @private
+         */
+        function uuencodedToBase64(str) {
+            var result = "";
+            for (var i = 0; i < str.length; i++) {
+                var charCode = str.charCodeAt(i) - 33;
+                if (charCode < 0 || charCode > 63) {
+                    throw new Error("Out-of-range character code " + charCode + " at index " + i + " in string " + str);
+                }
+                if (charCode < 26) {
+                    result += String.fromCharCode("A".charCodeAt(0) + charCode);
+                } else if (charCode < 52) {
+                    result += String.fromCharCode("a".charCodeAt(0) + charCode - 26);
+                } else if (charCode < 62) {
+                    result += String.fromCharCode("0".charCodeAt(0) + charCode - 52);
+                } else if (charCode === 62) {
+                    result += "+";
+                } else {
+                    result += "/";
+                }
+            }
+            return result;
+        }
     }, /* 5 ./parser/streams */ function (exports, require) {
-        var promise_1 = require(31);
+        var promise_1 = require(32);
         /**
          * A {@link libjass.parser.Stream} that reads from a string in memory.
          *
@@ -2141,11 +2166,15 @@
                 this._xhr = xhr;
                 this._readTill = 0;
                 this._pendingDeferred = null;
-                xhr.addEventListener("progress", function (event) {
-                    return _this._onXhrProgress(event);
+                this._failedError = null;
+                xhr.addEventListener("progress", function () {
+                    return _this._onXhrProgress();
                 }, false);
-                xhr.addEventListener("loadend", function (event) {
-                    return _this._onXhrLoadEnd(event);
+                xhr.addEventListener("load", function () {
+                    return _this._onXhrLoad();
+                }, false);
+                xhr.addEventListener("error", function (event) {
+                    return _this._onXhrError(event);
                 }, false);
             }
             /**
@@ -2160,22 +2189,38 @@
                 return deferred.promise;
             };
             /**
-             * @param {!ProgressEvent} event
-             *
              * @private
              */
             XhrStream.prototype._onXhrProgress = function () {
                 if (this._pendingDeferred === null) {
                     return;
                 }
+                if (this._xhr.readyState === XMLHttpRequest.DONE) {
+                    /* Suppress resolving next line here. Let the "load" or "error" event handlers do it.
+                     *
+                     * This is required because a failed XHR fires the progress event with readyState === DONE before it fires the error event.
+                     * This would confuse _tryResolveNextLine() into thinking the request succeeded with no data if it was called here.
+                     */
+                    return;
+                }
                 this._tryResolveNextLine();
             };
             /**
-             * @param {!ProgressEvent} event
+             * @private
+             */
+            XhrStream.prototype._onXhrLoad = function () {
+                if (this._pendingDeferred === null) {
+                    return;
+                }
+                this._tryResolveNextLine();
+            };
+            /**
+             * @param {!ErrorEvent} event
              *
              * @private
              */
-            XhrStream.prototype._onXhrLoadEnd = function () {
+            XhrStream.prototype._onXhrError = function (event) {
+                this._failedError = event;
                 if (this._pendingDeferred === null) {
                     return;
                 }
@@ -2185,6 +2230,10 @@
              * @private
              */
             XhrStream.prototype._tryResolveNextLine = function () {
+                if (this._failedError !== null) {
+                    this._pendingDeferred.reject(this._failedError);
+                    return;
+                }
                 var response = this._xhr.responseText;
                 var nextNewLinePos = response.indexOf("\n", this._readTill);
                 if (nextNewLinePos !== -1) {
@@ -2192,8 +2241,9 @@
                     this._readTill = nextNewLinePos + 1;
                     this._pendingDeferred = null;
                 } else if (this._xhr.readyState === XMLHttpRequest.DONE) {
-                    // No more data. This is the last line.
-                    if (this._readTill < response.length) {
+                    if (this._failedError !== null) {
+                        this._pendingDeferred.reject(this._failedError);
+                    } else if (this._readTill < response.length) {
                         this._pendingDeferred.resolve(response.substr(this._readTill));
                         this._readTill = response.length;
                     } else {
@@ -2247,7 +2297,8 @@
                     this._pendingDeferred = null;
                 } else {
                     this._reader.read().then(function (next) {
-                        var value = next.value, done = next.done;
+                        var value = next.value;
+                        var done = next.done;
                         if (!done) {
                             _this._buffer += _this._decoder.decode(value, {
                                 stream: true
@@ -2269,7 +2320,186 @@
             return BrowserReadableStream;
         }();
         exports.BrowserReadableStream = BrowserReadableStream;
-    }, /* 6 ./parts/drawing */ function (exports) {
+    }, /* 6 ./parser/ttf */ function (exports, require) {
+        var __decorate = require(34).__decorate;
+        var map_1 = require(30);
+        var set_1 = require(33);
+        var DataType;
+        (function (DataType) {
+            DataType[DataType["Char"] = 0] = "Char";
+            DataType[DataType["Uint16"] = 1] = "Uint16";
+            DataType[DataType["Uint32"] = 2] = "Uint32";
+        })(DataType || (DataType = {}));
+        var fieldDecorators = new map_1.Map();
+        var OffsetTable = function () {
+            function OffsetTable() {}
+            __decorate([ field(DataType.Uint16) ], OffsetTable.prototype, "majorVersion", void 0);
+            __decorate([ field(DataType.Uint16) ], OffsetTable.prototype, "minorVersion", void 0);
+            __decorate([ field(DataType.Uint16) ], OffsetTable.prototype, "numTables", void 0);
+            __decorate([ field(DataType.Uint16) ], OffsetTable.prototype, "searchRange", void 0);
+            __decorate([ field(DataType.Uint16) ], OffsetTable.prototype, "entrySelector", void 0);
+            __decorate([ field(DataType.Uint16) ], OffsetTable.prototype, "rangeShift", void 0);
+            OffsetTable = __decorate([ struct ], OffsetTable);
+            return OffsetTable;
+        }();
+        var TableRecord = function () {
+            function TableRecord() {}
+            __decorate([ field(DataType.Char) ], TableRecord.prototype, "c1", void 0);
+            __decorate([ field(DataType.Char) ], TableRecord.prototype, "c2", void 0);
+            __decorate([ field(DataType.Char) ], TableRecord.prototype, "c3", void 0);
+            __decorate([ field(DataType.Char) ], TableRecord.prototype, "c4", void 0);
+            __decorate([ field(DataType.Uint32) ], TableRecord.prototype, "checksum", void 0);
+            __decorate([ field(DataType.Uint32) ], TableRecord.prototype, "offset", void 0);
+            __decorate([ field(DataType.Uint32) ], TableRecord.prototype, "length", void 0);
+            TableRecord = __decorate([ struct ], TableRecord);
+            return TableRecord;
+        }();
+        var NameTableHeader = function () {
+            function NameTableHeader() {}
+            __decorate([ field(DataType.Uint16) ], NameTableHeader.prototype, "formatSelector", void 0);
+            __decorate([ field(DataType.Uint16) ], NameTableHeader.prototype, "count", void 0);
+            __decorate([ field(DataType.Uint16) ], NameTableHeader.prototype, "stringOffset", void 0);
+            NameTableHeader = __decorate([ struct ], NameTableHeader);
+            return NameTableHeader;
+        }();
+        var NameRecord = function () {
+            function NameRecord() {}
+            __decorate([ field(DataType.Uint16) ], NameRecord.prototype, "platformId", void 0);
+            __decorate([ field(DataType.Uint16) ], NameRecord.prototype, "encodingId", void 0);
+            __decorate([ field(DataType.Uint16) ], NameRecord.prototype, "languageId", void 0);
+            __decorate([ field(DataType.Uint16) ], NameRecord.prototype, "nameId", void 0);
+            __decorate([ field(DataType.Uint16) ], NameRecord.prototype, "length", void 0);
+            __decorate([ field(DataType.Uint16) ], NameRecord.prototype, "offset", void 0);
+            NameRecord = __decorate([ struct ], NameRecord);
+            return NameRecord;
+        }();
+        /**
+         * Gets all the font names from the given font attachment.
+         *
+         * @param {!libjass.Attachment} attachment
+         * @return {!libjass.Set.<string>}
+         */
+        function getTtfNames(attachment) {
+            var decoded = atob(attachment.contents);
+            var bytes = new Uint8Array(new ArrayBuffer(decoded.length));
+            for (var i = 0; i < decoded.length; i++) {
+                bytes[i] = decoded.charCodeAt(i);
+            }
+            var reader = {
+                dataView: new DataView(bytes.buffer),
+                position: 0
+            };
+            var offsetTable = OffsetTable.read(reader);
+            var nameTableRecord = null;
+            for (var i = 0; i < offsetTable.numTables; i++) {
+                var tableRecord = TableRecord.read(reader);
+                if (tableRecord.c1 + tableRecord.c2 + tableRecord.c3 + tableRecord.c4 === "name") {
+                    nameTableRecord = tableRecord;
+                    break;
+                }
+            }
+            reader.position = nameTableRecord.offset;
+            var nameTableHeader = NameTableHeader.read(reader);
+            var result = new set_1.Set();
+            for (var i = 0; i < nameTableHeader.count; i++) {
+                var nameRecord = NameRecord.read(reader);
+                switch (nameRecord.nameId) {
+                  case 1:
+                  case 4:
+                  case 6:
+                    var recordOffset = nameTableRecord.offset + nameTableHeader.stringOffset + nameRecord.offset;
+                    var nameBytes = bytes.subarray(recordOffset, recordOffset + nameRecord.length);
+                    switch (nameRecord.platformId) {
+                      case 1:
+                        {
+                            var name_1 = "";
+                            for (var j = 0; j < nameBytes.length; j++) {
+                                name_1 += String.fromCharCode(nameBytes[j]);
+                            }
+                            result.add(name_1);
+                        }
+                        break;
+
+                      case 3:
+                        {
+                            var name_2 = "";
+                            for (var j = 0; j < nameBytes.length; j += 2) {
+                                name_2 += String.fromCharCode((nameBytes[j] << 8) + nameBytes[j + 1]);
+                            }
+                            result.add(name_2);
+                        }
+                        break;
+                    }
+                    break;
+
+                  default:
+                    break;
+                }
+            }
+            return result;
+        }
+        exports.getTtfNames = getTtfNames;
+        /**
+         * @param {!function(new(): T)} clazz
+         * @return {!function(new(): T)}
+         *
+         * @template T
+         * @private
+         */
+        function struct(clazz) {
+            var fields = clazz.__fields;
+            clazz.read = function (reader) {
+                var result = new clazz();
+                for (var _i = 0; _i < fields.length; _i++) {
+                    var field_1 = fields[_i];
+                    var value = void 0;
+                    switch (field_1.type) {
+                      case DataType.Char:
+                        value = String.fromCharCode(reader.dataView.getInt8(reader.position));
+                        reader.position += 1;
+                        break;
+
+                      case DataType.Uint16:
+                        value = reader.dataView.getUint16(reader.position);
+                        reader.position += 2;
+                        break;
+
+                      case DataType.Uint32:
+                        value = reader.dataView.getUint32(reader.position);
+                        reader.position += 4;
+                        break;
+                    }
+                    result[field_1.field] = value;
+                }
+                return result;
+            };
+            return clazz;
+        }
+        /**
+         * @param {number} type
+         * @return {function(T, string)}
+         *
+         * @template T
+         * @private
+         */
+        function field(type) {
+            var existingDecorator = fieldDecorators.get(type);
+            if (existingDecorator === undefined) {
+                existingDecorator = function (proto, field) {
+                    var ctor = proto.constructor;
+                    if (ctor.__fields === undefined) {
+                        ctor.__fields = [];
+                    }
+                    ctor.__fields.push({
+                        type: type,
+                        field: field
+                    });
+                };
+                fieldDecorators.set(type, existingDecorator);
+            }
+            return existingDecorator;
+        }
+    }, /* 7 ./parts/drawing */ function (exports) {
         /**
          * An instruction to move to a particular position.
          *
@@ -2452,8 +2682,8 @@
             return CubicBezierCurveInstruction;
         }();
         exports.CubicBezierCurveInstruction = CubicBezierCurveInstruction;
-    }, /* 7 ./parts/index */ function (exports, require) {
-        var drawing = require(6);
+    }, /* 8 ./parts/index */ function (exports, require) {
+        var drawing = require(7);
         exports.drawing = drawing;
         /**
          * Represents a CSS color with red, green, blue and alpha components.
@@ -2541,6 +2771,16 @@
              */
             Color.prototype.toString = function () {
                 return "rgba(" + this._red + ", " + this._green + ", " + this._blue + ", " + this._alpha.toFixed(3) + ")";
+            };
+            /**
+             * Returns a new Color by interpolating the current color to the final color by the given progression.
+             *
+             * @param {!libjass.parts.Color} final
+             * @param {number} progression
+             * @return {!libjass.parts.Color}
+             */
+            Color.prototype.interpolate = function (final, progression) {
+                return new Color(this._red + progression * (final.red - this._red), this._green + progression * (final.green - this._green), this._blue + progression * (final.blue - this._blue), this._alpha + progression * (final.alpha - this._alpha));
             };
             return Color;
         }();
@@ -2997,7 +3237,7 @@
         /**
          * A font size increase tag {\fs+}
          *
-         * @param {?number} value {\fs+###} -> difference (number)
+         * @param {number} value {\fs+###} -> difference (number)
          *
          * @constructor
          * @memberOf libjass.parts
@@ -3010,7 +3250,7 @@
                 /**
                  * The value of this font size increase tag.
                  *
-                 * @type {?number}
+                 * @type {number}
                  */
                 get: function () {
                     return this._value;
@@ -3024,7 +3264,7 @@
         /**
          * A font size decrease tag {\fs-}
          *
-         * @param {?number} value {\fs-###} -> difference (number)
+         * @param {number} value {\fs-###} -> difference (number)
          *
          * @constructor
          * @memberOf libjass.parts
@@ -3037,7 +3277,7 @@
                 /**
                  * The value of this font size decrease tag.
                  *
-                 * @type {?number}
+                 * @type {number}
                  */
                 get: function () {
                     return this._value;
@@ -4022,7 +4262,7 @@
                 /**
                  * The starting time of this transform tag.
                  *
-                 * @type {number}
+                 * @type {?number}
                  */
                 get: function () {
                     return this._start;
@@ -4034,7 +4274,7 @@
                 /**
                  * The ending time of this transform tag.
                  *
-                 * @type {number}
+                 * @type {?number}
                  */
                 get: function () {
                     return this._end;
@@ -4046,7 +4286,7 @@
                 /**
                  * The acceleration of this transform tag.
                  *
-                 * @type {number}
+                 * @type {?number}
                  */
                 get: function () {
                     return this._accel;
@@ -4301,7 +4541,7 @@
                 };
             }
         };
-        var misc_1 = require(36);
+        var misc_1 = require(38);
         for (var _i = 0, _a = Object.keys(exports); _i < _a.length; _i++) {
             var key = _a[_i];
             var value = exports[key];
@@ -4318,14 +4558,14 @@
                 misc_1.registerClassPrototype(value.prototype);
             }
         }
-    }, /* 8 ./renderers/clocks/auto */ function (exports, require) {
-        var settings_1 = require(22);
-        var manual_1 = require(10);
+    }, /* 9 ./renderers/clocks/auto */ function (exports, require) {
+        var settings_1 = require(23);
+        var manual_1 = require(11);
         /**
-         * An implementation of libjass.renderers.Clock that automatically ticks and generates {@link libjass.renderers.ClockEvent}s according to the state of an external driver.
+         * An implementation of {@link libjass.renderers.Clock} that automatically ticks and generates {@link libjass.renderers.ClockEvent}s according to the state of an external driver.
          *
          * For example, if you're using libjass to render subtitles on a canvas with your own video controls, these video controls will function as the driver to this AutoClock.
-         * It would call {@link libjass.renderers.AutoClock.play}, {@link libjass.renderers.AutoClock.play}, etc. when the user pressed the corresponding video controls.
+         * It would call {@link libjass.renderers.AutoClock.play}, {@link libjass.renderers.AutoClock.pause}, etc. when the user pressed the corresponding video controls.
          *
          * The difference from ManualClock is that AutoClock does not require the driver to call something like {@link libjass.renderers.ManualClock.tick}. Instead it keeps its
          * own time with a high-resolution requestAnimationFrame-based timer.
@@ -4333,7 +4573,7 @@
          * If using libjass with a <video> element, consider using {@link libjass.renderers.VideoClock} that uses the video element as a driver.
          *
          * @param {function():number} getCurrentTime A callback that will be invoked to get the current time of the external driver.
-         * @param {number} currentTimeUpdateMaxDelay If two calls to getCurrentTime are more than currentTimeUpdateMaxDelay milliseconds apart, then the external driver will be
+         * @param {number} autoPauseAfter If two calls to getCurrentTime are more than autoPauseAfter milliseconds apart but return the same time, then the external driver will be
          * considered to have paused.
          *
          * @constructor
@@ -4341,9 +4581,9 @@
          * @memberOf libjass.renderers
          */
         var AutoClock = function () {
-            function AutoClock(getCurrentTime, currentTimeUpdateMaxDelay) {
+            function AutoClock(getCurrentTime, autoPauseAfter) {
                 this._getCurrentTime = getCurrentTime;
-                this._currentTimeUpdateMaxDelay = currentTimeUpdateMaxDelay;
+                this._autoPauseAfter = autoPauseAfter;
                 this._manualClock = new manual_1.ManualClock();
                 this._nextAnimationFrameRequestId = null;
                 this._lastKnownExternalTime = null;
@@ -4460,7 +4700,11 @@
              * Toggle the clock.
              */
             AutoClock.prototype.toggle = function () {
-                this._manualClock.toggle();
+                if (this._manualClock.enabled) {
+                    this.disable();
+                } else {
+                    this.enable();
+                }
             };
             /**
              * Enable or disable the clock.
@@ -4469,7 +4713,11 @@
              * @return {boolean} True if the clock is now in the given state, false if it was already in that state.
              */
             AutoClock.prototype.setEnabled = function (enabled) {
-                return this._manualClock.setEnabled(enabled);
+                if (enabled) {
+                    return this.enable();
+                } else {
+                    return this.disable();
+                }
             };
             /**
              * @param {number} type
@@ -4495,7 +4743,7 @@
                 var currentExternalTime = this._getCurrentTime();
                 if (!this._manualClock.paused) {
                     if (this._lastKnownExternalTime !== null && currentExternalTime === this._lastKnownExternalTime) {
-                        if (timeStamp - this._lastKnownExternalTimeObtainedAt > this._currentTimeUpdateMaxDelay) {
+                        if (timeStamp - this._lastKnownExternalTimeObtainedAt > this._autoPauseAfter) {
                             this._lastKnownExternalTimeObtainedAt = null;
                             this._manualClock.pause();
                         } else {
@@ -4534,7 +4782,7 @@
             return AutoClock;
         }();
         exports.AutoClock = AutoClock;
-    }, /* 9 ./renderers/clocks/base */ function (exports) {
+    }, /* 10 ./renderers/clocks/base */ function (exports) {
         /**
          * A mixin class that represents an event source.
          *
@@ -4588,10 +4836,10 @@
             ClockEvent[ClockEvent["Stop"] = 3] = "Stop";
             ClockEvent[ClockEvent["RateChange"] = 4] = "RateChange";
         })(exports.ClockEvent || (exports.ClockEvent = {}));
-    }, /* 10 ./renderers/clocks/manual */ function (exports, require) {
-        var mixin_1 = require(30);
-        var map_1 = require(29);
-        var base_1 = require(9);
+    }, /* 11 ./renderers/clocks/manual */ function (exports, require) {
+        var mixin_1 = require(31);
+        var map_1 = require(30);
+        var base_1 = require(10);
         /**
          * An implementation of {@link libjass.renderers.Clock} that allows user script to manually trigger {@link libjass.renderers.ClockEvent}s.
          *
@@ -4634,9 +4882,10 @@
                 if (!this._enabled) {
                     return;
                 }
-                if (this._currentTime !== currentTime) {
-                    this.play();
+                if (this._currentTime === currentTime) {
+                    return;
                 }
+                this.play();
                 this._currentTime = currentTime;
                 this._dispatchEvent(base_1.ClockEvent.Tick, []);
             };
@@ -4753,9 +5002,9 @@
                 if (!this._enabled) {
                     return false;
                 }
-                this._enabled = false;
                 this.pause();
                 this.stop();
+                this._enabled = false;
                 return true;
             };
             /**
@@ -4785,8 +5034,8 @@
         }();
         exports.ManualClock = ManualClock;
         mixin_1.mixin(ManualClock, [ base_1.EventSource ]);
-    }, /* 11 ./renderers/clocks/video */ function (exports, require) {
-        var auto_1 = require(8);
+    }, /* 12 ./renderers/clocks/video */ function (exports, require) {
+        var auto_1 = require(9);
         /**
          * An implementation of libjass.renderers.Clock that generates {@link libjass.renderers.ClockEvent}s according to the state of a <video> element.
          *
@@ -4877,7 +5126,11 @@
              * Toggle the clock.
              */
             VideoClock.prototype.toggle = function () {
-                this._autoClock.toggle();
+                if (this._autoClock.enabled) {
+                    this.disable();
+                } else {
+                    this.enable();
+                }
             };
             /**
              * Enable or disable the clock.
@@ -4886,7 +5139,11 @@
              * @return {boolean} True if the clock is now in the given state, false if it was already in that state.
              */
             VideoClock.prototype.setEnabled = function (enabled) {
-                return this._autoClock.setEnabled(enabled);
+                if (enabled) {
+                    return this.enable();
+                } else {
+                    return this.disable();
+                }
             };
             /**
              * @param {number} type
@@ -4898,10 +5155,10 @@
             return VideoClock;
         }();
         exports.VideoClock = VideoClock;
-    }, /* 12 ./renderers/default */ function (exports, require) {
-        var __extends = require(28).__extends;
-        var video_1 = require(11);
-        var renderer_1 = require(20);
+    }, /* 13 ./renderers/default */ function (exports, require) {
+        var __extends = require(34).__extends;
+        var video_1 = require(12);
+        var renderer_1 = require(21);
         /**
          * A default renderer implementation.
          *
@@ -4918,79 +5175,63 @@
             function DefaultRenderer(video, ass, settings) {
                 _super.call(this, ass, new video_1.VideoClock(video), document.createElement("div"), settings);
                 this._video = video;
-                this._videoIsFullScreen = false;
                 this._video.parentElement.replaceChild(this.libjassSubsWrapper, this._video);
                 this.libjassSubsWrapper.insertBefore(this._video, this.libjassSubsWrapper.firstElementChild);
             }
             /**
-             * @deprecated
+             * Resize the subtitles to the dimensions of the video element.
              *
-             * @param {number} width
-             * @param {number} height
+             * This method accounts for letterboxing if the video element's size is not the same ratio as the video resolution.
              */
-            DefaultRenderer.prototype.resizeVideo = function (width, height) {
-                console.warn("`DefaultRenderer.resizeVideo(width, height)` has been deprecated. Use `DefaultRenderer.resize(width, height)` instead.");
-                this.resize(width, height);
-            };
-            DefaultRenderer.prototype._ready = function () {
-                var _this = this;
-                document.addEventListener("mozfullscreenchange", function () {
-                    return _this._onFullScreenChange(document.mozFullScreenElement);
-                }, false);
-                document.addEventListener("webkitfullscreenchange", function () {
-                    return _this._onFullScreenChange(document.webkitFullscreenElement);
-                }, false);
-                document.addEventListener("fullscreenchange", function () {
-                    return _this._onFullScreenChange(document.fullscreenElement);
-                }, false);
-                this.resize(this._video.offsetWidth, this._video.offsetHeight);
-                _super.prototype._ready.call(this);
+            DefaultRenderer.prototype.resize = function () {
+                // Handle letterboxing around the video. If the width or height are greater than the video can be, then consider that dead space.
+                var videoWidth = this._video.videoWidth;
+                var videoHeight = this._video.videoHeight;
+                var videoOffsetWidth = this._video.offsetWidth;
+                var videoOffsetHeight = this._video.offsetHeight;
+                var ratio = Math.min(videoOffsetWidth / videoWidth, videoOffsetHeight / videoHeight);
+                var subsWrapperWidth = videoWidth * ratio;
+                var subsWrapperHeight = videoHeight * ratio;
+                var subsWrapperLeft = (videoOffsetWidth - subsWrapperWidth) / 2;
+                var subsWrapperTop = (videoOffsetHeight - subsWrapperHeight) / 2;
+                _super.prototype.resize.call(this, subsWrapperWidth, subsWrapperHeight, subsWrapperLeft, subsWrapperTop);
             };
             /**
-             * @param {!Element} fullScreenElement
-             *
-             * @private
+             * @deprecated
              */
-            DefaultRenderer.prototype._onFullScreenChange = function (fullScreenElement) {
-                if (fullScreenElement === undefined) {
-                    fullScreenElement = document.msFullscreenElement;
-                }
-                if (fullScreenElement === this._video) {
-                    this.libjassSubsWrapper.classList.add("libjass-full-screen");
-                    this.resize(screen.width, screen.height);
-                    this._videoIsFullScreen = true;
-                    this._dispatchEvent("fullScreenChange", [ this._videoIsFullScreen ]);
-                } else if (fullScreenElement === null && this._videoIsFullScreen) {
-                    this.libjassSubsWrapper.classList.remove("libjass-full-screen");
-                    this._videoIsFullScreen = false;
-                    this._dispatchEvent("fullScreenChange", [ this._videoIsFullScreen ]);
-                }
+            DefaultRenderer.prototype.resizeVideo = function () {
+                console.warn("`DefaultRenderer.resizeVideo(width, height)` has been deprecated. Use `DefaultRenderer.resize()` instead.");
+                this.resize();
+            };
+            DefaultRenderer.prototype._ready = function () {
+                this.resize();
+                _super.prototype._ready.call(this);
             };
             return DefaultRenderer;
         }(renderer_1.WebRenderer);
         exports.DefaultRenderer = DefaultRenderer;
-    }, /* 13 ./renderers/index */ function (exports, require) {
-        var base_1 = require(9);
+    }, /* 14 ./renderers/index */ function (exports, require) {
+        var base_1 = require(10);
         exports.ClockEvent = base_1.ClockEvent;
         exports.EventSource = base_1.EventSource;
-        var auto_1 = require(8);
+        var auto_1 = require(9);
         exports.AutoClock = auto_1.AutoClock;
-        var manual_1 = require(10);
+        var manual_1 = require(11);
         exports.ManualClock = manual_1.ManualClock;
-        var video_1 = require(11);
+        var video_1 = require(12);
         exports.VideoClock = video_1.VideoClock;
-        var default_1 = require(12);
+        var default_1 = require(13);
         exports.DefaultRenderer = default_1.DefaultRenderer;
-        var null_1 = require(14);
+        var null_1 = require(15);
         exports.NullRenderer = null_1.NullRenderer;
-        var renderer_1 = require(20);
+        var renderer_1 = require(21);
         exports.WebRenderer = renderer_1.WebRenderer;
-        var settings_1 = require(15);
+        var settings_1 = require(16);
         exports.RendererSettings = settings_1.RendererSettings;
-    }, /* 14 ./renderers/null */ function (exports, require) {
-        var base_1 = require(9);
-        var settings_1 = require(15);
-        var settings_2 = require(22);
+    }, /* 15 ./renderers/null */ function (exports, require) {
+        var base_1 = require(10);
+        var settings_1 = require(16);
+        var settings_2 = require(23);
         /**
          * A renderer implementation that doesn't output anything.
          *
@@ -5186,8 +5427,8 @@
             return NullRenderer;
         }();
         exports.NullRenderer = NullRenderer;
-    }, /* 15 ./renderers/settings */ function (exports, require) {
-        var map_1 = require(29);
+    }, /* 16 ./renderers/settings */ function (exports, require) {
+        var map_1 = require(30);
         /**
          * Settings for the renderer.
          *
@@ -5203,43 +5444,32 @@
              *
              *     @font-face {
              *         font-family: "Helvetica";
-             *         src: url("/fonts/helvetica.ttf");
+             *         src: url("/fonts/helvetica.ttf"), local("Arial");
              *     }
              *
              * @param {!LinkStyle} linkStyle
-             * @return {!Map.<string, !Array.<string>>}
+             * @return {!Map.<string, string>}
              *
              * @static
              */
             RendererSettings.makeFontMapFromStyleElement = function (linkStyle) {
                 var fontMap = new map_1.Map();
                 var styleSheet = linkStyle.sheet;
-                var rules = Array.prototype.filter.call(styleSheet.cssRules, function (rule) {
-                    return rule.type === CSSRule.FONT_FACE_RULE;
-                });
-                for (var _i = 0; _i < rules.length; _i++) {
-                    var rule = rules[_i];
-                    var src = rule.style.getPropertyValue("src");
-                    if (!src) {
-                        src = rule.cssText.split("\n").map(function (line) {
-                            return line.match(/src: ([^;]+);/);
-                        }).filter(function (matches) {
-                            return matches !== null;
-                        }).map(function (matches) {
-                            return matches[1];
-                        })[0];
-                    }
-                    var urls = src.split(/,\s*/).map(function (url) {
-                        return RendererSettings._stripQuotes(url.match(/^url\((.+)\)$/)[1]);
-                    });
-                    if (urls.length > 0) {
-                        var name = RendererSettings._stripQuotes(rule.style.getPropertyValue("font-family"));
-                        var existingList = fontMap.get(name);
-                        if (existingList === undefined) {
-                            existingList = [];
-                            fontMap.set(name, existingList);
+                for (var i = 0; i < styleSheet.cssRules.length; i++) {
+                    var rule = styleSheet.cssRules[i];
+                    if (isFontFaceRule(rule)) {
+                        var name_1 = rule.style.getPropertyValue("font-family").match(/^["']?(.*?)["']?$/)[1];
+                        var src = rule.style.getPropertyValue("src");
+                        if (!src) {
+                            src = rule.cssText.split("\n").map(function (line) {
+                                return line.match(/src:\s*([^;]+?)\s*;/);
+                            }).filter(function (matches) {
+                                return matches !== null;
+                            }).map(function (matches) {
+                                return matches[1];
+                            })[0];
                         }
-                        existingList.unshift.apply(existingList, urls);
+                        fontMap.set(name_1, src);
                     }
                 }
                 return fontMap;
@@ -5256,58 +5486,60 @@
                 if (object === undefined || object === null) {
                     object = {};
                 }
-                var _a = object, _b = _a.fontMap, fontMap = _b === void 0 ? null : _b, _c = _a.preRenderTime, preRenderTime = _c === void 0 ? 5 : _c, _d = _a.preciseOutlines, preciseOutlines = _d === void 0 ? false : _d, _e = _a.enableSvg, enableSvg = _e === void 0 ? true : _e;
+                var _a = object;
+                var _b = _a.fontMap;
+                var fontMap = _b === void 0 ? null : _b;
+                var _c = _a.preRenderTime;
+                var preRenderTime = _c === void 0 ? 5 : _c;
+                var _d = _a.preciseOutlines;
+                var preciseOutlines = _d === void 0 ? false : _d;
+                var _e = _a.enableSvg;
+                var enableSvg = _e === void 0 ? true : _e;
+                var _f = _a.fallbackFonts;
+                var fallbackFonts = _f === void 0 ? 'Arial, Helvetica, sans-serif, "Segoe UI Symbol"' : _f;
+                var _g = _a.useAttachedFonts;
+                var useAttachedFonts = _g === void 0 ? false : _g;
                 var result = new RendererSettings();
                 result.fontMap = fontMap;
                 result.preRenderTime = preRenderTime;
                 result.preciseOutlines = preciseOutlines;
                 result.enableSvg = enableSvg;
+                result.fallbackFonts = fallbackFonts;
+                result.useAttachedFonts = useAttachedFonts;
                 return result;
-            };
-            /**
-             * @param {string} str
-             * @return {string}
-             *
-             * @private
-             * @static
-             */
-            RendererSettings._stripQuotes = function (str) {
-                return str.match(/^["']?(.*?)["']?$/)[1];
             };
             return RendererSettings;
         }();
         exports.RendererSettings = RendererSettings;
-    }, /* 16 ./renderers/web/animation-collection */ function (exports, require) {
-        var map_1 = require(29);
+        /**
+         * @param {!CSSRule} rule
+         * @return {boolean}
+         *
+         * @private
+         */
+        function isFontFaceRule(rule) {
+            return rule.type === CSSRule.FONT_FACE_RULE;
+        }
+    }, /* 17 ./renderers/web/animation-collection */ function (exports, require) {
+        var map_1 = require(30);
         /**
          * This class represents a collection of animations. Each animation contains one or more keyframes.
          * The collection can then be converted to a CSS3 representation.
          *
          * @param {!libjass.renderers.NullRenderer} renderer The renderer that this collection is associated with
+         * @param {!HTMLStyleElement} style A <style> element to insert the animation rules into
          *
          * @constructor
          */
         var AnimationCollection = function () {
-            function AnimationCollection(renderer) {
-                this._cssText = "";
+            function AnimationCollection(renderer, style) {
+                this._style = style;
                 this._animationStyle = "";
                 this._animationDelays = new map_1.Map();
                 this._numAnimations = 0;
                 this._id = renderer.id + "-" + AnimationCollection._nextId++;
                 this._rate = renderer.clock.rate;
             }
-            Object.defineProperty(AnimationCollection.prototype, "cssText", {
-                /**
-                 * This string contains the animation definitions and should be inserted into a <style> element.
-                 *
-                 * @type {string}
-                 */
-                get: function () {
-                    return this._cssText;
-                },
-                enumerable: true,
-                configurable: true
-            });
             Object.defineProperty(AnimationCollection.prototype, "animationStyle", {
                 /**
                  * This string should be set as the "animation" CSS property of the target element.
@@ -5358,7 +5590,8 @@
                     ruleCssText += "	}\n";
                 }
                 var animationName = "animation-" + this._id + "-" + this._numAnimations++;
-                this._cssText += "@-webkit-keyframes " + animationName + " {\n" + ruleCssText + "\n}\n\n@keyframes " + animationName + " {\n" + ruleCssText + "\n}\n\n";
+                this._style.appendChild(document.createTextNode("@-webkit-keyframes " + animationName + " {\n" + ruleCssText + "\n}"));
+                this._style.appendChild(document.createTextNode("@keyframes " + animationName + " {\n" + ruleCssText + "\n}"));
                 if (this._animationStyle !== "") {
                     this._animationStyle += ",";
                 }
@@ -5369,15 +5602,8 @@
             return AnimationCollection;
         }();
         exports.AnimationCollection = AnimationCollection;
-    }, /* 17 ./renderers/web/dom-parser */ function (exports) {
-        /** @type {!DomParser} */
-        exports.domParser = null;
-        if (typeof DOMParser !== "undefined") {
-            exports.domParser = new DOMParser();
-        }
     }, /* 18 ./renderers/web/drawing-styles */ function (exports, require) {
-        var dom_parser_1 = require(17);
-        var parts = require(7);
+        var parts = require(8);
         /**
          * This class represents an ASS drawing - a set of drawing instructions between {\p} tags.
          *
@@ -5424,32 +5650,150 @@
                 var scaleFactor = Math.pow(2, this._scale - 1);
                 var scaleX = this._outputScaleX / scaleFactor;
                 var scaleY = this._outputScaleY / scaleFactor;
-                var path = "";
+                var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 var bboxWidth = 0;
                 var bboxHeight = 0;
                 for (var _i = 0, _a = drawingInstructions.instructions; _i < _a.length; _i++) {
                     var instruction = _a[_i];
                     if (instruction instanceof parts.drawing.MoveInstruction) {
-                        path += " M " + instruction.x + " " + (instruction.y + this._baselineOffset);
+                        path.pathSegList.appendItem(path.createSVGPathSegMovetoAbs(instruction.x, instruction.y + this._baselineOffset));
                         bboxWidth = Math.max(bboxWidth, instruction.x);
                         bboxHeight = Math.max(bboxHeight, instruction.y + this._baselineOffset);
                     } else if (instruction instanceof parts.drawing.LineInstruction) {
-                        path += " L " + instruction.x + " " + (instruction.y + this._baselineOffset);
+                        path.pathSegList.appendItem(path.createSVGPathSegLinetoAbs(instruction.x, instruction.y + this._baselineOffset));
                         bboxWidth = Math.max(bboxWidth, instruction.x);
                         bboxHeight = Math.max(bboxHeight, instruction.y + this._baselineOffset);
                     } else if (instruction instanceof parts.drawing.CubicBezierCurveInstruction) {
-                        path += " C " + instruction.x1 + " " + (instruction.y1 + this._baselineOffset) + ", " + instruction.x2 + " " + (instruction.y2 + this._baselineOffset) + ", " + instruction.x3 + " " + (instruction.y3 + this._baselineOffset);
+                        path.pathSegList.appendItem(path.createSVGPathSegCurvetoCubicAbs(instruction.x3, instruction.y3 + this._baselineOffset, instruction.x1, instruction.y1 + this._baselineOffset, instruction.x2, instruction.y2 + this._baselineOffset));
                         bboxWidth = Math.max(bboxWidth, instruction.x1, instruction.x2, instruction.x3);
                         bboxHeight = Math.max(bboxHeight, instruction.y1 + this._baselineOffset, instruction.y2 + this._baselineOffset, instruction.y3 + this._baselineOffset);
                     }
                 }
-                var result = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="' + (bboxWidth * scaleX).toFixed(3) + 'px" height="' + (bboxHeight * scaleY).toFixed(3) + 'px">\n<g transform="scale(' + scaleX.toFixed(3) + " " + scaleY.toFixed(3) + ')">\n	<path d="' + path + '" fill="' + fillColor.toString() + '" />\n</g>\n</svg>';
-                return dom_parser_1.domParser.parseFromString(result, "image/svg+xml").childNodes[0];
+                var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svg.setAttribute("version", "1.1");
+                svg.width.baseVal.valueAsString = (bboxWidth * scaleX).toFixed(3) + "px";
+                svg.height.baseVal.valueAsString = (bboxHeight * scaleY).toFixed(3) + "px";
+                var g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                svg.appendChild(g);
+                g.setAttribute("transform", "scale(" + scaleX.toFixed(3) + " " + scaleY.toFixed(3) + ")");
+                g.appendChild(path);
+                path.setAttribute("fill", fillColor.toString());
+                return svg;
             };
             return DrawingStyles;
         }();
         exports.DrawingStyles = DrawingStyles;
-    }, /* 19 ./renderers/web/keyframe */ function (exports) {
+    }, /* 19 ./renderers/web/font-size */ function (exports, require) {
+        var promise_1 = require(32);
+        /**
+         * @param {string} fontFamily
+         * @param {number} fontSize
+         * @param {string} fallbackFonts
+         * @param {!HTMLDivElement} fontSizeElement
+         *
+         * @private
+         */
+        function prepareFontSizeElement(fontFamily, fontSize, fallbackFonts, fontSizeElement) {
+            var fonts = '"' + fontFamily + '"';
+            if (fallbackFonts !== "") {
+                fonts += ", " + fallbackFonts;
+            }
+            fontSizeElement.style.fontFamily = fonts;
+            fontSizeElement.style.fontSize = fontSize + "px";
+        }
+        /**
+         * @param {string} fontFamily
+         * @param {number} fontSize
+         * @param {string} fallbackFonts
+         * @param {!HTMLDivElement} fontSizeElement
+         * @return {!Promise.<number>}
+         *
+         * @private
+         */
+        function lineHeightForFontSize(fontFamily, fontSize, fallbackFonts, fontSizeElement) {
+            prepareFontSizeElement(fontFamily, fontSize, fallbackFonts, fontSizeElement);
+            return new promise_1.Promise(function (resolve) {
+                return setTimeout(function () {
+                    return resolve(fontSizeElement.offsetHeight);
+                }, 1e3);
+            });
+        }
+        /**
+         * @param {string} fontFamily
+         * @param {number} fontSize
+         * @param {string} fallbackFonts
+         * @param {!HTMLDivElement} fontSizeElement
+         * @return {number}
+         *
+         * @private
+         */
+        function lineHeightForFontSizeSync(fontFamily, fontSize, fallbackFonts, fontSizeElement) {
+            prepareFontSizeElement(fontFamily, fontSize, fallbackFonts, fontSizeElement);
+            return fontSizeElement.offsetHeight;
+        }
+        /**
+         * @param {number} lowerLineHeight
+         * @param {number} upperLineHeight
+         * @return {[number, number]}
+         *
+         * @private
+         */
+        function fontMetricsFromLineHeights(lowerLineHeight, upperLineHeight) {
+            return [ lowerLineHeight, (360 - 180) / (upperLineHeight - lowerLineHeight) ];
+        }
+        /**
+         * Calculates font metrics for the given font family.
+         *
+         * @param {string} fontFamily
+         * @param {string} fallbackFonts
+         * @param {!HTMLDivElement} fontSizeElement
+         * @return {!Promise.<number>}
+         */
+        function calculateFontMetrics(fontFamily, fallbackFonts, fontSizeElement) {
+            return lineHeightForFontSize(fontFamily, 180, fallbackFonts, fontSizeElement).then(function (lowerLineHeight) {
+                return lineHeightForFontSize(fontFamily, 360, fallbackFonts, fontSizeElement).then(function (upperLineHeight) {
+                    return fontMetricsFromLineHeights(lowerLineHeight, upperLineHeight);
+                });
+            });
+        }
+        exports.calculateFontMetrics = calculateFontMetrics;
+        /**
+         * @param {number} lineHeight
+         * @param {number} lowerLineHeight
+         * @param {number} factor
+         * @return {number}
+         *
+         * @private
+         */
+        function fontSizeFromMetrics(lineHeight, lowerLineHeight, factor) {
+            return 180 + (lineHeight - lowerLineHeight) * factor;
+        }
+        /**
+         * Uses linear interpolation to calculate the CSS font size that would give the specified line height for the specified font family.
+         *
+         * WARNING: If fontMetricsCache doesn't already contain a cached value for this font family, and it is not a font already installed on the user's device, then this function
+         * may return wrong values. To avoid this, make sure to preload the font using the {@link libjass.renderers.RendererSettings.fontMap} property when constructing the renderer.
+         *
+         * @param {string} fontFamily
+         * @param {number} lineHeight
+         * @param {string} fallbackFonts
+         * @param {!HTMLDivElement} fontSizeElement
+         * @param {!Map.<string, [number, number]>} fontMetricsCache
+         * @return {number}
+         */
+        function fontSizeForLineHeight(fontFamily, lineHeight, fallbackFonts, fontSizeElement, fontMetricsCache) {
+            var existingMetrics = fontMetricsCache.get(fontFamily);
+            if (existingMetrics === undefined) {
+                var lowerLineHeight_1 = lineHeightForFontSizeSync(fontFamily, 180, fallbackFonts, fontSizeElement);
+                var upperLineHeight = lineHeightForFontSizeSync(fontFamily, 360, fallbackFonts, fontSizeElement);
+                fontMetricsCache.set(fontFamily, existingMetrics = fontMetricsFromLineHeights(lowerLineHeight_1, upperLineHeight));
+            }
+            var lowerLineHeight = existingMetrics[0];
+            var factor = existingMetrics[1];
+            return fontSizeFromMetrics(lineHeight, lowerLineHeight, factor);
+        }
+        exports.fontSizeForLineHeight = fontSizeForLineHeight;
+    }, /* 20 ./renderers/web/keyframe */ function (exports) {
         /**
          * This class represents a single keyframe. It has a list of CSS properties (names and values) associated with a point in time. Multiple keyframes make up an animation.
          *
@@ -5486,23 +5830,28 @@
             return Keyframe;
         }();
         exports.Keyframe = Keyframe;
-    }, /* 20 ./renderers/web/renderer */ function (exports, require) {
-        var __extends = require(28).__extends;
-        var animation_collection_1 = require(16);
+    }, /* 21 ./renderers/web/renderer */ function (exports, require) {
+        var __extends = require(34).__extends;
+        var animation_collection_1 = require(17);
         var drawing_styles_1 = require(18);
-        var keyframe_1 = require(19);
-        var span_styles_1 = require(21);
-        var base_1 = require(9);
-        var null_1 = require(14);
-        var parts = require(7);
-        var settings_1 = require(22);
-        var misc_1 = require(25);
-        var mixin_1 = require(30);
-        var map_1 = require(29);
-        var set_1 = require(32);
-        var promise_1 = require(31);
+        var font_size_1 = require(19);
+        var keyframe_1 = require(20);
+        var span_styles_1 = require(22);
+        var base_1 = require(10);
+        var null_1 = require(15);
+        var ttf_1 = require(6);
+        var parts = require(8);
+        var settings_1 = require(23);
+        var attachment_1 = require(25);
+        var misc_1 = require(27);
+        var mixin_1 = require(31);
+        var map_1 = require(30);
+        var promise_1 = require(32);
+        var fontSrcUrlRegex = /^(url|local)\(["']?(.+?)["']?\)$/;
         /**
          * A renderer implementation that draws subtitles to the given <div>
+         *
+         * After the renderer fires its ready event, {@link libjass.renderers.WebRenderer.resize} must be called to initialize its size before starting the clock.
          *
          * @param {!libjass.ASS} ass
          * @param {!libjass.renderers.Clock} clock
@@ -5530,6 +5879,7 @@
                 this._libjassSubsWrapper = libjassSubsWrapper;
                 this._layerWrappers = [];
                 this._layerAlignmentWrappers = [];
+                this._fontMetricsCache = new map_1.Map();
                 this._currentSubs = new map_1.Map();
                 this._preRenderedSubs = new map_1.Map();
                 // EventSource members
@@ -5545,47 +5895,143 @@
                 this._libjassSubsWrapper.appendChild(this._fontSizeElement);
                 this._fontSizeElement.className = "libjass-font-measure";
                 this._fontSizeElement.appendChild(document.createTextNode("M"));
-                this._animationStyleElement = document.createElement("style");
-                this._animationStyleElement.id = "libjass-animation-styles-" + this.id;
-                this._animationStyleElement.type = "text/css";
-                document.querySelector("head").appendChild(this._animationStyleElement);
-                var svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                this._libjassSubsWrapper.appendChild(svgElement);
-                svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-                svgElement.setAttribute("version", "1.1");
-                svgElement.setAttribute("class", "libjass-filters");
-                svgElement.setAttribute("width", "0");
-                svgElement.setAttribute("height", "0");
-                this._svgDefsElement = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-                svgElement.appendChild(this._svgDefsElement);
                 // Preload fonts
-                var urlsToPreload = new set_1.Set();
-                if (this.settings.fontMap !== null) {
-                    this.settings.fontMap.forEach(function (srcs) {
-                        for (var _i = 0; _i < srcs.length; _i++) {
-                            var src = srcs[_i];
-                            urlsToPreload.add(src);
+                if (settings_1.debugMode) {
+                    console.log("Preloading fonts...");
+                }
+                var preloadFontPromises = [];
+                var fontFetchPromisesCache = new map_1.Map();
+                var fontMap = this.settings.fontMap === null ? new map_1.Map() : this.settings.fontMap;
+                var attachedFontsMap = new map_1.Map();
+                if (this.settings.useAttachedFonts) {
+                    ass.attachments.forEach(function (attachment) {
+                        if (attachment.type !== attachment_1.AttachmentType.Font) {
+                            return;
                         }
+                        var ttfNames = null;
+                        try {
+                            ttfNames = ttf_1.getTtfNames(attachment);
+                        } catch (ex) {
+                            console.error(ex);
+                            return;
+                        }
+                        var attachmentUrl = "data:application/x-font-ttf;base64," + attachment.contents;
+                        ttfNames.forEach(function (name) {
+                            var correspondingFontMapEntry = fontMap.get(name);
+                            if (correspondingFontMapEntry !== undefined) {
+                                // Also defined in fontMap.
+                                if (typeof correspondingFontMapEntry !== "string") {
+                                    // Entry in fontMap is an array. Append this URL to it.
+                                    correspondingFontMapEntry.push(attachmentUrl);
+                                } else {
+                                    /* The entry in fontMap is a string. Don't append this URL to it. Instead, put it in attachedFontsMap now
+                                     * and it'll be merged with the entry from fontMap later. If it was added here, and later the string needed
+                                     * to be split on commas, then the commas in the data URI would break the result.
+                                     */
+                                    var existingList = attachedFontsMap.get(name);
+                                    if (existingList === undefined) {
+                                        attachedFontsMap.set(name, existingList = []);
+                                    }
+                                    existingList.push(attachmentUrl);
+                                }
+                            } else {
+                                // Not defined in fontMap. Add it there.
+                                fontMap.set(name, [ attachmentUrl ]);
+                            }
+                        });
                     });
                 }
-                if (settings_1.debugMode) {
-                    console.log("Preloading " + urlsToPreload.size + " fonts...");
-                }
-                var xhrPromises = [];
-                urlsToPreload.forEach(function (url) {
-                    xhrPromises.push(new promise_1.Promise(function (resolve) {
-                        var xhr = new XMLHttpRequest();
-                        xhr.addEventListener("load", function () {
-                            if (settings_1.debugMode) {
-                                console.log("Preloaded " + url + ".");
+                fontMap.forEach(function (srcs, fontFamily) {
+                    var fontFamilyMetricsPromise;
+                    if (global.document.fonts && global.document.fonts.add) {
+                        // value should be string. If it's string[], combine it into string
+                        var source = typeof srcs === "string" ? srcs : srcs.map(function (src) {
+                            return src.match(fontSrcUrlRegex) !== null ? src : 'url("' + src + '")';
+                        }).join(", ");
+                        var attachedFontUrls = attachedFontsMap.get(fontFamily);
+                        if (attachedFontUrls !== undefined) {
+                            for (var _i = 0; _i < attachedFontUrls.length; _i++) {
+                                var url = attachedFontUrls[_i];
+                                source += ', url("' + url + '")';
                             }
-                            resolve(null);
+                        }
+                        var existingFontFaces = [];
+                        global.document.fonts.forEach(function (fontFace) {
+                            if (fontFace.family === fontFamily || fontFace.family === '"' + fontFamily + '"') {
+                                existingFontFaces.push(fontFace);
+                            }
                         });
-                        xhr.open("GET", url, true);
-                        xhr.send();
+                        var fontFetchPromise;
+                        if (existingFontFaces.length === 0) {
+                            var fontFace = new FontFace(fontFamily, source);
+                            var quotedFontFace = new FontFace('"' + fontFamily + '"', source);
+                            global.document.fonts.add(fontFace);
+                            global.document.fonts.add(quotedFontFace);
+                            fontFetchPromise = promise_1.any([ fontFace.load(), quotedFontFace.load() ]);
+                        } else {
+                            fontFetchPromise = promise_1.any(existingFontFaces.map(function (fontFace) {
+                                return fontFace.load();
+                            }));
+                        }
+                        fontFamilyMetricsPromise = _this._calculateFontMetricsAfterFetch(fontFamily, fontFetchPromise.catch(function (reason) {
+                            console.warn("Fetching fonts for " + fontFamily + " at " + source + " failed: %o", reason);
+                            return null;
+                        }));
+                    } else {
+                        // value should be string[]. If it's string, split it into string[]
+                        var urls = (typeof srcs === "string" ? srcs.split(/,/) : srcs).map(function (url) {
+                            return url.trim();
+                        }).map(function (url) {
+                            var match = url.match(fontSrcUrlRegex);
+                            if (match === null) {
+                                // A URL
+                                return url;
+                            }
+                            if (match[1] === "local") {
+                                // A local() URL. Don't fetch it.
+                                return null;
+                            }
+                            // A url() URL. Extract the raw URL.
+                            return match[2];
+                        }).filter(function (url) {
+                            return url !== null;
+                        });
+                        var attachedFontUrls = attachedFontsMap.get(fontFamily);
+                        if (attachedFontUrls !== undefined) {
+                            urls = urls.concat(attachedFontUrls);
+                        }
+                        var thisFontFamilysFetchPromises = urls.map(function (url) {
+                            var fontFetchPromise = fontFetchPromisesCache.get(url);
+                            if (fontFetchPromise === undefined) {
+                                fontFetchPromise = new promise_1.Promise(function (resolve, reject) {
+                                    var xhr = new XMLHttpRequest();
+                                    xhr.addEventListener("load", function () {
+                                        if (settings_1.debugMode) {
+                                            console.log("Preloaded " + url + ".");
+                                        }
+                                        resolve(null);
+                                    });
+                                    xhr.addEventListener("error", function (err) {
+                                        reject(err);
+                                    });
+                                    xhr.open("GET", url, true);
+                                    xhr.send();
+                                });
+                                fontFetchPromisesCache.set(url, fontFetchPromise);
+                            }
+                            return fontFetchPromise;
+                        });
+                        var allFontsFetchedPromise = thisFontFamilysFetchPromises.length === 0 ? promise_1.Promise.resolve(null) : promise_1.first(thisFontFamilysFetchPromises).catch(function (reason) {
+                            console.warn("Fetching fonts for " + fontFamily + " at " + urls.join(", ") + " failed: %o", reason);
+                            return null;
+                        });
+                        fontFamilyMetricsPromise = _this._calculateFontMetricsAfterFetch(fontFamily, allFontsFetchedPromise);
+                    }
+                    preloadFontPromises.push(fontFamilyMetricsPromise.then(function (metrics) {
+                        return _this._fontMetricsCache.set(fontFamily, metrics);
                     }));
                 });
-                promise_1.Promise.all(xhrPromises).then(function () {
+                promise_1.Promise.all(preloadFontPromises).then(function () {
                     if (settings_1.debugMode) {
                         console.log("All fonts have been preloaded.");
                     }
@@ -5607,28 +6053,26 @@
              *
              * @param {number} width
              * @param {number} height
+             * @param {number=0} left
+             * @param {number=0} top
              */
-            WebRenderer.prototype.resize = function (width, height) {
+            WebRenderer.prototype.resize = function (width, height, left, top) {
+                if (left === void 0) {
+                    left = 0;
+                }
+                if (top === void 0) {
+                    top = 0;
+                }
                 this._removeAllSubs();
-                var ratio = Math.min(width / this.ass.properties.resolutionX, height / this.ass.properties.resolutionY);
-                var subsWrapperWidth = this.ass.properties.resolutionX * ratio;
-                var subsWrapperHeight = this.ass.properties.resolutionY * ratio;
-                this._subsWrapper.style.width = subsWrapperWidth.toFixed(3) + "px";
-                this._subsWrapper.style.height = subsWrapperHeight.toFixed(3) + "px";
-                this._subsWrapper.style.left = ((width - subsWrapperWidth) / 2).toFixed(3) + "px";
-                this._subsWrapper.style.top = ((height - subsWrapperHeight) / 2).toFixed(3) + "px";
-                this._scaleX = subsWrapperWidth / this.ass.properties.resolutionX;
-                this._scaleY = subsWrapperHeight / this.ass.properties.resolutionY;
+                this._subsWrapper.style.width = width.toFixed(3) + "px";
+                this._subsWrapper.style.height = height.toFixed(3) + "px";
+                this._subsWrapper.style.left = left.toFixed(3) + "px";
+                this._subsWrapper.style.top = top.toFixed(3) + "px";
+                this._subsWrapperWidth = width;
+                this._scaleX = width / this.ass.properties.resolutionX;
+                this._scaleY = height / this.ass.properties.resolutionY;
                 // Any dialogues which have been pre-rendered will need to be pre-rendered again.
                 this._preRenderedSubs.clear();
-                if (this._animationStyleElement !== null) {
-                    while (this._animationStyleElement.firstChild !== null) {
-                        this._animationStyleElement.removeChild(this._animationStyleElement.firstChild);
-                    }
-                }
-                while (this._svgDefsElement.firstChild !== null) {
-                    this._svgDefsElement.removeChild(this._svgDefsElement.firstChild);
-                }
                 // this.currentTime will be -1 if resize() is called before the clock begins playing for the first time. In this situation, there is no need to force a redraw.
                 if (this.clock.currentTime !== -1) {
                     this._onClockTick();
@@ -5638,26 +6082,43 @@
              * The magic happens here. The subtitle div is rendered and stored. Call {@link libjass.renderers.WebRenderer.draw} to get a clone of the div to display.
              *
              * @param {!libjass.Dialogue} dialogue
+             * @return {PreRenderedSub}
              */
             WebRenderer.prototype.preRender = function (dialogue) {
                 var _this = this;
-                if (this._preRenderedSubs.has(dialogue.id)) {
-                    return;
+                var alreadyPreRenderedSub = this._preRenderedSubs.get(dialogue.id);
+                if (alreadyPreRenderedSub) {
+                    return alreadyPreRenderedSub;
+                }
+                var currentTimeRelativeToDialogueStart = this.clock.currentTime - dialogue.start;
+                if (dialogue.containsTransformTag && currentTimeRelativeToDialogueStart < 0) {
+                    // draw() expects this function to always return non-null, but it only calls this function when currentTimeRelativeToDialogueStart would be >= 0
+                    return null;
                 }
                 var sub = document.createElement("div");
                 sub.style.marginLeft = (this._scaleX * dialogue.style.marginLeft).toFixed(3) + "px";
                 sub.style.marginRight = (this._scaleX * dialogue.style.marginRight).toFixed(3) + "px";
                 sub.style.marginTop = sub.style.marginBottom = (this._scaleY * dialogue.style.marginVertical).toFixed(3) + "px";
-                sub.style.minWidth = (this._subsWrapper.offsetWidth - this._scaleX * (dialogue.style.marginLeft + dialogue.style.marginRight)).toFixed(3) + "px";
-                var dialogueAnimationCollection = new animation_collection_1.AnimationCollection(this);
+                sub.style.minWidth = (this._subsWrapperWidth - this._scaleX * (dialogue.style.marginLeft + dialogue.style.marginRight)).toFixed(3) + "px";
+                var dialogueAnimationStylesElement = document.createElement("style");
+                dialogueAnimationStylesElement.id = "libjass-animation-styles-" + this.id + "-" + dialogue.id;
+                dialogueAnimationStylesElement.type = "text/css";
+                var dialogueAnimationCollection = new animation_collection_1.AnimationCollection(this, dialogueAnimationStylesElement);
+                var svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svgElement.setAttribute("version", "1.1");
+                svgElement.setAttribute("class", "libjass-filters");
+                svgElement.width.baseVal.valueAsString = "0";
+                svgElement.height.baseVal.valueAsString = "0";
+                var svgDefsElement = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+                svgElement.appendChild(svgDefsElement);
                 var currentSpan = null;
-                var currentSpanStyles = new span_styles_1.SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, this._svgDefsElement);
+                var currentSpanStyles = new span_styles_1.SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, svgDefsElement, this._fontMetricsCache);
                 var currentAnimationCollection = null;
                 var previousAddNewLine = false;
                 // If two or more \N's are encountered in sequence, then all but the first will be created using currentSpanStyles.makeNewLine() instead
                 var startNewSpan = function (addNewLine) {
-                    if (currentSpan !== null && currentSpan.textContent !== "") {
-                        sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan, currentAnimationCollection, _this._animationStyleElement));
+                    if (currentSpan !== null && currentSpan.hasChildNodes()) {
+                        sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan, currentAnimationCollection));
                     }
                     if (currentAnimationCollection !== null) {
                         currentAnimationCollection.animationDelays.forEach(function (delay, name) {
@@ -5672,7 +6133,7 @@
                         }
                     }
                     currentSpan = document.createElement("span");
-                    currentAnimationCollection = new animation_collection_1.AnimationCollection(_this);
+                    currentAnimationCollection = new animation_collection_1.AnimationCollection(_this, dialogueAnimationStylesElement);
                     previousAddNewLine = addNewLine;
                 };
                 startNewSpan(false);
@@ -5771,6 +6232,73 @@
                         dialogueAnimationCollection.add("linear", [ new keyframe_1.Keyframe(0, new map_1.Map([ [ "opacity", "0" ] ])), new keyframe_1.Keyframe(part.start, new map_1.Map([ [ "opacity", "1" ] ])), new keyframe_1.Keyframe(dialogue.end - dialogue.start - part.end, new map_1.Map([ [ "opacity", "1" ] ])), new keyframe_1.Keyframe(dialogue.end - dialogue.start, new map_1.Map([ [ "opacity", "0" ] ])) ]);
                     } else if (part instanceof parts.ComplexFade) {
                         dialogueAnimationCollection.add("linear", [ new keyframe_1.Keyframe(0, new map_1.Map([ [ "opacity", part.a1.toFixed(3) ] ])), new keyframe_1.Keyframe(part.t1, new map_1.Map([ [ "opacity", part.a1.toFixed(3) ] ])), new keyframe_1.Keyframe(part.t2, new map_1.Map([ [ "opacity", part.a2.toFixed(3) ] ])), new keyframe_1.Keyframe(part.t3, new map_1.Map([ [ "opacity", part.a2.toFixed(3) ] ])), new keyframe_1.Keyframe(part.t4, new map_1.Map([ [ "opacity", part.a3.toFixed(3) ] ])), new keyframe_1.Keyframe(dialogue.end - dialogue.start, new map_1.Map([ [ "opacity", part.a3.toFixed(3) ] ])) ]);
+                    } else if (part instanceof parts.Transform) {
+                        var progression = currentTimeRelativeToDialogueStart <= part.start ? 0 : currentTimeRelativeToDialogueStart >= part.end ? 1 : Math.pow((currentTimeRelativeToDialogueStart - part.start) / (part.end - part.start), part.accel);
+                        for (var _b = 0, _c = part.tags; _b < _c.length; _b++) {
+                            var tag = _c[_b];
+                            if (tag instanceof parts.Border) {
+                                currentSpanStyles.outlineWidth += progression * (tag.value - currentSpanStyles.outlineWidth);
+                                currentSpanStyles.outlineHeight += progression * (tag.value - currentSpanStyles.outlineHeight);
+                            } else if (tag instanceof parts.BorderX) {
+                                currentSpanStyles.outlineWidth += progression * (tag.value - currentSpanStyles.outlineWidth);
+                            } else if (tag instanceof parts.BorderY) {
+                                currentSpanStyles.outlineHeight += progression * (tag.value - currentSpanStyles.outlineHeight);
+                            } else if (tag instanceof parts.Shadow) {
+                                currentSpanStyles.shadowDepthX += progression * (tag.value - currentSpanStyles.shadowDepthX);
+                                currentSpanStyles.shadowDepthY += progression * (tag.value - currentSpanStyles.shadowDepthY);
+                            } else if (tag instanceof parts.ShadowX) {
+                                currentSpanStyles.shadowDepthX += progression * (tag.value - currentSpanStyles.shadowDepthX);
+                            } else if (tag instanceof parts.ShadowY) {
+                                currentSpanStyles.shadowDepthY += progression * (tag.value - currentSpanStyles.shadowDepthY);
+                            } else if (tag instanceof parts.Blur) {
+                                currentSpanStyles.blur += progression * (tag.value - currentSpanStyles.blur);
+                            } else if (tag instanceof parts.GaussianBlur) {
+                                currentSpanStyles.gaussianBlur += progression * (tag.value - currentSpanStyles.gaussianBlur);
+                            } else if (tag instanceof parts.FontSize) {
+                                currentSpanStyles.fontSize += progression * (tag.value - currentSpanStyles.fontSize);
+                            } else if (tag instanceof parts.FontSizePlus) {
+                                currentSpanStyles.fontSize += progression * tag.value;
+                            } else if (tag instanceof parts.FontSizeMinus) {
+                                currentSpanStyles.fontSize -= progression * tag.value;
+                            } else if (tag instanceof parts.FontScaleX) {
+                                currentSpanStyles.fontScaleX += progression * (tag.value - currentSpanStyles.fontScaleX);
+                            } else if (tag instanceof parts.FontScaleY) {
+                                currentSpanStyles.fontScaleY += progression * (tag.value - currentSpanStyles.fontScaleY);
+                            } else if (tag instanceof parts.LetterSpacing) {
+                                currentSpanStyles.letterSpacing += progression * (tag.value - currentSpanStyles.letterSpacing);
+                            } else if (tag instanceof parts.RotateX) {
+                                currentSpanStyles.rotationX += progression * (tag.value - currentSpanStyles.rotationX);
+                            } else if (tag instanceof parts.RotateY) {
+                                currentSpanStyles.rotationY += progression * (tag.value - currentSpanStyles.rotationY);
+                            } else if (tag instanceof parts.RotateZ) {
+                                currentSpanStyles.rotationZ += progression * (tag.value - currentSpanStyles.rotationZ);
+                            } else if (tag instanceof parts.SkewX) {
+                                currentSpanStyles.skewX += progression * (tag.value - currentSpanStyles.skewX);
+                            } else if (tag instanceof parts.SkewY) {
+                                currentSpanStyles.skewY += progression * (tag.value - currentSpanStyles.skewY);
+                            } else if (tag instanceof parts.PrimaryColor) {
+                                currentSpanStyles.primaryColor = currentSpanStyles.primaryColor.interpolate(tag.value, progression);
+                            } else if (tag instanceof parts.SecondaryColor) {
+                                currentSpanStyles.secondaryColor = currentSpanStyles.secondaryColor.interpolate(tag.value, progression);
+                            } else if (tag instanceof parts.OutlineColor) {
+                                currentSpanStyles.outlineColor = currentSpanStyles.outlineColor.interpolate(tag.value, progression);
+                            } else if (tag instanceof parts.ShadowColor) {
+                                currentSpanStyles.shadowColor = currentSpanStyles.shadowColor.interpolate(tag.value, progression);
+                            } else if (tag instanceof parts.Alpha) {
+                                currentSpanStyles.primaryAlpha += progression * (tag.value - currentSpanStyles.primaryAlpha);
+                                currentSpanStyles.secondaryAlpha += progression * (tag.value - currentSpanStyles.secondaryAlpha);
+                                currentSpanStyles.outlineAlpha += progression * (tag.value - currentSpanStyles.outlineAlpha);
+                                currentSpanStyles.shadowAlpha += progression * (tag.value - currentSpanStyles.shadowAlpha);
+                            } else if (tag instanceof parts.PrimaryAlpha) {
+                                currentSpanStyles.primaryAlpha += progression * (tag.value - currentSpanStyles.primaryAlpha);
+                            } else if (tag instanceof parts.SecondaryAlpha) {
+                                currentSpanStyles.secondaryAlpha += progression * (tag.value - currentSpanStyles.secondaryAlpha);
+                            } else if (tag instanceof parts.OutlineAlpha) {
+                                currentSpanStyles.outlineAlpha += progression * (tag.value - currentSpanStyles.outlineAlpha);
+                            } else if (tag instanceof parts.ShadowAlpha) {
+                                currentSpanStyles.shadowAlpha += progression * (tag.value - currentSpanStyles.shadowAlpha);
+                            }
+                        }
                     } else if (part instanceof parts.DrawingMode) {
                         if (part.scale !== 0) {
                             currentDrawingStyles.scale = part.scale;
@@ -5781,7 +6309,7 @@
                         currentSpan.appendChild(currentDrawingStyles.toSVG(part, currentSpanStyles.primaryColor.withAlpha(currentSpanStyles.primaryAlpha)));
                         startNewSpan(false);
                     } else if (part instanceof parts.Text) {
-                        currentSpan.appendChild(document.createTextNode(part.value));
+                        currentSpan.appendChild(document.createTextNode(part.value + "‌"));
                         startNewSpan(false);
                     } else if (settings_1.debugMode && part instanceof parts.Comment) {
                         currentSpan.appendChild(document.createTextNode(part.value));
@@ -5790,8 +6318,8 @@
                         startNewSpan(true);
                     }
                 }
-                for (var _b = 0, _c = dialogue.parts; _b < _c.length; _b++) {
-                    var part = _c[_b];
+                for (var _d = 0, _e = dialogue.parts; _d < _e.length; _d++) {
+                    var part = _e[_d];
                     if (part instanceof parts.Position || part instanceof parts.Move) {
                         var transformOrigin = WebRenderer._transformOrigins[dialogue.alignment];
                         var divTransformStyle = "translate(" + -transformOrigin[0] + "%, " + -transformOrigin[1] + "%) translate(-" + sub.style.marginLeft + ", -" + sub.style.marginTop + ")";
@@ -5840,14 +6368,23 @@
                         break;
                     }
                 }
-                this._animationStyleElement.appendChild(document.createTextNode(dialogueAnimationCollection.cssText));
                 sub.style.webkitAnimation = dialogueAnimationCollection.animationStyle;
                 sub.style.animation = dialogueAnimationCollection.animationStyle;
                 sub.setAttribute("data-dialogue-id", this.id + "-" + dialogue.id);
-                this._preRenderedSubs.set(dialogue.id, {
+                if (dialogueAnimationStylesElement.textContent !== "") {
+                    sub.appendChild(dialogueAnimationStylesElement);
+                }
+                if (svgDefsElement.hasChildNodes()) {
+                    sub.appendChild(svgElement);
+                }
+                var result = {
                     sub: sub,
                     animationDelays: dialogueAnimationCollection.animationDelays
-                });
+                };
+                if (!dialogue.containsTransformTag) {
+                    this._preRenderedSubs.set(dialogue.id, result);
+                }
+                return result;
             };
             /**
              * Returns the subtitle div for display. The {@link libjass.renderers.Clock.currentTime} of the {@link libjass.renderers.NullRenderer.clock} is used to shift the
@@ -5857,7 +6394,7 @@
              */
             WebRenderer.prototype.draw = function (dialogue) {
                 var _this = this;
-                if (this._currentSubs.has(dialogue)) {
+                if (this._currentSubs.has(dialogue) && !dialogue.containsTransformTag) {
                     return;
                 }
                 if (settings_1.debugMode) {
@@ -5865,11 +6402,7 @@
                 }
                 var preRenderedSub = this._preRenderedSubs.get(dialogue.id);
                 if (preRenderedSub === undefined) {
-                    if (settings_1.debugMode) {
-                        console.warn("This dialogue was not pre-rendered. Call preRender() before calling draw() so that draw() is faster.");
-                    }
-                    this.preRender(dialogue);
-                    preRenderedSub = this._preRenderedSubs.get(dialogue.id);
+                    preRenderedSub = this.preRender(dialogue);
                     if (settings_1.debugMode) {
                         console.log(dialogue.toString());
                     }
@@ -5925,6 +6458,14 @@
                     this._layerAlignmentWrappers[layer][alignment] = layerAlignmentWrapper;
                 }
                 this._layerAlignmentWrappers[layer][alignment].appendChild(result);
+                // Workaround for IE
+                var dialogueAnimationStylesElement = result.getElementsByTagName("style")[0];
+                if (dialogueAnimationStylesElement !== undefined) {
+                    var sheet = dialogueAnimationStylesElement.sheet;
+                    if (sheet.cssRules.length === 0) {
+                        sheet.cssText = dialogueAnimationStylesElement.textContent;
+                    }
+                }
                 this._currentSubs.set(dialogue, result);
             };
             WebRenderer.prototype._onClockPlay = function () {
@@ -5938,7 +6479,7 @@
                 var _this = this;
                 var currentTime = this.clock.currentTime;
                 this._currentSubs.forEach(function (sub, dialogue) {
-                    if (dialogue.start > currentTime || dialogue.end < currentTime) {
+                    if (dialogue.start > currentTime || dialogue.end < currentTime || dialogue.containsTransformTag) {
                         _this._currentSubs.delete(dialogue);
                         _this._removeSub(sub);
                     }
@@ -5957,17 +6498,26 @@
                 _super.prototype._onClockRateChange.call(this);
                 // Any dialogues which have been pre-rendered will need to be pre-rendered again.
                 this._preRenderedSubs.clear();
-                if (this._animationStyleElement !== null) {
-                    while (this._animationStyleElement.firstChild !== null) {
-                        this._animationStyleElement.removeChild(this._animationStyleElement.firstChild);
-                    }
-                }
-                while (this._svgDefsElement.firstChild !== null) {
-                    this._svgDefsElement.removeChild(this._svgDefsElement.firstChild);
-                }
             };
             WebRenderer.prototype._ready = function () {
                 this._dispatchEvent("ready", []);
+            };
+            /**
+             * @param {string} fontFamily
+             * @param {!Promise.<*>} fontFetchPromise
+             * @return {!Promise.<[number, number]>}
+             *
+             * @private
+             */
+            WebRenderer.prototype._calculateFontMetricsAfterFetch = function (fontFamily, fontFetchPromise) {
+                var _this = this;
+                return fontFetchPromise.then(function () {
+                    var fontSizeElement = _this._fontSizeElement.cloneNode(true);
+                    _this._libjassSubsWrapper.appendChild(fontSizeElement);
+                    return promise_1.lastly(font_size_1.calculateFontMetrics(fontFamily, _this.settings.fallbackFonts, fontSizeElement), function () {
+                        _this._libjassSubsWrapper.removeChild(fontSizeElement);
+                    });
+                });
             };
             /**
              * @param {!HTMLDivElement} sub
@@ -5989,9 +6539,8 @@
         }(null_1.NullRenderer);
         exports.WebRenderer = WebRenderer;
         mixin_1.mixin(WebRenderer, [ base_1.EventSource ]);
-    }, /* 21 ./renderers/web/span-styles */ function (exports, require) {
-        var dom_parser_1 = require(17);
-        var map_1 = require(29);
+    }, /* 22 ./renderers/web/span-styles */ function (exports, require) {
+        var font_size_1 = require(19);
         /**
          * This class represents the style attribute of a span.
          * As a Dialogue's div is rendered, individual parts are added to span's, and this class is used to maintain the style attribute of those.
@@ -6003,16 +6552,18 @@
          * @param {!libjass.renderers.RendererSettings} settings The renderer settings
          * @param {!HTMLDivElement} fontSizeElement A <div> element to measure font sizes with
          * @param {!SVGDefsElement} svgDefsElement An SVG <defs> element to append filter definitions to
+         * @param {!Map<string, [number, number]>} fontMetricsCache Font metrics cache
          *
          * @constructor
          */
         var SpanStyles = function () {
-            function SpanStyles(renderer, dialogue, scaleX, scaleY, settings, fontSizeElement, svgDefsElement) {
+            function SpanStyles(renderer, dialogue, scaleX, scaleY, settings, fontSizeElement, svgDefsElement, fontMetricsCache) {
                 this._scaleX = scaleX;
                 this._scaleY = scaleY;
                 this._settings = settings;
                 this._fontSizeElement = fontSizeElement;
                 this._svgDefsElement = svgDefsElement;
+                this._fontMetricsCache = fontMetricsCache;
                 this._nextFilterId = 0;
                 this._id = renderer.id + "-" + dialogue.id;
                 this._defaultStyle = dialogue.style;
@@ -6049,10 +6600,10 @@
                 this.secondaryColor = newStyle.secondaryColor;
                 this.outlineColor = newStyle.outlineColor;
                 this.shadowColor = newStyle.shadowColor;
-                this.primaryAlpha = null;
-                this.secondaryAlpha = null;
-                this.outlineAlpha = null;
-                this.shadowAlpha = null;
+                this.primaryAlpha = newStyle.primaryColor.alpha;
+                this.secondaryAlpha = newStyle.secondaryColor.alpha;
+                this.outlineAlpha = newStyle.outlineColor.alpha;
+                this.shadowAlpha = newStyle.shadowColor.alpha;
                 this.blur = null;
                 this.gaussianBlur = null;
             };
@@ -6061,11 +6612,9 @@
              *
              * @param {!HTMLSpanElement} span
              * @param {!AnimationCollection} animationCollection
-             * @param {!HTMLStyleElement} animationStyleElement
              * @return {!HTMLSpanElement} The resulting <span> with the CSS styles applied. This may be a wrapper around the input <span> if the styles were applied using SVG filters.
              */
-            SpanStyles.prototype.setStylesOnSpan = function (span, animationCollection, animationStyleElement) {
-                var _this = this;
+            SpanStyles.prototype.setStylesOnSpan = function (span, animationCollection) {
                 var isTextOnlySpan = span.childNodes[0] instanceof Text;
                 var fontStyleOrWeight = "";
                 if (this._italic) {
@@ -6076,14 +6625,26 @@
                 } else if (this._bold !== false) {
                     fontStyleOrWeight += this._bold + " ";
                 }
-                var fontSize;
-                if (isTextOnlySpan) {
-                    fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize * this._fontScaleY, this._fontSizeElement)).toFixed(3);
-                } else {
-                    fontSize = (this._scaleY * SpanStyles._getFontSize(this._fontName, this._fontSize, this._fontSizeElement)).toFixed(3);
-                }
+                var fontSize = (this._scaleY * font_size_1.fontSizeForLineHeight(this._fontName, this._fontSize * (isTextOnlySpan ? this._fontScaleX : 1), this._settings.fallbackFonts, this._fontSizeElement, this._fontMetricsCache)).toFixed(3);
                 var lineHeight = (this._scaleY * this._fontSize).toFixed(3);
-                span.style.font = "" + fontStyleOrWeight + fontSize + "px/" + lineHeight + 'px "' + this._fontName + '"';
+                var fonts = this._fontName;
+                // Quote the font family unless it's a generic family, as those must never be quoted
+                switch (fonts) {
+                  case "cursive":
+                  case "fantasy":
+                  case "monospace":
+                  case "sans-serif":
+                  case "serif":
+                    break;
+
+                  default:
+                    fonts = '"' + fonts + '"';
+                    break;
+                }
+                if (this._settings.fallbackFonts !== "") {
+                    fonts += ", " + this._settings.fallbackFonts;
+                }
+                span.style.font = "" + fontStyleOrWeight + fontSize + "px/" + lineHeight + "px " + fonts;
                 var textDecoration = "";
                 if (this._underline) {
                     textDecoration = "underline";
@@ -6127,96 +6688,28 @@
                     span.style.display = "inline-block";
                 }
                 span.style.letterSpacing = (this._scaleX * this._letterSpacing).toFixed(3) + "px";
-                var primaryColor = this._primaryColor.withAlpha(this._primaryAlpha);
-                span.style.color = primaryColor.toString();
-                var outlineColor = this._outlineColor.withAlpha(this._outlineAlpha);
                 var outlineWidth = this._scaleX * this._outlineWidth;
                 var outlineHeight = this._scaleY * this._outlineHeight;
-                var outlineFilter = "";
-                var blurFilter = "";
-                if (this._settings.enableSvg) {
-                    var filterId = "svg-filter-" + this._id + "-" + this._nextFilterId++;
-                    if (outlineWidth > 0 || outlineHeight > 0) {
-                        /* Construct an elliptical border by merging together many rectangles. The border is creating using dilate morphology filters, but these only support
-                         * generating rectangles.   http://lists.w3.org/Archives/Public/public-fx/2012OctDec/0003.html
-                         */
-                        var mergeOutlinesFilter = "";
-                        var outlineNumber = 0;
-                        var increment = !this._settings.preciseOutlines && this._gaussianBlur > 0 ? this._gaussianBlur : 1;
-                        (function (addOutline) {
-                            if (outlineWidth <= outlineHeight) {
-                                if (outlineWidth > 0) {
-                                    for (var x = 0; x <= outlineWidth; x += increment) {
-                                        addOutline(x, outlineHeight / outlineWidth * Math.sqrt(outlineWidth * outlineWidth - x * x));
-                                    }
-                                    if (x !== outlineWidth + increment) {
-                                        addOutline(outlineWidth, 0);
-                                    }
-                                } else {
-                                    addOutline(0, outlineHeight);
-                                }
-                            } else {
-                                if (outlineHeight > 0) {
-                                    for (var y = 0; y <= outlineHeight; y += increment) {
-                                        addOutline(outlineWidth / outlineHeight * Math.sqrt(outlineHeight * outlineHeight - y * y), y);
-                                    }
-                                    if (y !== outlineHeight + increment) {
-                                        addOutline(0, outlineHeight);
-                                    }
-                                } else {
-                                    addOutline(outlineWidth, 0);
-                                }
-                            }
-                        })(function (x, y) {
-                            outlineFilter += '	<feMorphology in="SourceAlpha" operator="dilate" radius="' + x.toFixed(3) + " " + y.toFixed(3) + '" result="outline' + outlineNumber + '" />\n';
-                            mergeOutlinesFilter += '		<feMergeNode in="outline' + outlineNumber + '" />\n';
-                            outlineNumber++;
-                        });
-                        outlineFilter += '	<feMerge result="outline">\n' + mergeOutlinesFilter + '\n	</feMerge>\n	<feFlood flood-color="' + outlineColor.toString() + '" />\n	<feComposite operator="in" in2="outline" />\n';
-                    }
-                    if (this._gaussianBlur > 0) {
-                        blurFilter += '	<feGaussianBlur stdDeviation="' + this._gaussianBlur + '" />\n';
-                    }
-                    for (var i = 0; i < this._blur; i++) {
-                        blurFilter += '	<feConvolveMatrix kernelMatrix="1 2 1 2 4 2 1 2 1" edgeMode="none" />\n';
-                    }
-                } else {
-                    if (outlineWidth > 0 || outlineHeight > 0) {
-                        var outlineCssString = "";
-                        (function (addOutline) {
-                            for (var x = 0; x <= outlineWidth; x++) {
-                                var maxY = outlineWidth === 0 ? outlineHeight : outlineHeight * Math.sqrt(1 - x * x / (outlineWidth * outlineWidth));
-                                for (var y = 0; y <= maxY; y++) {
-                                    addOutline(x, y);
-                                    if (x !== 0) {
-                                        addOutline(-x, y);
-                                    }
-                                    if (y !== 0) {
-                                        addOutline(x, -y);
-                                    }
-                                    if (x !== 0 && y !== 0) {
-                                        addOutline(-x, -y);
-                                    }
-                                }
-                            }
-                        })(function (x, y) {
-                            outlineCssString += ", " + outlineColor.toString() + " " + x + "px " + y + "px " + _this._gaussianBlur.toFixed(3) + "px";
-                        });
-                        span.style.textShadow = outlineCssString.substr(", ".length);
-                    }
-                }
                 var filterWrapperSpan = document.createElement("span");
                 filterWrapperSpan.appendChild(span);
-                if (outlineFilter !== "" || blurFilter !== "") {
-                    var filterString = '<filter xmlns="http://www.w3.org/2000/svg" id="' + filterId + '" x="-50%" width="200%" y="-50%" height="200%">\n' + outlineFilter + "\n" + blurFilter + '\n	<feMerge>\n		<feMergeNode />\n		<feMergeNode in="SourceGraphic" />\n	</feMerge>\n</filter>\n';
-                    var filterElement = dom_parser_1.domParser.parseFromString(filterString, "image/svg+xml").childNodes[0];
-                    this._svgDefsElement.appendChild(filterElement);
-                    filterWrapperSpan.style.webkitFilter = 'url("#' + filterId + '")';
-                    filterWrapperSpan.style.filter = 'url("#' + filterId + '")';
+                var primaryColor = this._primaryColor.withAlpha(this._primaryAlpha);
+                var outlineColor = this._outlineColor.withAlpha(this._outlineAlpha);
+                var shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
+                // If we're in non-SVG mode and all colors have the same alpha, then set all colors to alpha === 1 and set the common alpha as the span's opacity property instead
+                if (!this._settings.enableSvg && (outlineWidth === 0 && outlineHeight === 0 || outlineColor.alpha === primaryColor.alpha) && (this._shadowDepthX === 0 && this._shadowDepthY === 0 || shadowColor.alpha === primaryColor.alpha)) {
+                    primaryColor = this._primaryColor.withAlpha(1);
+                    outlineColor = this._outlineColor.withAlpha(1);
+                    shadowColor = this._shadowColor.withAlpha(1);
+                    span.style.opacity = this._primaryAlpha.toFixed(3);
+                }
+                span.style.color = primaryColor.toString();
+                if (this._settings.enableSvg) {
+                    this._setSvgOutlineOnSpan(filterWrapperSpan, outlineWidth, outlineHeight, outlineColor, this._primaryAlpha);
+                } else {
+                    this._setTextShadowOutlineOnSpan(span, outlineWidth, outlineHeight, outlineColor);
                 }
                 if (this._shadowDepthX !== 0 || this._shadowDepthY !== 0) {
-                    var shadowColor = this._shadowColor.withAlpha(this._shadowAlpha);
-                    var shadowCssString = shadowColor.toString() + " " + (this._shadowDepthX * this._scaleX / this._fontScaleX).toFixed(3) + "px " + (this._shadowDepthY * this._scaleY / this._fontScaleY).toFixed(3) + "px 0px";
+                    var shadowCssString = shadowColor.toString() + " " + (this._shadowDepthX * this._scaleX).toFixed(3) + "px " + (this._shadowDepthY * this._scaleY).toFixed(3) + "px 0px";
                     if (span.style.textShadow === "") {
                         span.style.textShadow = shadowCssString;
                     } else {
@@ -6227,10 +6720,195 @@
                     // Perspective needs to be set on a "transformable element"
                     filterWrapperSpan.style.display = "inline-block";
                 }
-                animationStyleElement.appendChild(document.createTextNode(animationCollection.cssText));
                 span.style.webkitAnimation = animationCollection.animationStyle;
                 span.style.animation = animationCollection.animationStyle;
                 return filterWrapperSpan;
+            };
+            /**
+             * @param {!HTMLSpanElement} filterWrapperSpan
+             * @param {number} outlineWidth
+             * @param {number} outlineHeight
+             * @param {!libjass.parts.Color} outlineColor
+             * @param {number} primaryAlpha
+             *
+             * @private
+             */
+            SpanStyles.prototype._setSvgOutlineOnSpan = function (filterWrapperSpan, outlineWidth, outlineHeight, outlineColor, primaryAlpha) {
+                var filterId = "svg-filter-" + this._id + "-" + this._nextFilterId++;
+                var filterElement = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+                filterElement.id = filterId;
+                filterElement.x.baseVal.valueAsString = "-50%";
+                filterElement.width.baseVal.valueAsString = "200%";
+                filterElement.y.baseVal.valueAsString = "-50%";
+                filterElement.height.baseVal.valueAsString = "200%";
+                if (outlineWidth > 0 || outlineHeight > 0) {
+                    /* Construct an elliptical border by merging together many rectangles. The border is creating using dilate morphology filters, but these only support
+                     * generating rectangles.   http://lists.w3.org/Archives/Public/public-fx/2012OctDec/0003.html
+                     */
+                    var outlineNumber = 0;
+                    var increment = !this._settings.preciseOutlines && this._gaussianBlur > 0 ? this._gaussianBlur : 1;
+                    (function (addOutline) {
+                        if (outlineWidth <= outlineHeight) {
+                            if (outlineWidth > 0) {
+                                var x;
+                                for (x = 0; x <= outlineWidth; x += increment) {
+                                    addOutline(x, outlineHeight / outlineWidth * Math.sqrt(outlineWidth * outlineWidth - x * x));
+                                }
+                                if (x !== outlineWidth + increment) {
+                                    addOutline(outlineWidth, 0);
+                                }
+                            } else {
+                                addOutline(0, outlineHeight);
+                            }
+                        } else {
+                            if (outlineHeight > 0) {
+                                var y;
+                                for (y = 0; y <= outlineHeight; y += increment) {
+                                    addOutline(outlineWidth / outlineHeight * Math.sqrt(outlineHeight * outlineHeight - y * y), y);
+                                }
+                                if (y !== outlineHeight + increment) {
+                                    addOutline(0, outlineHeight);
+                                }
+                            } else {
+                                addOutline(outlineWidth, 0);
+                            }
+                        }
+                    })(function (x, y) {
+                        var outlineFilter = document.createElementNS("http://www.w3.org/2000/svg", "feMorphology");
+                        filterElement.appendChild(outlineFilter);
+                        outlineFilter.in1.baseVal = "source";
+                        outlineFilter.operator.baseVal = SVGFEMorphologyElement.SVG_MORPHOLOGY_OPERATOR_DILATE;
+                        outlineFilter.radiusX.baseVal = x;
+                        outlineFilter.radiusY.baseVal = y;
+                        outlineFilter.result.baseVal = "outline" + outlineNumber;
+                        outlineNumber++;
+                    });
+                    // Start with SourceAlpha. Leave the alpha as 0 if it's 0, and set it to 1 if it's greater than 0
+                    var source = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
+                    filterElement.insertBefore(source, filterElement.firstElementChild);
+                    source.in1.baseVal = "SourceAlpha";
+                    source.result.baseVal = "source";
+                    var sourceAlphaTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
+                    source.appendChild(sourceAlphaTransferNode);
+                    sourceAlphaTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
+                    /* The alphas of all colored pixels of the SourceAlpha should be made as close to 1 as possible. This way the summed outlines below will be uniformly dark.
+                     * Multiply the pixels by 1 / primaryAlpha so that the primaryAlpha pixels become 1. A higher value would make the outline larger and too sharp,
+                     * leading to jagged outer edge and transparent space around the inner edge between itself and the SourceGraphic.
+                     */
+                    sourceAlphaTransferNode.slope.baseVal = primaryAlpha === 0 ? 1 : 1 / primaryAlpha;
+                    sourceAlphaTransferNode.intercept.baseVal = 0;
+                    // Merge the individual outlines
+                    var mergedOutlines = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+                    filterElement.appendChild(mergedOutlines);
+                    for (var i = 0; i < outlineNumber; i++) {
+                        var outlineReferenceNode_1 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+                        mergedOutlines.appendChild(outlineReferenceNode_1);
+                        outlineReferenceNode_1.in1.baseVal = "outline" + i;
+                    }
+                    // Color it with the outline color
+                    var coloredSource = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
+                    filterElement.appendChild(coloredSource);
+                    coloredSource.setAttribute("color-interpolation-filters", "sRGB");
+                    var outlineRedTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncR");
+                    coloredSource.appendChild(outlineRedTransferNode);
+                    outlineRedTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
+                    outlineRedTransferNode.slope.baseVal = 0;
+                    outlineRedTransferNode.intercept.baseVal = outlineColor.red / 255 * outlineColor.alpha;
+                    var outlineGreenTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncG");
+                    coloredSource.appendChild(outlineGreenTransferNode);
+                    outlineGreenTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
+                    outlineGreenTransferNode.slope.baseVal = 0;
+                    outlineGreenTransferNode.intercept.baseVal = outlineColor.green / 255 * outlineColor.alpha;
+                    var outlineBlueTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncB");
+                    coloredSource.appendChild(outlineBlueTransferNode);
+                    outlineBlueTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
+                    outlineBlueTransferNode.slope.baseVal = 0;
+                    outlineBlueTransferNode.intercept.baseVal = outlineColor.blue / 255 * outlineColor.alpha;
+                    var outlineAlphaTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
+                    coloredSource.appendChild(outlineAlphaTransferNode);
+                    outlineAlphaTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
+                    outlineAlphaTransferNode.slope.baseVal = outlineColor.alpha;
+                    outlineAlphaTransferNode.intercept.baseVal = 0;
+                    // Blur the merged outline
+                    if (this._gaussianBlur > 0) {
+                        var gaussianBlurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+                        filterElement.appendChild(gaussianBlurFilter);
+                        gaussianBlurFilter.stdDeviationX.baseVal = this._gaussianBlur;
+                        gaussianBlurFilter.stdDeviationY.baseVal = this._gaussianBlur;
+                    }
+                    for (var i = 0; i < this._blur; i++) {
+                        var blurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feConvolveMatrix");
+                        filterElement.appendChild(blurFilter);
+                        blurFilter.setAttribute("kernelMatrix", "1 2 1 2 4 2 1 2 1");
+                        blurFilter.edgeMode.baseVal = SVGFEConvolveMatrixElement.SVG_EDGEMODE_NONE;
+                    }
+                    // Cut out the source, so only the outline remains
+                    var outlineCutoutNode = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+                    filterElement.appendChild(outlineCutoutNode);
+                    outlineCutoutNode.in2.baseVal = "source";
+                    outlineCutoutNode.operator.baseVal = SVGFECompositeElement.SVG_FECOMPOSITE_OPERATOR_OUT;
+                    // Merge the outline with the SourceGraphic
+                    var mergedOutlineAndSourceGraphic = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+                    filterElement.appendChild(mergedOutlineAndSourceGraphic);
+                    var outlineReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+                    mergedOutlineAndSourceGraphic.appendChild(outlineReferenceNode);
+                    var sourceGraphicReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+                    mergedOutlineAndSourceGraphic.appendChild(sourceGraphicReferenceNode);
+                    sourceGraphicReferenceNode.in1.baseVal = "SourceGraphic";
+                } else {
+                    // Blur the source graphic directly
+                    if (this._gaussianBlur > 0) {
+                        var gaussianBlurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+                        filterElement.appendChild(gaussianBlurFilter);
+                        gaussianBlurFilter.stdDeviationX.baseVal = this._gaussianBlur;
+                        gaussianBlurFilter.stdDeviationY.baseVal = this._gaussianBlur;
+                    }
+                    for (var i = 0; i < this._blur; i++) {
+                        var blurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feConvolveMatrix");
+                        filterElement.appendChild(blurFilter);
+                        blurFilter.setAttribute("kernelMatrix", "1 2 1 2 4 2 1 2 1");
+                        blurFilter.edgeMode.baseVal = SVGFEConvolveMatrixElement.SVG_EDGEMODE_NONE;
+                    }
+                }
+                if (filterElement.childElementCount > 0) {
+                    this._svgDefsElement.appendChild(filterElement);
+                    filterWrapperSpan.style.webkitFilter = 'url("#' + filterId + '")';
+                    filterWrapperSpan.style.filter = 'url("#' + filterId + '")';
+                }
+            };
+            /**
+             * @param {!HTMLSpanElement} span
+             * @param {number} outlineWidth
+             * @param {number} outlineHeight
+             * @param {!libjass.parts.Color} outlineColor
+             *
+             * @private
+             */
+            SpanStyles.prototype._setTextShadowOutlineOnSpan = function (span, outlineWidth, outlineHeight, outlineColor) {
+                var _this = this;
+                if (outlineWidth > 0 || outlineHeight > 0) {
+                    var outlineCssString = "";
+                    (function (addOutline) {
+                        for (var x = 0; x <= outlineWidth; x++) {
+                            var maxY = outlineWidth === 0 ? outlineHeight : outlineHeight * Math.sqrt(1 - x * x / (outlineWidth * outlineWidth));
+                            for (var y = 0; y <= maxY; y++) {
+                                addOutline(x, y);
+                                if (x !== 0) {
+                                    addOutline(-x, y);
+                                }
+                                if (y !== 0) {
+                                    addOutline(x, -y);
+                                }
+                                if (x !== 0 && y !== 0) {
+                                    addOutline(-x, -y);
+                                }
+                            }
+                        }
+                    })(function (x, y) {
+                        outlineCssString += ", " + outlineColor.toString() + " " + x + "px " + y + "px " + _this._gaussianBlur.toFixed(3) + "px";
+                    });
+                    span.style.textShadow = outlineCssString.substr(", ".length);
+                }
             };
             /**
              * @return {!HTMLBRElement}
@@ -6290,6 +6968,14 @@
             });
             Object.defineProperty(SpanStyles.prototype, "outlineWidth", {
                 /**
+                 * Gets the outline width property.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._outlineWidth;
+                },
+                /**
                  * Sets the outline width property. null defaults it to the style's original outline width value.
                  *
                  * @type {?number}
@@ -6301,6 +6987,14 @@
                 configurable: true
             });
             Object.defineProperty(SpanStyles.prototype, "outlineHeight", {
+                /**
+                 * Gets the outline width property.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._outlineWidth;
+                },
                 /**
                  * Sets the outline height property. null defaults it to the style's original outline height value.
                  *
@@ -6314,7 +7008,15 @@
             });
             Object.defineProperty(SpanStyles.prototype, "shadowDepthX", {
                 /**
-                 * Sets the outline width property. null defaults it to the style's original shadow depth X value.
+                 * Gets the shadow width property.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._shadowDepthX;
+                },
+                /**
+                 * Sets the shadow width property. null defaults it to the style's original shadow depth value.
                  *
                  * @type {?number}
                  */
@@ -6326,7 +7028,15 @@
             });
             Object.defineProperty(SpanStyles.prototype, "shadowDepthY", {
                 /**
-                 * Sets the shadow height property. null defaults it to the style's original shadow depth Y value.
+                 * Gets the shadow height property.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._shadowDepthY;
+                },
+                /**
+                 * Sets the shadow height property. null defaults it to the style's original shadow depth value.
                  *
                  * @type {?number}
                  */
@@ -6337,6 +7047,14 @@
                 configurable: true
             });
             Object.defineProperty(SpanStyles.prototype, "blur", {
+                /**
+                 * Gets the blur property.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._blur;
+                },
                 /**
                  * Sets the blur property. null defaults it to 0.
                  *
@@ -6349,6 +7067,14 @@
                 configurable: true
             });
             Object.defineProperty(SpanStyles.prototype, "gaussianBlur", {
+                /**
+                 * Gets the Gaussian blur property.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._gaussianBlur;
+                },
                 /**
                  * Sets the Gaussian blur property. null defaults it to 0.
                  *
@@ -6374,6 +7100,14 @@
             });
             Object.defineProperty(SpanStyles.prototype, "fontSize", {
                 /**
+                 * Gets the font size property.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._fontSize;
+                },
+                /**
                  * Sets the font size property. null defaults it to the default style's value.
                  *
                  * @type {?number}
@@ -6385,6 +7119,14 @@
                 configurable: true
             });
             Object.defineProperty(SpanStyles.prototype, "fontScaleX", {
+                /**
+                 * Gets the horizontal font scaling property.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._fontScaleX;
+                },
                 /**
                  * Sets the horizontal font scaling property. null defaults it to the default style's value.
                  *
@@ -6398,6 +7140,14 @@
             });
             Object.defineProperty(SpanStyles.prototype, "fontScaleY", {
                 /**
+                 * Gets the vertical font scaling property.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._fontScaleY;
+                },
+                /**
                  * Sets the vertical font scaling property. null defaults it to the default style's value.
                  *
                  * @type {?number}
@@ -6409,6 +7159,14 @@
                 configurable: true
             });
             Object.defineProperty(SpanStyles.prototype, "letterSpacing", {
+                /**
+                 * Gets the letter spacing property.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._letterSpacing;
+                },
                 /**
                  * Sets the letter spacing property. null defaults it to the default style's value.
                  *
@@ -6422,6 +7180,14 @@
             });
             Object.defineProperty(SpanStyles.prototype, "rotationX", {
                 /**
+                 * Gets the X-axis rotation property.
+                 *
+                 * @type {?number}
+                 */
+                get: function () {
+                    return this._rotationX;
+                },
+                /**
                  * Sets the X-axis rotation property.
                  *
                  * @type {?number}
@@ -6433,6 +7199,14 @@
                 configurable: true
             });
             Object.defineProperty(SpanStyles.prototype, "rotationY", {
+                /**
+                 * Gets the Y-axis rotation property.
+                 *
+                 * @type {?number}
+                 */
+                get: function () {
+                    return this._rotationY;
+                },
                 /**
                  * Sets the Y-axis rotation property.
                  *
@@ -6446,6 +7220,14 @@
             });
             Object.defineProperty(SpanStyles.prototype, "rotationZ", {
                 /**
+                 * Gets the Z-axis rotation property.
+                 *
+                 * @type {?number}
+                 */
+                get: function () {
+                    return this._rotationZ;
+                },
+                /**
                  * Sets the Z-axis rotation property.
                  *
                  * @type {?number}
@@ -6458,6 +7240,14 @@
             });
             Object.defineProperty(SpanStyles.prototype, "skewX", {
                 /**
+                 * Gets the X-axis skew property.
+                 *
+                 * @type {?number}
+                 */
+                get: function () {
+                    return this._skewX;
+                },
+                /**
                  * Sets the X-axis skew property.
                  *
                  * @type {?number}
@@ -6469,6 +7259,14 @@
                 configurable: true
             });
             Object.defineProperty(SpanStyles.prototype, "skewY", {
+                /**
+                 * Gets the Y-axis skew property.
+                 *
+                 * @type {?number}
+                 */
+                get: function () {
+                    return this._skewY;
+                },
                 /**
                  * Sets the Y-axis skew property.
                  *
@@ -6522,6 +7320,14 @@
             });
             Object.defineProperty(SpanStyles.prototype, "outlineColor", {
                 /**
+                 * Gets the outline color property.
+                 *
+                 * @type {!libjass.Color}
+                 */
+                get: function () {
+                    return this._outlineColor;
+                },
+                /**
                  * Sets the outline color property. null defaults it to the default style's value.
                  *
                  * @type {libjass.Color}
@@ -6533,6 +7339,14 @@
                 configurable: true
             });
             Object.defineProperty(SpanStyles.prototype, "shadowColor", {
+                /**
+                 * Gets the shadow color property.
+                 *
+                 * @type {!libjass.Color}
+                 */
+                get: function () {
+                    return this._shadowColor;
+                },
                 /**
                  * Sets the shadow color property. null defaults it to the default style's value.
                  *
@@ -6548,7 +7362,7 @@
                 /**
                  * Gets the primary alpha property.
                  *
-                 * @type {?number}
+                 * @type {number}
                  */
                 get: function () {
                     return this._primaryAlpha;
@@ -6559,7 +7373,7 @@
                  * @type {?number}
                  */
                 set: function (value) {
-                    this._primaryAlpha = value;
+                    this._primaryAlpha = SpanStyles._valueOrDefault(value, this._defaultStyle.primaryColor.alpha);
                 },
                 enumerable: true,
                 configurable: true
@@ -6568,7 +7382,7 @@
                 /**
                  * Gets the secondary alpha property.
                  *
-                 * @type {?number}
+                 * @type {number}
                  */
                 get: function () {
                     return this._secondaryAlpha;
@@ -6579,65 +7393,58 @@
                  * @type {?number}
                  */
                 set: function (value) {
-                    this._secondaryAlpha = value;
+                    this._secondaryAlpha = SpanStyles._valueOrDefault(value, this._defaultStyle.secondaryColor.alpha);
                 },
                 enumerable: true,
                 configurable: true
             });
             Object.defineProperty(SpanStyles.prototype, "outlineAlpha", {
                 /**
+                 * Gets the outline alpha property.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._outlineAlpha;
+                },
+                /**
                  * Sets the outline alpha property.
                  *
                  * @type {?number}
                  */
                 set: function (value) {
-                    this._outlineAlpha = value;
+                    this._outlineAlpha = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineColor.alpha);
                 },
                 enumerable: true,
                 configurable: true
             });
             Object.defineProperty(SpanStyles.prototype, "shadowAlpha", {
                 /**
+                 * Gets the shadow alpha property.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._shadowAlpha;
+                },
+                /**
                  * Sets the shadow alpha property.
                  *
                  * @type {?number}
                  */
                 set: function (value) {
-                    this._shadowAlpha = value;
+                    this._shadowAlpha = SpanStyles._valueOrDefault(value, this._defaultStyle.shadowColor.alpha);
                 },
                 enumerable: true,
                 configurable: true
             });
-            /**
-             * @param {string} fontFamily
-             * @param {number} lineHeight
-             * @param {!HTMLDivElement} fontSizeElement
-             * @return {number}
-             *
-             * @private
-             * @static
-             */
-            SpanStyles._getFontSize = function (fontFamily, lineHeight, fontSizeElement) {
-                var existingFontSizeMap = SpanStyles._fontSizeCache.get(fontFamily);
-                if (existingFontSizeMap === undefined) {
-                    SpanStyles._fontSizeCache.set(fontFamily, existingFontSizeMap = new map_1.Map());
-                }
-                var existingFontSize = existingFontSizeMap.get(lineHeight);
-                if (existingFontSize === undefined) {
-                    fontSizeElement.style.fontFamily = fontFamily;
-                    fontSizeElement.style.fontSize = lineHeight + "px";
-                    existingFontSizeMap.set(lineHeight, existingFontSize = lineHeight * lineHeight / fontSizeElement.offsetHeight);
-                }
-                return existingFontSize;
-            };
-            SpanStyles._fontSizeCache = new map_1.Map();
             SpanStyles._valueOrDefault = function (newValue, defaultValue) {
                 return newValue !== null ? newValue : defaultValue;
             };
             return SpanStyles;
         }();
         exports.SpanStyles = SpanStyles;
-    }, /* 22 ./settings */ function (exports) {
+    }, /* 23 ./settings */ function (exports) {
         /**
          * Debug mode. When true, libjass logs some debug messages.
          *
@@ -6670,15 +7477,16 @@
             exports.verboseMode = value;
         }
         exports.setVerboseMode = setVerboseMode;
-    }, /* 23 ./types/ass */ function (exports, require) {
-        var dialogue_1 = require(24);
-        var style_1 = require(27);
-        var script_properties_1 = require(26);
-        var misc_1 = require(25);
-        var settings_1 = require(22);
+    }, /* 24 ./types/ass */ function (exports, require) {
+        var dialogue_1 = require(26);
+        var style_1 = require(29);
+        var script_properties_1 = require(28);
+        var misc_1 = require(27);
+        var settings_1 = require(23);
         var parser = require(1);
         var misc_2 = require(2);
-        var map_1 = require(29);
+        var map_1 = require(30);
+        var promise_1 = require(32);
         /**
          * This class represents an ASS script. It contains the {@link libjass.ScriptProperties}, an array of {@link libjass.Style}s, and an array of {@link libjass.Dialogue}s.
          *
@@ -6690,12 +7498,14 @@
                 this._properties = new script_properties_1.ScriptProperties();
                 this._styles = new map_1.Map();
                 this._dialogues = [];
+                this._attachments = [];
                 this._stylesFormatSpecifier = null;
                 this._dialoguesFormatSpecifier = null;
                 // Deprecated constructor argument
                 if (arguments.length === 1) {
                     throw new Error("Constructor `new ASS(rawASS)` has been deprecated. Use `ASS.fromString(rawASS)` instead.");
                 }
+                this._styles.set("Default", new style_1.Style(new map_1.Map([ [ "Name", "Default" ] ])));
             }
             Object.defineProperty(ASS.prototype, "properties", {
                 /**
@@ -6729,6 +7539,18 @@
                  */
                 get: function () {
                     return this._dialogues;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ASS.prototype, "attachments", {
+                /**
+                 * The attachments of this script.
+                 *
+                 * @type {!Array.<!libjass.Attachment>}
+                 */
+                get: function () {
+                    return this._attachments;
                 },
                 enumerable: true,
                 configurable: true
@@ -6817,6 +7639,14 @@
                 this.dialogues.push(new dialogue_1.Dialogue(dialogueTemplate, this));
             };
             /**
+             * Add an attachment to this ASS script.
+             *
+             * @param {!libjass.Attachment} attachment
+             */
+            ASS.prototype.addAttachment = function (attachment) {
+                this._attachments.push(attachment);
+            };
+            /**
              * Creates an ASS object from the raw text of an ASS script.
              *
              * @param {string} raw The raw text of the script.
@@ -6868,16 +7698,25 @@
                 if (type === void 0) {
                     type = misc_1.Format.ASS;
                 }
+                var fetchPromise;
                 if (typeof global.fetch === "function" && typeof global.ReadableStream === "function" && typeof global.ReadableStream.prototype.getReader === "function" && typeof global.TextDecoder === "function") {
-                    return global.fetch(url).then(function (response) {
+                    fetchPromise = global.fetch(url).then(function (response) {
+                        if (response.ok === false || response.ok === undefined && (response.status < 200 || response.status > 299)) {
+                            throw new Error("HTTP request for " + url + " failed with status code " + response.status);
+                        }
                         return ASS.fromReadableStream(response.body, "utf-8", type);
                     });
+                } else {
+                    fetchPromise = promise_1.Promise.reject(new Error("Not supported."));
                 }
-                var xhr = new XMLHttpRequest();
-                var result = ASS.fromStream(new parser.XhrStream(xhr), type);
-                xhr.open("GET", url, true);
-                xhr.send();
-                return result;
+                return fetchPromise.catch(function (reason) {
+                    console.warn("fetch() failed, falling back to XHR: %o", reason);
+                    var xhr = new XMLHttpRequest();
+                    var result = ASS.fromStream(new parser.XhrStream(xhr), type);
+                    xhr.open("GET", url, true);
+                    xhr.send();
+                    return result;
+                });
             };
             /**
              * Creates an ASS object from the given ReadableStream.
@@ -6901,11 +7740,82 @@
             return ASS;
         }();
         exports.ASS = ASS;
-    }, /* 24 ./types/dialogue */ function (exports, require) {
-        var misc_1 = require(25);
+    }, /* 25 ./types/attachment */ function (exports) {
+        /**
+         * The type of an attachment.
+         */
+        (function (AttachmentType) {
+            AttachmentType[AttachmentType["Font"] = 0] = "Font";
+            AttachmentType[AttachmentType["Graphic"] = 1] = "Graphic";
+        })(exports.AttachmentType || (exports.AttachmentType = {}));
+        /**
+         * This class represents an attachment in a {@link libjass.ASS} script.
+         *
+         * @param {string} filename The filename of this attachment.
+         * @param {number} type The type of this attachment.
+         *
+         * @constructor
+         * @memberOf libjass
+         */
+        var Attachment = function () {
+            function Attachment(filename, type) {
+                this._filename = filename;
+                this._type = type;
+                this._contents = "";
+            }
+            Object.defineProperty(Attachment.prototype, "filename", {
+                /**
+                 * The filename of this attachment.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._filename;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Attachment.prototype, "type", {
+                /**
+                 * The type of this attachment.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._type;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Attachment.prototype, "contents", {
+                /**
+                 * The contents of this attachment in base64 encoding.
+                 *
+                 * @type {number}
+                 */
+                get: function () {
+                    return this._contents;
+                },
+                /**
+                 * The contents of this attachment in base64 encoding.
+                 *
+                 * @type {number}
+                 */
+                set: function (value) {
+                    this._contents = value;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            return Attachment;
+        }();
+        exports.Attachment = Attachment;
+    }, /* 26 ./types/dialogue */ function (exports, require) {
+        var misc_1 = require(27);
         var parse_1 = require(3);
-        var parts = require(7);
-        var settings_1 = require(22);
+        var parts = require(8);
+        var settings_1 = require(23);
+        var map_1 = require(30);
         /**
          * This class represents a dialogue in a {@link libjass.ASS} script.
          *
@@ -6915,7 +7825,7 @@
          * @param {string} template["End"] The end time
          * @param {string} template["Layer"] The layer number
          * @param {string} template["Text"] The text of this dialogue
-         * @param {ASS} ass The ASS object to which this dialogue belongs
+         * @param {!libjass.ASS} ass The ASS object to which this dialogue belongs
          *
          * @constructor
          * @memberOf libjass
@@ -6923,19 +7833,38 @@
         var Dialogue = function () {
             function Dialogue(template, ass) {
                 this._parts = null;
-                this._sub = null;
-                this._id = ++Dialogue._lastDialogueId;
-                var style = template.get("Style");
-                this._style = ass.styles.get(style);
-                if (this._style === undefined) {
-                    throw new Error("Unrecognized style " + style);
+                this._containsTransformTag = false;
+                {
+                    var normalizedTemplate = new map_1.Map();
+                    template.forEach(function (value, key) {
+                        normalizedTemplate.set(key.toLowerCase(), value);
+                    });
+                    template = normalizedTemplate;
                 }
-                this._start = Dialogue._toTime(template.get("Start"));
-                this._end = Dialogue._toTime(template.get("End"));
-                this._layer = Math.max(misc_1.valueOrDefault(template, "Layer", parseInt, function (value) {
+                this._id = ++Dialogue._lastDialogueId;
+                var styleName = template.get("style");
+                if (styleName !== undefined && styleName !== null && styleName.constructor === String) {
+                    styleName = styleName.replace(/^\*+/, "");
+                    if (styleName.match(/^Default$/i) !== null) {
+                        styleName = "Default";
+                    }
+                }
+                this._style = ass.styles.get(styleName);
+                if (this._style === undefined) {
+                    if (settings_1.debugMode) {
+                        console.warn("Unrecognized style " + styleName + '. Falling back to "Default"');
+                    }
+                    this._style = ass.styles.get("Default");
+                }
+                if (this._style === undefined) {
+                    throw new Error("Unrecognized style " + styleName);
+                }
+                this._start = Dialogue._toTime(template.get("start"));
+                this._end = Dialogue._toTime(template.get("end"));
+                this._layer = Math.max(misc_1.valueOrDefault(template, "layer", parseInt, function (value) {
                     return !isNaN(value);
                 }, "0"), 0);
-                this._rawPartsString = template.get("Text");
+                this._rawPartsString = template.get("text");
                 if (this._rawPartsString === undefined || this._rawPartsString === null || this._rawPartsString.constructor !== String) {
                     throw new Error("Dialogue doesn't have any text.");
                 }
@@ -7030,6 +7959,21 @@
                 enumerable: true,
                 configurable: true
             });
+            Object.defineProperty(Dialogue.prototype, "containsTransformTag", {
+                /**
+                 * Convenience getter for whether this dialogue contains a {\t} tag.
+                 *
+                 * @type {boolean}
+                 */
+                get: function () {
+                    if (this._parts === null) {
+                        this._parsePartsString();
+                    }
+                    return this._containsTransformTag;
+                },
+                enumerable: true,
+                configurable: true
+            });
             /**
              * @return {string} A simple representation of this dialogue's properties and parts.
              */
@@ -7056,6 +8000,7 @@
                         if (part.start === null || part.end === null || part.accel === null) {
                             _this._parts[index] = new parts.Transform(part.start === null ? 0 : part.start, part.end === null ? _this._end - _this._start : part.end, part.accel === null ? 1 : part.accel, part.tags);
                         }
+                        _this._containsTransformTag = true;
                     }
                 });
                 if (settings_1.debugMode) {
@@ -7085,7 +8030,7 @@
             return Dialogue;
         }();
         exports.Dialogue = Dialogue;
-    }, /* 25 ./types/misc */ function (exports) {
+    }, /* 27 ./types/misc */ function (exports) {
         /**
          * The format of the string passed to {@link libjass.ASS.fromString}
          *
@@ -7134,17 +8079,17 @@
                 return converter(defaultValue);
             }
             try {
-                var numValue = converter(value);
-                if (validator !== null && !validator(numValue)) {
+                var result = converter(value);
+                if (validator !== null && !validator(result)) {
                     throw new Error("Validation failed.");
                 }
-                return numValue;
+                return result;
             } catch (ex) {
                 throw new Error("Property " + key + " has invalid value " + value + " - " + ex.stack);
             }
         }
         exports.valueOrDefault = valueOrDefault;
-    }, /* 26 ./types/script-properties */ function (exports) {
+    }, /* 28 ./types/script-properties */ function (exports) {
         /**
          * This class represents the properties of a {@link libjass.ASS} script.
          *
@@ -7236,9 +8181,10 @@
             return ScriptProperties;
         }();
         exports.ScriptProperties = ScriptProperties;
-    }, /* 27 ./types/style */ function (exports, require) {
-        var misc_1 = require(25);
+    }, /* 29 ./types/style */ function (exports, require) {
+        var misc_1 = require(27);
         var parse_1 = require(3);
+        var map_1 = require(30);
         /**
          * This class represents a single global style declaration in a {@link libjass.ASS} script. The styles can be obtained via the {@link libjass.ASS.styles} property.
          *
@@ -7268,63 +8214,83 @@
          */
         var Style = function () {
             function Style(template) {
-                this._name = template.get("Name");
+                {
+                    var normalizedTemplate = new map_1.Map();
+                    template.forEach(function (value, key) {
+                        normalizedTemplate.set(key.toLowerCase(), value);
+                    });
+                    template = normalizedTemplate;
+                }
+                this._name = template.get("name");
                 if (this._name === undefined || this._name === null || this._name.constructor !== String) {
                     throw new Error("Style doesn't have a name.");
                 }
-                this._italic = template.get("Italic") === "-1";
-                this._bold = template.get("Bold") === "-1";
-                this._underline = template.get("Underline") === "-1";
-                this._strikeThrough = template.get("StrikeOut") === "-1";
-                this._fontName = template.get("Fontname");
-                this._fontSize = misc_1.valueOrDefault(template, "Fontsize", parseFloat, function (value) {
-                    return !isNaN(value);
-                }, "50");
-                this._fontScaleX = misc_1.valueOrDefault(template, "ScaleX", parseFloat, function (value) {
-                    return !isNaN(value);
-                }, "100") / 100;
-                this._fontScaleY = misc_1.valueOrDefault(template, "ScaleY", parseFloat, function (value) {
-                    return !isNaN(value);
-                }, "100") / 100;
-                this._letterSpacing = misc_1.valueOrDefault(template, "Spacing", parseFloat, function (value) {
+                this._name = this._name.replace(/^\*+/, "");
+                this._italic = !!misc_1.valueOrDefault(template, "italic", parseFloat, function (value) {
                     return !isNaN(value);
                 }, "0");
-                this._rotationZ = misc_1.valueOrDefault(template, "Angle", parseFloat, function (value) {
+                this._bold = !!misc_1.valueOrDefault(template, "bold", parseFloat, function (value) {
                     return !isNaN(value);
                 }, "0");
-                this._primaryColor = misc_1.valueOrDefault(template, "PrimaryColour", function (str) {
+                this._underline = !!misc_1.valueOrDefault(template, "underline", parseFloat, function (value) {
+                    return !isNaN(value);
+                }, "0");
+                this._strikeThrough = !!misc_1.valueOrDefault(template, "strikeout", parseFloat, function (value) {
+                    return !isNaN(value);
+                }, "0");
+                this._fontName = misc_1.valueOrDefault(template, "fontname", function (str) {
+                    return str;
+                }, function (value) {
+                    return value.constructor === String;
+                }, "sans-serif");
+                this._fontSize = misc_1.valueOrDefault(template, "fontsize", parseFloat, function (value) {
+                    return !isNaN(value);
+                }, "18");
+                this._fontScaleX = misc_1.valueOrDefault(template, "scalex", parseFloat, function (value) {
+                    return value >= 0;
+                }, "100") / 100;
+                this._fontScaleY = misc_1.valueOrDefault(template, "scaley", parseFloat, function (value) {
+                    return value >= 0;
+                }, "100") / 100;
+                this._letterSpacing = misc_1.valueOrDefault(template, "spacing", parseFloat, function (value) {
+                    return value >= 0;
+                }, "0");
+                this._rotationZ = misc_1.valueOrDefault(template, "angle", parseFloat, function (value) {
+                    return !isNaN(value);
+                }, "0");
+                this._primaryColor = misc_1.valueOrDefault(template, "primarycolour", function (str) {
                     return parse_1.parse(str, "colorWithAlpha");
-                }, null, "&H0000FFFF");
-                this._secondaryColor = misc_1.valueOrDefault(template, "SecondaryColour", function (str) {
+                }, null, "&H00FFFFFF");
+                this._secondaryColor = misc_1.valueOrDefault(template, "secondarycolour", function (str) {
+                    return parse_1.parse(str, "colorWithAlpha");
+                }, null, "&H00FFFF00");
+                this._outlineColor = misc_1.valueOrDefault(template, "outlinecolour", function (str) {
                     return parse_1.parse(str, "colorWithAlpha");
                 }, null, "&H00000000");
-                this._outlineColor = misc_1.valueOrDefault(template, "OutlineColour", function (str) {
+                this._shadowColor = misc_1.valueOrDefault(template, "backcolour", function (str) {
                     return parse_1.parse(str, "colorWithAlpha");
-                }, null, "&H00000000");
-                this._shadowColor = misc_1.valueOrDefault(template, "BackColour", function (str) {
-                    return parse_1.parse(str, "colorWithAlpha");
-                }, null, "&H00000000");
-                this._outlineThickness = misc_1.valueOrDefault(template, "Outline", parseFloat, function (value) {
-                    return !isNaN(value);
-                }, "1");
-                this._borderStyle = misc_1.valueOrDefault(template, "BorderStyle", parseInt, function (value) {
-                    return !isNaN(value);
-                }, "1");
-                this._shadowDepth = misc_1.valueOrDefault(template, "Shadow", parseFloat, function (value) {
-                    return !isNaN(value);
-                }, "1");
-                this._alignment = misc_1.valueOrDefault(template, "Alignment", parseInt, function (value) {
-                    return !isNaN(value);
+                }, null, "&H80000000");
+                this._outlineThickness = misc_1.valueOrDefault(template, "outline", parseFloat, function (value) {
+                    return value >= 0;
                 }, "2");
-                this._marginLeft = misc_1.valueOrDefault(template, "MarginL", parseFloat, function (value) {
+                this._borderStyle = misc_1.valueOrDefault(template, "borderstyle", parseInt, function (value) {
+                    return misc_1.BorderStyle[misc_1.BorderStyle[value]] === value;
+                }, "1");
+                this._shadowDepth = misc_1.valueOrDefault(template, "shadow", parseFloat, function (value) {
+                    return value >= 0;
+                }, "3");
+                this._alignment = misc_1.valueOrDefault(template, "alignment", parseInt, function (value) {
+                    return value >= 1 && value <= 9;
+                }, "2");
+                this._marginLeft = misc_1.valueOrDefault(template, "marginl", parseFloat, function (value) {
                     return !isNaN(value);
-                }, "80");
-                this._marginRight = misc_1.valueOrDefault(template, "MarginR", parseFloat, function (value) {
+                }, "20");
+                this._marginRight = misc_1.valueOrDefault(template, "marginr", parseFloat, function (value) {
                     return !isNaN(value);
-                }, "80");
-                this._marginVertical = misc_1.valueOrDefault(template, "MarginV", parseFloat, function (value) {
+                }, "20");
+                this._marginVertical = misc_1.valueOrDefault(template, "marginv", parseFloat, function (value) {
                     return !isNaN(value);
-                }, "35");
+                }, "20");
             }
             Object.defineProperty(Style.prototype, "name", {
                 /**
@@ -7593,33 +8559,27 @@
             return Style;
         }();
         exports.Style = Style;
-    }, /* 28 ./utility/extends */ function (exports) {
+    }, /* 30 ./utility/map */ function (exports) {
         /**
-         * Class inheritance shim.
+         * Set to the global implementation of Map if the environment has one, else set to {@link ./utility/map.SimpleMap}
          *
-         * @param {!Function} derived
-         * @param {!Function} base
+         * Set it to null to force {@link ./utility/map.SimpleMap} to be used even if a global Map is present.
+         *
+         * @type {function(new:Map, !Array.<!Array.<*>>=)}
+         *
+         * @memberOf libjass
          */
-        function __extends(derived, base) {
-            for (var property in base) {
-                if (base.hasOwnProperty(property)) {
-                    derived[property] = base[property];
-                }
-            }
-            function __() {
-                this.constructor = derived;
-            }
-            __.prototype = base.prototype;
-            derived.prototype = new __();
-        }
-        exports.__extends = __extends;
-    }, /* 29 ./utility/map */ function (exports) {
+        exports.Map = global.Map;
         /**
          * Map implementation for browsers that don't support it. Only supports keys which are of Number or String type, or which have a property called "id".
          *
          * Keys and values are stored as properties of an object, with property names derived from the key type.
          *
          * @param {!Array.<!Array.<*>>=} iterable Only an array of elements (where each element is a 2-tuple of key and value) is supported.
+         *
+         * @constructor
+         * @template K, V
+         * @private
          */
         var SimpleMap = function () {
             function SimpleMap(iterable) {
@@ -7740,16 +8700,6 @@
             };
             return SimpleMap;
         }();
-        /**
-         * Set to the global implementation of Map if the environment has one, else set to {@link ./utility/map.SimpleMap}
-         *
-         * Set it to null to force {@link ./utility/map.SimpleMap} to be used even if a global Map is present.
-         *
-         * @type {function(new:Map, !Array.<!Array.<*>>=)}
-         *
-         * @memberOf libjass
-         */
-        exports.Map = global.Map;
         if (exports.Map === undefined || typeof exports.Map.prototype.forEach !== "function" || function () {
             try {
                 return new exports.Map([ [ 1, "foo" ], [ 2, "bar" ] ]).size !== 2;
@@ -7772,7 +8722,7 @@
             }
         }
         exports.setImplementation = setImplementation;
-    }, /* 30 ./utility/mixin */ function (exports) {
+    }, /* 31 ./utility/mixin */ function (exports) {
         /**
          * Adds properties of the given mixins' prototypes to the given class's prototype.
          *
@@ -7789,120 +8739,136 @@
             }
         }
         exports.mixin = mixin;
-    }, /* 31 ./utility/promise */ function (exports) {
+    }, /* 32 ./utility/promise */ function (exports) {
+        /**
+         * Set to the global implementation of Promise if the environment has one, else set to {@link ./utility/promise.SimplePromise}
+         *
+         * Set it to null to force {@link ./utility/promise.SimplePromise} to be used even if a global Promise is present.
+         *
+         * @type {function(new:Promise)}
+         *
+         * @memberOf libjass
+         */
+        exports.Promise = global.Promise;
+        // Based on https://github.com/petkaantonov/bluebird/blob/1b1467b95442c12378d0ea280ede61d640ab5510/src/schedule.js
+        var enqueueJob = function () {
+            var MutationObserver = global.MutationObserver || global.WebkitMutationObserver;
+            if (global.process !== undefined && typeof global.process.nextTick === "function") {
+                return function (callback) {
+                    global.process.nextTick(callback);
+                };
+            } else if (MutationObserver !== undefined) {
+                var pending = [];
+                var currentlyPending = false;
+                var div = document.createElement("div");
+                var observer = new MutationObserver(function () {
+                    var processing = pending.splice(0, pending.length);
+                    for (var _i = 0; _i < processing.length; _i++) {
+                        var callback = processing[_i];
+                        callback();
+                    }
+                    currentlyPending = false;
+                    if (pending.length > 0) {
+                        div.classList.toggle("foo");
+                        currentlyPending = true;
+                    }
+                });
+                observer.observe(div, {
+                    attributes: true
+                });
+                return function (callback) {
+                    pending.push(callback);
+                    if (!currentlyPending) {
+                        div.classList.toggle("foo");
+                        currentlyPending = true;
+                    }
+                };
+            } else {
+                return function (callback) {
+                    return setTimeout(callback, 0);
+                };
+            }
+        }();
         /**
          * Promise implementation for browsers that don't support it.
          *
-         * @param {function(function(T), function(*))} resolver
+         * @param {function(function(T|!Thenable.<T>), function(*))} executor
+         *
+         * @constructor
+         * @template T
+         * @private
          */
         var SimplePromise = function () {
-            function SimplePromise(resolver) {
-                var _this = this;
+            function SimplePromise(executor) {
                 this._state = SimplePromiseState.PENDING;
-                this._thens = [];
-                this._propagateIsPending = false;
-                this._alreadyFulfilledValue = null;
-                this._alreadyRejectedReason = null;
+                this._fulfillReactions = [];
+                this._rejectReactions = [];
+                this._fulfilledValue = null;
+                this._rejectedReason = null;
+                if (typeof executor !== "function") {
+                    throw new TypeError('typeof executor !== "function"');
+                }
+                var _a = this._createResolvingFunctions();
+                var resolve = _a.resolve;
+                var reject = _a.reject;
                 try {
-                    resolver(function (value) {
-                        return _this._resolve(value);
-                    }, function (reason) {
-                        return _this._reject(reason);
-                    });
+                    executor(resolve, reject);
                 } catch (ex) {
-                    this._reject(ex);
+                    reject(ex);
                 }
             }
             /**
-             * @param {?function(T):(U|Promise.<U>)} fulfilledHandler
-             * @param {?function(*):(U|Promise.<U>)} rejectedHandler
+             * @param {?function(T):(U|!Thenable.<U>)} onFulfilled
+             * @param {?function(*):(U|!Thenable.<U>)} onRejected
              * @return {!Promise.<U>}
              *
              * @template U
              */
-            SimplePromise.prototype.then = function (fulfilledHandler, rejectedHandler) {
-                var _this = this;
-                fulfilledHandler = typeof fulfilledHandler === "function" ? fulfilledHandler : null;
-                rejectedHandler = typeof rejectedHandler === "function" ? rejectedHandler : null;
-                if (fulfilledHandler === null && rejectedHandler === null) {
-                    return this;
-                }
-                if (fulfilledHandler === null) {
-                    fulfilledHandler = function (value) {
+            SimplePromise.prototype.then = function (onFulfilled, onRejected) {
+                var resultCapability = new DeferredPromise();
+                if (typeof onFulfilled !== "function") {
+                    onFulfilled = function (value) {
                         return value;
                     };
                 }
-                if (rejectedHandler === null) {
-                    rejectedHandler = function (reason) {
+                if (typeof onRejected !== "function") {
+                    onRejected = function (reason) {
                         throw reason;
                     };
                 }
-                var result = new exports.Promise(function (resolve, reject) {
-                    _this._thens.push({
-                        propagateFulfilling: function (value) {
-                            try {
-                                resolve(fulfilledHandler(value));
-                            } catch (ex) {
-                                reject(ex);
-                            }
-                        },
-                        propagateRejection: function (reason) {
-                            try {
-                                resolve(rejectedHandler(reason));
-                            } catch (ex) {
-                                reject(ex);
-                            }
-                        }
-                    });
-                });
-                this._propagateResolution();
-                return result;
+                var fulfillReaction = {
+                    capabilities: resultCapability,
+                    handler: onFulfilled
+                };
+                var rejectReaction = {
+                    capabilities: resultCapability,
+                    handler: onRejected
+                };
+                switch (this._state) {
+                  case SimplePromiseState.PENDING:
+                    this._fulfillReactions.push(fulfillReaction);
+                    this._rejectReactions.push(rejectReaction);
+                    break;
+
+                  case SimplePromiseState.FULFILLED:
+                    this._enqueueFulfilledReactionJob(fulfillReaction, this._fulfilledValue);
+                    break;
+
+                  case SimplePromiseState.REJECTED:
+                    this._enqueueRejectedReactionJob(rejectReaction, this._rejectedReason);
+                    break;
+                }
+                return resultCapability.promise;
             };
             /**
-             * @param {function(*):(T|Promise.<T>)} rejectedHandler
+             * @param {function(*):(T|!Thenable.<T>)} onRejected
              * @return {!Promise.<T>}
              */
-            SimplePromise.prototype.catch = function (rejectedHandler) {
-                return this.then(null, rejectedHandler);
+            SimplePromise.prototype.catch = function (onRejected) {
+                return this.then(null, onRejected);
             };
             /**
-             * @return {boolean}
-             */
-            SimplePromise.prototype.isFulfilled = function () {
-                return this._state === SimplePromiseState.FULFILLED;
-            };
-            /**
-             * @return {boolean}
-             */
-            SimplePromise.prototype.isRejected = function () {
-                return this._state === SimplePromiseState.REJECTED;
-            };
-            /**
-             * @return {boolean}
-             */
-            SimplePromise.prototype.isPending = function () {
-                return this._state === SimplePromiseState.PENDING;
-            };
-            /**
-             * @return {T}
-             */
-            SimplePromise.prototype.value = function () {
-                if (this._state !== SimplePromiseState.FULFILLED) {
-                    throw new Error("This promise is not in FULFILLED state.");
-                }
-                return this._alreadyFulfilledValue;
-            };
-            /**
-             * @return {*}
-             */
-            SimplePromise.prototype.reason = function () {
-                if (this._state !== SimplePromiseState.REJECTED) {
-                    throw new Error("This promise is not in FULFILLED state.");
-                }
-                return this._alreadyRejectedReason;
-            };
-            /**
-             * @param {T|!Promise.<T>} value
+             * @param {T|!Thenable.<T>} value
              * @return {!Promise.<T>}
              *
              * @template T
@@ -7917,7 +8883,19 @@
                 });
             };
             /**
-             * @param {!Array.<T|!Promise.<T>>} values
+             * @param {*} reason
+             * @return {!Promise.<T>}
+             *
+             * @template T
+             * @static
+             */
+            SimplePromise.reject = function (reason) {
+                return new exports.Promise(function (/* ujs:unreferenced */ resolve, reject) {
+                    return reject(reason);
+                });
+            };
+            /**
+             * @param {!Array.<T|!Thenable.<T>>} values
              * @return {!Promise.<!Array.<T>>}
              *
              * @template T
@@ -7938,45 +8916,86 @@
                             if (numUnresolved === 0) {
                                 resolve(result);
                             }
-                        });
-                    }, reject);
+                        }, reject);
+                    });
                 });
             };
             /**
-             * @param {T|!Promise.<T>} value
+             * @param {!Array.<T|!Thenable.<T>>} values
+             * @return {!Promise.<T>}
+             *
+             * @template T
+             * @static
+             */
+            SimplePromise.race = function (values) {
+                return new exports.Promise(function (resolve, reject) {
+                    for (var _i = 0; _i < values.length; _i++) {
+                        var value = values[_i];
+                        exports.Promise.resolve(value).then(resolve, reject);
+                    }
+                });
+            };
+            /**
+             * @return {{ resolve(T|!Thenable.<T>), reject(*) }}
              *
              * @private
              */
-            SimplePromise.prototype._resolve = function (value) {
+            SimplePromise.prototype._createResolvingFunctions = function () {
                 var _this = this;
-                var alreadyCalled = false;
-                try {
-                    if (value === this) {
-                        throw new TypeError("2.3.1");
-                    }
-                    var thenMethod = SimplePromise._getThenMethod(value);
-                    if (thenMethod === null) {
-                        this._fulfill(value);
+                var alreadyResolved = false;
+                var resolve = function (resolution) {
+                    if (alreadyResolved) {
                         return;
                     }
-                    thenMethod.call(value, function (value) {
-                        if (alreadyCalled) {
-                            return;
-                        }
-                        alreadyCalled = true;
-                        _this._resolve(value);
-                    }, function (reason) {
-                        if (alreadyCalled) {
-                            return;
-                        }
-                        alreadyCalled = true;
-                        _this._reject(reason);
+                    alreadyResolved = true;
+                    if (resolution === _this) {
+                        _this._reject(new TypeError("resolution === this"));
+                        return;
+                    }
+                    if (resolution === null || typeof resolution !== "object" && typeof resolution !== "function") {
+                        _this._fulfill(resolution);
+                        return;
+                    }
+                    try {
+                        var then = resolution.then;
+                    } catch (ex) {
+                        _this._reject(ex);
+                        return;
+                    }
+                    if (typeof then !== "function") {
+                        _this._fulfill(resolution);
+                        return;
+                    }
+                    enqueueJob(function () {
+                        return _this._resolveWithThenable(resolution, then);
                     });
-                } catch (ex) {
-                    if (alreadyCalled) {
+                };
+                var reject = function (reason) {
+                    if (alreadyResolved) {
                         return;
                     }
-                    this._reject(ex);
+                    alreadyResolved = true;
+                    _this._reject(reason);
+                };
+                return {
+                    resolve: resolve,
+                    reject: reject
+                };
+            };
+            /**
+             * @param {!Thenable.<T>} thenable
+             * @param {{function(this:!Thenable.<T>, function(T|!Thenable.<T>), function(*))}} then
+             *
+             * @private
+             */
+            SimplePromise.prototype._resolveWithThenable = function (thenable, then) {
+                var _a = this._createResolvingFunctions();
+                var resolve = _a.resolve;
+                var reject = _a.reject;
+                try {
+                    then.call(thenable, resolve, reject);
+                } catch (ex) {
+                    reject(ex);
                 }
             };
             /**
@@ -7985,12 +9004,15 @@
              * @private
              */
             SimplePromise.prototype._fulfill = function (value) {
-                if (this._state !== SimplePromiseState.PENDING) {
-                    return;
-                }
+                var reactions = this._fulfillReactions;
+                this._fulfilledValue = value;
+                this._fulfillReactions = undefined;
+                this._rejectReactions = undefined;
                 this._state = SimplePromiseState.FULFILLED;
-                this._alreadyFulfilledValue = value;
-                this._propagateResolution();
+                for (var _i = 0; _i < reactions.length; _i++) {
+                    var reaction = reactions[_i];
+                    this._enqueueFulfilledReactionJob(reaction, value);
+                }
             };
             /**
              * @param {*} reason
@@ -7998,105 +9020,65 @@
              * @private
              */
             SimplePromise.prototype._reject = function (reason) {
-                if (this._state !== SimplePromiseState.PENDING) {
-                    return;
-                }
+                var reactions = this._rejectReactions;
+                this._rejectedReason = reason;
+                this._fulfillReactions = undefined;
+                this._rejectReactions = undefined;
                 this._state = SimplePromiseState.REJECTED;
-                this._alreadyRejectedReason = reason;
-                this._propagateResolution();
+                for (var _i = 0; _i < reactions.length; _i++) {
+                    var reaction = reactions[_i];
+                    this._enqueueRejectedReactionJob(reaction, reason);
+                }
             };
             /**
-             * @param {!*} obj
-             * @return {?function(function(T):(T|!Promise.<T>), function(*):(T|!Promise.<T>)):!Promise.<T>}
-             *
-             * @template T
-             * @private
-             * @static
-             */
-            SimplePromise._getThenMethod = function (obj) {
-                if (typeof obj !== "object" && typeof obj !== "function") {
-                    return null;
-                }
-                if (obj === null || obj === undefined) {
-                    return null;
-                }
-                var then = obj.then;
-                if (typeof then !== "function") {
-                    return null;
-                }
-                return then;
-            };
-            /**
-             * Propagates the result of the current promise to all its children.
+             * @param {!FulfilledPromiseReaction.<T, *>} reaction
+             * @param {T} value
              *
              * @private
              */
-            SimplePromise.prototype._propagateResolution = function () {
-                var _this = this;
-                if (this._state === SimplePromiseState.PENDING) {
-                    return;
-                }
-                if (this._propagateIsPending) {
-                    return;
-                }
-                this._propagateIsPending = true;
-                SimplePromise._nextTick(function () {
-                    _this._propagateIsPending = false;
-                    if (_this._state === SimplePromiseState.FULFILLED) {
-                        while (_this._thens.length > 0) {
-                            var nextThen = _this._thens.shift();
-                            nextThen.propagateFulfilling(_this._alreadyFulfilledValue);
-                        }
-                    } else if (_this._state === SimplePromiseState.REJECTED) {
-                        while (_this._thens.length > 0) {
-                            var nextThen = _this._thens.shift();
-                            nextThen.propagateRejection(_this._alreadyRejectedReason);
-                        }
+            SimplePromise.prototype._enqueueFulfilledReactionJob = function (reaction, value) {
+                enqueueJob(function () {
+                    var _a = reaction.capabilities;
+                    var resolve = _a.resolve;
+                    var reject = _a.reject;
+                    var handler = reaction.handler;
+                    var handlerResult;
+                    try {
+                        handlerResult = handler(value);
+                    } catch (ex) {
+                        reject(ex);
+                        return;
                     }
+                    resolve(handlerResult);
                 });
             };
-            // Based on https://github.com/petkaantonov/bluebird/blob/1b1467b95442c12378d0ea280ede61d640ab5510/src/schedule.js
-            SimplePromise._nextTick = function () {
-                var MutationObserver = global.MutationObserver || global.WebkitMutationObserver;
-                if (global.process !== undefined && typeof global.process.nextTick === "function") {
-                    return function (callback) {
-                        global.process.nextTick(callback);
-                    };
-                } else if (MutationObserver !== undefined) {
-                    var pending = [];
-                    var currentlyPending = false;
-                    var div = document.createElement("div");
-                    var observer = new MutationObserver(function () {
-                        var processing = pending;
-                        pending = [];
-                        for (var _i = 0; _i < processing.length; _i++) {
-                            var callback = processing[_i];
-                            callback();
-                        }
-                        currentlyPending = false;
-                        if (pending.length > 0) {
-                            div.classList.toggle("foo");
-                            currentlyPending = true;
-                        }
-                    });
-                    observer.observe(div, {
-                        attributes: true
-                    });
-                    return function (callback) {
-                        pending.push(callback);
-                        if (!currentlyPending) {
-                            div.classList.toggle("foo");
-                            currentlyPending = true;
-                        }
-                    };
-                } else {
-                    return function (callback) {
-                        return setTimeout(callback, 0);
-                    };
-                }
-            }();
+            /**
+             * @param {!RejectedPromiseReaction.<*>} reaction
+             * @param {*} reason
+             *
+             * @private
+             */
+            SimplePromise.prototype._enqueueRejectedReactionJob = function (reaction, reason) {
+                enqueueJob(function () {
+                    var _a = reaction.capabilities;
+                    var resolve = _a.resolve;
+                    var reject = _a.reject;
+                    var handler = reaction.handler;
+                    var handlerResult;
+                    try {
+                        handlerResult = handler(reason);
+                    } catch (ex) {
+                        reject(ex);
+                        return;
+                    }
+                    resolve(handlerResult);
+                });
+            };
             return SimplePromise;
         }();
+        if (exports.Promise === undefined) {
+            exports.Promise = SimplePromise;
+        }
         /**
          * The state of the {@link ./utility/promise.SimplePromise}
          *
@@ -8109,19 +9091,6 @@
             SimplePromiseState[SimplePromiseState["FULFILLED"] = 1] = "FULFILLED";
             SimplePromiseState[SimplePromiseState["REJECTED"] = 2] = "REJECTED";
         })(SimplePromiseState || (SimplePromiseState = {}));
-        /**
-         * Set to the global implementation of Promise if the environment has one, else set to {@link ./utility/promise.SimplePromise}
-         *
-         * Set it to null to force {@link ./utility/promise.SimplePromise} to be used even if a global Promise is present.
-         *
-         * @type {function(new:Promise)}
-         *
-         * @memberOf libjass
-         */
-        exports.Promise = global.Promise;
-        if (exports.Promise === undefined) {
-            exports.Promise = SimplePromise;
-        }
         /**
          * Sets the Promise implementation used by libjass to the provided one. If null, {@link ./utility/promise.SimplePromise} is used.
          *
@@ -8146,8 +9115,16 @@
             function DeferredPromise() {
                 var _this = this;
                 this._promise = new exports.Promise(function (resolve, reject) {
-                    _this._resolve = resolve;
-                    _this._reject = reject;
+                    Object.defineProperties(_this, {
+                        resolve: {
+                            value: resolve,
+                            enumerable: true
+                        },
+                        reject: {
+                            value: reject,
+                            enumerable: true
+                        }
+                    });
                 });
             }
             Object.defineProperty(DeferredPromise.prototype, "promise", {
@@ -8160,28 +9137,97 @@
                 enumerable: true,
                 configurable: true
             });
-            /**
-             * @param {T} value
-             */
-            DeferredPromise.prototype.resolve = function (value) {
-                this._resolve(value);
-            };
-            /**
-             * @param {*} reason
-             */
-            DeferredPromise.prototype.reject = function (reason) {
-                this._reject(reason);
-            };
             return DeferredPromise;
         }();
         exports.DeferredPromise = DeferredPromise;
-    }, /* 32 ./utility/set */ function (exports) {
+        /**
+         * Returns a promise that resolves to the first (in iteration order) promise that fulfills, and rejects if all the promises reject.
+         *
+         * @param {!Array.<!Promise.<T>>} promises
+         * @return {!Promise.<T>}
+         *
+         * @template T
+         */
+        function first(promises) {
+            return first_rec(promises, []);
+        }
+        exports.first = first;
+        /**
+         * @param {!Array.<!Promise.<T>>} promises
+         * @param {!Array.<*>} previousRejections
+         * @return {!Promise.<T>}
+         *
+         * @template T
+         * @private
+         */
+        function first_rec(promises, previousRejections) {
+            if (promises.length === 0) {
+                return exports.Promise.reject(previousRejections);
+            }
+            var head = promises[0];
+            var tail = promises.slice(1);
+            return head.catch(function (reason) {
+                return first_rec(tail, previousRejections.concat(reason));
+            });
+        }
+        /**
+         * Returns a promise that resolves to the first (in time order) promise that fulfills, and rejects if all the promises reject.
+         *
+         * @param {!Array.<!Promise.<T>>} promises
+         * @return {!Promise.<T>}
+         *
+         * @template T
+         */
+        function any(promises) {
+            return new exports.Promise(function (resolve, reject) {
+                return exports.Promise.all(promises.map(function (promise) {
+                    return promise.then(resolve, function (reason) {
+                        return reason;
+                    });
+                })).then(reject);
+            });
+        }
+        exports.any = any;
+        /**
+         * Returns a promise that runs the given callback when the promise has resolved regardless of whether it fulfilled or rejected.
+         *
+         * @param {!Promise.<T>} promise
+         * @param {function()} body
+         * @return {!Promise.<T>}
+         *
+         * @template T
+         */
+        function lastly(promise, body) {
+            return promise.then(function (value) {
+                body();
+                return value;
+            }, function (reason) {
+                body();
+                throw reason;
+            });
+        }
+        exports.lastly = lastly;
+    }, /* 33 ./utility/set */ function (exports) {
+        /**
+         * Set to the global implementation of Set if the environment has one, else set to {@link ./utility/set.SimpleSet}
+         *
+         * Set it to null to force {@link ./utility/set.SimpleSet} to be used even if a global Set is present.
+         *
+         * @type {function(new:Set, !Array.<T>=)}
+         *
+         * @memberOf libjass
+         */
+        exports.Set = global.Set;
         /**
          * Set implementation for browsers that don't support it. Only supports Number and String elements.
          *
          * Elements are stored as properties of an object, with names derived from their type.
          *
          * @param {!Array.<T>=} iterable Only an array of values is supported.
+         *
+         * @constructor
+         * @template T
+         * @private
          */
         var SimpleSet = function () {
             function SimpleSet(iterable) {
@@ -8269,16 +9315,6 @@
             };
             return SimpleSet;
         }();
-        /**
-         * Set to the global implementation of Set if the environment has one, else set to {@link ./utility/set.SimpleSet}
-         *
-         * Set it to null to force {@link ./utility/set.SimpleSet} to be used even if a global Set is present.
-         *
-         * @type {function(new:Set, !Array.<T>=)}
-         *
-         * @memberOf libjass
-         */
-        exports.Set = global.Set;
         if (exports.Set === undefined || typeof exports.Set.prototype.forEach !== "function" || function () {
             try {
                 return new exports.Set([ 1, 2 ]).size !== 2;
@@ -8301,11 +9337,80 @@
             }
         }
         exports.setImplementation = setImplementation;
-    }, /* 33 ./webworker/channel */ function (exports, require) {
-        var map_1 = require(29);
-        var promise_1 = require(31);
-        var commands_1 = require(34);
-        var misc_1 = require(36);
+    }, /* 34 ./utility/ts-helpers */ function (exports) {
+        /**
+         * Class inheritance shim.
+         *
+         * @param {!Function} derived
+         * @param {!Function} base
+         */
+        function __extends(derived, base) {
+            for (var property in base) {
+                if (base.hasOwnProperty(property)) {
+                    derived[property] = base[property];
+                }
+            }
+            function __() {
+                this.constructor = derived;
+            }
+            __.prototype = base.prototype;
+            derived.prototype = new __();
+        }
+        exports.__extends = __extends;
+        /**
+         * Decorator shim.
+         *
+         * @param {!Array.<!Function>} decorators
+         * @param {!*} target
+         * @param {string=} key
+         * @return {*}
+         */
+        function __decorate(decorators, target, key) {
+            if (arguments.length < 3) {
+                return decorateClass(decorators.reverse(), target);
+            } else {
+                decorateField(decorators.reverse(), target, key);
+            }
+        }
+        exports.__decorate = __decorate;
+        /**
+         * Class decorator shim.
+         *
+         * @param {!Array.<function(function(new(): T)): function(new(): T)>} decorators
+         * @param {function(new(): T)} clazz
+         * @return {function(new(): T)}
+         *
+         * @template T
+         * @private
+         */
+        function decorateClass(decorators, clazz) {
+            for (var _i = 0; _i < decorators.length; _i++) {
+                var decorator = decorators[_i];
+                clazz = decorator(clazz) || clazz;
+            }
+            return clazz;
+        }
+        /**
+         * Class member decorator shim.
+         *
+         * @param {!Array.<function(T, string)>} decorators
+         * @param {!T} proto
+         * @param {string} name
+         *
+         * @template T
+         * @private
+         */
+        function decorateField(decorators, proto, name) {
+            for (var _i = 0; _i < decorators.length; _i++) {
+                var decorator = decorators[_i];
+                decorator(proto, name);
+            }
+        }
+    }, /* 35 ./webworker/channel */ function (exports, require) {
+        var map_1 = require(30);
+        var promise_1 = require(32);
+        var commands_1 = require(36);
+        var misc_1 = require(38);
         /**
          * Internal implementation of libjass.webworker.WorkerChannel
          *
@@ -8358,7 +9463,9 @@
              * @private
              */
             WorkerChannelImpl.prototype._respond = function (message) {
-                var requestId = message.requestId, error = message.error, result = message.result;
+                var requestId = message.requestId;
+                var error = message.error;
+                var result = message.result;
                 if (error instanceof Error) {
                     error = {
                         message: error.message,
@@ -8426,10 +9533,10 @@
         exports.WorkerChannelImpl = WorkerChannelImpl;
         misc_1.registerWorkerCommand(commands_1.WorkerCommands.Ping, function () {
             return new promise_1.Promise(function (resolve) {
-                return resolve();
+                return resolve(null);
             });
         });
-    }, /* 34 ./webworker/commands */ function (exports) {
+    }, /* 36 ./webworker/commands */ function (exports) {
         /**
          * The commands that can be sent to or from a web worker.
          */
@@ -8438,9 +9545,9 @@
             WorkerCommands[WorkerCommands["Parse"] = 1] = "Parse";
             WorkerCommands[WorkerCommands["Ping"] = 2] = "Ping";
         })(exports.WorkerCommands || (exports.WorkerCommands = {}));
-    }, /* 35 ./webworker/index */ function (exports, require) {
-        var channel_1 = require(33);
-        var commands_1 = require(34);
+    }, /* 37 ./webworker/index */ function (exports, require) {
+        var channel_1 = require(35);
+        var commands_1 = require(36);
         exports.WorkerCommands = commands_1.WorkerCommands;
         /**
          * Indicates whether web workers are supposed in this environment or not.
@@ -8450,6 +9557,7 @@
          * @memberOf libjass.webworker
          */
         exports.supported = typeof Worker !== "undefined";
+        var _scriptNode = typeof document !== "undefined" && document.currentScript !== undefined ? document.currentScript : null;
         /**
          * Create a new web worker and returns a {@link libjass.webworker.WorkerChannel} to it.
          *
@@ -8466,16 +9574,12 @@
             return new channel_1.WorkerChannelImpl(new Worker(scriptPath));
         }
         exports.createWorker = createWorker;
-        var _scriptNode = null;
-        if (typeof document !== "undefined" && document.currentScript !== undefined) {
-            _scriptNode = document.currentScript;
-        }
         if (typeof WorkerGlobalScope !== "undefined" && global instanceof WorkerGlobalScope) {
             // This is a web worker. Set up a channel to talk back to the main thread.
             new channel_1.WorkerChannelImpl(global);
         }
-    }, /* 36 ./webworker/misc */ function (exports, require) {
-        var map_1 = require(29);
+    }, /* 38 ./webworker/misc */ function (exports, require) {
+        var map_1 = require(30);
         var workerCommands = new map_1.Map();
         var classPrototypes = new map_1.Map();
         /**
