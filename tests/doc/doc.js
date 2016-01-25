@@ -65,7 +65,7 @@ define(["intern!tdd", "intern/chai!assert", "intern/dojo/node!fs", "intern/dojo/
 			assert.equal(brokenLinks.length, 0, "Broken link(s): " + brokenLinks.map(function (href) { return '"' + href + '"'; }).join(", "));
 		});
 
-		tdd.test("@{link} tags in the source", function () {
+		tdd.test("{@link} tags in the source", function () {
 			var regex = /\{@link ([^}]+)\}/g;
 			var brokenLinks = [];
 
