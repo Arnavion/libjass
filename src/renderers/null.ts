@@ -20,7 +20,7 @@
 
 import { Clock, ClockEvent } from "./clocks/base";
 
-import { RendererSettings } from "./settings";
+import { RendererSettings, toRendererSettings } from "./settings";
 
 import { verboseMode } from "../settings";
 
@@ -44,7 +44,7 @@ export class NullRenderer {
 	constructor(private _ass: ASS, private _clock: Clock, settings?: RendererSettings) {
 		this._id = ++NullRenderer._lastRendererId;
 
-		this._settings = RendererSettings.from(settings);
+		this._settings = toRendererSettings(settings);
 
 		this._clock.addEventListener(ClockEvent.Play, () => this._onClockPlay());
 		this._clock.addEventListener(ClockEvent.Tick, () => this._onClockTick());

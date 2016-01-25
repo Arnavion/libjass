@@ -50,7 +50,7 @@ The API documentation is linked in the Links section below. Here's an overview:
 
 * The renderer can be told to dynamically change the size of the subtitles based on user input by calling [WebRenderer.resize()](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.WebRenderer.resize)
 
-* Lastly, the renderer contains an implementation of preloading fonts before playing the video. It uses a map of font names to URLs - this map can be conveniently created from a CSS file containing @font-face rules using [RendererSettings.makeFontMapFromStyleElement()](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.RendererSettings.makeFontMapFromStyleElement)
+* Lastly, the renderer contains an implementation of preloading fonts before playing the video. It uses a map of font names to URLs - this map can be conveniently created from a CSS file containing @font-face rules using [libjass.renderers.makeFontMapFromStyleElement()](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.makeFontMapFromStyleElement)
 
 * For an example of using libjass, check out [the demo.](http://arnavion.github.io/libjass/demo/index.xhtml) It has comments explaining basic usage and pointers to some advanced usage.
 

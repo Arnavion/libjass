@@ -26,4 +26,5 @@ export { VideoClock } from "./clocks/video";
 export { DefaultRenderer } from "./default";
 export { NullRenderer } from "./null";
 export { WebRenderer } from "./web/renderer";
-export { RendererSettings } from "./settings";
+
+export { RendererSettings, makeFontMapFromStyleElement } from "./settings";
