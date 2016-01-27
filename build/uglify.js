@@ -316,6 +316,7 @@ var Run = (function () {
 		// Output
 		var output = {
 			source_map: _this._rootSourceMap,
+			ascii_only: true,
 			beautify: true,
 			comments: function (node, comment) {
 				// If this is the first license header, keep it.
@@ -452,6 +453,7 @@ module.exports = {
 						file: path.basename(sourceMapFile.path),
 						orig: sourceMapFile.contents.toString()
 					}),
+					ascii_only: true,
 					comments: function (node, comment) {
 						if (!firstLicenseHeaderFound && comment.value.indexOf("Copyright") !== -1) {
 							firstLicenseHeaderFound = true;
