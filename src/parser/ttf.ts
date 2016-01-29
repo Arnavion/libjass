@@ -205,7 +205,7 @@ function struct<T>(clazz: { new (): T; read(reader: DataReader): T; }): { new ()
 function field<T>(type: DataType): (proto: T, field: string) => void {
 	let existingDecorator = fieldDecorators.get(type);
 	if (existingDecorator === undefined) {
-		existingDecorator =(proto: T, field: string) => {
+		existingDecorator = (proto: T, field: string) => {
 			const ctor: { __fields?: StructMemberDefinition[] } = proto.constructor;
 			if (ctor.__fields === undefined) {
 				ctor.__fields = [];
