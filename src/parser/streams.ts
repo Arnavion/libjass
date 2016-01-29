@@ -27,7 +27,7 @@ export interface ReadableStream {
 	getReader(): ReadableStreamReader;
 }
 
-interface ReadableStreamReader {
+export interface ReadableStreamReader {
 	/**
 	 * @return {!Promise.<{ value?: Uint8Array, done: boolean }>}
 	 */

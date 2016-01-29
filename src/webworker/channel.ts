@@ -50,7 +50,7 @@ export interface WorkerCommandHandler {
 /**
  * The interface implemented by a communication channel to the other side.
  */
-interface WorkerCommunication {
+export interface WorkerCommunication {
 	/**
 	 * @param {"message"} type
 	 * @param {function(!MessageEvent): *} listener

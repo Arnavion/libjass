@@ -1062,7 +1062,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 }
 mixin(WebRenderer, [EventSource]);
 
-interface PreRenderedSub {
+export interface PreRenderedSub {
 	/** @type {!HTMLDivElement} */
 	sub: HTMLDivElement;
 
