@@ -25,7 +25,7 @@ import { ScriptProperties } from "./script-properties";
 
 import { Format } from "./misc";
 
-import { verboseMode } from "../settings";
+import { debugMode, verboseMode } from "../settings";
 
 import * as parser from "../parser";
 import { parseLineIntoTypedTemplate } from "../parser/misc";
@@ -246,7 +246,9 @@ export class ASS {
 		}
 
 		return fetchPromise.catch(reason => {
-			console.warn("fetch() failed, falling back to XHR: %o", reason);
+			if (debugMode) {
+				console.log("fetch() failed, falling back to XHR: %o", reason);
+			}
 
 			const xhr = new XMLHttpRequest();
 			const result = ASS.fromStream(new parser.XhrStream(xhr), type);
