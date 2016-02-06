@@ -193,10 +193,10 @@ export class ASS {
 	 * Creates an ASS object from the raw text of an ASS script.
 	 *
 	 * @param {string} raw The raw text of the script.
-	 * @param {number=0} type The type of the script. One of the {@link libjass.Format} constants.
+	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
 	 * @return {!Promise.<!libjass.ASS>}
 	 */
-	static fromString(raw: string, type: Format = Format.ASS): Promise<ASS> {
+	static fromString(raw: string, type: Format | string = Format.ASS): Promise<ASS> {
 		return ASS.fromStream(new parser.StringStream(raw), type);
 	}
 
@@ -204,17 +204,19 @@ export class ASS {
 	 * Creates an ASS object from the given {@link libjass.parser.Stream}.
 	 *
 	 * @param {!libjass.parser.Stream} stream The stream to parse the script from
-	 * @param {number=0} type The type of the script. One of the {@link libjass.Format} constants.
+	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
 	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 	 */
-	static fromStream(stream: parser.Stream, type: Format = Format.ASS): Promise<ASS> {
+	static fromStream(stream: parser.Stream, type: Format | string = Format.ASS): Promise<ASS> {
 		switch (type) {
 			case Format.ASS:
+			case "ass":
 				return new parser.StreamParser(stream).ass;
 			case Format.SRT:
+			case "srt":
 				return new parser.SrtStreamParser(stream).ass;
 			default:
-				throw new Error(`Illegal value of type: ${ type }`);
+				throw new Error(`Invalid value of type: ${ type }`);
 		}
 	}
 
@@ -222,10 +224,10 @@ export class ASS {
 	 * Creates an ASS object from the given URL.
 	 *
 	 * @param {string} url The URL of the script.
-	 * @param {number=0} type The type of the script. One of the {@link libjass.Format} constants.
+	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
 	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 	 */
-	static fromUrl(url: string, type: Format = Format.ASS): Promise<ASS> {
+	static fromUrl(url: string, type: Format | string = Format.ASS): Promise<ASS> {
 		let fetchPromise: Promise<ASS>;
 
 		if (
@@ -263,10 +265,10 @@ export class ASS {
 	 *
 	 * @param {!ReadableStream} stream
 	 * @param {string="utf-8"} encoding
-	 * @param {number=0} type The type of the script. One of the {@link libjass.Format} constants.
+	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
 	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 	 */
-	static fromReadableStream(stream: ReadableStream, encoding: string = "utf-8", type: Format = Format.ASS): Promise<ASS> {
+	static fromReadableStream(stream: ReadableStream, encoding: string = "utf-8", type: Format | string = Format.ASS): Promise<ASS> {
 		return ASS.fromStream(new parser.BrowserReadableStream(stream, encoding), type);
 	}
 }
