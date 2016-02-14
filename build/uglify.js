@@ -95,10 +95,19 @@ var Run = (function () {
 
 		switch (path.extname(file.path)) {
 			case ".js":
-				module.root = UglifyJS.parse(file.contents.toString(), {
-					filename: jsFilename,
-					toplevel: null,
-				});
+				try {
+					module.root = UglifyJS.parse(file.contents.toString(), {
+						filename: jsFilename,
+						toplevel: null,
+					});
+				}
+				catch (ex) {
+					if (ex instanceof UglifyJS.JS_Parse_Error) {
+						throw new Error("UglifyJS parse error: " + ex.toString() + "\n");
+					}
+
+					throw ex;
+				}
 
 				if (this._licenseHeader === null) {
 					module.root.walk(new UglifyJS.TreeWalker(function (node, descend) {
