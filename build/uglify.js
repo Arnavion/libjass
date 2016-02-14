@@ -76,7 +76,6 @@ var Run = (function () {
 				sourceMapContents.sources[0] = tsFilename;
 				sourceMapContents.file = jsFilename;
 				this._rootSourceMap.addInput(sourceMapContents);
-				this._rootSourceMap.get().setSourceContent(tsFilename, fs.readFileSync(moduleName + ".ts", { encoding: "utf8" }));
 				break;
 		}
 	};
@@ -456,6 +455,10 @@ function UjsSourceMap(options) {
 		addInput: function (rawSourceMap) {
 			var consumer = new SourceMap.SourceMapConsumer(rawSourceMap);
 			orig_maps[consumer.file] = consumer;
+
+			rawSourceMap.sources.forEach(function (sourceRelativePath, index) {
+				generator.setSourceContent(sourceRelativePath, rawSourceMap.sourcesContent[index]);
+			});
 		},
 		add: function (source, gen_line, gen_col, orig_line, orig_col, name) {
 			var originalMap = orig_maps[source];
