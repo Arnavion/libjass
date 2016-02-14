@@ -1,9 +1,12 @@
 {
 	"compilerOptions": {
-		"module": "CommonJS",
+		"experimentalDecorators": true,
 		"noImplicitAny": true,
-		"sourceMap": true,
-		"target": "ES5",
-		"experimentalDecorators": true
+
+		"target": "es5",
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"sourceMap": true
+
 	}
 }
