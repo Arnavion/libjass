@@ -27,16 +27,19 @@ var FileTransform = require("async-build").FileTransform;
 
 var Run = (function () {
 	function Run(entry, outputLibraryName, unusedVarsToIgnore) {
-		this._entry = path.resolve(entry).replace(/\\/g, "/");
+		this._sourceRoot = path.dirname(path.resolve(entry));
 		this._outputLibraryName = outputLibraryName;
 		this._unusedVarsToIgnore = unusedVarsToIgnore;
 
 		this._root = UglifyJS.parse(fs.readFileSync(path.resolve(__filename, "..", "umd-wrapper.js"), "utf8"));
 		this._root.figure_out_scope({ screw_ie8: true });
 
-		this._outputModulesArray = this._root.body[0].body.args[1].body[1].value.args[0].elements;
+		// Splice in the TS output into the UMD wrapper.
+		this._insertionParent = this._root.body[0].body.args[1].body;
+		this._varInsertionPoint = this._insertionParent.length - 1;
+		this._moduleInsertionPoint = this._varInsertionPoint;
 
-		this._modules = Object.create(null);
+		this._helpersFound = Object.create(null);
 
 		this._rootSourceMap = UjsSourceMap({ file: this._outputLibraryName + ".js", root: "" });
 	}
@@ -45,23 +48,18 @@ var Run = (function () {
 		var _this = this;
 
 		var moduleName = (path.extname(file.path) === ".map") ? file.path.substr(0, file.path.length - ".js.map".length) : file.path.substr(0, file.path.length - ".js".length);
-		if (!(moduleName in this._modules)) {
-			this._modules[moduleName] = { id: null, root: null };
-		}
+		moduleName = path.relative(this._sourceRoot, moduleName).replace(/\\/g, "/");
 
-		var module = this._modules[moduleName];
-
-		var filenameWithoutExtension = path.relative(path.join(this._entry, ".."), moduleName).replace(/\\/g, "/");
-		var tsFilename = filenameWithoutExtension + ".ts";
-		var jsFilename = filenameWithoutExtension + ".js";
+		var tsFilename = moduleName + ".ts";
+		var jsFilename = moduleName + ".js";
 
 		switch (path.extname(file.path)) {
 			case ".js":
 				try {
-					module.root = UglifyJS.parse(file.contents.toString(), {
+					var body = UglifyJS.parse(file.contents.toString(), {
 						filename: jsFilename,
 						toplevel: null,
-					});
+					}).body;
 				}
 				catch (ex) {
 					if (ex instanceof UglifyJS.JS_Parse_Error) {
@@ -70,6 +68,73 @@ var Run = (function () {
 
 					throw ex;
 				}
+
+				body.forEach(function (node) {
+					if (node instanceof UglifyJS.AST_Var) {
+						node.definitions.forEach(function (definition) {
+							if (definition.name.name in _this._helpersFound) {
+								return;
+							}
+
+							_this._helpersFound[definition.name.name] = undefined;
+
+							definition.value = definition.value.right;
+							_this._insertionParent.splice(_this._varInsertionPoint, 0, node);
+							_this._varInsertionPoint++;
+							_this._moduleInsertionPoint++;
+						});
+					}
+					else if (node instanceof UglifyJS.AST_Statement) {
+						if (!(node.body instanceof UglifyJS.AST_Call) || !(node.body.expression.name === "define")) {
+							throw new Error("Expected to find a top-level call to define()");
+						}
+
+						var defineCall = node.body;
+
+						defineCall.expression.name = "def";
+
+						defineCall.args.unshift(new UglifyJS.AST_String({ value: moduleName, quote: '"' }));
+						if (defineCall.args[1].elements[0].value !== "require") {
+							throw new Error("Expected first dep to be require");
+						}
+						defineCall.args[1].elements.shift();
+						defineCall.args[2].argnames.shift();
+
+						if (defineCall.args[1].elements[0].value !== "exports") {
+							throw new Error("Expected second dep to be exports");
+						}
+						defineCall.args[1].elements.shift();
+						defineCall.args[2].argnames.push(defineCall.args[2].argnames.shift());
+
+						for (var i = 0; i < defineCall.args[1].elements.length; i++) {
+							var depNameNode = defineCall.args[1].elements[i];
+							var depPath = path.resolve(file.path, "..", depNameNode.value);
+							var depName = path.relative(_this._sourceRoot, depPath).replace(/\\/g, "/");
+
+							try {
+								var depFileInfo = fs.statSync(depPath);
+								if (!depFileInfo.isDirectory()) {
+									throw new Error(depPath + " exists but isn't a directory.");
+								}
+
+								depName += "/index";
+							}
+							catch (ex) {
+								if (ex.code !== "ENOENT") {
+									throw ex;
+								}
+							}
+
+							depNameNode.value = depName;
+						}
+
+						_this._insertionParent.splice(_this._moduleInsertionPoint, 0, node);
+					}
+					else {
+						throw new Error("Unexpected node found.");
+					}
+				});
+
 				break;
 			case ".map":
 				var sourceMapContents = JSON.parse(file.contents.toString());
@@ -83,52 +148,6 @@ var Run = (function () {
 	Run.prototype.build = function (outputStream) {
 		var _this = this;
 
-		// Assign IDs to all modules
-		var moduleNames = Object.keys(this._modules);
-		moduleNames.sort(function (name1, name2) { return (name1 === name2) ? 0 : (name1 < name2 ? -1 : 1); });
-		moduleNames.unshift.apply(moduleNames, moduleNames.splice(moduleNames.indexOf(this._entry), 1));
-
-		moduleNames.forEach(function (moduleName, index) {
-			_this._modules[moduleName].id = index;
-		});
-
-
-		// Merge modules
-		moduleNames.forEach(function (moduleName) {
-			var module = _this._modules[moduleName];
-
-			module.root.body.forEach(function (statement) {
-				if (statement instanceof UglifyJS.AST_Var && statement.definitions.length === 1) {
-					if (
-						statement.definitions[0].value instanceof UglifyJS.AST_Call &&
-						statement.definitions[0].value.expression.name === "require"
-					) {
-						var importRelativePath = statement.definitions[0].value.args[0].value;
-						var importAbsolutePath = path.join(moduleName, "..", importRelativePath).replace(/\\/g, "/");
-						var stringArg = statement.definitions[0].value.args[0];
-						var importedModule = _this._modules[importAbsolutePath];
-						if (importedModule === undefined) {
-							importedModule = _this._modules[importAbsolutePath + "/index"];
-						}
-						statement.definitions[0].value.args[0] = new UglifyJS.AST_Number({ start: stringArg.start, end: stringArg.end, value: importedModule.id });
-					}
-					else if (statement.definitions[0].name.name === "__extends") {
-						var importAbsolutePath = path.join(_this._entry, "..", "utility", "ts-helpers").replace(/\\/g, "/");
-						statement.definitions[0].value = UglifyJS.parse('require(' + _this._modules[importAbsolutePath].id + ').__extends').body[0].body;
-					}
-					else if (statement.definitions[0].name.name === "__decorate") {
-						var importAbsolutePath = path.join(_this._entry, "..", "utility", "ts-helpers").replace(/\\/g, "/");
-						statement.definitions[0].value = UglifyJS.parse('require(' + _this._modules[importAbsolutePath].id + ').__decorate').body[0].body;
-					}
-				}
-			});
-
-			var wrapper = UglifyJS.parse('/* ' + module.id + ' ./' + path.relative(path.join(_this._entry, ".."), moduleName).replace(/\\/g, "/") + ' */ function x(exports, require) { }');
-			var func = wrapper.body[0];
-			func.body = module.root.body;
-			func.name = null;
-			_this._outputModulesArray.push(func);
-		});
 
 		this._root.figure_out_scope({ screw_ie8: true });
 
@@ -177,7 +196,7 @@ var Run = (function () {
 						return;
 					}
 
-					var indent = "         "; // 9 spaces
+					var indent = "     "; // 5 spaces
 					for (var i = 0; i < comment.col; i++) {
 						indent += " ";
 					}
@@ -282,7 +301,7 @@ var Run = (function () {
 
 		// Output
 		var output = {
-			source_map: _this._rootSourceMap,
+			source_map: this._rootSourceMap,
 			ascii_only: true,
 			beautify: true,
 			comments: true,
@@ -292,13 +311,13 @@ var Run = (function () {
 		this._root.print(stream);
 
 		outputStream.push({
-			path: _this._outputLibraryName + ".js",
-			contents: Buffer.concat([new Buffer(stream.toString()), new Buffer("\n//# sourceMappingURL=" + _this._outputLibraryName + ".js.map")])
+			path: this._outputLibraryName + ".js",
+			contents: Buffer.concat([new Buffer(stream.toString()), new Buffer("\n//# sourceMappingURL=" + this._outputLibraryName + ".js.map")])
 		});
 
 		outputStream.push({
-			path: _this._outputLibraryName + ".js.map",
-			contents: new Buffer(_this._rootSourceMap.get().toString())
+			path: this._outputLibraryName + ".js.map",
+			contents: new Buffer(this._rootSourceMap.get().toString())
 		});
 
 		// Print unused variables

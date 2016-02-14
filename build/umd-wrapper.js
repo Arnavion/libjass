@@ -39,19 +39,27 @@
 	}
 })(this, function (global) {
 	"use strict";
-	return (function (modules) {
-		var installedModules = Object.create(null);
-		function require(moduleId) {
-			if (installedModules[moduleId]) {
-				return installedModules[moduleId];
-			}
 
-			var exports = installedModules[moduleId] = Object.create(null);
-			modules[moduleId](exports, require);
-			return exports;
+	var registeredModules = Object.create(null);
+	var installedModules = Object.create(null);
+
+	function def(moduleId, deps, body) {
+		installedModules[moduleId] = { deps: deps, body: body, };
+	}
+
+	function req(moduleId) {
+		if (moduleId in registeredModules) {
+			return registeredModules[moduleId];
 		}
 
-		return require(0);
-	})([
-	]);
+		var exports = registeredModules[moduleId] = Object.create(null);
+		var deps = installedModules[moduleId].deps.map(req);
+		deps.push(exports);
+
+		installedModules[moduleId].body.apply(null, deps);
+
+		return exports;
+	}
+
+	return req("index");
 });

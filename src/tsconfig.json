@@ -4,7 +4,7 @@
 		"noImplicitAny": true,
 
 		"target": "es5",
-		"module": "commonjs",
+		"module": "amd",
 		"moduleResolution": "node",
 		"sourceMap": true,
 		"inlineSources": true
