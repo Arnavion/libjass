@@ -31,46 +31,8 @@ var Run = (function () {
 		this._outputLibraryName = outputLibraryName;
 		this._unusedVarsToIgnore = unusedVarsToIgnore;
 
-		this._root = UglifyJS.parse(
-			'(function (root, factory) {\n' +
-			'	var global = this;\n' +
-			'\n' +
-			'	if (typeof define === "function" && define.amd) {\n' +
-			'		define([], function() {\n' +
-			'			return factory(global);\n' +
-			'		});\n' +
-			'	}\n' +
-			'	else if (typeof exports === "object" && typeof module === "object") {\n' +
-			'		module.exports = factory(global);\n' +
-			'	}\n' +
-			'	else if (typeof exports === "object") {\n' +
-			'		exports.libjass = factory(global);\n' +
-			'	}\n' +
-			'	else {\n' +
-			'		root.libjass = factory(global);\n' +
-			'	}\n' +
-			'})(this, function (global) {\n' +
-			'	"use strict";\n' +
-			'	return (function (modules) {\n' +
-			'		var installedModules = Object.create(null);\n' +
-			'		function require(moduleId) {\n' +
-			'			if (installedModules[moduleId]) {\n' +
-			'				return installedModules[moduleId];\n' +
-			'			}\n' +
-			'\n' +
-			'			var exports = installedModules[moduleId] = Object.create(null);\n' +
-			'			modules[moduleId](exports, require);\n' +
-			'			return exports;\n' +
-			'		}\n' +
-			'\n' +
-			'		return require(0);\n' +
-			'	})([\n' +
-			'	]);\n' +
-			'});');
-
+		this._root = UglifyJS.parse(fs.readFileSync(path.resolve(__filename, "..", "umd-wrapper.js"), "utf8"));
 		this._root.figure_out_scope({ screw_ie8: true });
-
-		this._licenseHeader = null;
 
 		this._outputModulesArray = this._root.body[0].body.args[1].body[1].value.args[0].elements;
 
@@ -107,28 +69,6 @@ var Run = (function () {
 					}
 
 					throw ex;
-				}
-
-				if (this._licenseHeader === null) {
-					module.root.walk(new UglifyJS.TreeWalker(function (node, descend) {
-						if (_this._licenseHeader !== null) {
-							return;
-						}
-
-						if (node.start) {
-							(node.start.comments_before || []).some(function (comment, i) {
-								if (comment.value.indexOf("Copyright") !== -1) {
-									_this._licenseHeader = comment;
-									_this._licenseHeader.value = _this._licenseHeader.value.split("\n").map(function (line) { return line.replace(/^\t/, ""); }).join("\n");
-									node.start.comments_before.splice(i, 1);
-									return true;
-								}
-								return false;
-							});
-						}
-					}));
-					this._root.start.comments_before = [this._licenseHeader];
-					this._root.start.nlb = true;
 				}
 				break;
 			case ".map":
@@ -194,13 +134,26 @@ var Run = (function () {
 		this._root.figure_out_scope({ screw_ie8: true });
 
 
-		// Set if there are any unused variables apart from the ones in unusedVarsToIgnore
-		var haveUnusedVars = false;
+		// Remove all license headers except the one from the UMD wrapper
+		var firstLicenseHeader = null;
+		this._root.walk(new UglifyJS.TreeWalker(function (node, descend) {
+			if (node.start) {
+				(node.start.comments_before || []).some(function (comment, i) {
+					if (comment.value.indexOf("Copyright") !== -1) {
+						if (firstLicenseHeader === null) {
+							firstLicenseHeader = comment;
+						}
+						else if (comment !== firstLicenseHeader) {
+							node.start.comments_before.splice(i, 1);
+						}
 
-		// Remove some things from the AST
-		var nodesToRemove;
+						return true;
+					}
 
-		nodesToRemove = [];
+					return false;
+				});
+			}
+		}));
 
 
 		// Fixup anonymous functions to print a space after "function"
@@ -216,7 +169,7 @@ var Run = (function () {
 		this._root.walk(new UglifyJS.TreeWalker(function (node, descend) {
 			if (node.start && node.start.comments_before) {
 				node.start.comments_before.forEach(function (comment) {
-					if (comment === _this._licenseHeader) {
+					if (comment.value.indexOf("Copyright") !== -1) {
 						return;
 					}
 
@@ -239,8 +192,16 @@ var Run = (function () {
 		this._root.figure_out_scope({ screw_ie8: true });
 
 
+		// Remove some things from the AST
+		var nodesToRemove = [];
+
+		// Set if there are any unused variables apart from the ones in unusedVarsToIgnore
+		var haveUnusedVars = false;
+
 		// Repeat because removing some declarations may make others unreferenced
 		for (;;) {
+			this._root.figure_out_scope({ screw_ie8: true });
+
 			// Unreferenced variable and function declarations, and unreferenced terminal function arguments
 			this._root.walk(new UglifyJS.TreeWalker(function (node, descend) {
 				if (node instanceof UglifyJS.AST_SymbolDeclaration && node.unreferenced()) {
@@ -275,8 +236,6 @@ var Run = (function () {
 			});
 
 			nodesToRemove = [];
-
-			this._root.figure_out_scope({ screw_ie8: true });
 		}
 
 
@@ -327,24 +286,7 @@ var Run = (function () {
 			source_map: _this._rootSourceMap,
 			ascii_only: true,
 			beautify: true,
-			comments: function (node, comment) {
-				// If this is the first license header, keep it.
-				if (comment === _this._licenseHeader) {
-					return true;
-				}
-
-				// If this is a license header, remove it.
-				if (comment.value.indexOf("Copyright") !== -1) {
-					return false;
-				}
-
-				// If this is a TypeScript reference comment, strip it.
-				if (comment.value.substr(0, "/<reference path=".length) === "/<reference path=") {
-					return false;
-				}
-
-				return true;
-			}
+			comments: true,
 		};
 
 		var stream = UglifyJS.OutputStream(output);
