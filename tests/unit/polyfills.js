@@ -40,7 +40,7 @@ define(["intern!tdd", "intern/chai!assert", "libjass"], function (tdd, assert, l
 				assert.equal(originalSet, Set, "libjass.Set did not default to the runtime's implementation.");
 			}
 
-			libjass.Set = null;
+			libjass.configure({ Set: null });
 			assert.isNotNull(libjass.Set, "libjass.Set actually got set to null instead of SimpleSet.");
 
 			if (nativeSetShouldBeUsed) {
@@ -118,7 +118,7 @@ define(["intern!tdd", "intern/chai!assert", "libjass"], function (tdd, assert, l
 		});
 
 		tdd.after(function () {
-			libjass.Set = originalSet;
+			libjass.configure({ Set: originalSet });
 			assert.equal(libjass.Set, originalSet, "libjass.Set did not get reset to the original value.");
 		});
 	});
@@ -144,7 +144,7 @@ define(["intern!tdd", "intern/chai!assert", "libjass"], function (tdd, assert, l
 				assert.equal(originalMap, Map, "libjass.Map did not default to the runtime's implementation.");
 			}
 
-			libjass.Map = null;
+			libjass.configure({ Map: null });
 			assert.isNotNull(libjass.Map, "libjass.Map actually got set to null instead of SimpleMap.");
 
 			if (nativeMapShouldBeUsed) {
@@ -232,7 +232,7 @@ define(["intern!tdd", "intern/chai!assert", "libjass"], function (tdd, assert, l
 		});
 
 		tdd.after(function () {
-			libjass.Map = originalMap;
+			libjass.configure({ Map: originalMap });
 			assert.equal(libjass.Map, originalMap, "libjass.Map did not get reset to the original value.");
 		});
 	});
@@ -249,7 +249,7 @@ define(["intern!tdd", "intern/chai!assert", "libjass"], function (tdd, assert, l
 				assert.equal(originalPromise, Promise, "libjass.Promise did not default to the runtime's implementation.");
 			}
 
-			libjass.Promise = null;
+			libjass.configure({ Promise: null });
 			assert.isNotNull(libjass.Promise, "libjass.Promise actually got set to null instead of SimplePromise.");
 
 			if (typeof Promise !== "undefined") {
@@ -270,7 +270,7 @@ define(["intern!tdd", "intern/chai!assert", "libjass"], function (tdd, assert, l
 		});
 
 		tdd.after(function () {
-			libjass.Promise = originalPromise;
+			libjass.configure({ Promise: originalPromise });
 			assert.equal(libjass.Promise, originalPromise, "libjass.Promise did not get reset to the original value.");
 		});
 	});

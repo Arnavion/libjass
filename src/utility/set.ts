@@ -54,6 +54,8 @@ export interface Set<T> {
 /**
  * Set to the global implementation of Set if the environment has one, else set to {@link ./utility/set.SimpleSet}
  *
+ * Can be set to a value using {@link libjass.configure}
+ *
  * Set it to null to force {@link ./utility/set.SimpleSet} to be used even if a global Set is present.
  *
  * @type {function(new:Set, !Array.<T>=)}

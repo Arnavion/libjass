@@ -62,6 +62,8 @@ export interface Promise<T> extends Thenable<T> {
 /**
  * Set to the global implementation of Promise if the environment has one, else set to {@link ./utility/promise.SimplePromise}
  *
+ * Can be set to a value using {@link libjass.configure}
+ *
  * Set it to null to force {@link ./utility/promise.SimplePromise} to be used even if a global Promise is present.
  *
  * @type {function(new:Promise)}

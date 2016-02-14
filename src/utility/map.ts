@@ -67,6 +67,8 @@ export interface Map<K, V> {
 /**
  * Set to the global implementation of Map if the environment has one, else set to {@link ./utility/map.SimpleMap}
  *
+ * Can be set to a value using {@link libjass.configure}
+ *
  * Set it to null to force {@link ./utility/map.SimpleMap} to be used even if a global Map is present.
  *
  * @type {function(new:Map, !Array.<!Array.<*>>=)}

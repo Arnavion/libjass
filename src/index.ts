@@ -50,28 +50,84 @@ export { Style } from "./types/style";
 
 export { BorderStyle, Format, WrappingStyle } from "./types/misc";
 
+/**
+ * Configures libjass with the given properties.
+ *
+ * @param {!*} newConfig
+ * @param {boolean} newConfig["debugMode"] When true, libjass logs some debug messages.
+ * @param {boolean} newConfig["verboseMode"] When true, libjass logs some more debug messages. This setting is independent of {@link libjass.debugMode}
+ * @param {?function(new:Set, !Array.<T>=)} newConfig["Set"] Sets the Set implementation used by libjass to the provided one. If null, {@link ./utility/set.SimpleSet} is used.
+ * @param {?function(new:Map, !Array.<!Array.<*>>=)} newConfig["Map"] Sets the Map implementation used by libjass to the provided one. If null, {@link ./utility/map.SimpleMap} is used.
+ * @param {?function(new:Promise)} newConfig["Promise"] Sets the Promise implementation used by libjass to the provided one. If null, {@link ./utility/promise.SimplePromise} is used.
+ */
+export function configure(newConfig: {
+	debugMode?: boolean,
+	verboseMode?: boolean,
+	Set?: typeof set.Set,
+	Map?: typeof map.Map,
+	Promise?: typeof promise.Promise,
+}): void {
+	if ("debugMode" in newConfig) {
+		settings.setDebugMode(newConfig.debugMode);
+	}
+
+	if ("verboseMode" in newConfig) {
+		settings.setVerboseMode(newConfig.verboseMode);
+	}
+
+	if ("Set" in newConfig) {
+		set.setImplementation(newConfig.Set);
+	}
+
+	if ("Map" in newConfig) {
+		map.setImplementation(newConfig.Map);
+	}
+
+	if ("Promise" in newConfig) {
+		promise.setImplementation(newConfig.Promise);
+	}
+}
+
 declare const exports: any;
 
 Object.defineProperties(exports, {
 	debugMode: {
 		get: () => settings.debugMode,
-		set: settings.setDebugMode,
+		set: value => {
+			console.warn("Setter `libjass.debugMode = value` has been deprecated. Use `libjass.configure({ debugMode: value })` instead.");
+			settings.setDebugMode(value);
+		},
 	},
 
 	verboseMode: {
 		get: () => settings.verboseMode,
-		set: settings.setVerboseMode,
+		set: value => {
+			console.warn("Setter `libjass.verboseMode = value` has been deprecated. Use `libjass.configure({ verboseMode: value })` instead.");
+			settings.setVerboseMode(value);
+		},
 	},
+
 	Set: {
 		get: () => set.Set,
-		set: set.setImplementation,
+		set: value => {
+			console.warn("Setter `libjass.Set = value` has been deprecated. Use `libjass.configure({ Set: value })` instead.");
+			set.setImplementation(value);
+		},
 	},
+
 	Map: {
 		get: () => map.Map,
-		set: map.setImplementation,
+		set: value => {
+			console.warn("Setter `libjass.Map = value` has been deprecated. Use `libjass.configure({ Map: value })` instead.");
+			map.setImplementation(value);
+		},
 	},
+
 	Promise: {
 		get: () => promise.Promise,
-		set: promise.setImplementation,
+		set: value => {
+			console.warn("Setter `libjass.Promise = value` has been deprecated. Use `libjass.configure({ Promise: value })` instead.");
+			promise.setImplementation(value);
+		},
 	},
 });
