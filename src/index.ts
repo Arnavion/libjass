@@ -54,8 +54,8 @@ export { BorderStyle, Format, WrappingStyle } from "./types/misc";
  * Configures libjass with the given properties.
  *
  * @param {!*} newConfig
- * @param {boolean} newConfig["debugMode"] When true, libjass logs some debug messages.
- * @param {boolean} newConfig["verboseMode"] When true, libjass logs some more debug messages. This setting is independent of {@link libjass.debugMode}
+ * @param {?boolean} newConfig["debugMode"] When true, libjass logs some debug messages.
+ * @param {?boolean} newConfig["verboseMode"] When true, libjass logs some more debug messages. This setting is independent of {@link libjass.debugMode}
  * @param {?function(new:Set, !Array.<T>=)} newConfig["Set"] Sets the Set implementation used by libjass to the provided one. If null, {@link ./utility/set.SimpleSet} is used.
  * @param {?function(new:Map, !Array.<!Array.<*>>=)} newConfig["Map"] Sets the Map implementation used by libjass to the provided one. If null, {@link ./utility/map.SimpleMap} is used.
  * @param {?function(new:Promise)} newConfig["Promise"] Sets the Promise implementation used by libjass to the provided one. If null, {@link ./utility/promise.SimplePromise} is used.
