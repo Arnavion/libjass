@@ -146,7 +146,15 @@ export class RendererSettings {
 			object = {};
 		}
 
-		const { fontMap = null, preRenderTime = 5, preciseOutlines = false, enableSvg = true, fallbackFonts = 'Arial, Helvetica, sans-serif, "Segoe UI Symbol"', useAttachedFonts = false } = <RendererSettings>object;
+		const {
+			fontMap = null,
+			preRenderTime = 5,
+			preciseOutlines = false,
+			enableSvg = true,
+			fallbackFonts = 'Arial, Helvetica, sans-serif, "Segoe UI Symbol"',
+			useAttachedFonts = false,
+		} = <RendererSettings>object;
+
 		const result = new RendererSettings();
 		result.fontMap = fontMap;
 		result.preRenderTime = preRenderTime;
