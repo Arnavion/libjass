@@ -303,7 +303,7 @@ export class SpanStyles {
 	 * @param {number} primaryAlpha
 	 */
 	private _setSvgOutlineOnSpan(filterWrapperSpan: HTMLSpanElement, outlineWidth: number, outlineHeight: number, outlineColor: Color, primaryAlpha: number): void {
-		const filterId = `svg-filter-${ this._id }-${ this._nextFilterId++ }`;
+		const filterId = `libjass-svg-filter-${ this._id }-${ this._nextFilterId++ }`;
 
 		const filterElement = document.createElementNS("http://www.w3.org/2000/svg", "filter");
 		filterElement.id = filterId;
