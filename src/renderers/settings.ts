@@ -107,6 +107,8 @@ export class RendererSettings {
 	 *         src: url("/fonts/helvetica.ttf"), local("Arial");
 	 *     }
 	 *
+	 * More complicated @font-face syntax like format() or multi-line src are not supported.
+	 *
 	 * @param {!LinkStyle} linkStyle
 	 * @return {!Map.<string, string>}
 	 */
