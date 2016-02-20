@@ -25,8 +25,6 @@ import { WorkerCommandHandler } from "./channel";
 
 const workerCommands = new Map<WorkerCommands, WorkerCommandHandler>();
 
-const classPrototypes = new Map<number, any>();
-
 /**
  * Registers a handler for the given worker command.
  *
@@ -45,48 +43,4 @@ export function registerWorkerCommand(command: WorkerCommands, handler: WorkerCo
  */
 export function getWorkerCommandHandler(command: WorkerCommands): WorkerCommandHandler {
 	return workerCommands.get(command);
-}
-
-/**
- * Registers a prototype as a deserializable type.
- *
- * @param {!*} prototype
- */
-export function registerClassPrototype(prototype: any): void {
-	prototype._classTag = classPrototypes.size;
-	classPrototypes.set(prototype._classTag, prototype);
-}
-
-/**
- * @param {*} obj
- * @return {string}
- */
-export function serialize(obj: any): string {
-	return JSON.stringify(obj, (/* ujs:unreferenced */ key: string, value: any) => {
-		if (value && value._classTag !== undefined) {
-			value._classTag = value._classTag;
-		}
-
-		return value;
-	});
-}
-
-/**
- * @param {string} str
- * @return {*}
- */
-export function deserialize(str: string): any {
-	return JSON.parse(str, (/* ujs:unreferenced */ key: string, value: any) => {
-		if (value && value._classTag !== undefined) {
-			const hydratedValue = Object.create(classPrototypes.get(value._classTag));
-			for (const key of Object.keys(value)) {
-				if (key !== "_classTag") {
-					hydratedValue[key] = value[key];
-				}
-			}
-			value = hydratedValue;
-		}
-
-		return value;
-	});
 }

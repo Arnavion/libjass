@@ -18,13 +18,14 @@
  * limitations under the License.
  */
 
+import { serialize, deserialize } from "../serialization";
+
 import { Map } from "../utility/map";
 
 import { Promise, DeferredPromise } from "../utility/promise";
 
 import { WorkerCommands } from "./commands";
-
-import { getWorkerCommandHandler, serialize, deserialize, registerWorkerCommand } from "./misc";
+import { getWorkerCommandHandler, registerWorkerCommand } from "./misc";
 
 /**
  * Represents a communication channel between the host and the web worker. An instance of this class is created by calling {@link libjass.webworker.createWorker}

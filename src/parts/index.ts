@@ -1310,7 +1310,7 @@ const addToString = function (ctor: Function, ctorName: string) {
 	}
 };
 
-import { registerClassPrototype } from "../webworker/misc";
+import { registerClass } from "../serialization";
 
 declare const exports: any;
 
@@ -1318,7 +1318,7 @@ for (const key of Object.keys(exports)) {
 	const value: any = exports[key];
 	if (value instanceof Function) {
 		addToString(value, key);
-		registerClassPrototype(value.prototype);
+		registerClass(value);
 	}
 }
 
@@ -1326,6 +1326,6 @@ for (const key of Object.keys(drawing)) {
 	const value: any = (<any>drawing)[key];
 	if (value instanceof Function) {
 		addToString(value, `Drawing${ key }`);
-		registerClassPrototype(value.prototype);
+		registerClass(value);
 	}
 }
