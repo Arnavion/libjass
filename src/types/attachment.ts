@@ -18,6 +18,8 @@
  * limitations under the License.
  */
 
+import { registerClass as serializable } from "../serialization";
+
 /**
  * The type of an attachment.
  */
@@ -32,6 +34,7 @@ export enum AttachmentType {
  * @param {string} filename The filename of this attachment.
  * @param {number} type The type of this attachment.
  */
+@serializable
 export class Attachment {
 	private _contents: string = "";
 

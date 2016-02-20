@@ -24,6 +24,8 @@ import { parse } from "../parser/parse";
 
 import { Color } from "../parts";
 
+import { registerClass as serializable } from "../serialization";
+
 import { Map } from "../utility/map";
 
 /**
@@ -50,6 +52,7 @@ import { Map } from "../utility/map";
  * @param {string} template["MarginR"] The right margin
  * @param {string} template["MarginV"] The vertical margin
  */
+@serializable
 export class Style {
 	private _name: string;
 

@@ -34,6 +34,8 @@ import { ReadableStream, TextDecoder, TextDecoderConstructor } from "../parser/s
 import { Map } from "../utility/map";
 import { Promise } from "../utility/promise";
 
+import { registerClass as serializable } from "../serialization";
+
 declare const global: {
 	fetch?(url: string): Promise<{ body: ReadableStream; ok?: boolean; status?: number; }>;
 	ReadableStream?: { prototype: ReadableStream; };
@@ -43,6 +45,7 @@ declare const global: {
 /**
  * This class represents an ASS script. It contains the {@link libjass.ScriptProperties}, an array of {@link libjass.Style}s, and an array of {@link libjass.Dialogue}s.
  */
+@serializable
 export class ASS {
 	private _properties: ScriptProperties = new ScriptProperties();
 	private _styles: Map<string, Style> = new Map<string, Style>();
@@ -190,6 +193,29 @@ export class ASS {
 	}
 
 	/**
+	 * Custom JSON serialization for ASS objects.
+	 *
+	 * @return {!*}
+	 */
+	toJSON(): any {
+		const result = Object.create(null);
+
+		result._properties = this._properties;
+
+		result._styles = Object.create(null);
+		this._styles.forEach((style, name) => result._styles[name] = style);
+
+		result._dialogues = this._dialogues;
+		result._attachments = this._attachments;
+		result._stylesFormatSpecifier = this._stylesFormatSpecifier;
+		result._dialoguesFormatSpecifier = this._dialoguesFormatSpecifier;
+
+		result._classTag = (<any>ASS.prototype)._classTag;
+
+		return result;
+	}
+
+	/**
 	 * Creates an ASS object from the raw text of an ASS script.
 	 *
 	 * @param {string} raw The raw text of the script.
@@ -270,5 +296,30 @@ export class ASS {
 	 */
 	static fromReadableStream(stream: ReadableStream, encoding: string = "utf-8", type: Format | string = Format.ASS): Promise<ASS> {
 		return ASS.fromStream(new parser.BrowserReadableStream(stream, encoding), type);
+	}
+
+	/**
+	 * Custom deserialization for ASS objects.
+	 *
+	 * @param {!*} obj
+	 * @return {!libjass.ASS}
+	 */
+	static fromJSON(obj: any): ASS {
+		const result: ASS = Object.create(ASS.prototype);
+
+		result._properties = obj._properties;
+
+		result._styles = new Map<string, Style>();
+		for (const name of Object.keys(obj._styles)) {
+			const style = obj._styles[name];
+			result._styles.set(name, style);
+		}
+
+		result._dialogues = obj._dialogues;
+		result._attachments = obj._attachments;
+		result._stylesFormatSpecifier = obj._stylesFormatSpecifier;
+		result._dialoguesFormatSpecifier = obj._dialoguesFormatSpecifier;
+
+		return result;
 	}
 }

@@ -29,6 +29,8 @@ import { parse } from "../parser/parse";
 
 import * as parts from "../parts";
 
+import { registerClass as serializable } from "../serialization";
+
 import { debugMode } from "../settings";
 
 import { Map } from "../utility/map";
@@ -44,6 +46,7 @@ import { Map } from "../utility/map";
  * @param {string} template["Text"] The text of this dialogue
  * @param {!libjass.ASS} ass The ASS object to which this dialogue belongs
  */
+@serializable
 export class Dialogue {
 	private static _lastDialogueId = -1;
 

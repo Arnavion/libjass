@@ -18,11 +18,14 @@
  * limitations under the License.
  */
 
+import { registerClass as serializable } from "../serialization";
+
 import { WrappingStyle } from "./misc";
 
 /**
  * This class represents the properties of a {@link libjass.ASS} script.
  */
+@serializable
 export class ScriptProperties {
 	private _resolutionX: number;
 	private _resolutionY: number;
