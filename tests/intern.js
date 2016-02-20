@@ -27,6 +27,7 @@ define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profi
 			"tests/unit/miscellaneous",
 			"tests/unit/polyfills",
 			"tests/unit/primitives",
+			"tests/unit/serialization",
 			"tests/unit/tags",
 			"tests/unit/webworker"
 		],

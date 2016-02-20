@@ -42,6 +42,8 @@ export { parser };
 import * as renderers from "./renderers";
 export { renderers };
 
+export { serialize, deserialize } from "./serialization";
+
 export { ASS } from "./types/ass";
 export { Attachment, AttachmentType } from "./types/attachment";
 export { Dialogue } from "./types/dialogue";
