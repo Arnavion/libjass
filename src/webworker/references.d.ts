@@ -18,13 +18,6 @@
  * limitations under the License.
  */
 
-interface Document {
-	/**
-	 * @type {!HTMLScriptElement}
-	 */
-	currentScript: HTMLScriptElement;
-}
-
 interface WorkerGlobalScope {
 	/**
 	 * @param {*} message

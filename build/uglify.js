@@ -26,38 +26,25 @@ var UglifyJS = require("uglify-js");
 var FileTransform = require("async-build").FileTransform;
 
 var Run = (function () {
-	function Run(entry, outputLibraryName, unusedVarsToIgnore) {
-		this._sourceRoot = path.dirname(path.resolve(entry));
+	function Run(outputLibraryName, unusedVarsToIgnore) {
 		this._outputLibraryName = outputLibraryName;
 		this._unusedVarsToIgnore = unusedVarsToIgnore;
 
 		this._root = UglifyJS.parse(fs.readFileSync(path.resolve(__filename, "..", "umd-wrapper.js"), "utf8"));
+
 		this._root.figure_out_scope({ screw_ie8: true });
 
-		// Splice in the TS output into the UMD wrapper.
-		this._insertionParent = this._root.body[0].body.args[1].body;
-		this._varInsertionPoint = this._insertionParent.length - 1;
-		this._moduleInsertionPoint = this._varInsertionPoint;
+		this._toInsert = null;
 
-		this._helpersFound = Object.create(null);
-
-		this._rootSourceMap = UjsSourceMap({ file: this._outputLibraryName + ".js", root: "" });
+		this._rootSourceMap = null;
 	}
 
 	Run.prototype.addFile = function (file) {
-		var _this = this;
-
-		var moduleName = (path.extname(file.path) === ".map") ? file.path.substr(0, file.path.length - ".js.map".length) : file.path.substr(0, file.path.length - ".js".length);
-		moduleName = path.relative(this._sourceRoot, moduleName).replace(/\\/g, "/");
-
-		var tsFilename = moduleName + ".ts";
-		var jsFilename = moduleName + ".js";
-
 		switch (path.extname(file.path)) {
 			case ".js":
 				try {
-					var body = UglifyJS.parse(file.contents.toString(), {
-						filename: jsFilename,
+					this._toInsert = UglifyJS.parse(file.contents.toString(), {
+						filename: path.basename(file.path),
 						toplevel: null,
 					}).body;
 				}
@@ -68,79 +55,23 @@ var Run = (function () {
 
 					throw ex;
 				}
+				break;
 
-				body.forEach(function (node) {
-					if (node instanceof UglifyJS.AST_Var) {
-						node.definitions.forEach(function (definition) {
-							if (definition.name.name in _this._helpersFound) {
-								return;
-							}
+			case ".map":
+				var rawSourceMap = JSON.parse(file.contents.toString());
 
-							_this._helpersFound[definition.name.name] = undefined;
-
-							definition.value = definition.value.right;
-							_this._insertionParent.splice(_this._varInsertionPoint, 0, node);
-							_this._varInsertionPoint++;
-							_this._moduleInsertionPoint++;
-						});
-					}
-					else if (node instanceof UglifyJS.AST_Statement) {
-						if (!(node.body instanceof UglifyJS.AST_Call) || !(node.body.expression.name === "define")) {
-							throw new Error("Expected to find a top-level call to define()");
-						}
-
-						var defineCall = node.body;
-
-						defineCall.expression.name = "def";
-
-						defineCall.args.unshift(new UglifyJS.AST_String({ value: moduleName, quote: '"' }));
-						if (defineCall.args[1].elements[0].value !== "require") {
-							throw new Error("Expected first dep to be require");
-						}
-						defineCall.args[1].elements.shift();
-						defineCall.args[2].argnames.shift();
-
-						if (defineCall.args[1].elements[0].value !== "exports") {
-							throw new Error("Expected second dep to be exports");
-						}
-						defineCall.args[1].elements.shift();
-						defineCall.args[2].argnames.push(defineCall.args[2].argnames.shift());
-
-						for (var i = 0; i < defineCall.args[1].elements.length; i++) {
-							var depNameNode = defineCall.args[1].elements[i];
-							var depPath = path.resolve(file.path, "..", depNameNode.value);
-							var depName = path.relative(_this._sourceRoot, depPath).replace(/\\/g, "/");
-
-							try {
-								var depFileInfo = fs.statSync(depPath);
-								if (!depFileInfo.isDirectory()) {
-									throw new Error(depPath + " exists but isn't a directory.");
-								}
-
-								depName += "/index";
-							}
-							catch (ex) {
-								if (ex.code !== "ENOENT") {
-									throw ex;
-								}
-							}
-
-							depNameNode.value = depName;
-						}
-
-						_this._insertionParent.splice(_this._moduleInsertionPoint, 0, node);
-					}
-					else {
-						throw new Error("Unexpected node found.");
-					}
+				this._rootSourceMap = UglifyJS.SourceMap({
+					file: this._outputLibraryName + ".js",
+					root: "",
+					orig: rawSourceMap,
 				});
 
-				break;
-			case ".map":
-				var sourceMapContents = JSON.parse(file.contents.toString());
-				sourceMapContents.sources[0] = tsFilename;
-				sourceMapContents.file = jsFilename;
-				this._rootSourceMap.addInput(sourceMapContents);
+				var generator = this._rootSourceMap.get();
+
+				rawSourceMap.sources.forEach(function (sourceRelativePath, index) {
+					generator.setSourceContent(sourceRelativePath, rawSourceMap.sourcesContent[index]);
+				});
+
 				break;
 		}
 	};
@@ -149,7 +80,49 @@ var Run = (function () {
 		var _this = this;
 
 
-		this._root.figure_out_scope({ screw_ie8: true });
+		// Splice in the TS output into the UMD wrapper.
+		var insertionParent = this._root.body[0].body.args[1].body;
+
+		this._toInsert.reverse();
+		for (var i = this._toInsert.length - 1; i >= 0; i--) {
+			var node = this._toInsert[i];
+			if (node instanceof UglifyJS.AST_Var) {
+				for (var j = 0; j < node.definitions.length; j++) {
+					var definition = node.definitions[j];
+					if (definition.name.name === "__extends" || definition.name.name === "__decorate") {
+						definition.value = definition.value.right;
+					}
+				}
+
+				insertionParent.splice(-1, 0, node);
+				this._toInsert.pop();
+			}
+		}
+
+		insertionParent.splice.apply(insertionParent, [-1, 0].concat(this._toInsert));
+
+
+		// Fixups
+		for (var i = 0; i < this._toInsert.length; i++) {
+			var node = this._toInsert[i];
+			if (node instanceof UglifyJS.AST_Statement && node.body instanceof UglifyJS.AST_Call && node.body.expression.name === "define") {
+				var defineCall = node.body;
+
+				defineCall.expression.name = "def";
+
+				if (defineCall.args[1].elements[0].value !== "require") {
+					throw new Error("Expected first dep to be require");
+				}
+				defineCall.args[1].elements.shift();
+				defineCall.args[2].argnames.shift();
+
+				if (defineCall.args[1].elements[0].value !== "exports") {
+					throw new Error("Expected second dep to be exports");
+				}
+				defineCall.args[1].elements.shift();
+				defineCall.args[2].argnames.push(defineCall.args[2].argnames.shift());
+			}
+		}
 
 
 		// Remove all license headers except the one from the UMD wrapper
@@ -336,8 +309,8 @@ var Run = (function () {
 })();
 
 module.exports = {
-	build: function (entry, outputLibraryName, unusedVarsToIgnore) {
-		var run = new Run(entry, outputLibraryName, unusedVarsToIgnore);
+	build: function (outputLibraryName, unusedVarsToIgnore) {
+		var run = new Run(outputLibraryName, unusedVarsToIgnore);
 
 		return new FileTransform(function (file) {
 			run.addFile(file);
@@ -346,7 +319,7 @@ module.exports = {
 		});
 	},
 
-	watch: function (entry, outputLibraryName, unusedVarsToIgnore) {
+	watch: function (outputLibraryName, unusedVarsToIgnore) {
 		var files = Object.create(null);
 
 		return new FileTransform(function (file) {
@@ -354,7 +327,7 @@ module.exports = {
 				files[file.path] = file;
 			}
 			else {
-				var run = new Run(entry, outputLibraryName, unusedVarsToIgnore);
+				var run = new Run(outputLibraryName, unusedVarsToIgnore);
 				Object.keys(files).forEach(function (filename) {
 					run.addFile(files[filename]);
 				});
@@ -459,57 +432,6 @@ module.exports = {
 		});
 	}
 };
-
-var SourceMap = require.cache[require.resolve("uglify-js")].require("source-map");
-
-function UjsSourceMap(options) {
-	var orig_maps = Object.create(null);
-
-	var generator = new SourceMap.SourceMapGenerator({
-		file: options.file,
-		sourceRoot: options.root,
-	});
-
-	return {
-		addInput: function (rawSourceMap) {
-			var consumer = new SourceMap.SourceMapConsumer(rawSourceMap);
-			orig_maps[consumer.file] = consumer;
-
-			rawSourceMap.sources.forEach(function (sourceRelativePath, index) {
-				generator.setSourceContent(sourceRelativePath, rawSourceMap.sourcesContent[index]);
-			});
-		},
-		add: function (source, gen_line, gen_col, orig_line, orig_col, name) {
-			var originalMap = orig_maps[source];
-			if (originalMap === undefined) {
-				return;
-			}
-
-			var info = originalMap.originalPositionFor({
-				line: orig_line,
-				column: orig_col
-			});
-
-			if (info.source === null) {
-				return;
-			}
-
-			source = info.source;
-			orig_line = info.line;
-			orig_col = info.column;
-			name = info.name || name;
-
-			generator.addMapping({
-				generated : { line: gen_line, column: gen_col },
-				original  : { line: orig_line, column: orig_col },
-				source    : source,
-				name      : name
-			});
-		},
-		get: function () { return generator; },
-		toString: function () { return generator.toString(); },
-	};
-}
 
 var originalSymbolUnreferenced = UglifyJS.AST_Symbol.prototype.unreferenced;
 

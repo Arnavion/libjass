@@ -399,14 +399,13 @@ class FakeSourceFile {
 
 var fakeSourceFiles: { [name: string]: FakeSourceFile } = Object.create(null);
 
-export var oldGetLeadingCommentRangesOfNode: typeof ts.getLeadingCommentRangesOfNode = ts.getLeadingCommentRangesOfNode.bind(ts);
-ts.getLeadingCommentRangesOfNode = (node: ts.Node, sourceFileOfNode: ts.SourceFile) => {
-	sourceFileOfNode = sourceFileOfNode || ts.getSourceFileOfNode(node);
-
-	var originalComments = oldGetLeadingCommentRangesOfNode(node, sourceFileOfNode);
+export const oldGetLeadingCommentRangesOfNodeFromText: typeof ts.getLeadingCommentRangesOfNodeFromText = ts.getLeadingCommentRangesOfNodeFromText.bind(ts);
+ts.getLeadingCommentRangesOfNodeFromText = (node: ts.Node, text: string) => {
+	const originalComments = oldGetLeadingCommentRangesOfNodeFromText(node, text);
 
 	if (originalComments !== undefined && (<any>node)["typescript-new-comment"] !== undefined) {
-		var fakeSourceFile = fakeSourceFiles[sourceFileOfNode.fileName];
+		const sourceFileOfNode = ts.getSourceFileOfNode(node);
+		let fakeSourceFile = fakeSourceFiles[sourceFileOfNode.fileName];
 		if (fakeSourceFile === undefined) {
 			fakeSourceFile = fakeSourceFiles[sourceFileOfNode.fileName] = new FakeSourceFile(sourceFileOfNode);
 		}
@@ -418,10 +417,12 @@ ts.getLeadingCommentRangesOfNode = (node: ts.Node, sourceFileOfNode: ts.SourceFi
 };
 
 var oldWriteCommentRange: typeof ts.writeCommentRange = ts.writeCommentRange.bind(ts);
-ts.writeCommentRange = (currentSourceFile: ts.SourceFile, writer: ts.EmitTextWriter, comment: ts.CommentRange, newLine: string) => {
+ts.writeCommentRange = (text: string, lineMap: number[], writer: ts.EmitTextWriter, comment: ts.CommentRange, newLine: string) => {
 	if ((<{ sourceFile: ts.SourceFile }><any>comment).sourceFile) {
-		currentSourceFile = (<{ sourceFile: ts.SourceFile }><any>comment).sourceFile;
+		const currentSourceFile = (<{ sourceFile: ts.SourceFile }><any>comment).sourceFile;
+		text = currentSourceFile.text;
+		lineMap = currentSourceFile.lineMap;
 	}
 
-	return oldWriteCommentRange(currentSourceFile, writer, comment, newLine);
+	return oldWriteCommentRange(text, lineMap, writer, comment, newLine);
 };

@@ -21,7 +21,7 @@
 import * as path from "path";
 import * as ts from "typescript";
 
-import { Compiler, oldGetLeadingCommentRangesOfNode } from "./compiler";
+import { Compiler, oldGetLeadingCommentRangesOfNodeFromText } from "./compiler";
 
 import * as AST from "./ast";
 
@@ -498,7 +498,7 @@ class Walker {
 	}
 
 	private _parseJSDoc(node: ts.Node): JSDoc {
-		var comments = oldGetLeadingCommentRangesOfNode(node, this._currentSourceFile);
+		var comments = oldGetLeadingCommentRangesOfNodeFromText(node, this._currentSourceFile.text);
 
 		if (comments === undefined) {
 			comments = [];

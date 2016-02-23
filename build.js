@@ -76,7 +76,7 @@ task("libjass.js", ["build-tools"], function (callback) {
 
 		callback(null, task.src("./src/tsconfig.json")
 			.pipe(TypeScript.build("./src/index.ts", "libjass"))
-			.pipe(UglifyJS.build("./src/index", "libjass", ["AttachmentType", "BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle"]))
+			.pipe(UglifyJS.build("libjass", ["AttachmentType", "BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle"]))
 			.pipe(task.dest("./lib")));
 	});
 });
@@ -125,7 +125,7 @@ task("watch", ["build-tools"], function (callback) {
 
 		task.src("./src/tsconfig.json")
 			.pipe(TypeScript.watch("./src/index.ts", "libjass"))
-			.pipe(UglifyJS.watch("./src/index", "libjass", ["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle"]))
+			.pipe(UglifyJS.watch("libjass", ["BorderStyle", "ClockEvent", "Format", "WorkerCommands", "WrappingStyle"]))
 			.pipe(task.dest("./lib"))
 			.pipe(new task.FileTransform(function (file) {
 				if (file.path === "libjass.js") {

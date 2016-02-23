@@ -1,11 +1,15 @@
 {
 	"compilerOptions": {
 		"experimentalDecorators": true,
+		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
+		"noImplicitReturns": true,
 
 		"target": "es5",
 		"module": "amd",
 		"moduleResolution": "node",
+		"outFile": "../lib/libjass.js",
+		"noImplicitUseStrict": true,
 		"sourceMap": true,
 		"inlineSources": true
 	}
