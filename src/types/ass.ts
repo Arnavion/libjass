@@ -222,7 +222,7 @@ export class ASS {
 	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
 	 * @return {!Promise.<!libjass.ASS>}
 	 */
-	static fromString(raw: string, type: Format | string = Format.ASS): Promise<ASS> {
+	static fromString(raw: string, type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
 		return ASS.fromStream(new parser.StringStream(raw), type);
 	}
 
@@ -233,7 +233,7 @@ export class ASS {
 	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
 	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 	 */
-	static fromStream(stream: parser.Stream, type: Format | string = Format.ASS): Promise<ASS> {
+	static fromStream(stream: parser.Stream, type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
 		switch (type) {
 			case Format.ASS:
 			case "ass":
@@ -253,7 +253,7 @@ export class ASS {
 	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
 	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 	 */
-	static fromUrl(url: string, type: Format | string = Format.ASS): Promise<ASS> {
+	static fromUrl(url: string, type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
 		let fetchPromise: Promise<ASS>;
 
 		if (
@@ -294,7 +294,7 @@ export class ASS {
 	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
 	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 	 */
-	static fromReadableStream(stream: ReadableStream, encoding: string = "utf-8", type: Format | string = Format.ASS): Promise<ASS> {
+	static fromReadableStream(stream: ReadableStream, encoding: string = "utf-8", type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
 		return ASS.fromStream(new parser.BrowserReadableStream(stream, encoding), type);
 	}
 

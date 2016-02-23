@@ -1805,7 +1805,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	private _parse_tag_clip_or_iclip(tagName: string, parent: ParseNode): ParseNode {
+	private _parse_tag_clip_or_iclip(tagName: "clip" | "iclip", parent: ParseNode): ParseNode {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, tagName) === null) {
