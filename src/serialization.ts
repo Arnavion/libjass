@@ -61,7 +61,7 @@ export function deserialize(str: string): any {
 				value = clazz.fromJSON(value);
 			}
 			else {
-				const hydratedValue = Object.create(classes.get(value._classTag).prototype);
+				const hydratedValue = Object.create(clazz.prototype);
 				for (const key of Object.keys(value)) {
 					hydratedValue[key] = value[key];
 				}
