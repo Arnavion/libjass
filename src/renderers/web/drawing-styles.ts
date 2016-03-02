@@ -59,23 +59,24 @@ export class DrawingStyles {
 		const scaleY = this._outputScaleY / scaleFactor;
 
 		const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+		let pathString = "";
 
 		let bboxWidth = 0;
 		let bboxHeight = 0;
 
 		for (const instruction of drawingInstructions.instructions) {
 			if (instruction instanceof parts.drawing.MoveInstruction) {
-				path.pathSegList.appendItem(path.createSVGPathSegMovetoAbs(instruction.x, instruction.y + this._baselineOffset));
+				pathString += ` M ${ instruction.x.toFixed(3) } ${ (instruction.y + this._baselineOffset).toFixed(3) }`;
 				bboxWidth = Math.max(bboxWidth, instruction.x);
 				bboxHeight = Math.max(bboxHeight, instruction.y + this._baselineOffset);
 			}
 			else if (instruction instanceof parts.drawing.LineInstruction) {
-				path.pathSegList.appendItem(path.createSVGPathSegLinetoAbs(instruction.x, instruction.y + this._baselineOffset));
+				pathString += ` L ${ instruction.x.toFixed(3) } ${ (instruction.y + this._baselineOffset).toFixed(3) }`;
 				bboxWidth = Math.max(bboxWidth, instruction.x);
 				bboxHeight = Math.max(bboxHeight, instruction.y + this._baselineOffset);
 			}
 			else if (instruction instanceof parts.drawing.CubicBezierCurveInstruction) {
-				path.pathSegList.appendItem(path.createSVGPathSegCurvetoCubicAbs(instruction.x3, instruction.y3 + this._baselineOffset, instruction.x1, instruction.y1 + this._baselineOffset, instruction.x2, instruction.y2 + this._baselineOffset));
+				pathString += ` C ${ instruction.x1.toFixed(3) } ${ (instruction.y1 + this._baselineOffset).toFixed(3) } ${ instruction.x2.toFixed(3) } ${ (instruction.y2 + this._baselineOffset).toFixed(3) } ${ instruction.x3.toFixed(3) } ${ (instruction.y3 + this._baselineOffset).toFixed(3) }`;
 				bboxWidth = Math.max(bboxWidth, instruction.x1, instruction.x2, instruction.x3);
 				bboxHeight = Math.max(bboxHeight, instruction.y1 + this._baselineOffset, instruction.y2 + this._baselineOffset, instruction.y3 + this._baselineOffset);
 			}
@@ -91,6 +92,7 @@ export class DrawingStyles {
 		g.setAttribute("transform", `scale(${ scaleX.toFixed(3) } ${ scaleY.toFixed(3) })`);
 
 		g.appendChild(path);
+		path.setAttribute("d", pathString);
 		path.setAttribute("fill", fillColor.toString());
 
 		return svg;
