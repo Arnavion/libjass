@@ -268,7 +268,7 @@ export class SpanStyles {
 		span.style.color = primaryColor.toString();
 
 		if (this._settings.enableSvg) {
-			this._setSvgOutlineOnSpan(filterWrapperSpan, outlineWidth, outlineHeight, outlineColor, this._primaryAlpha);
+			this._setSvgOutlineOnSpan(filterWrapperSpan, outlineWidth, outlineHeight, outlineColor);
 		}
 		else {
 			this._setTextShadowOutlineOnSpan(span, outlineWidth, outlineHeight, outlineColor);
@@ -300,9 +300,8 @@ export class SpanStyles {
 	 * @param {number} outlineWidth
 	 * @param {number} outlineHeight
 	 * @param {!libjass.parts.Color} outlineColor
-	 * @param {number} primaryAlpha
 	 */
-	private _setSvgOutlineOnSpan(filterWrapperSpan: HTMLSpanElement, outlineWidth: number, outlineHeight: number, outlineColor: Color, primaryAlpha: number): void {
+	private _setSvgOutlineOnSpan(filterWrapperSpan: HTMLSpanElement, outlineWidth: number, outlineHeight: number, outlineColor: Color): void {
 		const filterElement = document.createElementNS("http://www.w3.org/2000/svg", "filter");
 
 		if (outlineWidth > 0 || outlineHeight > 0) {
@@ -325,7 +324,7 @@ export class SpanStyles {
 			 * Multiply the pixels by 1 / primaryAlpha so that the primaryAlpha pixels become 1. A higher value would make the outline larger and too sharp,
 			 * leading to jagged outer edge and transparent space around the inner edge between itself and the SourceGraphic.
 			 */
-			sourceAlphaTransferNode.slope.baseVal = (primaryAlpha === 0) ? 1 : (1 / primaryAlpha);
+			sourceAlphaTransferNode.slope.baseVal = (this._primaryAlpha === 0) ? 1 : (1 / this._primaryAlpha);
 
 			// Merge the individual outlines
 			const mergedOutlines = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
