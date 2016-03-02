@@ -303,19 +303,33 @@ export class SpanStyles {
 	 * @param {number} primaryAlpha
 	 */
 	private _setSvgOutlineOnSpan(filterWrapperSpan: HTMLSpanElement, outlineWidth: number, outlineHeight: number, outlineColor: Color, primaryAlpha: number): void {
-		const filterId = `libjass-svg-filter-${ this._id }-${ this._nextFilterId++ }`;
-
 		const filterElement = document.createElementNS("http://www.w3.org/2000/svg", "filter");
-		filterElement.id = filterId;
-		filterElement.x.baseVal.valueAsString = "-50%";
-		filterElement.width.baseVal.valueAsString = "200%";
-		filterElement.y.baseVal.valueAsString = "-50%";
-		filterElement.height.baseVal.valueAsString = "200%";
 
 		if (outlineWidth > 0 || outlineHeight > 0) {
 			/* Construct an elliptical border by merging together many rectangles. The border is creating using dilate morphology filters, but these only support
 			 * generating rectangles.   http://lists.w3.org/Archives/Public/public-fx/2012OctDec/0003.html
 			 */
+
+			// Start with SourceAlpha. Leave the alpha as 0 if it's 0, and set it to 1 if it's greater than 0
+			const source = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
+			filterElement.appendChild(source);
+			source.in1.baseVal = "SourceAlpha";
+			source.result.baseVal = "source";
+
+			const sourceAlphaTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
+			source.appendChild(sourceAlphaTransferNode);
+			sourceAlphaTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
+			sourceAlphaTransferNode.intercept.baseVal = 0;
+
+			/* The alphas of all colored pixels of the SourceAlpha should be made as close to 1 as possible. This way the summed outlines below will be uniformly dark.
+			 * Multiply the pixels by 1 / primaryAlpha so that the primaryAlpha pixels become 1. A higher value would make the outline larger and too sharp,
+			 * leading to jagged outer edge and transparent space around the inner edge between itself and the SourceGraphic.
+			 */
+			sourceAlphaTransferNode.slope.baseVal = (primaryAlpha === 0) ? 1 : (1 / primaryAlpha);
+
+			// Merge the individual outlines
+			const mergedOutlines = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+			filterElement.appendChild(mergedOutlines);
 
 			let outlineNumber = 0;
 
@@ -351,44 +365,22 @@ export class SpanStyles {
 					}
 				}
 			})((x: number, y: number): void => {
+				const outlineId = `outline${ outlineNumber }`;
+
 				const outlineFilter = document.createElementNS("http://www.w3.org/2000/svg", "feMorphology");
-				filterElement.appendChild(outlineFilter);
+				filterElement.insertBefore(outlineFilter, mergedOutlines);
 				outlineFilter.in1.baseVal = "source";
 				outlineFilter.operator.baseVal = SVGFEMorphologyElement.SVG_MORPHOLOGY_OPERATOR_DILATE;
 				outlineFilter.radiusX.baseVal = x;
 				outlineFilter.radiusY.baseVal = y;
-				outlineFilter.result.baseVal = `outline${ outlineNumber }`;
+				outlineFilter.result.baseVal = outlineId;
+
+				const outlineReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+				mergedOutlines.appendChild(outlineReferenceNode);
+				outlineReferenceNode.in1.baseVal = outlineId;
 
 				outlineNumber++;
 			});
-
-			// Start with SourceAlpha. Leave the alpha as 0 if it's 0, and set it to 1 if it's greater than 0
-			const source = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
-			filterElement.insertBefore(source, filterElement.firstElementChild);
-			source.in1.baseVal = "SourceAlpha";
-			source.result.baseVal = "source";
-
-			const sourceAlphaTransferNode = document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
-			source.appendChild(sourceAlphaTransferNode);
-			sourceAlphaTransferNode.type.baseVal = SVGComponentTransferFunctionElement.SVG_FECOMPONENTTRANSFER_TYPE_LINEAR;
-
-			/* The alphas of all colored pixels of the SourceAlpha should be made as close to 1 as possible. This way the summed outlines below will be uniformly dark.
-			 * Multiply the pixels by 1 / primaryAlpha so that the primaryAlpha pixels become 1. A higher value would make the outline larger and too sharp,
-			 * leading to jagged outer edge and transparent space around the inner edge between itself and the SourceGraphic.
-			 */
-			sourceAlphaTransferNode.slope.baseVal = (primaryAlpha === 0) ? 1 : (1 / primaryAlpha);
-
-			sourceAlphaTransferNode.intercept.baseVal = 0;
-
-			// Merge the individual outlines
-			const mergedOutlines = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
-			filterElement.appendChild(mergedOutlines);
-
-			for (let i = 0; i < outlineNumber; i++) {
-				const outlineReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
-				mergedOutlines.appendChild(outlineReferenceNode);
-				outlineReferenceNode.in1.baseVal = `outline${ i }`;
-			}
 
 			// Color it with the outline color
 			const coloredSource = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
@@ -423,6 +415,8 @@ export class SpanStyles {
 			if (this._gaussianBlur > 0) {
 				const gaussianBlurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
 				filterElement.appendChild(gaussianBlurFilter);
+
+				// Don't use setStdDeviation - cloneNode() clears it in Chrome
 				gaussianBlurFilter.stdDeviationX.baseVal = this._gaussianBlur;
 				gaussianBlurFilter.stdDeviationY.baseVal = this._gaussianBlur;
 			}
@@ -455,6 +449,8 @@ export class SpanStyles {
 			if (this._gaussianBlur > 0) {
 				const gaussianBlurFilter = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
 				filterElement.appendChild(gaussianBlurFilter);
+
+				// Don't use setStdDeviation - cloneNode() clears it in Chrome
 				gaussianBlurFilter.stdDeviationX.baseVal = this._gaussianBlur;
 				gaussianBlurFilter.stdDeviationY.baseVal = this._gaussianBlur;
 			}
@@ -467,10 +463,18 @@ export class SpanStyles {
 		}
 
 		if (filterElement.childElementCount > 0) {
-			this._svgDefsElement.appendChild(filterElement);
+			const filterId = `libjass-svg-filter-${ this._id }-${ this._nextFilterId++ }`;
 
-			filterWrapperSpan.style.webkitFilter = `url("#${ filterId }")`;
-			filterWrapperSpan.style.filter = `url("#${ filterId }")`;
+			this._svgDefsElement.appendChild(filterElement);
+			filterElement.id = filterId;
+			filterElement.x.baseVal.valueAsString = "-50%";
+			filterElement.width.baseVal.valueAsString = "200%";
+			filterElement.y.baseVal.valueAsString = "-50%";
+			filterElement.height.baseVal.valueAsString = "200%";
+
+			const filterProperty = `url("#${ filterId }")`;
+			filterWrapperSpan.style.webkitFilter = filterProperty;
+			filterWrapperSpan.style.filter = filterProperty;
 		}
 	}
 
