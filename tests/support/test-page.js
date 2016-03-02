@@ -43,7 +43,7 @@ define([
 			.setWindowSize(1280, 720)
 			.get(this._pageUrl)
 			.then(pollUntil('return (document.readyState === "complete") ? true : null;', 100))
-			.executeAsync(function (assUrl, enableSvg, callback) {
+			.executeAsync(function (assUrl, callback) {
 				libjass.ASS.fromUrl(assUrl).then(function (ass) {
 					var clock = window.clock = new libjass.renderers.ManualClock();
 					var libjassSubsWrapper = document.querySelector(".libjass-wrapper");
@@ -51,7 +51,7 @@ define([
 					libjassSubsWrapper.style.width = ass.properties.resolutionX + "px";
 					libjassSubsWrapper.style.height = ass.properties.resolutionY + "px";
 
-					var renderer = new libjass.renderers.WebRenderer(ass, clock, libjassSubsWrapper, { enableSvg: enableSvg });
+					var renderer = new libjass.renderers.WebRenderer(ass, clock, libjassSubsWrapper);
 					renderer.addEventListener("ready", function () {
 						try {
 							renderer.resize(ass.properties.resolutionX, ass.properties.resolutionY);
@@ -65,7 +65,7 @@ define([
 				}).catch(function (ex) {
 					callback({ name: ex.name, message: ex.message, stack: ex.stack });
 				});
-			}, [this._assUrl, this._remote.session.capabilities.browserName !== "internet explorer"])
+			}, [this._assUrl])
 			.then(function (err) {
 				if (err) {
 					throw Object.create(Error.prototype, {
