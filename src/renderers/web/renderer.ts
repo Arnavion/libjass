@@ -886,7 +886,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 		}
 
-		const result = <HTMLDivElement>preRenderedSub.sub.cloneNode(true);
+		const result = preRenderedSub.sub.cloneNode(true);
 
 		const applyAnimationDelays = (node: HTMLElement) => {
 			const animationNames = node.style.animationName || node.style.webkitAnimationName;
@@ -1016,7 +1016,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	 */
 	private _calculateFontMetricsAfterFetch(fontFamily: string, fontFetchPromise: Promise<any>): Promise<[number, number]> {
 		return fontFetchPromise.then(() => {
-			const fontSizeElement = <HTMLDivElement>this._fontSizeElement.cloneNode(true);
+			const fontSizeElement = this._fontSizeElement.cloneNode(true);
 			this._libjassSubsWrapper.appendChild(fontSizeElement);
 			return Promise_finally(calculateFontMetrics(fontFamily, this.settings.fallbackFonts, fontSizeElement), () => {
 				this._libjassSubsWrapper.removeChild(fontSizeElement);

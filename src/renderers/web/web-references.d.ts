@@ -18,6 +18,10 @@
  * limitations under the License.
  */
 
+interface Node {
+	cloneNode(deep?: boolean): this;
+}
+
 interface Document {
 	createElementNS(namespaceURI: "http://www.w3.org/2000/svg", qualifiedName: "defs"): SVGDefsElement;
 	createElementNS(namespaceURI: "http://www.w3.org/2000/svg", qualifiedName: "feComponentTransfer"): SVGFEComponentTransferElement;
