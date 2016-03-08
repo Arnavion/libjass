@@ -37,6 +37,7 @@ define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profi
 			"tests/functional/fsc/fsc",
 			"tests/functional/kfx/kfx",
 			"tests/functional/outlines/outlines",
+			"tests/functional/outlines/subpixel",
 			"tests/functional/r/alpha",
 			"tests/functional/t/alpha"
 		],

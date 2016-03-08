@@ -381,6 +381,33 @@ export class SpanStyles {
 				outlineNumber++;
 			});
 
+			((addOutline: (x: number, y: number) => void) => {
+				if ((outlineWidth % 1) > 0) {
+					addOutline(outlineWidth, 0);
+					addOutline(-outlineWidth, 0);
+				}
+
+				if ((outlineHeight % 1) > 0) {
+					addOutline(0, outlineHeight);
+					addOutline(0, -outlineHeight);
+				}
+			})((x: number, y: number): void => {
+				const outlineId = `outline${ outlineNumber }`;
+
+				const outlineFilter = document.createElementNS("http://www.w3.org/2000/svg", "feOffset");
+				filterElement.insertBefore(outlineFilter, mergedOutlines);
+				outlineFilter.in1.baseVal = "source";
+				outlineFilter.dx.baseVal = x;
+				outlineFilter.dy.baseVal = y;
+				outlineFilter.result.baseVal = outlineId;
+
+				const outlineReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+				mergedOutlines.appendChild(outlineReferenceNode);
+				outlineReferenceNode.in1.baseVal = outlineId;
+
+				outlineNumber++;
+			});
+
 			// Color it with the outline color
 			const coloredSource = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
 			filterElement.appendChild(coloredSource);
@@ -506,8 +533,18 @@ export class SpanStyles {
 						}
 					}
 				}
+
+				if ((outlineWidth % 1) > 0) {
+					addOutline(outlineWidth, 0);
+					addOutline(-outlineWidth, 0);
+				}
+
+				if ((outlineHeight % 1) > 0) {
+					addOutline(0, outlineHeight);
+					addOutline(0, -outlineHeight);
+				}
 			})((x: number, y: number): void => {
-				outlineCssString += `, ${ outlineColor.toString() } ${ x }px ${ y }px ${ this._gaussianBlur.toFixed(3) }px`;
+				outlineCssString += `, ${ outlineColor.toString() } ${ x.toFixed(3) }px ${ y.toFixed(3) }px ${ this._gaussianBlur.toFixed(3) }px`;
 			});
 
 			span.style.textShadow = outlineCssString.substr(", ".length);
