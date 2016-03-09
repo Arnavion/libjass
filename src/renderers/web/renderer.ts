@@ -355,16 +355,16 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	 * @return {PreRenderedSub}
 	 */
 	preRender(dialogue: Dialogue): PreRenderedSub {
-		const alreadyPreRenderedSub = this._preRenderedSubs.get(dialogue.id);
-		if (alreadyPreRenderedSub) {
-			return alreadyPreRenderedSub;
-		}
-
 		const currentTimeRelativeToDialogueStart = this.clock.currentTime - dialogue.start;
 
 		if (dialogue.containsTransformTag && currentTimeRelativeToDialogueStart < 0) {
 			// draw() expects this function to always return non-null, but it only calls this function when currentTimeRelativeToDialogueStart would be >= 0
 			return null;
+		}
+
+		const alreadyPreRenderedSub = this._preRenderedSubs.get(dialogue.id);
+		if (alreadyPreRenderedSub) {
+			return alreadyPreRenderedSub;
 		}
 
 		const sub = document.createElement("div");
