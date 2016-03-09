@@ -98,3 +98,7 @@
 .libjass-filters {
 	display: block;
 }
+
+.libjass-filters * {
+	color-interpolation-filters: sRGB;
+}
