@@ -183,17 +183,17 @@ export class Italic {
 /**
  * A bold tag {\b}
  *
- * @param {*} value {\b1} -> true, {\b0} -> false, {\b###} -> weight of the bold (number), {\b} -> null
+ * @param {?boolean|?number} value {\b1} -> true, {\b0} -> false, {\b###} -> weight of the bold (number), {\b} -> null
  */
 export class Bold {
-	constructor(private _value: Object) { }
+	constructor(private _value: boolean | number) { }
 
 	/**
 	 * The value of this bold tag.
 	 *
 	 * @type {?boolean|?number}
 	 */
-	get value(): Object {
+	get value(): boolean | number {
 		return this._value;
 	}
 }

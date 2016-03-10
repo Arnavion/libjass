@@ -51,7 +51,7 @@ export class SpanStyles {
 	private _defaultStyle: Style;
 
 	private _italic: boolean;
-	private _bold: Object;
+	private _bold: boolean | number;
 	private _underline: boolean;
 	private _strikeThrough: boolean;
 
@@ -616,9 +616,9 @@ export class SpanStyles {
 	/**
 	 * Sets the bold property. null defaults it to the default style's value.
 	 *
-	 * @type {(?number|?boolean)}
+	 * @type {(?boolean|?number)}
 	 */
-	set bold(value: Object) {
+	set bold(value: boolean | number) {
 		this._bold = SpanStyles._valueOrDefault(value, this._defaultStyle.bold);
 	}
 
