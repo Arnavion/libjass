@@ -54,6 +54,13 @@ export class DrawingStyles {
 	 * @return {!SVGSVGElement}
 	 */
 	toSVG(drawingInstructions: parts.DrawingInstructions, fillColor: parts.Color): SVGSVGElement {
+		const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		svg.setAttribute("version", "1.1");
+
+		if (drawingInstructions.instructions.length === 0) {
+			return svg;
+		}
+
 		const scaleFactor = Math.pow(2, this._scale - 1);
 		const scaleX = this._outputScaleX / scaleFactor;
 		const scaleY = this._outputScaleY / scaleFactor;
@@ -61,31 +68,55 @@ export class DrawingStyles {
 		const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
 		let pathString = "";
 
-		let bboxWidth = 0;
-		let bboxHeight = 0;
+		let bboxMinX = Infinity;
+		let bboxMaxX = -Infinity;
+		let bboxMinY = Infinity;
+		let bboxMaxY = -Infinity;
 
 		for (const instruction of drawingInstructions.instructions) {
 			if (instruction instanceof parts.drawing.MoveInstruction) {
 				pathString += ` M ${ instruction.x.toFixed(3) } ${ (instruction.y + this._baselineOffset).toFixed(3) }`;
-				bboxWidth = Math.max(bboxWidth, instruction.x);
-				bboxHeight = Math.max(bboxHeight, instruction.y + this._baselineOffset);
+
+				bboxMinX = Math.min(bboxMinX, instruction.x);
+				bboxMaxX = Math.max(bboxMaxX, instruction.x);
+				bboxMinY = Math.min(bboxMinY, instruction.y + this._baselineOffset);
+				bboxMaxY = Math.max(bboxMaxY, instruction.y + this._baselineOffset);
 			}
 			else if (instruction instanceof parts.drawing.LineInstruction) {
 				pathString += ` L ${ instruction.x.toFixed(3) } ${ (instruction.y + this._baselineOffset).toFixed(3) }`;
-				bboxWidth = Math.max(bboxWidth, instruction.x);
-				bboxHeight = Math.max(bboxHeight, instruction.y + this._baselineOffset);
+
+				bboxMinX = Math.min(bboxMinX, instruction.x);
+				bboxMaxX = Math.max(bboxMaxX, instruction.x);
+				bboxMinY = Math.min(bboxMinY, instruction.y + this._baselineOffset);
+				bboxMaxY = Math.max(bboxMaxY, instruction.y + this._baselineOffset);
 			}
 			else if (instruction instanceof parts.drawing.CubicBezierCurveInstruction) {
 				pathString += ` C ${ instruction.x1.toFixed(3) } ${ (instruction.y1 + this._baselineOffset).toFixed(3) } ${ instruction.x2.toFixed(3) } ${ (instruction.y2 + this._baselineOffset).toFixed(3) } ${ instruction.x3.toFixed(3) } ${ (instruction.y3 + this._baselineOffset).toFixed(3) }`;
-				bboxWidth = Math.max(bboxWidth, instruction.x1, instruction.x2, instruction.x3);
-				bboxHeight = Math.max(bboxHeight, instruction.y1 + this._baselineOffset, instruction.y2 + this._baselineOffset, instruction.y3 + this._baselineOffset);
+
+				bboxMinX = Math.min(bboxMinX, instruction.x1, instruction.x2, instruction.x3);
+				bboxMaxX = Math.max(bboxMaxX, instruction.x1, instruction.x2, instruction.x3);
+				bboxMinY = Math.min(bboxMinY, instruction.y1 + this._baselineOffset, instruction.y2 + this._baselineOffset, instruction.y3 + this._baselineOffset);
+				bboxMaxY = Math.max(bboxMaxY, instruction.y1 + this._baselineOffset, instruction.y2 + this._baselineOffset, instruction.y3 + this._baselineOffset);
 			}
 		}
 
-		const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-		svg.setAttribute("version", "1.1");
-		svg.width.baseVal.valueAsString = `${ (bboxWidth * scaleX).toFixed(3) }px`;
-		svg.height.baseVal.valueAsString = `${ (bboxHeight * scaleY).toFixed(3) }px`;
+		bboxMinX *= scaleX;
+		bboxMaxX *= scaleX;
+		bboxMinY *= scaleY;
+		bboxMaxY *= scaleY;
+
+		const bboxWidth = bboxMaxX - bboxMinX;
+		const bboxHeight = bboxMaxY - bboxMinY;
+
+		svg.width.baseVal.valueAsString = `${ bboxWidth.toFixed(3) }px`;
+		svg.height.baseVal.valueAsString = `${ bboxHeight.toFixed(3) }px`;
+		svg.viewBox.baseVal.x = bboxMinX;
+		svg.viewBox.baseVal.y = bboxMinY;
+		svg.viewBox.baseVal.width = bboxWidth;
+		svg.viewBox.baseVal.height = bboxHeight;
+		svg.style.position = "relative";
+		svg.style.left = `${ bboxMinX.toFixed(3) }px`;
+		svg.style.top = `${ bboxMinY.toFixed(3) }px`;
 
 		const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
 		svg.appendChild(g);
