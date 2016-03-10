@@ -159,7 +159,7 @@ class SimplePromise<T> {
 		const resultCapability = new DeferredPromise<U>();
 
 		if (typeof onFulfilled !== "function") {
-			onFulfilled = (value: T) => <U><any>value;
+			onFulfilled = (value: T) => value as any as U;
 		}
 
 		if (typeof onRejected !== "function") {
@@ -278,12 +278,12 @@ class SimplePromise<T> {
 			}
 
 			if (resolution === null || (typeof resolution !== "object" && typeof resolution !== "function")) {
-				this._fulfill(<T>resolution);
+				this._fulfill(resolution as T);
 				return;
 			}
 
 			try {
-				var then = (<Thenable<T>>resolution).then;
+				var then = (resolution as Thenable<T>).then;
 			}
 			catch (ex) {
 				this._reject(ex);
@@ -291,11 +291,11 @@ class SimplePromise<T> {
 			}
 
 			if (typeof then !== "function") {
-				this._fulfill(<T>resolution);
+				this._fulfill(resolution as T);
 				return;
 			}
 
-			enqueueJob(() => this._resolveWithThenable(<Thenable<T>>resolution, then));
+			enqueueJob(() => this._resolveWithThenable(resolution as Thenable<T>, then));
 		};
 
 		const reject = (reason: any): void => {

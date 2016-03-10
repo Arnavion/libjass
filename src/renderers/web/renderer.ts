@@ -111,8 +111,8 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		super(ass, clock, (() => {
 			if (!(_libjassSubsWrapper instanceof HTMLDivElement)) {
 				const temp = settings;
-				settings = <any>_libjassSubsWrapper;
-				_libjassSubsWrapper = <any>temp;
+				settings = _libjassSubsWrapper as any;
+				_libjassSubsWrapper = temp as any;
 				console.warn("WebRenderer's constructor now takes libjassSubsWrapper as the third parameter and settings as the fourth parameter. Please update the caller.");
 			}
 
@@ -904,7 +904,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		applyAnimationDelays(result);
 		const animatedDescendants = result.querySelectorAll('[style*="animation:"]');
 		for (let i = 0; i < animatedDescendants.length; i++) {
-			applyAnimationDelays(<HTMLElement>animatedDescendants[i]);
+			applyAnimationDelays(animatedDescendants[i] as HTMLElement);
 		}
 
 		const layer = dialogue.layer;
@@ -952,7 +952,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		// Workaround for IE
 		const dialogueAnimationStylesElement = result.getElementsByTagName("style")[0];
 		if (dialogueAnimationStylesElement !== undefined) {
-			const sheet = <CSSStyleSheet>dialogueAnimationStylesElement.sheet;
+			const sheet = dialogueAnimationStylesElement.sheet as CSSStyleSheet;
 			if (sheet.cssRules.length === 0) {
 				sheet.cssText = dialogueAnimationStylesElement.textContent;
 			}

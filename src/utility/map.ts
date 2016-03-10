@@ -218,8 +218,8 @@ class SimpleMap<K, V> {
 			return `'${ key }`;
 		}
 
-		if ((<any>key).id !== undefined) {
-			return `!${ (<any>key).id }`;
+		if ((key as any).id !== undefined) {
+			return `!${ (key as any).id }`;
 		}
 
 		return null;

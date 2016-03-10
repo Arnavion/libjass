@@ -136,7 +136,7 @@ export class WorkerChannelImpl implements WorkerChannel {
 	private _pendingRequests = new Map<number, DeferredPromise<any>>();
 
 	constructor(private _comm: WorkerCommunication) {
-		this._comm.addEventListener("message", ev => this._onMessage(<string>ev.data), false);
+		this._comm.addEventListener("message", ev => this._onMessage(ev.data as string), false);
 	}
 
 	/**
@@ -183,10 +183,10 @@ export class WorkerChannelImpl implements WorkerChannel {
 	 * @param {string} rawMessage
 	 */
 	private _onMessage(rawMessage: string): void {
-		const message = <{ command: WorkerCommands }>deserialize(rawMessage);
+		const message = deserialize(rawMessage) as { command: WorkerCommands };
 
 		if (message.command === WorkerCommands.Response) {
-			const responseMessage = <WorkerResponseMessage><any>message;
+			const responseMessage = message as any as WorkerResponseMessage;
 
 			const deferred = this._pendingRequests.get(responseMessage.requestId);
 			if (deferred !== undefined) {
@@ -200,7 +200,7 @@ export class WorkerChannelImpl implements WorkerChannel {
 			}
 		}
 		else {
-			const requestMessage = <WorkerRequestMessage>message;
+			const requestMessage = message as WorkerRequestMessage;
 			const requestId = requestMessage.requestId;
 
 			const commandCallback = getWorkerCommandHandler(requestMessage.command);

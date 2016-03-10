@@ -116,7 +116,7 @@ export class RendererSettings {
 	static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string> {
 		const fontMap = new Map<string, string>();
 
-		const styleSheet = <CSSStyleSheet>linkStyle.sheet;
+		const styleSheet = linkStyle.sheet as CSSStyleSheet;
 		for (let i = 0; i < styleSheet.cssRules.length; i++) {
 			const rule = styleSheet.cssRules[i];
 
@@ -156,7 +156,7 @@ export class RendererSettings {
 			enableSvg = RendererSettings._testSupportsSvg(),
 			fallbackFonts = 'Arial, Helvetica, sans-serif, "Segoe UI Symbol"',
 			useAttachedFonts = false,
-		} = <RendererSettings>object;
+		} = object as RendererSettings;
 
 		const result = new RendererSettings();
 		result.fontMap = fontMap;
@@ -196,7 +196,7 @@ export class RendererSettings {
 		catch (ex) {
 			if (debugMode) {
 				if (ex instanceof DOMException) {
-					const domException = <DOMException>ex;
+					const domException = ex as DOMException;
 					if (domException.code === DOMException.NO_MODIFICATION_ALLOWED_ERR) {
 						console.log("Setting SVGFEMorphologyElement.radiusX.baseVal threw NoModificationAllowedError. This browser doesn't support SVG DOM correctly.");
 					}

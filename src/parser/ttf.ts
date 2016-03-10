@@ -165,7 +165,7 @@ export function getTtfNames(attachment: Attachment): Set<string> {
  * @return {!function(new(): T)}
  */
 function struct<T>(clazz: { new (): T; read(reader: DataReader): T; }): { new (): T; read(reader: DataReader): T; } {
-	const fields: StructMemberDefinition[] = (<any>clazz).__fields;
+	const fields: StructMemberDefinition[] = (clazz as any).__fields;
 
 	clazz.read = (reader: DataReader) => {
 		const result: any = new clazz();

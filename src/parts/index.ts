@@ -1302,7 +1302,7 @@ const addToString = function (ctor: Function, ctorName: string) {
 		ctor.prototype.toString = function () {
 			return (
 				ctorName + " { " +
-				propertyNames.map(name => `${ name }: ${ (<any>this)[name] }`).join(", ") +
+				propertyNames.map(name => `${ name }: ${ (this as any)[name] }`).join(", ") +
 				((propertyNames.length > 0) ? " " : "") +
 				"}"
 			);
@@ -1323,7 +1323,7 @@ for (const key of Object.keys(exports)) {
 }
 
 for (const key of Object.keys(drawing)) {
-	const value: any = (<any>drawing)[key];
+	const value: any = (drawing as any)[key];
 	if (value instanceof Function) {
 		addToString(value, `Drawing${ key }`);
 		registerClass(value);

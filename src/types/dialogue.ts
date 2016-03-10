@@ -202,7 +202,7 @@ export class Dialogue {
 	 * Parses this dialogue's parts from the raw parts string.
 	 */
 	private _parsePartsString(): void {
-		this._parts = <parts.Part[]>parse(this._rawPartsString, "dialogueParts");
+		this._parts = parse(this._rawPartsString, "dialogueParts") as parts.Part[];
 
 		this._alignment = this._style.alignment;
 

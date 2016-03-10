@@ -117,13 +117,13 @@ export class Style {
 
 		this._rotationZ = valueOrDefault(template, "angle", parseFloat, value => !isNaN(value), "0");
 
-		this._primaryColor = valueOrDefault(template, "primarycolour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00FFFFFF");
-		this._secondaryColor = valueOrDefault(template, "secondarycolour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00FFFF00");
-		this._outlineColor = valueOrDefault(template, "outlinecolour", str => <Color>parse(str, "colorWithAlpha"), null, "&H00000000");
-		this._shadowColor = valueOrDefault(template, "backcolour", str => <Color>parse(str, "colorWithAlpha"), null, "&H80000000");
+		this._primaryColor = valueOrDefault(template, "primarycolour", str => parse(str, "colorWithAlpha") as Color, null, "&H00FFFFFF");
+		this._secondaryColor = valueOrDefault(template, "secondarycolour", str => parse(str, "colorWithAlpha") as Color, null, "&H00FFFF00");
+		this._outlineColor = valueOrDefault(template, "outlinecolour", str => parse(str, "colorWithAlpha") as Color, null, "&H00000000");
+		this._shadowColor = valueOrDefault(template, "backcolour", str => parse(str, "colorWithAlpha") as Color, null, "&H80000000");
 
 		this._outlineThickness = valueOrDefault(template, "outline", parseFloat, value => value >= 0, "2");
-		this._borderStyle = valueOrDefault(template, "borderstyle", parseInt, value => (<any>BorderStyle)[(<any>BorderStyle)[value]] === value, "1");
+		this._borderStyle = valueOrDefault(template, "borderstyle", parseInt, value => (BorderStyle as any)[(BorderStyle as any)[value]] === value, "1");
 
 		this._shadowDepth = valueOrDefault(template, "shadow", parseFloat, value => value >= 0, "3");
 

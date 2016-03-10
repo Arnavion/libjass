@@ -210,7 +210,7 @@ export class ASS {
 		result._stylesFormatSpecifier = this._stylesFormatSpecifier;
 		result._dialoguesFormatSpecifier = this._dialoguesFormatSpecifier;
 
-		result._classTag = (<any>ASS.prototype)._classTag;
+		result._classTag = (ASS.prototype as any)._classTag;
 
 		return result;
 	}

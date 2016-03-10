@@ -96,8 +96,8 @@ class ParserRun {
 
 				if (whiteSpaceOrTextNode.value instanceof parts.Text && current.value[current.value.length - 1] instanceof parts.Text) {
 					// Merge consecutive text parts into one part
-					const previousTextPart = <parts.Text>current.value[current.value.length - 1];
-					current.value[current.value.length - 1] = new parts.Text(previousTextPart.value + (<parts.Text>whiteSpaceOrTextNode.value).value);
+					const previousTextPart = current.value[current.value.length - 1] as parts.Text;
+					current.value[current.value.length - 1] = new parts.Text(previousTextPart.value + (whiteSpaceOrTextNode.value as parts.Text).value);
 				}
 				else {
 					current.value.push(whiteSpaceOrTextNode.value);
@@ -113,7 +113,7 @@ class ParserRun {
 			}
 
 			else if (part instanceof parts.Text && inDrawingMode) {
-				current.value[i] = new parts.DrawingInstructions(<parts.drawing.Instruction[]>parse(part.value, "drawingInstructions"));
+				current.value[i] = new parts.DrawingInstructions(parse(part.value, "drawingInstructions") as parts.drawing.Instruction[]);
 			}
 		});
 
@@ -211,8 +211,8 @@ class ParserRun {
 					// Merge consecutive comment parts into one part
 					current.value[current.value.length - 1] =
 						new parts.Comment(
-							(<parts.Comment>current.value[current.value.length - 1]).value +
-							(<parts.Comment>childNode.value).value
+							(current.value[current.value.length - 1] as parts.Comment).value +
+							(childNode.value as parts.Comment).value
 						);
 				}
 				else {
@@ -1323,8 +1323,8 @@ class ParserRun {
 					// Merge consecutive comment parts into one part
 					transformTags[transformTags.length - 1] =
 						new parts.Comment(
-							(<parts.Comment>transformTags[transformTags.length - 1]).value +
-							(<parts.Comment>childNode.value).value
+							(transformTags[transformTags.length - 1] as parts.Comment).value +
+							(childNode.value as parts.Comment).value
 						);
 				}
 				else {
@@ -1502,7 +1502,7 @@ class ParserRun {
 				break;
 			}
 
-			const newType = (<parts.Text>typePart.value).value;
+			const newType = (typePart.value as parts.Text).value;
 			switch (newType) {
 				case "m":
 				case "l":
@@ -1868,7 +1868,7 @@ class ParserRun {
 				commandsNode.value += next;
 			}
 
-			current.value = new parts.VectorClip((scaleNode !== null) ? scaleNode.value : 1, <parts.drawing.Instruction[]>parse(commandsNode.value, "drawingInstructions"), tagName === "clip");
+			current.value = new parts.VectorClip((scaleNode !== null) ? scaleNode.value : 1, parse(commandsNode.value, "drawingInstructions") as parts.drawing.Instruction[], tagName === "clip");
 		}
 
 		if (this.read(current, ")") === null) {
@@ -1894,8 +1894,8 @@ function makeTagParserFunction(
 	valueParser: (current: ParseNode) => ParseNode,
 	required: boolean
 ): void {
-	(<any>ParserRun.prototype)[`parse_tag_${ tagName }`] = function (parent: ParseNode): ParseNode {
-		const self = <ParserRun>this;
+	(ParserRun.prototype as any)[`parse_tag_${ tagName }`] = function (parent: ParseNode): ParseNode {
+		const self = this as ParserRun;
 		const current = new ParseNode(parent);
 
 		if (self.read(current, tagName) === null) {
@@ -1953,8 +1953,8 @@ makeTagParserFunction("4a", parts.ShadowAlpha, ParserRun.prototype.parse_alpha, 
 makeTagParserFunction("4c", parts.ShadowColor, ParserRun.prototype.parse_color, false);
 
 for (const key of Object.keys(ParserRun.prototype)) {
-	if (key.indexOf("parse_") === 0 && typeof (<any>ParserRun.prototype)[key] === "function") {
-		rules.set(key.substr("parse_".length), (<any>ParserRun.prototype)[key]);
+	if (key.indexOf("parse_") === 0 && typeof (ParserRun.prototype as any)[key] === "function") {
+		rules.set(key.substr("parse_".length), (ParserRun.prototype as any)[key]);
 	}
 }
 
