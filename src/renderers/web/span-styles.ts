@@ -168,11 +168,9 @@ export class SpanStyles {
 		else if (this._bold !== false) {
 			fontStyleOrWeight += this._bold + " ";
 		}
-		const fontSize = (
-			this._scaleY *
-			fontSizeForLineHeight(this._fontName, this._fontSize * (isTextOnlySpan ? this._fontScaleX : 1), this._settings.fallbackFonts, this._fontSizeElement, this._fontMetricsCache)
-		).toFixed(3);
-		const lineHeight = (this._scaleY * this._fontSize).toFixed(3);
+
+		const lineHeight = this._scaleY * (isTextOnlySpan ? this._fontScaleX : 1) * this._fontSize;
+		const fontSize = fontSizeForLineHeight(this._fontName, lineHeight, this._settings.fallbackFonts, this._fontSizeElement, this._fontMetricsCache);
 
 		let fonts = this._fontName;
 
@@ -193,7 +191,7 @@ export class SpanStyles {
 			fonts += `, ${ this._settings.fallbackFonts }`;
 		}
 
-		span.style.font = `${ fontStyleOrWeight }${ fontSize }px/${ lineHeight }px ${ fonts }`;
+		span.style.font = `${ fontStyleOrWeight }${ fontSize.toFixed(3) }px/${ lineHeight.toFixed(3) }px ${ fonts }`;
 
 		let textDecoration = "";
 		if (this._underline) {
