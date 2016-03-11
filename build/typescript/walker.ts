@@ -286,7 +286,6 @@ class Walker {
 
 		var property = this._scope.enter(new AST.Property(ts.getTextOfNode(declaration.name)));
 		property.getter = new AST.Getter(node, jsDoc.description, jsDoc.typeAnnotation, false);
-		property.setter = new AST.Setter(node, jsDoc.description, jsDoc.typeAnnotation, false);
 
 		parent.members[property.name] = property;
 
