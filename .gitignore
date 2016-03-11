@@ -10,3 +10,5 @@
 /node_modules/
 
 /npm-debug.log
+
+/src/version.ts

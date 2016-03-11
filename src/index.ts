@@ -52,6 +52,8 @@ export { Style } from "./types/style";
 
 export { BorderStyle, Format, WrappingStyle } from "./types/misc";
 
+export { version } from "./version";
+
 /**
  * Configures libjass with the given properties.
  *

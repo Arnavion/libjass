@@ -67,7 +67,43 @@ task("build-tools", function (callback) {
 
 task("default", ["libjass.js", "libjass.min.js"]);
 
-task("libjass.js", ["build-tools"], function (callback) {
+task("version.ts", function (callback) {
+	fs.exists("./src/version.ts", function (exists) {
+		if (exists) {
+			callback();
+			return;
+		}
+
+		async.waterfall([
+			fs.readFile.bind(fs, "./package.json"),
+			function (buffer, callback) {
+				try {
+					var packageJson = JSON.parse(buffer);
+					var versionString = packageJson.version;
+					var versionParts = versionString.split(".").map(function (num) { return parseInt(num); });
+					var versionFileContents =
+						"/**\n" +
+						" * The version of libjass. An array like\n" +
+						" *\n" +
+						" *     [\"0.12.0\", 0, 12, 0]\n" +
+						" *\n" +
+						" * @type {!Array.<string|number>}\n" +
+						" */\n" +
+						"export const version = " + JSON.stringify([versionString].concat(versionParts)) + ";\n";
+					callback(null, versionFileContents);
+				}
+				catch (ex) {
+					callback(ex);
+				}
+			},
+			function (contents, callback) {
+				fs.writeFile("./src/version.ts", contents, "utf8", callback);
+			}
+		], callback);
+	});
+});
+
+task("libjass.js", ["build-tools", "version.ts"], function (callback) {
 	fs.exists("./lib/libjass.js", function (exists) {
 		if (exists) {
 			callback();
@@ -94,9 +130,9 @@ task("libjass.min.js", ["libjass.js"], function (callback) {
 	});
 });
 
-task("clean", task.clean(["./lib/libjass.js", "./lib/libjass.js.map", "./lib/libjass.min.js", "./lib/libjass.min.js.map"]));
+task("clean", task.clean(["./src/version.ts", "./lib/libjass.js", "./lib/libjass.js.map", "./lib/libjass.min.js", "./lib/libjass.min.js.map"]));
 
-task("watch", ["build-tools"], function (callback) {
+task("watch", ["build-tools", "version.ts"], function (callback) {
 	npm.load(function () {
 		var testRunning = false;
 		var rerunTest = false;
@@ -165,7 +201,7 @@ task("demo", ["libjass.js"], function () {
 
 task("doc", ["make-doc", "test-doc"]);
 
-task("make-doc", ["build-tools"], function () {
+task("make-doc", ["build-tools", "version.ts"], function () {
 	var Doc = require("./build/doc.js");
 
 	return task.src("./src/tsconfig.json")
