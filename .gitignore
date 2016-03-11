@@ -1,12 +1,12 @@
-build/doc.js
-build/typescript/typescript.d.ts
-build/typescript/*.js
+/build/doc.js
+/build/typescript/typescript.d.ts
+/build/typescript/*.js
 
-dist/
+/dist/
 
-lib/
-!lib/libjass.css
+/lib/
+!/lib/libjass.css
 
-node_modules/
+/node_modules/
 
-npm-debug.log
+/npm-debug.log
