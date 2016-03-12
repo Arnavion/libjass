@@ -929,8 +929,9 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			this._layerAlignmentWrappers[layer] = [];
 		}
 
-		if (this._layerAlignmentWrappers[layer][alignment] === undefined) {
-			const layerAlignmentWrapper = document.createElement("div");
+		let layerAlignmentWrapper = this._layerAlignmentWrappers[layer][alignment];
+		if (layerAlignmentWrapper === undefined) {
+			layerAlignmentWrapper = this._layerAlignmentWrappers[layer][alignment] = document.createElement("div");
 			layerAlignmentWrapper.className = `an an${ alignment }`;
 
 			// Find the next greater layer,alignment div and insert this div before that one
@@ -943,11 +944,16 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			layerWrapper.insertBefore(layerAlignmentWrapper, insertBeforeElement);
-
-			this._layerAlignmentWrappers[layer][alignment] = layerAlignmentWrapper;
 		}
 
-		this._layerAlignmentWrappers[layer][alignment].appendChild(result);
+		if (alignment >= 1 && alignment <= 3) {
+			// New subs go above existing subs
+			layerAlignmentWrapper.insertBefore(result, layerAlignmentWrapper.firstElementChild);
+		}
+		else {
+			// New subs go below existing subs
+			layerAlignmentWrapper.appendChild(result);
+		}
 
 		// Workaround for IE
 		const dialogueAnimationStylesElement = result.getElementsByTagName("style")[0];
