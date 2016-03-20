@@ -183,12 +183,12 @@ addEventListener("DOMContentLoaded", function () {
 	var debugModeCheckbox = document.querySelector("#debug-mode");
 	debugModeCheckbox.addEventListener("change", function () {
 		console.log((debugModeCheckbox.checked ? "Enabling" : "Disabling") + " debug mode.");
-		libjass.debugMode = debugModeCheckbox.checked;
+		libjass.configure({ debugMode: debugModeCheckbox.checked });
 	}, false);
 	var verboseModeCheckbox = document.querySelector("#verbose-mode");
 	verboseModeCheckbox.addEventListener("change", function () {
 		console.log((debugModeCheckbox.checked ? "Enabling" : "Disabling") + " verbose mode.");
-		libjass.verboseMode = verboseModeCheckbox.checked;
+		libjass.configure({ verboseMode: verboseModeCheckbox.checked });
 	}, false);
 
 
