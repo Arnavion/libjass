@@ -96,6 +96,9 @@ addEventListener("DOMContentLoaded", function () {
 	var assChoiceTextInput = document.querySelector("#ass-choice-text");
 	var assInputText = document.querySelector("#ass-input-text");
 
+	var enableSvgChoiceInputYes = document.querySelector("#enable-svg-yes");
+	var enableSvgChoiceInputNo = document.querySelector("#enable-svg-no");
+
 	// Local file input requires URL.createObjectURL, so disable those inputs if the function doesn't exist.
 	if (typeof URL === "undefined" || typeof URL.createObjectURL !== "function") {
 		[
@@ -290,7 +293,17 @@ addEventListener("DOMContentLoaded", function () {
 				break;
 		}
 
-		go(videoPromise, assPromise);
+		var enableSvg = null;
+		switch (document.querySelector('input[name="enable-svg"]:checked')) {
+			case enableSvgChoiceInputYes:
+				enableSvg = true;
+				break;
+			case enableSvgChoiceInputNo:
+				enableSvg = false;
+				break;
+		}
+
+		go(videoPromise, assPromise, enableSvg);
 	});
 
 	updateGoButton();
@@ -372,7 +385,7 @@ function prepareVideo(videoType /*, ...parameters */) {
 
 /* This is a function that sets up libjass to render the subs.
  */
-function go(videoPromise, assPromise) {
+function go(videoPromise, assPromise, enableSvg) {
 	var video = document.querySelector("#video");
 
 
@@ -404,11 +417,14 @@ function go(videoPromise, assPromise) {
 	libjass.Promise.all([videoPromise, assLoadedPromise]).then(function (results) {
 		var ass = results[1];
 
+		var rendererSettings = { };
+		if (enableSvg !== null) {
+			rendererSettings.enableSvg = enableSvg;
+		}
+		// else unset, which means libjass will try to auto-detect it.
+
 		// Create a DefaultRenderer using the video element and the ASS object
-		var renderer = new libjass.renderers.DefaultRenderer(video, ass, {
-			// IE doesn't support SVG filter effects on HTML. Unfortunately there isn't a clean way of feature-detecting this.
-			enableSvg: (navigator.userAgent.indexOf("Trident") === -1) && (location.search.indexOf("disableSvg") === -1)
-		});
+		var renderer = new libjass.renderers.DefaultRenderer(video, ass, rendererSettings);
 
 		// Export the renderer for debugging
 		window.renderer = renderer;

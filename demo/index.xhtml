@@ -78,6 +78,7 @@
 					</li>
 				</ul>
 			</fieldset>
+
 			<fieldset>
 				<legend>Choose an ASS script</legend>
 				<ul class="choices-list">
@@ -140,6 +141,31 @@ Dialogue: 0,0:01:10.00,0:01:15.00,Default,,0000,0000,0000,,The End
 					</li>
 				</ul>
 			</fieldset>
+
+			<fieldset>
+				<legend>Other options</legend>
+				<ul>
+					<li>
+						Does the M at the end of this question appear red or black?
+						<span style="color: black; -webkit-filter: url('#redtext'); filter: url('#redtext');">M</span>
+						<label><input type="radio" id="enable-svg-yes" name="enable-svg" /> Red</label>
+						<label><input type="radio" id="enable-svg-no" name="enable-svg" /> Black</label>
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="0" height="0">
+							<defs>
+								<filter id="redtext" x="-50%" y="-50%" width="200%" height="200%">
+									<feComponentTransfer in="SourceAlpha">
+										<feFuncR type="linear" slope="0" intercept="1" />
+										<feFuncG type="linear" slope="0" intercept="0" />
+										<feFuncB type="linear" slope="0" intercept="0" />
+										<feFuncA type="linear" slope="1" intercept="0" />
+									</feComponentTransfer>
+								</filter>
+							</defs>
+						</svg>
+					</li>
+				</ul>
+			</fieldset>
+
 			<button type="button" id="go-button" disabled="disabled">Go</button>
 		</div>
 
