@@ -51,6 +51,12 @@ export class Compiler {
 			throw new Error("There were one or more syntactic diagnostics.");
 		}
 
+		const optionsDiagnostics = this._program.getOptionsDiagnostics();
+		if (optionsDiagnostics.length > 0) {
+			this._reportDiagnostics(optionsDiagnostics);
+			throw new Error("There were one or more options diagnostics.");
+		}
+
 		var globalDiagnostics = this._program.getGlobalDiagnostics();
 		if (globalDiagnostics.length > 0) {
 			this._reportDiagnostics(globalDiagnostics);
