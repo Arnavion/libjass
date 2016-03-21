@@ -242,6 +242,7 @@ addEventListener("DOMContentLoaded", function () {
 
 		var videoChoice = document.querySelector('input[name="video-choice"]:checked');
 		var assChoice = document.querySelector('input[name="ass-choice"]:checked');
+		var enableSvgChoice = document.querySelector('input[name="enable-svg"]:checked');
 
 		while (content.firstChild) {
 			content.removeChild(content.firstChild);
@@ -294,7 +295,7 @@ addEventListener("DOMContentLoaded", function () {
 		}
 
 		var enableSvg = null;
-		switch (document.querySelector('input[name="enable-svg"]:checked')) {
+		switch (enableSvgChoice) {
 			case enableSvgChoiceInputYes:
 				enableSvg = true;
 				break;
