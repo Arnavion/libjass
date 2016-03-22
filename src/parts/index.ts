@@ -417,7 +417,7 @@ export class FontSize {
 /**
  * A font size increase tag {\fs+}
  *
- * @param {number} value {\fs+###} -> difference (number)
+ * @param {number} value {\fs+###} -> relative difference (number, percentage)
  */
 export class FontSizePlus {
 	constructor(private _value: number) { }
@@ -435,7 +435,7 @@ export class FontSizePlus {
 /**
  * A font size decrease tag {\fs-}
  *
- * @param {number} value {\fs-###} -> difference (number)
+ * @param {number} value {\fs-###} -> relative difference (number, percentage)
  */
 export class FontSizeMinus {
 	constructor(private _value: number) { }

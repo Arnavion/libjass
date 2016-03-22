@@ -486,11 +486,11 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.FontSizePlus) {
-				currentSpanStyles.fontSize += part.value;
+				currentSpanStyles.fontSize *= (1 + part.value);
 			}
 
 			else if (part instanceof parts.FontSizeMinus) {
-				currentSpanStyles.fontSize -= part.value;
+				currentSpanStyles.fontSize *= (1 - part.value);
 			}
 
 			else if (part instanceof parts.FontScaleX) {
@@ -693,11 +693,11 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 					}
 
 					else if (tag instanceof parts.FontSizePlus) {
-						currentSpanStyles.fontSize += progression * tag.value;
+						currentSpanStyles.fontSize *= (1 + progression * tag.value);
 					}
 
 					else if (tag instanceof parts.FontSizeMinus) {
-						currentSpanStyles.fontSize -= progression * tag.value;
+						currentSpanStyles.fontSize *= (1 - progression * tag.value);
 					}
 
 					else if (tag instanceof parts.FontScaleX) {

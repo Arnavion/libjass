@@ -745,7 +745,7 @@ class ParserRun {
 			return null;
 		}
 
-		current.value = new parts.FontSizePlus(valueNode.value);
+		current.value = new parts.FontSizePlus(valueNode.value / 10);
 
 		return current;
 	}
@@ -769,7 +769,7 @@ class ParserRun {
 			return null;
 		}
 
-		current.value = new parts.FontSizeMinus(valueNode.value);
+		current.value = new parts.FontSizeMinus(valueNode.value / 10);
 
 		return current;
 	}

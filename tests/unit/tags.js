@@ -83,11 +83,11 @@ define(["intern!tdd", "tests/support/parser-test", "libjass"], function (tdd, pa
 
 			tdd.test("null", parserTest("fs", "tag_fs", new libjass.parts.FontSize(null)));
 
-			tdd.test("Plus 5", parserTest("fs+5", "tag_fsplus", new libjass.parts.FontSizePlus(5)));
+			tdd.test("Plus 5", parserTest("fs+5", "tag_fsplus", new libjass.parts.FontSizePlus(0.5)));
 
 			tdd.test("Plus null", parserTest("fs+", "tag_fsplus", null));
 
-			tdd.test("Minus 5", parserTest("fs-5", "tag_fsminus", new libjass.parts.FontSizeMinus(5)));
+			tdd.test("Minus 5", parserTest("fs-5", "tag_fsminus", new libjass.parts.FontSizeMinus(0.5)));
 
 			tdd.test("Minus null", parserTest("fs-", "tag_fsminus", null));
 		});
