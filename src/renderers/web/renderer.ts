@@ -655,41 +655,88 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 				for (const tag of part.tags) {
 					if (tag instanceof parts.Border) {
-						currentSpanStyles.outlineWidth += progression * (tag.value - currentSpanStyles.outlineWidth);
-						currentSpanStyles.outlineHeight += progression * (tag.value - currentSpanStyles.outlineHeight);
+						if (tag.value !== null) {
+							currentSpanStyles.outlineWidth += progression * (tag.value - currentSpanStyles.outlineWidth);
+							currentSpanStyles.outlineHeight += progression * (tag.value - currentSpanStyles.outlineHeight);
+						}
+						else {
+							currentSpanStyles.outlineWidth = null;
+							currentSpanStyles.outlineHeight = null;
+						}
 					}
 
 					else if (tag instanceof parts.BorderX) {
-						currentSpanStyles.outlineWidth += progression * (tag.value - currentSpanStyles.outlineWidth);
+						if (tag.value !== null) {
+							currentSpanStyles.outlineWidth += progression * (tag.value - currentSpanStyles.outlineWidth);
+						}
+						else {
+							currentSpanStyles.outlineWidth = null;
+						}
 					}
 
 					else if (tag instanceof parts.BorderY) {
-						currentSpanStyles.outlineHeight += progression * (tag.value - currentSpanStyles.outlineHeight);
+						if (tag.value !== null) {
+							currentSpanStyles.outlineHeight += progression * (tag.value - currentSpanStyles.outlineHeight);
+						}
+						else {
+							currentSpanStyles.outlineHeight = null;
+						}
 					}
 
 					else if (tag instanceof parts.Shadow) {
-						currentSpanStyles.shadowDepthX += progression * (tag.value - currentSpanStyles.shadowDepthX);
-						currentSpanStyles.shadowDepthY += progression * (tag.value - currentSpanStyles.shadowDepthY);
+						if (tag.value !== null) {
+							currentSpanStyles.shadowDepthX += progression * (tag.value - currentSpanStyles.shadowDepthX);
+							currentSpanStyles.shadowDepthY += progression * (tag.value - currentSpanStyles.shadowDepthY);
+						}
+						else {
+							currentSpanStyles.shadowDepthX = null;
+							currentSpanStyles.shadowDepthY = null;
+						}
 					}
 
 					else if (tag instanceof parts.ShadowX) {
-						currentSpanStyles.shadowDepthX += progression * (tag.value - currentSpanStyles.shadowDepthX);
+						if (tag.value !== null) {
+							currentSpanStyles.shadowDepthX += progression * (tag.value - currentSpanStyles.shadowDepthX);
+						}
+						else {
+							currentSpanStyles.shadowDepthX = null;
+						}
 					}
 
 					else if (tag instanceof parts.ShadowY) {
-						currentSpanStyles.shadowDepthY += progression * (tag.value - currentSpanStyles.shadowDepthY);
+						if (tag.value !== null) {
+							currentSpanStyles.shadowDepthY += progression * (tag.value - currentSpanStyles.shadowDepthY);
+						}
+						else {
+							currentSpanStyles.shadowDepthY = null;
+						}
 					}
 
 					else if (tag instanceof parts.Blur) {
-						currentSpanStyles.blur += progression * (tag.value - currentSpanStyles.blur);
+						if (tag.value !== null) {
+							currentSpanStyles.blur += progression * (tag.value - currentSpanStyles.blur);
+						}
+						else {
+							currentSpanStyles.blur = null;
+						}
 					}
 
 					else if (tag instanceof parts.GaussianBlur) {
-						currentSpanStyles.gaussianBlur += progression * (tag.value - currentSpanStyles.gaussianBlur);
+						if (tag.value !== null) {
+							currentSpanStyles.gaussianBlur += progression * (tag.value - currentSpanStyles.gaussianBlur);
+						}
+						else {
+							currentSpanStyles.gaussianBlur = null;
+						}
 					}
 
 					else if (tag instanceof parts.FontSize) {
-						currentSpanStyles.fontSize += progression * (tag.value - currentSpanStyles.fontSize);
+						if (tag.value !== null) {
+							currentSpanStyles.fontSize += progression * (tag.value - currentSpanStyles.fontSize);
+						}
+						else {
+							currentSpanStyles.fontSize = null;
+						}
 					}
 
 					else if (tag instanceof parts.FontSizePlus) {
@@ -701,74 +748,162 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 					}
 
 					else if (tag instanceof parts.FontScaleX) {
-						currentSpanStyles.fontScaleX += progression * (tag.value - currentSpanStyles.fontScaleX);
+						if (tag.value !== null) {
+							currentSpanStyles.fontScaleX += progression * (tag.value - currentSpanStyles.fontScaleX);
+						}
+						else {
+							currentSpanStyles.fontScaleX = null;
+						}
 					}
 
 					else if (tag instanceof parts.FontScaleY) {
-						currentSpanStyles.fontScaleY += progression * (tag.value - currentSpanStyles.fontScaleY);
+						if (tag.value !== null) {
+							currentSpanStyles.fontScaleY += progression * (tag.value - currentSpanStyles.fontScaleY);
+						}
+						else {
+							currentSpanStyles.fontScaleY = null;
+						}
 					}
 
 					else if (tag instanceof parts.LetterSpacing) {
-						currentSpanStyles.letterSpacing += progression * (tag.value - currentSpanStyles.letterSpacing);
+						if (tag.value !== null) {
+							currentSpanStyles.letterSpacing += progression * (tag.value - currentSpanStyles.letterSpacing);
+						}
+						else {
+							currentSpanStyles.letterSpacing = null;
+						}
 					}
 
 					else if (tag instanceof parts.RotateX) {
-						currentSpanStyles.rotationX += progression * (tag.value - currentSpanStyles.rotationX);
+						if (tag.value !== null) {
+							currentSpanStyles.rotationX += progression * (tag.value - currentSpanStyles.rotationX);
+						}
+						else {
+							currentSpanStyles.rotationX = null;
+						}
 					}
 
 					else if (tag instanceof parts.RotateY) {
-						currentSpanStyles.rotationY += progression * (tag.value - currentSpanStyles.rotationY);
+						if (tag.value !== null) {
+							currentSpanStyles.rotationY += progression * (tag.value - currentSpanStyles.rotationY);
+						}
+						else {
+							currentSpanStyles.rotationY = null;
+						}
 					}
 
 					else if (tag instanceof parts.RotateZ) {
-						currentSpanStyles.rotationZ += progression * (tag.value - currentSpanStyles.rotationZ);
+						if (tag.value !== null) {
+							currentSpanStyles.rotationZ += progression * (tag.value - currentSpanStyles.rotationZ);
+						}
+						else {
+							currentSpanStyles.rotationZ = null;
+						}
 					}
 
 					else if (tag instanceof parts.SkewX) {
-						currentSpanStyles.skewX += progression * (tag.value - currentSpanStyles.skewX);
+						if (tag.value !== null) {
+							currentSpanStyles.skewX += progression * (tag.value - currentSpanStyles.skewX);
+						}
+						else {
+							currentSpanStyles.skewX = null;
+						}
 					}
 
 					else if (tag instanceof parts.SkewY) {
-						currentSpanStyles.skewY += progression * (tag.value - currentSpanStyles.skewY);
+						if (tag.value !== null) {
+							currentSpanStyles.skewY += progression * (tag.value - currentSpanStyles.skewY);
+						}
+						else {
+							currentSpanStyles.skewY = null;
+						}
 					}
 
 					else if (tag instanceof parts.PrimaryColor) {
-						currentSpanStyles.primaryColor = currentSpanStyles.primaryColor.interpolate(tag.value, progression);
+						if (tag.value !== null) {
+							currentSpanStyles.primaryColor = currentSpanStyles.primaryColor.interpolate(tag.value, progression);
+						}
+						else {
+							currentSpanStyles.primaryColor = null;
+						}
 					}
 
 					else if (tag instanceof parts.SecondaryColor) {
-						currentSpanStyles.secondaryColor = currentSpanStyles.secondaryColor.interpolate(tag.value, progression);
+						if (tag.value !== null) {
+							currentSpanStyles.secondaryColor = currentSpanStyles.secondaryColor.interpolate(tag.value, progression);
+						}
+						else {
+							currentSpanStyles.secondaryColor = null;
+						}
 					}
 
 					else if (tag instanceof parts.OutlineColor) {
-						currentSpanStyles.outlineColor = currentSpanStyles.outlineColor.interpolate(tag.value, progression);
+						if (tag.value !== null) {
+							currentSpanStyles.outlineColor = currentSpanStyles.outlineColor.interpolate(tag.value, progression);
+						}
+						else {
+							currentSpanStyles.outlineColor = null;
+						}
 					}
 
 					else if (tag instanceof parts.ShadowColor) {
-						currentSpanStyles.shadowColor = currentSpanStyles.shadowColor.interpolate(tag.value, progression);
+						if (tag.value !== null) {
+							currentSpanStyles.shadowColor = currentSpanStyles.shadowColor.interpolate(tag.value, progression);
+						}
+						else {
+							currentSpanStyles.shadowColor = null;
+						}
 					}
 
 					else if (tag instanceof parts.Alpha) {
-						currentSpanStyles.primaryAlpha += progression * (tag.value - currentSpanStyles.primaryAlpha);
-						currentSpanStyles.secondaryAlpha += progression * (tag.value - currentSpanStyles.secondaryAlpha);
-						currentSpanStyles.outlineAlpha += progression * (tag.value - currentSpanStyles.outlineAlpha);
-						currentSpanStyles.shadowAlpha += progression * (tag.value - currentSpanStyles.shadowAlpha);
+						if (tag.value !== null) {
+							currentSpanStyles.primaryAlpha += progression * (tag.value - currentSpanStyles.primaryAlpha);
+							currentSpanStyles.secondaryAlpha += progression * (tag.value - currentSpanStyles.secondaryAlpha);
+							currentSpanStyles.outlineAlpha += progression * (tag.value - currentSpanStyles.outlineAlpha);
+							currentSpanStyles.shadowAlpha += progression * (tag.value - currentSpanStyles.shadowAlpha);
+						}
+						else {
+							currentSpanStyles.primaryAlpha = null;
+							currentSpanStyles.secondaryAlpha = null;
+							currentSpanStyles.outlineAlpha = null;
+							currentSpanStyles.shadowAlpha = null;
+						}
 					}
 
 					else if (tag instanceof parts.PrimaryAlpha) {
-						currentSpanStyles.primaryAlpha += progression * (tag.value - currentSpanStyles.primaryAlpha);
+						if (tag.value !== null) {
+							currentSpanStyles.primaryAlpha += progression * (tag.value - currentSpanStyles.primaryAlpha);
+						}
+						else {
+							currentSpanStyles.primaryAlpha = null;
+						}
 					}
 
 					else if (tag instanceof parts.SecondaryAlpha) {
-						currentSpanStyles.secondaryAlpha += progression * (tag.value - currentSpanStyles.secondaryAlpha);
+						if (tag.value !== null) {
+							currentSpanStyles.secondaryAlpha += progression * (tag.value - currentSpanStyles.secondaryAlpha);
+						}
+						else {
+							currentSpanStyles.secondaryAlpha = null;
+						}
 					}
 
 					else if (tag instanceof parts.OutlineAlpha) {
-						currentSpanStyles.outlineAlpha += progression * (tag.value - currentSpanStyles.outlineAlpha);
+						if (tag.value !== null) {
+							currentSpanStyles.outlineAlpha += progression * (tag.value - currentSpanStyles.outlineAlpha);
+						}
+						else {
+							currentSpanStyles.outlineAlpha = null;
+						}
 					}
 
 					else if (tag instanceof parts.ShadowAlpha) {
-						currentSpanStyles.shadowAlpha += progression * (tag.value - currentSpanStyles.shadowAlpha);
+						if (tag.value !== null) {
+							currentSpanStyles.shadowAlpha += progression * (tag.value - currentSpanStyles.shadowAlpha);
+						}
+						else {
+							currentSpanStyles.shadowAlpha = null;
+						}
 					}
 				}
 			}

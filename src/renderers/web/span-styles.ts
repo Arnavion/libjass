@@ -127,12 +127,12 @@ export class SpanStyles {
 
 		this.letterSpacing = newStyle.letterSpacing;
 
-		this._rotationX = null;
-		this._rotationY = null;
-		this._rotationZ = newStyle.rotationZ;
+		this.rotationX = 0;
+		this.rotationY = 0;
+		this.rotationZ = newStyle.rotationZ;
 
-		this._skewX = null;
-		this._skewY = null;
+		this.skewX = 0;
+		this.skewY = 0;
 
 		this.primaryColor = newStyle.primaryColor;
 		this.secondaryColor = newStyle.secondaryColor;
@@ -216,19 +216,17 @@ export class SpanStyles {
 				transform += `scaleY(${ this._fontScaleY }) `;
 			}
 		}
-		if (this._rotationY !== null) {
+		if (this._rotationY !== 0) {
 			transform += `rotateY(${ this._rotationY }deg) `;
 		}
-		if (this._rotationX !== null) {
+		if (this._rotationX !== 0) {
 			transform += `rotateX(${ this._rotationX }deg) `;
 		}
 		if (this._rotationZ !== 0) {
 			transform += `rotateZ(${ -1 * this._rotationZ }deg) `;
 		}
-		if (this._skewX !== null || this._skewY !== null) {
-			const skewX = SpanStyles._valueOrDefault(this._skewX, 0);
-			const skewY = SpanStyles._valueOrDefault(this._skewY, 0);
-			transform += `matrix(1, ${ skewY }, ${ skewX }, 1, 0, 0) `;
+		if (this._skewX !== 0 || this._skewY !== 0) {
+			transform += `matrix(1, ${ this._skewY }, ${ this._skewX }, 1, 0, 0) `;
 		}
 		if (transform !== "") {
 			span.style.webkitTransform = transform;
@@ -832,7 +830,7 @@ export class SpanStyles {
 	/**
 	 * Gets the X-axis rotation property.
 	 *
-	 * @type {?number}
+	 * @type {number}
 	 */
 	get rotationX(): number {
 		return this._rotationX;
@@ -844,13 +842,13 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set rotationX(value: number) {
-		this._rotationX = value;
+		this._rotationX = SpanStyles._valueOrDefault(value, 0);
 	}
 
 	/**
 	 * Gets the Y-axis rotation property.
 	 *
-	 * @type {?number}
+	 * @type {number}
 	 */
 	get rotationY(): number {
 		return this._rotationY;
@@ -862,7 +860,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set rotationY(value: number) {
-		this._rotationY = value;
+		this._rotationY = SpanStyles._valueOrDefault(value, 0);
 	}
 
 	/**
@@ -886,7 +884,7 @@ export class SpanStyles {
 	/**
 	 * Gets the X-axis skew property.
 	 *
-	 * @type {?number}
+	 * @type {number}
 	 */
 	get skewX(): number {
 		return this._skewX;
@@ -898,13 +896,13 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set skewX(value: number) {
-		this._skewX = value;
+		this._skewX = SpanStyles._valueOrDefault(value, 0);
 	}
 
 	/**
 	 * Gets the Y-axis skew property.
 	 *
-	 * @type {?number}
+	 * @type {number}
 	 */
 	get skewY(): number {
 		return this._skewY;
@@ -916,7 +914,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set skewY(value: number) {
-		this._skewY = value;
+		this._skewY = SpanStyles._valueOrDefault(value, 0);
 	}
 
 	/**
