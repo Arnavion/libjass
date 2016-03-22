@@ -645,7 +645,7 @@ export class SpanStyles {
 	 *
 	 * @type {number}
 	 */
-	get outlineWidth() {
+	get outlineWidth(): number {
 		return this._outlineWidth;
 	}
 
@@ -659,12 +659,12 @@ export class SpanStyles {
 	}
 
 	/**
-	 * Gets the outline width property.
+	 * Gets the outline height property.
 	 *
 	 * @type {number}
 	 */
-	get outlineHeight() {
-		return this._outlineWidth;
+	get outlineHeight(): number {
+		return this._outlineHeight;
 	}
 
 	/**
@@ -681,7 +681,7 @@ export class SpanStyles {
 	 *
 	 * @type {number}
 	 */
-	get shadowDepthX() {
+	get shadowDepthX(): number {
 		return this._shadowDepthX;
 	}
 
@@ -699,7 +699,7 @@ export class SpanStyles {
 	 *
 	 * @type {number}
 	 */
-	get shadowDepthY() {
+	get shadowDepthY(): number {
 		return this._shadowDepthY;
 	}
 
@@ -717,7 +717,7 @@ export class SpanStyles {
 	 *
 	 * @type {number}
 	 */
-	get blur() {
+	get blur(): number {
 		return this._blur;
 	}
 
@@ -735,7 +735,7 @@ export class SpanStyles {
 	 *
 	 * @type {number}
 	 */
-	get gaussianBlur() {
+	get gaussianBlur(): number {
 		return this._gaussianBlur;
 	}
 
@@ -762,7 +762,7 @@ export class SpanStyles {
 	 *
 	 * @type {number}
 	 */
-	get fontSize() {
+	get fontSize(): number {
 		return this._fontSize;
 	}
 
@@ -780,7 +780,7 @@ export class SpanStyles {
 	 *
 	 * @type {number}
 	 */
-	get fontScaleX() {
+	get fontScaleX(): number {
 		return this._fontScaleX;
 	}
 
@@ -798,7 +798,7 @@ export class SpanStyles {
 	 *
 	 * @type {number}
 	 */
-	get fontScaleY() {
+	get fontScaleY(): number {
 		return this._fontScaleY;
 	}
 
@@ -816,7 +816,7 @@ export class SpanStyles {
 	 *
 	 * @type {number}
 	 */
-	get letterSpacing() {
+	get letterSpacing(): number {
 		return this._letterSpacing;
 	}
 
@@ -834,7 +834,7 @@ export class SpanStyles {
 	 *
 	 * @type {?number}
 	 */
-	get rotationX() {
+	get rotationX(): number {
 		return this._rotationX;
 	}
 
@@ -852,7 +852,7 @@ export class SpanStyles {
 	 *
 	 * @type {?number}
 	 */
-	get rotationY() {
+	get rotationY(): number {
 		return this._rotationY;
 	}
 
@@ -868,9 +868,9 @@ export class SpanStyles {
 	/**
 	 * Gets the Z-axis rotation property.
 	 *
-	 * @type {?number}
+	 * @type {number}
 	 */
-	get rotationZ() {
+	get rotationZ(): number {
 		return this._rotationZ;
 	}
 
@@ -888,7 +888,7 @@ export class SpanStyles {
 	 *
 	 * @type {?number}
 	 */
-	get skewX() {
+	get skewX(): number {
 		return this._skewX;
 	}
 
@@ -906,7 +906,7 @@ export class SpanStyles {
 	 *
 	 * @type {?number}
 	 */
-	get skewY() {
+	get skewY(): number {
 		return this._skewY;
 	}
 

@@ -43,7 +43,7 @@ export class RendererSettings {
 	 *
 	 * Defaults to null.
 	 *
-	 * @type {!Map.<string, (string|!Array.<string>)>}
+	 * @type {Map.<string, (string|!Array.<string>)>}
 	 */
 	fontMap: Map<string, string | string[]>;
 

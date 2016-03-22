@@ -94,7 +94,7 @@ export class ASS {
 	/**
 	 * The format specifier for the styles section.
 	 *
-	 * @type {!Array.<string>}
+	 * @type {Array.<string>}
 	 */
 	get stylesFormatSpecifier(): string[] {
 		return this._stylesFormatSpecifier;
@@ -103,7 +103,7 @@ export class ASS {
 	/**
 	 * The format specifier for the styles section.
 	 *
-	 * @type {!Array.<string>}
+	 * @type {Array.<string>}
 	 */
 	get dialoguesFormatSpecifier(): string[] {
 		return this._dialoguesFormatSpecifier;
@@ -112,7 +112,7 @@ export class ASS {
 	/**
 	 * The format specifier for the events section.
 	 *
-	 * @type {!Array.<string>}
+	 * @type {Array.<string>}
 	 */
 	set stylesFormatSpecifier(value: string[]) {
 		this._stylesFormatSpecifier = value;
@@ -121,7 +121,7 @@ export class ASS {
 	/**
 	 * The format specifier for the events section.
 	 *
-	 * @type {!Array.<string>}
+	 * @type {Array.<string>}
 	 */
 	set dialoguesFormatSpecifier(value: string[]) {
 		this._dialoguesFormatSpecifier = value;
@@ -142,6 +142,10 @@ export class ASS {
 	 * @param {string} line The line from the script that contains the new style.
 	 */
 	addStyle(line: string): void {
+		if (this._stylesFormatSpecifier === null) {
+			throw new Error("stylesFormatSpecifier is not set.");
+		}
+
 		const styleLine = parseLineIntoTypedTemplate(line, this._stylesFormatSpecifier);
 		if (styleLine === null || styleLine.type !== "Style") {
 			return;
@@ -166,6 +170,10 @@ export class ASS {
 	 * @param {string} line The line from the script that contains the new event.
 	 */
 	addEvent(line: string): void {
+		if (this._dialoguesFormatSpecifier === null) {
+			throw new Error("dialoguesFormatSpecifier is not set.");
+		}
+
 		const dialogueLine = parseLineIntoTypedTemplate(line, this._dialoguesFormatSpecifier);
 		if (dialogueLine === null || dialogueLine.type !== "Dialogue") {
 			return;

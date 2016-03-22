@@ -52,20 +52,6 @@ export interface Set<T> {
 }
 
 /**
- * Set to the global implementation of Set if the environment has one, else set to {@link ./utility/set.SimpleSet}
- *
- * Can be set to a value using {@link libjass.configure}
- *
- * Set it to null to force {@link ./utility/set.SimpleSet} to be used even if a global Set is present.
- *
- * @type {function(new:Set, !Array.<T>=)}
- */
-export var Set: {
-	new <T>(iterable?: T[]): Set<T>;
-	prototype: Set<any>;
-} = global.Set;
-
-/**
  * Set implementation for browsers that don't support it. Only supports Number and String elements.
  *
  * Elements are stored as properties of an object, with names derived from their type.
@@ -155,7 +141,7 @@ class SimpleSet<T> {
 	 * Converts the given value into a property name for the internal map.
 	 *
 	 * @param {T} value
-	 * @return {string}
+	 * @return {?string}
 	 */
 	private _toProperty(value: T): string {
 		if (typeof value === "number") {
@@ -170,7 +156,21 @@ class SimpleSet<T> {
 	}
 }
 
-if (Set === undefined || typeof Set.prototype.forEach !== "function" || (() => {
+/**
+ * Set to the global implementation of Set if the environment has one, else set to {@link ./utility/set.SimpleSet}
+ *
+ * Can be set to a value using {@link libjass.configure}
+ *
+ * Set it to null to force {@link ./utility/set.SimpleSet} to be used even if a global Set is present.
+ *
+ * @type {function(new:Set, !Array.<T>=)}
+ */
+export var Set: {
+	new <T>(iterable?: T[]): Set<T>;
+	prototype: Set<any>;
+} = global.Set || SimpleSet;
+
+if (typeof Set.prototype.forEach !== "function" || (() => {
 	try {
 		return new Set([1, 2]).size !== 2;
 	}

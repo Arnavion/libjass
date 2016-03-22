@@ -149,7 +149,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 					return;
 				}
 
-				let ttfNames: Set<string> = null;
+				let ttfNames: Set<string>;
 				try {
 					ttfNames = getTtfNames(attachment);
 				}
@@ -587,7 +587,13 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.Reset) {
-				currentSpanStyles.reset(this.ass.styles.get(part.value));
+				const newStyleName = part.value;
+				if (newStyleName === null) {
+					currentSpanStyles.reset(null);
+				}
+				else {
+					currentSpanStyles.reset(this.ass.styles.get(newStyleName));
+				}
 			}
 
 			else if (part instanceof parts.Position) {
@@ -889,8 +895,8 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		const result = preRenderedSub.sub.cloneNode(true);
 
 		const applyAnimationDelays = (node: HTMLElement) => {
-			const animationNames = node.style.animationName || node.style.webkitAnimationName;
-			if (animationNames !== undefined && animationNames !== "") {
+			const animationNames = node.style.animationName || node.style.webkitAnimationName || "";
+			if (animationNames !== "") {
 				const animationDelays = animationNames.split(",").map(name => {
 					name = name.trim();
 					const delay = preRenderedSub.animationDelays.get(name);
@@ -1043,7 +1049,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	}
 
 	private static _transformOrigins: number[][] = [
-		null,
+		[],
 		[0, 100], [50, 100], [100, 100],
 		[0, 50], [50, 50], [100, 50],
 		[0, 0], [50, 0], [100, 0]

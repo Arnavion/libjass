@@ -217,4 +217,4 @@ export class WorkerChannelImpl implements WorkerChannel {
 	}
 }
 
-registerWorkerCommand(WorkerCommands.Ping, parameters => new Promise<void>(resolve => resolve(null)));
+registerWorkerCommand(WorkerCommands.Ping, parameters => Promise.resolve<void>(null));

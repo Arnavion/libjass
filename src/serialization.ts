@@ -57,6 +57,10 @@ export function deserialize(str: string): any {
 	return JSON.parse(str, (/* ujs:unreferenced */ key: string, value: any) => {
 		if (value && (value._classTag !== undefined)) {
 			const clazz = classes.get(value._classTag);
+			if (clazz === undefined) {
+				throw new Error(`Unknown class of tag ${ value._classTag } cannot be deserialized.`);
+			}
+
 			if (typeof clazz.fromJSON === "function") {
 				value = clazz.fromJSON(value);
 			}

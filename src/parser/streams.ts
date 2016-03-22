@@ -82,7 +82,7 @@ export class StringStream implements Stream {
 	 * @return {!Promise.<?string>} A promise that will be resolved with the next line, or null if the string has been completely read.
 	 */
 	nextLine(): Promise<string> {
-		let result: Promise<string> = null;
+		let result: Promise<string>;
 
 		if (this._readTill < this._str.length) {
 			const nextNewLinePos = this._str.indexOf("\n", this._readTill);

@@ -31,7 +31,7 @@ enum DataType {
 	Uint32,
 }
 
-type StructMemberDefinition = { type: DataType; field?: string; };
+type StructMemberDefinition = { type: DataType; field: string; };
 
 const fieldDecorators = new Map<DataType, (proto: any, field: string) => void>();
 
@@ -110,6 +110,9 @@ export function getTtfNames(attachment: Attachment): Set<string> {
 			nameTableRecord = tableRecord;
 			break;
 		}
+	}
+	if (nameTableRecord === null) {
+		throw new Error('Could not find "name" table record.');
 	}
 
 	reader.position = nameTableRecord.offset;

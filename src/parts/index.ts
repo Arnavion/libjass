@@ -571,7 +571,7 @@ export class SkewX {
 	 *
 	 * @type {?number}
 	 */
-	get value() {
+	get value(): number {
 		return this._value;
 	}
 }
@@ -767,7 +767,7 @@ export class Alignment {
 	/**
 	 * The value of this alignment tag.
 	 *
-	 * @type {?number}
+	 * @type {number}
 	 */
 	get value(): number {
 		return this._value;
@@ -899,8 +899,8 @@ export class Position {
  * @param {number} y1
  * @param {number} x2
  * @param {number} y2
- * @param {number} t1
- * @param {number} t2
+ * @param {?number} t1
+ * @param {?number} t2
  */
 export class Move {
 	constructor(private _x1: number, private _y1: number, private _x2: number, private _y2: number, private _t1: number, private _t2: number) { }
@@ -944,7 +944,7 @@ export class Move {
 	/**
 	 * The start time of this move tag.
 	 *
-	 * @type {number}
+	 * @type {?number}
 	 */
 	get t1(): number {
 		return this._t1;
@@ -953,7 +953,7 @@ export class Move {
 	/**
 	 * The end time value of this move tag.
 	 *
-	 * @type {number}
+	 * @type {?number}
 	 */
 	get t2(): number {
 		return this._t2;
@@ -1100,9 +1100,9 @@ export class ComplexFade {
 /**
  * A transform tag {\t}
  *
- * @param {number} start
- * @param {number} end
- * @param {number} accel
+ * @param {?number} start
+ * @param {?number} end
+ * @param {?number} accel
  * @param {!Array.<!libjass.parts.Tag>} tags
  */
 export class Transform {

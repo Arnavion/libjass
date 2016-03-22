@@ -45,7 +45,15 @@ const _scriptNode = (typeof document !== "undefined" && document.currentScript !
  * the path will be determined from the src attribute of the <script> element that contains the currently running copy of libjass.js
  * @return {!libjass.webworker.WorkerChannel} A communication channel to the new web worker.
  */
-export function createWorker(scriptPath: string = _scriptNode.src): WorkerChannel {
+export function createWorker(scriptPath?: string): WorkerChannel {
+	if (scriptPath === undefined) {
+		if (_scriptNode === null) {
+			throw new Error("Could not auto-detect path of libjass.js, and explicit path was not passed in.");
+		}
+
+		scriptPath = _scriptNode.src;
+	}
+
 	return new WorkerChannelImpl(new Worker(scriptPath));
 }
 

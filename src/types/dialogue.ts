@@ -77,34 +77,45 @@ export class Dialogue {
 		this._id = ++Dialogue._lastDialogueId;
 
 		let styleName = template.get("style");
-		if (styleName !== undefined && styleName !== null && styleName.constructor === String) {
+		if (typeof styleName === "string") {
 			styleName = styleName.replace(/^\*+/, "");
 			if (styleName.match(/^Default$/i) !== null) {
 				styleName = "Default";
 			}
 		}
 
-		this._style = ass.styles.get(styleName);
-		if (this._style === undefined) {
+		let style = (styleName !== undefined) ? ass.styles.get(styleName) : undefined;
+		if (style === undefined) {
 			if (debugMode) {
 				console.warn(`Unrecognized style ${ styleName }. Falling back to "Default"`);
 			}
 
-			this._style = ass.styles.get("Default");
+			style = ass.styles.get("Default");
+			if (style === undefined) {
+				throw new Error(`Unrecognized style ${ styleName }. Could not fall back to "Default" style since it doesn't exist.`);
+			}
 		}
-		if (this._style === undefined) {
-			throw new Error(`Unrecognized style ${ styleName }`);
-		}
+		this._style = style;
 
-		this._start = Dialogue._toTime(template.get("start"));
-		this._end = Dialogue._toTime(template.get("end"));
+		const start = template.get("start");
+		if (typeof start !== "string") {
+			throw new Error(`Dialogue start time ${ start } is not a string.`);
+		}
+		this._start = Dialogue._toTime(start);
+
+		const end = template.get("end");
+		if (typeof end !== "string") {
+			throw new Error(`Dialogue end time ${ end } is not a string.`);
+		}
+		this._end = Dialogue._toTime(end);
 
 		this._layer = Math.max(valueOrDefault(template, "layer", parseInt, value => !isNaN(value), "0"), 0);
 
-		this._rawPartsString = template.get("text");
-		if (this._rawPartsString === undefined || this._rawPartsString === null || this._rawPartsString.constructor !== String) {
-			throw new Error("Dialogue doesn't have any text.");
+		const text = template.get("text");
+		if (typeof text !== "string") {
+			throw new Error(`Dialogue text ${ text } is not a string.`);
 		}
+		this._rawPartsString = text;
 	}
 
 	/**

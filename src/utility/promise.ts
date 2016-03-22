@@ -59,24 +59,6 @@ export interface Promise<T> extends Thenable<T> {
 	catch(onRejected?: (reason: any) => T | Thenable<T>): Promise<T>
 }
 
-/**
- * Set to the global implementation of Promise if the environment has one, else set to {@link ./utility/promise.SimplePromise}
- *
- * Can be set to a value using {@link libjass.configure}
- *
- * Set it to null to force {@link ./utility/promise.SimplePromise} to be used even if a global Promise is present.
- *
- * @type {function(new:Promise)}
- */
-export var Promise: {
-	new <T>(init: (resolve: (value: T | Thenable<T>) => void, reject: (reason: any) => void) => void): Promise<T>;
-	prototype: Promise<any>;
-	resolve<T>(value: T | Thenable<T>): Promise<T>;
-	reject<T>(reason: any): Promise<T>;
-	all<T>(values: (T | Thenable<T>)[]): Promise<T[]>;
-	race<T>(values: (T | Thenable<T>)[]): Promise<T>;
-} = global.Promise;
-
 // Based on https://github.com/petkaantonov/bluebird/blob/1b1467b95442c12378d0ea280ede61d640ab5510/src/schedule.js
 const enqueueJob: (callback: () => void) => void = (function () {
 	const MutationObserver = global.MutationObserver || global.WebkitMutationObserver;
@@ -333,8 +315,8 @@ class SimplePromise<T> {
 		const reactions = this._fulfillReactions;
 
 		this._fulfilledValue = value;
-		this._fulfillReactions = undefined;
-		this._rejectReactions = undefined;
+		this._fulfillReactions = [];
+		this._rejectReactions = [];
 		this._state = SimplePromiseState.FULFILLED;
 
 		for (const reaction of reactions) {
@@ -349,8 +331,8 @@ class SimplePromise<T> {
 		const reactions = this._rejectReactions;
 
 		this._rejectedReason = reason;
-		this._fulfillReactions = undefined;
-		this._rejectReactions = undefined;
+		this._fulfillReactions = [];
+		this._rejectReactions = [];
 		this._state = SimplePromiseState.REJECTED;
 
 		for (const reaction of reactions) {
@@ -403,9 +385,23 @@ class SimplePromise<T> {
 	}
 }
 
-if (Promise === undefined) {
-	Promise = SimplePromise;
-}
+/**
+ * Set to the global implementation of Promise if the environment has one, else set to {@link ./utility/promise.SimplePromise}
+ *
+ * Can be set to a value using {@link libjass.configure}
+ *
+ * Set it to null to force {@link ./utility/promise.SimplePromise} to be used even if a global Promise is present.
+ *
+ * @type {function(new:Promise)}
+ */
+export var Promise: {
+	new <T>(init: (resolve: (value: T | Thenable<T>) => void, reject: (reason: any) => void) => void): Promise<T>;
+	prototype: Promise<any>;
+	resolve<T>(value: T | Thenable<T>): Promise<T>;
+	reject<T>(reason: any): Promise<T>;
+	all<T>(values: (T | Thenable<T>)[]): Promise<T[]>;
+	race<T>(values: (T | Thenable<T>)[]): Promise<T>;
+} = global.Promise || SimplePromise;
 
 interface FulfilledPromiseReaction<T, U> {
 	/** @type {!libjass.DeferredPromise.<U>} */

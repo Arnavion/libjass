@@ -25,7 +25,7 @@ declare const global: {
 export interface Map<K, V> {
 	/**
 	 * @param {K} key
-	 * @return {V}
+	 * @return {?V}
 	 */
 	get(key: K): V;
 
@@ -65,20 +65,6 @@ export interface Map<K, V> {
 }
 
 /**
- * Set to the global implementation of Map if the environment has one, else set to {@link ./utility/map.SimpleMap}
- *
- * Can be set to a value using {@link libjass.configure}
- *
- * Set it to null to force {@link ./utility/map.SimpleMap} to be used even if a global Map is present.
- *
- * @type {function(new:Map, !Array.<!Array.<*>>=)}
- */
-export var Map: {
-	new <K, V>(iterable?: [K, V][]): Map<K, V>;
-	prototype: Map<any, any>;
-} = global.Map;
-
-/**
  * Map implementation for browsers that don't support it. Only supports keys which are of Number or String type, or which have a property called "id".
  *
  * Keys and values are stored as properties of an object, with property names derived from the key type.
@@ -108,7 +94,7 @@ class SimpleMap<K, V> {
 
 	/**
 	 * @param {K} key
-	 * @return {V}
+	 * @return {?V}
 	 */
 	get(key: K): V {
 		const property = this._keyToProperty(key);
@@ -207,7 +193,7 @@ class SimpleMap<K, V> {
 	 * Converts the given key into a property name for the internal map.
 	 *
 	 * @param {K} key
-	 * @return {string}
+	 * @return {?string}
 	 */
 	private _keyToProperty(key: K): string {
 		if (typeof key === "number") {
@@ -226,7 +212,21 @@ class SimpleMap<K, V> {
 	}
 }
 
-if (Map === undefined || typeof Map.prototype.forEach !== "function" || (() => {
+/**
+ * Set to the global implementation of Map if the environment has one, else set to {@link ./utility/map.SimpleMap}
+ *
+ * Can be set to a value using {@link libjass.configure}
+ *
+ * Set it to null to force {@link ./utility/map.SimpleMap} to be used even if a global Map is present.
+ *
+ * @type {function(new:Map, !Array.<!Array.<*>>=)}
+ */
+export var Map: {
+	new <K, V>(iterable?: [K, V][]): Map<K, V>;
+	prototype: Map<any, any>;
+} = global.Map || SimpleMap;
+
+if (typeof Map.prototype.forEach !== "function" || (() => {
 	try {
 		return new Map([[1, "foo"], [2, "bar"]]).size !== 2;
 	}

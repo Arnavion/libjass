@@ -26,7 +26,7 @@ import { Map } from "../utility/map";
  * Parses a line into a {@link ./types/misc.Property}.
  *
  * @param {string} line
- * @return {!Property}
+ * @return {Property}
  */
 export function parseLineIntoProperty(line: string): Property {
 	const colonPos = line.indexOf(":");
@@ -45,7 +45,7 @@ export function parseLineIntoProperty(line: string): Property {
  *
  * @param {string} line
  * @param {!Array.<string>} formatSpecifier
- * @return {!TypedTemplate}
+ * @return {TypedTemplate}
  */
 export function parseLineIntoTypedTemplate(line: string, formatSpecifier: string[]): TypedTemplate {
 	const property = parseLineIntoProperty(line);

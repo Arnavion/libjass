@@ -34,17 +34,17 @@ const rules = new Map<string, (parent: ParseNode) => ParseNode>();
  * @return {*} The value returned depends on the rule used.
  */
 export function parse(input: string, rule: string): any {
-	const run = new ParserRun(input, rule);
+	const { result } = new ParserRun(input, rule);
 
-	if (run.result === null || run.result.end !== input.length) {
+	if (result === null || result.end !== input.length) {
 		if (debugMode) {
-			console.error("Parse failed. %s %s %o", rule, input, run.result);
+			console.error("Parse failed. %s %s %o", rule, input, result);
 		}
 
 		throw new Error("Parse failed.");
 	}
 
-	return run.result.value;
+	return result.value;
 }
 
 /**
@@ -58,9 +58,14 @@ class ParserRun {
 	private _result: ParseNode;
 
 	constructor(private _input: string, rule: string) {
+		const ruleFunction = rules.get(rule);
+		if (ruleFunction === undefined) {
+			throw new Error(`Could not find parser rule named ${ rule }`);
+		}
+
 		this._parseTree = new ParseNode(null);
 
-		this._result = rules.get(rule).call(this, this._parseTree);
+		this._result = ruleFunction.call(this, this._parseTree);
 	}
 
 	/**
@@ -88,11 +93,6 @@ class ParserRun {
 
 			else {
 				const whiteSpaceOrTextNode = this.parse_newline(current) || this.parse_hardspace(current) || this.parse_text(current);
-
-				if (whiteSpaceOrTextNode === null) {
-					parent.pop();
-					return null;
-				}
 
 				if (whiteSpaceOrTextNode.value instanceof parts.Text && current.value[current.value.length - 1] instanceof parts.Text) {
 					// Merge consecutive text parts into one part
@@ -339,7 +339,7 @@ class ParserRun {
 
 		const valueNode = new ParseNode(current, next);
 
-		let value: number = null;
+		let value: number;
 		switch (valueNode.value) {
 			case "1":
 				value = 1;
@@ -1498,10 +1498,6 @@ class ParserRun {
 			}
 
 			const typePart = this.parse_text(current);
-			if (typePart === null) {
-				break;
-			}
-
 			const newType = (typePart.value as parts.Text).value;
 			switch (newType) {
 				case "m":
@@ -1851,6 +1847,10 @@ class ParserRun {
 			}
 
 			x2Node = this.parse_decimal(current);
+			if (x2Node === null) {
+				parent.pop();
+				return null;
+			}
 
 			if (this.read(current, ",") === null) {
 				parent.pop();
@@ -1858,6 +1858,10 @@ class ParserRun {
 			}
 
 			y2Node = this.parse_decimal(current);
+			if (y2Node === null) {
+				parent.pop();
+				return null;
+			}
 
 			current.value = new parts.RectangularClip(x1Node.value, y1Node.value, x2Node.value, y2Node.value, tagName === "clip");
 		}
