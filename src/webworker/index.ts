@@ -27,8 +27,6 @@ export { WorkerChannel } from "./channel";
 
 export { WorkerCommands } from "./commands";
 
-declare const exports: any;
-
 /**
  * Indicates whether web workers are supposed in this environment or not.
  *
