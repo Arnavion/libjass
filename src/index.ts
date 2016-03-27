@@ -94,6 +94,8 @@ export function configure(newConfig: {
 
 declare const exports: any;
 
+// Getters below are to work around https://github.com/Microsoft/TypeScript/issues/6366
+
 Object.defineProperties(exports, {
 	debugMode: {
 		get: () => settings.debugMode,
