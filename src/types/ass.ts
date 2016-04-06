@@ -29,7 +29,7 @@ import { debugMode, verboseMode } from "../settings";
 
 import * as parser from "../parser";
 import { parseLineIntoTypedTemplate } from "../parser/misc";
-import { ReadableStream, TextDecoder, TextDecoderConstructor } from "../parser/streams";
+import { ReadableStream, TextDecoderConstructor } from "../parser/streams";
 
 import { Map } from "../utility/map";
 import { Promise } from "../utility/promise";

@@ -153,7 +153,7 @@ export class RendererSettings {
 			fontMap = null,
 			preRenderTime = 5,
 			preciseOutlines = false,
-			enableSvg = RendererSettings._testSupportsSvg(),
+			enableSvg = testSupportsSvg(),
 			fallbackFonts = 'Arial, Helvetica, sans-serif, "Segoe UI Symbol"',
 			useAttachedFonts = false,
 		} = object as RendererSettings;
@@ -168,66 +168,6 @@ export class RendererSettings {
 
 		return result;
 	}
-
-	/**
-	 * Returns true if this environment may support SVG filter effects. May return false positives.
-	 *
-	 * @return {boolean}
-	 */
-	private static _testSupportsSvg(): boolean {
-		if (debugMode) {
-			console.log("Testing whether SVG filter effects are supported.");
-		}
-
-		if (typeof document === "undefined") {
-			if (debugMode) {
-				console.log("This doesn't look like a browser. Assuming it doesn't support SVG filter effects.");
-			}
-
-			return false;
-		}
-
-		const morphologyFilter = document.createElementNS("http://www.w3.org/2000/svg", "feMorphology");
-
-		// https://connect.microsoft.com/IE/feedback/details/2375800
-		try {
-			morphologyFilter.radiusX.baseVal = 1;
-		}
-		catch (ex) {
-			if (debugMode) {
-				if (ex instanceof DOMException) {
-					const domException = ex as DOMException;
-					if (domException.code === DOMException.NO_MODIFICATION_ALLOWED_ERR) {
-						console.log("Setting SVGFEMorphologyElement.radiusX.baseVal threw NoModificationAllowedError. This browser doesn't support SVG DOM correctly.");
-					}
-					else {
-						console.log(`Setting SVGFEMorphologyElement.radiusX.baseVal threw unexpected DOMException code ${ domException.code }. This browser doesn't support SVG DOM correctly.`);
-					}
-				}
-				else {
-					console.log(`Setting SVGFEMorphologyElement.radiusX.baseVal threw unexpected exception ${ ex }. This browser doesn't support SVG SVG DOM correctly.`);
-				}
-			}
-
-			return false;
-		}
-
-		// https://connect.microsoft.com/IE/feedback/details/2375757
-		morphologyFilter.setAttribute("radius", "1");
-		if (morphologyFilter.cloneNode().getAttribute("radius") !== "1") {
-			if (debugMode) {
-				console.log("SVGFEMorphologyElement's radius attribute was corrupted when cloned. This browser doesn't support SVG DOM correctly.");
-			}
-
-			return false;
-		}
-
-		if (debugMode) {
-			console.log("This browser may support SVG filter effects.");
-		}
-
-		return true;
-	}
 }
 
 /**
@@ -236,4 +176,64 @@ export class RendererSettings {
  */
 function isFontFaceRule(rule: CSSRule): rule is CSSFontFaceRule {
 	return rule.type === CSSRule.FONT_FACE_RULE;
+}
+
+/**
+ * Returns true if this environment may support SVG filter effects. May return false positives.
+ *
+ * @return {boolean}
+ */
+function testSupportsSvg(): boolean {
+	if (debugMode) {
+		console.log("Testing whether SVG filter effects are supported.");
+	}
+
+	if (typeof document === "undefined") {
+		if (debugMode) {
+			console.log("This doesn't look like a browser. Assuming it doesn't support SVG filter effects.");
+		}
+
+		return false;
+	}
+
+	const morphologyFilter = document.createElementNS("http://www.w3.org/2000/svg", "feMorphology");
+
+	// https://connect.microsoft.com/IE/feedback/details/2375800
+	try {
+		morphologyFilter.radiusX.baseVal = 1;
+	}
+	catch (ex) {
+		if (debugMode) {
+			if (ex instanceof DOMException) {
+				const domException = ex as DOMException;
+				if (domException.code === DOMException.NO_MODIFICATION_ALLOWED_ERR) {
+					console.log("Setting SVGFEMorphologyElement.radiusX.baseVal threw NoModificationAllowedError. This browser doesn't support SVG DOM correctly.");
+				}
+				else {
+					console.log(`Setting SVGFEMorphologyElement.radiusX.baseVal threw unexpected DOMException code ${ domException.code }. This browser doesn't support SVG DOM correctly.`);
+				}
+			}
+			else {
+				console.log(`Setting SVGFEMorphologyElement.radiusX.baseVal threw unexpected exception ${ ex }. This browser doesn't support SVG SVG DOM correctly.`);
+			}
+		}
+
+		return false;
+	}
+
+	// https://connect.microsoft.com/IE/feedback/details/2375757
+	morphologyFilter.setAttribute("radius", "1");
+	if (morphologyFilter.cloneNode().getAttribute("radius") !== "1") {
+		if (debugMode) {
+			console.log("SVGFEMorphologyElement's radius attribute was corrupted when cloned. This browser doesn't support SVG DOM correctly.");
+		}
+
+		return false;
+	}
+
+	if (debugMode) {
+		console.log("This browser may support SVG filter effects.");
+	}
+
+	return true;
 }

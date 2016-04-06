@@ -23,8 +23,6 @@ import { Style } from "./style";
 
 import { valueOrDefault } from "./misc";
 
-import { parseLineIntoTypedTemplate } from "../parser/misc";
-
 import { parse } from "../parser/parse";
 
 import * as parts from "../parts";
@@ -101,13 +99,13 @@ export class Dialogue {
 		if (typeof start !== "string") {
 			throw new Error(`Dialogue start time ${ start } is not a string.`);
 		}
-		this._start = Dialogue._toTime(start);
+		this._start = toTime(start);
 
 		const end = template.get("end");
 		if (typeof end !== "string") {
 			throw new Error(`Dialogue end time ${ end } is not a string.`);
 		}
-		this._end = Dialogue._toTime(end);
+		this._end = toTime(end);
 
 		this._layer = Math.max(valueOrDefault(template, "layer", parseInt, value => !isNaN(value), "0"), 0);
 
@@ -259,14 +257,14 @@ ${ possiblyIncorrectParses.join("\n") }`
 			}
 		}
 	}
+}
 
-	/**
-	 * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
-	 *
-	 * @param {string} str
-	 * @return {number}
-	 */
-	private static _toTime(str: string): number {
-		return str.split(":").reduce<number>((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);
-	}
+/**
+ * Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
+ *
+ * @param {string} str
+ * @return {number}
+ */
+function toTime(str: string): number {
+	return str.split(":").reduce<number>((previousValue, currentValue) => previousValue * 60 + parseFloat(currentValue), 0);
 }

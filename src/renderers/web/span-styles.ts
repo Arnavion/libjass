@@ -608,7 +608,7 @@ export class SpanStyles {
 	 * @type {?boolean}
 	 */
 	set italic(value: boolean) {
-		this._italic = SpanStyles._valueOrDefault(value, this._defaultStyle.italic);
+		this._italic = valueOrDefault(value, this._defaultStyle.italic);
 	}
 
 	/**
@@ -617,7 +617,7 @@ export class SpanStyles {
 	 * @type {(?boolean|?number)}
 	 */
 	set bold(value: boolean | number) {
-		this._bold = SpanStyles._valueOrDefault(value, this._defaultStyle.bold);
+		this._bold = valueOrDefault(value, this._defaultStyle.bold);
 	}
 
 	/**
@@ -626,7 +626,7 @@ export class SpanStyles {
 	 * @type {?boolean}
 	 */
 	set underline(value: boolean) {
-		this._underline = SpanStyles._valueOrDefault(value, this._defaultStyle.underline);
+		this._underline = valueOrDefault(value, this._defaultStyle.underline);
 	}
 
 	/**
@@ -635,7 +635,7 @@ export class SpanStyles {
 	 * @type {?boolean}
 	 */
 	set strikeThrough(value: boolean) {
-		this._strikeThrough = SpanStyles._valueOrDefault(value, this._defaultStyle.strikeThrough);
+		this._strikeThrough = valueOrDefault(value, this._defaultStyle.strikeThrough);
 	}
 
 	/**
@@ -653,7 +653,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set outlineWidth(value: number) {
-		this._outlineWidth = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineThickness);
+		this._outlineWidth = valueOrDefault(value, this._defaultStyle.outlineThickness);
 	}
 
 	/**
@@ -671,7 +671,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set outlineHeight(value: number) {
-		this._outlineHeight = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineThickness);
+		this._outlineHeight = valueOrDefault(value, this._defaultStyle.outlineThickness);
 	}
 
 	/**
@@ -689,7 +689,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set shadowDepthX(value: number) {
-		this._shadowDepthX = SpanStyles._valueOrDefault(value, this._defaultStyle.shadowDepth);
+		this._shadowDepthX = valueOrDefault(value, this._defaultStyle.shadowDepth);
 	}
 
 	/**
@@ -707,7 +707,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set shadowDepthY(value: number) {
-		this._shadowDepthY = SpanStyles._valueOrDefault(value, this._defaultStyle.shadowDepth);
+		this._shadowDepthY = valueOrDefault(value, this._defaultStyle.shadowDepth);
 	}
 
 	/**
@@ -725,7 +725,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set blur(value: number) {
-		this._blur = SpanStyles._valueOrDefault(value, 0);
+		this._blur = valueOrDefault(value, 0);
 	}
 
 	/**
@@ -743,7 +743,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set gaussianBlur(value: number) {
-		this._gaussianBlur = SpanStyles._valueOrDefault(value, 0);
+		this._gaussianBlur = valueOrDefault(value, 0);
 	}
 
 	/**
@@ -752,7 +752,7 @@ export class SpanStyles {
 	 * @type {?string}
 	 */
 	set fontName(value: string) {
-		this._fontName = SpanStyles._valueOrDefault(value, this._defaultStyle.fontName);
+		this._fontName = valueOrDefault(value, this._defaultStyle.fontName);
 	}
 
 	/**
@@ -770,7 +770,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set fontSize(value: number) {
-		this._fontSize = SpanStyles._valueOrDefault(value, this._defaultStyle.fontSize);
+		this._fontSize = valueOrDefault(value, this._defaultStyle.fontSize);
 	}
 
 	/**
@@ -788,7 +788,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set fontScaleX(value: number) {
-		this._fontScaleX = SpanStyles._valueOrDefault(value, this._defaultStyle.fontScaleX);
+		this._fontScaleX = valueOrDefault(value, this._defaultStyle.fontScaleX);
 	}
 
 	/**
@@ -806,7 +806,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set fontScaleY(value: number) {
-		this._fontScaleY = SpanStyles._valueOrDefault(value, this._defaultStyle.fontScaleY);
+		this._fontScaleY = valueOrDefault(value, this._defaultStyle.fontScaleY);
 	}
 
 	/**
@@ -824,7 +824,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set letterSpacing(value: number) {
-		this._letterSpacing = SpanStyles._valueOrDefault(value, this._defaultStyle.letterSpacing);
+		this._letterSpacing = valueOrDefault(value, this._defaultStyle.letterSpacing);
 	}
 
 	/**
@@ -842,7 +842,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set rotationX(value: number) {
-		this._rotationX = SpanStyles._valueOrDefault(value, 0);
+		this._rotationX = valueOrDefault(value, 0);
 	}
 
 	/**
@@ -860,7 +860,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set rotationY(value: number) {
-		this._rotationY = SpanStyles._valueOrDefault(value, 0);
+		this._rotationY = valueOrDefault(value, 0);
 	}
 
 	/**
@@ -878,7 +878,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set rotationZ(value: number) {
-		this._rotationZ = SpanStyles._valueOrDefault(value, this._defaultStyle.rotationZ);
+		this._rotationZ = valueOrDefault(value, this._defaultStyle.rotationZ);
 	}
 
 	/**
@@ -896,7 +896,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set skewX(value: number) {
-		this._skewX = SpanStyles._valueOrDefault(value, 0);
+		this._skewX = valueOrDefault(value, 0);
 	}
 
 	/**
@@ -914,7 +914,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set skewY(value: number) {
-		this._skewY = SpanStyles._valueOrDefault(value, 0);
+		this._skewY = valueOrDefault(value, 0);
 	}
 
 	/**
@@ -932,7 +932,7 @@ export class SpanStyles {
 	 * @type {libjass.Color}
 	 */
 	set primaryColor(value: Color) {
-		this._primaryColor = SpanStyles._valueOrDefault(value, this._defaultStyle.primaryColor);
+		this._primaryColor = valueOrDefault(value, this._defaultStyle.primaryColor);
 	}
 
 	/**
@@ -950,7 +950,7 @@ export class SpanStyles {
 	 * @type {libjass.Color}
 	 */
 	set secondaryColor(value: Color) {
-		this._secondaryColor = SpanStyles._valueOrDefault(value, this._defaultStyle.secondaryColor);
+		this._secondaryColor = valueOrDefault(value, this._defaultStyle.secondaryColor);
 	}
 
 	/**
@@ -968,7 +968,7 @@ export class SpanStyles {
 	 * @type {libjass.Color}
 	 */
 	set outlineColor(value: Color) {
-		this._outlineColor = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineColor);
+		this._outlineColor = valueOrDefault(value, this._defaultStyle.outlineColor);
 	}
 
 	/**
@@ -986,7 +986,7 @@ export class SpanStyles {
 	 * @type {libjass.Color}
 	 */
 	set shadowColor(value: Color) {
-		this._shadowColor = SpanStyles._valueOrDefault(value, this._defaultStyle.shadowColor);
+		this._shadowColor = valueOrDefault(value, this._defaultStyle.shadowColor);
 	}
 
 	/**
@@ -1004,7 +1004,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set primaryAlpha(value: number) {
-		this._primaryAlpha = SpanStyles._valueOrDefault(value, this._defaultStyle.primaryColor.alpha);
+		this._primaryAlpha = valueOrDefault(value, this._defaultStyle.primaryColor.alpha);
 	}
 
 	/**
@@ -1022,7 +1022,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set secondaryAlpha(value: number) {
-		this._secondaryAlpha = SpanStyles._valueOrDefault(value, this._defaultStyle.secondaryColor.alpha);
+		this._secondaryAlpha = valueOrDefault(value, this._defaultStyle.secondaryColor.alpha);
 	}
 
 	/**
@@ -1040,7 +1040,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set outlineAlpha(value: number) {
-		this._outlineAlpha = SpanStyles._valueOrDefault(value, this._defaultStyle.outlineColor.alpha);
+		this._outlineAlpha = valueOrDefault(value, this._defaultStyle.outlineColor.alpha);
 	}
 
 	/**
@@ -1058,10 +1058,8 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set shadowAlpha(value: number) {
-		this._shadowAlpha = SpanStyles._valueOrDefault(value, this._defaultStyle.shadowColor.alpha);
+		this._shadowAlpha = valueOrDefault(value, this._defaultStyle.shadowColor.alpha);
 	}
-
-	private static _valueOrDefault = <T>(newValue: T, defaultValue: T): T => ((newValue !== null) ? newValue : defaultValue);
 }
 
 /**
@@ -1096,4 +1094,13 @@ function createComponentTransferFilter(color: Color): SVGFEComponentTransferElem
 	alphaTransferNode.intercept.baseVal = 0;
 
 	return result;
+}
+
+/**
+ * @param {?T} newValue
+ * @param {!T} defaultValue
+ * @return {!T}
+ */
+function valueOrDefault<T>(newValue: T, defaultValue: T): T {
+	return ((newValue !== null) ? newValue : defaultValue);
 }

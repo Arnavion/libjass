@@ -1306,7 +1306,7 @@ const addToString = function (ctor: Function, ctorName: string) {
 				((propertyNames.length > 0) ? " " : "") +
 				"}"
 			);
-		}
+		};
 	}
 };
 

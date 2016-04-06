@@ -18,10 +18,6 @@
  * limitations under the License.
  */
 
-import { Map } from "../utility/map";
-
-import { Promise, DeferredPromise } from "../utility/promise";
-
 import { WorkerChannel, WorkerChannelImpl } from "./channel";
 export { WorkerChannel } from "./channel";
 

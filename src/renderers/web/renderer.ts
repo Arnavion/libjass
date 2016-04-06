@@ -223,7 +223,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 					global.document.fonts.add(fontFace);
 					global.document.fonts.add(quotedFontFace);
 
-					fontFetchPromise = Promise_any([fontFace.load(), quotedFontFace.load()])
+					fontFetchPromise = Promise_any([fontFace.load(), quotedFontFace.load()]);
 				}
 				else {
 					fontFetchPromise = Promise_any(existingFontFaces.map(fontFace => fontFace.load()));
@@ -1041,7 +1041,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 				node.style.webkitAnimationDelay = animationDelays;
 				node.style.animationDelay = animationDelays;
 			}
-		}
+		};
 		applyAnimationDelays(result);
 		const animatedDescendants = result.querySelectorAll('[style*="animation:"]');
 		for (let i = 0; i < animatedDescendants.length; i++) {

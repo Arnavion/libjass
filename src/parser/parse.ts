@@ -1595,8 +1595,8 @@ class ParserRun {
 
 		const valueNode =
 			(this.read(current, "&H") !== null || this.read(current, "&h") !== null) ?
-				 this.parse_hexInt32(current) :
-				 this.parse_decimalInt32(current);
+				this.parse_hexInt32(current) :
+				this.parse_decimalInt32(current);
 
 		if (valueNode === null) {
 			parent.pop();

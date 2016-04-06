@@ -24,7 +24,6 @@ import { ASS } from "../types/ass";
 import { Style } from "../types/style";
 import { Dialogue } from "../types/dialogue";
 import { Attachment, AttachmentType } from "../types/attachment";
-import { Property, TypedTemplate } from "../types/misc";
 
 import { Map } from "../utility/map";
 

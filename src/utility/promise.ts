@@ -56,7 +56,7 @@ export interface Promise<T> extends Thenable<T> {
 	 * @param {function(*):(T|!Thenable.<T>)} onRejected
 	 * @return {!Promise.<T>}
 	 */
-	catch(onRejected?: (reason: any) => T | Thenable<T>): Promise<T>
+	catch(onRejected?: (reason: any) => T | Thenable<T>): Promise<T>;
 }
 
 // Based on https://github.com/petkaantonov/bluebird/blob/1b1467b95442c12378d0ea280ede61d640ab5510/src/schedule.js
