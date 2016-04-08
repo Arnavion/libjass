@@ -214,7 +214,7 @@ export class AutoClock implements Clock {
 			if (this._lastKnownExternalTime !== null && currentExternalTime === this._lastKnownExternalTime) {
 				if (timeStamp - this._lastKnownExternalTimeObtainedAt > this._autoPauseAfter) {
 					this._lastKnownExternalTimeObtainedAt = null;
-					this._manualClock.pause();
+					this._manualClock.seek(currentExternalTime);
 				}
 				else {
 					this._manualClock.tick((timeStamp - this._lastKnownExternalTimeObtainedAt) / 1000 * this._manualClock.rate + this._lastKnownExternalTime);
