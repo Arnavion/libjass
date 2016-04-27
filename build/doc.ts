@@ -20,7 +20,6 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import { Transform } from "stream";
 
 import { File, FileTransform } from "async-build";
 

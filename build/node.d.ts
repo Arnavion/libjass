@@ -7,6 +7,12 @@ declare var require: {
     resolve(id: string): string;
 };
 
+interface BufferConstructor {
+	new (str: string): Buffer;
+	prototype: Buffer;
+	concat(list: Buffer[]): Buffer;
+}
+
 declare module "fs" {
 	export function existsSync(filename: string): boolean;
 	export function readFileSync(filename: string, options: { encoding: string }): string;

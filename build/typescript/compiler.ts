@@ -20,7 +20,6 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import { Transform } from "stream";
 import * as ts from "typescript";
 
 import { File, FileTransform, FileWatcher } from "async-build";

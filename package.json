@@ -26,7 +26,7 @@
 	},
 	"devDependencies": {
 		"async": "1.x >=1.4",
-		"async-build": "0.2.0",
+		"async-build": "0.3.0",
 		"firefox-profile": "0.3.x",
 		"intern": "3.0.x >=3.0.1",
 		"npm": "3.x",
