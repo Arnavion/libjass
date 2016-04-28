@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profile!"], function (intern, encodedFirefoxProfile) {
+define(["intern"], function (intern) {
 	var result = {
 		suites: [
 			"tests/unit/attachments",
@@ -52,7 +52,6 @@ define(["intern", "intern/dojo/has!host-node?tests/support/encoded-firefox-profi
 		tunnel: "NullTunnel",
 		environments: [
 			{ browserName: "chrome" },
-			//{ browserName: "firefox", firefox_profile: encodedFirefoxProfile },
 			{ browserName: "internet explorer", version: "11" }
 		],
 	};
