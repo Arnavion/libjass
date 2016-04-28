@@ -21,7 +21,7 @@
 define(["intern!tdd", "require", "tests/support/test-page"], function (tdd, require, TestPage) {
 	tdd.suite("kfx", function () {
 		tdd.test("Basic", function () {
-			var testPage = new TestPage(this.remote, require.toUrl("tests/support/browser-test-page.html"), "/tests/functional/kfx/kfx.ass", 256, 144);
+			var testPage = new TestPage(this.remote, require.toUrl("tests/support/browser-test-page.html"), "/tests/functional/kfx/kfx.ass", 1280, 720);
 			return testPage
 				.prepare()
 				.then(function (testPage) { return testPage.seekAndCompareScreenshot(1.5, require.toUrl("./kfx-1.png")); })

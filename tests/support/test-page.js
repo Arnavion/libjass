@@ -41,7 +41,7 @@ define([
 		this._remote.session.setExecuteAsyncTimeout(10000);
 
 		return this._remote
-			.setWindowSize(1280, 720)
+			.setWindowSize(1440, 900)
 			.get(this._pageUrl)
 			.then(pollUntil('return (document.readyState === "complete") ? true : null;', 100))
 			.executeAsync(function (assUrl, callback) {

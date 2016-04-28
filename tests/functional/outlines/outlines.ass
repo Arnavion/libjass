@@ -2,8 +2,8 @@
 Title: 
 ScriptType: v4.00+
 WrapStyle: 0
-PlayResX: 256
-PlayResY: 144
+PlayResX: 1280
+PlayResY: 720
 Scroll Position: 0
 Active Line: 0
 Video Zoom Percent: 1
@@ -11,9 +11,9 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Arial,36,&H000000FF,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,1.2,2,15,15,15,1
-Style: Default2,Arial,36,&H000000FF,&H00FFFFFF,&H7F000000,&H00000000,0,0,0,0,100,100,0,0,1,2,1.2,2,15,15,15,1
-Style: Default3,Arial,36,&H9E0000FF,&H9EFFFFFF,&H9E000000,&H9E000000,0,0,0,0,100,100,0,0,1,2,1.2,2,15,15,15,1
+Style: Default,Arial,180,&H000000FF,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,10,6,2,75,75,75,1
+Style: Default2,Arial,180,&H000000FF,&H00FFFFFF,&H7F000000,&H00000000,0,0,0,0,100,100,0,0,1,10,6,2,75,75,75,1
+Style: Default3,Arial,180,&H9E0000FF,&H9EFFFFFF,&H9E000000,&H9E000000,0,0,0,0,100,100,0,0,1,10,6,2,75,75,75,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text

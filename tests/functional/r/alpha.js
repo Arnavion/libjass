@@ -21,7 +21,7 @@
 define(["intern!tdd", "require", "tests/support/test-page"], function (tdd, require, TestPage) {
 	tdd.suite("r", function () {
 		tdd.test("Alpha", function () {
-			var testPage = new TestPage(this.remote, require.toUrl("tests/support/browser-test-page.html"), "/tests/functional/r/alpha.ass", 256, 144);
+			var testPage = new TestPage(this.remote, require.toUrl("tests/support/browser-test-page.html"), "/tests/functional/r/alpha.ass", 1280, 720);
 			return testPage
 				.prepare()
 				.then(function (testPage) { return testPage.seekAndCompareScreenshot(0.5, require.toUrl("./alpha-1.png")); })

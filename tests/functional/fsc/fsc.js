@@ -21,7 +21,7 @@
 define(["intern!tdd", "require", "tests/support/test-page"], function (tdd, require, TestPage) {
 	tdd.suite("fscx and fscy", function () {
 		tdd.test("Basic", function () {
-			var testPage = new TestPage(this.remote, require.toUrl("tests/support/browser-test-page.html"), "/tests/functional/fsc/fsc.ass", 256, 144);
+			var testPage = new TestPage(this.remote, require.toUrl("tests/support/browser-test-page.html"), "/tests/functional/fsc/fsc.ass", 1280, 720);
 			return testPage
 				.prepare()
 				.then(function (testPage) { return testPage.seekAndCompareScreenshot(1, require.toUrl("./fsc-1.png")); })

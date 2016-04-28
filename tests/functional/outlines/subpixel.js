@@ -21,7 +21,7 @@
 define(["intern!tdd", "require", "tests/support/test-page"], function (tdd, require, TestPage) {
 	tdd.suite("Outlines", function () {
 		tdd.test("Subpixel", function () {
-			var testPage = new TestPage(this.remote, require.toUrl("tests/support/browser-test-page.html"), "/tests/functional/outlines/subpixel.ass", 256, 144);
+			var testPage = new TestPage(this.remote, require.toUrl("tests/support/browser-test-page.html"), "/tests/functional/outlines/subpixel.ass", 1280, 720);
 			return testPage
 				.prepare()
 				.then(function (testPage) { return testPage.seekAndCompareScreenshot(0.5, require.toUrl("./subpixel-1.png")); })
