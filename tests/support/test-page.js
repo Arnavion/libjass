@@ -32,6 +32,7 @@ define([
 		this._assUrl = assUrl;
 		this._targetWidth = targetWidth;
 		this._targetHeight = targetHeight;
+		this._errors = [];
 	}
 
 	TestPage.prototype.prepare = function () {
@@ -122,10 +123,20 @@ define([
 					return new libjass.Promise(function (resolve, reject) {
 						var newFilename = filename.substr(0, filename.length - path.extname(filename).length) + "-new" + path.extname(filename);
 						screenshot.pack().pipe(fs.createWriteStream(newFilename)).once("error", reject).on("finish", function () { reject(err); });
+					}).catch(function (err) {
+						_this._errors.push(err);
 					});
 				});
 			})
 			.then(function () { return _this; });
+	};
+
+	TestPage.prototype.done = function () {
+		if (this._errors.length === 0) {
+			return this;
+		}
+
+		throw new Error(this._errors.map(function (error) { return error.message; }).join("\n"));
 	};
 
 	return TestPage;

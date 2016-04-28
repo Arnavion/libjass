@@ -29,7 +29,8 @@ define(["intern!tdd", "require", "tests/support/test-page"], function (tdd, requ
 				.then(function (testPage) { return testPage.seekAndCompareScreenshot(3.5, require.toUrl("./kfx-3.png")); })
 				.then(function (testPage) { return testPage.seekAndCompareScreenshot(4.5, require.toUrl("./kfx-4.png")); })
 				.then(function (testPage) { return testPage.seekAndCompareScreenshot(5.5, require.toUrl("./kfx-5.png")); })
-				.then(function (testPage) { return testPage.seekAndCompareScreenshot(6.5, require.toUrl("./kfx-6.png")); });
+				.then(function (testPage) { return testPage.seekAndCompareScreenshot(6.5, require.toUrl("./kfx-6.png")); })
+				.then(function (testPage) { return testPage.done(); });
 		});
 	});
 });

@@ -24,7 +24,8 @@ define(["intern!tdd", "require", "tests/support/test-page"], function (tdd, requ
 			var testPage = new TestPage(this.remote, require.toUrl("tests/support/browser-test-page.html"), "/tests/functional/alpha/alpha.ass", 256, 144, "rgb(47, 163, 254)");
 			return testPage
 				.prepare()
-				.then(function (testPage) { return testPage.seekAndCompareScreenshot(1, require.toUrl("./alpha-1.png")); });
+				.then(function (testPage) { return testPage.seekAndCompareScreenshot(1, require.toUrl("./alpha-1.png")); })
+				.then(function (testPage) { return testPage.done(); });
 		});
 	});
 });
