@@ -110,10 +110,10 @@ export class DrawingStyles {
 
 		svg.width.baseVal.valueAsString = `${ bboxWidth.toFixed(3) }px`;
 		svg.height.baseVal.valueAsString = `${ bboxHeight.toFixed(3) }px`;
-		svg.viewBox.baseVal.x = bboxMinX;
-		svg.viewBox.baseVal.y = bboxMinY;
-		svg.viewBox.baseVal.width = bboxWidth;
-		svg.viewBox.baseVal.height = bboxHeight;
+
+		// svg.viewBox.baseVal is null in atleast FF. See https://bugzilla.mozilla.org/show_bug.cgi?id=888307 which justifies it with SVG 1.2 spec.
+		svg.setAttribute("viewBox", `${ bboxMinX } ${ bboxMinY } ${ bboxWidth } ${ bboxHeight }`);
+
 		svg.style.position = "relative";
 		svg.style.left = `${ bboxMinX.toFixed(3) }px`;
 		svg.style.top = `${ bboxMinY.toFixed(3) }px`;
