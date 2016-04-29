@@ -1,0 +1,32 @@
+﻿[Script Info]
+Title: 
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 1280
+PlayResY: 720
+Scroll Position: 0
+Active Line: 0
+Video Zoom Percent: 1
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Arial,90,&H00FFFFFF,&H00000000,&H00000000,&H96000000,0,0,0,0,100,100,0,0,1,0,0,2,75,75,75,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:00.00,0:00:01.00,Default,,0,0,0,,{\an1\frz45}MM\NMM
+Dialogue: 1,0:00:00.00,0:00:01.00,Default,,0,0,0,,{\an2\frz45}MM\NMM
+Dialogue: 1,0:00:00.00,0:00:01.00,Default,,0,0,0,,{\an3\frz45}MM\NMM
+Dialogue: 1,0:00:00.00,0:00:01.00,Default,,0,0,0,,{\an7\frz45}MM\NMM
+Dialogue: 1,0:00:00.00,0:00:01.00,Default,,0,0,0,,{\an8\frz45}MM\NMM
+Dialogue: 1,0:00:00.00,0:00:01.00,Default,,0,0,0,,{\an9\frz45}MM\NMM
+Dialogue: 1,0:00:01.00,0:00:02.00,Default,,0,0,0,,{\an1\pos(640,360)\frz45}MM\NMM
+Dialogue: 1,0:00:02.00,0:00:03.00,Default,,0,0,0,,{\an2\pos(640,360)\frz45}MM\NMM
+Dialogue: 1,0:00:03.00,0:00:04.00,Default,,0,0,0,,{\an3\pos(640,360)\frz45}MM\NMM
+Dialogue: 1,0:00:04.00,0:00:05.00,Default,,0,0,0,,{\an4\pos(640,360)\frz45}MM\NMM
+Dialogue: 1,0:00:05.00,0:00:06.00,Default,,0,0,0,,{\an5\pos(640,360)\frz45}MM\NMM
+Dialogue: 1,0:00:06.00,0:00:07.00,Default,,0,0,0,,{\an6\pos(640,360)\frz45}MM\NMM
+Dialogue: 1,0:00:07.00,0:00:08.00,Default,,0,0,0,,{\an7\pos(640,360)\frz45}MM\NMM
+Dialogue: 1,0:00:08.00,0:00:09.00,Default,,0,0,0,,{\an8\pos(640,360)\frz45}MM\NMM
+Dialogue: 1,0:00:09.00,0:00:10.00,Default,,0,0,0,,{\an9\pos(640,360)\frz45}MM\NMM

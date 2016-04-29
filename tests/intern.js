@@ -34,6 +34,7 @@ define(["intern"], function (intern) {
 		functionalSuites: [
 			"tests/functional/alpha/alpha",
 			"tests/functional/auto-clock",
+			"tests/functional/fr/frz",
 			"tests/functional/fsc/fsc",
 			"tests/functional/kfx/kfx",
 			"tests/functional/outlines/outlines",

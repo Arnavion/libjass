@@ -938,22 +938,34 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 		}
 
+		let divTransformStyle = "";
+		const transformOrigin = WebRenderer._transformOrigins[dialogue.alignment];
+		const transformOriginString = `${ transformOrigin[0] }% ${ transformOrigin[1] }%`;
+
 		for (const part of dialogue.parts) {
 			if (part instanceof parts.Position || part instanceof parts.Move) {
-				const transformOrigin = WebRenderer._transformOrigins[dialogue.alignment];
 
-				const divTransformStyle = `translate(${ -transformOrigin[0] }%, ${ -transformOrigin[1] }%) translate(-${ sub.style.marginLeft }, -${ sub.style.marginTop })`;
-				const transformOriginString = `${ transformOrigin[0] }% ${ transformOrigin[1] }%`;
-
-				sub.style.webkitTransform = divTransformStyle;
-				sub.style.webkitTransformOrigin = transformOriginString;
-
-				sub.style.transform = divTransformStyle;
-				sub.style.transformOrigin = transformOriginString;
+				divTransformStyle = `translate(${ -transformOrigin[0] }%, ${ -transformOrigin[1] }%) translate(-${ sub.style.marginLeft }, -${ sub.style.marginTop })`;
 
 				break;
 			}
 		}
+
+		if (currentSpanStyles.rotationY !== 0) {
+			divTransformStyle += ` rotateY(${ currentSpanStyles.rotationY }deg)`;
+		}
+		if (currentSpanStyles.rotationX !== 0) {
+			divTransformStyle += ` rotateX(${ currentSpanStyles.rotationX }deg)`;
+		}
+		if (currentSpanStyles.rotationZ !== 0) {
+			divTransformStyle += ` rotateZ(${ -1 * currentSpanStyles.rotationZ }deg)`;
+		}
+
+		sub.style.webkitTransform = divTransformStyle;
+		sub.style.transform = divTransformStyle;
+
+		sub.style.webkitTransformOrigin = transformOriginString;
+		sub.style.transformOrigin = transformOriginString;
 
 		switch (wrappingStyle) {
 			case WrappingStyle.EndOfLineWrapping:

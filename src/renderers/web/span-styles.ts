@@ -216,15 +216,6 @@ export class SpanStyles {
 				transform += `scaleY(${ this._fontScaleY }) `;
 			}
 		}
-		if (this._rotationY !== 0) {
-			transform += `rotateY(${ this._rotationY }deg) `;
-		}
-		if (this._rotationX !== 0) {
-			transform += `rotateX(${ this._rotationX }deg) `;
-		}
-		if (this._rotationZ !== 0) {
-			transform += `rotateZ(${ -1 * this._rotationZ }deg) `;
-		}
 		if (this._skewX !== 0 || this._skewY !== 0) {
 			transform += `matrix(1, ${ this._skewY }, ${ this._skewX }, 1, 0, 0) `;
 		}
