@@ -22,7 +22,7 @@ import { Clock, ClockEvent } from "./clocks/base";
 
 import { RendererSettings } from "./settings";
 
-import { verboseMode } from "../settings";
+import { debugMode, verboseMode } from "../settings";
 
 import { ASS } from "../types/ass";
 import { Dialogue } from "../types/dialogue";
@@ -159,14 +159,21 @@ export class NullRenderer {
 		}
 
 		for (const dialogue of this._ass.dialogues) {
-			if (dialogue.end > currentTime) {
-				if (dialogue.start <= currentTime) {
-					// This dialogue is visible right now. Draw it.
-					this.draw(dialogue);
+			try {
+				if (dialogue.end > currentTime) {
+					if (dialogue.start <= currentTime) {
+						// This dialogue is visible right now. Draw it.
+						this.draw(dialogue);
+					}
+					else if (dialogue.start <= (currentTime + this._settings.preRenderTime)) {
+						// This dialogue will be visible soon. Pre-render it.
+						this.preRender(dialogue);
+					}
 				}
-				else if (dialogue.start <= (currentTime + this._settings.preRenderTime)) {
-					// This dialogue will be visible soon. Pre-render it.
-					this.preRender(dialogue);
+			}
+			catch (ex) {
+				if (debugMode) {
+					console.error(`Rendering dialogue ${ dialogue.id } failed.`, ex);
 				}
 			}
 		}
