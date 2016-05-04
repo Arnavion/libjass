@@ -161,6 +161,10 @@
 					<li><a href="#libjass.Promise">Promise</a></li>
 					<li><a href="#libjass.Set">Set</a></li>
 					<li><a href="#libjass.verboseMode">verboseMode</a></li>
+					<li><a href="#libjass.version">version</a></li>
+					<li><a href="#libjass.configure">configure</a></li>
+					<li><a href="#libjass.deserialize">deserialize</a></li>
+					<li><a href="#libjass.serialize">serialize</a></li>
 					<li><a href="#libjass.ASS">ASS</a></li>
 					<li><a href="#libjass.Attachment">Attachment</a></li>
 					<li><a href="#libjass.DeferredPromise">DeferredPromise</a></li>
@@ -313,9 +317,9 @@
 				<legend><a href="#./parser/streams">./parser/streams</a></legend>
 				<ul class="elements">
 					<li><a href="#./parser/streams.ReadableStream">ReadableStream</a></li>
+					<li><a href="#./parser/streams.ReadableStreamReader">ReadableStreamReader</a></li>
 					<li><a href="#./parser/streams.TextDecoder">TextDecoder</a></li>
 					<li><a href="#./parser/streams.TextDecoderConstructor">TextDecoderConstructor</a></li>
-					<li><a href="#./parser/streams.ReadableStreamReader">ReadableStreamReader</a></li>
 				</ul>
 			</fieldset>
 
@@ -337,6 +341,7 @@
 				<legend><a href="#./renderers/settings">./renderers/settings</a></legend>
 				<ul class="elements">
 					<li><a href="#./renderers/settings.isFontFaceRule">isFontFaceRule</a></li>
+					<li><a href="#./renderers/settings.testSupportsSvg">testSupportsSvg</a></li>
 				</ul>
 			</fieldset>
 
@@ -377,9 +382,9 @@
 			<fieldset class="module">
 				<legend><a href="#./renderers/web/renderer">./renderers/web/renderer</a></legend>
 				<ul class="elements">
+					<li><a href="#./renderers/web/renderer.PreRenderedSub">PreRenderedSub</a></li>
 					<li><a href="#./renderers/web/renderer.FontFace">FontFace</a></li>
 					<li><a href="#./renderers/web/renderer.FontFaceSet">FontFaceSet</a></li>
-					<li><a href="#./renderers/web/renderer.PreRenderedSub">PreRenderedSub</a></li>
 				</ul>
 			</fieldset>
 
@@ -387,6 +392,15 @@
 				<legend><a href="#./renderers/web/span-styles">./renderers/web/span-styles</a></legend>
 				<ul class="elements">
 					<li><a href="#./renderers/web/span-styles.SpanStyles">SpanStyles</a></li>
+					<li><a href="#./renderers/web/span-styles.createComponentTransferFilter">createComponentTransferFilter</a></li>
+					<li><a href="#./renderers/web/span-styles.valueOrDefault">valueOrDefault</a></li>
+				</ul>
+			</fieldset>
+
+			<fieldset class="module">
+				<legend><a href="#./serialization">./serialization</a></legend>
+				<ul class="elements">
+					<li><a href="#./serialization.registerClass">registerClass</a></li>
 				</ul>
 			</fieldset>
 
@@ -395,6 +409,13 @@
 				<ul class="elements">
 					<li><a href="#./settings.setDebugMode">setDebugMode</a></li>
 					<li><a href="#./settings.setVerboseMode">setVerboseMode</a></li>
+				</ul>
+			</fieldset>
+
+			<fieldset class="module">
+				<legend><a href="#./types/dialogue">./types/dialogue</a></legend>
+				<ul class="elements">
+					<li><a href="#./types/dialogue.toTime">toTime</a></li>
 				</ul>
 			</fieldset>
 
@@ -448,21 +469,11 @@
 			</fieldset>
 
 			<fieldset class="module">
-				<legend><a href="#./utility/ts-helpers">./utility/ts-helpers</a></legend>
-				<ul class="elements">
-					<li><a href="#./utility/ts-helpers.___decorate">___decorate</a></li>
-					<li><a href="#./utility/ts-helpers.___extends">___extends</a></li>
-					<li><a href="#./utility/ts-helpers.decorateClass">decorateClass</a></li>
-					<li><a href="#./utility/ts-helpers.decorateField">decorateField</a></li>
-				</ul>
-			</fieldset>
-
-			<fieldset class="module">
 				<legend><a href="#./webworker/channel">./webworker/channel</a></legend>
 				<ul class="elements">
 					<li><a href="#./webworker/channel.WorkerCommandHandler">WorkerCommandHandler</a></li>
-					<li><a href="#./webworker/channel.WorkerChannelImpl">WorkerChannelImpl</a></li>
 					<li><a href="#./webworker/channel.WorkerCommunication">WorkerCommunication</a></li>
+					<li><a href="#./webworker/channel.WorkerChannelImpl">WorkerChannelImpl</a></li>
 					<li><a href="#./webworker/channel.WorkerRequestMessage">WorkerRequestMessage</a></li>
 					<li><a href="#./webworker/channel.WorkerResponseMessage">WorkerResponseMessage</a></li>
 				</ul>
@@ -471,11 +482,8 @@
 			<fieldset class="module">
 				<legend><a href="#./webworker/misc">./webworker/misc</a></legend>
 				<ul class="elements">
-					<li><a href="#./webworker/misc.deserialize">deserialize</a></li>
 					<li><a href="#./webworker/misc.getWorkerCommandHandler">getWorkerCommandHandler</a></li>
-					<li><a href="#./webworker/misc.registerClassPrototype">registerClassPrototype</a></li>
 					<li><a href="#./webworker/misc.registerWorkerCommand">registerWorkerCommand</a></li>
-					<li><a href="#./webworker/misc.serialize">serialize</a></li>
 				</ul>
 			</fieldset>
 
@@ -494,81 +502,33 @@
 						</dd>
 						<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.debugMode;</code></pre></fieldset></dd>
 						<dd class="return type">boolean</dd>
-						<dt class="setter">Setter</dt>
-						<dd class="description">
-							Debug mode. When true, libjass logs some debug messages.
-						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>libjass.debugMode = value;</code></pre></fieldset></dd>
-						<dd class="parameters">
-							<dl>
-								<dt class="parameter name">value</dt>
-								<dd class="parameter type">boolean</dd>
-								<dd class="parameter description"></dd>
-							</dl>
-						</dd>
 					</dl>
 					<dl id="libjass.Map" class="property">
 						<dt class="name"><a href="#libjass.Map">Map</a></dt>
 						<dt class="getter">Getter</dt>
 						<dd class="description">
-							<p>Set to the global implementation of Map if the environment has one, else set to <a href="#./utility/map.SimpleMap">./utility/map.SimpleMap</a></p><p>Set it to null to force <a href="#./utility/map.SimpleMap">./utility/map.SimpleMap</a> to be used even if a global Map is present.</p>
+							<p>Set to the global implementation of Map if the environment has one, else set to <a href="#./utility/map.SimpleMap">./utility/map.SimpleMap</a></p><p>Can be set to a value using <a href="#libjass.configure">libjass.configure</a></p><p>Set it to null to force <a href="#./utility/map.SimpleMap">./utility/map.SimpleMap</a> to be used even if a global Map is present.</p>
 						</dd>
 						<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.Map;</code></pre></fieldset></dd>
 						<dd class="return type">function(new:Map, !Array.&lt;!Array.&lt;*&gt;&gt;=)</dd>
-						<dt class="setter">Setter</dt>
-						<dd class="description">
-							<p>Set to the global implementation of Map if the environment has one, else set to <a href="#./utility/map.SimpleMap">./utility/map.SimpleMap</a></p><p>Set it to null to force <a href="#./utility/map.SimpleMap">./utility/map.SimpleMap</a> to be used even if a global Map is present.</p>
-						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>libjass.Map = value;</code></pre></fieldset></dd>
-						<dd class="parameters">
-							<dl>
-								<dt class="parameter name">value</dt>
-								<dd class="parameter type">function(new:Map, !Array.&lt;!Array.&lt;*&gt;&gt;=)</dd>
-								<dd class="parameter description"></dd>
-							</dl>
-						</dd>
 					</dl>
 					<dl id="libjass.Promise" class="property">
 						<dt class="name"><a href="#libjass.Promise">Promise</a></dt>
 						<dt class="getter">Getter</dt>
 						<dd class="description">
-							<p>Set to the global implementation of Promise if the environment has one, else set to <a href="#./utility/promise.SimplePromise">./utility/promise.SimplePromise</a></p><p>Set it to null to force <a href="#./utility/promise.SimplePromise">./utility/promise.SimplePromise</a> to be used even if a global Promise is present.</p>
+							<p>Set to the global implementation of Promise if the environment has one, else set to <a href="#./utility/promise.SimplePromise">./utility/promise.SimplePromise</a></p><p>Can be set to a value using <a href="#libjass.configure">libjass.configure</a></p><p>Set it to null to force <a href="#./utility/promise.SimplePromise">./utility/promise.SimplePromise</a> to be used even if a global Promise is present.</p>
 						</dd>
 						<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.Promise;</code></pre></fieldset></dd>
 						<dd class="return type">function(new:Promise)</dd>
-						<dt class="setter">Setter</dt>
-						<dd class="description">
-							<p>Set to the global implementation of Promise if the environment has one, else set to <a href="#./utility/promise.SimplePromise">./utility/promise.SimplePromise</a></p><p>Set it to null to force <a href="#./utility/promise.SimplePromise">./utility/promise.SimplePromise</a> to be used even if a global Promise is present.</p>
-						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>libjass.Promise = value;</code></pre></fieldset></dd>
-						<dd class="parameters">
-							<dl>
-								<dt class="parameter name">value</dt>
-								<dd class="parameter type">function(new:Promise)</dd>
-								<dd class="parameter description"></dd>
-							</dl>
-						</dd>
 					</dl>
 					<dl id="libjass.Set" class="property">
 						<dt class="name"><a href="#libjass.Set">Set</a></dt>
 						<dt class="getter">Getter</dt>
 						<dd class="description">
-							<p>Set to the global implementation of Set if the environment has one, else set to <a href="#./utility/set.SimpleSet">./utility/set.SimpleSet</a></p><p>Set it to null to force <a href="#./utility/set.SimpleSet">./utility/set.SimpleSet</a> to be used even if a global Set is present.</p>
+							<p>Set to the global implementation of Set if the environment has one, else set to <a href="#./utility/set.SimpleSet">./utility/set.SimpleSet</a></p><p>Can be set to a value using <a href="#libjass.configure">libjass.configure</a></p><p>Set it to null to force <a href="#./utility/set.SimpleSet">./utility/set.SimpleSet</a> to be used even if a global Set is present.</p>
 						</dd>
 						<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.Set;</code></pre></fieldset></dd>
 						<dd class="return type">function(new:Set, !Array.&lt;T&gt;=)</dd>
-						<dt class="setter">Setter</dt>
-						<dd class="description">
-							<p>Set to the global implementation of Set if the environment has one, else set to <a href="#./utility/set.SimpleSet">./utility/set.SimpleSet</a></p><p>Set it to null to force <a href="#./utility/set.SimpleSet">./utility/set.SimpleSet</a> to be used even if a global Set is present.</p>
-						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>libjass.Set = value;</code></pre></fieldset></dd>
-						<dd class="parameters">
-							<dl>
-								<dt class="parameter name">value</dt>
-								<dd class="parameter type">function(new:Set, !Array.&lt;T&gt;=)</dd>
-								<dd class="parameter description"></dd>
-							</dl>
-						</dd>
 					</dl>
 					<dl id="libjass.verboseMode" class="property">
 						<dt class="name"><a href="#libjass.verboseMode">verboseMode</a></dt>
@@ -578,18 +538,87 @@
 						</dd>
 						<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.verboseMode;</code></pre></fieldset></dd>
 						<dd class="return type">boolean</dd>
-						<dt class="setter">Setter</dt>
+					</dl>
+					<dl id="libjass.version" class="property">
+						<dt class="name"><a href="#libjass.version">version</a></dt>
+						<dt class="getter">Getter</dt>
 						<dd class="description">
-							Verbose debug mode. When true, libjass logs some more debug messages. This setting is independent of <a href="#libjass.debugMode">libjass.debugMode</a>
+							<p>The version of libjass. An array like</p><p><pre class="code"><code>["0.12.0", 0, 12, 0]
+
+</code></pre></p>
 						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>libjass.verboseMode = value;</code></pre></fieldset></dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.version;</code></pre></fieldset></dd>
+						<dd class="return type">!Array.&lt;string|number&gt;</dd>
+					</dl>
+				</section>
+				<section>
+					<h2>Free functions</h2>
+					<dl id="libjass.configure" class="function">
+						<dt class="name"><a href="#libjass.configure">configure</a></dt>
+						<dd class="description">
+							Configures libjass with the given properties.
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>libjass.configure(newConfig);</code></pre></fieldset></dd>
 						<dd class="parameters">
 							<dl>
-								<dt class="parameter name">value</dt>
-								<dd class="parameter type">boolean</dd>
+								<dt class="parameter name">newConfig</dt>
+								<dd class="parameter type">!*</dd>
+								<dd class="parameter description"></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">"debugMode"</dt>
+										<dd class="parameter type">?boolean</dd>
+										<dd class="parameter description">When true, libjass logs some debug messages.</dd>
+										<dt class="parameter name">"verboseMode"</dt>
+										<dd class="parameter type">?boolean</dd>
+										<dd class="parameter description">When true, libjass logs some more debug messages. This setting is independent of <a href="#libjass.debugMode">libjass.debugMode</a></dd>
+										<dt class="parameter name">"Set"</dt>
+										<dd class="parameter type">?function(new:Set, !Array.&lt;T&gt;=)</dd>
+										<dd class="parameter description">Sets the Set implementation used by libjass to the provided one. If null, <a href="#./utility/set.SimpleSet">./utility/set.SimpleSet</a> is used.</dd>
+										<dt class="parameter name">"Map"</dt>
+										<dd class="parameter type">?function(new:Map, !Array.&lt;!Array.&lt;*&gt;&gt;=)</dd>
+										<dd class="parameter description">Sets the Map implementation used by libjass to the provided one. If null, <a href="#./utility/map.SimpleMap">./utility/map.SimpleMap</a> is used.</dd>
+										<dt class="parameter name">"Promise"</dt>
+										<dd class="parameter type">?function(new:Promise)</dd>
+										<dd class="parameter description">Sets the Promise implementation used by libjass to the provided one. If null, <a href="#./utility/promise.SimplePromise">./utility/promise.SimplePromise</a> is used.</dd>
+									</dl>
+								</dd>
+							</dl>
+						</dd>
+					</dl>
+					<dl id="libjass.deserialize" class="function">
+						<dt class="name"><a href="#libjass.deserialize">deserialize</a></dt>
+						<dd class="description">
+							
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.deserialize(str);</code></pre></fieldset></dd>
+						<dd class="parameters">
+							<dl>
+								<dt class="parameter name">str</dt>
+								<dd class="parameter type">string</dd>
 								<dd class="parameter description"></dd>
 							</dl>
 						</dd>
+						<dt>Returns</dt>
+						<dd class="return type">*</dd>
+						<dd class="return description"></dd>
+					</dl>
+					<dl id="libjass.serialize" class="function">
+						<dt class="name"><a href="#libjass.serialize">serialize</a></dt>
+						<dd class="description">
+							Serializes the given object.
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.serialize(obj);</code></pre></fieldset></dd>
+						<dd class="parameters">
+							<dl>
+								<dt class="parameter name">obj</dt>
+								<dd class="parameter type">*</dd>
+								<dd class="parameter description"></dd>
+							</dl>
+						</dd>
+						<dt>Returns</dt>
+						<dd class="return type">string</dd>
+						<dd class="return description"></dd>
 					</dl>
 				</section>
 				<section>
@@ -628,7 +657,7 @@
 									The format specifier for the styles section.
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = ass.dialoguesFormatSpecifier;</code></pre></fieldset></dd>
-								<dd class="return type">!Array.&lt;string&gt;</dd>
+								<dd class="return type">Array.&lt;string&gt;</dd>
 								<dt class="setter">Setter</dt>
 								<dd class="description">
 									The format specifier for the events section.
@@ -637,7 +666,7 @@
 								<dd class="parameters">
 									<dl>
 										<dt class="parameter name">value</dt>
-										<dd class="parameter type">!Array.&lt;string&gt;</dd>
+										<dd class="parameter type">Array.&lt;string&gt;</dd>
 										<dd class="parameter description"></dd>
 									</dl>
 								</dd>
@@ -670,7 +699,7 @@
 									The format specifier for the styles section.
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = ass.stylesFormatSpecifier;</code></pre></fieldset></dd>
-								<dd class="return type">!Array.&lt;string&gt;</dd>
+								<dd class="return type">Array.&lt;string&gt;</dd>
 								<dt class="setter">Setter</dt>
 								<dd class="description">
 									The format specifier for the events section.
@@ -679,7 +708,7 @@
 								<dd class="parameters">
 									<dl>
 										<dt class="parameter name">value</dt>
-										<dd class="parameter type">!Array.&lt;string&gt;</dd>
+										<dd class="parameter type">Array.&lt;string&gt;</dd>
 										<dd class="parameter description"></dd>
 									</dl>
 								</dd>
@@ -730,6 +759,24 @@
 								</dd>
 							</dl>
 
+							<dl id="libjass.ASS.fromJSON" class="function static">
+								<dt class="name"><a href="#libjass.ASS.fromJSON">fromJSON</a></dt>
+								<dd class="description">
+									Custom deserialization for ASS objects.
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.ASS.fromJSON(obj);</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">obj</dt>
+										<dd class="parameter type">!*</dd>
+										<dd class="parameter description"></dd>
+									</dl>
+								</dd>
+								<dt>Returns</dt>
+								<dd class="return type">!libjass.ASS</dd>
+								<dd class="return description"></dd>
+							</dl>
+
 							<dl id="libjass.ASS.fromReadableStream" class="function static">
 								<dt class="name"><a href="#libjass.ASS.fromReadableStream">fromReadableStream</a></dt>
 								<dd class="description">
@@ -745,8 +792,8 @@
 										<dd class="parameter type">string="utf-8"</dd>
 										<dd class="parameter description"></dd>
 										<dt class="parameter name">type</dt>
-										<dd class="parameter type">number=0</dd>
-										<dd class="parameter description">The type of the script. One of the <a href="#libjass.Format">libjass.Format</a> constants.</dd>
+										<dd class="parameter type">(number|string)=0</dd>
+										<dd class="parameter description">The type of the script. One of the <a href="#libjass.Format">libjass.Format</a> constants, or one of the strings "ass" and "srt".</dd>
 									</dl>
 								</dd>
 								<dt>Returns</dt>
@@ -766,8 +813,8 @@
 										<dd class="parameter type">!libjass.parser.Stream</dd>
 										<dd class="parameter description">The stream to parse the script from</dd>
 										<dt class="parameter name">type</dt>
-										<dd class="parameter type">number=0</dd>
-										<dd class="parameter description">The type of the script. One of the <a href="#libjass.Format">libjass.Format</a> constants.</dd>
+										<dd class="parameter type">(number|string)=0</dd>
+										<dd class="parameter description">The type of the script. One of the <a href="#libjass.Format">libjass.Format</a> constants, or one of the strings "ass" and "srt".</dd>
 									</dl>
 								</dd>
 								<dt>Returns</dt>
@@ -787,8 +834,8 @@
 										<dd class="parameter type">string</dd>
 										<dd class="parameter description">The raw text of the script.</dd>
 										<dt class="parameter name">type</dt>
-										<dd class="parameter type">number=0</dd>
-										<dd class="parameter description">The type of the script. One of the <a href="#libjass.Format">libjass.Format</a> constants.</dd>
+										<dd class="parameter type">(number|string)=0</dd>
+										<dd class="parameter description">The type of the script. One of the <a href="#libjass.Format">libjass.Format</a> constants, or one of the strings "ass" and "srt".</dd>
 									</dl>
 								</dd>
 								<dt>Returns</dt>
@@ -808,13 +855,24 @@
 										<dd class="parameter type">string</dd>
 										<dd class="parameter description">The URL of the script.</dd>
 										<dt class="parameter name">type</dt>
-										<dd class="parameter type">number=0</dd>
-										<dd class="parameter description">The type of the script. One of the <a href="#libjass.Format">libjass.Format</a> constants.</dd>
+										<dd class="parameter type">(number|string)=0</dd>
+										<dd class="parameter description">The type of the script. One of the <a href="#libjass.Format">libjass.Format</a> constants, or one of the strings "ass" and "srt".</dd>
 									</dl>
 								</dd>
 								<dt>Returns</dt>
 								<dd class="return type">!Promise.&lt;!libjass.ASS&gt;</dd>
 								<dd class="return description">A promise that will be resolved with the ASS object when it has been fully parsed</dd>
+							</dl>
+
+							<dl id="libjass.ASS.toJSON" class="function">
+								<dt class="name"><a href="#libjass.ASS.toJSON">toJSON</a></dt>
+								<dd class="description">
+									Custom JSON serialization for ASS objects.
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = ass.toJSON();</code></pre></fieldset></dd>
+								<dt>Returns</dt>
+								<dd class="return type">!*</dd>
+								<dd class="return description"></dd>
 							</dl>
 
 						</dd>
@@ -1076,24 +1134,6 @@
 									Parses this dialogue's parts from the raw parts string.
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>dialogue._parsePartsString();</code></pre></fieldset></dd>
-							</dl>
-
-							<dl id="libjass.Dialogue._toTime" class="function private static">
-								<dt class="name"><a href="#libjass.Dialogue._toTime">_toTime</a></dt>
-								<dd class="description">
-									Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.Dialogue._toTime(str);</code></pre></fieldset></dd>
-								<dd class="parameters">
-									<dl>
-										<dt class="parameter name">str</dt>
-										<dd class="parameter type">string</dd>
-										<dd class="parameter description"></dd>
-									</dl>
-								</dd>
-								<dt>Returns</dt>
-								<dd class="return type">number</dd>
-								<dd class="return description"></dd>
 							</dl>
 
 						</dd>
@@ -1922,7 +1962,7 @@ since event handlers cannot be registered after open() has been called.</dd>
 									The value of this alignment tag.
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = alignment.value;</code></pre></fieldset></dd>
-								<dd class="return type">?number</dd>
+								<dd class="return type">number</dd>
 							</dl>
 
 						</dd>
@@ -1988,7 +2028,7 @@ since event handlers cannot be registered after open() has been called.</dd>
 						<dd class="parameters">
 							<dl>
 								<dt class="parameter name">value</dt>
-								<dd class="parameter type">*</dd>
+								<dd class="parameter type">?boolean|?number</dd>
 								<dd class="parameter description">{\b1} -&gt; true, {\b0} -&gt; false, {\b###} -&gt; weight of the bold (number), {\b} -&gt; null</dd>
 							</dl>
 						</dd>
@@ -2585,7 +2625,7 @@ since event handlers cannot be registered after open() has been called.</dd>
 							<dl>
 								<dt class="parameter name">value</dt>
 								<dd class="parameter type">number</dd>
-								<dd class="parameter description">{\fs-###} -&gt; difference (number)</dd>
+								<dd class="parameter description">{\fs-###} -&gt; relative difference (number, percentage)</dd>
 							</dl>
 						</dd>
 						<dd class="members">
@@ -2611,7 +2651,7 @@ since event handlers cannot be registered after open() has been called.</dd>
 							<dl>
 								<dt class="parameter name">value</dt>
 								<dd class="parameter type">number</dd>
-								<dd class="parameter description">{\fs+###} -&gt; difference (number)</dd>
+								<dd class="parameter description">{\fs+###} -&gt; relative difference (number, percentage)</dd>
 							</dl>
 						</dd>
 						<dd class="members">
@@ -2726,10 +2766,10 @@ since event handlers cannot be registered after open() has been called.</dd>
 								<dd class="parameter type">number</dd>
 								<dd class="parameter description"></dd>
 								<dt class="parameter name">t1</dt>
-								<dd class="parameter type">number</dd>
+								<dd class="parameter type">?number</dd>
 								<dd class="parameter description"></dd>
 								<dt class="parameter name">t2</dt>
-								<dd class="parameter type">number</dd>
+								<dd class="parameter type">?number</dd>
 								<dd class="parameter description"></dd>
 							</dl>
 						</dd>
@@ -2741,7 +2781,7 @@ since event handlers cannot be registered after open() has been called.</dd>
 									The start time of this move tag.
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = move.t1;</code></pre></fieldset></dd>
-								<dd class="return type">number</dd>
+								<dd class="return type">?number</dd>
 							</dl>
 
 							<dl id="libjass.parts.Move.t2" class="property">
@@ -2751,7 +2791,7 @@ since event handlers cannot be registered after open() has been called.</dd>
 									The end time value of this move tag.
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = move.t2;</code></pre></fieldset></dd>
-								<dd class="return type">number</dd>
+								<dd class="return type">?number</dd>
 							</dl>
 
 							<dl id="libjass.parts.Move.x1" class="property">
@@ -3527,13 +3567,13 @@ since event handlers cannot be registered after open() has been called.</dd>
 						<dd class="parameters">
 							<dl>
 								<dt class="parameter name">start</dt>
-								<dd class="parameter type">number</dd>
+								<dd class="parameter type">?number</dd>
 								<dd class="parameter description"></dd>
 								<dt class="parameter name">end</dt>
-								<dd class="parameter type">number</dd>
+								<dd class="parameter type">?number</dd>
 								<dd class="parameter description"></dd>
 								<dt class="parameter name">accel</dt>
-								<dd class="parameter type">number</dd>
+								<dd class="parameter type">?number</dd>
 								<dd class="parameter description"></dd>
 								<dt class="parameter name">tags</dt>
 								<dd class="parameter type">!Array.&lt;!libjass.parts.Tag&gt;</dd>
@@ -4837,7 +4877,7 @@ via the video element's position bar.
 convenience method to create a font map.</p><p>Defaults to null.</p>
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = rendererSettings.fontMap;</code></pre></fieldset></dd>
-								<dd class="return type">!Map.&lt;string, (string|!Array.&lt;string&gt;)&gt;</dd>
+								<dd class="return type">Map.&lt;string, (string|!Array.&lt;string&gt;)&gt;</dd>
 								<dt class="setter">Setter</dt>
 								<dd class="description">
 									<p>A map of font name to one or more URLs of that font. If provided, the fonts in this map are pre-loaded by the WebRenderer when it's created.</p><p>The key of each entry of the map is the font name used in the ASS script. There are three choices for the value:</p><p>- A single string that you would use for the src attribute of a @font-face rule. Eg: `'url("/fonts.foo.ttf"), url("/fonts/foo-fallback.ttf"), local("Arial.ttf")'`</p><p>- An array of the individual sources that you would use for the src attribute of a @font-face rule. Eg: `['url("/fonts.foo.ttf")', 'url("/fonts/foo-fallback.ttf")', 'local("Arial")']`</p><p>- An array of URLs. Eg: `["/fonts.foo.ttf", "/fonts/foo-fallback.ttf"]`</p><p>Only the first and second forms allow you to use local fonts. The third form only allows you to use remote fonts.</p><p>If you have a &lt;style&gt; or &lt;link&gt; element on the page containing @font-face rules, you can use the <a href="#libjass.renderers.RendererSettings.makeFontMapFromStyleElement">libjass.renderers.RendererSettings.makeFontMapFromStyleElement</a>
@@ -4847,7 +4887,7 @@ convenience method to create a font map.</p><p>Defaults to null.</p>
 								<dd class="parameters">
 									<dl>
 										<dt class="parameter name">value</dt>
-										<dd class="parameter type">!Map.&lt;string, (string|!Array.&lt;string&gt;)&gt;</dd>
+										<dd class="parameter type">Map.&lt;string, (string|!Array.&lt;string&gt;)&gt;</dd>
 										<dd class="parameter description"></dd>
 									</dl>
 								</dd>
@@ -4944,7 +4984,8 @@ convenience method to create a font map.</p><p>Defaults to null.</p>
     font-family: "Helvetica";
     src: url("/fonts/helvetica.ttf"), local("Arial");
 }
-</code></pre></p>
+
+</code></pre>More complicated @font-face syntax like format() or multi-line src are not supported.</p>
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.renderers.RendererSettings.makeFontMapFromStyleElement(linkStyle);</code></pre></fieldset></dd>
 								<dd class="parameters">
@@ -5389,18 +5430,6 @@ animations appropriately, so that at the time the div is inserted into the DOM a
 						</dd>
 						<dd class="usage"><fieldset><legend /><pre><code>var result = libjass.webworker.supported;</code></pre></fieldset></dd>
 						<dd class="return type">boolean</dd>
-						<dt class="setter">Setter</dt>
-						<dd class="description">
-							Indicates whether web workers are supposed in this environment or not.
-						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>libjass.webworker.supported = value;</code></pre></fieldset></dd>
-						<dd class="parameters">
-							<dl>
-								<dt class="parameter name">value</dt>
-								<dd class="parameter type">boolean</dd>
-								<dd class="parameter description"></dd>
-							</dl>
-						</dd>
 					</dl>
 				</section>
 				<section>
@@ -5504,7 +5533,7 @@ the path will be determined from the src attribute of the &lt;script&gt; element
 							</dl>
 						</dd>
 						<dt>Returns</dt>
-						<dd class="return type">!Property</dd>
+						<dd class="return type">Property</dd>
 						<dd class="return description"></dd>
 					</dl>
 					<dl id="./parser/misc.parseLineIntoTypedTemplate" class="function">
@@ -5524,7 +5553,7 @@ the path will be determined from the src attribute of the &lt;script&gt; element
 							</dl>
 						</dd>
 						<dt>Returns</dt>
-						<dd class="return type">!TypedTemplate</dd>
+						<dd class="return type">TypedTemplate</dd>
 						<dd class="return description"></dd>
 					</dl>
 				</section>
@@ -7106,6 +7135,25 @@ the path will be determined from the src attribute of the &lt;script&gt; element
 
 						</dd>
 					</dl>
+					<dl id="./parser/streams.ReadableStreamReader" class="interface">
+						<dt class="name">interface <a href="#./parser/streams.ReadableStreamReader">ReadableStreamReader</a></dt>
+						<dd class="description">
+							
+						</dd>
+						<dd class="members">
+							<dl id="./parser/streams.ReadableStreamReader.read" class="function">
+								<dt class="name"><a href="#./parser/streams.ReadableStreamReader.read">read</a></dt>
+								<dd class="description">
+									
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = readableStreamReader.read();</code></pre></fieldset></dd>
+								<dt>Returns</dt>
+								<dd class="return type">!Promise.&lt;{ value?: Uint8Array, done: boolean }&gt;</dd>
+								<dd class="return description"></dd>
+							</dl>
+
+						</dd>
+					</dl>
 					<dl id="./parser/streams.TextDecoder" class="interface">
 						<dt class="name">interface <a href="#./parser/streams.TextDecoder">TextDecoder</a></dt>
 						<dd class="description">
@@ -7161,25 +7209,6 @@ the path will be determined from the src attribute of the &lt;script&gt; element
 										<dd class="parameter description"></dd>
 									</dl>
 								</dd>
-							</dl>
-
-						</dd>
-					</dl>
-					<dl id="./parser/streams.ReadableStreamReader" class="interface private">
-						<dt class="name">interface <a href="#./parser/streams.ReadableStreamReader">ReadableStreamReader</a></dt>
-						<dd class="description">
-							
-						</dd>
-						<dd class="members">
-							<dl id="./parser/streams.ReadableStreamReader.read" class="function">
-								<dt class="name"><a href="#./parser/streams.ReadableStreamReader.read">read</a></dt>
-								<dd class="description">
-									
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>var result = readableStreamReader.read();</code></pre></fieldset></dd>
-								<dt>Returns</dt>
-								<dd class="return type">!Promise.&lt;{ value?: Uint8Array, done: boolean }&gt;</dd>
-								<dd class="return description"></dd>
 							</dl>
 
 						</dd>
@@ -7904,6 +7933,16 @@ the path will be determined from the src attribute of the &lt;script&gt; element
 						<dd class="return type">boolean</dd>
 						<dd class="return description"></dd>
 					</dl>
+					<dl id="./renderers/settings.testSupportsSvg" class="function private">
+						<dt class="name"><a href="#./renderers/settings.testSupportsSvg">testSupportsSvg</a></dt>
+						<dd class="description">
+							Returns true if this environment may support SVG filter effects. May return false positives.
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = testSupportsSvg();</code></pre></fieldset></dd>
+						<dt>Returns</dt>
+						<dd class="return type">boolean</dd>
+						<dd class="return description"></dd>
+					</dl>
 				</section>
 			</section>
 			<section class="module">
@@ -8274,6 +8313,58 @@ may return wrong values. To avoid this, make sure to preload the font using the 
 				<h1 id="./renderers/web/renderer">Module ./renderers/web/renderer</h1>
 				<section>
 					<h2>Interfaces</h2>
+					<dl id="./renderers/web/renderer.PreRenderedSub" class="interface">
+						<dt class="name">interface <a href="#./renderers/web/renderer.PreRenderedSub">PreRenderedSub</a></dt>
+						<dd class="description">
+							
+						</dd>
+						<dd class="members">
+							<dl id="./renderers/web/renderer.PreRenderedSub.animationDelays" class="property">
+								<dt class="name"><a href="#./renderers/web/renderer.PreRenderedSub.animationDelays">animationDelays</a></dt>
+								<dt class="getter">Getter</dt>
+								<dd class="description">
+									
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = preRenderedSub.animationDelays;</code></pre></fieldset></dd>
+								<dd class="return type">!Map.&lt;string, number&gt;</dd>
+								<dt class="setter">Setter</dt>
+								<dd class="description">
+									
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>preRenderedSub.animationDelays = value;</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">value</dt>
+										<dd class="parameter type">!Map.&lt;string, number&gt;</dd>
+										<dd class="parameter description"></dd>
+									</dl>
+								</dd>
+							</dl>
+
+							<dl id="./renderers/web/renderer.PreRenderedSub.sub" class="property">
+								<dt class="name"><a href="#./renderers/web/renderer.PreRenderedSub.sub">sub</a></dt>
+								<dt class="getter">Getter</dt>
+								<dd class="description">
+									
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>var result = preRenderedSub.sub;</code></pre></fieldset></dd>
+								<dd class="return type">!HTMLDivElement</dd>
+								<dt class="setter">Setter</dt>
+								<dd class="description">
+									
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>preRenderedSub.sub = value;</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">value</dt>
+										<dd class="parameter type">!HTMLDivElement</dd>
+										<dd class="parameter description"></dd>
+									</dl>
+								</dd>
+							</dl>
+
+						</dd>
+					</dl>
 					<dl id="./renderers/web/renderer.FontFace" class="interface private">
 						<dt class="name">interface <a href="#./renderers/web/renderer.FontFace">FontFace</a></dt>
 						<dd class="description">
@@ -8359,62 +8450,50 @@ may return wrong values. To avoid this, make sure to preload the font using the 
 
 						</dd>
 					</dl>
-					<dl id="./renderers/web/renderer.PreRenderedSub" class="interface private">
-						<dt class="name">interface <a href="#./renderers/web/renderer.PreRenderedSub">PreRenderedSub</a></dt>
-						<dd class="description">
-							
-						</dd>
-						<dd class="members">
-							<dl id="./renderers/web/renderer.PreRenderedSub.animationDelays" class="property">
-								<dt class="name"><a href="#./renderers/web/renderer.PreRenderedSub.animationDelays">animationDelays</a></dt>
-								<dt class="getter">Getter</dt>
-								<dd class="description">
-									
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>var result = preRenderedSub.animationDelays;</code></pre></fieldset></dd>
-								<dd class="return type">!Map.&lt;string, number&gt;</dd>
-								<dt class="setter">Setter</dt>
-								<dd class="description">
-									
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>preRenderedSub.animationDelays = value;</code></pre></fieldset></dd>
-								<dd class="parameters">
-									<dl>
-										<dt class="parameter name">value</dt>
-										<dd class="parameter type">!Map.&lt;string, number&gt;</dd>
-										<dd class="parameter description"></dd>
-									</dl>
-								</dd>
-							</dl>
-
-							<dl id="./renderers/web/renderer.PreRenderedSub.sub" class="property">
-								<dt class="name"><a href="#./renderers/web/renderer.PreRenderedSub.sub">sub</a></dt>
-								<dt class="getter">Getter</dt>
-								<dd class="description">
-									
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>var result = preRenderedSub.sub;</code></pre></fieldset></dd>
-								<dd class="return type">!HTMLDivElement</dd>
-								<dt class="setter">Setter</dt>
-								<dd class="description">
-									
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>preRenderedSub.sub = value;</code></pre></fieldset></dd>
-								<dd class="parameters">
-									<dl>
-										<dt class="parameter name">value</dt>
-										<dd class="parameter type">!HTMLDivElement</dd>
-										<dd class="parameter description"></dd>
-									</dl>
-								</dd>
-							</dl>
-
-						</dd>
-					</dl>
 				</section>
 			</section>
 			<section class="module">
 				<h1 id="./renderers/web/span-styles">Module ./renderers/web/span-styles</h1>
+				<section>
+					<h2>Free functions</h2>
+					<dl id="./renderers/web/span-styles.createComponentTransferFilter" class="function private">
+						<dt class="name"><a href="#./renderers/web/span-styles.createComponentTransferFilter">createComponentTransferFilter</a></dt>
+						<dd class="description">
+							
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = createComponentTransferFilter(color);</code></pre></fieldset></dd>
+						<dd class="parameters">
+							<dl>
+								<dt class="parameter name">color</dt>
+								<dd class="parameter type">!libjass.parts.Color</dd>
+								<dd class="parameter description"></dd>
+							</dl>
+						</dd>
+						<dt>Returns</dt>
+						<dd class="return type">!SVGFEComponentTransferElement</dd>
+						<dd class="return description"></dd>
+					</dl>
+					<dl id="./renderers/web/span-styles.valueOrDefault" class="function private">
+						<dt class="name"><a href="#./renderers/web/span-styles.valueOrDefault">valueOrDefault.&lt;T&gt;</a></dt>
+						<dd class="description">
+							
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = valueOrDefault(newValue, defaultValue);</code></pre></fieldset></dd>
+						<dd class="parameters">
+							<dl>
+								<dt class="parameter name">newValue</dt>
+								<dd class="parameter type">?T</dd>
+								<dd class="parameter description"></dd>
+								<dt class="parameter name">defaultValue</dt>
+								<dd class="parameter type">!T</dd>
+								<dd class="parameter description"></dd>
+							</dl>
+						</dd>
+						<dt>Returns</dt>
+						<dd class="return type">!T</dd>
+						<dd class="return description"></dd>
+					</dl>
+				</section>
 				<section>
 					<h2>Classes</h2>
 					<dl id="./renderers/web/span-styles.SpanStyles" class="clazz">
@@ -8485,7 +8564,7 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 								<dd class="parameters">
 									<dl>
 										<dt class="parameter name">value</dt>
-										<dd class="parameter type">(?number|?boolean)</dd>
+										<dd class="parameter type">(?boolean|?number)</dd>
 										<dd class="parameter description"></dd>
 									</dl>
 								</dd>
@@ -8681,7 +8760,7 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 								<dt class="name"><a href="#./renderers/web/span-styles.SpanStyles.outlineHeight">outlineHeight</a></dt>
 								<dt class="getter">Getter</dt>
 								<dd class="description">
-									Gets the outline width property.
+									Gets the outline height property.
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = spanStyles.outlineHeight;</code></pre></fieldset></dd>
 								<dd class="return type">number</dd>
@@ -8772,7 +8851,7 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 									Gets the X-axis rotation property.
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = spanStyles.rotationX;</code></pre></fieldset></dd>
-								<dd class="return type">?number</dd>
+								<dd class="return type">number</dd>
 								<dt class="setter">Setter</dt>
 								<dd class="description">
 									Sets the X-axis rotation property.
@@ -8794,7 +8873,7 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 									Gets the Y-axis rotation property.
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = spanStyles.rotationY;</code></pre></fieldset></dd>
-								<dd class="return type">?number</dd>
+								<dd class="return type">number</dd>
 								<dt class="setter">Setter</dt>
 								<dd class="description">
 									Sets the Y-axis rotation property.
@@ -8816,7 +8895,7 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 									Gets the Z-axis rotation property.
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = spanStyles.rotationZ;</code></pre></fieldset></dd>
-								<dd class="return type">?number</dd>
+								<dd class="return type">number</dd>
 								<dt class="setter">Setter</dt>
 								<dd class="description">
 									Sets the Z-axis rotation property.
@@ -8970,7 +9049,7 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 									Gets the X-axis skew property.
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = spanStyles.skewX;</code></pre></fieldset></dd>
-								<dd class="return type">?number</dd>
+								<dd class="return type">number</dd>
 								<dt class="setter">Setter</dt>
 								<dd class="description">
 									Sets the X-axis skew property.
@@ -8992,7 +9071,7 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 									Gets the Y-axis skew property.
 								</dd>
 								<dd class="usage"><fieldset><legend /><pre><code>var result = spanStyles.skewY;</code></pre></fieldset></dd>
-								<dd class="return type">?number</dd>
+								<dd class="return type">number</dd>
 								<dt class="setter">Setter</dt>
 								<dd class="description">
 									Sets the Y-axis skew property.
@@ -9086,39 +9165,12 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 								<dd class="return description">The resulting &lt;span&gt; with the CSS styles applied. This may be a wrapper around the input &lt;span&gt; if the styles were applied using SVG filters.</dd>
 							</dl>
 
-							<dl id="./renderers/web/span-styles.SpanStyles._setSvgOutlineOnSpan" class="function private">
-								<dt class="name"><a href="#./renderers/web/span-styles.SpanStyles._setSvgOutlineOnSpan">_setSvgOutlineOnSpan</a></dt>
+							<dl id="./renderers/web/span-styles.SpanStyles._svg" class="function private">
+								<dt class="name"><a href="#./renderers/web/span-styles.SpanStyles._svg">_svg</a></dt>
 								<dd class="description">
 									
 								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>spanStyles._setSvgOutlineOnSpan(filterWrapperSpan, outlineWidth, outlineHeight, outlineColor, primaryAlpha);</code></pre></fieldset></dd>
-								<dd class="parameters">
-									<dl>
-										<dt class="parameter name">filterWrapperSpan</dt>
-										<dd class="parameter type">!HTMLSpanElement</dd>
-										<dd class="parameter description"></dd>
-										<dt class="parameter name">outlineWidth</dt>
-										<dd class="parameter type">number</dd>
-										<dd class="parameter description"></dd>
-										<dt class="parameter name">outlineHeight</dt>
-										<dd class="parameter type">number</dd>
-										<dd class="parameter description"></dd>
-										<dt class="parameter name">outlineColor</dt>
-										<dd class="parameter type">!libjass.parts.Color</dd>
-										<dd class="parameter description"></dd>
-										<dt class="parameter name">primaryAlpha</dt>
-										<dd class="parameter type">number</dd>
-										<dd class="parameter description"></dd>
-									</dl>
-								</dd>
-							</dl>
-
-							<dl id="./renderers/web/span-styles.SpanStyles._setTextShadowOutlineOnSpan" class="function private">
-								<dt class="name"><a href="#./renderers/web/span-styles.SpanStyles._setTextShadowOutlineOnSpan">_setTextShadowOutlineOnSpan</a></dt>
-								<dd class="description">
-									
-								</dd>
-								<dd class="usage"><fieldset><legend /><pre><code>spanStyles._setTextShadowOutlineOnSpan(span, outlineWidth, outlineHeight, outlineColor);</code></pre></fieldset></dd>
+								<dd class="usage"><fieldset><legend /><pre><code>spanStyles._svg(span, outlineWidth, outlineHeight, outlineColor, shadowDepthX, shadowDepthY, shadowColor);</code></pre></fieldset></dd>
 								<dd class="parameters">
 									<dl>
 										<dt class="parameter name">span</dt>
@@ -9133,10 +9185,72 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 										<dt class="parameter name">outlineColor</dt>
 										<dd class="parameter type">!libjass.parts.Color</dd>
 										<dd class="parameter description"></dd>
+										<dt class="parameter name">shadowDepthX</dt>
+										<dd class="parameter type">number</dd>
+										<dd class="parameter description"></dd>
+										<dt class="parameter name">shadowDepthY</dt>
+										<dd class="parameter type">number</dd>
+										<dd class="parameter description"></dd>
+										<dt class="parameter name">shadowColor</dt>
+										<dd class="parameter type">!libjass.parts.Color</dd>
+										<dd class="parameter description"></dd>
 									</dl>
 								</dd>
 							</dl>
 
+							<dl id="./renderers/web/span-styles.SpanStyles._textShadow" class="function private">
+								<dt class="name"><a href="#./renderers/web/span-styles.SpanStyles._textShadow">_textShadow</a></dt>
+								<dd class="description">
+									
+								</dd>
+								<dd class="usage"><fieldset><legend /><pre><code>spanStyles._textShadow(span, outlineWidth, outlineHeight, outlineColor, shadowDepthX, shadowDepthY, shadowColor);</code></pre></fieldset></dd>
+								<dd class="parameters">
+									<dl>
+										<dt class="parameter name">span</dt>
+										<dd class="parameter type">!HTMLSpanElement</dd>
+										<dd class="parameter description"></dd>
+										<dt class="parameter name">outlineWidth</dt>
+										<dd class="parameter type">number</dd>
+										<dd class="parameter description"></dd>
+										<dt class="parameter name">outlineHeight</dt>
+										<dd class="parameter type">number</dd>
+										<dd class="parameter description"></dd>
+										<dt class="parameter name">outlineColor</dt>
+										<dd class="parameter type">!libjass.parts.Color</dd>
+										<dd class="parameter description"></dd>
+										<dt class="parameter name">shadowDepthX</dt>
+										<dd class="parameter type">number</dd>
+										<dd class="parameter description"></dd>
+										<dt class="parameter name">shadowDepthY</dt>
+										<dd class="parameter type">number</dd>
+										<dd class="parameter description"></dd>
+										<dt class="parameter name">shadowColor</dt>
+										<dd class="parameter type">!libjass.parts.Color</dd>
+										<dd class="parameter description"></dd>
+									</dl>
+								</dd>
+							</dl>
+
+						</dd>
+					</dl>
+				</section>
+			</section>
+			<section class="module">
+				<h1 id="./serialization">Module ./serialization</h1>
+				<section>
+					<h2>Free functions</h2>
+					<dl id="./serialization.registerClass" class="function">
+						<dt class="name"><a href="#./serialization.registerClass">registerClass</a></dt>
+						<dd class="description">
+							Registers a class as a serializable type.
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>registerClass(clazz);</code></pre></fieldset></dd>
+						<dd class="parameters">
+							<dl>
+								<dt class="parameter name">clazz</dt>
+								<dd class="parameter type">function(new:*)</dd>
+								<dd class="parameter description"></dd>
+							</dl>
 						</dd>
 					</dl>
 				</section>
@@ -9172,6 +9286,29 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 								<dd class="parameter description"></dd>
 							</dl>
 						</dd>
+					</dl>
+				</section>
+			</section>
+			<section class="module">
+				<h1 id="./types/dialogue">Module ./types/dialogue</h1>
+				<section>
+					<h2>Free functions</h2>
+					<dl id="./types/dialogue.toTime" class="function private">
+						<dt class="name"><a href="#./types/dialogue.toTime">toTime</a></dt>
+						<dd class="description">
+							Converts this string into the number of seconds it represents. This string must be in the form of hh:mm:ss.MMM
+						</dd>
+						<dd class="usage"><fieldset><legend /><pre><code>var result = toTime(str);</code></pre></fieldset></dd>
+						<dd class="parameters">
+							<dl>
+								<dt class="parameter name">str</dt>
+								<dd class="parameter type">string</dd>
+								<dd class="parameter description"></dd>
+							</dl>
+						</dd>
+						<dt>Returns</dt>
+						<dd class="return type">number</dd>
+						<dd class="return description"></dd>
 					</dl>
 				</section>
 			</section>
@@ -9420,7 +9557,7 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 									</dl>
 								</dd>
 								<dt>Returns</dt>
-								<dd class="return type">V</dd>
+								<dd class="return type">?V</dd>
 								<dd class="return description"></dd>
 							</dl>
 
@@ -9477,7 +9614,7 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 									</dl>
 								</dd>
 								<dt>Returns</dt>
-								<dd class="return type">string</dd>
+								<dd class="return type">?string</dd>
 								<dd class="return description"></dd>
 							</dl>
 
@@ -10114,96 +10251,10 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 									</dl>
 								</dd>
 								<dt>Returns</dt>
-								<dd class="return type">string</dd>
+								<dd class="return type">?string</dd>
 								<dd class="return description"></dd>
 							</dl>
 
-						</dd>
-					</dl>
-				</section>
-			</section>
-			<section class="module">
-				<h1 id="./utility/ts-helpers">Module ./utility/ts-helpers</h1>
-				<section>
-					<h2>Free functions</h2>
-					<dl id="./utility/ts-helpers.___decorate" class="function">
-						<dt class="name"><a href="#./utility/ts-helpers.___decorate">___decorate</a></dt>
-						<dd class="description">
-							Decorator shim.
-						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>var result = ___decorate(decorators, target, key);</code></pre></fieldset></dd>
-						<dd class="parameters">
-							<dl>
-								<dt class="parameter name">decorators</dt>
-								<dd class="parameter type">!Array.&lt;!Function&gt;</dd>
-								<dd class="parameter description"></dd>
-								<dt class="parameter name">target</dt>
-								<dd class="parameter type">!*</dd>
-								<dd class="parameter description"></dd>
-								<dt class="parameter name">key</dt>
-								<dd class="parameter type">string=</dd>
-								<dd class="parameter description"></dd>
-							</dl>
-						</dd>
-						<dt>Returns</dt>
-						<dd class="return type">*</dd>
-						<dd class="return description"></dd>
-					</dl>
-					<dl id="./utility/ts-helpers.___extends" class="function">
-						<dt class="name"><a href="#./utility/ts-helpers.___extends">___extends</a></dt>
-						<dd class="description">
-							Class inheritance shim.
-						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>___extends(derived, base);</code></pre></fieldset></dd>
-						<dd class="parameters">
-							<dl>
-								<dt class="parameter name">derived</dt>
-								<dd class="parameter type">!Function</dd>
-								<dd class="parameter description"></dd>
-								<dt class="parameter name">base</dt>
-								<dd class="parameter type">!Function</dd>
-								<dd class="parameter description"></dd>
-							</dl>
-						</dd>
-					</dl>
-					<dl id="./utility/ts-helpers.decorateClass" class="function private">
-						<dt class="name"><a href="#./utility/ts-helpers.decorateClass">decorateClass.&lt;T&gt;</a></dt>
-						<dd class="description">
-							Class decorator shim.
-						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>var result = decorateClass(decorators, clazz);</code></pre></fieldset></dd>
-						<dd class="parameters">
-							<dl>
-								<dt class="parameter name">decorators</dt>
-								<dd class="parameter type">!Array.&lt;function(function(new(): T)): function(new(): T)&gt;</dd>
-								<dd class="parameter description"></dd>
-								<dt class="parameter name">clazz</dt>
-								<dd class="parameter type">function(new(): T)</dd>
-								<dd class="parameter description"></dd>
-							</dl>
-						</dd>
-						<dt>Returns</dt>
-						<dd class="return type">function(new(): T)</dd>
-						<dd class="return description"></dd>
-					</dl>
-					<dl id="./utility/ts-helpers.decorateField" class="function private">
-						<dt class="name"><a href="#./utility/ts-helpers.decorateField">decorateField.&lt;T&gt;</a></dt>
-						<dd class="description">
-							Class member decorator shim.
-						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>decorateField(decorators, proto, name);</code></pre></fieldset></dd>
-						<dd class="parameters">
-							<dl>
-								<dt class="parameter name">decorators</dt>
-								<dd class="parameter type">!Array.&lt;function(T, string)&gt;</dd>
-								<dd class="parameter description"></dd>
-								<dt class="parameter name">proto</dt>
-								<dd class="parameter type">!T</dd>
-								<dd class="parameter description"></dd>
-								<dt class="parameter name">name</dt>
-								<dd class="parameter type">string</dd>
-								<dd class="parameter description"></dd>
-							</dl>
 						</dd>
 					</dl>
 				</section>
@@ -10220,7 +10271,7 @@ As a Dialogue's div is rendered, individual parts are added to span's, and this 
 						<dd class="members">
 						</dd>
 					</dl>
-					<dl id="./webworker/channel.WorkerCommunication" class="interface private">
+					<dl id="./webworker/channel.WorkerCommunication" class="interface">
 						<dt class="name">interface <a href="#./webworker/channel.WorkerCommunication">WorkerCommunication</a></dt>
 						<dd class="description">
 							The interface implemented by a communication channel to the other side.
@@ -10504,23 +10555,6 @@ When created by the web worker, this is its global object.</dd>
 				<h1 id="./webworker/misc">Module ./webworker/misc</h1>
 				<section>
 					<h2>Free functions</h2>
-					<dl id="./webworker/misc.deserialize" class="function">
-						<dt class="name"><a href="#./webworker/misc.deserialize">deserialize</a></dt>
-						<dd class="description">
-							
-						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>var result = deserialize(str);</code></pre></fieldset></dd>
-						<dd class="parameters">
-							<dl>
-								<dt class="parameter name">str</dt>
-								<dd class="parameter type">string</dd>
-								<dd class="parameter description"></dd>
-							</dl>
-						</dd>
-						<dt>Returns</dt>
-						<dd class="return type">*</dd>
-						<dd class="return description"></dd>
-					</dl>
 					<dl id="./webworker/misc.getWorkerCommandHandler" class="function">
 						<dt class="name"><a href="#./webworker/misc.getWorkerCommandHandler">getWorkerCommandHandler</a></dt>
 						<dd class="description">
@@ -10538,20 +10572,6 @@ When created by the web worker, this is its global object.</dd>
 						<dd class="return type">?function(*, function(*, *))</dd>
 						<dd class="return description"></dd>
 					</dl>
-					<dl id="./webworker/misc.registerClassPrototype" class="function">
-						<dt class="name"><a href="#./webworker/misc.registerClassPrototype">registerClassPrototype</a></dt>
-						<dd class="description">
-							Registers a prototype as a deserializable type.
-						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>registerClassPrototype(prototype);</code></pre></fieldset></dd>
-						<dd class="parameters">
-							<dl>
-								<dt class="parameter name">prototype</dt>
-								<dd class="parameter type">!*</dd>
-								<dd class="parameter description"></dd>
-							</dl>
-						</dd>
-					</dl>
 					<dl id="./webworker/misc.registerWorkerCommand" class="function">
 						<dt class="name"><a href="#./webworker/misc.registerWorkerCommand">registerWorkerCommand</a></dt>
 						<dd class="description">
@@ -10568,23 +10588,6 @@ When created by the web worker, this is its global object.</dd>
 								<dd class="parameter description">The handler. A function of the form (parameters: *, response: function(error: *, result: *): void): void</dd>
 							</dl>
 						</dd>
-					</dl>
-					<dl id="./webworker/misc.serialize" class="function">
-						<dt class="name"><a href="#./webworker/misc.serialize">serialize</a></dt>
-						<dd class="description">
-							
-						</dd>
-						<dd class="usage"><fieldset><legend /><pre><code>var result = serialize(obj);</code></pre></fieldset></dd>
-						<dd class="parameters">
-							<dl>
-								<dt class="parameter name">obj</dt>
-								<dd class="parameter type">*</dd>
-								<dd class="parameter description"></dd>
-							</dl>
-						</dd>
-						<dt>Returns</dt>
-						<dd class="return type">string</dd>
-						<dd class="return description"></dd>
 					</dl>
 				</section>
 			</section>
