@@ -560,3 +560,7 @@ var htmlConsoleError = function (htmlConsole) {
 		message.appendChild(document.createTextNode(text));
 	};
 };
+
+addEventListener("error", function (event) {
+	console.error(event.message, event.error);
+});
