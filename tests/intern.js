@@ -49,6 +49,11 @@ define(["intern"], function (intern) {
 				main: (intern.args.minified === "true") ? "libjass.min" : "libjass",
 			}]
 		},
+		instrumenterOptions: {
+			codeGenerationOptions: {
+				verbatim: "raw",
+			},
+		},
 		excludeInstrumentation: /^(?:tests|node_modules)\//,
 		tunnel: "NullTunnel",
 		environments: [

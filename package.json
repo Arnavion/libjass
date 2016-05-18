@@ -27,7 +27,7 @@
 	"devDependencies": {
 		"async": "1.x >=1.4",
 		"async-build": "0.3.0",
-		"intern": "3.0.x >=3.0.1",
+		"intern": "3.x >=3.2.0",
 		"npm": "3.x",
 		"pngjs": "2.2.0",
 		"sax": "1.x",
