@@ -137,6 +137,7 @@ You can also join the IRC channel in the links section below and ask any questio
 * \an4, \an5, \an6 aren't positioned correctly.
 * Smart line wrapping is not supported. Such lines are rendered as [wrapping style 1 (end-of-line wrapping).](http://docs.aegisub.org/3.0/ASS_Tags/#wrapstyle)
 * Lines with multiple rotations aren't rotated the same as VSFilter or libass. See [#14](https://github.com/Arnavion/libjass/issues/14)
+- Desktop renderers include borders when calculating space between adjacent lines. libjass doesn't.
 
 
 ### Links
