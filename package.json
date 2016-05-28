@@ -29,7 +29,7 @@
 		"async-build": "0.3.0",
 		"intern": "3.x >=3.2.0",
 		"npm": "3.x",
-		"pngjs": "2.2.0",
+		"pngjs": "2.3.1",
 		"sax": "1.x",
 		"typescript": "1.8.10",
 		"uglify-js": "2.x >=2.4.24"
