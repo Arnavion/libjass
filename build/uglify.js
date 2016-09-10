@@ -95,7 +95,7 @@ var Run = (function () {
 				}
 
 				insertionParent.splice(-1, 0, node);
-				this._toInsert.pop();
+				this._toInsert.splice(i, 1);
 			}
 		}
 
