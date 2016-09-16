@@ -41,10 +41,10 @@ import { ManualClock } from "./manual";
 export class AutoClock implements Clock {
 	private _manualClock: ManualClock = new ManualClock();
 
-	private _nextAnimationFrameRequestId: number = null;
+	private _nextAnimationFrameRequestId: number | null = null;
 
-	private _lastKnownExternalTime: number = null;
-	private _lastKnownExternalTimeObtainedAt: number = null;
+	private _lastKnownExternalTime: number | null = null;
+	private _lastKnownExternalTimeObtainedAt: number | null = null;
 
 	constructor(private _getCurrentTime: () => number, private _autoPauseAfter: number) { }
 

@@ -65,7 +65,7 @@ export interface Stream {
 	/**
 	 * @return {!Promise.<?string>} A promise that will be resolved with the next line, or null if the stream is exhausted.
 	 */
-	nextLine(): Promise<string>;
+	nextLine(): Promise<string | null>;
 }
 
 /**
@@ -81,8 +81,8 @@ export class StringStream implements Stream {
 	/**
 	 * @return {!Promise.<?string>} A promise that will be resolved with the next line, or null if the string has been completely read.
 	 */
-	nextLine(): Promise<string> {
-		let result: Promise<string>;
+	nextLine(): Promise<string | null> {
+		let result: Promise<string | null>;
 
 		if (this._readTill < this._str.length) {
 			const nextNewLinePos = this._str.indexOf("\n", this._readTill);
@@ -96,7 +96,7 @@ export class StringStream implements Stream {
 			}
 		}
 		else {
-			result = Promise.resolve<string>(null);
+			result = Promise.resolve<string | null>(null);
 		}
 
 		return result;
@@ -111,8 +111,8 @@ export class StringStream implements Stream {
  */
 export class XhrStream implements Stream {
 	private _readTill: number = 0;
-	private _pendingDeferred: DeferredPromise<string> = null;
-	private _failedError: ErrorEvent = null;
+	private _pendingDeferred: DeferredPromise<string | null> | null = null;
+	private _failedError: ErrorEvent | null = null;
 
 	constructor(private _xhr: XMLHttpRequest) {
 		_xhr.addEventListener("progress", () => this._onXhrProgress(), false);
@@ -181,7 +181,7 @@ export class XhrStream implements Stream {
 	 */
 	private _tryResolveNextLine(): void {
 		if (this._failedError !== null) {
-			this._pendingDeferred.reject(this._failedError);
+			this._pendingDeferred!.reject(this._failedError);
 			return;
 		}
 
@@ -189,23 +189,23 @@ export class XhrStream implements Stream {
 
 		const nextNewLinePos = response.indexOf("\n", this._readTill);
 		if (nextNewLinePos !== -1) {
-			this._pendingDeferred.resolve(response.substring(this._readTill, nextNewLinePos));
+			this._pendingDeferred!.resolve(response.substring(this._readTill, nextNewLinePos));
 			this._readTill = nextNewLinePos + 1;
 			this._pendingDeferred = null;
 		}
 
 		else if (this._xhr.readyState === XMLHttpRequest.DONE) {
 			if (this._failedError !== null) {
-				this._pendingDeferred.reject(this._failedError);
+				this._pendingDeferred!.reject(this._failedError);
 			}
 
 			// No more data. This is the last line.
 			else if (this._readTill < response.length) {
-				this._pendingDeferred.resolve(response.substr(this._readTill));
+				this._pendingDeferred!.resolve(response.substr(this._readTill));
 				this._readTill = response.length;
 			}
 			else {
-				this._pendingDeferred.resolve(null);
+				this._pendingDeferred!.resolve(null);
 			}
 
 			this._pendingDeferred = null;
@@ -223,11 +223,11 @@ export class BrowserReadableStream implements Stream {
 	private _reader: ReadableStreamReader;
 	private _decoder: TextDecoder;
 	private _buffer: string = "";
-	private _pendingDeferred: DeferredPromise<string> = null;
+	private _pendingDeferred: DeferredPromise<string | null> | null = null;
 
 	constructor(stream: ReadableStream, encoding: string) {
 		this._reader = stream.getReader();
-		this._decoder = new global.TextDecoder(encoding, { ignoreBOM: true });
+		this._decoder = new global.TextDecoder!(encoding, { ignoreBOM: true });
 	}
 
 	/**
@@ -250,7 +250,7 @@ export class BrowserReadableStream implements Stream {
 	private _tryResolveNextLine(): void {
 		const nextNewLinePos = this._buffer.indexOf("\n");
 		if (nextNewLinePos !== -1) {
-			this._pendingDeferred.resolve(this._buffer.substr(0, nextNewLinePos));
+			this._pendingDeferred!.resolve(this._buffer.substr(0, nextNewLinePos));
 			this._buffer = this._buffer.substr(nextNewLinePos + 1);
 			this._pendingDeferred = null;
 		}
@@ -266,10 +266,10 @@ export class BrowserReadableStream implements Stream {
 				else {
 					// No more data.
 					if (this._buffer.length === 0) {
-						this._pendingDeferred.resolve(null);
+						this._pendingDeferred!.resolve(null);
 					}
 					else {
-						this._pendingDeferred.resolve(this._buffer);
+						this._pendingDeferred!.resolve(this._buffer);
 						this._buffer = "";
 					}
 

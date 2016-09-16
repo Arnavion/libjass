@@ -18,15 +18,6 @@
  * limitations under the License.
  */
 
-declare const global: {
-	Promise?: typeof Promise;
-	MutationObserver?: typeof MutationObserver;
-	WebkitMutationObserver?: typeof MutationObserver;
-	process?: {
-		nextTick(callback: () => void): void;
-	}
-};
-
 export interface Thenable<T> {
 	/** @type {function(this:!Thenable.<T>, function(T|!Thenable.<T>), function(*))} */
 	then: ThenableThen<T>;
@@ -34,37 +25,38 @@ export interface Thenable<T> {
 
 export interface ThenableThen<T> {
 	/** @type {function(this:!Thenable.<T>, function(T|!Thenable.<T>), function(*))} */
-	(resolve: (resolution: T | Thenable<T>) => void, reject: (reason: any) => void): void;
+	(this: Thenable<T>, resolve: ((resolution: T | Thenable<T>) => void) | undefined, reject: ((reason: any) => void) | undefined): void;
 }
 
 export interface Promise<T> extends Thenable<T> {
 	/**
-	 * @param {?function(T):!Thenable.<U>} onFulfilled
+	 * @param {function(T):!Thenable.<U>} onFulfilled
 	 * @param {?function(*):(U|!Thenable.<U>)} onRejected
 	 * @return {!Promise.<U>}
 	 */
-	then<U>(onFulfilled?: (value: T) => Thenable<U>, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
+	then<U>(onFulfilled: (value: T) => Thenable<U> | undefined, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
 
 	/**
-	 * @param {?function(T):U} onFulfilled
+	 * @param {function(T):U} onFulfilled
 	 * @param {?function(*):(U|!Thenable.<U>)} onRejected
 	 * @return {!Promise.<U>}
 	 */
-	then<U>(onFulfilled?: (value: T) => U, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
+	then<U>(onFulfilled: (value: T) => U | undefined, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
 
 	/**
 	 * @param {function(*):(T|!Thenable.<T>)} onRejected
 	 * @return {!Promise.<T>}
 	 */
-	catch(onRejected?: (reason: any) => T | Thenable<T>): Promise<T>;
+	catch(onRejected: (reason: any) => T | Thenable<T>): Promise<T>;
 }
 
 // Based on https://github.com/petkaantonov/bluebird/blob/1b1467b95442c12378d0ea280ede61d640ab5510/src/schedule.js
 const enqueueJob: (callback: () => void) => void = (function () {
 	const MutationObserver = global.MutationObserver || global.WebkitMutationObserver;
 	if (global.process !== undefined && typeof global.process.nextTick === "function") {
+		const process = global.process;
 		return (callback: () => void) => {
-			global.process.nextTick(callback);
+			process.nextTick(callback);
 		};
 	}
 	else if (MutationObserver !== undefined) {
@@ -115,7 +107,7 @@ class SimplePromise<T> {
 	private _fulfillReactions: FulfilledPromiseReaction<T, any>[] = [];
 	private _rejectReactions: RejectedPromiseReaction<any>[] = [];
 
-	private _fulfilledValue: T = null;
+	private _fulfilledValue: T | null = null;
 	private _rejectedReason: any = null;
 
 	constructor(executor: (resolve: (resolution: T | Thenable<T>) => void, reject: (reason: any) => void) => void) {
@@ -137,7 +129,7 @@ class SimplePromise<T> {
 	 * @param {?function(*):(U|!Thenable.<U>)} onRejected
 	 * @return {!Promise.<U>}
 	 */
-	then<U>(onFulfilled: (value: T) => U | Thenable<U>, onRejected: (reason: any) => U | Thenable<U>): Promise<U> {
+	then<U>(onFulfilled: ((value: T) => U | Thenable<U>) | undefined, onRejected?: (reason: any) => U | Thenable<U>): Promise<U> {
 		const resultCapability = new DeferredPromise<U>();
 
 		if (typeof onFulfilled !== "function") {
@@ -165,7 +157,7 @@ class SimplePromise<T> {
 				break;
 
 			case SimplePromiseState.FULFILLED:
-				this._enqueueFulfilledReactionJob(fulfillReaction, this._fulfilledValue);
+				this._enqueueFulfilledReactionJob(fulfillReaction, this._fulfilledValue!);
 				break;
 
 			case SimplePromiseState.REJECTED:
@@ -180,8 +172,8 @@ class SimplePromise<T> {
 	 * @param {function(*):(T|!Thenable.<T>)} onRejected
 	 * @return {!Promise.<T>}
 	 */
-	catch(onRejected?: (reason: any) => T | Thenable<T>): Promise<T> {
-		return this.then(null, onRejected);
+	catch(onRejected: (reason: any) => T | Thenable<T>): Promise<T> {
+		return this.then(undefined, onRejected);
 	}
 
 	/**
@@ -403,6 +395,15 @@ export var Promise: {
 	race<T>(values: (T | Thenable<T>)[]): Promise<T>;
 } = global.Promise || SimplePromise;
 
+declare var global: {
+	Promise?: typeof Promise;
+	MutationObserver?: typeof MutationObserver;
+	WebkitMutationObserver?: typeof MutationObserver;
+	process?: {
+		nextTick(callback: () => void): void;
+	}
+};
+
 interface FulfilledPromiseReaction<T, U> {
 	/** @type {!libjass.DeferredPromise.<U>} */
 	capabilities: DeferredPromise<U>;
@@ -439,7 +440,7 @@ enum SimplePromiseState {
  *
  * @param {?function(new:Promise)} value
  */
-export function setImplementation(value: typeof Promise): void {
+export function setImplementation(value: typeof Promise | null): void {
 	if (value !== null) {
 		Promise = value;
 	}

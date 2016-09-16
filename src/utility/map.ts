@@ -18,16 +18,12 @@
  * limitations under the License.
  */
 
-declare const global: {
-	Map?: typeof Map;
-};
-
 export interface Map<K, V> {
 	/**
 	 * @param {K} key
 	 * @return {?V}
 	 */
-	get(key: K): V;
+	get(key: K): V | undefined;
 
 	/**
 	 * @param {K} key
@@ -40,7 +36,7 @@ export interface Map<K, V> {
 	 * @param {V} value
 	 * @return {libjass.Map.<K, V>} This map
 	 */
-	set(key: K, value?: V): Map<K, V>;
+	set(key: K, value: V): this;
 
 	/**
 	 * @param {K} key
@@ -56,7 +52,7 @@ export interface Map<K, V> {
 	 * @param {function(V, K, libjass.Map.<K, V>)} callbackfn A function that is called with each key and value in the map.
 	 * @param {*} thisArg
 	 */
-	forEach(callbackfn: (value: V, index: K, map: Map<K, V>) => void, thisArg?: any): void;
+	forEach(callbackfn: (value: V, index: K, map: this) => void, thisArg?: any): void;
 
 	/**
 	 * @type {number}
@@ -71,7 +67,7 @@ export interface Map<K, V> {
  *
  * @param {!Array.<!Array.<*>>=} iterable Only an array of elements (where each element is a 2-tuple of key and value) is supported.
  */
-class SimpleMap<K, V> {
+class SimpleMap<K, V> implements Map<K, V> {
 	private _keys: { [key: string]: K };
 	private _values: { [key: string]: V };
 	private _size: number;
@@ -96,7 +92,7 @@ class SimpleMap<K, V> {
 	 * @param {K} key
 	 * @return {?V}
 	 */
-	get(key: K): V {
+	get(key: K): V | undefined {
 		const property = this._keyToProperty(key);
 
 		if (property === null) {
@@ -125,7 +121,7 @@ class SimpleMap<K, V> {
 	 * @param {V} value
 	 * @return {libjass.Map.<K, V>} This map
 	 */
-	set(key: K, value: V): Map<K, V> {
+	set(key: K, value: V): this {
 		const property = this._keyToProperty(key);
 
 		if (property === null) {
@@ -176,7 +172,7 @@ class SimpleMap<K, V> {
 	 * @param {function(V, K, libjass.Map.<K, V>)} callbackfn A function that is called with each key and value in the map.
 	 * @param {*} thisArg
 	 */
-	forEach(callbackfn: (value: V, index: K, map: Map<K, V>) => void, thisArg?: any): void {
+	forEach(callbackfn: (value: V, index: K, map: this) => void, thisArg?: any): void {
 		for (const property of Object.keys(this._keys)) {
 			callbackfn.call(thisArg, this._values[property], this._keys[property], this);
 		}
@@ -195,7 +191,7 @@ class SimpleMap<K, V> {
 	 * @param {K} key
 	 * @return {?string}
 	 */
-	private _keyToProperty(key: K): string {
+	private _keyToProperty(key: K): string | null {
 		if (typeof key === "number") {
 			return `#${ key }`;
 		}
@@ -237,12 +233,16 @@ if (typeof Map.prototype.forEach !== "function" || (() => {
 	Map = SimpleMap;
 }
 
+declare var global: {
+	Map?: typeof Map;
+};
+
 /**
  * Sets the Map implementation used by libjass to the provided one. If null, {@link ./utility/map.SimpleMap} is used.
  *
  * @param {?function(new:Map, !Array.<!Array.<*>>=)} value
  */
-export function setImplementation(value: typeof Map): void {
+export function setImplementation(value: typeof Map | null): void {
 	if (value !== null) {
 		Map = value;
 	}

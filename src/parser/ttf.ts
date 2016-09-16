@@ -103,7 +103,7 @@ export function getTtfNames(attachment: Attachment): Set<string> {
 	const reader = { dataView: new DataView(bytes.buffer), position: 0 };
 
 	const offsetTable = OffsetTable.read(reader);
-	let nameTableRecord: TableRecord = null;
+	let nameTableRecord: TableRecord | null = null;
 	for (let i = 0; i < offsetTable.numTables; i++) {
 		const tableRecord = TableRecord.read(reader);
 		if (tableRecord.c1 + tableRecord.c2 + tableRecord.c3 + tableRecord.c4 === "name") {

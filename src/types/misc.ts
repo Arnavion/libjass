@@ -84,7 +84,7 @@ export interface TypedTemplate {
  * @param {T} defaultValue
  * @return {T}
  */
-export function valueOrDefault<T>(template: Map<string, string>, key: string, converter: (str: string) => T, validator: (value: T) => boolean, defaultValue: string): T {
+export function valueOrDefault<T>(template: Map<string, string>, key: string, converter: (str: string) => T, validator: ((value: T) => boolean) | null, defaultValue: string): T {
 	const value = template.get(key);
 	if (value === undefined) {
 		return converter(defaultValue);

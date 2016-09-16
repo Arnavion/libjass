@@ -41,6 +41,6 @@ export function registerWorkerCommand(command: WorkerCommands, handler: WorkerCo
  * @param {number} command
  * @return {?function(*, function(*, *))}
  */
-export function getWorkerCommandHandler(command: WorkerCommands): WorkerCommandHandler {
+export function getWorkerCommandHandler(command: WorkerCommands): WorkerCommandHandler | undefined {
 	return workerCommands.get(command);
 }

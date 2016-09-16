@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 
-import * as path from "path";
-import * as ts from "typescript";
+import path = require("path");
+import ts = require("typescript");
 
 import { Compiler, oldGetLeadingCommentRangesOfNodeFromText } from "./compiler";
 
@@ -68,13 +68,13 @@ class Walker {
 	}
 
 	walk(sourceFile: ts.SourceFile): void {
-		var moduleName = this._moduleNameFromFileName(sourceFile.fileName);
+		const moduleName = this._moduleNameFromFileName(sourceFile.fileName);
 
 		if (!(moduleName in this.modules)) {
 			this.modules[moduleName] = new AST.Module(moduleName);
 		}
 
-		var module = this._scope.enter(this.modules[moduleName]);
+		const module = this._scope.enter(this.modules[moduleName]);
 		this._currentSourceFile = sourceFile;
 
 		for (const statement of sourceFile.statements) {
@@ -87,31 +87,31 @@ class Walker {
 	private _walk(node: ts.Node, parent: AST.Module): void {
 		switch (node.kind) {
 			case ts.SyntaxKind.VariableStatement:
-				this._visitVariableStatement(<ts.VariableStatement>node, parent);
+				this._visitVariableStatement(node as ts.VariableStatement, parent);
 				break;
 
 			case ts.SyntaxKind.FunctionDeclaration:
-				this._visitFunctionDeclaration(<ts.FunctionDeclaration>node, parent);
+				this._visitFunctionDeclaration(node as ts.FunctionDeclaration, parent);
 				break;
 
 			case ts.SyntaxKind.ClassDeclaration:
-				this._visitClassDeclaration(<ts.ClassDeclaration>node, parent);
+				this._visitClassDeclaration(node as ts.ClassDeclaration, parent);
 				break;
 
 			case ts.SyntaxKind.InterfaceDeclaration:
-				this._visitInterfaceDeclaration(<ts.InterfaceDeclaration>node, parent);
+				this._visitInterfaceDeclaration(node as ts.InterfaceDeclaration, parent);
 				break;
 
 			case ts.SyntaxKind.EnumDeclaration:
-				this._visitEnumDeclaration(<ts.EnumDeclaration>node, parent);
+				this._visitEnumDeclaration(node as ts.EnumDeclaration, parent);
 				break;
 
 			case ts.SyntaxKind.ImportDeclaration:
-				this._visitImportDeclaration(<ts.ImportDeclaration>node, parent);
+				this._visitImportDeclaration(node as ts.ImportDeclaration, parent);
 				break;
 
 			case ts.SyntaxKind.ExportDeclaration:
-				this._visitExportDeclaration(<ts.ExportDeclaration>node, parent);
+				this._visitExportDeclaration(node as ts.ExportDeclaration, parent);
 				break;
 
 			case ts.SyntaxKind.ExpressionStatement:
@@ -121,7 +121,7 @@ class Walker {
 				break;
 
 			default:
-				console.error(node.kind, (<any>ts).SyntaxKind[node.kind], node);
+				console.error(node.kind, ts.SyntaxKind[node.kind], node);
 				throw new Error("Unrecognized node.");
 		}
 	}
@@ -130,20 +130,20 @@ class Walker {
 		switch (node.kind) {
 			case ts.SyntaxKind.PropertySignature:
 			case ts.SyntaxKind.PropertyDeclaration:
-				this._visitProperty(<ts.PropertyDeclaration>node, clazz);
+				this._visitProperty(node as ts.PropertyDeclaration, clazz);
 				break;
 
 			case ts.SyntaxKind.MethodSignature:
 			case ts.SyntaxKind.MethodDeclaration:
-				this._visitMethod(<ts.MethodDeclaration>node, clazz);
+				this._visitMethod(node as ts.MethodDeclaration, clazz);
 				break;
 
 			case ts.SyntaxKind.GetAccessor:
-				this._visitGetAccessor(<ts.AccessorDeclaration>node, clazz);
+				this._visitGetAccessor(node as ts.AccessorDeclaration, clazz);
 				break;
 
 			case ts.SyntaxKind.SetAccessor:
-				this._visitSetAccessor(<ts.AccessorDeclaration>node, clazz);
+				this._visitSetAccessor(node as ts.AccessorDeclaration, clazz);
 				break;
 
 			case ts.SyntaxKind.TypeParameter:
@@ -152,7 +152,7 @@ class Walker {
 				break;
 
 			default:
-				console.error(node.kind, (<any>ts).SyntaxKind[node.kind], node);
+				console.error(node.kind, ts.SyntaxKind[node.kind], node);
 				throw new Error("Unrecognized node.");
 		}
 	}
@@ -161,12 +161,12 @@ class Walker {
 		switch (node.kind) {
 			case ts.SyntaxKind.PropertySignature:
 			case ts.SyntaxKind.PropertyDeclaration:
-				this._visitProperty(<ts.PropertyDeclaration>node, interfase);
+				this._visitProperty(node as ts.PropertyDeclaration, interfase);
 				break;
 
 			case ts.SyntaxKind.MethodSignature:
 			case ts.SyntaxKind.MethodDeclaration:
-				this._visitMethod(<ts.MethodDeclaration>node, interfase);
+				this._visitMethod(node as ts.MethodDeclaration, interfase);
 				break;
 
 			case ts.SyntaxKind.TypeParameter:
@@ -176,24 +176,24 @@ class Walker {
 				break;
 
 			default:
-				console.error(node.kind, (<any>ts).SyntaxKind[node.kind], node);
+				console.error(node.kind, ts.SyntaxKind[node.kind], node);
 				throw new Error("Unrecognized node.");
 		}
 	}
 
 	private _visitProperty(node: ts.PropertyDeclaration, parent: AST.Class | AST.Interface) {
-		if ((node.flags & ts.NodeFlags.Private) === ts.NodeFlags.Private) {
+		if (ts.hasModifier(node, ts.ModifierFlags.Private)) {
 			return;
 		}
 
-		var jsDoc = this._parseJSDoc(node);
+		const jsDoc = this._parseJSDoc(node);
 
 		if (jsDoc.typeAnnotation === null) {
 			this._notifyIncorrectJsDoc(`Field ${ ts.getTextOfNode(node.name) } has no @type annotation.`);
 			jsDoc.typeAnnotation = "*";
 		}
 
-		var property = this._scope.enter(new AST.Property(ts.getTextOfNode(node.name)));
+		const property = this._scope.enter(new AST.Property(ts.getTextOfNode(node.name)));
 		parent.members[property.name] = property;
 		property.getter = new AST.Getter(node, jsDoc.description, jsDoc.typeAnnotation, false);
 		property.setter = new AST.Setter(node, jsDoc.description, jsDoc.typeAnnotation, false);
@@ -201,9 +201,9 @@ class Walker {
 	}
 
 	private _visitMethod(node: ts.MethodDeclaration, parent: AST.Class | AST.Interface) {
-		var jsDoc = this._parseJSDoc(node);
+		const jsDoc = this._parseJSDoc(node);
 
-		var parameters = this._connectParameters(node.parameters, jsDoc.parameters,
+		const parameters = this._connectParameters(node.parameters, jsDoc.parameters,
 			parameterName => `Could not find @param annotation for ${ parameterName } on method ${ ts.getTextOfNode(node.name) }`
 		);
 
@@ -212,25 +212,25 @@ class Walker {
 			jsDoc.returnType = new AST.ReturnType("", "*");
 		}
 
-		var isPrivate = (node.flags & ts.NodeFlags.Private) === ts.NodeFlags.Private;
-		var isProtected = (node.flags & ts.NodeFlags.Protected) === ts.NodeFlags.Protected;
-		var isStatic = (node.flags & ts.NodeFlags.Static) === ts.NodeFlags.Static;
+		const isPrivate = ts.hasModifier(node, ts.ModifierFlags.Private);
+		const isProtected = ts.hasModifier(node, ts.ModifierFlags.Protected);
+		const isStatic = ts.hasModifier(node, ts.ModifierFlags.Static);
 
-		var generics = this._getGenericsOfSignatureDeclaration(node);
+		const generics = this._getGenericsOfSignatureDeclaration(node);
 
-		var method = this._scope.enter(new AST.Function(ts.getTextOfNode(node.name), node, jsDoc.description, generics, parameters, jsDoc.returnType, jsDoc.isAbstract, isPrivate, isProtected, isStatic));
+		const method = this._scope.enter(new AST.Function(ts.getTextOfNode(node.name), node, jsDoc.description, generics, parameters, jsDoc.returnType, jsDoc.isAbstract, isPrivate, isProtected, isStatic));
 		parent.members[method.name] = method;
 		this._scope.leave();
 	}
 
 	private _visitGetAccessor(node: ts.AccessorDeclaration, clazz: AST.Class): void {
-		var jsDoc = this._parseJSDoc(node);
+		const jsDoc = this._parseJSDoc(node);
 
-		var name = ts.getTextOfNode(node.name);
+		const name = ts.getTextOfNode(node.name);
 
-		var isPrivate = (node.flags & ts.NodeFlags.Private) === ts.NodeFlags.Private;
+		const isPrivate = ts.hasModifier(node, ts.ModifierFlags.Private);
 
-		var property = <AST.Property>clazz.members[name];
+		let property = clazz.members[name] as AST.Property;
 		if (property === undefined) {
 			this._scope.enter(property = new AST.Property(name));
 
@@ -247,13 +247,13 @@ class Walker {
 	}
 
 	private _visitSetAccessor(node: ts.AccessorDeclaration, clazz: AST.Class): void {
-		var jsDoc = this._parseJSDoc(node);
+		const jsDoc = this._parseJSDoc(node);
 
-		var name = ts.getTextOfNode(node.name);
+		const name = ts.getTextOfNode(node.name);
 
-		var isPrivate = (node.flags & ts.NodeFlags.Private) === ts.NodeFlags.Private;
+		const isPrivate = ts.hasModifier(node, ts.ModifierFlags.Private);
 
-		var property = <AST.Property>clazz.members[name];
+		let property = clazz.members[name] as AST.Property;
 		if (property === undefined) {
 			this._scope.enter(property = new AST.Property(name));
 
@@ -274,17 +274,17 @@ class Walker {
 			return;
 		}
 
-		var declaration = node.declarationList.declarations[0];
-		if ((declaration.flags & ts.NodeFlags.Ambient) === ts.NodeFlags.Ambient) {
+		const declaration = node.declarationList.declarations[0];
+		if (ts.hasModifier(declaration, ts.ModifierFlags.Ambient)) {
 			return;
 		}
 
-		var jsDoc = this._parseJSDoc(node);
+		const jsDoc = this._parseJSDoc(node);
 		if (jsDoc.typeAnnotation === null) {
 			return;
 		}
 
-		var property = this._scope.enter(new AST.Property(ts.getTextOfNode(declaration.name)));
+		const property = this._scope.enter(new AST.Property(ts.getTextOfNode(declaration.name)));
 		property.getter = new AST.Getter(node, jsDoc.description, jsDoc.typeAnnotation, false);
 
 		parent.members[property.name] = property;
@@ -293,13 +293,13 @@ class Walker {
 	}
 
 	private _visitFunctionDeclaration(node: ts.FunctionDeclaration, parent: AST.Module): void {
-		var jsDoc = this._parseJSDoc(node);
+		const jsDoc = this._parseJSDoc(node);
 
-		var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
+		const isPrivate = !ts.hasModifier(node, ts.ModifierFlags.Export);
 
-		var generics = this._getGenericsOfSignatureDeclaration(node);
+		const generics = this._getGenericsOfSignatureDeclaration(node);
 
-		var parameters = this._connectParameters(node.parameters, jsDoc.parameters,
+		const parameters = this._connectParameters(node.parameters, jsDoc.parameters,
 			parameterName => `Could not find @param annotation for ${ parameterName } on function ${ node.name.text }`
 		);
 
@@ -312,7 +312,7 @@ class Walker {
 			jsDoc.returnType = new AST.ReturnType("", "*");
 		}
 
-		var freeFunction = this._scope.enter(new AST.Function(node.name.text, node, jsDoc.description, generics, parameters, jsDoc.returnType, jsDoc.isAbstract, isPrivate, false, false));
+		const freeFunction = this._scope.enter(new AST.Function(node.name.text, node, jsDoc.description, generics, parameters, jsDoc.returnType, jsDoc.isAbstract, isPrivate, false, false));
 
 		parent.members[freeFunction.name] = freeFunction;
 
@@ -320,32 +320,32 @@ class Walker {
 	}
 
 	private _visitClassDeclaration(node: ts.ClassDeclaration, parent: AST.Module): void {
-		var jsDoc = this._parseJSDoc(node);
+		const jsDoc = this._parseJSDoc(node);
 
-		var baseTypeHeritageClauseElement = ts.getClassExtendsHeritageClauseElement(node) || null;
-		var baseType: AST.UnresolvedType = null;
+		const type = this._typeChecker.getTypeAtLocation(node) as ts.InterfaceType;
+
+		const generics = this._getGenericsOfInterfaceType(type);
+
+		const baseTypeHeritageClauseElement = ts.getClassExtendsHeritageClauseElement(node) || null;
+		let baseType: AST.UnresolvedType = null;
 		if (baseTypeHeritageClauseElement !== null) {
 			baseType = new AST.UnresolvedType(
 				this._typeChecker.getTypeAtLocation(baseTypeHeritageClauseElement).symbol,
-				this._getGenericsOfTypeReferenceNode(baseTypeHeritageClauseElement)
+				this._getGenericsOfTypeReferenceNode(baseTypeHeritageClauseElement, generics)
 			);
 		}
 
-		var interfaces = (ts.getClassImplementsHeritageClauseElements(node) || []).map(type => new AST.UnresolvedType(
+		const interfaces = (ts.getClassImplementsHeritageClauseElements(node) || []).map(type => new AST.UnresolvedType(
 			this._typeChecker.getTypeAtLocation(type).symbol,
-			this._getGenericsOfTypeReferenceNode(type)
+			this._getGenericsOfTypeReferenceNode(type, generics)
 		));
 
-		var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
+		const isPrivate = !ts.hasModifier(node, ts.ModifierFlags.Export);
 
-		var type = <ts.InterfaceType>this._typeChecker.getTypeAtLocation(node);
-
-		var generics = this._getGenericsOfInterfaceType(type);
-
-		var parameters: AST.Parameter[] = [];
+		let parameters: AST.Parameter[] = [];
 
 		if (type.symbol.members["__constructor"] !== undefined) {
-			parameters = this._connectParameters((<ts.ConstructorDeclaration>type.symbol.members["__constructor"].declarations[0]).parameters, jsDoc.parameters,
+			parameters = this._connectParameters((type.symbol.members["__constructor"].declarations[0] as ts.ConstructorDeclaration).parameters, jsDoc.parameters,
 				parameterName => `Could not find @param annotation for ${ parameterName } on constructor in class ${ node.name.text }`
 			);
 		}
@@ -353,11 +353,11 @@ class Walker {
 			this._notifyIncorrectJsDoc("There are @param annotations on this class but it has no constructors.");
 		}
 
-		var clazz = this._scope.enter(new AST.Class(node.name.text, node, jsDoc.description, generics, parameters, baseType, interfaces, jsDoc.isAbstract, isPrivate));
+		const clazz = this._scope.enter(new AST.Class(node.name.text, node, jsDoc.description, generics, parameters, baseType, interfaces, jsDoc.isAbstract, isPrivate));
 
 		parent.members[clazz.name] = clazz;
 
-		ts.forEachValue(type.symbol.exports, symbol => {
+		ts.forEachProperty(type.symbol.exports, symbol => {
 			if (symbol.name === "prototype") {
 				return;
 			}
@@ -367,7 +367,7 @@ class Walker {
 			}
 		});
 
-		ts.forEachValue(type.symbol.members, symbol => {
+		ts.forEachProperty(type.symbol.members, symbol => {
 			for (const declaration of symbol.declarations) {
 				this._walkClassMember(declaration, clazz);
 			}
@@ -377,28 +377,28 @@ class Walker {
 	}
 
 	private _visitInterfaceDeclaration(node: ts.InterfaceDeclaration, parent: AST.Module): void {
-		var jsDoc = this._parseJSDoc(node);
+		const jsDoc = this._parseJSDoc(node);
 
-		var baseTypes = (ts.getInterfaceBaseTypeNodes(node) || []).map(type => new AST.UnresolvedType(
+		const type = this._typeChecker.getTypeAtLocation(node) as ts.InterfaceType;
+
+		const generics = this._getGenericsOfInterfaceType(type);
+
+		const baseTypes = (ts.getInterfaceBaseTypeNodes(node) || []).map(type => new AST.UnresolvedType(
 			this._typeChecker.getTypeAtLocation(type).symbol,
-			this._getGenericsOfTypeReferenceNode(type)
+			this._getGenericsOfTypeReferenceNode(type, generics)
 		));
 
-		var existingInterfaceType = parent.members[node.name.text];
+		const existingInterfaceType = parent.members[node.name.text];
 		if (existingInterfaceType !== undefined) {
 			return;
 		}
 
-		var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
+		const isPrivate = !ts.hasModifier(node, ts.ModifierFlags.Export);
 
-		var type = <ts.InterfaceType>this._typeChecker.getTypeAtLocation(node);
-
-		var generics = this._getGenericsOfInterfaceType(type);
-
-		var interfase = this._scope.enter(new AST.Interface(node.name.text, node, jsDoc.description, generics, baseTypes, isPrivate));
+		const interfase = this._scope.enter(new AST.Interface(node.name.text, node, jsDoc.description, generics, baseTypes, isPrivate));
 		parent.members[interfase.name] = interfase;
 
-		ts.forEachValue(type.symbol.members, symbol => {
+		ts.forEachProperty(type.symbol.members, symbol => {
 			for (const declaration of symbol.declarations) {
 				this._walkInterfaceMember(declaration, interfase);
 			}
@@ -408,33 +408,33 @@ class Walker {
 	}
 
 	private _visitEnumDeclaration(node: ts.EnumDeclaration, parent: AST.Module): void {
-		var jsDoc = this._parseJSDoc(node);
+		const jsDoc = this._parseJSDoc(node);
 
-		var existingEnumType = parent.members[node.name.text];
+		const existingEnumType = parent.members[node.name.text];
 		if (existingEnumType !== undefined) {
 			return;
 		}
 
-		var isPrivate = (node.flags & ts.NodeFlags.Export) !== ts.NodeFlags.Export;
+		const isPrivate = !ts.hasModifier(node, ts.ModifierFlags.Export);
 
-		var type = this._typeChecker.getTypeAtLocation(node);
+		const type = this._typeChecker.getTypeAtLocation(node);
 
-		var enumType = this._scope.enter(new AST.Enum(node.name.text, node, jsDoc.description, isPrivate));
+		const enumType = this._scope.enter(new AST.Enum(node.name.text, node, jsDoc.description, isPrivate));
 		parent.members[enumType.name] = enumType;
 
-		ts.forEachValue(type.symbol.exports, symbol => {
-			this._visitEnumMember(<ts.EnumMember>symbol.declarations[0], enumType);
+		ts.forEachProperty(type.symbol.exports, symbol => {
+			this._visitEnumMember(symbol.declarations[0] as ts.EnumMember, enumType);
 		});
 
 		this._scope.leave();
 	}
 
 	private _visitEnumMember(node: ts.EnumMember, parent: AST.Enum): void {
-		var jsDoc = this._parseJSDoc(node);
+		const jsDoc = this._parseJSDoc(node);
 
-		var value = (node.initializer === undefined) ? null : parseInt((<ts.LiteralExpression>node.initializer).text);
+		const value = (node.initializer === undefined) ? null : parseInt((node.initializer as ts.LiteralExpression).text);
 
-		var enumMember = this._scope.enter(new AST.EnumMember(ts.getTextOfNode(node.name), (jsDoc === null) ? "" : jsDoc.description, value));
+		const enumMember = this._scope.enter(new AST.EnumMember(ts.getTextOfNode(node.name), (jsDoc === null) ? "" : jsDoc.description, value));
 
 		parent.members.push(enumMember);
 
@@ -451,16 +451,16 @@ class Walker {
 			throw new Error("Default import is not supported.");
 		}
 
-		var moduleName = this._resolve((<ts.LiteralExpression>node.moduleSpecifier).text, parent);
+		const moduleName = this._resolve((node.moduleSpecifier as ts.LiteralExpression).text, parent);
 
-		if ((<ts.NamespaceImport>node.importClause.namedBindings).name !== undefined) {
+		if ((node.importClause.namedBindings as ts.NamespaceImport).name !== undefined) {
 			// import * as foo from "baz";
-			parent.members[(<ts.NamespaceImport>node.importClause.namedBindings).name.text] = new AST.Reference(moduleName, "*", true);
+			parent.members[(node.importClause.namedBindings as ts.NamespaceImport).name.text] = new AST.Reference(moduleName, "*", true);
 		}
-		else if ((<ts.NamedImports>node.importClause.namedBindings).elements !== undefined) {
+		else if ((node.importClause.namedBindings as ts.NamedImports).elements !== undefined) {
 			// import { foo, bar } from "baz";
-			for (const element of (<ts.NamedImports>node.importClause.namedBindings).elements) {
-				var importedName = element.propertyName && element.propertyName.text || element.name.text;
+			for (const element of (node.importClause.namedBindings as ts.NamedImports).elements) {
+				const importedName = element.propertyName && element.propertyName.text || element.name.text;
 				parent.members[element.name.text] = new AST.Reference(moduleName, importedName, true);
 			}
 		}
@@ -472,22 +472,22 @@ class Walker {
 	private _visitExportDeclaration(node: ts.ExportDeclaration, parent: AST.Module): void {
 		if (node.moduleSpecifier !== undefined) {
 			// export { foo } from "bar";
-			var moduleName = this._resolve((<ts.LiteralExpression>node.moduleSpecifier).text, parent);
+			const moduleName = this._resolve((node.moduleSpecifier as ts.LiteralExpression).text, parent);
 			for (const element of node.exportClause.elements) {
-				var importedName = element.propertyName && element.propertyName.text || element.name.text;
+				const importedName = element.propertyName && element.propertyName.text || element.name.text;
 				parent.members[element.name.text] = new AST.Reference(moduleName, importedName, false);
 			}
 		}
 		else {
 			// export { foo };
 			for (const element of node.exportClause.elements) {
-				(<AST.CanBePrivate><any>parent.members[element.name.text]).isPrivate = false;
+				(parent.members[element.name.text] as AST.CanBePrivate).isPrivate = false;
 			}
 		}
 	}
 
 	private _resolve(relativeModuleName: string, currentModule: AST.Module): string {
-		var result = ts.normalizeSlashes(path.join(currentModule.name, `../${ relativeModuleName }`));
+		let result = ts.normalizeSlashes(path.join(currentModule.name, `../${ relativeModuleName }`));
 
 		if (result[0] !== ".") {
 			result = `./${ result }`;
@@ -497,7 +497,7 @@ class Walker {
 	}
 
 	private _parseJSDoc(node: ts.Node): JSDoc {
-		var comments = oldGetLeadingCommentRangesOfNodeFromText(node, this._currentSourceFile.text);
+		let comments = oldGetLeadingCommentRangesOfNodeFromText(node, this._currentSourceFile.text);
 
 		if (comments === undefined) {
 			comments = [];
@@ -507,41 +507,41 @@ class Walker {
 			comments = [comments[comments.length - 1]];
 		}
 
-		var comment =
+		const comment =
 			(comments.length === 0) ?
 				"" :
 				this._currentSourceFile.text.substring(comments[0].pos, comments[0].end);
 
-		var commentStartIndex = comment.indexOf("/**");
-		var commentEndIndex = comment.lastIndexOf("*/");
+		const commentStartIndex = comment.indexOf("/**");
+		const commentEndIndex = comment.lastIndexOf("*/");
 
-		var lines =
+		const lines =
 			(commentStartIndex === -1 || commentEndIndex === -1) ?
 				[] :
 				comment.substring(commentStartIndex + 2, commentEndIndex).split("\n").map(line => {
-					var match = line.match(/^[ \t]*\* (.*)/);
+					const match = line.match(/^[ \t]*\* (.*)/);
 					if (match === null) {
 						return "";
 					}
 					return match[1];
 				});
 
-		var rootDescription = "";
+		let rootDescription = "";
 
-		var parameters: { [name: string]: AST.Parameter } = Object.create(null);
+		const parameters: { [name: string]: AST.Parameter } = Object.create(null);
 
-		var typeAnnotation: string = null;
+		let typeAnnotation: string = null;
 
-		var returnType: AST.ReturnType = null;
+		let returnType: AST.ReturnType = null;
 
-		var isAbstract = false;
+		let isAbstract = false;
 
-		var lastRead: { description: string } = null;
+		let lastRead: { description: string } = null;
 
 		for (const line of lines) {
-			var firstWordMatch = line.match(/^\s*(\S+)(\s*)/);
-			var firstWord = (firstWordMatch !== null) ? firstWordMatch[1] : "";
-			var remainingLine = (firstWordMatch !== null) ? line.substring(firstWordMatch[0].length) : "";
+			const firstWordMatch = line.match(/^\s*(\S+)(\s*)/);
+			const firstWord = (firstWordMatch !== null) ? firstWordMatch[1] : "";
+			let remainingLine = (firstWordMatch !== null) ? line.substring(firstWordMatch[0].length) : "";
 
 			if (firstWord[0] === "@") {
 				lastRead = null;
@@ -552,30 +552,33 @@ class Walker {
 					isAbstract = true;
 					break;
 
-				case "@param":
-					var type: string;
+				case "@param": {
+					let type: string;
 					[type, remainingLine] = this._readType(remainingLine);
 
-					var [, name, description] = remainingLine.match(/(\S+)\s*(.*)/);
+					const [, name, description] = remainingLine.match(/(\S+)\s*(.*)/);
 
-					var subParameterMatch = name.match(/^(?:(.+)\.([^\.]+))|(?:(.+)\[("[^\[\]"]+")\])$/);
+					const subParameterMatch = name.match(/^(?:(.+)\.([^\.]+))|(?:(.+)\[("[^\[\]"]+")\])$/);
 					if (subParameterMatch === null) {
 						parameters[name] = lastRead = new AST.Parameter(name, description, type);
 					}
 					else {
-						var parentName = subParameterMatch[1] || subParameterMatch[3];
-						var childName = subParameterMatch[2] || subParameterMatch[4];
-						var parentParameter = parameters[parentName];
+						const parentName = subParameterMatch[1] || subParameterMatch[3];
+						const childName = subParameterMatch[2] || subParameterMatch[4];
+						const parentParameter = parameters[parentName];
 						parentParameter.subParameters.push(lastRead = new AST.Parameter(childName, description, type));
 					}
-					break;
 
-				case "@return":
-					var [type, description] = this._readType(remainingLine);
+					break;
+				}
+
+				case "@return": {
+					const [type, description] = this._readType(remainingLine);
 
 					returnType = lastRead = new AST.ReturnType(description, type);
 
 					break;
+				}
 
 				case "@type":
 					[typeAnnotation] = this._readType(remainingLine);
@@ -606,9 +609,9 @@ class Walker {
 			return ["*", remainingLine];
 		}
 
-		var index = -1;
-		var numberOfUnterminatedBraces = 0;
-		for (var i = 0; i < remainingLine.length; i++) {
+		let index = -1;
+		let numberOfUnterminatedBraces = 0;
+		for (let i = 0; i < remainingLine.length; i++) {
 			if (remainingLine[i] === "{") {
 				numberOfUnterminatedBraces++;
 			}
@@ -626,7 +629,7 @@ class Walker {
 			throw new Error("Unterminated type specifier.");
 		}
 
-		var type = remainingLine.substr(1, index - 1);
+		const type = remainingLine.substr(1, index - 1);
 		remainingLine = remainingLine.substr(index + 1).replace(/^\s+/, "");
 
 		return [type, remainingLine];
@@ -640,16 +643,24 @@ class Walker {
 		return signatureDeclaration.typeParameters.map(typeParameter => typeParameter.name.text);
 	}
 
-	private _getGenericsOfTypeReferenceNode(typeReferenceNode: ts.ExpressionWithTypeArguments): (AST.UnresolvedType | AST.IntrinsicTypeReference)[] {
+	private _getGenericsOfTypeReferenceNode(typeReferenceNode: ts.ExpressionWithTypeArguments, intrinsicGenerics: string[]): (AST.UnresolvedType | AST.IntrinsicTypeReference)[] {
 		if (typeReferenceNode.typeArguments === undefined) {
 			return [];
 		}
 
-		var typeReference = <ts.TypeReference>this._typeChecker.getTypeAtLocation(typeReferenceNode);
+		const typeReference = this._typeChecker.getTypeAtLocation(typeReferenceNode) as ts.TypeReference;
 
 		return typeReference.typeArguments.map(typeArgument => {
-			if ((<ts.IntrinsicType>typeArgument).intrinsicName !== undefined) {
-				return new AST.IntrinsicTypeReference((<ts.IntrinsicType>typeArgument).intrinsicName);
+			if ((typeArgument as ts.IntrinsicType).intrinsicName !== undefined) {
+				return new AST.IntrinsicTypeReference((typeArgument as ts.IntrinsicType).intrinsicName);
+			}
+
+			if (typeArgument.flags & ts.TypeFlags.TypeParameter) {
+				if (intrinsicGenerics.indexOf(typeArgument.symbol.name) !== -1) {
+					return new AST.IntrinsicTypeReference(typeArgument.symbol.name);
+				}
+
+				throw new Error(`Unbound type parameter ${ typeArgument.symbol.name }`);
 			}
 
 			return new AST.UnresolvedType(typeArgument.symbol, []);
@@ -668,12 +679,12 @@ class Walker {
 
 	private _connectParameters(astParameters: ts.ParameterDeclaration[], jsDocParameters: { [name: string]: AST.Parameter }, onMissingMessageCallback: (parameterName: string) => string) {
 		return astParameters.map(parameter => {
-			var parameterName = (<ts.Identifier>parameter.name).text;
+			let parameterName = (parameter.name as ts.Identifier).text;
 			if (parameterName[0] === "_") {
 				parameterName = parameterName.substr(1);
 			}
 
-			var jsDocParameter = jsDocParameters[parameterName];
+			let jsDocParameter = jsDocParameters[parameterName];
 
 			if (jsDocParameter === undefined) {
 				this._notifyIncorrectJsDoc(onMissingMessageCallback.call(this, parameterName));
@@ -685,8 +696,8 @@ class Walker {
 	}
 
 	private _notifyIncorrectJsDoc(message: string): void {
-		var fileName = path.basename(this._currentSourceFile.fileName);
-		if (fileName === "lib.core.d.ts" || fileName === "lib.dom.d.ts") {
+		const fileName = path.basename(this._currentSourceFile.fileName);
+		if (fileName === "lib.es5.d.ts" || fileName === "lib.dom.d.ts") {
 			return;
 		}
 
@@ -695,17 +706,17 @@ class Walker {
 
 	link(rootNamespaceName: string): void {
 		for (const moduleName of Object.keys(this.modules)) {
-			var module = this.modules[moduleName];
+			const module = this.modules[moduleName];
 
 			for (const memberName of Object.keys(module.members)) {
-				var member = module.members[memberName];
+				const member = module.members[memberName];
 
 				if (member instanceof AST.Class) {
 					if (member.unresolvedBaseType instanceof AST.UnresolvedType) {
-						member.baseType = this._resolveTypeReference(<AST.UnresolvedType>member.unresolvedBaseType);
+						member.baseType = this._resolveTypeReference(member.unresolvedBaseType);
 					}
 					else {
-						member.baseType = <AST.TypeReference | AST.IntrinsicTypeReference>member.unresolvedBaseType;
+						member.baseType = member.unresolvedBaseType;
 					}
 
 					member.interfaces = member.unresolvedInterfaces.map(interfase => {
@@ -713,7 +724,7 @@ class Walker {
 							return this._resolveTypeReference(interfase);
 						}
 
-						return <AST.TypeReference | AST.IntrinsicTypeReference>interfase;
+						return interfase;
 					});
 				}
 
@@ -723,12 +734,12 @@ class Walker {
 							return this._resolveTypeReference(baseType);
 						}
 
-						return <AST.TypeReference | AST.IntrinsicTypeReference>baseType;
+						return baseType;
 					});
 				}
 
 				else if (member instanceof AST.Enum) {
-					var value = 0;
+					let value = 0;
 					for (const enumMember of member.members) {
 						if (enumMember.value === null) {
 							enumMember.value = value;
@@ -750,17 +761,17 @@ class Walker {
 
 	private _moduleToNamespace(module: AST.Module): void {
 		for (const memberName of Object.keys(module.members)) {
-			var member = module.members[memberName];
+			let member = module.members[memberName];
 
 			if (member instanceof AST.Reference) {
-				if ((<AST.Reference>member).isPrivate) {
+				if (member.isPrivate) {
 					continue;
 				}
 
 				if (member.name === "*") {
-					var newNamespace = this._scope.enter(new AST.Namespace(memberName));
+					const newNamespace = this._scope.enter(new AST.Namespace(memberName));
 
-					var existingNamespace = this.namespaces[newNamespace.fullName];
+					const existingNamespace = this.namespaces[newNamespace.fullName];
 					if (existingNamespace !== undefined) {
 						this._scope.leave();
 						this._scope.enter(existingNamespace);
@@ -769,10 +780,10 @@ class Walker {
 						this.namespaces[newNamespace.fullName] = newNamespace;
 					}
 
-					var referencedModuleName = (<AST.Reference>member).moduleName;
-					var referencedModule = this.modules[referencedModuleName];
+					let referencedModuleName = member.moduleName;
+					let referencedModule = this.modules[referencedModuleName];
 					if (referencedModule === undefined && ((referencedModuleName + "/index") in this.modules)) {
-						(<AST.Reference>member).moduleName = referencedModuleName = referencedModuleName + "/index";
+						member.moduleName = referencedModuleName = referencedModuleName + "/index";
 						referencedModule = this.modules[referencedModuleName];
 					}
 					this._moduleToNamespace(referencedModule);
@@ -781,56 +792,56 @@ class Walker {
 				}
 				else {
 					while (member instanceof AST.Reference) {
-						member = this.modules[(<AST.Reference>member).moduleName].members[member.name];
+						member = this.modules[member.moduleName].members[member.name];
 					}
 
-					this._scope.enter(<AST.NamespaceMember><any>member);
+					this._scope.enter(member);
 					this._scope.leave();
-					(<AST.Namespace>this._scope.current).members[member.name] = <AST.NamespaceMember>member;
+					(this._scope.current as AST.Namespace).members[member.name] = member;
 				}
 			}
-			else if (!(<AST.CanBePrivate><any>member).isPrivate) {
-				this._scope.enter(<AST.NamespaceMember>member);
+			else if (!(member as AST.CanBePrivate).isPrivate) {
+				this._scope.enter(member);
 				this._scope.leave();
-				(<AST.Namespace>this._scope.current).members[member.name] = <AST.NamespaceMember>member;
+				(this._scope.current as AST.Namespace).members[member.name] = member;
 			}
 		}
 	}
 
 	private _resolveTypeReference(unresolvedType: AST.UnresolvedType): AST.TypeReference {
-		var node: ts.Node = unresolvedType.symbol.declarations[0];
+		let node: ts.Node = unresolvedType.symbol.declarations[0];
 		while (node.kind !== ts.SyntaxKind.SourceFile) {
 			node = node.parent;
 		}
 
-		var sourceFile = <ts.SourceFile>node;
+		const sourceFile = node as ts.SourceFile;
 
-		var moduleName = this._moduleNameFromFileName(sourceFile.fileName);
-		var module = this.modules[moduleName];
+		const moduleName = this._moduleNameFromFileName(sourceFile.fileName);
+		const module = this.modules[moduleName];
 
-		var result = module.members[unresolvedType.symbol.name];
+		let result = module.members[unresolvedType.symbol.name];
 
 		if (result === undefined) {
 			throw new Error(`Type ${ unresolvedType.symbol.name } could not be resolved.`);
 		}
 
 		while (result instanceof AST.Reference) {
-			result = this.modules[(<AST.Reference>result).moduleName].members[result.name];
+			result = this.modules[result.moduleName].members[result.name];
 		}
 
-		var resultGenerics = unresolvedType.generics.map(generic => {
+		const resultGenerics = unresolvedType.generics.map(generic => {
 			if (generic instanceof AST.UnresolvedType) {
 				return this._resolveTypeReference(generic);
 			}
 
-			return <AST.IntrinsicTypeReference>generic;
+			return generic;
 		});
 
-		return new AST.TypeReference(<AST.NamespaceMember><any>result, resultGenerics);
+		return new AST.TypeReference(result, resultGenerics);
 	}
 
 	private _moduleNameFromFileName(fileName: string): string {
-		var result = ts.normalizeSlashes(path.relative(this._compiler.projectRoot, fileName));
+		let result = ts.normalizeSlashes(path.relative(this._compiler.projectRoot, fileName));
 
 		result = result.substr(0, result.length - ".ts".length);
 
@@ -843,16 +854,14 @@ class Walker {
 }
 
 export function walk(compiler: Compiler, root: string, rootNamespaceName: string) {
-	var sourceFiles = compiler.sourceFiles;
-	var rootFileName = ts.normalizeSlashes(path.resolve(root));
-	var rootSourceFile = sourceFiles.filter(sourceFile => sourceFile.fileName === rootFileName)[0];
+	const sourceFiles = compiler.sourceFiles;
 
-	var walker = new Walker(compiler);
+	const walker = new Walker(compiler);
 
 	// Walk
 	for (const sourceFile of sourceFiles) {
 		if (
-			path.basename(sourceFile.fileName) === "lib.core.d.ts" ||
+			path.basename(sourceFile.fileName) === "lib.es5.d.ts" ||
 			path.basename(sourceFile.fileName) === "lib.dom.d.ts" ||
 			sourceFile.fileName.substr(-"references.d.ts".length) === "references.d.ts"
 		) {

@@ -45,7 +45,7 @@ export class RendererSettings {
 	 *
 	 * @type {Map.<string, (string|!Array.<string>)>}
 	 */
-	fontMap: Map<string, string | string[]>;
+	fontMap: Map<string, string | string[]> | null;
 
 	/**
 	 * Subtitles will be pre-rendered for this amount of time (seconds).
@@ -121,13 +121,13 @@ export class RendererSettings {
 			const rule = styleSheet.cssRules[i];
 
 			if (isFontFaceRule(rule)) {
-				const name = rule.style.getPropertyValue("font-family").match(/^["']?(.*?)["']?$/)[1];
+				const name = rule.style.getPropertyValue("font-family").match(/^["']?(.*?)["']?$/)![1];
 
 				let src = rule.style.getPropertyValue("src");
 				if (!src) {
 					src = rule.cssText.split("\n")
 						.map(line => line.match(/src:\s*([^;]+?)\s*;/))
-						.filter(matches => matches !== null)
+						.filter((matches): matches is RegExpMatchArray => matches !== null)
 						.map(matches => matches[1])[0];
 				}
 

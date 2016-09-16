@@ -71,12 +71,8 @@ export class AnimationCollection {
 	 * @param {!Array.<!libjass.renderers.Keyframe>} keyframes
 	 */
 	add(timingFunction: string, keyframes: Keyframe[]): void {
-		if (keyframes.length < 1) {
-			throw new Error("Atleast one keyframe must be provided.");
-		}
-
-		let start: number = null;
-		let end: number = null;
+		let start: number | null = null;
+		let end: number | null = null;
 
 		for (const keyframe of keyframes) {
 			if (start === null) {
@@ -84,6 +80,10 @@ export class AnimationCollection {
 			}
 
 			end = keyframe.time;
+		}
+
+		if (start === null || end === null) {
+			throw new Error("Atleast one keyframe must be provided.");
 		}
 
 		let ruleCssText = "";

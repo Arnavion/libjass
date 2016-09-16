@@ -38,7 +38,7 @@ import { registerClass as serializable } from "../serialization";
 
 declare const global: {
 	fetch?(url: string): Promise<{ body: ReadableStream; ok?: boolean; status?: number; }>;
-	ReadableStream?: { prototype: ReadableStream; };
+	ReadableStream?: Function & { prototype: ReadableStream; };
 	TextDecoder?: TextDecoderConstructor;
 };
 
@@ -52,8 +52,8 @@ export class ASS {
 	private _dialogues: Dialogue[] = [];
 	private _attachments: Attachment[] = [];
 
-	private _stylesFormatSpecifier: string[] = null;
-	private _dialoguesFormatSpecifier: string[] = null;
+	private _stylesFormatSpecifier: string[] | null = null;
+	private _dialoguesFormatSpecifier: string[] | null = null;
 
 	/**
 	 * The properties of this script.
@@ -96,7 +96,7 @@ export class ASS {
 	 *
 	 * @type {Array.<string>}
 	 */
-	get stylesFormatSpecifier(): string[] {
+	get stylesFormatSpecifier(): string[] | null {
 		return this._stylesFormatSpecifier;
 	}
 
@@ -105,7 +105,7 @@ export class ASS {
 	 *
 	 * @type {Array.<string>}
 	 */
-	get dialoguesFormatSpecifier(): string[] {
+	get dialoguesFormatSpecifier(): string[] | null {
 		return this._dialoguesFormatSpecifier;
 	}
 
@@ -114,7 +114,7 @@ export class ASS {
 	 *
 	 * @type {Array.<string>}
 	 */
-	set stylesFormatSpecifier(value: string[]) {
+	set stylesFormatSpecifier(value: string[] | null) {
 		this._stylesFormatSpecifier = value;
 	}
 
@@ -123,7 +123,7 @@ export class ASS {
 	 *
 	 * @type {Array.<string>}
 	 */
-	set dialoguesFormatSpecifier(value: string[]) {
+	set dialoguesFormatSpecifier(value: string[] | null) {
 		this._dialoguesFormatSpecifier = value;
 	}
 
