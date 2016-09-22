@@ -78,7 +78,7 @@ function fontMetricsFromLineHeights(lowerLineHeight: number, upperLineHeight: nu
  * @param {string} fontFamily
  * @param {string} fallbackFonts
  * @param {!HTMLDivElement} fontSizeElement
- * @return {!Promise.<number>}
+ * @return {!Promise.<[number, number]>}
  */
 export function calculateFontMetrics(fontFamily: string, fallbackFonts: string, fontSizeElement: HTMLDivElement): Promise<[number, number]> {
 	return lineHeightForFontSize(fontFamily, 180, fallbackFonts, fontSizeElement).then(lowerLineHeight =>
