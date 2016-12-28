@@ -362,8 +362,7 @@ export class SpanStyles {
 				filterElement.insertBefore(outlineFilter, mergedOutlines);
 				outlineFilter.in1.baseVal = "source";
 				outlineFilter.operator.baseVal = SVGFEMorphologyElement.SVG_MORPHOLOGY_OPERATOR_DILATE;
-				outlineFilter.radiusX.baseVal = x;
-				outlineFilter.radiusY.baseVal = y;
+				outlineFilter.setAttribute("radius", x + " " + y);
 				outlineFilter.result.baseVal = outlineId;
 
 				const outlineReferenceNode = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
