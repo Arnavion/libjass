@@ -28,7 +28,7 @@
 		"async": "1.x >=1.4",
 		"async-build": "0.3.1",
 		"intern": "3.x >=3.2.0",
-		"npm": "3.x",
+		"npm": "4.x",
 		"pngjs": "3.x",
 		"sax": "1.x",
 		"typescript": "2.0.10",
