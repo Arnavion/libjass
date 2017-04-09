@@ -20,8 +20,8 @@
 
 import { Map } from "../utility/map";
 
-import { WorkerCommands } from "./commands";
 import { WorkerCommandHandler } from "./channel";
+import { WorkerCommands } from "./commands";
 
 const workerCommands = new Map<WorkerCommands, WorkerCommandHandler>();
 
@@ -41,6 +41,6 @@ export function registerWorkerCommand(command: WorkerCommands, handler: WorkerCo
  * @param {number} command
  * @return {?function(*, function(*, *))}
  */
-export function getWorkerCommandHandler(command: WorkerCommands): WorkerCommandHandler {
+export function getWorkerCommandHandler(command: WorkerCommands): WorkerCommandHandler | undefined {
 	return workerCommands.get(command);
 }

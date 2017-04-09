@@ -18,15 +18,6 @@
  * limitations under the License.
  */
 
-declare const global: {
-	Promise?: typeof Promise;
-	MutationObserver?: typeof MutationObserver;
-	WebkitMutationObserver?: typeof MutationObserver;
-	process?: {
-		nextTick(callback: () => void): void;
-	}
-};
-
 export interface Thenable<T> {
 	/** @type {function(this:!Thenable.<T>, function(T|!Thenable.<T>), function(*))} */
 	then: ThenableThen<T>;
@@ -34,37 +25,39 @@ export interface Thenable<T> {
 
 export interface ThenableThen<T> {
 	/** @type {function(this:!Thenable.<T>, function(T|!Thenable.<T>), function(*))} */
-	(resolve: (resolution: T | Thenable<T>) => void, reject: (reason: any) => void): void;
+	(this: Thenable<T>, resolve: ((resolution: T | Thenable<T>) => void) | undefined, reject: ((reason: any) => void) | undefined): void;
 }
 
 export interface Promise<T> extends Thenable<T> {
 	/**
-	 * @param {?function(T):!Thenable.<U>} onFulfilled
+	 * @param {function(T):!Thenable.<U>} onFulfilled
 	 * @param {?function(*):(U|!Thenable.<U>)} onRejected
 	 * @return {!Promise.<U>}
 	 */
-	then<U>(onFulfilled?: (value: T) => Thenable<U>, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
+	then<U>(onFulfilled: (value: T) => Thenable<U> | undefined, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
 
 	/**
-	 * @param {?function(T):U} onFulfilled
+	 * @param {function(T):U} onFulfilled
 	 * @param {?function(*):(U|!Thenable.<U>)} onRejected
 	 * @return {!Promise.<U>}
 	 */
-	then<U>(onFulfilled?: (value: T) => U, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
+	then<U>(onFulfilled: (value: T) => U | undefined, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
 
 	/**
 	 * @param {function(*):(T|!Thenable.<T>)} onRejected
 	 * @return {!Promise.<T>}
 	 */
-	catch(onRejected?: (reason: any) => T | Thenable<T>): Promise<T>;
+	catch(onRejected: (reason: any) => T | Thenable<T>): Promise<T>;
 }
 
 // Based on https://github.com/petkaantonov/bluebird/blob/1b1467b95442c12378d0ea280ede61d640ab5510/src/schedule.js
-const enqueueJob: (callback: () => void) => void = (function () {
+const enqueueJob = (function (): (callback: () => void) => void {
 	const MutationObserver = global.MutationObserver || global.WebkitMutationObserver;
+
 	if (global.process !== undefined && typeof global.process.nextTick === "function") {
+		const process = global.process;
 		return (callback: () => void) => {
-			global.process.nextTick(callback);
+			process.nextTick(callback);
 		};
 	}
 	else if (MutationObserver !== undefined) {
@@ -110,80 +103,6 @@ const enqueueJob: (callback: () => void) => void = (function () {
  * @param {function(function(T|!Thenable.<T>), function(*))} executor
  */
 class SimplePromise<T> {
-	private _state: SimplePromiseState = SimplePromiseState.PENDING;
-
-	private _fulfillReactions: FulfilledPromiseReaction<T, any>[] = [];
-	private _rejectReactions: RejectedPromiseReaction<any>[] = [];
-
-	private _fulfilledValue: T = null;
-	private _rejectedReason: any = null;
-
-	constructor(executor: (resolve: (resolution: T | Thenable<T>) => void, reject: (reason: any) => void) => void) {
-		if (typeof executor !== "function") {
-			throw new TypeError(`typeof executor !== "function"`);
-		}
-
-		const { resolve, reject } = this._createResolvingFunctions();
-		try {
-			executor(resolve, reject);
-		}
-		catch (ex) {
-			reject(ex);
-		}
-	}
-
-	/**
-	 * @param {?function(T):(U|!Thenable.<U>)} onFulfilled
-	 * @param {?function(*):(U|!Thenable.<U>)} onRejected
-	 * @return {!Promise.<U>}
-	 */
-	then<U>(onFulfilled: (value: T) => U | Thenable<U>, onRejected: (reason: any) => U | Thenable<U>): Promise<U> {
-		const resultCapability = new DeferredPromise<U>();
-
-		if (typeof onFulfilled !== "function") {
-			onFulfilled = (value: T) => value as any as U;
-		}
-
-		if (typeof onRejected !== "function") {
-			onRejected = (reason: any): U => { throw reason; };
-		}
-
-		const fulfillReaction: FulfilledPromiseReaction<T, U> = {
-			capabilities: resultCapability,
-			handler: onFulfilled,
-		};
-
-		const rejectReaction: RejectedPromiseReaction<U> = {
-			capabilities: resultCapability,
-			handler: onRejected,
-		};
-
-		switch (this._state) {
-			case SimplePromiseState.PENDING:
-				this._fulfillReactions.push(fulfillReaction);
-				this._rejectReactions.push(rejectReaction);
-				break;
-
-			case SimplePromiseState.FULFILLED:
-				this._enqueueFulfilledReactionJob(fulfillReaction, this._fulfilledValue);
-				break;
-
-			case SimplePromiseState.REJECTED:
-				this._enqueueRejectedReactionJob(rejectReaction, this._rejectedReason);
-				break;
-		}
-
-		return resultCapability.promise;
-	}
-
-	/**
-	 * @param {function(*):(T|!Thenable.<T>)} onRejected
-	 * @return {!Promise.<T>}
-	 */
-	catch(onRejected?: (reason: any) => T | Thenable<T>): Promise<T> {
-		return this.then(null, onRejected);
-	}
-
 	/**
 	 * @param {T|!Thenable.<T>} value
 	 * @return {!Promise.<T>}
@@ -239,6 +158,80 @@ class SimplePromise<T> {
 				Promise.resolve(value).then(resolve, reject);
 			}
 		});
+	}
+
+	private _state: SimplePromiseState = SimplePromiseState.PENDING;
+
+	private _fulfillReactions: FulfilledPromiseReaction<T, any>[] = [];
+	private _rejectReactions: RejectedPromiseReaction<any>[] = [];
+
+	private _fulfilledValue: T | null = null;
+	private _rejectedReason: any = null;
+
+	constructor(executor: (resolve: (resolution: T | Thenable<T>) => void, reject: (reason: any) => void) => void) {
+		if (typeof executor !== "function") {
+			throw new TypeError(`typeof executor !== "function"`);
+		}
+
+		const { resolve, reject } = this._createResolvingFunctions();
+		try {
+			executor(resolve, reject);
+		}
+		catch (ex) {
+			reject(ex);
+		}
+	}
+
+	/**
+	 * @param {?function(T):(U|!Thenable.<U>)} onFulfilled
+	 * @param {?function(*):(U|!Thenable.<U>)} onRejected
+	 * @return {!Promise.<U>}
+	 */
+	then<U>(onFulfilled: ((value: T) => U | Thenable<U>) | undefined, onRejected?: (reason: any) => U | Thenable<U>): Promise<U> {
+		const resultCapability = new DeferredPromise<U>();
+
+		if (typeof onFulfilled !== "function") {
+			onFulfilled = (value: T) => value as any as U;
+		}
+
+		if (typeof onRejected !== "function") {
+			onRejected = (reason: any): U => { throw reason; };
+		}
+
+		const fulfillReaction: FulfilledPromiseReaction<T, U> = {
+			capabilities: resultCapability,
+			handler: onFulfilled,
+		};
+
+		const rejectReaction: RejectedPromiseReaction<U> = {
+			capabilities: resultCapability,
+			handler: onRejected,
+		};
+
+		switch (this._state) {
+			case SimplePromiseState.PENDING:
+				this._fulfillReactions.push(fulfillReaction);
+				this._rejectReactions.push(rejectReaction);
+				break;
+
+			case SimplePromiseState.FULFILLED:
+				this._enqueueFulfilledReactionJob(fulfillReaction, this._fulfilledValue!);
+				break;
+
+			case SimplePromiseState.REJECTED:
+				this._enqueueRejectedReactionJob(rejectReaction, this._rejectedReason);
+				break;
+		}
+
+		return resultCapability.promise;
+	}
+
+	/**
+	 * @param {function(*):(T|!Thenable.<T>)} onRejected
+	 * @return {!Promise.<T>}
+	 */
+	catch(onRejected: (reason: any) => T | Thenable<T>): Promise<T> {
+		return this.then(undefined, onRejected);
 	}
 
 	/**
@@ -403,6 +396,15 @@ export var Promise: {
 	race<T>(values: (T | Thenable<T>)[]): Promise<T>;
 } = global.Promise || SimplePromise;
 
+declare var global: {
+	Promise?: typeof Promise;
+	MutationObserver?: typeof MutationObserver;
+	WebkitMutationObserver?: typeof MutationObserver;
+	process?: {
+		nextTick(callback: () => void): void;
+	}
+};
+
 interface FulfilledPromiseReaction<T, U> {
 	/** @type {!libjass.DeferredPromise.<U>} */
 	capabilities: DeferredPromise<U>;
@@ -439,7 +441,7 @@ enum SimplePromiseState {
  *
  * @param {?function(new:Promise)} value
  */
-export function setImplementation(value: typeof Promise): void {
+export function setImplementation(value: typeof Promise | null): void {
 	if (value !== null) {
 		Promise = value;
 	}
@@ -452,8 +454,6 @@ export function setImplementation(value: typeof Promise): void {
  * A deferred promise.
  */
 export class DeferredPromise<T> {
-	private _promise: Promise<T>;
-
 	/**
 	 * @type {function(T|!Thenable.<T>)}
 	 */
@@ -463,6 +463,8 @@ export class DeferredPromise<T> {
 	 * @type {function(*)} reason
 	 */
 	reject: (reason: any) => void;
+
+	private _promise: Promise<T>;
 
 	constructor() {
 		this._promise = new Promise<T>((resolve, reject) => {

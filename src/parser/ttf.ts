@@ -37,19 +37,22 @@ const fieldDecorators = new Map<DataType, (proto: any, field: string) => void>()
 
 @struct
 class OffsetTable {
+	/** @type {function(!{ dataView: DataView, position: number }): OffsetTable} */
+	static read: (reader: DataReader) => OffsetTable;
+
 	/** @type {number} */ @field(DataType.Uint16) majorVersion: number;
 	/** @type {number} */ @field(DataType.Uint16) minorVersion: number;
 	/** @type {number} */ @field(DataType.Uint16) numTables: number;
 	/** @type {number} */ @field(DataType.Uint16) searchRange: number;
 	/** @type {number} */ @field(DataType.Uint16) entrySelector: number;
 	/** @type {number} */ @field(DataType.Uint16) rangeShift: number;
-
-	/** @type {function(!{ dataView: DataView, position: number }): OffsetTable} */
-	static read: (reader: DataReader) => OffsetTable;
 }
 
 @struct
 class TableRecord {
+	/** @type {function(!{ dataView: DataView, position: number }): TableRecord} */
+	static read: (reader: DataReader) => TableRecord;
+
 	/** @type {string} */ @field(DataType.Char) c1: string;
 	/** @type {string} */ @field(DataType.Char) c2: string;
 	/** @type {string} */ @field(DataType.Char) c3: string;
@@ -57,32 +60,29 @@ class TableRecord {
 	/** @type {number} */ @field(DataType.Uint32) checksum: number;
 	/** @type {number} */ @field(DataType.Uint32) offset: number;
 	/** @type {number} */ @field(DataType.Uint32) length: number;
-
-	/** @type {function(!{ dataView: DataView, position: number }): TableRecord} */
-	static read: (reader: DataReader) => TableRecord;
 }
 
 @struct
 class NameTableHeader {
+	/** @type {function(!{ dataView: DataView, position: number }): NameTableHeader} */
+	static read: (reader: DataReader) => NameTableHeader;
+
 	/** @type {number} */ @field(DataType.Uint16) formatSelector: number;
 	/** @type {number} */ @field(DataType.Uint16) count: number;
 	/** @type {number} */ @field(DataType.Uint16) stringOffset: number;
-
-	/** @type {function(!{ dataView: DataView, position: number }): NameTableHeader} */
-	static read: (reader: DataReader) => NameTableHeader;
 }
 
 @struct
 class NameRecord {
+	/** @type {function(!{ dataView: DataView, position: number }): NameRecord} */
+	static read: (reader: DataReader) => NameRecord;
+
 	/** @type {number} */ @field(DataType.Uint16) platformId: number;
 	/** @type {number} */ @field(DataType.Uint16) encodingId: number;
 	/** @type {number} */ @field(DataType.Uint16) languageId: number;
 	/** @type {number} */ @field(DataType.Uint16) nameId: number;
 	/** @type {number} */ @field(DataType.Uint16) length: number;
 	/** @type {number} */ @field(DataType.Uint16) offset: number;
-
-	/** @type {function(!{ dataView: DataView, position: number }): NameRecord} */
-	static read: (reader: DataReader) => NameRecord;
 }
 
 /**
@@ -103,7 +103,7 @@ export function getTtfNames(attachment: Attachment): Set<string> {
 	const reader = { dataView: new DataView(bytes.buffer), position: 0 };
 
 	const offsetTable = OffsetTable.read(reader);
-	let nameTableRecord: TableRecord = null;
+	let nameTableRecord: TableRecord | null = null;
 	for (let i = 0; i < offsetTable.numTables; i++) {
 		const tableRecord = TableRecord.read(reader);
 		if (tableRecord.c1 + tableRecord.c2 + tableRecord.c3 + tableRecord.c4 === "name") {

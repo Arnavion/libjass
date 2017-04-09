@@ -18,8 +18,6 @@
  * limitations under the License.
  */
 
-import { valueOrDefault, BorderStyle } from "./misc";
-
 import { parse } from "../parser/parse";
 
 import { Color } from "../parts";
@@ -27,6 +25,8 @@ import { Color } from "../parts";
 import { registerClass as serializable } from "../serialization";
 
 import { Map } from "../utility/map";
+
+import { BorderStyle, valueOrDefault } from "./misc";
 
 /**
  * This class represents a single global style declaration in a {@link libjass.ASS} script. The styles can be obtained via the {@link libjass.ASS.styles} property.

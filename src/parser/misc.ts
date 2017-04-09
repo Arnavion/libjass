@@ -28,7 +28,7 @@ import { Map } from "../utility/map";
  * @param {string} line
  * @return {Property}
  */
-export function parseLineIntoProperty(line: string): Property {
+export function parseLineIntoProperty(line: string): Property | null {
 	const colonPos = line.indexOf(":");
 	if (colonPos === -1) {
 		return null;
@@ -47,7 +47,7 @@ export function parseLineIntoProperty(line: string): Property {
  * @param {!Array.<string>} formatSpecifier
  * @return {TypedTemplate}
  */
-export function parseLineIntoTypedTemplate(line: string, formatSpecifier: string[]): TypedTemplate {
+export function parseLineIntoTypedTemplate(line: string, formatSpecifier: string[]): TypedTemplate | null {
 	const property = parseLineIntoProperty(line);
 	if (property === null) {
 		return null;

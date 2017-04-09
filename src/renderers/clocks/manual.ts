@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 
-import { mixin } from "../../utility/mixin";
 import { Map } from "../../utility/map";
+import { mixin } from "../../utility/mixin";
 
 import { Clock, ClockEvent, EventSource } from "./base";
 

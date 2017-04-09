@@ -18,11 +18,11 @@
  * limitations under the License.
  */
 
-import { serialize, deserialize } from "../serialization";
+import { deserialize, serialize } from "../serialization";
 
 import { Map } from "../utility/map";
 
-import { Promise, DeferredPromise } from "../utility/promise";
+import { DeferredPromise, Promise } from "../utility/promise";
 
 import { WorkerCommands } from "./commands";
 import { getWorkerCommandHandler, registerWorkerCommand } from "./misc";
@@ -133,7 +133,7 @@ interface WorkerResponseMessage {
 export class WorkerChannelImpl implements WorkerChannel {
 	private static _lastRequestId: number = -1;
 
-	private _pendingRequests = new Map<number, DeferredPromise<any>>();
+	private _pendingRequests: Map<number, DeferredPromise<any>> = new Map<number, DeferredPromise<any>>();
 
 	constructor(private _comm: WorkerCommunication) {
 		this._comm.addEventListener("message", ev => this._onMessage(ev.data as string), false);
@@ -217,4 +217,4 @@ export class WorkerChannelImpl implements WorkerChannel {
 	}
 }
 
-registerWorkerCommand(WorkerCommands.Ping, parameters => Promise.resolve<void>(null));
+registerWorkerCommand(WorkerCommands.Ping, parameters => Promise.resolve(null));

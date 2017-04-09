@@ -46,7 +46,7 @@ import { Map } from "../utility/map";
  */
 @serializable
 export class Dialogue {
-	private static _lastDialogueId = -1;
+	private static _lastDialogueId: number = -1;
 
 	private _id: number;
 
@@ -59,7 +59,7 @@ export class Dialogue {
 	private _alignment: number;
 
 	private _rawPartsString: string;
-	private _parts: parts.Part[] = null;
+	private _parts: parts.Part[] | null = null;
 
 	private _containsTransformTag: boolean = false;
 
@@ -184,7 +184,7 @@ export class Dialogue {
 			this._parsePartsString();
 		}
 
-		return this._parts;
+		return this._parts!;
 	}
 
 	/**
@@ -221,7 +221,7 @@ export class Dialogue {
 			}
 			else if (part instanceof parts.Move) {
 				if (part.t1 === null || part.t2 === null) {
-					this._parts[index] =
+					this._parts![index] =
 						new parts.Move(
 							part.x1, part.y1, part.x2, part.y2,
 							0, this._end - this._start
@@ -230,7 +230,7 @@ export class Dialogue {
 			}
 			else if (part instanceof parts.Transform) {
 				if (part.start === null || part.end === null || part.accel === null) {
-					this._parts[index] =
+					this._parts![index] =
 						new parts.Transform(
 							(part.start === null) ? 0 : part.start,
 							(part.end === null) ? (this._end - this._start) : part.end,

@@ -18,17 +18,6 @@
  * limitations under the License.
  */
 
-import { AnimationCollection } from "./animation-collection";
-import { DrawingStyles } from "./drawing-styles";
-import { calculateFontMetrics } from "./font-size";
-import { Keyframe } from "./keyframe";
-import { SpanStyles } from "./span-styles";
-
-import { Clock, EventSource } from "../clocks/base";
-
-import { NullRenderer } from "../null";
-import { RendererSettings } from "../settings";
-
 import { getTtfNames } from "../../parser/ttf";
 
 import * as parts from "../../parts";
@@ -40,10 +29,21 @@ import { AttachmentType } from "../../types/attachment";
 import { Dialogue } from "../../types/dialogue";
 import { WrappingStyle } from "../../types/misc";
 
-import { mixin } from "../../utility/mixin";
 import { Map } from "../../utility/map";
-import { Promise, any as Promise_any, first as Promise_first, lastly as Promise_finally } from "../../utility/promise";
+import { mixin } from "../../utility/mixin";
+import { any as Promise_any, first as Promise_first, lastly as Promise_finally, Promise } from "../../utility/promise";
 import { Set } from "../../utility/set";
+
+import { Clock, EventSource } from "../clocks/base";
+
+import { NullRenderer } from "../null";
+import { RendererSettings } from "../settings";
+
+import { AnimationCollection } from "./animation-collection";
+import { DrawingStyles } from "./drawing-styles";
+import { calculateFontMetrics } from "./font-size";
+import { Keyframe } from "./keyframe";
+import { SpanStyles } from "./span-styles";
 
 declare const global: {
 	document: {
@@ -92,6 +92,13 @@ const fontSrcUrlRegex = /^(url|local)\(["']?(.+?)["']?\)$/;
  * @param {!libjass.renderers.RendererSettings} settings
  */
 export class WebRenderer extends NullRenderer implements EventSource<string> {
+	private static _transformOrigins: number[][] = [
+		[],
+		[0, 100], [50, 100], [100, 100],
+		[0, 50], [50, 50], [100, 50],
+		[0, 0], [50, 0], [100, 0],
+	];
+
 	private _subsWrapper: HTMLDivElement;
 	private _subsWrapperWidth: number; // this._subsWrapper.offsetWidth is expensive, so cache this.
 
@@ -215,7 +222,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 					}
 				});
 
-				let fontFetchPromise: Promise<FontFace>;
+				let fontFetchPromise: Promise<FontFace | null>;
 				if (existingFontFaces.length === 0) {
 					const fontFace = new FontFace(fontFamily, source);
 					const quotedFontFace = new FontFace(`"${ fontFamily }"`, source);
@@ -254,7 +261,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 							// A url() URL. Extract the raw URL.
 							return match[2];
-						}).filter(url => url !== null);
+						}).filter((url): url is string => url !== null);
 
 				const attachedFontUrls = attachedFontsMap.get(fontFamily);
 				if (attachedFontUrls !== undefined) {
@@ -266,7 +273,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 						let fontFetchPromise = fontFetchPromisesCache.get(url);
 						if (fontFetchPromise === undefined) {
 							fontFetchPromise =
-								new Promise<void>((resolve, reject) => {
+								new Promise<null>((resolve, reject) => {
 									const xhr = new XMLHttpRequest();
 									xhr.addEventListener("load", () => {
 										if (debugMode) {
@@ -290,7 +297,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 				const allFontsFetchedPromise =
 					(thisFontFamilysFetchPromises.length === 0) ?
-						Promise.resolve<void>(null) :
+						Promise.resolve(null) :
 						Promise_first(thisFontFamilysFetchPromises).catch(reason => {
 							console.warn(`Fetching fonts for ${ fontFamily } at ${ urls.join(", ") } failed: %o`, reason);
 							return null;
@@ -354,7 +361,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	 * @param {!libjass.Dialogue} dialogue
 	 * @return {PreRenderedSub}
 	 */
-	preRender(dialogue: Dialogue): PreRenderedSub {
+	preRender(dialogue: Dialogue): PreRenderedSub | null {
 		const currentTimeRelativeToDialogueStart = this.clock.currentTime - dialogue.start;
 
 		if (dialogue.containsTransformTag && currentTimeRelativeToDialogueStart < 0) {
@@ -389,15 +396,15 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		const svgDefsElement = document.createElementNS("http://www.w3.org/2000/svg", "defs");
 		svgElement.appendChild(svgDefsElement);
 
-		let currentSpan: HTMLSpanElement = null;
+		let currentSpan: HTMLSpanElement | null = null;
 		const currentSpanStyles = new SpanStyles(this, dialogue, this._scaleX, this._scaleY, this.settings, this._fontSizeElement, svgDefsElement, this._fontMetricsCache);
 
-		let currentAnimationCollection: AnimationCollection = null;
+		let currentAnimationCollection: AnimationCollection | null = null;
 
 		let previousAddNewLine = false; // If two or more \N's are encountered in sequence, then all but the first will be created using currentSpanStyles.makeNewLine() instead
 		const startNewSpan = (addNewLine: boolean): void => {
 			if (currentSpan !== null && currentSpan.hasChildNodes()) {
-				sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan, currentAnimationCollection));
+				sub.appendChild(currentSpanStyles.setStylesOnSpan(currentSpan, currentAnimationCollection!));
 			}
 
 			if (currentAnimationCollection !== null) {
@@ -486,19 +493,19 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.FontSizePlus) {
-				currentSpanStyles.fontSize *= (1 + part.value);
+				currentSpanStyles.fontSize = currentSpanStyles.fontSize! * (1 + part.value);
 			}
 
 			else if (part instanceof parts.FontSizeMinus) {
-				currentSpanStyles.fontSize *= (1 - part.value);
+				currentSpanStyles.fontSize = currentSpanStyles.fontSize! * (1 - part.value);
 			}
 
 			else if (part instanceof parts.FontScaleX) {
-				currentSpanStyles.fontScaleX = part.value;
+				currentSpanStyles.fontScaleX = part.value as number;
 			}
 
 			else if (part instanceof parts.FontScaleY) {
-				currentSpanStyles.fontScaleY = part.value;
+				currentSpanStyles.fontScaleY = part.value as number;
 			}
 
 			else if (part instanceof parts.LetterSpacing) {
@@ -571,12 +578,12 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			else if (part instanceof parts.ColorKaraoke) {
 				startNewSpan(false);
 
-				currentAnimationCollection.add("step-end", [
+				currentAnimationCollection!.add("step-end", [
 					new Keyframe(0, new Map([
-						["color", currentSpanStyles.secondaryColor.withAlpha(currentSpanStyles.secondaryAlpha).toString()],
+						["color", currentSpanStyles.secondaryColor!.withAlpha(currentSpanStyles.secondaryAlpha!).toString()],
 					])), new Keyframe(karaokeTimesAccumulator, new Map([
-						["color", currentSpanStyles.primaryColor.withAlpha(currentSpanStyles.primaryAlpha).toString()],
-					]))
+						["color", currentSpanStyles.primaryColor!.withAlpha(currentSpanStyles.primaryAlpha!).toString()],
+					])),
 				]);
 
 				karaokeTimesAccumulator += part.duration;
@@ -607,10 +614,10 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 				dialogueAnimationCollection.add("linear", [new Keyframe(0, new Map([
 					["left", `${ (this._scaleX * part.x1).toFixed(3) }px`],
 					["top", `${ (this._scaleY * part.y1).toFixed(3) }px`],
-				])), new Keyframe(part.t1, new Map([
+				])), new Keyframe(part.t1!, new Map([
 					["left", `${ (this._scaleX * part.x1).toFixed(3) }px`],
 					["top", `${ (this._scaleY * part.y1).toFixed(3) }px`],
-				])), new Keyframe(part.t2, new Map([
+				])), new Keyframe(part.t2!, new Map([
 					["left", `${ (this._scaleX * part.x2).toFixed(3) }px`],
 					["top", `${ (this._scaleY * part.y2).toFixed(3) }px`],
 				])), new Keyframe(dialogue.end - dialogue.start, new Map([
@@ -649,9 +656,9 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 			else if (part instanceof parts.Transform) {
 				const progression =
-					(currentTimeRelativeToDialogueStart <= part.start) ? 0 :
-					(currentTimeRelativeToDialogueStart >= part.end) ? 1 :
-					Math.pow((currentTimeRelativeToDialogueStart - part.start) / (part.end - part.start), part.accel);
+					(currentTimeRelativeToDialogueStart <= part.start!) ? 0 :
+					(currentTimeRelativeToDialogueStart >= part.end!) ? 1 :
+					Math.pow((currentTimeRelativeToDialogueStart - part.start!) / (part.end! - part.start!), part.accel!);
 
 				for (const tag of part.tags) {
 					if (tag instanceof parts.Border) {
@@ -660,8 +667,8 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.outlineHeight += progression * (tag.value - currentSpanStyles.outlineHeight);
 						}
 						else {
-							currentSpanStyles.outlineWidth = null;
-							currentSpanStyles.outlineHeight = null;
+							currentSpanStyles.outlineWidth = null as any as number;
+							currentSpanStyles.outlineHeight = null as any as number;
 						}
 					}
 
@@ -670,7 +677,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.outlineWidth += progression * (tag.value - currentSpanStyles.outlineWidth);
 						}
 						else {
-							currentSpanStyles.outlineWidth = null;
+							currentSpanStyles.outlineWidth = null as any as number;
 						}
 					}
 
@@ -679,7 +686,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.outlineHeight += progression * (tag.value - currentSpanStyles.outlineHeight);
 						}
 						else {
-							currentSpanStyles.outlineHeight = null;
+							currentSpanStyles.outlineHeight = null as any as number;
 						}
 					}
 
@@ -689,8 +696,8 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.shadowDepthY += progression * (tag.value - currentSpanStyles.shadowDepthY);
 						}
 						else {
-							currentSpanStyles.shadowDepthX = null;
-							currentSpanStyles.shadowDepthY = null;
+							currentSpanStyles.shadowDepthX = null as any as number;
+							currentSpanStyles.shadowDepthY = null as any as number;
 						}
 					}
 
@@ -699,7 +706,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.shadowDepthX += progression * (tag.value - currentSpanStyles.shadowDepthX);
 						}
 						else {
-							currentSpanStyles.shadowDepthX = null;
+							currentSpanStyles.shadowDepthX = null as any as number;
 						}
 					}
 
@@ -708,7 +715,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.shadowDepthY += progression * (tag.value - currentSpanStyles.shadowDepthY);
 						}
 						else {
-							currentSpanStyles.shadowDepthY = null;
+							currentSpanStyles.shadowDepthY = null as any as number;
 						}
 					}
 
@@ -717,7 +724,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.blur += progression * (tag.value - currentSpanStyles.blur);
 						}
 						else {
-							currentSpanStyles.blur = null;
+							currentSpanStyles.blur = null as any as number;
 						}
 					}
 
@@ -726,7 +733,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.gaussianBlur += progression * (tag.value - currentSpanStyles.gaussianBlur);
 						}
 						else {
-							currentSpanStyles.gaussianBlur = null;
+							currentSpanStyles.gaussianBlur = null as any as number;
 						}
 					}
 
@@ -735,7 +742,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.fontSize += progression * (tag.value - currentSpanStyles.fontSize);
 						}
 						else {
-							currentSpanStyles.fontSize = null;
+							currentSpanStyles.fontSize = null as any as number;
 						}
 					}
 
@@ -752,7 +759,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.fontScaleX += progression * (tag.value - currentSpanStyles.fontScaleX);
 						}
 						else {
-							currentSpanStyles.fontScaleX = null;
+							currentSpanStyles.fontScaleX = null as any as number;
 						}
 					}
 
@@ -761,7 +768,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.fontScaleY += progression * (tag.value - currentSpanStyles.fontScaleY);
 						}
 						else {
-							currentSpanStyles.fontScaleY = null;
+							currentSpanStyles.fontScaleY = null as any as number;
 						}
 					}
 
@@ -770,7 +777,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.letterSpacing += progression * (tag.value - currentSpanStyles.letterSpacing);
 						}
 						else {
-							currentSpanStyles.letterSpacing = null;
+							currentSpanStyles.letterSpacing = null as any as number;
 						}
 					}
 
@@ -779,7 +786,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.rotationX += progression * (tag.value - currentSpanStyles.rotationX);
 						}
 						else {
-							currentSpanStyles.rotationX = null;
+							currentSpanStyles.rotationX = null as any as number;
 						}
 					}
 
@@ -788,7 +795,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.rotationY += progression * (tag.value - currentSpanStyles.rotationY);
 						}
 						else {
-							currentSpanStyles.rotationY = null;
+							currentSpanStyles.rotationY = null as any as number;
 						}
 					}
 
@@ -797,7 +804,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.rotationZ += progression * (tag.value - currentSpanStyles.rotationZ);
 						}
 						else {
-							currentSpanStyles.rotationZ = null;
+							currentSpanStyles.rotationZ = null as any as number;
 						}
 					}
 
@@ -806,7 +813,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.skewX += progression * (tag.value - currentSpanStyles.skewX);
 						}
 						else {
-							currentSpanStyles.skewX = null;
+							currentSpanStyles.skewX = null as any as number;
 						}
 					}
 
@@ -815,43 +822,43 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.skewY += progression * (tag.value - currentSpanStyles.skewY);
 						}
 						else {
-							currentSpanStyles.skewY = null;
+							currentSpanStyles.skewY = null as any as number;
 						}
 					}
 
 					else if (tag instanceof parts.PrimaryColor) {
 						if (tag.value !== null) {
-							currentSpanStyles.primaryColor = currentSpanStyles.primaryColor.interpolate(tag.value, progression);
+							currentSpanStyles.primaryColor = currentSpanStyles.primaryColor!.interpolate(tag.value, progression);
 						}
 						else {
-							currentSpanStyles.primaryColor = null;
+							currentSpanStyles.primaryColor = null as any as parts.Color;
 						}
 					}
 
 					else if (tag instanceof parts.SecondaryColor) {
 						if (tag.value !== null) {
-							currentSpanStyles.secondaryColor = currentSpanStyles.secondaryColor.interpolate(tag.value, progression);
+							currentSpanStyles.secondaryColor = currentSpanStyles.secondaryColor!.interpolate(tag.value, progression);
 						}
 						else {
-							currentSpanStyles.secondaryColor = null;
+							currentSpanStyles.secondaryColor = null as any as parts.Color;
 						}
 					}
 
 					else if (tag instanceof parts.OutlineColor) {
 						if (tag.value !== null) {
-							currentSpanStyles.outlineColor = currentSpanStyles.outlineColor.interpolate(tag.value, progression);
+							currentSpanStyles.outlineColor = currentSpanStyles.outlineColor!.interpolate(tag.value, progression);
 						}
 						else {
-							currentSpanStyles.outlineColor = null;
+							currentSpanStyles.outlineColor = null as any as parts.Color;
 						}
 					}
 
 					else if (tag instanceof parts.ShadowColor) {
 						if (tag.value !== null) {
-							currentSpanStyles.shadowColor = currentSpanStyles.shadowColor.interpolate(tag.value, progression);
+							currentSpanStyles.shadowColor = currentSpanStyles.shadowColor!.interpolate(tag.value, progression);
 						}
 						else {
-							currentSpanStyles.shadowColor = null;
+							currentSpanStyles.shadowColor = null as any as parts.Color;
 						}
 					}
 
@@ -863,10 +870,10 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.shadowAlpha += progression * (tag.value - currentSpanStyles.shadowAlpha);
 						}
 						else {
-							currentSpanStyles.primaryAlpha = null;
-							currentSpanStyles.secondaryAlpha = null;
-							currentSpanStyles.outlineAlpha = null;
-							currentSpanStyles.shadowAlpha = null;
+							currentSpanStyles.primaryAlpha = null as any as number;
+							currentSpanStyles.secondaryAlpha = null as any as number;
+							currentSpanStyles.outlineAlpha = null as any as number;
+							currentSpanStyles.shadowAlpha = null as any as number;
 						}
 					}
 
@@ -875,7 +882,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.primaryAlpha += progression * (tag.value - currentSpanStyles.primaryAlpha);
 						}
 						else {
-							currentSpanStyles.primaryAlpha = null;
+							currentSpanStyles.primaryAlpha = null as any as number;
 						}
 					}
 
@@ -884,7 +891,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.secondaryAlpha += progression * (tag.value - currentSpanStyles.secondaryAlpha);
 						}
 						else {
-							currentSpanStyles.secondaryAlpha = null;
+							currentSpanStyles.secondaryAlpha = null as any as number;
 						}
 					}
 
@@ -893,7 +900,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.outlineAlpha += progression * (tag.value - currentSpanStyles.outlineAlpha);
 						}
 						else {
-							currentSpanStyles.outlineAlpha = null;
+							currentSpanStyles.outlineAlpha = null as any as number;
 						}
 					}
 
@@ -902,7 +909,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 							currentSpanStyles.shadowAlpha += progression * (tag.value - currentSpanStyles.shadowAlpha);
 						}
 						else {
-							currentSpanStyles.shadowAlpha = null;
+							currentSpanStyles.shadowAlpha = null as any as number;
 						}
 					}
 				}
@@ -919,17 +926,17 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.DrawingInstructions) {
-				currentSpan.appendChild(currentDrawingStyles.toSVG(part, currentSpanStyles.primaryColor.withAlpha(currentSpanStyles.primaryAlpha)));
+				currentSpan!.appendChild(currentDrawingStyles.toSVG(part, currentSpanStyles.primaryColor!.withAlpha(currentSpanStyles.primaryAlpha!)));
 				startNewSpan(false);
 			}
 
 			else if (part instanceof parts.Text) {
-				currentSpan.appendChild(document.createTextNode(part.value + "\u200C"));
+				currentSpan!.appendChild(document.createTextNode(part.value + "\u200C"));
 				startNewSpan(false);
 			}
 
 			else if (debugMode && part instanceof parts.Comment) {
-				currentSpan.appendChild(document.createTextNode(part.value));
+				currentSpan!.appendChild(document.createTextNode(part.value));
 				startNewSpan(false);
 			}
 
@@ -1029,15 +1036,17 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			console.log(dialogue.toString());
 		}
 
-		let preRenderedSub = this._preRenderedSubs.get(dialogue.id);
+		let thePreRenderedSub = this._preRenderedSubs.get(dialogue.id);
 
-		if (preRenderedSub === undefined) {
-			preRenderedSub = this.preRender(dialogue);
+		if (thePreRenderedSub === undefined) {
+			thePreRenderedSub = this.preRender(dialogue)!;
 
 			if (debugMode) {
 				console.log(dialogue.toString());
 			}
 		}
+
+		const preRenderedSub = thePreRenderedSub;
 
 		const result = preRenderedSub.sub.cloneNode(true);
 
@@ -1046,7 +1055,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			if (animationNames !== "") {
 				const animationDelays = animationNames.split(",").map(name => {
 					name = name.trim();
-					const delay = preRenderedSub.animationDelays.get(name);
+					const delay = preRenderedSub.animationDelays.get(name)!;
 					return `${ ((delay + dialogue.start - this.clock.currentTime) / this.clock.rate).toFixed(3) }s`;
 				}).join(", ");
 
@@ -1069,7 +1078,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			layerWrapper.className = `layer layer${ layer }`;
 
 			// Find the next greater layer div and insert this div before that one
-			let insertBeforeElement: HTMLDivElement = null;
+			let insertBeforeElement: HTMLDivElement | null = null;
 			for (let insertBeforeLayer = layer + 1; insertBeforeLayer < this._layerWrappers.length && insertBeforeElement === null; insertBeforeLayer++) {
 				if (this._layerWrappers[insertBeforeLayer] !== undefined) {
 					insertBeforeElement = this._layerWrappers[insertBeforeLayer];
@@ -1089,7 +1098,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 			// Find the next greater layer,alignment div and insert this div before that one
 			const layerWrapper = this._layerWrappers[layer];
-			let insertBeforeElement: HTMLDivElement = null;
+			let insertBeforeElement: HTMLDivElement | null = null;
 			for (let insertBeforeAlignment = alignment + 1; insertBeforeAlignment < this._layerAlignmentWrappers[layer].length && insertBeforeElement === null; insertBeforeAlignment++) {
 				if (this._layerAlignmentWrappers[layer][insertBeforeAlignment] !== undefined) {
 					insertBeforeElement = this._layerAlignmentWrappers[layer][insertBeforeAlignment];
@@ -1113,7 +1122,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		if (dialogueAnimationStylesElement !== undefined) {
 			const sheet = dialogueAnimationStylesElement.sheet as CSSStyleSheet;
 			if (sheet.cssRules.length === 0) {
-				sheet.cssText = dialogueAnimationStylesElement.textContent;
+				sheet.cssText = dialogueAnimationStylesElement.textContent!;
 			}
 		}
 
@@ -1187,7 +1196,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	 * @param {!HTMLDivElement} sub
 	 */
 	private _removeSub(sub: HTMLDivElement): void {
-		sub.parentNode.removeChild(sub);
+		sub.parentNode!.removeChild(sub);
 	}
 
 	private _removeAllSubs(): void {
@@ -1195,12 +1204,6 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		this._currentSubs.clear();
 	}
 
-	private static _transformOrigins: number[][] = [
-		[],
-		[0, 100], [50, 100], [100, 100],
-		[0, 50], [50, 50], [100, 50],
-		[0, 0], [50, 0], [100, 0]
-	];
 
 	// EventSource members
 

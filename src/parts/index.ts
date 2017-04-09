@@ -186,14 +186,14 @@ export class Italic {
  * @param {?boolean|?number} value {\b1} -> true, {\b0} -> false, {\b###} -> weight of the bold (number), {\b} -> null
  */
 export class Bold {
-	constructor(private _value: boolean | number) { }
+	constructor(private _value: boolean | number | null) { }
 
 	/**
 	 * The value of this bold tag.
 	 *
 	 * @type {?boolean|?number}
 	 */
-	get value(): boolean | number {
+	get value(): boolean | number | null {
 		return this._value;
 	}
 }
@@ -384,14 +384,14 @@ export class GaussianBlur {
  * @param {?string} value {\fn###} -> name (string), {\fn} -> null
  */
 export class FontName {
-	constructor(private _value: string) { }
+	constructor(private _value: string | null) { }
 
 	/**
 	 * The value of this font name tag.
 	 *
 	 * @type {?string}
 	 */
-	get value(): string {
+	get value(): string | null {
 		return this._value;
 	}
 }
@@ -456,14 +456,14 @@ export class FontSizeMinus {
  * @param {?number} value {\fscx###} -> scale (number), {\fscx} -> null
  */
 export class FontScaleX {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this horizontal font scaling tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -474,14 +474,14 @@ export class FontScaleX {
  * @param {?number} value {\fscy###} -> scale (number), {\fscy} -> null
  */
 export class FontScaleY {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this vertical font scaling tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -852,14 +852,14 @@ export class WrappingStyle {
  * @param {?string} value {\r###} -> style name (string), {\r} -> null
  */
 export class Reset {
-	constructor(private _value: string) { }
+	constructor(private _value: string | null) { }
 
 	/**
 	 * The value of this style reset tag.
 	 *
 	 * @type {?string}
 	 */
-	get value(): string {
+	get value(): string | null {
 		return this._value;
 	}
 }
@@ -903,7 +903,7 @@ export class Position {
  * @param {?number} t2
  */
 export class Move {
-	constructor(private _x1: number, private _y1: number, private _x2: number, private _y2: number, private _t1: number, private _t2: number) { }
+	constructor(private _x1: number, private _y1: number, private _x2: number, private _y2: number, private _t1: number | null, private _t2: number | null) { }
 
 	/**
 	 * The starting x value of this move tag.
@@ -946,7 +946,7 @@ export class Move {
 	 *
 	 * @type {?number}
 	 */
-	get t1(): number {
+	get t1(): number | null {
 		return this._t1;
 	}
 
@@ -955,7 +955,7 @@ export class Move {
 	 *
 	 * @type {?number}
 	 */
-	get t2(): number {
+	get t2(): number | null {
 		return this._t2;
 	}
 }
@@ -1106,14 +1106,14 @@ export class ComplexFade {
  * @param {!Array.<!libjass.parts.Tag>} tags
  */
 export class Transform {
-	constructor(private _start: number, private _end: number, private _accel: number, private _tags: Part[]) { }
+	constructor(private _start: number | null, private _end: number | null, private _accel: number | null, private _tags: Part[]) { }
 
 	/**
 	 * The starting time of this transform tag.
 	 *
 	 * @type {?number}
 	 */
-	get start(): number {
+	get start(): number | null {
 		return this._start;
 	}
 
@@ -1122,7 +1122,7 @@ export class Transform {
 	 *
 	 * @type {?number}
 	 */
-	get end(): number {
+	get end(): number | null {
 		return this._end;
 	}
 
@@ -1131,7 +1131,7 @@ export class Transform {
 	 *
 	 * @type {?number}
 	 */
-	get accel(): number {
+	get accel(): number | null {
 		return this._accel;
 	}
 
@@ -1295,14 +1295,14 @@ export class DrawingInstructions {
 	}
 }
 
-const addToString = function (ctor: Function, ctorName: string) {
+const addToString = function (ctor: Function, ctorName: string): void {
 	if (!ctor.prototype.hasOwnProperty("toString")) {
 		const propertyNames = Object.getOwnPropertyNames(ctor.prototype).filter(property => property !== "constructor");
 
-		ctor.prototype.toString = function () {
+		ctor.prototype.toString = function (this: any): string {
 			return (
 				ctorName + " { " +
-				propertyNames.map(name => `${ name }: ${ (this as any)[name] }`).join(", ") +
+				propertyNames.map(name => `${ name }: ${ this[name] }`).join(", ") +
 				((propertyNames.length > 0) ? " " : "") +
 				"}"
 			);

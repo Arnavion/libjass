@@ -18,17 +18,14 @@
  * limitations under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-
-import { File, FileTransform } from "async-build";
+import { FileTransform } from "async-build";
 
 import * as AST from "./typescript/ast";
 import { Compiler } from "./typescript/compiler";
 import { walk } from "./typescript/walker";
 
 function flatten<T>(arr: T[][]): T[] {
-	var result: T[] = [];
+	let result: T[] = [];
 
 	for (const a of arr) {
 		result = result.concat(a);
@@ -37,7 +34,7 @@ function flatten<T>(arr: T[][]): T[] {
 	return result;
 }
 
-var sorter = (() => {
+const sorter = (() => {
 	function visibilitySorter(value1: { isPrivate?: boolean; isProtected?: boolean; }, value2: { isPrivate?: boolean; isProtected?: boolean; }) {
 		if (value1.isPrivate === value2.isPrivate && value1.isProtected === value2.isProtected) {
 			return 0;
@@ -62,10 +59,10 @@ var sorter = (() => {
 		return 0;
 	}
 
-	var types = [AST.Property, AST.Function, AST.Interface, AST.Class, AST.Enum];
+	const types = [AST.Property, AST.Function, AST.Interface, AST.Class, AST.Enum];
 	function typeSorter(value1: AST.ModuleMember | AST.NamespaceMember, value2: AST.ModuleMember | AST.NamespaceMember) {
-		var type1Index = -1;
-		var type2Index = -1;
+		let type1Index = -1;
+		let type2Index = -1;
 
 		types.every((type, index) => {
 			if (value1 instanceof type) {
@@ -84,11 +81,11 @@ var sorter = (() => {
 		return value1.name.localeCompare(value2.name);
 	}
 
-	var sorters: ((value1: AST.ModuleMember, value2: AST.ModuleMember) => number)[] = [visibilitySorter, typeSorter, nameSorter];
+	const sorters: ((value1: AST.ModuleMember, value2: AST.ModuleMember) => number)[] = [visibilitySorter, typeSorter, nameSorter];
 
 	return (value1: AST.ModuleMember, value2: AST.ModuleMember) => {
-		for (var i = 0; i < sorters.length; i++) {
-			var result = sorters[i](value1, value2);
+		for (const sorter of sorters) {
+			const result = sorter(value1, value2);
 
 			if (result !== 0) {
 				return result;
@@ -110,10 +107,10 @@ function sanitize(str: string) {
 function toVariableName(item: { name: string }) {
 	// TODO: Handle non-letters (are both their toLowerCase() and toUpperCase())
 
-	var name = item.name;
-	var result = "";
+	const name = item.name;
+	let result = "";
 
-	for (var i = 0; i < name.length; i++) {
+	for (let i = 0; i < name.length; i++) {
 		if (name[i] === name[i].toLowerCase()) {
 			// This is lower case. Write it as lower case.
 			result += name[i];
@@ -168,15 +165,15 @@ function toUsageName(item: AST.Class | AST.Interface | AST.Function | AST.Proper
 	}
 
 	if (item.parent instanceof AST.Namespace) {
-		if ((<AST.Class | AST.Interface | AST.Function | AST.Enum>item).isPrivate) {
+		if ((item as AST.CanBePrivate).isPrivate) {
 			return item.name;
 		}
 
 		return item.fullName;
 	}
 
-	if ((<AST.Function>item).isStatic) {
-		return toUsageName(<AST.Class | AST.Interface>item.parent) + '.' + item.name;
+	if ((item as AST.CanBeStatic).isStatic) {
+		return toUsageName(item.parent as AST.Class | AST.Interface) + '.' + item.name;
 	}
 
 	return toVariableName(item.parent) + '.' + item.name;
@@ -187,13 +184,12 @@ function toId(item: { fullName?: string; name: string; }): string {
 }
 
 function toLink(item: AST.ModuleMember | AST.EnumMember | AST.TypeReference): string {
-	var result = `<a href="#${ toId(item) }">${ sanitize(item.name) }`;
+	let result = `<a href="#${ toId(item) }">${ sanitize(item.name) }`;
 
-	var itemWithGenerics = <AST.HasGenerics>item;
-	if (itemWithGenerics.generics !== undefined && itemWithGenerics.generics.length > 0) {
-		var generics = <(string | AST.TypeReference | AST.IntrinsicTypeReference)[]>itemWithGenerics.generics;
+	if (AST.hasGenerics(item) && item.generics.length > 0) {
+		const generics = item.generics as (string | AST.TypeReference | AST.IntrinsicTypeReference)[];
 		result += sanitize(`.<${ generics.map(generic =>
-			(generic instanceof AST.TypeReference || generic instanceof AST.IntrinsicTypeReference) ? generic.name : <string>generic
+			(generic instanceof AST.TypeReference || generic instanceof AST.IntrinsicTypeReference) ? generic.name : generic
 		).join(', ') }>`);
 	}
 
@@ -203,9 +199,9 @@ function toLink(item: AST.ModuleMember | AST.EnumMember | AST.TypeReference): st
 }
 
 function writeDescription(text: string): string {
-	var result = sanitize(text).replace(/\{@link ([^} ]+)\}/g, (substring, linkTarget) => `<a href="#${ linkTarget }">${ linkTarget }</a>`);
+	let result = sanitize(text).replace(/\{@link ([^} ]+)\}/g, (substring, linkTarget) => `<a href="#${ linkTarget }">${ linkTarget }</a>`);
 
-	var inCodeBlock = false;
+	let inCodeBlock = false;
 	result = result.split("\n").map(line => {
 		if (line.substr(0, "    ".length) === "    ") {
 			line = line.substr("    ".length);
@@ -288,7 +284,7 @@ function functionToHtml(func: AST.Function): string[] {
 }
 
 function interfaceToHtml(interfase: AST.Interface): string[] {
-	var members: AST.InterfaceMember[] = [];
+	const members: AST.InterfaceMember[] = [];
 	Object.keys(interfase.members).forEach(memberName => members.push(interfase.members[memberName]));
 
 	members.sort(sorter);
@@ -310,7 +306,7 @@ function interfaceToHtml(interfase: AST.Interface): string[] {
 			return functionToHtml(member).map(indenter(2));
 		}
 		else {
-			throw new Error(`Unrecognized member type: ${ (<any>member.constructor).name }`);
+			throw new Error(`Unrecognized member type: ${ (member as any).constructor.name }`);
 		}
 	}))).concat([
 		'	</dd>',
@@ -320,7 +316,7 @@ function interfaceToHtml(interfase: AST.Interface): string[] {
 }
 
 function classToHtml(clazz: AST.Class): string[] {
-	var members: AST.InterfaceMember[] = [];
+	const members: AST.InterfaceMember[] = [];
 	Object.keys(clazz.members).forEach(memberName => members.push(clazz.members[memberName]));
 
 	members.sort(sorter);
@@ -330,7 +326,7 @@ function classToHtml(clazz: AST.Class): string[] {
 			clazz.isAbstract ? ' abstract' : ''}${
 			clazz.isPrivate ? ' private' : ''}">`,
 		`	<dt class="name">class ${ toLink(clazz) }${
-				(clazz.baseType !== null) ? ` extends ${ (clazz.baseType instanceof AST.TypeReference) ? toLink(<AST.TypeReference>clazz.baseType) : clazz.baseType.name }` : '' }${
+				(clazz.baseType !== null) ? ` extends ${ (clazz.baseType instanceof AST.TypeReference) ? toLink(clazz.baseType) : clazz.baseType.name }` : '' }${
 				(clazz.interfaces.length > 0) ? ` implements ${ clazz.interfaces.map(interfase => interfase instanceof AST.TypeReference ? toLink(interfase) : interfase.name).join(', ') }` : ''}</dt>`,
 		'	<dd class="description">',
 		`		${ writeDescription(clazz.description) }`,
@@ -350,7 +346,7 @@ function classToHtml(clazz: AST.Class): string[] {
 			return functionToHtml(member).map(indenter(2));
 		}
 		else {
-			throw new Error(`Unrecognized member type: ${ (<any>member.constructor).name }`);
+			throw new Error(`Unrecognized member type: ${ (member as any).constructor.name }`);
 		}
 	}))).concat([
 		'	</dd>',
@@ -406,30 +402,26 @@ function propertyToHtml(property: AST.Property): string[] {
 }
 
 export function build(outputFilePath: string, root: string, rootNamespaceName: string): FileTransform {
-	var compiler = new Compiler();
+	const compiler = new Compiler();
 
-	return new FileTransform(function (file: File): void {
-		var self: FileTransform = this;
-
+	return new FileTransform(function (file): void {
 		// Compile
 		compiler.compile(file);
 
 		// Walk
-		var walkResult = walk(compiler, root, rootNamespaceName);
-		var namespaces = walkResult.namespaces;
-		var modules = walkResult.modules;
+		const walkResult = walk(compiler, root, rootNamespaceName);
+		const namespaces = walkResult.namespaces;
+		const modules = walkResult.modules;
 
 		// Make HTML
 
-		var namespaceNames = Object.keys(namespaces)
+		const namespaceNames = Object.keys(namespaces)
 			.filter(namespaceName => namespaceName.substr(0, rootNamespaceName.length) === rootNamespaceName)
 			.sort((ns1, ns2) => ns1.localeCompare(ns2));
 
-		var moduleNames = Object.keys(modules).sort((ns1, ns2) => ns1.localeCompare(ns2));
+		const moduleNames = Object.keys(modules).sort((ns1, ns2) => ns1.localeCompare(ns2)).filter(moduleName => Object.keys(modules[moduleName].members).length > 0);
 
-		moduleNames = moduleNames.filter(moduleName => Object.keys(modules[moduleName].members).length > 0);
-
-		self.push({
+		this.push({
 			path: outputFilePath,
 			contents: Buffer.concat([new Buffer(
 `<?xml version="1.0" encoding="utf-8" ?>
@@ -589,9 +581,9 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 			<label><input type="checkbox" id="show-private" />Show private</label>
 `
 			)].concat(namespaceNames.map(namespaceName => {
-				var namespace = namespaces[namespaceName];
+				const namespace = namespaces[namespaceName];
 
-				var namespaceMembers: AST.NamespaceMember[] = [];
+				const namespaceMembers: AST.NamespaceMember[] = [];
 				for (const memberName of Object.keys(namespace.members)) {
 					namespaceMembers.push(namespace.members[memberName]);
 				}
@@ -613,13 +605,13 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 `
 				)]));
 			})).concat(moduleNames.map(moduleName => {
-				var module = modules[moduleName];
+				const module = modules[moduleName];
 
-				var moduleMembers: AST.ModuleMemberWithoutReference[] = [];
+				const moduleMembers: AST.ModuleMemberWithoutReference[] = [];
 				for (const memberName of Object.keys(module.members)) {
-					var member = module.members[memberName];
-					if ((<AST.HasParent><any>member).parent === module) {
-						moduleMembers.push(<AST.ModuleMemberWithoutReference>member);
+					const member = module.members[memberName];
+					if ((member as AST.HasParent).parent === module) {
+						moduleMembers.push(member as AST.ModuleMemberWithoutReference);
 					}
 				}
 
@@ -649,22 +641,22 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 		<div class="content">
 `
 			)]).concat(flatten(namespaceNames.map(namespaceName => {
-				var namespace = namespaces[namespaceName];
+				const namespace = namespaces[namespaceName];
 
-				var namespaceMembers: AST.NamespaceMember[] = [];
+				const namespaceMembers: AST.NamespaceMember[] = [];
 				for (const memberName of Object.keys(namespace.members)) {
 					namespaceMembers.push(namespace.members[memberName]);
 				}
 
 				namespaceMembers.sort(sorter);
 
-				var properties = <AST.Property[]>namespaceMembers.filter(member => member instanceof AST.Property);
-				var functions = <AST.Function[]>namespaceMembers.filter(member => member instanceof AST.Function);
-				var interfaces = <AST.Interface[]>namespaceMembers.filter(member => member instanceof AST.Interface);
-				var classes = <AST.Class[]>namespaceMembers.filter(member => member instanceof AST.Class);
-				var enums = <AST.Enum[]>namespaceMembers.filter(member => member instanceof AST.Enum);
+				const properties = namespaceMembers.filter(member => member instanceof AST.Property) as AST.Property[];
+				const functions = namespaceMembers.filter(member => member instanceof AST.Function) as AST.Function[];
+				const interfaces = namespaceMembers.filter(member => member instanceof AST.Interface) as AST.Interface[];
+				const classes = namespaceMembers.filter(member => member instanceof AST.Class) as AST.Class[];
+				const enums = namespaceMembers.filter(member => member instanceof AST.Enum) as AST.Enum[];
 
-				var result = [new Buffer(
+				const result = [new Buffer(
 `			<section class="namespace">
 				<h1 id="${ sanitize(namespaceName) }">Namespace ${ sanitize(namespaceName) }</h1>
 `
@@ -762,13 +754,13 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 
 				return result;
 			}))).concat(flatten(moduleNames.map(moduleName => {
-				var module = modules[moduleName];
+				const module = modules[moduleName];
 
-				var moduleMembers: AST.ModuleMember[] = [];
+				const moduleMembers: AST.ModuleMember[] = [];
 				for (const memberName of Object.keys(module.members)) {
-					var member = module.members[memberName];
-					if ((<AST.HasParent><any>member).parent === module) {
-						moduleMembers.push(<AST.ModuleMember>member);
+					const member = module.members[memberName];
+					if ((member as AST.HasParent).parent === module) {
+						moduleMembers.push(member);
 					}
 				}
 
@@ -778,13 +770,13 @@ export function build(outputFilePath: string, root: string, rootNamespaceName: s
 
 				moduleMembers.sort(sorter);
 
-				var properties = <AST.Property[]>moduleMembers.filter(member => member instanceof AST.Property);
-				var functions = <AST.Function[]>moduleMembers.filter(member => member instanceof AST.Function);
-				var interfaces = <AST.Interface[]>moduleMembers.filter(member => member instanceof AST.Interface);
-				var classes = <AST.Class[]>moduleMembers.filter(member => member instanceof AST.Class);
-				var enums = <AST.Enum[]>moduleMembers.filter(member => member instanceof AST.Enum);
+				const properties = moduleMembers.filter(member => member instanceof AST.Property) as AST.Property[];
+				const functions = moduleMembers.filter(member => member instanceof AST.Function) as AST.Function[];
+				const interfaces = moduleMembers.filter(member => member instanceof AST.Interface) as AST.Interface[];
+				const classes = moduleMembers.filter(member => member instanceof AST.Class) as AST.Class[];
+				const enums = moduleMembers.filter(member => member instanceof AST.Enum) as AST.Enum[];
 
-				var result = [new Buffer(
+				const result = [new Buffer(
 `			<section class="module">
 				<h1 id="${ sanitize(moduleName) }">Module ${ sanitize(moduleName) }</h1>
 `

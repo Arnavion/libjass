@@ -18,20 +18,18 @@
  * limitations under the License.
  */
 
-import { AnimationCollection } from "./animation-collection";
+import { Color } from "../../parts";
 
-import { fontSizeForLineHeight } from "./font-size";
+import { Dialogue } from "../../types/dialogue";
+import { Style } from "../../types/style";
 
-import { WebRenderer } from "./renderer";
+import { Map } from "../../utility/map";
 
 import { RendererSettings } from "../settings";
 
-import { Color } from "../../parts";
-
-import { Style } from "../../types/style";
-import { Dialogue } from "../../types/dialogue";
-
-import { Map } from "../../utility/map";
+import { AnimationCollection } from "./animation-collection";
+import { fontSizeForLineHeight } from "./font-size";
+import { WebRenderer } from "./renderer";
 
 /**
  * This class represents the style attribute of a span.
@@ -89,7 +87,7 @@ export class SpanStyles {
 	private _blur: number;
 	private _gaussianBlur: number;
 
-	private _nextFilterId = 0;
+	private _nextFilterId: number = 0;
 
 	constructor(renderer: WebRenderer, dialogue: Dialogue, private _scaleX: number, private _scaleY: number, private _settings: RendererSettings, private _fontSizeElement: HTMLDivElement, private _svgDefsElement: SVGDefsElement, private _fontMetricsCache: Map<string, [number, number]>) {
 		this._id = `${ renderer.id }-${ dialogue.id }`;
@@ -103,7 +101,7 @@ export class SpanStyles {
 	 *
 	 * @param {libjass.Style} newStyle The new defaults to reset the style to. If null, the styles are reset to the default style of the Dialogue.
 	 */
-	reset(newStyle: Style): void {
+	reset(newStyle: Style | undefined | null): void {
 		if (newStyle === undefined || newStyle === null) {
 			newStyle = this._defaultStyle;
 		}
@@ -144,8 +142,8 @@ export class SpanStyles {
 		this.outlineAlpha = newStyle.outlineColor.alpha;
 		this.shadowAlpha = newStyle.shadowColor.alpha;
 
-		this.blur = null;
-		this.gaussianBlur = null;
+		this.blur = null as any as number;
+		this.gaussianBlur = null as any as number;
 	}
 
 	/**
@@ -166,7 +164,7 @@ export class SpanStyles {
 			fontStyleOrWeight += "bold ";
 		}
 		else if (this._bold !== false) {
-			fontStyleOrWeight += this._bold + " ";
+			fontStyleOrWeight += this._bold.toFixed(0) + " ";
 		}
 
 		const lineHeight = this._scaleY * (isTextOnlySpan ? this._fontScaleX : 1) * this._fontSize;
@@ -277,6 +275,15 @@ export class SpanStyles {
 		span.style.animation = animationCollection.animationStyle;
 
 		return span;
+	}
+
+	/**
+	 * @return {!HTMLBRElement}
+	 */
+	makeNewLine(): HTMLBRElement {
+		const result = document.createElement("br");
+		result.style.lineHeight = `${ (this._scaleY * this._fontSize).toFixed(3) }px`;
+		return result;
 	}
 
 	/**
@@ -585,15 +592,6 @@ export class SpanStyles {
 	}
 
 	/**
-	 * @return {!HTMLBRElement}
-	 */
-	makeNewLine(): HTMLBRElement {
-		const result = document.createElement("br");
-		result.style.lineHeight = `${ (this._scaleY * this._fontSize).toFixed(3) }px`;
-		return result;
-	}
-
-	/**
 	 * Sets the italic property. null defaults it to the default style's value.
 	 *
 	 * @type {?boolean}
@@ -607,7 +605,7 @@ export class SpanStyles {
 	 *
 	 * @type {(?boolean|?number)}
 	 */
-	set bold(value: boolean | number) {
+	set bold(value: boolean | number | null) {
 		this._bold = valueOrDefault(value, this._defaultStyle.bold);
 	}
 
@@ -716,7 +714,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set blur(value: number) {
-		this._blur = valueOrDefault(value, 0);
+		this._blur = valueOrDefault<number>(value, 0);
 	}
 
 	/**
@@ -734,7 +732,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set gaussianBlur(value: number) {
-		this._gaussianBlur = valueOrDefault(value, 0);
+		this._gaussianBlur = valueOrDefault<number>(value, 0);
 	}
 
 	/**
@@ -742,7 +740,7 @@ export class SpanStyles {
 	 *
 	 * @type {?string}
 	 */
-	set fontName(value: string) {
+	set fontName(value: string | null) {
 		this._fontName = valueOrDefault(value, this._defaultStyle.fontName);
 	}
 
@@ -833,7 +831,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set rotationX(value: number) {
-		this._rotationX = valueOrDefault(value, 0);
+		this._rotationX = valueOrDefault<number>(value, 0);
 	}
 
 	/**
@@ -851,7 +849,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set rotationY(value: number) {
-		this._rotationY = valueOrDefault(value, 0);
+		this._rotationY = valueOrDefault<number>(value, 0);
 	}
 
 	/**
@@ -887,7 +885,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set skewX(value: number) {
-		this._skewX = valueOrDefault(value, 0);
+		this._skewX = valueOrDefault<number>(value, 0);
 	}
 
 	/**
@@ -905,7 +903,7 @@ export class SpanStyles {
 	 * @type {?number}
 	 */
 	set skewY(value: number) {
-		this._skewY = valueOrDefault(value, 0);
+		this._skewY = valueOrDefault<number>(value, 0);
 	}
 
 	/**
@@ -1092,6 +1090,6 @@ function createComponentTransferFilter(color: Color): SVGFEComponentTransferElem
  * @param {!T} defaultValue
  * @return {!T}
  */
-function valueOrDefault<T>(newValue: T, defaultValue: T): T {
+function valueOrDefault<T>(newValue: T | null, defaultValue: T): T {
 	return ((newValue !== null) ? newValue : defaultValue);
 }

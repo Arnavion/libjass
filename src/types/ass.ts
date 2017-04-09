@@ -18,27 +18,26 @@
  * limitations under the License.
  */
 
-import { Attachment } from "./attachment";
-import { Dialogue } from "./dialogue";
-import { Style } from "./style";
-import { ScriptProperties } from "./script-properties";
-
-import { Format } from "./misc";
-
-import { debugMode, verboseMode } from "../settings";
-
 import * as parser from "../parser";
 import { parseLineIntoTypedTemplate } from "../parser/misc";
 import { ReadableStream, TextDecoderConstructor } from "../parser/streams";
 
+import { registerClass as serializable } from "../serialization";
+
+import { debugMode, verboseMode } from "../settings";
+
 import { Map } from "../utility/map";
 import { Promise } from "../utility/promise";
 
-import { registerClass as serializable } from "../serialization";
+import { Attachment } from "./attachment";
+import { Dialogue } from "./dialogue";
+import { Format } from "./misc";
+import { ScriptProperties } from "./script-properties";
+import { Style } from "./style";
 
 declare const global: {
 	fetch?(url: string): Promise<{ body: ReadableStream; ok?: boolean; status?: number; }>;
-	ReadableStream?: { prototype: ReadableStream; };
+	ReadableStream?: Function & { prototype: ReadableStream; };
 	TextDecoder?: TextDecoderConstructor;
 };
 
@@ -47,13 +46,121 @@ declare const global: {
  */
 @serializable
 export class ASS {
+	/**
+	 * Creates an ASS object from the raw text of an ASS script.
+	 *
+	 * @param {string} raw The raw text of the script.
+	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
+	 * @return {!Promise.<!libjass.ASS>}
+	 */
+	static fromString(raw: string, type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
+		return ASS.fromStream(new parser.StringStream(raw), type);
+	}
+
+	/**
+	 * Creates an ASS object from the given {@link libjass.parser.Stream}.
+	 *
+	 * @param {!libjass.parser.Stream} stream The stream to parse the script from
+	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
+	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
+	 */
+	static fromStream(stream: parser.Stream, type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
+		switch (type) {
+			case Format.ASS:
+			case "ass":
+				return new parser.StreamParser(stream).ass;
+			case Format.SRT:
+			case "srt":
+				return new parser.SrtStreamParser(stream).ass;
+			default:
+				throw new Error(`Invalid value of type: ${ type }`);
+		}
+	}
+
+	/**
+	 * Creates an ASS object from the given URL.
+	 *
+	 * @param {string} url The URL of the script.
+	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
+	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
+	 */
+	static fromUrl(url: string, type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
+		let fetchPromise: Promise<ASS>;
+
+		if (
+			typeof global.fetch === "function" &&
+			typeof global.ReadableStream === "function" && typeof global.ReadableStream.prototype.getReader === "function" &&
+			typeof global.TextDecoder === "function"
+		) {
+			fetchPromise = global.fetch(url).then(response => {
+				if (response.ok === false || (response.ok === undefined && (response.status === undefined || response.status < 200 || response.status > 299))) {
+					throw new Error(`HTTP request for ${ url } failed with status code ${ response.status }`);
+				}
+
+				return ASS.fromReadableStream(response.body, "utf-8", type);
+			});
+		}
+		else {
+			fetchPromise = Promise.reject<ASS>(new Error("Not supported."));
+		}
+
+		return fetchPromise.catch(reason => {
+			if (debugMode) {
+				console.log("fetch() failed, falling back to XHR: %o", reason);
+			}
+
+			const xhr = new XMLHttpRequest();
+			const result = ASS.fromStream(new parser.XhrStream(xhr), type);
+			xhr.open("GET", url, true);
+			xhr.send();
+			return result;
+		});
+	}
+
+	/**
+	 * Creates an ASS object from the given ReadableStream.
+	 *
+	 * @param {!ReadableStream} stream
+	 * @param {string="utf-8"} encoding
+	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
+	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
+	 */
+	static fromReadableStream(stream: ReadableStream, encoding: string = "utf-8", type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
+		return ASS.fromStream(new parser.BrowserReadableStream(stream, encoding), type);
+	}
+
+	/**
+	 * Custom deserialization for ASS objects.
+	 *
+	 * @param {!*} obj
+	 * @return {!libjass.ASS}
+	 */
+	static fromJSON(obj: any): ASS {
+		const result: ASS = Object.create(ASS.prototype);
+
+		result._properties = obj._properties;
+
+		result._styles = new Map<string, Style>();
+		for (const name of Object.keys(obj._styles)) {
+			const style = obj._styles[name];
+			result._styles.set(name, style);
+		}
+
+		result._dialogues = obj._dialogues;
+		result._attachments = obj._attachments;
+		result._stylesFormatSpecifier = obj._stylesFormatSpecifier;
+		result._dialoguesFormatSpecifier = obj._dialoguesFormatSpecifier;
+
+		return result;
+	}
+
 	private _properties: ScriptProperties = new ScriptProperties();
 	private _styles: Map<string, Style> = new Map<string, Style>();
 	private _dialogues: Dialogue[] = [];
 	private _attachments: Attachment[] = [];
 
-	private _stylesFormatSpecifier: string[] = null;
-	private _dialoguesFormatSpecifier: string[] = null;
+	private _stylesFormatSpecifier: string[] | null = null;
+	private _dialoguesFormatSpecifier: string[] | null = null;
 
 	/**
 	 * The properties of this script.
@@ -96,7 +203,7 @@ export class ASS {
 	 *
 	 * @type {Array.<string>}
 	 */
-	get stylesFormatSpecifier(): string[] {
+	get stylesFormatSpecifier(): string[] | null {
 		return this._stylesFormatSpecifier;
 	}
 
@@ -105,7 +212,7 @@ export class ASS {
 	 *
 	 * @type {Array.<string>}
 	 */
-	get dialoguesFormatSpecifier(): string[] {
+	get dialoguesFormatSpecifier(): string[] | null {
 		return this._dialoguesFormatSpecifier;
 	}
 
@@ -114,7 +221,7 @@ export class ASS {
 	 *
 	 * @type {Array.<string>}
 	 */
-	set stylesFormatSpecifier(value: string[]) {
+	set stylesFormatSpecifier(value: string[] | null) {
 		this._stylesFormatSpecifier = value;
 	}
 
@@ -123,7 +230,7 @@ export class ASS {
 	 *
 	 * @type {Array.<string>}
 	 */
-	set dialoguesFormatSpecifier(value: string[]) {
+	set dialoguesFormatSpecifier(value: string[] | null) {
 		this._dialoguesFormatSpecifier = value;
 	}
 
@@ -219,114 +326,6 @@ export class ASS {
 		result._dialoguesFormatSpecifier = this._dialoguesFormatSpecifier;
 
 		result._classTag = (ASS.prototype as any)._classTag;
-
-		return result;
-	}
-
-	/**
-	 * Creates an ASS object from the raw text of an ASS script.
-	 *
-	 * @param {string} raw The raw text of the script.
-	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
-	 * @return {!Promise.<!libjass.ASS>}
-	 */
-	static fromString(raw: string, type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
-		return ASS.fromStream(new parser.StringStream(raw), type);
-	}
-
-	/**
-	 * Creates an ASS object from the given {@link libjass.parser.Stream}.
-	 *
-	 * @param {!libjass.parser.Stream} stream The stream to parse the script from
-	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
-	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
-	 */
-	static fromStream(stream: parser.Stream, type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
-		switch (type) {
-			case Format.ASS:
-			case "ass":
-				return new parser.StreamParser(stream).ass;
-			case Format.SRT:
-			case "srt":
-				return new parser.SrtStreamParser(stream).ass;
-			default:
-				throw new Error(`Invalid value of type: ${ type }`);
-		}
-	}
-
-	/**
-	 * Creates an ASS object from the given URL.
-	 *
-	 * @param {string} url The URL of the script.
-	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
-	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
-	 */
-	static fromUrl(url: string, type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
-		let fetchPromise: Promise<ASS>;
-
-		if (
-			typeof global.fetch === "function" &&
-			typeof global.ReadableStream === "function" && typeof global.ReadableStream.prototype.getReader === "function" &&
-			typeof global.TextDecoder === "function"
-		) {
-			fetchPromise = global.fetch(url).then(response => {
-				if (response.ok === false || (response.ok === undefined && (response.status < 200 || response.status > 299))) {
-					throw new Error(`HTTP request for ${ url } failed with status code ${ response.status }`);
-				}
-
-				return ASS.fromReadableStream(response.body, "utf-8", type);
-			});
-		}
-		else {
-			fetchPromise = Promise.reject<ASS>(new Error("Not supported."));
-		}
-
-		return fetchPromise.catch(reason => {
-			if (debugMode) {
-				console.log("fetch() failed, falling back to XHR: %o", reason);
-			}
-
-			const xhr = new XMLHttpRequest();
-			const result = ASS.fromStream(new parser.XhrStream(xhr), type);
-			xhr.open("GET", url, true);
-			xhr.send();
-			return result;
-		});
-	}
-
-	/**
-	 * Creates an ASS object from the given ReadableStream.
-	 *
-	 * @param {!ReadableStream} stream
-	 * @param {string="utf-8"} encoding
-	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
-	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
-	 */
-	static fromReadableStream(stream: ReadableStream, encoding: string = "utf-8", type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
-		return ASS.fromStream(new parser.BrowserReadableStream(stream, encoding), type);
-	}
-
-	/**
-	 * Custom deserialization for ASS objects.
-	 *
-	 * @param {!*} obj
-	 * @return {!libjass.ASS}
-	 */
-	static fromJSON(obj: any): ASS {
-		const result: ASS = Object.create(ASS.prototype);
-
-		result._properties = obj._properties;
-
-		result._styles = new Map<string, Style>();
-		for (const name of Object.keys(obj._styles)) {
-			const style = obj._styles[name];
-			result._styles.set(name, style);
-		}
-
-		result._dialogues = obj._dialogues;
-		result._attachments = obj._attachments;
-		result._stylesFormatSpecifier = obj._stylesFormatSpecifier;
-		result._dialoguesFormatSpecifier = obj._dialoguesFormatSpecifier;
 
 		return result;
 	}

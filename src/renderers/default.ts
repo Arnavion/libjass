@@ -35,7 +35,7 @@ export class DefaultRenderer extends WebRenderer {
 	constructor(private _video: HTMLVideoElement, ass: ASS, settings?: RendererSettings) {
 		super(ass, new VideoClock(_video), document.createElement("div"), settings);
 
-		this._video.parentElement.replaceChild(this.libjassSubsWrapper, this._video);
+		this._video.parentElement!.replaceChild(this.libjassSubsWrapper, this._video);
 		this.libjassSubsWrapper.insertBefore(this._video, this.libjassSubsWrapper.firstElementChild);
 	}
 

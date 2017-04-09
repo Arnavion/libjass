@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import * as ts from "typescript";
+import ts = require("typescript");
 
 export class HasParent {
 	public parent: HasParent = null;
@@ -30,7 +30,7 @@ export class HasParent {
 			return this.name;
 		}
 
-		var parent = this.parent;
+		const parent = this.parent;
 		if (parent instanceof Namespace) {
 			return parent.getMemberFullName(this);
 		}
@@ -188,7 +188,17 @@ export class UnresolvedType {
 }
 
 export type HasStringGenerics = Class | Interface | Function;
+
+export function hasStringGenerics(item: NamespaceMember): item is HasStringGenerics {
+	return (item as HasGenerics).generics !== undefined;
+}
+
 export type HasGenerics = HasStringGenerics | TypeReference;
+
+export function hasGenerics(item: ModuleMember | EnumMember | TypeReference): item is HasGenerics {
+	return (item as HasGenerics).generics !== undefined;
+}
+
 export type CanBePrivate = Class | Interface | Function | Getter | Setter | Enum | Reference;
 export type CanBeProtected = Function;
 export type CanBeStatic = Function;

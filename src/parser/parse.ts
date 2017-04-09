@@ -71,7 +71,7 @@ class ParserRun {
 	/**
 	 * @type {ParseNode}
 	 */
-	get result(): ParseNode {
+	get result(): ParseNode | null {
 		return this._result;
 	}
 
@@ -124,7 +124,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_enclosedTags(parent: ParseNode): ParseNode {
+	parse_enclosedTags(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		current.value = [];
@@ -135,7 +135,7 @@ class ParserRun {
 		}
 
 		for (let next = this._peek(); this._haveMore() && next !== "}"; next = this._peek()) {
-			let childNode: ParseNode = null;
+			let childNode: ParseNode | null = null;
 
 			if (this.read(current, "\\") !== null) {
 				childNode =
@@ -237,7 +237,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_newline(parent: ParseNode): ParseNode {
+	parse_newline(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "\\N") === null) {
@@ -254,7 +254,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_hardspace(parent: ParseNode): ParseNode {
+	parse_hardspace(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "\\h") === null) {
@@ -301,7 +301,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_a(parent: ParseNode): ParseNode {
+	parse_tag_a(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "a") === null) {
@@ -339,8 +339,8 @@ class ParserRun {
 
 		const valueNode = new ParseNode(current, next);
 
-		let value: number;
-		switch (valueNode.value) {
+		let value: number = -1;
+		switch ((valueNode.value)) {
 			case "1":
 				value = 1;
 				break;
@@ -387,7 +387,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_alpha(parent: ParseNode): ParseNode {
+	parse_tag_alpha(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -395,7 +395,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_an(parent: ParseNode): ParseNode {
+	parse_tag_an(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "an") === null) {
@@ -421,7 +421,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_b(parent: ParseNode): ParseNode {
+	parse_tag_b(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "b") === null) {
@@ -429,7 +429,7 @@ class ParserRun {
 			return null;
 		}
 
-		let valueNode: ParseNode = null;
+		let valueNode: ParseNode | null = null;
 
 		let next = this._peek();
 
@@ -459,7 +459,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_be(parent: ParseNode): ParseNode {
+	parse_tag_be(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -467,7 +467,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_blur(parent: ParseNode): ParseNode {
+	parse_tag_blur(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -475,7 +475,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_bord(parent: ParseNode): ParseNode {
+	parse_tag_bord(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -483,7 +483,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_c(parent: ParseNode): ParseNode {
+	parse_tag_c(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -491,7 +491,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_clip(parent: ParseNode): ParseNode {
+	parse_tag_clip(parent: ParseNode): ParseNode | null {
 		return this._parse_tag_clip_or_iclip("clip", parent);
 	}
 
@@ -499,7 +499,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fad(parent: ParseNode): ParseNode {
+	parse_tag_fad(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "fad") === null) {
@@ -543,7 +543,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fade(parent: ParseNode): ParseNode {
+	parse_tag_fade(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "fade") === null) {
@@ -646,7 +646,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fax(parent: ParseNode): ParseNode {
+	parse_tag_fax(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -654,7 +654,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fay(parent: ParseNode): ParseNode {
+	parse_tag_fay(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -662,7 +662,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fn(parent: ParseNode): ParseNode {
+	parse_tag_fn(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "fn") === null) {
@@ -690,7 +690,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fr(parent: ParseNode): ParseNode {
+	parse_tag_fr(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -698,7 +698,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_frx(parent: ParseNode): ParseNode {
+	parse_tag_frx(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -706,7 +706,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fry(parent: ParseNode): ParseNode {
+	parse_tag_fry(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -714,7 +714,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_frz(parent: ParseNode): ParseNode {
+	parse_tag_frz(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -722,7 +722,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fs(parent: ParseNode): ParseNode {
+	parse_tag_fs(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -730,7 +730,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fsplus(parent: ParseNode): ParseNode {
+	parse_tag_fsplus(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "fs+") === null) {
@@ -754,7 +754,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fsminus(parent: ParseNode): ParseNode {
+	parse_tag_fsminus(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "fs-") === null) {
@@ -778,7 +778,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fscx(parent: ParseNode): ParseNode {
+	parse_tag_fscx(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "fscx") === null) {
@@ -802,7 +802,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fscy(parent: ParseNode): ParseNode {
+	parse_tag_fscy(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "fscy") === null) {
@@ -826,7 +826,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fsp(parent: ParseNode): ParseNode {
+	parse_tag_fsp(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -834,7 +834,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_i(parent: ParseNode): ParseNode {
+	parse_tag_i(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -842,7 +842,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_iclip(parent: ParseNode): ParseNode {
+	parse_tag_iclip(parent: ParseNode): ParseNode | null {
 		return this._parse_tag_clip_or_iclip("iclip", parent);
 	}
 
@@ -850,7 +850,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_k(parent: ParseNode): ParseNode {
+	parse_tag_k(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "k") === null) {
@@ -874,7 +874,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_K(parent: ParseNode): ParseNode {
+	parse_tag_K(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "K") === null) {
@@ -898,7 +898,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_kf(parent: ParseNode): ParseNode {
+	parse_tag_kf(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "kf") === null) {
@@ -922,7 +922,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_ko(parent: ParseNode): ParseNode {
+	parse_tag_ko(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "ko") === null) {
@@ -946,7 +946,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_move(parent: ParseNode): ParseNode {
+	parse_tag_move(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "move") === null) {
@@ -998,8 +998,8 @@ class ParserRun {
 			return null;
 		}
 
-		let t1Node: ParseNode = null;
-		let t2Node: ParseNode = null;
+		let t1Node: ParseNode | null = null;
+		let t2Node: ParseNode | null = null;
 
 		if (this.read(current, ",") !== null) {
 			t1Node = this.parse_decimal(current);
@@ -1037,7 +1037,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_org(parent: ParseNode): ParseNode {
+	parse_tag_org(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "org") === null) {
@@ -1081,7 +1081,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_p(parent: ParseNode): ParseNode {
+	parse_tag_p(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1089,7 +1089,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_pbo(parent: ParseNode): ParseNode {
+	parse_tag_pbo(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1097,7 +1097,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_pos(parent: ParseNode): ParseNode {
+	parse_tag_pos(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "pos") === null) {
@@ -1141,7 +1141,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_q(parent: ParseNode): ParseNode {
+	parse_tag_q(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "q") === null) {
@@ -1167,7 +1167,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_r(parent: ParseNode): ParseNode {
+	parse_tag_r(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "r") === null) {
@@ -1195,7 +1195,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_s(parent: ParseNode): ParseNode {
+	parse_tag_s(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1203,7 +1203,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_shad(parent: ParseNode): ParseNode {
+	parse_tag_shad(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1211,7 +1211,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_t(parent: ParseNode): ParseNode {
+	parse_tag_t(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, "t") === null) {
@@ -1224,9 +1224,9 @@ class ParserRun {
 			return null;
 		}
 
-		let startNode: ParseNode = null;
-		let endNode: ParseNode = null;
-		let accelNode: ParseNode = null;
+		let startNode: ParseNode | null = null;
+		let endNode: ParseNode | null = null;
+		let accelNode: ParseNode | null = null;
 
 		const firstNode = this.parse_decimal(current);
 		if (firstNode !== null) {
@@ -1268,7 +1268,7 @@ class ParserRun {
 		const transformTags: parts.Part[] = [];
 
 		for (let next = this._peek(); this._haveMore() && next !== ")" && next !== "}"; next = this._peek()) {
-			let childNode: ParseNode = null;
+			let childNode: ParseNode | null = null;
 
 			if (this.read(current, "\\") !== null) {
 				childNode =
@@ -1354,7 +1354,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_u(parent: ParseNode): ParseNode {
+	parse_tag_u(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1362,7 +1362,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_xbord(parent: ParseNode): ParseNode {
+	parse_tag_xbord(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1370,7 +1370,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_xshad(parent: ParseNode): ParseNode {
+	parse_tag_xshad(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1378,7 +1378,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_ybord(parent: ParseNode): ParseNode {
+	parse_tag_ybord(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1386,7 +1386,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_yshad(parent: ParseNode): ParseNode {
+	parse_tag_yshad(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1394,7 +1394,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_1a(parent: ParseNode): ParseNode {
+	parse_tag_1a(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1402,7 +1402,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_1c(parent: ParseNode): ParseNode {
+	parse_tag_1c(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1410,7 +1410,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_2a(parent: ParseNode): ParseNode {
+	parse_tag_2a(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1418,7 +1418,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_2c(parent: ParseNode): ParseNode {
+	parse_tag_2c(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1426,7 +1426,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_3a(parent: ParseNode): ParseNode {
+	parse_tag_3a(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1434,7 +1434,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_3c(parent: ParseNode): ParseNode {
+	parse_tag_3c(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1442,7 +1442,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_4a(parent: ParseNode): ParseNode {
+	parse_tag_4a(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1450,7 +1450,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_4c(parent: ParseNode): ParseNode {
+	parse_tag_4c(parent: ParseNode): ParseNode | null {
 		throw new Error("Method not implemented.");
 	}
 
@@ -1461,7 +1461,7 @@ class ParserRun {
 	parse_drawingInstructions(parent: ParseNode): ParseNode {
 		const current = new ParseNode(parent);
 
-		let currentType: string = null;
+		let currentType: string | null = null;
 		const numberParts: ParseNode[] = [];
 
 		current.value = [];
@@ -1518,7 +1518,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_decimalInt32(parent: ParseNode): ParseNode {
+	parse_decimalInt32(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		const isNegative = this.read(current, "-") !== null;
@@ -1550,7 +1550,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_hexInt32(parent: ParseNode): ParseNode {
+	parse_hexInt32(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		const isNegative = this.read(current, "-") !== null;
@@ -1590,7 +1590,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_decimalOrHexInt32(parent: ParseNode): ParseNode {
+	parse_decimalOrHexInt32(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		const valueNode =
@@ -1612,7 +1612,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_decimal(parent: ParseNode): ParseNode {
+	parse_decimal(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		const negative = (this.read(current, "-") !== null);
@@ -1637,12 +1637,12 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_unsignedDecimal(parent: ParseNode): ParseNode {
+	parse_unsignedDecimal(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		const characteristicNode = new ParseNode(current, "");
 
-		let mantissaNode: ParseNode = null;
+		let mantissaNode: ParseNode | null = null;
 
 		for (let next = this._peek(); this._haveMore() && next >= "0" && next <= "9"; next = this._peek()) {
 			characteristicNode.value += next;
@@ -1675,7 +1675,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_enableDisable(parent: ParseNode): ParseNode {
+	parse_enableDisable(parent: ParseNode): ParseNode | null {
 		const next = this._peek();
 
 		if (next === "0" || next === "1") {
@@ -1692,7 +1692,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_color(parent: ParseNode): ParseNode {
+	parse_color(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		while (this.read(current, "&") !== null || this.read(current, "H") !== null) { }
@@ -1720,7 +1720,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_alpha(parent: ParseNode): ParseNode {
+	parse_alpha(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		while (this.read(current, "&") !== null || this.read(current, "H") !== null) { }
@@ -1744,7 +1744,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_colorWithAlpha(parent: ParseNode): ParseNode {
+	parse_colorWithAlpha(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		const valueNode = this.parse_decimalOrHexInt32(current);
@@ -1770,7 +1770,7 @@ class ParserRun {
 	 * @param {string} next
 	 * @return {ParseNode}
 	 */
-	read(parent: ParseNode, next: string): ParseNode {
+	read(parent: ParseNode, next: string): ParseNode | null {
 		if (this._peek(next.length) !== next) {
 			return null;
 		}
@@ -1801,7 +1801,7 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	private _parse_tag_clip_or_iclip(tagName: "clip" | "iclip", parent: ParseNode): ParseNode {
+	private _parse_tag_clip_or_iclip(tagName: "clip" | "iclip", parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
 		if (this.read(current, tagName) === null) {
@@ -1814,12 +1814,12 @@ class ParserRun {
 			return null;
 		}
 
-		let x1Node: ParseNode = null;
-		let x2Node: ParseNode = null;
-		let y1Node: ParseNode = null;
-		let y2Node: ParseNode = null;
-		let scaleNode: ParseNode = null;
-		let commandsNode: ParseNode = null;
+		let x1Node: ParseNode | null = null;
+		let x2Node: ParseNode | null = null;
+		let y1Node: ParseNode | null = null;
+		let y2Node: ParseNode | null = null;
+		let scaleNode: ParseNode | null = null;
+		let commandsNode: ParseNode | null = null;
 
 		const firstNode = this.parse_decimal(current);
 
@@ -1895,19 +1895,18 @@ class ParserRun {
 function makeTagParserFunction(
 	tagName: string,
 	tagConstructor: { new (value: any): parts.Part },
-	valueParser: (current: ParseNode) => ParseNode,
+	valueParser: (current: ParseNode) => ParseNode | null,
 	required: boolean
 ): void {
-	(ParserRun.prototype as any)[`parse_tag_${ tagName }`] = function (parent: ParseNode): ParseNode {
-		const self = this as ParserRun;
+	(ParserRun.prototype as any)[`parse_tag_${ tagName }`] = function (this: ParserRun, parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
-		if (self.read(current, tagName) === null) {
+		if (this.read(current, tagName) === null) {
 			parent.pop();
 			return null;
 		}
 
-		const valueNode = valueParser.call(self, current);
+		const valueNode: ParseNode | null = valueParser.call(this, current);
 
 		if (valueNode !== null) {
 			current.value = new tagConstructor(valueNode.value);
@@ -1975,7 +1974,7 @@ class ParseNode {
 	private _end: number;
 	private _value: any;
 
-	constructor(private _parent: ParseNode, value: any = null) {
+	constructor(private _parent: ParseNode | null, value: any = null) {
 		if (_parent !== null) {
 			_parent.children.push(this);
 		}
@@ -2007,7 +2006,7 @@ class ParseNode {
 	/**
 	 * @type {ParseNode}
 	 */
-	get parent(): ParseNode {
+	get parent(): ParseNode | null {
 		return this._parent;
 	}
 

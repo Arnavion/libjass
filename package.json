@@ -17,7 +17,7 @@
 	"main": "lib/libjass.js",
 	"scripts": {
 		"prepublish": "node ./build.js clean default",
-		"build": "tsc ./build/typescript/index.ts ./build/doc.ts ./build/node.d.ts ./build/typescript/typescript.d.ts ./node_modules/async-build/typings.d.ts -m commonjs -t es5 -noImplicitAny --moduleResolution classic",
+		"build": "tsc -p ./build/tsconfig.json",
 		"test": "node ./build.js test",
 		"test-lib": "intern-client config=tests/intern reporters=Pretty",
 		"test-minified": "intern-client config=tests/intern reporters=Pretty minified=true",
@@ -26,12 +26,12 @@
 	},
 	"devDependencies": {
 		"async": "1.x >=1.4",
-		"async-build": "0.3.0",
+		"async-build": "0.3.1",
 		"intern": "3.x >=3.2.0",
 		"npm": "3.x",
-		"pngjs": "2.3.1",
+		"pngjs": "3.x",
 		"sax": "1.x",
-		"typescript": "1.8.10",
+		"typescript": "2.0.10",
 		"uglify-js": "2.x >=2.4.24"
 	},
 	"private": true

@@ -18,16 +18,17 @@
  * limitations under the License.
  */
 
-declare const global: {
-	Set?: typeof Set;
-};
-
 export interface Set<T> {
+	/**
+	 * @type {number}
+	 */
+	size: number;
+
 	/**
 	 * @param {T} value
 	 * @return {libjass.Set.<T>} This set
 	 */
-	add(value: T): Set<T>;
+	add(value: T): this;
 
 	/**
 	 */
@@ -43,12 +44,7 @@ export interface Set<T> {
 	 * @param {function(T, T, libjass.Set.<T>)} callbackfn A function that is called with each value in the set.
 	 * @param {*} thisArg
 	 */
-	forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void;
-
-	/**
-	 * @type {number}
-	 */
-	size: number;
+	forEach(callbackfn: (value: T, index: T, set: this) => void, thisArg?: any): void;
 }
 
 /**
@@ -58,7 +54,7 @@ export interface Set<T> {
  *
  * @param {!Array.<T>=} iterable Only an array of values is supported.
  */
-class SimpleSet<T> {
+class SimpleSet<T> implements Set<T> {
 	private _elements: { [key: string]: T };
 	private _size: number;
 
@@ -82,7 +78,7 @@ class SimpleSet<T> {
 	 * @param {T} value
 	 * @return {libjass.Set.<T>} This set
 	 */
-	add(value: T): Set<T> {
+	add(value: T): this {
 		const property = this._toProperty(value);
 
 		if (property === null) {
@@ -123,7 +119,7 @@ class SimpleSet<T> {
 	 * @param {function(T, T, libjass.Set.<T>)} callbackfn A function that is called with each value in the set.
 	 * @param {*} thisArg
 	 */
-	forEach(callbackfn: (value: T, index: T, set: Set<T>) => void, thisArg?: any): void {
+	forEach(callbackfn: (value: T, index: T, set: this) => void, thisArg?: any): void {
 		for (const property of Object.keys(this._elements)) {
 			const element = this._elements[property];
 			callbackfn.call(thisArg, element, element, this);
@@ -143,7 +139,7 @@ class SimpleSet<T> {
 	 * @param {T} value
 	 * @return {?string}
 	 */
-	private _toProperty(value: T): string {
+	private _toProperty(value: T): string | null {
 		if (typeof value === "number") {
 			return `#${ value }`;
 		}
@@ -181,12 +177,16 @@ if (typeof Set.prototype.forEach !== "function" || (() => {
 	Set = SimpleSet;
 }
 
+declare var global: {
+	Set?: typeof Set;
+};
+
 /**
  * Sets the Set implementation used by libjass to the provided one. If null, {@link ./utility/set.SimpleSet} is used.
  *
  * @param {?function(new:Set, !Array.<T>=)} value
  */
-export function setImplementation(value: typeof Set): void {
+export function setImplementation(value: typeof Set | null): void {
 	if (value !== null) {
 		Set = value;
 	}

@@ -1,8 +1,5 @@
 {
 	"compilerOptions": {
-		"lib": ["es5", "dom"],
-
-		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
@@ -10,15 +7,20 @@
 		"noImplicitThis": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": false,
-		"strictNullChecks": true,
+		"strictNullChecks": false,
 
 		"target": "es5",
-		"module": "amd",
-		"moduleResolution": "node",
-		"outFile": "../lib/libjass.js",
-		"noImplicitUseStrict": true,
-		"sourceMap": true,
-		"inlineSources": true,
+		"module": "commonjs",
+		"moduleResolution": "classic",
+		"noImplicitUseStrict": false,
 		"types": []
-	}
+	},
+
+	"files": [
+		"./typescript/index.ts",
+		"./doc.ts",
+		"./node.d.ts",
+		"./typescript/typescript.d.ts",
+		"../node_modules/async-build/typings.d.ts"
+	]
 }

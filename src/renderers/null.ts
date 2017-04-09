@@ -18,14 +18,14 @@
  * limitations under the License.
  */
 
-import { Clock, ClockEvent } from "./clocks/base";
-
-import { RendererSettings } from "./settings";
-
 import { debugMode, verboseMode } from "../settings";
 
 import { ASS } from "../types/ass";
 import { Dialogue } from "../types/dialogue";
+
+import { Clock, ClockEvent } from "./clocks/base";
+
+import { RendererSettings } from "./settings";
 
 /**
  * A renderer implementation that doesn't output anything.
@@ -35,7 +35,7 @@ import { Dialogue } from "../types/dialogue";
  * @param {libjass.renderers.RendererSettings} settings
  */
 export class NullRenderer {
-	private static _lastRendererId = -1;
+	private static _lastRendererId: number = -1;
 
 	private _id: number;
 

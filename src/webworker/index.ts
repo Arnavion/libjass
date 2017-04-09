@@ -30,7 +30,7 @@ export { WorkerCommands } from "./commands";
  */
 export const supported = typeof Worker !== "undefined";
 
-const _scriptNode = (typeof document !== "undefined" && document.currentScript !== undefined) ? document.currentScript : null;
+const _scriptNode = (typeof document !== "undefined" && document.currentScript !== undefined) ? (document.currentScript as HTMLScriptElement) : null;
 
 /**
  * Create a new web worker and returns a {@link libjass.webworker.WorkerChannel} to it.

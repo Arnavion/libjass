@@ -21,13 +21,13 @@
 import { debugMode } from "../settings";
 
 import { ASS } from "../types/ass";
-import { Style } from "../types/style";
-import { Dialogue } from "../types/dialogue";
 import { Attachment, AttachmentType } from "../types/attachment";
+import { Dialogue } from "../types/dialogue";
+import { Style } from "../types/style";
 
 import { Map } from "../utility/map";
 
-import { Promise, DeferredPromise } from "../utility/promise";
+import { DeferredPromise, Promise } from "../utility/promise";
 
 import { parseLineIntoProperty } from "./misc";
 import { Stream } from "./streams";
@@ -54,7 +54,7 @@ export class StreamParser {
 
 	private _shouldSwallowBom: boolean = true;
 	private _currentSection: Section = Section.ScriptInfo;
-	private _currentAttachment: Attachment = null;
+	private _currentAttachment: Attachment | null = null;
 
 	constructor(private _stream: Stream) {
 		this._stream.nextLine().then(line => this._onNextLine(line), reason => {
@@ -118,7 +118,7 @@ export class StreamParser {
 	/**
 	 * @param {string} line
 	 */
-	private _onNextLine(line: string): void {
+	private _onNextLine(line: string | null): void {
 		if (line === null) {
 			this.currentSection = Section.EOF;
 			return;
@@ -290,10 +290,10 @@ export class SrtStreamParser {
 
 	private _shouldSwallowBom: boolean = true;
 
-	private _currentDialogueNumber: string = null;
-	private _currentDialogueStart: string = null;
-	private _currentDialogueEnd: string = null;
-	private _currentDialogueText: string = null;
+	private _currentDialogueNumber: string | null = null;
+	private _currentDialogueStart: string | null = null;
+	private _currentDialogueEnd: string | null = null;
+	private _currentDialogueText: string | null = null;
 
 	constructor(private _stream: Stream) {
 		this._stream.nextLine().then(line => this._onNextLine(line), reason => {
@@ -319,7 +319,7 @@ export class SrtStreamParser {
 	/**
 	 * @param {string} line
 	 */
-	private _onNextLine(line: string): void {
+	private _onNextLine(line: string | null): void {
 		if (line === null) {
 			if (this._currentDialogueNumber !== null && this._currentDialogueStart !== null && this._currentDialogueEnd !== null && this._currentDialogueText !== null) {
 				this._ass.dialogues.push(new Dialogue(new Map([

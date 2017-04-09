@@ -26,6 +26,77 @@ import { Map } from "../utility/map";
  */
 export class RendererSettings {
 	/**
+	 * A convenience method to create a font map from a <style> or <link> element that contains @font-face rules. There should be one @font-face rule for each font name, mapping to a font file URL.
+	 *
+	 * For example:
+	 *
+	 *     @font-face {
+	 *         font-family: "Helvetica";
+	 *         src: url("/fonts/helvetica.ttf"), local("Arial");
+	 *     }
+	 *
+	 * More complicated @font-face syntax like format() or multi-line src are not supported.
+	 *
+	 * @param {!LinkStyle} linkStyle
+	 * @return {!Map.<string, string>}
+	 */
+	static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string> {
+		const fontMap = new Map<string, string>();
+
+		const styleSheet = linkStyle.sheet as CSSStyleSheet;
+		for (let i = 0; i < styleSheet.cssRules.length; i++) {
+			const rule = styleSheet.cssRules[i];
+
+			if (isFontFaceRule(rule)) {
+				const name = rule.style.getPropertyValue("font-family").match(/^["']?(.*?)["']?$/)![1];
+
+				let src = rule.style.getPropertyValue("src");
+				if (!src) {
+					src = rule.cssText.split("\n")
+						.map(line => line.match(/src:\s*([^;]+?)\s*;/))
+						.filter((matches): matches is RegExpMatchArray => matches !== null)
+						.map(matches => matches[1])[0];
+				}
+
+				fontMap.set(name, src);
+			}
+		}
+
+		return fontMap;
+	}
+
+	/**
+	 * Converts an arbitrary object into a {@link libjass.renderers.RendererSettings} object.
+	 *
+	 * @param {*} object
+	 * @return {!libjass.renderers.RendererSettings}
+	 */
+	static from(object?: any): RendererSettings {
+		if (object === undefined || object === null) {
+			object = {};
+		}
+
+		const {
+			fontMap = null,
+			preRenderTime = 5,
+			preciseOutlines = false,
+			enableSvg = testSupportsSvg(),
+			fallbackFonts = 'Arial, Helvetica, sans-serif, "Segoe UI Symbol"',
+			useAttachedFonts = false,
+		} = object as RendererSettings;
+
+		const result = new RendererSettings();
+		result.fontMap = fontMap;
+		result.preRenderTime = preRenderTime;
+		result.preciseOutlines = preciseOutlines;
+		result.enableSvg = enableSvg;
+		result.fallbackFonts = fallbackFonts;
+		result.useAttachedFonts = useAttachedFonts;
+
+		return result;
+	}
+
+	/**
 	 * A map of font name to one or more URLs of that font. If provided, the fonts in this map are pre-loaded by the WebRenderer when it's created.
 	 *
 	 * The key of each entry of the map is the font name used in the ASS script. There are three choices for the value:
@@ -45,7 +116,7 @@ export class RendererSettings {
 	 *
 	 * @type {Map.<string, (string|!Array.<string>)>}
 	 */
-	fontMap: Map<string, string | string[]>;
+	fontMap: Map<string, string | string[]> | null;
 
 	/**
 	 * Subtitles will be pre-rendered for this amount of time (seconds).
@@ -97,77 +168,6 @@ export class RendererSettings {
 	 * @type {boolean}
 	 */
 	useAttachedFonts: boolean;
-
-	/**
-	 * A convenience method to create a font map from a <style> or <link> element that contains @font-face rules. There should be one @font-face rule for each font name, mapping to a font file URL.
-	 *
-	 * For example:
-	 *
-	 *     @font-face {
-	 *         font-family: "Helvetica";
-	 *         src: url("/fonts/helvetica.ttf"), local("Arial");
-	 *     }
-	 *
-	 * More complicated @font-face syntax like format() or multi-line src are not supported.
-	 *
-	 * @param {!LinkStyle} linkStyle
-	 * @return {!Map.<string, string>}
-	 */
-	static makeFontMapFromStyleElement(linkStyle: LinkStyle): Map<string, string> {
-		const fontMap = new Map<string, string>();
-
-		const styleSheet = linkStyle.sheet as CSSStyleSheet;
-		for (let i = 0; i < styleSheet.cssRules.length; i++) {
-			const rule = styleSheet.cssRules[i];
-
-			if (isFontFaceRule(rule)) {
-				const name = rule.style.getPropertyValue("font-family").match(/^["']?(.*?)["']?$/)[1];
-
-				let src = rule.style.getPropertyValue("src");
-				if (!src) {
-					src = rule.cssText.split("\n")
-						.map(line => line.match(/src:\s*([^;]+?)\s*;/))
-						.filter(matches => matches !== null)
-						.map(matches => matches[1])[0];
-				}
-
-				fontMap.set(name, src);
-			}
-		}
-
-		return fontMap;
-	}
-
-	/**
-	 * Converts an arbitrary object into a {@link libjass.renderers.RendererSettings} object.
-	 *
-	 * @param {*} object
-	 * @return {!libjass.renderers.RendererSettings}
-	 */
-	static from(object?: any): RendererSettings {
-		if (object === undefined || object === null) {
-			object = {};
-		}
-
-		const {
-			fontMap = null,
-			preRenderTime = 5,
-			preciseOutlines = false,
-			enableSvg = testSupportsSvg(),
-			fallbackFonts = 'Arial, Helvetica, sans-serif, "Segoe UI Symbol"',
-			useAttachedFonts = false,
-		} = object as RendererSettings;
-
-		const result = new RendererSettings();
-		result.fontMap = fontMap;
-		result.preRenderTime = preRenderTime;
-		result.preciseOutlines = preciseOutlines;
-		result.enableSvg = enableSvg;
-		result.fallbackFonts = fallbackFonts;
-		result.useAttachedFonts = useAttachedFonts;
-
-		return result;
-	}
 }
 
 /**

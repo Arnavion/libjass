@@ -67,27 +67,27 @@ export { version } from "./version";
 export function configure(newConfig: {
 	debugMode?: boolean,
 	verboseMode?: boolean,
-	Set?: typeof set.Set,
-	Map?: typeof map.Map,
-	Promise?: typeof promise.Promise,
+	Set?: typeof set.Set | null,
+	Map?: typeof map.Map | null,
+	Promise?: typeof promise.Promise | null,
 }): void {
-	if ("debugMode" in newConfig) {
+	if (typeof newConfig.debugMode === "boolean") {
 		settings.setDebugMode(newConfig.debugMode);
 	}
 
-	if ("verboseMode" in newConfig) {
+	if (typeof newConfig.verboseMode === "boolean") {
 		settings.setVerboseMode(newConfig.verboseMode);
 	}
 
-	if ("Set" in newConfig) {
+	if (typeof newConfig.Set === "function" || newConfig.Set === null) {
 		set.setImplementation(newConfig.Set);
 	}
 
-	if ("Map" in newConfig) {
+	if (typeof newConfig.Map === "function" || newConfig.Map === null) {
 		map.setImplementation(newConfig.Map);
 	}
 
-	if ("Promise" in newConfig) {
+	if (typeof newConfig.Promise === "function" || newConfig.Promise === null) {
 		promise.setImplementation(newConfig.Promise);
 	}
 }
