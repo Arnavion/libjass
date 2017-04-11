@@ -952,12 +952,30 @@ export class SpanStyles {
 	}
 
 	/**
+	 * Gets the outline color property.
+	 *
+	 * @type {!libjass.Color}
+	 */
+	get outlineColor(): Color {
+		return this._outlineColor;
+	}
+
+	/**
 	 * Sets the outline color property. null defaults it to the default style's value.
 	 *
 	 * @type {libjass.Color}
 	 */
 	set outlineColor(value: Color) {
 		this._outlineColor = valueOrDefault(value, this._defaultStyle.outlineColor);
+	}
+
+	/**
+	 * Gets the shadow color property.
+	 *
+	 * @type {!libjass.Color}
+	 */
+	get shadowColor(): Color {
+		return this._shadowColor;
 	}
 
 	/**
