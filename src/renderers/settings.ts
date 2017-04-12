@@ -198,7 +198,7 @@ function testSupportsSvg(): boolean {
 
 	const morphologyFilter = document.createElementNS("http://www.w3.org/2000/svg", "feMorphology");
 
-	// https://connect.microsoft.com/IE/feedback/details/2375800
+	// https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/6618301/
 	try {
 		morphologyFilter.radiusX.baseVal = 1;
 	}
@@ -221,7 +221,7 @@ function testSupportsSvg(): boolean {
 		return false;
 	}
 
-	// https://connect.microsoft.com/IE/feedback/details/2375757
+	// https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/6618454/
 	morphologyFilter.setAttribute("radius", "1");
 	if (morphologyFilter.cloneNode().getAttribute("radius") !== "1") {
 		if (debugMode) {
