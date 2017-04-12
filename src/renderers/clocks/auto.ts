@@ -193,7 +193,7 @@ export class AutoClock implements Clock {
 	 */
 	addEventListener(type: ClockEvent, listener: Function): void {
 		this._manualClock.addEventListener(type, listener);
-	};
+	}
 
 	/**
 	 * @param {number} timeStamp

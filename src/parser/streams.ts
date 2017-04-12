@@ -20,44 +20,6 @@
 
 import { DeferredPromise, Promise } from "../utility/promise";
 
-export interface ReadableStream {
-	/**
-	 * @return {!ReadableStreamReader}
-	 */
-	getReader(): ReadableStreamReader;
-}
-
-export interface ReadableStreamReader {
-	/**
-	 * @return {!Promise.<{ value?: Uint8Array, done: boolean }>}
-	 */
-	read(): Promise<{ value: Uint8Array; done: boolean; }>;
-}
-
-export interface TextDecoder {
-	/**
-	 * @param {!ArrayBuffer|!ArrayBufferView} input
-	 * @param {{ stream: boolean }} options
-	 * @return {string}
-	 */
-	decode(input: ArrayBuffer | ArrayBufferView, options: { stream: boolean }): string;
-}
-export interface TextDecoderConstructor {
-	new (encoding: string, options: { ignoreBOM: boolean }): TextDecoder;
-
-	/**
-	 * @type {!TextDecoder}
-	 */
-	prototype: TextDecoder;
-}
-
-declare const global: {
-	/**
-	 * @type {!TextDecoderConstructor}
-	 */
-	TextDecoder?: TextDecoderConstructor;
-};
-
 /**
  * An interface for a stream.
  */
@@ -195,12 +157,8 @@ export class XhrStream implements Stream {
 		}
 
 		else if (this._xhr.readyState === XMLHttpRequest.DONE) {
-			if (this._failedError !== null) {
-				this._pendingDeferred!.reject(this._failedError);
-			}
-
 			// No more data. This is the last line.
-			else if (this._readTill < response.length) {
+			if (this._readTill < response.length) {
 				this._pendingDeferred!.resolve(response.substr(this._readTill));
 				this._readTill = response.length;
 			}
@@ -220,6 +178,17 @@ export class XhrStream implements Stream {
  * @param {string} encoding
  */
 export class BrowserReadableStream implements Stream {
+	/**
+	 * @return {boolean} Whether BrowserReadableStream is supported in this environment.
+	 */
+	static isSupported(): boolean {
+		return (
+			global.ReadableStream !== undefined &&
+			typeof global.ReadableStream.prototype.getReader === "function" &&
+			typeof global.TextDecoder === "function"
+		);
+	}
+
 	private _reader: ReadableStreamReader;
 	private _decoder: TextDecoder;
 	private _buffer: string = "";

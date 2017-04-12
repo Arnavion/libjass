@@ -18,8 +18,6 @@
  * limitations under the License.
  */
 
-import { Map } from "../../utility/map";
-
 /**
  * This class represents a single keyframe. It has a list of CSS properties (names and values) associated with a point in time. Multiple keyframes make up an animation.
  *

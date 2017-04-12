@@ -18,35 +18,6 @@
  * limitations under the License.
  */
 
-export interface Set<T> {
-	/**
-	 * @type {number}
-	 */
-	size: number;
-
-	/**
-	 * @param {T} value
-	 * @return {libjass.Set.<T>} This set
-	 */
-	add(value: T): this;
-
-	/**
-	 */
-	clear(): void;
-
-	/**
-	 * @param {T} value
-	 * @return {boolean}
-	 */
-	has(value: T): boolean;
-
-	/**
-	 * @param {function(T, T, libjass.Set.<T>)} callbackfn A function that is called with each value in the set.
-	 * @param {*} thisArg
-	 */
-	forEach(callbackfn: (value: T, index: T, set: this) => void, thisArg?: any): void;
-}
-
 /**
  * Set implementation for browsers that don't support it. Only supports Number and String elements.
  *
@@ -79,7 +50,7 @@ class SimpleSet<T> implements Set<T> {
 	 * @return {libjass.Set.<T>} This set
 	 */
 	add(value: T): this {
-		const property = this._toProperty(value);
+		const property = toProperty(value);
 
 		if (property === null) {
 			throw new Error("This Set implementation only supports Number and String values.");
@@ -106,7 +77,7 @@ class SimpleSet<T> implements Set<T> {
 	 * @return {boolean}
 	 */
 	has(value: T): boolean {
-		const property = this._toProperty(value);
+		const property = toProperty(value);
 
 		if (property === null) {
 			return false;
@@ -132,24 +103,6 @@ class SimpleSet<T> implements Set<T> {
 	get size(): number {
 		return this._size;
 	}
-
-	/**
-	 * Converts the given value into a property name for the internal map.
-	 *
-	 * @param {T} value
-	 * @return {?string}
-	 */
-	private _toProperty(value: T): string | null {
-		if (typeof value === "number") {
-			return `#${ value }`;
-		}
-
-		if (typeof value === "string") {
-			return `'${ value }`;
-		}
-
-		return null;
-	}
 }
 
 /**
@@ -161,25 +114,31 @@ class SimpleSet<T> implements Set<T> {
  *
  * @type {function(new:Set, !Array.<T>=)}
  */
-export var Set: {
+export let Set: {
 	new <T>(iterable?: T[]): Set<T>;
 	prototype: Set<any>;
-} = global.Set || SimpleSet;
+} = (() => {
+	const globalSet = global.Set;
 
-if (typeof Set.prototype.forEach !== "function" || (() => {
+	if (globalSet === undefined) {
+		return SimpleSet;
+	}
+
+	if (typeof globalSet.prototype.forEach !== "function") {
+		return SimpleSet;
+	}
+
 	try {
-		return new Set([1, 2]).size !== 2;
+		if ((new globalSet([1, 2])).size !== 2) {
+			return SimpleSet;
+		}
 	}
 	catch (ex) {
-		return true;
+		return SimpleSet;
 	}
-})()) {
-	Set = SimpleSet;
-}
 
-declare var global: {
-	Set?: typeof Set;
-};
+	return globalSet as any;
+})();
 
 /**
  * Sets the Set implementation used by libjass to the provided one. If null, {@link ./utility/set.SimpleSet} is used.
@@ -193,4 +152,22 @@ export function setImplementation(value: typeof Set | null): void {
 	else {
 		Set = SimpleSet;
 	}
+}
+
+/**
+ * Converts the given value into a property name for the internal map.
+ *
+ * @param {*} value
+ * @return {?string}
+ */
+function toProperty(value: any): string | null {
+	if (typeof value === "number") {
+		return `#${ value }`;
+	}
+
+	if (typeof value === "string") {
+		return `'${ value }`;
+	}
+
+	return null;
 }

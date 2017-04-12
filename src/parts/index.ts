@@ -77,11 +77,7 @@ export class Color {
 	 * @return {!libjass.parts.Color} Returns a new Color instance with the same color but the provided alpha.
 	 */
 	withAlpha(value: number): Color {
-		if (value !== null) {
-			return new Color(this._red, this._green, this._blue, value);
-		}
-
-		return this;
+		return new Color(this._red, this._green, this._blue, value);
 	}
 
 	/**
@@ -103,7 +99,7 @@ export class Color {
 			this._red + progression * (final.red - this._red),
 			this._green + progression * (final.green - this._green),
 			this._blue + progression * (final.blue - this._blue),
-			this._alpha + progression * (final.alpha - this._alpha)
+			this._alpha + progression * (final.alpha - this._alpha),
 		);
 	}
 }
@@ -168,14 +164,14 @@ export class NewLine {
  * @param {?boolean} value {\i1} -> true, {\i0} -> false, {\i} -> null
  */
 export class Italic {
-	constructor(private _value: boolean) { }
+	constructor(private _value: boolean | null) { }
 
 	/**
 	 * The value of this italic tag.
 	 *
 	 * @type {?boolean}
 	 */
-	get value(): boolean {
+	get value(): boolean | null {
 		return this._value;
 	}
 }
@@ -204,14 +200,14 @@ export class Bold {
  * @param {?boolean} value {\u1} -> true, {\u0} -> false, {\u} -> null
  */
 export class Underline {
-	constructor(private _value: boolean) { }
+	constructor(private _value: boolean | null) { }
 
 	/**
 	 * The value of this underline tag.
 	 *
 	 * @type {?boolean}
 	 */
-	get value(): boolean {
+	get value(): boolean | null {
 		return this._value;
 	}
 }
@@ -222,14 +218,14 @@ export class Underline {
  * @param {?boolean} value {\s1} -> true, {\s0} -> false, {\s} -> null
  */
 export class StrikeThrough {
-	constructor(private _value: boolean) { }
+	constructor(private _value: boolean | null) { }
 
 	/**
 	 * The value of this strike-through tag.
 	 *
 	 * @type {?boolean}
 	 */
-	get value(): boolean {
+	get value(): boolean | null {
 		return this._value;
 	}
 }
@@ -240,14 +236,14 @@ export class StrikeThrough {
  * @param {?number} value {\bord###} -> width (number), {\bord} -> null
  */
 export class Border {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this border tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -258,14 +254,14 @@ export class Border {
  * @param {?number} value {\xbord###} -> width (number), {\xbord} -> null
  */
 export class BorderX {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this horizontal border tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -276,14 +272,14 @@ export class BorderX {
  * @param {?number} value {\ybord###} -> height (number), {\ybord} -> null
  */
 export class BorderY {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this vertical border tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -294,14 +290,14 @@ export class BorderY {
  * @param {?number} value {\shad###} -> depth (number), {\shad} -> null
  */
 export class Shadow {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this shadow tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -312,14 +308,14 @@ export class Shadow {
  * @param {?number} value {\xshad###} -> depth (number), {\xshad} -> null
  */
 export class ShadowX {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this horizontal shadow tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -330,14 +326,14 @@ export class ShadowX {
  * @param {?number} value {\yshad###} -> depth (number), {\yshad} -> null
  */
 export class ShadowY {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this vertical shadow tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -348,14 +344,14 @@ export class ShadowY {
  * @param {?number} value {\be###} -> strength (number), {\be} -> null
  */
 export class Blur {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this blur tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -366,14 +362,14 @@ export class Blur {
  * @param {?number} value {\blur###} -> strength (number), {\blur} -> null
  */
 export class GaussianBlur {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this Gaussian blur tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -402,14 +398,14 @@ export class FontName {
  * @param {?number} value {\fs###} -> size (number), {\fs} -> null
  */
 export class FontSize {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this font size tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -492,14 +488,14 @@ export class FontScaleY {
  * @param {?number} value {\fsp###} -> spacing (number), {\fsp} -> null
  */
 export class LetterSpacing {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this letter-spacing tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -510,14 +506,14 @@ export class LetterSpacing {
  * @param {?number} value {\frx###} -> angle (number), {\frx} -> null
  */
 export class RotateX {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this X-axis rotation tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -528,14 +524,14 @@ export class RotateX {
  * @param {?number} value {\fry###} -> angle (number), {\fry} -> null
  */
 export class RotateY {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this Y-axis rotation tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -546,14 +542,14 @@ export class RotateY {
  * @param {?number} value {\frz###} -> angle (number), {\frz} -> null
  */
 export class RotateZ {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this Z-axis rotation tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -564,14 +560,14 @@ export class RotateZ {
  * @param {?number} value {\fax###} -> angle (number), {\fax} -> null
  */
 export class SkewX {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this X-axis shearing tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -582,14 +578,14 @@ export class SkewX {
  * @param {?number} value {\fay###} -> angle (number), {\fay} -> null
  */
 export class SkewY {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this Y-axis shearing tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -600,14 +596,14 @@ export class SkewY {
  * @param {libjass.parts.Color} value {\1c###} -> color (Color), {\1c} -> null
  */
 export class PrimaryColor {
-	constructor(private _value: Color) { }
+	constructor(private _value: Color | null) { }
 
 	/**
 	 * The value of this primary color tag.
 	 *
 	 * @type {libjass.parts.Color}
 	 */
-	get value(): Color {
+	get value(): Color | null {
 		return this._value;
 	}
 }
@@ -618,14 +614,14 @@ export class PrimaryColor {
  * @param {libjass.parts.Color} value {\2c###} -> color (Color), {\2c} -> null
  */
 export class SecondaryColor {
-	constructor(private _value: Color) { }
+	constructor(private _value: Color | null) { }
 
 	/**
 	 * The value of this secondary color tag.
 	 *
 	 * @type {libjass.parts.Color}
 	 */
-	get value(): Color {
+	get value(): Color | null {
 		return this._value;
 	}
 }
@@ -636,14 +632,14 @@ export class SecondaryColor {
  * @param {libjass.parts.Color} value {\3c###} -> color (Color), {\3c} -> null
  */
 export class OutlineColor {
-	constructor(private _value: Color) { }
+	constructor(private _value: Color | null) { }
 
 	/**
 	 * The value of this outline color tag.
 	 *
 	 * @type {libjass.parts.Color}
 	 */
-	get value(): Color {
+	get value(): Color | null {
 		return this._value;
 	}
 }
@@ -654,14 +650,14 @@ export class OutlineColor {
  * @param {libjass.parts.Color} value {\4c###} -> color (Color), {\4c} -> null
  */
 export class ShadowColor {
-	constructor(private _value: Color) { }
+	constructor(private _value: Color | null) { }
 
 	/**
 	 * The value of this shadow color tag.
 	 *
 	 * @type {libjass.parts.Color}
 	 */
-	get value(): Color {
+	get value(): Color | null {
 		return this._value;
 	}
 }
@@ -672,14 +668,14 @@ export class ShadowColor {
  * @param {?number} value {\alpha###} -> alpha (number), {\alpha} -> null
  */
 export class Alpha {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this alpha tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -690,14 +686,14 @@ export class Alpha {
  * @param {?number} value {\1a###} -> alpha (number), {\1a} -> null
  */
 export class PrimaryAlpha {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this primary alpha tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -708,14 +704,14 @@ export class PrimaryAlpha {
  * @param {?number} value {\2a###} -> alpha (number), {\2a} -> null
  */
 export class SecondaryAlpha {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this secondary alpha tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -726,14 +722,14 @@ export class SecondaryAlpha {
  * @param {?number} value {\3a###} -> alpha (number), {\3a} -> null
  */
 export class OutlineAlpha {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this outline alpha tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -744,14 +740,14 @@ export class OutlineAlpha {
  * @param {?number} value {\4a###} -> alpha (number), {\4a} -> null
  */
 export class ShadowAlpha {
-	constructor(private _value: number) { }
+	constructor(private _value: number | null) { }
 
 	/**
 	 * The value of this shadow alpha tag.
 	 *
 	 * @type {?number}
 	 */
-	get value(): number {
+	get value(): number | null {
 		return this._value;
 	}
 }
@@ -1030,7 +1026,7 @@ export class Fade {
 export class ComplexFade {
 	constructor(
 		private _a1: number, private _a2: number, private _a3: number,
-		private _t1: number, private _t2: number, private _t3: number, private _t4: number
+		private _t1: number, private _t2: number, private _t3: number, private _t4: number,
 	) { }
 
 	/**
@@ -1300,19 +1296,12 @@ const addToString = function (ctor: Function, ctorName: string): void {
 		const propertyNames = Object.getOwnPropertyNames(ctor.prototype).filter(property => property !== "constructor");
 
 		ctor.prototype.toString = function (this: any): string {
-			return (
-				ctorName + " { " +
-				propertyNames.map(name => `${ name }: ${ this[name] }`).join(", ") +
-				((propertyNames.length > 0) ? " " : "") +
-				"}"
-			);
+			return `${ ctorName } { ${ propertyNames.map(name => `${ name }: ${ this[name] }`).join(", ") }${ (propertyNames.length > 0) ? " " : "" }}`;
 		};
 	}
 };
 
 import { registerClass } from "../serialization";
-
-declare const exports: any;
 
 for (const key of Object.keys(exports)) {
 	const value: any = exports[key];

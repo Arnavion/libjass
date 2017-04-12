@@ -224,7 +224,7 @@ export class Dialogue {
 					this._parts![index] =
 						new parts.Move(
 							part.x1, part.y1, part.x2, part.y2,
-							0, this._end - this._start
+							0, this._end - this._start,
 						);
 				}
 			}
@@ -235,7 +235,7 @@ export class Dialogue {
 							(part.start === null) ? 0 : part.start,
 							(part.end === null) ? (this._end - this._start) : part.end,
 							(part.accel === null) ? 1 : part.accel,
-							part.tags
+							part.tags,
 						);
 				}
 
@@ -252,7 +252,7 @@ ${ this._rawPartsString }
 was parsed as
 ${ this.toString() }
 The possibly incorrect parses are:
-${ possiblyIncorrectParses.join("\n") }`
+${ possiblyIncorrectParses.join("\n") }`,
 				);
 			}
 		}

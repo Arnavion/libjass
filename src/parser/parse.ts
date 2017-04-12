@@ -48,6 +48,114 @@ export function parse(input: string, rule: string): any {
 }
 
 /**
+ * This class represents a single parse node. It has a start and end position, and an optional value object.
+ *
+ * @param {ParseNode} parent The parent of this parse node.
+ * @param {*=null} value If provided, it is assigned as the value of the node.
+ */
+class ParseNode {
+	private _children: ParseNode[] = [];
+
+	private _start: number;
+	private _end: number;
+	private _value: any;
+
+	constructor(private _parent: ParseNode | null, value: any = null) {
+		if (_parent !== null) {
+			_parent.children.push(this);
+		}
+
+		this._start = ((_parent !== null) ? _parent.end : 0);
+		this._end = this._start;
+
+		this.value = value;
+	}
+
+	/**
+	 * The start position of this parse node.
+	 *
+	 * @type {number}
+	 */
+	get start(): number {
+		return this._start;
+	}
+
+	/**
+	 * The end position of this parse node.
+	 *
+	 * @type {number}
+	 */
+	get end(): number {
+		return this._end;
+	}
+
+	/**
+	 * @type {ParseNode}
+	 */
+	get parent(): ParseNode | null {
+		return this._parent;
+	}
+
+	/**
+	 * @type {!Array.<!ParseNode>}
+	 */
+	get children(): ParseNode[] {
+		return this._children;
+	}
+
+	/**
+	 * An optional object associated with this parse node.
+	 *
+	 * @type {*}
+	 */
+	get value(): any {
+		return this._value;
+	}
+
+	/**
+	 * An optional object associated with this parse node.
+	 *
+	 * If the value is a string, then the end property is updated to be the length of the string.
+	 *
+	 * @type {*}
+	 */
+	set value(newValue: any) {
+		this._value = newValue;
+
+		if (this._value !== null && this._value.constructor === String && this._children.length === 0) {
+			this._setEnd(this._start + (this._value as string).length);
+		}
+	}
+
+	/**
+	 * Removes the last child of this node and updates the end position to be end position of the new last child.
+	 */
+	pop(): void {
+		this._children.splice(this._children.length - 1, 1);
+
+		if (this._children.length > 0) {
+			this._setEnd(this._children[this._children.length - 1].end);
+		}
+		else {
+			this._setEnd(this.start);
+		}
+	}
+
+	/**
+	 * Updates the end property of this node and its parent recursively to the root node.
+	 *
+	 * @param {number} newEnd
+	 */
+	private _setEnd(newEnd: number): void {
+		this._end = newEnd;
+
+		if (this._parent !== null && this._parent.end !== this._end) {
+			this._parent._setEnd(this._end);
+		}
+	}
+}
+
+/**
  * This class represents a single run of the parser.
  *
  * @param {string} input
@@ -206,22 +314,16 @@ class ParserRun {
 				childNode = this.parse_comment(current);
 			}
 
-			if (childNode !== null) {
-				if (childNode.value instanceof parts.Comment && current.value[current.value.length - 1] instanceof parts.Comment) {
-					// Merge consecutive comment parts into one part
-					current.value[current.value.length - 1] =
-						new parts.Comment(
-							(current.value[current.value.length - 1] as parts.Comment).value +
-							(childNode.value as parts.Comment).value
-						);
-				}
-				else {
-					current.value.push(childNode.value);
-				}
+			if (childNode.value instanceof parts.Comment && current.value[current.value.length - 1] instanceof parts.Comment) {
+				// Merge consecutive comment parts into one part
+				current.value[current.value.length - 1] =
+					new parts.Comment(
+						(current.value[current.value.length - 1] as parts.Comment).value +
+						(childNode.value as parts.Comment).value,
+					);
 			}
 			else {
-				parent.pop();
-				return null;
+				current.value.push(childNode.value);
 			}
 		}
 
@@ -387,8 +489,8 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_alpha(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_alpha(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
@@ -459,32 +561,32 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_be(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_be(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_blur(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_blur(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_bord(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_bord(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_c(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_c(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
@@ -636,7 +738,7 @@ class ParserRun {
 		current.value =
 			new parts.ComplexFade(
 				1 - a1Node.value / 255, 1 - a2Node.value / 255, 1 - a3Node.value / 255,
-				t1Node.value / 1000, t2Node.value / 1000, t3Node.value / 1000, t4Node.value / 1000
+				t1Node.value / 1000, t2Node.value / 1000, t3Node.value / 1000, t4Node.value / 1000,
 			);
 
 		return current;
@@ -646,16 +748,16 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fax(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_fax(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fay(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_fay(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
@@ -690,40 +792,40 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fr(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_fr(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_frx(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_frx(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fry(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_fry(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_frz(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_frz(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fs(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_fs(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
@@ -826,16 +928,16 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_fsp(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_fsp(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_i(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_i(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
@@ -1027,7 +1129,7 @@ class ParserRun {
 
 		current.value = new parts.Move(
 			x1Node.value, y1Node.value, x2Node.value, y2Node.value,
-			(t1Node !== null) ? (t1Node.value / 1000) : null, (t2Node !== null) ? (t2Node.value / 1000) : null
+			(t1Node !== null) ? (t1Node.value / 1000) : null, (t2Node !== null) ? (t2Node.value / 1000) : null,
 		);
 
 		return current;
@@ -1081,16 +1183,16 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_p(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_p(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_pbo(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_pbo(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
@@ -1195,16 +1297,16 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_s(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_s(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_shad(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_shad(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
@@ -1318,22 +1420,16 @@ class ParserRun {
 				childNode = this.parse_comment(current);
 			}
 
-			if (childNode !== null) {
-				if (childNode.value instanceof parts.Comment && transformTags[transformTags.length - 1] instanceof parts.Comment) {
-					// Merge consecutive comment parts into one part
-					transformTags[transformTags.length - 1] =
-						new parts.Comment(
-							(transformTags[transformTags.length - 1] as parts.Comment).value +
-							(childNode.value as parts.Comment).value
-						);
-				}
-				else {
-					transformTags.push(childNode.value);
-				}
+			if (childNode.value instanceof parts.Comment && transformTags[transformTags.length - 1] instanceof parts.Comment) {
+				// Merge consecutive comment parts into one part
+				transformTags[transformTags.length - 1] =
+					new parts.Comment(
+						(transformTags[transformTags.length - 1] as parts.Comment).value +
+						(childNode.value as parts.Comment).value,
+					);
 			}
 			else {
-				parent.pop();
-				return null;
+				transformTags.push(childNode.value);
 			}
 		}
 
@@ -1344,7 +1440,7 @@ class ParserRun {
 				(startNode !== null) ? (startNode.value / 1000) : null,
 				(endNode !== null) ? (endNode.value / 1000) : null,
 				(accelNode !== null) ? (accelNode.value / 1000) : null,
-				transformTags
+				transformTags,
 			);
 
 		return current;
@@ -1354,104 +1450,104 @@ class ParserRun {
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_u(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_u(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_xbord(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_xbord(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_xshad(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_xshad(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_ybord(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_ybord(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_yshad(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_yshad(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_1a(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_1a(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_1c(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_1c(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_2a(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_2a(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_2c(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_2c(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_3a(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_3a(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_3c(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_3c(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_4a(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_4a(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
 	 * @param {!ParseNode} parent
 	 * @return {ParseNode}
 	 */
-	parse_tag_4c(parent: ParseNode): ParseNode | null {
-		throw new Error("Method not implemented.");
+	parse_tag_4c(_parent: ParseNode): ParseNode | null {
+		throw new Error("unreachable");
 	}
 
 	/**
@@ -1666,7 +1762,7 @@ class ParserRun {
 			}
 		}
 
-		current.value = parseFloat(characteristicNode.value + ((mantissaNode !== null) ? ("." + mantissaNode.value) : ""));
+		current.value = parseFloat((characteristicNode.value as string) + ((mantissaNode !== null) ? ("." + (mantissaNode.value as string)) : ""));
 
 		return current;
 	}
@@ -1708,7 +1804,7 @@ class ParserRun {
 		current.value = new parts.Color(
 			value & 0xFF,
 			(value >> 8) & 0xFF,
-			(value >> 16) & 0xFF
+			(value >> 16) & 0xFF,
 		);
 
 		while (this.read(current, "&") !== null || this.read(current, "H") !== null) { }
@@ -1759,7 +1855,7 @@ class ParserRun {
 			value & 0xFF,
 			(value >> 8) & 0xFF,
 			(value >> 16) & 0xFF,
-			1 - ((value >> 24) & 0xFF) / 0xFF
+			1 - ((value >> 24) & 0xFF) / 0xFF,
 		);
 
 		return current;
@@ -1896,7 +1992,7 @@ function makeTagParserFunction(
 	tagName: string,
 	tagConstructor: { new (value: any): parts.Part },
 	valueParser: (current: ParseNode) => ParseNode | null,
-	required: boolean
+	required: boolean,
 ): void {
 	(ParserRun.prototype as any)[`parse_tag_${ tagName }`] = function (this: ParserRun, parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
@@ -1961,119 +2057,11 @@ for (const key of Object.keys(ParserRun.prototype)) {
 	}
 }
 
-/**
- * This class represents a single parse node. It has a start and end position, and an optional value object.
- *
- * @param {ParseNode} parent The parent of this parse node.
- * @param {*=null} value If provided, it is assigned as the value of the node.
- */
-class ParseNode {
-	private _children: ParseNode[] = [];
-
-	private _start: number;
-	private _end: number;
-	private _value: any;
-
-	constructor(private _parent: ParseNode | null, value: any = null) {
-		if (_parent !== null) {
-			_parent.children.push(this);
-		}
-
-		this._start = ((_parent !== null) ? _parent.end : 0);
-		this._end = this._start;
-
-		this.value = value;
-	}
-
-	/**
-	 * The start position of this parse node.
-	 *
-	 * @type {number}
-	 */
-	get start(): number {
-		return this._start;
-	}
-
-	/**
-	 * The end position of this parse node.
-	 *
-	 * @type {number}
-	 */
-	get end(): number {
-		return this._end;
-	}
-
-	/**
-	 * @type {ParseNode}
-	 */
-	get parent(): ParseNode | null {
-		return this._parent;
-	}
-
-	/**
-	 * @type {!Array.<!ParseNode>}
-	 */
-	get children(): ParseNode[] {
-		return this._children;
-	}
-
-	/**
-	 * An optional object associated with this parse node.
-	 *
-	 * @type {*}
-	 */
-	get value(): any {
-		return this._value;
-	}
-
-	/**
-	 * An optional object associated with this parse node.
-	 *
-	 * If the value is a string, then the end property is updated to be the length of the string.
-	 *
-	 * @type {*}
-	 */
-	set value(newValue: any) {
-		this._value = newValue;
-
-		if (this._value !== null && this._value.constructor === String && this._children.length === 0) {
-			this._setEnd(this._start + this._value.length);
-		}
-	}
-
-	/**
-	 * Removes the last child of this node and updates the end position to be end position of the new last child.
-	 */
-	pop(): void {
-		this._children.splice(this._children.length - 1, 1);
-
-		if (this._children.length > 0) {
-			this._setEnd(this._children[this._children.length - 1].end);
-		}
-		else {
-			this._setEnd(this.start);
-		}
-	}
-
-	/**
-	 * Updates the end property of this node and its parent recursively to the root node.
-	 *
-	 * @param {number} newEnd
-	 */
-	private _setEnd(newEnd: number): void {
-		this._end = newEnd;
-
-		if (this._parent !== null && this._parent.end !== this._end) {
-			this._parent._setEnd(this._end);
-		}
-	}
-}
-
 import { Promise } from "../utility/promise";
 
 import { WorkerCommands } from "../webworker/commands";
 import { registerWorkerCommand } from "../webworker/misc";
 
-registerWorkerCommand(WorkerCommands.Parse, parameters => new Promise(resolve => {
+registerWorkerCommand(WorkerCommands.Parse, parameters => new Promise<any>(resolve => {
 	resolve(parse(parameters.input, parameters.rule));
 }));

@@ -18,46 +18,14 @@
  * limitations under the License.
  */
 
-export interface Thenable<T> {
-	/** @type {function(this:!Thenable.<T>, function(T|!Thenable.<T>), function(*))} */
-	then: ThenableThen<T>;
-}
-
-export interface ThenableThen<T> {
-	/** @type {function(this:!Thenable.<T>, function(T|!Thenable.<T>), function(*))} */
-	(this: Thenable<T>, resolve: ((resolution: T | Thenable<T>) => void) | undefined, reject: ((reason: any) => void) | undefined): void;
-}
-
-export interface Promise<T> extends Thenable<T> {
-	/**
-	 * @param {function(T):!Thenable.<U>} onFulfilled
-	 * @param {?function(*):(U|!Thenable.<U>)} onRejected
-	 * @return {!Promise.<U>}
-	 */
-	then<U>(onFulfilled: (value: T) => Thenable<U> | undefined, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
-
-	/**
-	 * @param {function(T):U} onFulfilled
-	 * @param {?function(*):(U|!Thenable.<U>)} onRejected
-	 * @return {!Promise.<U>}
-	 */
-	then<U>(onFulfilled: (value: T) => U | undefined, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
-
-	/**
-	 * @param {function(*):(T|!Thenable.<T>)} onRejected
-	 * @return {!Promise.<T>}
-	 */
-	catch(onRejected: (reason: any) => T | Thenable<T>): Promise<T>;
-}
-
 // Based on https://github.com/petkaantonov/bluebird/blob/1b1467b95442c12378d0ea280ede61d640ab5510/src/schedule.js
 const enqueueJob = (function (): (callback: () => void) => void {
 	const MutationObserver = global.MutationObserver || global.WebkitMutationObserver;
 
 	if (global.process !== undefined && typeof global.process.nextTick === "function") {
-		const process = global.process;
+		const nextTick = global.process.nextTick;
 		return (callback: () => void) => {
-			process.nextTick(callback);
+			nextTick(callback);
 		};
 	}
 	else if (MutationObserver !== undefined) {
@@ -120,7 +88,7 @@ class SimplePromise<T> {
 	 * @return {!Promise.<T>}
 	 */
 	static reject<T>(reason: any): Promise<T> {
-		return new Promise<T>((/* ujs:unreferenced */ resolve, reject) => reject(reason));
+		return new Promise<T>((/* ujs:unreferenced */ _resolve, reject) => reject(reason));
 	}
 
 	/**
@@ -160,13 +128,9 @@ class SimplePromise<T> {
 		});
 	}
 
-	private _state: SimplePromiseState = SimplePromiseState.PENDING;
-
+	private _state: SimplePromiseState<T> = { state: "pending" };
 	private _fulfillReactions: FulfilledPromiseReaction<T, any>[] = [];
 	private _rejectReactions: RejectedPromiseReaction<any>[] = [];
-
-	private _fulfilledValue: T | null = null;
-	private _rejectedReason: any = null;
 
 	constructor(executor: (resolve: (resolution: T | Thenable<T>) => void, reject: (reason: any) => void) => void) {
 		if (typeof executor !== "function") {
@@ -208,18 +172,18 @@ class SimplePromise<T> {
 			handler: onRejected,
 		};
 
-		switch (this._state) {
-			case SimplePromiseState.PENDING:
+		switch (this._state.state) {
+			case "pending":
 				this._fulfillReactions.push(fulfillReaction);
 				this._rejectReactions.push(rejectReaction);
 				break;
 
-			case SimplePromiseState.FULFILLED:
-				this._enqueueFulfilledReactionJob(fulfillReaction, this._fulfilledValue!);
+			case "fulfilled":
+				enqueueFulfilledReactionJob(fulfillReaction, this._state.value);
 				break;
 
-			case SimplePromiseState.REJECTED:
-				this._enqueueRejectedReactionJob(rejectReaction, this._rejectedReason);
+			case "rejected":
+				enqueueRejectedReactionJob(rejectReaction, this._state.reason);
 				break;
 		}
 
@@ -257,8 +221,10 @@ class SimplePromise<T> {
 				return;
 			}
 
+			let then: ThenableThen<T>;
+
 			try {
-				var then = (resolution as Thenable<T>).then;
+				then = (resolution as Thenable<T>).then;
 			}
 			catch (ex) {
 				this._reject(ex);
@@ -307,13 +273,12 @@ class SimplePromise<T> {
 	private _fulfill(value: T): void {
 		const reactions = this._fulfillReactions;
 
-		this._fulfilledValue = value;
+		this._state = { state: "fulfilled", value };
 		this._fulfillReactions = [];
 		this._rejectReactions = [];
-		this._state = SimplePromiseState.FULFILLED;
 
 		for (const reaction of reactions) {
-			this._enqueueFulfilledReactionJob(reaction, value);
+			enqueueFulfilledReactionJob(reaction, value);
 		}
 	}
 
@@ -323,58 +288,13 @@ class SimplePromise<T> {
 	private _reject(reason: any): void {
 		const reactions = this._rejectReactions;
 
-		this._rejectedReason = reason;
+		this._state = { state: "rejected", reason };
 		this._fulfillReactions = [];
 		this._rejectReactions = [];
-		this._state = SimplePromiseState.REJECTED;
 
 		for (const reaction of reactions) {
-			this._enqueueRejectedReactionJob(reaction, reason);
+			enqueueRejectedReactionJob(reaction, reason);
 		}
-	}
-
-	/**
-	 * @param {!FulfilledPromiseReaction.<T, *>} reaction
-	 * @param {T} value
-	 */
-	private _enqueueFulfilledReactionJob(reaction: FulfilledPromiseReaction<T, any>, value: T): void {
-		enqueueJob(() => {
-			const { capabilities: { resolve, reject }, handler } = reaction;
-
-			let handlerResult: any | Thenable<any>;
-
-			try {
-				handlerResult = handler(value);
-			}
-			catch (ex) {
-				reject(ex);
-				return;
-			}
-
-			resolve(handlerResult);
-		});
-	}
-
-	/**
-	 * @param {!RejectedPromiseReaction.<*>} reaction
-	 * @param {*} reason
-	 */
-	private _enqueueRejectedReactionJob(reaction: RejectedPromiseReaction<any>, reason: any): void {
-		enqueueJob(() => {
-			const { capabilities: { resolve, reject }, handler } = reaction;
-
-			let handlerResult: any | Thenable<any>;
-
-			try {
-				handlerResult = handler(reason);
-			}
-			catch (ex) {
-				reject(ex);
-				return;
-			}
-
-			resolve(handlerResult);
-		});
 	}
 }
 
@@ -387,7 +307,7 @@ class SimplePromise<T> {
  *
  * @type {function(new:Promise)}
  */
-export var Promise: {
+export let Promise: {
 	new <T>(init: (resolve: (value: T | Thenable<T>) => void, reject: (reason: any) => void) => void): Promise<T>;
 	prototype: Promise<any>;
 	resolve<T>(value: T | Thenable<T>): Promise<T>;
@@ -396,14 +316,6 @@ export var Promise: {
 	race<T>(values: (T | Thenable<T>)[]): Promise<T>;
 } = global.Promise || SimplePromise;
 
-declare var global: {
-	Promise?: typeof Promise;
-	MutationObserver?: typeof MutationObserver;
-	WebkitMutationObserver?: typeof MutationObserver;
-	process?: {
-		nextTick(callback: () => void): void;
-	}
-};
 
 interface FulfilledPromiseReaction<T, U> {
 	/** @type {!libjass.DeferredPromise.<U>} */
@@ -430,11 +342,7 @@ interface RejectedPromiseReaction<U> {
 /**
  * The state of the {@link ./utility/promise.SimplePromise}
  */
-enum SimplePromiseState {
-	PENDING = 0,
-	FULFILLED = 1,
-	REJECTED = 2,
-}
+type SimplePromiseState<T> = { state: "pending" } | { state: "fulfilled"; value: T; } | { state: "rejected"; reason: any; };
 
 /**
  * Sets the Promise implementation used by libjass to the provided one. If null, {@link ./utility/promise.SimplePromise} is used.
@@ -532,5 +440,49 @@ export function lastly<T>(promise: Promise<T>, body: () => void): Promise<T> {
 	}, reason => {
 		body();
 		throw reason;
+	});
+}
+
+/**
+ * @param {!FulfilledPromiseReaction.<T, *>} reaction
+ * @param {T} value
+ */
+function enqueueFulfilledReactionJob<T>(reaction: FulfilledPromiseReaction<T, any>, value: T): void {
+	enqueueJob(() => {
+		const { capabilities: { resolve, reject }, handler } = reaction;
+
+		let handlerResult: any | Thenable<any>;
+
+		try {
+			handlerResult = handler(value);
+		}
+		catch (ex) {
+			reject(ex);
+			return;
+		}
+
+		resolve(handlerResult);
+	});
+}
+
+/**
+ * @param {!RejectedPromiseReaction.<*>} reaction
+ * @param {*} reason
+ */
+function enqueueRejectedReactionJob(reaction: RejectedPromiseReaction<any>, reason: any): void {
+	enqueueJob(() => {
+		const { capabilities: { resolve, reject }, handler } = reaction;
+
+		let handlerResult: any | Thenable<any>;
+
+		try {
+			handlerResult = handler(reason);
+		}
+		catch (ex) {
+			reject(ex);
+			return;
+		}
+
+		resolve(handlerResult);
 	});
 }

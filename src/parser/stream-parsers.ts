@@ -27,7 +27,7 @@ import { Style } from "../types/style";
 
 import { Map } from "../utility/map";
 
-import { DeferredPromise, Promise } from "../utility/promise";
+import { DeferredPromise } from "../utility/promise";
 
 import { parseLineIntoProperty } from "./misc";
 import { Stream } from "./streams";
@@ -379,7 +379,7 @@ export class SrtStreamParser {
 					.replace(/<\/u>/g, "{\\u0}").replace(/\{\/u\}/g, "{\\u0}")
 					.replace(
 						/<font color="#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})">/g,
-						(/* ujs:unreferenced */ substring: string, red: string, green: string, blue: string) => `{\c&H${ blue }${ green }${ red }&}`
+						(/* ujs:unreferenced */ _substring: string, red: string, green: string, blue: string) => `{\c&H${ blue }${ green }${ red }&}`,
 					).replace(/<\/font>/g, "{\\c}");
 
 				if (this._currentDialogueText !== null) {

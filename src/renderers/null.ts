@@ -88,14 +88,14 @@ export class NullRenderer {
 	 *
 	 * @param {!libjass.Dialogue} dialogue
 	 */
-	preRender(dialogue: Dialogue): void { }
+	preRender(_dialogue: Dialogue): void { }
 
 	/**
 	 * Draw a dialogue. This is a no-op for this type.
 	 *
 	 * @param {!libjass.Dialogue} dialogue
 	 */
-	draw(dialogue: Dialogue): void { }
+	draw(_dialogue: Dialogue): void { }
 
 	/**
 	 * Enable the renderer.

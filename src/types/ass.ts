@@ -18,9 +18,9 @@
  * limitations under the License.
  */
 
-import * as parser from "../parser";
 import { parseLineIntoTypedTemplate } from "../parser/misc";
-import { ReadableStream, TextDecoderConstructor } from "../parser/streams";
+import { SrtStreamParser, StreamParser } from "../parser/stream-parsers";
+import { BrowserReadableStream, Stream, StringStream, XhrStream } from "../parser/streams";
 
 import { registerClass as serializable } from "../serialization";
 
@@ -35,12 +35,6 @@ import { Format } from "./misc";
 import { ScriptProperties } from "./script-properties";
 import { Style } from "./style";
 
-declare const global: {
-	fetch?(url: string): Promise<{ body: ReadableStream; ok?: boolean; status?: number; }>;
-	ReadableStream?: Function & { prototype: ReadableStream; };
-	TextDecoder?: TextDecoderConstructor;
-};
-
 /**
  * This class represents an ASS script. It contains the {@link libjass.ScriptProperties}, an array of {@link libjass.Style}s, and an array of {@link libjass.Dialogue}s.
  */
@@ -54,7 +48,7 @@ export class ASS {
 	 * @return {!Promise.<!libjass.ASS>}
 	 */
 	static fromString(raw: string, type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
-		return ASS.fromStream(new parser.StringStream(raw), type);
+		return ASS.fromStream(new StringStream(raw), type);
 	}
 
 	/**
@@ -64,14 +58,14 @@ export class ASS {
 	 * @param {(number|string)=0} type The type of the script. One of the {@link libjass.Format} constants, or one of the strings "ass" and "srt".
 	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 	 */
-	static fromStream(stream: parser.Stream, type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
+	static fromStream(stream: Stream, type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
 		switch (type) {
 			case Format.ASS:
 			case "ass":
-				return new parser.StreamParser(stream).ass;
+				return new StreamParser(stream).ass;
 			case Format.SRT:
 			case "srt":
-				return new parser.SrtStreamParser(stream).ass;
+				return new SrtStreamParser(stream).ass;
 			default:
 				throw new Error(`Invalid value of type: ${ type }`);
 		}
@@ -87,11 +81,7 @@ export class ASS {
 	static fromUrl(url: string, type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
 		let fetchPromise: Promise<ASS>;
 
-		if (
-			typeof global.fetch === "function" &&
-			typeof global.ReadableStream === "function" && typeof global.ReadableStream.prototype.getReader === "function" &&
-			typeof global.TextDecoder === "function"
-		) {
+		if (typeof global.fetch === "function" && BrowserReadableStream.isSupported()) {
 			fetchPromise = global.fetch(url).then(response => {
 				if (response.ok === false || (response.ok === undefined && (response.status === undefined || response.status < 200 || response.status > 299))) {
 					throw new Error(`HTTP request for ${ url } failed with status code ${ response.status }`);
@@ -110,7 +100,7 @@ export class ASS {
 			}
 
 			const xhr = new XMLHttpRequest();
-			const result = ASS.fromStream(new parser.XhrStream(xhr), type);
+			const result = ASS.fromStream(new XhrStream(xhr), type);
 			xhr.open("GET", url, true);
 			xhr.send();
 			return result;
@@ -126,7 +116,7 @@ export class ASS {
 	 * @return {!Promise.<!libjass.ASS>} A promise that will be resolved with the ASS object when it has been fully parsed
 	 */
 	static fromReadableStream(stream: ReadableStream, encoding: string = "utf-8", type: Format | "ass" | "srt" = Format.ASS): Promise<ASS> {
-		return ASS.fromStream(new parser.BrowserReadableStream(stream, encoding), type);
+		return ASS.fromStream(new BrowserReadableStream(stream, encoding), type);
 	}
 
 	/**
@@ -208,21 +198,21 @@ export class ASS {
 	}
 
 	/**
-	 * The format specifier for the styles section.
-	 *
-	 * @type {Array.<string>}
-	 */
-	get dialoguesFormatSpecifier(): string[] | null {
-		return this._dialoguesFormatSpecifier;
-	}
-
-	/**
 	 * The format specifier for the events section.
 	 *
 	 * @type {Array.<string>}
 	 */
 	set stylesFormatSpecifier(value: string[] | null) {
 		this._stylesFormatSpecifier = value;
+	}
+
+	/**
+	 * The format specifier for the styles section.
+	 *
+	 * @type {Array.<string>}
+	 */
+	get dialoguesFormatSpecifier(): string[] | null {
+		return this._dialoguesFormatSpecifier;
 	}
 
 	/**

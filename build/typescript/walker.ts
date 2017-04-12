@@ -812,7 +812,7 @@ class Walker {
 		}
 	}
 
-	private _resolveTypeReference(unresolvedType: AST.UnresolvedType): AST.TypeReference {
+	private _resolveTypeReference(unresolvedType: AST.UnresolvedType): AST.TypeReference | AST.IntrinsicTypeReference {
 		let node: ts.Node = unresolvedType.symbol.declarations[0];
 		while (node.kind !== ts.SyntaxKind.SourceFile) {
 			node = node.parent;
@@ -820,28 +820,33 @@ class Walker {
 
 		const sourceFile = node as ts.SourceFile;
 
-		const moduleName = this._moduleNameFromFileName(sourceFile.fileName);
-		const module = this.modules[moduleName];
-
-		let result = module.members[unresolvedType.symbol.name];
-
-		if (result === undefined) {
-			throw new Error(`Type ${ unresolvedType.symbol.name } could not be resolved.`);
+		if (sourceFile.fileName.substr(-"globals.d.ts".length) === "globals.d.ts") {
+			return new AST.IntrinsicTypeReference(unresolvedType.symbol.name);
 		}
+		else {
+			const moduleName = this._moduleNameFromFileName(sourceFile.fileName);
+			const module = this.modules[moduleName];
 
-		while (result instanceof AST.Reference) {
-			result = this.modules[result.moduleName].members[result.name];
-		}
+			let result = module.members[unresolvedType.symbol.name];
 
-		const resultGenerics = unresolvedType.generics.map(generic => {
-			if (generic instanceof AST.UnresolvedType) {
-				return this._resolveTypeReference(generic);
+			if (result === undefined) {
+				throw new Error(`Type ${unresolvedType.symbol.name} could not be resolved.`);
 			}
 
-			return generic;
-		});
+			while (result instanceof AST.Reference) {
+				result = this.modules[result.moduleName].members[result.name];
+			}
 
-		return new AST.TypeReference(result, resultGenerics);
+			const resultGenerics = unresolvedType.generics.map(generic => {
+				if (generic instanceof AST.UnresolvedType) {
+					return this._resolveTypeReference(generic);
+				}
+
+				return generic;
+			});
+
+			return new AST.TypeReference(result, resultGenerics);
+		}	
 	}
 
 	private _moduleNameFromFileName(fileName: string): string {
@@ -867,7 +872,7 @@ export function walk(compiler: Compiler, root: string, rootNamespaceName: string
 		if (
 			path.basename(sourceFile.fileName) === "lib.es5.d.ts" ||
 			path.basename(sourceFile.fileName) === "lib.dom.d.ts" ||
-			sourceFile.fileName.substr(-"references.d.ts".length) === "references.d.ts"
+			sourceFile.fileName.substr(-"globals.d.ts".length) === "globals.d.ts"
 		) {
 			continue;
 		}

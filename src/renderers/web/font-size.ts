@@ -18,7 +18,6 @@
  * limitations under the License.
  */
 
-import { Map } from "../../utility/map";
 import { Promise } from "../../utility/promise";
 
 /**
@@ -47,7 +46,7 @@ function prepareFontSizeElement(fontFamily: string, fontSize: number, fallbackFo
 function lineHeightForFontSize(fontFamily: string, fontSize: number, fallbackFonts: string, fontSizeElement: HTMLDivElement): Promise<number> {
 	prepareFontSizeElement(fontFamily, fontSize, fallbackFonts, fontSizeElement);
 
-	return new Promise(resolve => setTimeout(() => resolve(fontSizeElement.offsetHeight), 1000));
+	return new Promise<number>(resolve => setTimeout(() => resolve(fontSizeElement.offsetHeight), 1000));
 }
 
 /**
@@ -83,9 +82,7 @@ function fontMetricsFromLineHeights(lowerLineHeight: number, upperLineHeight: nu
 export function calculateFontMetrics(fontFamily: string, fallbackFonts: string, fontSizeElement: HTMLDivElement): Promise<[number, number]> {
 	return lineHeightForFontSize(fontFamily, 180, fallbackFonts, fontSizeElement).then(lowerLineHeight =>
 		lineHeightForFontSize(fontFamily, 360, fallbackFonts, fontSizeElement).then(upperLineHeight =>
-			fontMetricsFromLineHeights(lowerLineHeight, upperLineHeight)
-		)
-	);
+			fontMetricsFromLineHeights(lowerLineHeight, upperLineHeight)));
 }
 
 /**

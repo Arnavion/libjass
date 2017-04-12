@@ -18,8 +18,6 @@
  * limitations under the License.
  */
 
-import { Map } from "../utility/map";
-
 /**
  * The format of the string passed to {@link libjass.ASS.fromString}
  */

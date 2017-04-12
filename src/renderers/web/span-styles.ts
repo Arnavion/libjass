@@ -23,8 +23,6 @@ import { Color } from "../../parts";
 import { Dialogue } from "../../types/dialogue";
 import { Style } from "../../types/style";
 
-import { Map } from "../../utility/map";
-
 import { RendererSettings } from "../settings";
 
 import { AnimationCollection } from "./animation-collection";
@@ -255,14 +253,14 @@ export class SpanStyles {
 			this._svg(
 				span,
 				outlineWidth, outlineHeight, outlineColor,
-				shadowDepthX, shadowDepthY, shadowColor
+				shadowDepthX, shadowDepthY, shadowColor,
 			);
 		}
 		else {
 			this._textShadow(
 				span,
 				outlineWidth, outlineHeight, outlineColor,
-				shadowDepthX, shadowDepthY, shadowColor
+				shadowDepthX, shadowDepthY, shadowColor,
 			);
 		}
 
@@ -298,7 +296,7 @@ export class SpanStyles {
 	private _svg(
 		span: HTMLSpanElement,
 		outlineWidth: number, outlineHeight: number, outlineColor: Color,
-		shadowDepthX: number, shadowDepthY: number, shadowColor: Color
+		shadowDepthX: number, shadowDepthY: number, shadowColor: Color,
 	): void {
 		const filterElement = document.createElementNS("http://www.w3.org/2000/svg", "filter");
 
@@ -535,7 +533,7 @@ export class SpanStyles {
 	private _textShadow(
 		span: HTMLSpanElement,
 		outlineWidth: number, outlineHeight: number, outlineColor: Color,
-		shadowDepthX: number, shadowDepthY: number, shadowColor: Color
+		shadowDepthX: number, shadowDepthY: number, shadowColor: Color,
 	): void {
 		if (outlineWidth > 0 || outlineHeight > 0) {
 			let outlineCssString = "";

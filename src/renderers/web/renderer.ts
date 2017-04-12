@@ -32,7 +32,6 @@ import { WrappingStyle } from "../../types/misc";
 import { Map } from "../../utility/map";
 import { mixin } from "../../utility/mixin";
 import { any as Promise_any, first as Promise_first, lastly as Promise_finally, Promise } from "../../utility/promise";
-import { Set } from "../../utility/set";
 
 import { Clock, EventSource } from "../clocks/base";
 
@@ -44,40 +43,6 @@ import { DrawingStyles } from "./drawing-styles";
 import { calculateFontMetrics } from "./font-size";
 import { Keyframe } from "./keyframe";
 import { SpanStyles } from "./span-styles";
-
-declare const global: {
-	document: {
-		fonts?: FontFaceSet;
-	};
-};
-
-interface FontFaceSet {
-	/**
-	 * @param {!FontFace} fontFace
-	 * @return {!FontFaceSet}
-	 */
-	add(fontFace: FontFace): FontFaceSet;
-
-	/**
-	 * @param {function(!FontFace, !FontFace, !FontFaceSet)} callbackfn A function that is called with each value in the set.
-	 * @param {*} thisArg
-	 */
-	forEach(callbackfn: (fontFace: FontFace, index: FontFace, set: FontFaceSet) => void, thisArg?: any): void;
-}
-
-interface FontFace {
-	/** @type {string} */
-	family: string;
-
-	/**
-	 * @return {!Promise.<!FontFace>}
-	 */
-	load(): Promise<FontFace>;
-}
-
-declare var FontFace: {
-	new (family: string, source: string): FontFace;
-};
 
 const fontSrcUrlRegex = /^(url|local)\(["']?(.+?)["']?\)$/;
 
@@ -102,8 +67,8 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	private _subsWrapper: HTMLDivElement;
 	private _subsWrapperWidth: number; // this._subsWrapper.offsetWidth is expensive, so cache this.
 
-	private _layerWrappers: HTMLDivElement[] = [];
-	private _layerAlignmentWrappers: HTMLDivElement[][] = [];
+	private _layerWrappers: (HTMLDivElement | undefined)[] = [];
+	private _layerAlignmentWrappers: (HTMLDivElement | undefined)[][] = [];
 	private _fontSizeElement: HTMLDivElement;
 
 	private _fontMetricsCache: Map<string, [number, number]> = new Map<string, [number, number]>();
@@ -168,7 +133,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 				const attachmentUrl = `data:application/x-font-ttf;base64,${ attachment.contents }`;
 
 				ttfNames.forEach(name => {
-					let correspondingFontMapEntry = fontMap.get(name);
+					const correspondingFontMapEntry = fontMap.get(name);
 					if (correspondingFontMapEntry !== undefined) {
 						// Also defined in fontMap.
 						if (typeof correspondingFontMapEntry !== "string") {
@@ -198,7 +163,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		fontMap.forEach((srcs, fontFamily) => {
 			let fontFamilyMetricsPromise: Promise<[number, number]>;
 
-			if (global.document.fonts && global.document.fonts.add) {
+			if (global.document && global.document.fonts && global.document.fonts!.add) {
 				// value should be string. If it's string[], combine it into string
 				let source =
 					(typeof srcs === "string") ?
@@ -215,7 +180,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 					}
 				}
 
-				let existingFontFaces: FontFace[] = [];
+				const existingFontFaces: FontFace[] = [];
 				global.document.fonts.forEach(fontFace => {
 					if (fontFace.family === fontFamily || fontFace.family === `"${ fontFamily }"`) {
 						existingFontFaces.push(fontFace);
@@ -224,8 +189,8 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 				let fontFetchPromise: Promise<FontFace | null>;
 				if (existingFontFaces.length === 0) {
-					const fontFace = new FontFace(fontFamily, source);
-					const quotedFontFace = new FontFace(`"${ fontFamily }"`, source);
+					const fontFace = new global.FontFace!(fontFamily, source);
+					const quotedFontFace = new global.FontFace!(`"${ fontFamily }"`, source);
 
 					global.document.fonts.add(fontFace);
 					global.document.fonts.add(quotedFontFace);
@@ -435,7 +400,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		for (const part of dialogue.parts) {
 			if (part instanceof parts.Italic) {
-				currentSpanStyles.italic = part.value;
+				currentSpanStyles.italic = part.value as boolean;
 			}
 
 			else if (part instanceof parts.Bold) {
@@ -443,45 +408,45 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.Underline) {
-				currentSpanStyles.underline = part.value;
+				currentSpanStyles.underline = part.value as boolean;
 			}
 
 			else if (part instanceof parts.StrikeThrough) {
-				currentSpanStyles.strikeThrough = part.value;
+				currentSpanStyles.strikeThrough = part.value as boolean;
 			}
 
 			else if (part instanceof parts.Border) {
-				currentSpanStyles.outlineWidth = part.value;
-				currentSpanStyles.outlineHeight = part.value;
+				currentSpanStyles.outlineWidth = part.value as number;
+				currentSpanStyles.outlineHeight = part.value as number;
 			}
 
 			else if (part instanceof parts.BorderX) {
-				currentSpanStyles.outlineWidth = part.value;
+				currentSpanStyles.outlineWidth = part.value as number;
 			}
 
 			else if (part instanceof parts.BorderY) {
-				currentSpanStyles.outlineHeight = part.value;
+				currentSpanStyles.outlineHeight = part.value as number;
 			}
 
 			else if (part instanceof parts.Shadow) {
-				currentSpanStyles.shadowDepthX = part.value;
-				currentSpanStyles.shadowDepthY = part.value;
+				currentSpanStyles.shadowDepthX = part.value as number;
+				currentSpanStyles.shadowDepthY = part.value as number;
 			}
 
 			else if (part instanceof parts.ShadowX) {
-				currentSpanStyles.shadowDepthX = part.value;
+				currentSpanStyles.shadowDepthX = part.value as number;
 			}
 
 			else if (part instanceof parts.ShadowY) {
-				currentSpanStyles.shadowDepthY = part.value;
+				currentSpanStyles.shadowDepthY = part.value as number;
 			}
 
 			else if (part instanceof parts.Blur) {
-				currentSpanStyles.blur = part.value;
+				currentSpanStyles.blur = part.value as number;
 			}
 
 			else if (part instanceof parts.GaussianBlur) {
-				currentSpanStyles.gaussianBlur = part.value;
+				currentSpanStyles.gaussianBlur = part.value as number;
 			}
 
 			else if (part instanceof parts.FontName) {
@@ -489,15 +454,15 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.FontSize) {
-				currentSpanStyles.fontSize = part.value;
+				currentSpanStyles.fontSize = part.value as number;
 			}
 
 			else if (part instanceof parts.FontSizePlus) {
-				currentSpanStyles.fontSize = currentSpanStyles.fontSize! * (1 + part.value);
+				currentSpanStyles.fontSize *= (1 + part.value);
 			}
 
 			else if (part instanceof parts.FontSizeMinus) {
-				currentSpanStyles.fontSize = currentSpanStyles.fontSize! * (1 - part.value);
+				currentSpanStyles.fontSize *= (1 - part.value);
 			}
 
 			else if (part instanceof parts.FontScaleX) {
@@ -509,66 +474,66 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.LetterSpacing) {
-				currentSpanStyles.letterSpacing = part.value;
+				currentSpanStyles.letterSpacing = part.value as number;
 			}
 
 			else if (part instanceof parts.RotateX) {
-				currentSpanStyles.rotationX = part.value;
+				currentSpanStyles.rotationX = part.value as number;
 			}
 
 			else if (part instanceof parts.RotateY) {
-				currentSpanStyles.rotationY = part.value;
+				currentSpanStyles.rotationY = part.value as number;
 			}
 
 			else if (part instanceof parts.RotateZ) {
-				currentSpanStyles.rotationZ = part.value;
+				currentSpanStyles.rotationZ = part.value as number;
 			}
 
 			else if (part instanceof parts.SkewX) {
-				currentSpanStyles.skewX = part.value;
+				currentSpanStyles.skewX = part.value as number;
 			}
 
 			else if (part instanceof parts.SkewY) {
-				currentSpanStyles.skewY = part.value;
+				currentSpanStyles.skewY = part.value as number;
 			}
 
 			else if (part instanceof parts.PrimaryColor) {
-				currentSpanStyles.primaryColor = part.value;
+				currentSpanStyles.primaryColor = part.value as parts.Color;
 			}
 
 			else if (part instanceof parts.SecondaryColor) {
-				currentSpanStyles.secondaryColor = part.value;
+				currentSpanStyles.secondaryColor = part.value as parts.Color;
 			}
 
 			else if (part instanceof parts.OutlineColor) {
-				currentSpanStyles.outlineColor = part.value;
+				currentSpanStyles.outlineColor = part.value as parts.Color;
 			}
 
 			else if (part instanceof parts.ShadowColor) {
-				currentSpanStyles.shadowColor = part.value;
+				currentSpanStyles.shadowColor = part.value as parts.Color;
 			}
 
 			else if (part instanceof parts.Alpha) {
-				currentSpanStyles.primaryAlpha = part.value;
-				currentSpanStyles.secondaryAlpha = part.value;
-				currentSpanStyles.outlineAlpha = part.value;
-				currentSpanStyles.shadowAlpha = part.value;
+				currentSpanStyles.primaryAlpha = part.value as number;
+				currentSpanStyles.secondaryAlpha = part.value as number;
+				currentSpanStyles.outlineAlpha = part.value as number;
+				currentSpanStyles.shadowAlpha = part.value as number;
 			}
 
 			else if (part instanceof parts.PrimaryAlpha) {
-				currentSpanStyles.primaryAlpha = part.value;
+				currentSpanStyles.primaryAlpha = part.value as number;
 			}
 
 			else if (part instanceof parts.SecondaryAlpha) {
-				currentSpanStyles.secondaryAlpha = part.value;
+				currentSpanStyles.secondaryAlpha = part.value as number;
 			}
 
 			else if (part instanceof parts.OutlineAlpha) {
-				currentSpanStyles.outlineAlpha = part.value;
+				currentSpanStyles.outlineAlpha = part.value as number;
 			}
 
 			else if (part instanceof parts.ShadowAlpha) {
-				currentSpanStyles.shadowAlpha = part.value;
+				currentSpanStyles.shadowAlpha = part.value as number;
 			}
 
 			else if (part instanceof parts.Alignment) {
@@ -580,9 +545,9 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 				currentAnimationCollection!.add("step-end", [
 					new Keyframe(0, new Map([
-						["color", currentSpanStyles.secondaryColor!.withAlpha(currentSpanStyles.secondaryAlpha!).toString()],
+						["color", currentSpanStyles.secondaryColor.withAlpha(currentSpanStyles.secondaryAlpha).toString()],
 					])), new Keyframe(karaokeTimesAccumulator, new Map([
-						["color", currentSpanStyles.primaryColor!.withAlpha(currentSpanStyles.primaryAlpha!).toString()],
+						["color", currentSpanStyles.primaryColor.withAlpha(currentSpanStyles.primaryAlpha).toString()],
 					])),
 				]);
 
@@ -828,7 +793,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 					else if (tag instanceof parts.PrimaryColor) {
 						if (tag.value !== null) {
-							currentSpanStyles.primaryColor = currentSpanStyles.primaryColor!.interpolate(tag.value, progression);
+							currentSpanStyles.primaryColor = currentSpanStyles.primaryColor.interpolate(tag.value, progression);
 						}
 						else {
 							currentSpanStyles.primaryColor = null as any as parts.Color;
@@ -837,7 +802,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 					else if (tag instanceof parts.SecondaryColor) {
 						if (tag.value !== null) {
-							currentSpanStyles.secondaryColor = currentSpanStyles.secondaryColor!.interpolate(tag.value, progression);
+							currentSpanStyles.secondaryColor = currentSpanStyles.secondaryColor.interpolate(tag.value, progression);
 						}
 						else {
 							currentSpanStyles.secondaryColor = null as any as parts.Color;
@@ -846,7 +811,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 					else if (tag instanceof parts.OutlineColor) {
 						if (tag.value !== null) {
-							currentSpanStyles.outlineColor = currentSpanStyles.outlineColor!.interpolate(tag.value, progression);
+							currentSpanStyles.outlineColor = currentSpanStyles.outlineColor.interpolate(tag.value, progression);
 						}
 						else {
 							currentSpanStyles.outlineColor = null as any as parts.Color;
@@ -855,7 +820,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 					else if (tag instanceof parts.ShadowColor) {
 						if (tag.value !== null) {
-							currentSpanStyles.shadowColor = currentSpanStyles.shadowColor!.interpolate(tag.value, progression);
+							currentSpanStyles.shadowColor = currentSpanStyles.shadowColor.interpolate(tag.value, progression);
 						}
 						else {
 							currentSpanStyles.shadowColor = null as any as parts.Color;
@@ -926,7 +891,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.DrawingInstructions) {
-				currentSpan!.appendChild(currentDrawingStyles.toSVG(part, currentSpanStyles.primaryColor!.withAlpha(currentSpanStyles.primaryAlpha!)));
+				currentSpan!.appendChild(currentDrawingStyles.toSVG(part, currentSpanStyles.primaryColor.withAlpha(currentSpanStyles.primaryAlpha)));
 				startNewSpan(false);
 			}
 
@@ -1081,7 +1046,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			let insertBeforeElement: HTMLDivElement | null = null;
 			for (let insertBeforeLayer = layer + 1; insertBeforeLayer < this._layerWrappers.length && insertBeforeElement === null; insertBeforeLayer++) {
 				if (this._layerWrappers[insertBeforeLayer] !== undefined) {
-					insertBeforeElement = this._layerWrappers[insertBeforeLayer];
+					insertBeforeElement = this._layerWrappers[insertBeforeLayer]!;
 				}
 			}
 
@@ -1097,11 +1062,11 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			layerAlignmentWrapper.className = `an an${ alignment }`;
 
 			// Find the next greater layer,alignment div and insert this div before that one
-			const layerWrapper = this._layerWrappers[layer];
+			const layerWrapper = this._layerWrappers[layer]!;
 			let insertBeforeElement: HTMLDivElement | null = null;
 			for (let insertBeforeAlignment = alignment + 1; insertBeforeAlignment < this._layerAlignmentWrappers[layer].length && insertBeforeElement === null; insertBeforeAlignment++) {
 				if (this._layerAlignmentWrappers[layer][insertBeforeAlignment] !== undefined) {
-					insertBeforeElement = this._layerAlignmentWrappers[layer][insertBeforeAlignment];
+					insertBeforeElement = this._layerAlignmentWrappers[layer][insertBeforeAlignment]!;
 				}
 			}
 
@@ -1147,7 +1112,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		this._currentSubs.forEach((sub: HTMLDivElement, dialogue: Dialogue) => {
 			if (dialogue.start > currentTime || dialogue.end < currentTime || dialogue.containsTransformTag) {
 				this._currentSubs.delete(dialogue);
-				this._removeSub(sub);
+				sub.parentNode!.removeChild(sub);
 			}
 		});
 
@@ -1192,15 +1157,8 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		});
 	}
 
-	/**
-	 * @param {!HTMLDivElement} sub
-	 */
-	private _removeSub(sub: HTMLDivElement): void {
-		sub.parentNode!.removeChild(sub);
-	}
-
 	private _removeAllSubs(): void {
-		this._currentSubs.forEach((sub: HTMLDivElement) => this._removeSub(sub));
+		this._currentSubs.forEach((sub: HTMLDivElement) => sub.parentNode!.removeChild(sub));
 		this._currentSubs.clear();
 	}
 

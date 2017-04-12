@@ -28,9 +28,9 @@ export { WorkerCommands } from "./commands";
  *
  * @type {boolean}
  */
-export const supported = typeof Worker !== "undefined";
+export const supported = global.Worker !== undefined;
 
-const _scriptNode = (typeof document !== "undefined" && document.currentScript !== undefined) ? (document.currentScript as HTMLScriptElement) : null;
+const _scriptNode = (global.document !== undefined && global.document.currentScript !== undefined) ? global.document.currentScript : null;
 
 /**
  * Create a new web worker and returns a {@link libjass.webworker.WorkerChannel} to it.
@@ -51,9 +51,8 @@ export function createWorker(scriptPath?: string): WorkerChannel {
 	return new WorkerChannelImpl(new Worker(scriptPath));
 }
 
-declare const global: any;
-
-if (typeof WorkerGlobalScope !== "undefined" && global instanceof WorkerGlobalScope) {
+if (global.WorkerGlobalScope !== undefined && global instanceof global.WorkerGlobalScope) {
 	// This is a web worker. Set up a channel to talk back to the main thread.
+
 	new WorkerChannelImpl(global);
 }

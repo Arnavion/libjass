@@ -18,8 +18,6 @@
  * limitations under the License.
  */
 
-import { Map } from "../../utility/map";
-
 /**
  * A mixin class that represents an event source.
  */

@@ -20,14 +20,14 @@
 
 import { Map } from "./utility/map";
 
-const classes = new Map<number, Function & { fromJSON?: (obj: any) => any }>();
+const classes = new Map<number, Function & { fromJSON?(obj: any): any }>();
 
 /**
  * Registers a class as a serializable type.
  *
  * @param {function(new:*)} clazz
  */
-export function registerClass(clazz: Function & { fromJSON?: (obj: any) => any }): void {
+export function registerClass(clazz: Function & { fromJSON?(obj: any): any }): void {
 	clazz.prototype._classTag = classes.size;
 	classes.set(clazz.prototype._classTag, clazz);
 }
@@ -39,7 +39,7 @@ export function registerClass(clazz: Function & { fromJSON?: (obj: any) => any }
  * @return {string}
  */
 export function serialize(obj: any): string {
-	return JSON.stringify(obj, (/* ujs:unreferenced */ key: string, value: any) => {
+	return JSON.stringify(obj, (/* ujs:unreferenced */ _key: string, value: any) => {
 		if (value && (value._classTag !== undefined) && !Object.prototype.hasOwnProperty.call(value, "_classTag")) {
 			// Copy the _classTag from this object's prototype to itself, so that it will be serialized.
 			value._classTag = value._classTag;
@@ -54,7 +54,7 @@ export function serialize(obj: any): string {
  * @return {*}
  */
 export function deserialize(str: string): any {
-	return JSON.parse(str, (/* ujs:unreferenced */ key: string, value: any) => {
+	return JSON.parse(str, (/* ujs:unreferenced */ _key: string, value: any) => {
 		if (value && (value._classTag !== undefined)) {
 			const clazz = classes.get(value._classTag);
 			if (clazz === undefined) {

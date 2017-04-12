@@ -188,7 +188,7 @@ function testSupportsSvg(): boolean {
 		console.log("Testing whether SVG filter effects are supported.");
 	}
 
-	if (typeof document === "undefined") {
+	if (global.document === undefined) {
 		if (debugMode) {
 			console.log("This doesn't look like a browser. Assuming it doesn't support SVG filter effects.");
 		}

@@ -44,33 +44,7 @@ export interface WorkerChannel {
 /**
  * The signature of a handler registered to handle a particular command in {@link libjass.webworker.WorkerCommands}
  */
-export interface WorkerCommandHandler {
-	(parameters: any): Promise<any>;
-}
-
-/**
- * The interface implemented by a communication channel to the other side.
- */
-export interface WorkerCommunication {
-	/**
-	 * @param {"message"} type
-	 * @param {function(!MessageEvent): *} listener
-	 * @param {?boolean} useCapture
-	 */
-	addEventListener(type: "message", listener: (ev: MessageEvent) => any, useCapture?: boolean): void;
-
-	/**
-	 * @param {string} type
-	 * @param {!EventListener} listener
-	 * @param {?boolean} useCapture
-	 */
-	addEventListener(type: string, listener: EventListener, useCapture?: boolean): void;
-
-	/**
-	 * @param {*} message
-	 */
-	postMessage(message: any): void;
-}
+export type WorkerCommandHandler = (parameters: any) => Promise<any>;
 
 /**
  * The interface implemented by a request sent to the other side of the communication channel.
@@ -211,10 +185,10 @@ export class WorkerChannelImpl implements WorkerChannel {
 
 			commandCallback(requestMessage.parameters).then<WorkerResponseMessage>(
 				result => ({ requestId, error: null, result }),
-				error => ({ requestId, error, result: null })
+				error => ({ requestId, error, result: null }),
 			).then(responseMessage => this._respond(responseMessage));
 		}
 	}
 }
 
-registerWorkerCommand(WorkerCommands.Ping, parameters => Promise.resolve(null));
+registerWorkerCommand(WorkerCommands.Ping, () => Promise.resolve(null));

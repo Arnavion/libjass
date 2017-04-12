@@ -138,8 +138,9 @@ export function getTtfNames(attachment: Attachment): Set<string> {
 						}
 
 						result.add(name);
-					}
+
 						break;
+					}
 
 					case 3: {
 						let name = "";
@@ -149,8 +150,9 @@ export function getTtfNames(attachment: Attachment): Set<string> {
 						}
 
 						result.add(name);
-					}
+
 						break;
+					}
 				}
 
 				break;

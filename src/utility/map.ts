@@ -18,48 +18,6 @@
  * limitations under the License.
  */
 
-export interface Map<K, V> {
-	/**
-	 * @type {number}
-	 */
-	size: number;
-
-	/**
-	 * @param {K} key
-	 * @return {?V}
-	 */
-	get(key: K): V | undefined;
-
-	/**
-	 * @param {K} key
-	 * @return {boolean}
-	 */
-	has(key: K): boolean;
-
-	/**
-	 * @param {K} key
-	 * @param {V} value
-	 * @return {libjass.Map.<K, V>} This map
-	 */
-	set(key: K, value: V): this;
-
-	/**
-	 * @param {K} key
-	 * @return {boolean} true if the key was present before being deleted, false otherwise
-	 */
-	delete(key: K): boolean;
-
-	/**
-	 */
-	clear(): void;
-
-	/**
-	 * @param {function(V, K, libjass.Map.<K, V>)} callbackfn A function that is called with each key and value in the map.
-	 * @param {*} thisArg
-	 */
-	forEach(callbackfn: (value: V, index: K, map: this) => void, thisArg?: any): void;
-}
-
 /**
  * Map implementation for browsers that don't support it. Only supports keys which are of Number or String type, or which have a property called "id".
  *
@@ -93,7 +51,7 @@ class SimpleMap<K, V> implements Map<K, V> {
 	 * @return {?V}
 	 */
 	get(key: K): V | undefined {
-		const property = this._keyToProperty(key);
+		const property = keyToProperty(key);
 
 		if (property === null) {
 			return undefined;
@@ -107,7 +65,7 @@ class SimpleMap<K, V> implements Map<K, V> {
 	 * @return {boolean}
 	 */
 	has(key: K): boolean {
-		const property = this._keyToProperty(key);
+		const property = keyToProperty(key);
 
 		if (property === null) {
 			return false;
@@ -122,7 +80,7 @@ class SimpleMap<K, V> implements Map<K, V> {
 	 * @return {libjass.Map.<K, V>} This map
 	 */
 	set(key: K, value: V): this {
-		const property = this._keyToProperty(key);
+		const property = keyToProperty(key);
 
 		if (property === null) {
 			throw new Error("This Map implementation only supports Number and String keys, or keys with an id property.");
@@ -143,7 +101,7 @@ class SimpleMap<K, V> implements Map<K, V> {
 	 * @return {boolean} true if the key was present before being deleted, false otherwise
 	 */
 	delete(key: K): boolean {
-		const property = this._keyToProperty(key);
+		const property = keyToProperty(key);
 
 		if (property === null) {
 			return false;
@@ -184,28 +142,6 @@ class SimpleMap<K, V> implements Map<K, V> {
 	get size(): number {
 		return this._size;
 	}
-
-	/**
-	 * Converts the given key into a property name for the internal map.
-	 *
-	 * @param {K} key
-	 * @return {?string}
-	 */
-	private _keyToProperty(key: K): string | null {
-		if (typeof key === "number") {
-			return `#${ key }`;
-		}
-
-		if (typeof key === "string") {
-			return `'${ key }`;
-		}
-
-		if ((key as any).id !== undefined) {
-			return `!${ (key as any).id }`;
-		}
-
-		return null;
-	}
 }
 
 /**
@@ -217,25 +153,31 @@ class SimpleMap<K, V> implements Map<K, V> {
  *
  * @type {function(new:Map, !Array.<!Array.<*>>=)}
  */
-export var Map: {
+export let Map: {
 	new <K, V>(iterable?: [K, V][]): Map<K, V>;
 	prototype: Map<any, any>;
-} = global.Map || SimpleMap;
+} = (() => {
+	const globalMap = global.Map;
 
-if (typeof Map.prototype.forEach !== "function" || (() => {
+	if (globalMap === undefined) {
+		return SimpleMap;
+	}
+
+	if (typeof globalMap.prototype.forEach !== "function") {
+		return SimpleMap;
+	}
+
 	try {
-		return new Map([[1, "foo"], [2, "bar"]]).size !== 2;
+		if (new globalMap([[1, "foo"], [2, "bar"]]).size !== 2) {
+			return SimpleMap;
+		}
 	}
 	catch (ex) {
-		return true;
+		return SimpleMap;
 	}
-})()) {
-	Map = SimpleMap;
-}
 
-declare var global: {
-	Map?: typeof Map;
-};
+	return globalMap as any;
+})();
 
 /**
  * Sets the Map implementation used by libjass to the provided one. If null, {@link ./utility/map.SimpleMap} is used.
@@ -249,4 +191,26 @@ export function setImplementation(value: typeof Map | null): void {
 	else {
 		Map = SimpleMap;
 	}
+}
+
+/**
+ * Converts the given key into a property name for the internal map.
+ *
+ * @param {*} key
+ * @return {?string}
+ */
+function keyToProperty(key: any): string | null {
+	if (typeof key === "number") {
+		return `#${ key }`;
+	}
+
+	if (typeof key === "string") {
+		return `'${ key }`;
+	}
+
+	if ((key as any).id !== undefined) {
+		return `!${ (key as any).id }`;
+	}
+
+	return null;
 }
