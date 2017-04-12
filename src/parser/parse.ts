@@ -34,6 +34,7 @@ const rules = new Map<string, (parent: ParseNode) => ParseNode>();
  * @return {*} The value returned depends on the rule used.
  */
 export function parse(input: string, rule: string): any {
+	/* tslint:disable-next-line:no-use-before-declare */
 	const { result } = new ParserRun(input, rule);
 
 	if (result === null || result.end !== input.length) {
@@ -1801,11 +1802,15 @@ class ParserRun {
 
 		const value = valueNode.value;
 
+		/* tslint:disable:no-bitwise */
+
 		current.value = new parts.Color(
 			value & 0xFF,
 			(value >> 8) & 0xFF,
 			(value >> 16) & 0xFF,
 		);
+
+		/* tslint:enable:no-bitwise */
 
 		while (this.read(current, "&") !== null || this.read(current, "H") !== null) { }
 
@@ -1829,6 +1834,7 @@ class ParserRun {
 
 		const value = valueNode.value;
 
+		/* tslint:disable-next-line:no-bitwise */
 		current.value = 1 - (value & 0xFF) / 0xFF;
 
 		while (this.read(current, "&") !== null || this.read(current, "H") !== null) { }
@@ -1851,12 +1857,16 @@ class ParserRun {
 
 		const value = valueNode.value;
 
+		/* tslint:disable:no-bitwise */
+
 		current.value = new parts.Color(
 			value & 0xFF,
 			(value >> 8) & 0xFF,
 			(value >> 16) & 0xFF,
 			1 - ((value >> 24) & 0xFF) / 0xFF,
 		);
+
+		/* tslint:enable:no-bitwise */
 
 		return current;
 	}

@@ -274,6 +274,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			preloadFontPromises.push(fontFamilyMetricsPromise.then(metrics => this._fontMetricsCache.set(fontFamily, metrics)));
 		});
 
+		/* tslint:disable-next-line:no-floating-promises */
 		Promise.all(preloadFontPromises).then(() => {
 			if (debugMode) {
 				console.log("All fonts have been preloaded.");
@@ -1030,6 +1031,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		};
 		applyAnimationDelays(result);
 		const animatedDescendants = result.querySelectorAll('[style*="animation:"]');
+		/* tslint:disable-next-line:prefer-for-of */
 		for (let i = 0; i < animatedDescendants.length; i++) {
 			applyAnimationDelays(animatedDescendants[i] as HTMLElement);
 		}
@@ -1084,6 +1086,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 
 		// Workaround for IE
 		const dialogueAnimationStylesElement = result.getElementsByTagName("style")[0];
+		/* tslint:disable-next-line:strict-type-predicates */
 		if (dialogueAnimationStylesElement !== undefined) {
 			const sheet = dialogueAnimationStylesElement.sheet as CSSStyleSheet;
 			if (sheet.cssRules.length === 0) {
@@ -1162,6 +1165,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 		this._currentSubs.clear();
 	}
 
+	/* tslint:disable:member-ordering */
 
 	// EventSource members
 
@@ -1179,6 +1183,8 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 	 * @type {function(number, Array.<*>)}
 	 */
 	_dispatchEvent: (type: string, args: Object[]) => void;
+
+	/* tslint:enable:member-ordering */
 }
 mixin(WebRenderer, [EventSource]);
 

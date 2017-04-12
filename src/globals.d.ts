@@ -53,6 +53,7 @@ interface Node {
 
 interface Promise<T> extends Thenable<T> {
 	then<U>(onFulfilled: (value: T) => Thenable<U>, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
+	/* tslint:disable-next-line:unified-signatures */
 	then<U>(onFulfilled: (value: T) => U, onRejected?: (reason: any) => U | Thenable<U>): Promise<U>;
 	catch(onRejected: (reason: any) => T | Thenable<T>): Promise<T>;
 }
@@ -112,6 +113,7 @@ declare const global: (WorkerGlobalScope) & {
 
 	Map?: {
 		new <K, V>(iterable?: [K, V][]): Map<K, V>;
+		/* tslint:disable-next-line:member-ordering */
 		prototype: Map<any, any> | { forEach: undefined };
 	};
 
@@ -119,6 +121,7 @@ declare const global: (WorkerGlobalScope) & {
 
 	Promise?: {
 		new <T>(init: (resolve: (value: T | Thenable<T>) => void, reject: (reason: any) => void) => void): Promise<T>;
+		/* tslint:disable-next-line:member-ordering */
 		prototype: Promise<any>;
 		resolve<T>(value: T | Thenable<T>): Promise<T>;
 		reject<T>(reason: any): Promise<T>;
@@ -132,6 +135,7 @@ declare const global: (WorkerGlobalScope) & {
 
 	Set?: {
 		new <T>(iterable?: T[]): Set<T>;
+		/* tslint:disable-next-line:member-ordering */
 		prototype: Set<any> | { forEach: undefined };
 	};
 

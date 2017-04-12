@@ -20,6 +20,7 @@
 
 // Based on https://github.com/petkaantonov/bluebird/blob/1b1467b95442c12378d0ea280ede61d640ab5510/src/schedule.js
 const enqueueJob = (function (): (callback: () => void) => void {
+	/* tslint:disable-next-line:variable-name */
 	const MutationObserver = global.MutationObserver || global.WebkitMutationObserver;
 
 	if (global.process !== undefined && typeof global.process.nextTick === "function") {
@@ -123,6 +124,7 @@ class SimplePromise<T> {
 	static race<T>(values: (T | Thenable<T>)[]): Promise<T> {
 		return new Promise<T>((resolve, reject) => {
 			for (const value of values) {
+				/* tslint:disable-next-line:no-floating-promises */
 				Promise.resolve(value).then(resolve, reject);
 			}
 		});
@@ -133,6 +135,7 @@ class SimplePromise<T> {
 	private _rejectReactions: RejectedPromiseReaction<any>[] = [];
 
 	constructor(executor: (resolve: (resolution: T | Thenable<T>) => void, reject: (reason: any) => void) => void) {
+		/* tslint:disable-next-line:strict-type-predicates */
 		if (typeof executor !== "function") {
 			throw new TypeError(`typeof executor !== "function"`);
 		}
@@ -216,6 +219,7 @@ class SimplePromise<T> {
 				return;
 			}
 
+			/* tslint:disable-next-line:strict-type-predicates */
 			if (resolution === null || (typeof resolution !== "object" && typeof resolution !== "function")) {
 				this._fulfill(resolution as T);
 				return;
@@ -231,6 +235,7 @@ class SimplePromise<T> {
 				return;
 			}
 
+			/* tslint:disable-next-line:strict-type-predicates */
 			if (typeof then !== "function") {
 				this._fulfill(resolution as T);
 				return;
@@ -298,6 +303,8 @@ class SimplePromise<T> {
 	}
 }
 
+/* tslint:disable:variable-name */
+
 /**
  * Set to the global implementation of Promise if the environment has one, else set to {@link ./utility/promise.SimplePromise}
  *
@@ -309,6 +316,7 @@ class SimplePromise<T> {
  */
 export let Promise: {
 	new <T>(init: (resolve: (value: T | Thenable<T>) => void, reject: (reason: any) => void) => void): Promise<T>;
+	/* tslint:disable-next-line:member-ordering */
 	prototype: Promise<any>;
 	resolve<T>(value: T | Thenable<T>): Promise<T>;
 	reject<T>(reason: any): Promise<T>;
@@ -316,6 +324,7 @@ export let Promise: {
 	race<T>(values: (T | Thenable<T>)[]): Promise<T>;
 } = global.Promise || SimplePromise;
 
+/* tslint:enable:variable-name */
 
 interface FulfilledPromiseReaction<T, U> {
 	/** @type {!libjass.DeferredPromise.<U>} */

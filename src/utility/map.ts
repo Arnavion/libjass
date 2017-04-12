@@ -144,6 +144,8 @@ class SimpleMap<K, V> implements Map<K, V> {
 	}
 }
 
+/* tslint:disable:variable-name */
+
 /**
  * Set to the global implementation of Map if the environment has one, else set to {@link ./utility/map.SimpleMap}
  *
@@ -155,6 +157,7 @@ class SimpleMap<K, V> implements Map<K, V> {
  */
 export let Map: {
 	new <K, V>(iterable?: [K, V][]): Map<K, V>;
+	/* tslint:disable-next-line:member-ordering */
 	prototype: Map<any, any>;
 } = (() => {
 	const globalMap = global.Map;
@@ -178,6 +181,8 @@ export let Map: {
 
 	return globalMap as any;
 })();
+
+/* tslint:enable:variable-name */
 
 /**
  * Sets the Map implementation used by libjass to the provided one. If null, {@link ./utility/map.SimpleMap} is used.

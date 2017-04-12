@@ -183,6 +183,7 @@ export class WorkerChannelImpl implements WorkerChannel {
 				return;
 			}
 
+			/* tslint:disable-next-line:no-floating-promises */
 			commandCallback(requestMessage.parameters).then<WorkerResponseMessage>(
 				result => ({ requestId, error: null, result }),
 				error => ({ requestId, error, result: null }),

@@ -105,6 +105,8 @@ class SimpleSet<T> implements Set<T> {
 	}
 }
 
+/* tslint:disable:variable-name */
+
 /**
  * Set to the global implementation of Set if the environment has one, else set to {@link ./utility/set.SimpleSet}
  *
@@ -116,6 +118,7 @@ class SimpleSet<T> implements Set<T> {
  */
 export let Set: {
 	new <T>(iterable?: T[]): Set<T>;
+	/* tslint:disable-next-line:member-ordering */
 	prototype: Set<any>;
 } = (() => {
 	const globalSet = global.Set;
@@ -139,6 +142,8 @@ export let Set: {
 
 	return globalSet as any;
 })();
+
+/* tslint:enable:variable-name */
 
 /**
  * Sets the Set implementation used by libjass to the provided one. If null, {@link ./utility/set.SimpleSet} is used.

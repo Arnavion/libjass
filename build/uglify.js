@@ -277,7 +277,9 @@ var Run = (function () {
 			source_map: this._rootSourceMap,
 			ascii_only: true,
 			beautify: true,
-			comments: true,
+			comments: function (node, comment) {
+				return comment.value.indexOf("tslint") === -1;
+			},
 		};
 
 		var stream = UglifyJS.OutputStream(output);

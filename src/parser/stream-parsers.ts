@@ -57,6 +57,7 @@ export class StreamParser {
 	private _currentAttachment: Attachment | null = null;
 
 	constructor(private _stream: Stream) {
+		/* tslint:disable-next-line:no-floating-promises */
 		this._stream.nextLine().then(line => this._onNextLine(line), reason => {
 			this._minimalDeferred.reject(reason);
 			this._deferred.reject(reason);
@@ -101,6 +102,7 @@ export class StreamParser {
 
 		if (value === Section.EOF) {
 			const scriptProperties = this._ass.properties;
+			/* tslint:disable-next-line:strict-type-predicates */
 			if (scriptProperties.resolutionX === undefined || scriptProperties.resolutionY === undefined) {
 				// Malformed script.
 				this._minimalDeferred.reject("Malformed ASS script.");
@@ -272,6 +274,7 @@ export class StreamParser {
 			}
 		}
 
+		/* tslint:disable-next-line:no-floating-promises */
 		this._stream.nextLine().then(line => this._onNextLine(line), reason => {
 			this._minimalDeferred.reject(reason);
 			this._deferred.reject(reason);
@@ -296,6 +299,7 @@ export class SrtStreamParser {
 	private _currentDialogueText: string | null = null;
 
 	constructor(private _stream: Stream) {
+		/* tslint:disable-next-line:no-floating-promises */
 		this._stream.nextLine().then(line => this._onNextLine(line), reason => {
 			this._deferred.reject(reason);
 		});
@@ -391,6 +395,7 @@ export class SrtStreamParser {
 			}
 		}
 
+		/* tslint:disable-next-line:no-floating-promises */
 		this._stream.nextLine().then(line => this._onNextLine(line), reason => {
 			this._deferred.reject(reason);
 		});

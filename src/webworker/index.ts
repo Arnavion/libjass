@@ -54,5 +54,6 @@ export function createWorker(scriptPath?: string): WorkerChannel {
 if (global.WorkerGlobalScope !== undefined && global instanceof global.WorkerGlobalScope) {
 	// This is a web worker. Set up a channel to talk back to the main thread.
 
+	/* tslint:disable-next-line:no-unused-expression */
 	new WorkerChannelImpl(global);
 }

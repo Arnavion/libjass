@@ -82,6 +82,8 @@ task("version.ts", function (callback) {
 					var versionString = packageJson.version;
 					var versionParts = versionString.split(".").map(function (num) { return parseInt(num); });
 					var versionFileContents =
+						"/* tslint:disable */\n" +
+						"\n" +
 						"/**\n" +
 						" * The version of libjass. An array like\n" +
 						" *\n" +

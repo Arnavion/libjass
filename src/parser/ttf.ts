@@ -133,6 +133,7 @@ export function getTtfNames(attachment: Attachment): Set<string> {
 					case 1: {
 						let name = "";
 
+						/* tslint:disable-next-line:prefer-for-of */
 						for (let j = 0; j < nameBytes.length; j++) {
 							name += String.fromCharCode(nameBytes[j]);
 						}
@@ -146,6 +147,7 @@ export function getTtfNames(attachment: Attachment): Set<string> {
 						let name = "";
 
 						for (let j = 0; j < nameBytes.length; j += 2) {
+							/* tslint:disable-next-line:no-bitwise */
 							name += String.fromCharCode((nameBytes[j] << 8) + nameBytes[j + 1]);
 						}
 

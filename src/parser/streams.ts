@@ -225,6 +225,7 @@ export class BrowserReadableStream implements Stream {
 		}
 
 		else {
+			/* tslint:disable-next-line:no-floating-promises */
 			this._reader.read().then(next => {
 				const { value, done } = next;
 

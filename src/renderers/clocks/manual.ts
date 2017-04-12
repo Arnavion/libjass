@@ -226,6 +226,8 @@ export class ManualClock implements Clock, EventSource<ClockEvent> {
 		}
 	}
 
+	/* tslint:disable:member-ordering */
+
 	// EventSource members
 
 	/**
@@ -242,5 +244,7 @@ export class ManualClock implements Clock, EventSource<ClockEvent> {
 	 * @type {function(number, Array.<*>)}
 	 */
 	_dispatchEvent: (type: ClockEvent, args: Object[]) => void;
+
+	/* tslint:enable:member-ordering */
 }
 mixin(ManualClock, [EventSource]);

@@ -44,6 +44,7 @@ export class RendererSettings {
 		const fontMap = new Map<string, string>();
 
 		const styleSheet = linkStyle.sheet as CSSStyleSheet;
+		/* tslint:disable-next-line:prefer-for-of */
 		for (let i = 0; i < styleSheet.cssRules.length; i++) {
 			const rule = styleSheet.cssRules[i];
 
