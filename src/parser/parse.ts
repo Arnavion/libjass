@@ -240,7 +240,7 @@ class ParserRun {
 	parse_newline(parent: ParseNode): ParseNode | null {
 		const current = new ParseNode(parent);
 
-		if (this.read(current, "\\N") === null) {
+		if (this.read(current, "\\N") === null && this.read(current, "\\n") === null) {
 			parent.pop();
 			return null;
 		}
