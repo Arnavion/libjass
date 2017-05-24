@@ -2,9 +2,6 @@
 /build/typescript/typescript.d.ts
 /build/typescript/*.js
 
-/dist/
-
-/lib/
 !/lib/libjass.css
 
 /node_modules/
@@ -12,3 +9,5 @@
 /npm-debug.log
 
 /src/version.ts
+
+.idea
