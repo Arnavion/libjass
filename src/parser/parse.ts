@@ -201,7 +201,7 @@ class ParserRun {
 			}
 
 			else {
-				const whiteSpaceOrTextNode = this.parse_newline(current) || this.parse_hardspace(current) || this.parse_text(current);
+				const whiteSpaceOrTextNode = this.parse_newline(current) || this.parse_soft_newline(current) || this.parse_hardspace(current) || this.parse_text(current);
 
 				if (whiteSpaceOrTextNode.value instanceof parts.Text && current.value[current.value.length - 1] instanceof parts.Text) {
 					// Merge consecutive text parts into one part
@@ -349,6 +349,23 @@ class ParserRun {
 		}
 
 		current.value = new parts.NewLine();
+
+		return current;
+	}
+
+	/**
+	 * @param {!ParseNode} parent
+	 * @return {ParseNode}
+	 */
+	parse_soft_newline(parent: ParseNode): ParseNode | null {
+		const current = new ParseNode(parent);
+
+		if (this.read(current, "\\n") === null) {
+			parent.pop();
+			return null;
+		}
+
+		current.value = new parts.SoftNewLine();
 
 		return current;
 	}

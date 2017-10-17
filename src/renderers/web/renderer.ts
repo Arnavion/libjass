@@ -909,6 +909,15 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			else if (part instanceof parts.NewLine) {
 				startNewSpan(true);
 			}
+
+			else if (part instanceof parts.SoftNewLine) {
+				if (wrappingStyle === WrappingStyle.NoLineWrapping) {
+					startNewSpan(true);
+				}
+				else {
+					currentSpan!.appendChild(document.createTextNode(" "));
+				}
+			}
 		}
 
 		let divTransformStyle = "";
