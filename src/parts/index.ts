@@ -163,6 +163,12 @@ export class NewLine {
 }
 
 /**
+ * A soft newline character \n.
+ */
+export class SoftNewLine {
+}
+
+/**
  * An italic tag {\i}
  *
  * @param {?boolean} value {\i1} -> true, {\i0} -> false, {\i} -> null
