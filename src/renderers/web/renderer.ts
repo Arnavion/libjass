@@ -947,6 +947,10 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			else if (part instanceof parts.SoftNewLine && wrappingStyle === WrappingStyle.NoLineWrapping) {
 				startNewSpan(true);
 			}
+
+			else if (part instanceof parts.SoftNewLine) {
+				currentSpan!.appendChild(document.createTextNode("\u200C"));
+			}
 		}
 
 		let divTransformStyle = "";
