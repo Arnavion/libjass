@@ -12,3 +12,5 @@
 /npm-debug.log
 
 /src/version.ts
+
+.idea

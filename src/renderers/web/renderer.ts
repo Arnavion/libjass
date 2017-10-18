@@ -943,6 +943,14 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			else if (part instanceof parts.NewLine) {
 				startNewSpan(true);
 			}
+
+			else if (part instanceof parts.SoftNewLine && wrappingStyle === WrappingStyle.NoLineWrapping) {
+				startNewSpan(true);
+			}
+
+			else if (part instanceof parts.SoftNewLine) {
+				currentSpan!.appendChild(document.createTextNode("\u0020"));
+			}
 		}
 
 		let divTransformStyle = "";
