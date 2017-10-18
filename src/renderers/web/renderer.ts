@@ -949,7 +949,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.SoftNewLine) {
-				currentSpan!.appendChild(document.createTextNode("\u200C"));
+				currentSpan!.appendChild(document.createTextNode("\u0020"));
 			}
 		}
 
