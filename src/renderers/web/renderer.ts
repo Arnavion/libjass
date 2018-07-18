@@ -593,7 +593,7 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.Fade) {
-				var keyframes = [new Keyframe(0, new Map([
+				let keyframes = [new Keyframe(0, new Map([
 					["opacity", "0"],
 				])), new Keyframe(part.start, new Map([
 					["opacity", "1"],
