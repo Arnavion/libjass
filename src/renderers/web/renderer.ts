@@ -593,15 +593,23 @@ export class WebRenderer extends NullRenderer implements EventSource<string> {
 			}
 
 			else if (part instanceof parts.Fade) {
-				dialogueAnimationCollection.add("linear", [new Keyframe(0, new Map([
-					["opacity", "0"],
-				])), new Keyframe(part.start, new Map([
+				const keyframes: Keyframe[] = [];
+				if (part.start !== 0) {
+					keyframes.push(new Keyframe(0, new Map([
+						["opacity", "0"],
+					])));
+				}
+				keyframes.push(new Keyframe(part.start, new Map([
 					["opacity", "1"],
 				])), new Keyframe(dialogue.end - dialogue.start - part.end, new Map([
 					["opacity", "1"],
-				])), new Keyframe(dialogue.end - dialogue.start, new Map([
-					["opacity", "0"],
-				]))]);
+				])));
+				if (part.end !== 0) {
+					keyframes.push(new Keyframe(dialogue.end - dialogue.start, new Map([
+						["opacity", "0"],
+					])));
+				}
+				dialogueAnimationCollection.add("linear", keyframes);
 			}
 
 			else if (part instanceof parts.ComplexFade) {
