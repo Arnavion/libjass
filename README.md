@@ -1,3 +1,23 @@
+This project is no longer being worked on.
+
+You should probably use something else, like https://github.com/Dador/JavascriptSubtitlesOctopus
+
+When I started libjass in 2011, I made a bet that offloading rendering to the DOM would eventually be the way to get fast and accurate rendering. CSS filter effects were about to be standardized. Regular JavaScript would've been too slow to do the fancy rendering that ASS requires. Surely letting the browser render text would be faster than parsing fonts in JS, computing the dimensions and margins for every rendered character, and blitting individual outline and shadow pixels to a canvas.
+
+However CSS filter effects by themselves turned out to be inadequate to accurately render even the basics of ASS. SVG filters are more accurate, but are unoptimized or unsupported in all browsers since nobody really uses them (a vicious cycle). As such, both of them are unable to efficiently render the simplest and most common ASS feature - the elliptical border. The `feMorphology` SVG filter can only dilate to rectangles, so libjass has to stack many such rectangles of different sizes to approximate an ellipse. Big borders end up needing tens of such rectangles and a large gaussian blur, which brings even the mightiest browser's renderer to its single-threaded knees.
+
+Layout also has problems. CSS doesn't provide an easy to way for a subtitle to push another subtitle away so that they don't overlap. It doesn't provide a line-breaking strategy that tries to equalize the lengths of the broken lines (what ASS calls smart line wrapping). Vertically centering things is still a nightmare - flexbox and CSS grid don't help because subtitles don't follow grids - so `\an4-6` were never properly implemented. These things *could* be solved by positioning the text manually, but this would've brought us back to the problem of parsing fonts and measuring text dimensions in JavaScript instead of letting the DOM handle it.
+
+In 2013, asm.js became a way to use the original C renderers like libass, compiled to something that's not as fast as native C but still faster than regular JavaScript rendering. More recently, WASM has emerged as a more cross-platform and strongly-guaranteed way of doing this. Parsing fonts and computing dimensions is now a feasible prospect.
+
+Because of this, I believe libjass's strategy of relying on the browser DOM is a dead end.
+
+I'm happy to continue providing support and answering questions about the code on Github and IRC, and review PRs for minor bugfixes. The code itself is still available under APL-2.0. The ASS parser is functional regardless of the browser renderer. Feel free to fork this project, or incorporate its code into your own projects, under the terms of the license.
+
+Thank you, the users who used libjass on your websites, opened issues, and contributed fixes. libjass was my first OSS project that I intended to be used by more people than me. I had fun working on it and learning about web dev.
+
+----
+
 [![Build Status](https://travis-ci.org/Arnavion/libjass.png?branch=master)](https://travis-ci.org/Arnavion/libjass)
 
 libjass is a JavaScript library written in TypeScript to render ASS subs in the browser. [Check out the demo.](http://arnavion.github.io/libjass/demo/index.xhtml)
