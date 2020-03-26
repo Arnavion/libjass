@@ -12,15 +12,13 @@ In 2013, asm.js became a way to use the original C renderers like libass, compil
 
 Because of this, I believe libjass's strategy of relying on the browser DOM is a dead end.
 
-I'm happy to continue providing support and answering questions about the code on Github and IRC, and review PRs for minor bugfixes. The code itself is still available under APL-2.0. The ASS parser is functional regardless of the browser renderer. Feel free to fork this project, or incorporate its code into your own projects, under the terms of the license.
+I'm happy to continue providing support and answering questions about the code on Github. The code itself is still available under APL-2.0. The ASS parser is functional regardless of the browser renderer. Feel free to fork this project, or incorporate its code into your own projects, under the terms of the license.
 
 Thank you, the users who used libjass on your websites, opened issues, and contributed fixes. libjass was my first OSS project that I intended to be used by more people than me. I had fun working on it and learning about web dev.
 
 ----
 
-[![Build Status](https://travis-ci.org/Arnavion/libjass.png?branch=master)](https://travis-ci.org/Arnavion/libjass)
-
-libjass is a JavaScript library written in TypeScript to render ASS subs in the browser. [Check out the demo.](http://arnavion.github.io/libjass/demo/index.xhtml)
+libjass is a JavaScript library written in TypeScript to render ASS subs in the browser. [Check out the demo.](https://arnavion.github.io/libjass/demo/index.xhtml)
 
 
 ### What's special about libjass?
@@ -62,37 +60,37 @@ Only libjass.js and libjass.css are needed to use libjass on your website. The o
 
 The API documentation is linked in the Links section below. Here's an overview:
 
-* The [ASS.fromUrl()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromUrl) function takes in a URL to an ASS script and returns a promise that resolves to an [ASS](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS) object. This ASS object represents the script properties, the line styles and dialogue lines in it. Alternatively, you can use [ASS.fromString()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromString) to convert a string of the script contents into an ASS object.
+* The [ASS.fromUrl()](https://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromUrl) function takes in a URL to an ASS script and returns a promise that resolves to an [ASS](https://arnavion.github.io/libjass/api.xhtml#libjass.ASS) object. This ASS object represents the script properties, the line styles and dialogue lines in it. Alternatively, you can use [ASS.fromString()](https://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromString) to convert a string of the script contents into an ASS object.
 
-* Next, you initialize a renderer to render the subtitles. libjass ships with an easy-to-use renderer, the [DefaultRenderer](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.DefaultRenderer). It uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (.libjass-subs) containing div's corresponding to the layers in the ASS script, and each layer has div's corresponding to the 9 alignment directions. libjass.css contains styles for these div's to render them at the correct location.
+* Next, you initialize a renderer to render the subtitles. libjass ships with an easy-to-use renderer, the [DefaultRenderer](https://arnavion.github.io/libjass/api.xhtml#libjass.renderers.DefaultRenderer). It uses information from the ASS object to build up a series of div elements around the video tag. There is a wrapper (.libjass-subs) containing div's corresponding to the layers in the ASS script, and each layer has div's corresponding to the 9 alignment directions. libjass.css contains styles for these div's to render them at the correct location.
 
 * The renderer uses [window.requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame) as a source of timer ticks. In each tick, it determines the set of dialogues to be shown at the current video time, renders each of them as a div, and appendChild's the div into the appropriate layer+alignment div.
 
-* The renderer can be told to dynamically change the size of the subtitles based on user input by calling [WebRenderer.resize()](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.WebRenderer.resize)
+* The renderer can be told to dynamically change the size of the subtitles based on user input by calling [WebRenderer.resize()](https://arnavion.github.io/libjass/api.xhtml#libjass.renderers.WebRenderer.resize)
 
-* Lastly, the renderer contains an implementation of preloading fonts before playing the video. It uses a map of font names to URLs - this map can be conveniently created from a CSS file containing @font-face rules using [RendererSettings.makeFontMapFromStyleElement()](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.RendererSettings.makeFontMapFromStyleElement)
+* Lastly, the renderer contains an implementation of preloading fonts before playing the video. It uses a map of font names to URLs - this map can be conveniently created from a CSS file containing @font-face rules using [RendererSettings.makeFontMapFromStyleElement()](https://arnavion.github.io/libjass/api.xhtml#libjass.renderers.RendererSettings.makeFontMapFromStyleElement)
 
-* For an example of using libjass, check out [the demo.](http://arnavion.github.io/libjass/demo/index.xhtml) It has comments explaining basic usage and pointers to some advanced usage.
+* For an example of using libjass, check out [the demo.](https://arnavion.github.io/libjass/demo/index.xhtml) It has comments explaining basic usage and pointers to some advanced usage.
 
 
 ### What browser and JavaScript features does libjass need?
 
 * libjass uses some ES5 features like getters and setters (via Object.defineProperty), and assumptions like the behavior of parseInt with leading zeros. It cannot be used with an ES3 environment.
 
-* libjass will use ES6 Set, Map and Promise if they're available on the global object. If they're not present, it will use its own minimal internal implementations. If you have implementations of these that you would like libjass to use but don't want to register them on the global object, you can provide them to libjass specifically by setting the [libjass.Set](http://arnavion.github.io/libjass/api.xhtml#libjass.Set), [libjass.Map](http://arnavion.github.io/libjass/api.xhtml#libjass.Map) and [libjass.Promise](http://arnavion.github.io/libjass/api.xhtml#libjass.Promise) properties.
+* libjass will use ES6 Set, Map and Promise if they're available on the global object. If they're not present, it will use its own minimal internal implementations. If you have implementations of these that you would like libjass to use but don't want to register them on the global object, you can provide them to libjass specifically by setting the [libjass.Set](https://arnavion.github.io/libjass/api.xhtml#libjass.Set), [libjass.Map](https://arnavion.github.io/libjass/api.xhtml#libjass.Map) and [libjass.Promise](https://arnavion.github.io/libjass/api.xhtml#libjass.Promise) properties.
 
-* [AutoClock](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.AutoClock) and [VideoClock](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.VideoClock) use [window.requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame) to generate clock ticks.
+* [AutoClock](https://arnavion.github.io/libjass/api.xhtml#libjass.renderers.AutoClock) and [VideoClock](https://arnavion.github.io/libjass/api.xhtml#libjass.renderers.VideoClock) use [window.requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame) to generate clock ticks.
 
-* [WebRenderer](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.WebRenderer) and [DefaultRenderer](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.DefaultRenderer) use [SVG filter effects for HTML](http://caniuse.com/#feat=svg-html) to render outlines and blur. This feature is not available on all browsers, so you can tell them to fall back to more widely available CSS methods by setting the [RendererSettings.enableSvg](http://arnavion.github.io/libjass/api.xhtml#libjass.renderers.RendererSettings.enableSvg) property to false.
+* [WebRenderer](https://arnavion.github.io/libjass/api.xhtml#libjass.renderers.WebRenderer) and [DefaultRenderer](https://arnavion.github.io/libjass/api.xhtml#libjass.renderers.DefaultRenderer) use [SVG filter effects for HTML](https://caniuse.com/#feat=svg-html) to render outlines and blur. This feature is not available on all browsers, so you can tell them to fall back to more widely available CSS methods by setting the [RendererSettings.enableSvg](https://arnavion.github.io/libjass/api.xhtml#libjass.renderers.RendererSettings.enableSvg) property to false.
 
-* WebRenderer and DefaultRenderer use [CSS3 animations](http://caniuse.com/#feat=css-animation) for effects like \mov and \fad.
+* WebRenderer and DefaultRenderer use [CSS3 animations](https://caniuse.com/#feat=css-animation) for effects like \mov and \fad.
 
-* Using fonts attached to the script requires [ES6 typed arrays](http://caniuse.com/#feat=typedarrays) (ArrayBuffer, DataView, Uint8Array, etc).
+* Using fonts attached to the script requires [ES6 typed arrays](https://caniuse.com/#feat=typedarrays) (ArrayBuffer, DataView, Uint8Array, etc).
 
 
 ### Can I use libjass in node?
 
-libjass's parser works in node. Entire scripts can be parsed via [ASS.fromString()](http://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromString)
+libjass's parser works in node. Entire scripts can be parsed via [ASS.fromString()](https://arnavion.github.io/libjass/api.xhtml#libjass.ASS.fromString)
 
 ```javascript
 > var libjass = require("libjass")
@@ -115,7 +113,7 @@ true
 'Fade { start: 0.2, end: 0 }'
 ```
 
-[libjass.parser.parse](http://arnavion.github.io/libjass/api.xhtml#libjass.parser.parse) parses the first parameter using the second parameter as the rule name. For example, the [dialogueParts](http://arnavion.github.io/libjass/api.xhtml#./parser/parse.ParserRun.parse_dialogueParts) rule can be used to get an array of [libjass.parts](http://arnavion.github.io/libjass/api.xhtml#libjass.parts) objects that represent the parts of an ASS dialogue line.
+[libjass.parser.parse](https://arnavion.github.io/libjass/api.xhtml#libjass.parser.parse) parses the first parameter using the second parameter as the rule name. For example, the [dialogueParts](https://arnavion.github.io/libjass/api.xhtml#./parser/parse.ParserRun.parse_dialogueParts) rule can be used to get an array of [libjass.parts](https://arnavion.github.io/libjass/api.xhtml#libjass.parts) objects that represent the parts of an ASS dialogue line.
 
 ```javascript
 > var parts = libjass.parser.parse("{\\an8}Are {\\i1}you{\\i0} the one who stole the clock?!", "dialogueParts")
@@ -132,16 +130,9 @@ true
 8
 ```
 
-The rule names are derived from the methods on the [ParserRun class](http://arnavion.github.io/libjass/api.xhtml#./parser/parse.ParserRun).
+The rule names are derived from the methods on the [ParserRun class](https://arnavion.github.io/libjass/api.xhtml#./parser/parse.ParserRun).
 
 See the tests, particularly the ones in tests/unit/miscellaneous.js, for examples.
-
-
-### Can I contribute?
-
-Yes! Feature requests, suggestions, bug reports and pull requests are welcome! I'm especially looking for details and edge-cases of the ASS syntax that libjass doesn't support.
-
-You can also join the IRC channel in the links section below and ask any questions.
 
 
 ### Supported features
@@ -163,8 +154,7 @@ You can also join the IRC channel in the links section below and ask any questio
 ### Links
 
 * [GitHub](https://github.com/Arnavion/libjass/)
-* IRC channel - #libjass on irc.rizon.net
-* [API documentation](http://arnavion.github.io/libjass/api.xhtml)
+* [API documentation](https://arnavion.github.io/libjass/api.xhtml)
 * [Aegisub's documentation on ASS](http://docs.aegisub.org/3.0/ASS_Tags/)
 
 
