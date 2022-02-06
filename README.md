@@ -12,7 +12,7 @@ In 2013, asm.js became a way to use the original C renderers like libass, compil
 
 Because of this, I believe libjass's strategy of relying on the browser DOM is a dead end.
 
-I'm happy to continue providing support and answering questions about the code on Github. The code itself is still available under APL-2.0. The ASS parser is functional regardless of the browser renderer. Feel free to fork this project, or incorporate its code into your own projects, under the terms of the license.
+I'm happy to continue providing support and answering questions about the code on Github. Since this repository is archived, please ask by opening an issue at https://github.com/Arnavion/archived-repos-issues instead. The code in this repository is still available under APL-2.0. The ASS parser is functional regardless of the browser renderer. Feel free to fork this project, or incorporate its code into your own projects, under the terms of the license.
 
 Thank you, the users who used libjass on your websites, opened issues, and contributed fixes. libjass was my first OSS project that I intended to be used by more people than me. I had fun working on it and learning about web dev.
 
